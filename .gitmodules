@@ -1,0 +1,3 @@
+[submodule "DiskLruCache"]
+	path = DiskLruCache
+	url = https://github.com/JakeWharton/DiskLruCache.git
