@@ -1,0 +1,6 @@
+bin/*
+gin/*
+local.properties
+*.iml
+.idea/*
+proguard-project.txt
