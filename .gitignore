@@ -1,5 +1,5 @@
 bin/*
-gin/*
+gen/*
 local.properties
 *.iml
 .idea/*
