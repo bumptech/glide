@@ -43,33 +43,9 @@ public class PhotoStreamResizer {
                 if (streamed.getWidth() == width && streamed.getHeight() == height) {
                     return streamed;
                 }
-
-                //from ImageView/Bitmap.createScaledBitmap
-                //https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/core/java/android/widget/ImageView.java
-                //https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/Bitmap.java
-                final float scale;
-                float dx = 0, dy = 0;
-                Matrix m = new Matrix();
-                if (streamed.getWidth() * height > width * streamed.getHeight()) {
-                    scale = (float) height / (float) streamed.getHeight();
-                    dx = (width - streamed.getWidth() * scale) * 0.5f;
                 } else {
-                    scale = (float) width / (float) streamed.getWidth();
-                    dy = (height - streamed.getHeight() * scale) * 0.5f;
+                    return Utils.centerCrop(streamed, width, height);
                 }
-
-                m.setScale(scale, scale);
-                m.postTranslate((int) dx + 0.5f, (int) dy + 0.5f);
-                Bitmap bitmap = Bitmap.createBitmap(width, height, streamed.getConfig());
-                Canvas canvas = new Canvas(bitmap);
-                Paint paint = new Paint();
-                //only if scaling up
-                paint.setFilterBitmap(false);
-                paint.setAntiAlias(true);
-                canvas.drawBitmap(streamed, m, paint);
-                result = bitmap;
-
-                return result;
             }
         };
         return startTask(task, callback);

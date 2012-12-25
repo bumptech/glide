@@ -7,6 +7,7 @@ package com.bumptech.photos;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
+import android.os.SystemClock;
 import com.bumptech.photos.cache.LruPhotoCache;
 import com.bumptech.photos.cache.PhotoDiskCache;
 import com.bumptech.photos.resize.PhotoStreamResizer;
@@ -18,7 +19,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,7 +31,6 @@ public class PhotoManager {
     private PhotoDiskCache diskCache;
     private LruPhotoCache memoryCache;
     private PhotoStreamResizer resizer;
-    private Map<Object, Future> taskManager = new HashMap<Object, Future>();
     private Handler backgroundHandler;
 
     public PhotoManager(int maxMemCacheSize, long maxDiskCacheSize, File diskCacheDir, Handler mainHandler, Handler backgroundHandler) {
@@ -39,7 +38,7 @@ public class PhotoManager {
         if (Build.VERSION.SDK_INT < 11)
             this.memoryCache = new LruPhotoCache(maxMemCacheSize);
         this.diskCache = new PhotoDiskCache(diskCacheDir, maxDiskCacheSize, mainHandler, backgroundHandler);
-        this.resizer = new PhotoStreamResizer(mainHandler, backgroundHandler);
+        this.resizer = new PhotoStreamResizer(mainHandler);
     }
 
     public Object getImage(final String path, final LoadedCallback cb) {
@@ -57,8 +56,8 @@ public class PhotoManager {
         final Object token = cb;
         final String key = getKey(path);
         if (!returnFromCache(key, cb)) {
-            final Future task = resizer.loadAsIs(path, recycled, getResizeCb(key, token, cb, false, false));
-            taskManager.put(token, task);
+            final Runnable task = resizer.loadAsIs(path, recycled, getResizeCb(key, token, cb, false, false));
+            postJob(task, token);
         }
         return token;
     }
@@ -80,12 +79,13 @@ public class PhotoManager {
         final Object token = cb;
         final String key = getKey(path, width, height);
         if (!returnFromCache(key, cb)) {
-            diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
+            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
                 @Override
-                public Future resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
+                public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
                     return resizer.loadApproximate(path, width, height, resizeCallback);
                 }
             });
+            postJob(checkDiskCache, token);
         }
         return token;
     }
@@ -109,12 +109,13 @@ public class PhotoManager {
         final Object token = cb;
         final String key = getKey(path, width, height);
         if (!returnFromCache(key, cb)) {
-            diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb, false) {
+            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb, false) {
                 @Override
-                public Future resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
+                public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
                     return resizer.resizeCenterCrop(path, width, height, resizeCallback);
                 }
             });
+            postJob(checkDiskCache, token);
         }
         return token;
     }
@@ -137,12 +138,13 @@ public class PhotoManager {
         final Object token = cb;
         final String key = getKey(path, width, height);
         if (!returnFromCache(key, cb)) {
-            diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
+            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
                 @Override
-                public Future resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
+                public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
                     return resizer.fitInSpace(path, width, height, resizeCallback);
                 }
             });
+            postJob(checkDiskCache, token);
         }
         return token;
     }
@@ -180,7 +182,7 @@ public class PhotoManager {
 
         @Override
         public void onGet(InputStream is) {
-            final Future task;
+            final Runnable task;
             final boolean inDiskCache = is != null;
             final PhotoStreamResizer.ResizeCallback resizeCb = getResizeCb(key, token, cb, inDiskCache, useDiskCache);
             if (inDiskCache) {
@@ -188,10 +190,10 @@ public class PhotoManager {
             } else {
                 task = resizeIfNotFound(resizeCb);
             }
-            taskManager.put(token, task);
+            postJob(task, token);
         }
 
-        public abstract Future resizeIfNotFound(PhotoStreamResizer.ResizeCallback cb);
+        public abstract Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback cb);
     }
 
     private PhotoStreamResizer.ResizeCallback getResizeCb(final String key, final Object token, final LoadedCallback cb, final boolean inDiskCache, final boolean useDiskCache ) {
@@ -202,9 +204,9 @@ public class PhotoManager {
                     memoryCache.put(key, resized);
                 }
                 if (!inDiskCache && useDiskCache) {
-                    diskCache.put(key, resized);
+                    Runnable putToDiskCache = diskCache.put(key, resized);
+                    postJob(putToDiskCache, token);
                 }
-                taskManager.remove(token);
                 cb.loadCompleted(resized);
             }
 
@@ -215,11 +217,13 @@ public class PhotoManager {
         };
     }
 
+    private void postJob(Runnable job, Object token) {
+        backgroundHandler.postAtTime(job, token, SystemClock.uptimeMillis());
+    }
+
     public void cancelTask(Object token){
         backgroundHandler.removeCallbacksAndMessages(token);
-        final Future task = taskManager.get(token);
-        if (task != null){
-            task.cancel(true);
+    }
         }
     }
 

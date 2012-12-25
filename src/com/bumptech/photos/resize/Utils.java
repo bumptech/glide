@@ -2,9 +2,12 @@ package com.bumptech.photos.resize;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.os.Build;
-import com.bumptech.photos.util.Photo;
 import com.bumptech.photos.util.Log;
+import com.bumptech.photos.util.Photo;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -20,6 +23,36 @@ import java.io.InputStream;
  * To change this template use File | Settings | File Templates.
  */
 public class Utils {
+
+    public static Bitmap centerCrop(Bitmap toCrop, int width, int height) {
+        if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
+            return toCrop;
+        }
+        //from ImageView/Bitmap.createScaledBitmap
+        //https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/core/java/android/widget/ImageView.java
+        //https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/Bitmap.java
+        final float scale;
+        float dx = 0, dy = 0;
+        Matrix m = new Matrix();
+        if (toCrop.getWidth() * height > width * toCrop.getHeight()) {
+            scale = (float) height / (float) toCrop.getHeight();
+            dx = (width - toCrop.getWidth() * scale) * 0.5f;
+        } else {
+            scale = (float) width / (float) toCrop.getWidth();
+            dy = (height - toCrop.getHeight() * scale) * 0.5f;
+        }
+
+        m.setScale(scale, scale);
+        m.postTranslate((int) dx + 0.5f, (int) dy + 0.5f);
+        Bitmap result = Bitmap.createBitmap(width, height, toCrop.getConfig());
+        Canvas canvas = new Canvas(result);
+        Paint paint = new Paint();
+        //only if scaling up
+        paint.setFilterBitmap(false);
+        paint.setAntiAlias(true);
+        canvas.drawBitmap(toCrop, m, paint);
+        return result;
+    }
 
     public static Bitmap cropToWidth(Bitmap toCrop, int width) {
         Bitmap cropped = toCrop;
