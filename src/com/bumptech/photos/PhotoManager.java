@@ -56,7 +56,7 @@ public class PhotoManager {
     public Object getImage(final String path, final Bitmap recycled, final LoadedCallback cb){
         final Object token = cb;
         final String key = getKey(path);
-        if (!returnFromCache(key, token, cb)) {
+        if (!returnFromCache(key, cb)) {
             final Future task = resizer.loadAsIs(path, recycled, getResizeCb(key, token, cb, false, false));
             taskManager.put(token, task);
         }
@@ -79,7 +79,7 @@ public class PhotoManager {
     public Object getImage(final String path, final int width, final int height, final Bitmap recycled, final LoadedCallback cb){
         final Object token = cb;
         final String key = getKey(path, width, height);
-        if (!returnFromCache(key, token, cb)) {
+        if (!returnFromCache(key, cb)) {
             diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
                 @Override
                 public Future resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
@@ -108,7 +108,7 @@ public class PhotoManager {
     public Object centerSlice(final String path, final int width, final int height, final Bitmap recycled, final LoadedCallback cb){
         final Object token = cb;
         final String key = getKey(path, width, height);
-        if (!returnFromCache(key, token, cb)) {
+        if (!returnFromCache(key, cb)) {
             diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb, false) {
                 @Override
                 public Future resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
@@ -136,7 +136,7 @@ public class PhotoManager {
     public Object fitCenter(final String path, final int width, final int height, final Bitmap recycled, final LoadedCallback cb){
         final Object token = cb;
         final String key = getKey(path, width, height);
-        if (!returnFromCache(key, token, cb)) {
+        if (!returnFromCache(key, cb)) {
             diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
                 @Override
                 public Future resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
@@ -147,7 +147,7 @@ public class PhotoManager {
         return token;
     }
 
-    private boolean returnFromCache(String key, Object token, LoadedCallback cb) {
+    private boolean returnFromCache(String key, LoadedCallback cb) {
         boolean found = false;
         if (Build.VERSION.SDK_INT < 11) {
             Bitmap inCache = memoryCache.get(key);
