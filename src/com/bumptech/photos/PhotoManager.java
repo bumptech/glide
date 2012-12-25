@@ -18,7 +18,9 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,11 +34,20 @@ public class PhotoManager {
     private LruPhotoCache memoryCache;
     private PhotoStreamResizer resizer;
     private Handler backgroundHandler;
+    private Map<Bitmap, Integer> bitmapReferenceCounter = new HashMap<Bitmap, Integer>();
+    private Map<String, Queue<Bitmap>> recycledBitmapsForSize = new HashMap<String, Queue<Bitmap>>();
 
     public PhotoManager(int maxMemCacheSize, long maxDiskCacheSize, File diskCacheDir, Handler mainHandler, Handler backgroundHandler) {
         this.backgroundHandler = backgroundHandler;
         if (Build.VERSION.SDK_INT < 11)
-            this.memoryCache = new LruPhotoCache(maxMemCacheSize);
+        this.memoryCache = new LruPhotoCache(maxMemCacheSize);
+        memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {
+            @Override
+            public void onPhotoRemoved(String key, Bitmap bitmap) {
+                Log.d("RECYCLE: onPhotoRemoved key=" + key + " bitmap=" + bitmap);
+                releaseBitmap(bitmap);
+            }
+        });
         this.diskCache = new PhotoDiskCache(diskCacheDir, maxDiskCacheSize, mainHandler, backgroundHandler);
         this.resizer = new PhotoStreamResizer(mainHandler);
     }
@@ -196,8 +207,9 @@ public class PhotoManager {
             @Override
             public void onResizeComplete(Bitmap resized) {
                 if (Build.VERSION.SDK_INT < 11) {
-                    memoryCache.put(key, resized);
                 }
+                memoryCache.put(key, resized);
+                acquireBitmap(resized);
                 if (!inDiskCache && useDiskCache) {
                     Runnable putToDiskCache = diskCache.put(key, resized);
                     postJob(putToDiskCache, token);
@@ -219,7 +231,38 @@ public class PhotoManager {
     public void cancelTask(Object token){
         backgroundHandler.removeCallbacksAndMessages(token);
     }
+
+    public void acquireBitmap(Bitmap b) {
+        if (!b.isMutable()) return;
+
+        Integer currentCount = bitmapReferenceCounter.get(b);
+        if (currentCount == null) {
+            currentCount = 0;
         }
+        bitmapReferenceCounter.put(b, currentCount+1);
+    }
+
+    public void releaseBitmap(Bitmap b) {
+        if (!b.isMutable()) return;
+
+        Integer currentCount = bitmapReferenceCounter.get(b);
+        currentCount--;
+        if (currentCount == 0) {
+            bitmapReferenceCounter.remove(b);
+            final String sizeKey = getSizeKey(b.getWidth(), b.getHeight());
+            Queue<Bitmap> available = recycledBitmapsForSize.get(sizeKey);
+            if (available == null) {
+                available = new LinkedList<Bitmap>();
+                recycledBitmapsForSize.put(sizeKey, available);
+            }
+            available.add(b);
+        } else {
+            bitmapReferenceCounter.put(b, currentCount);
+        }
+    }
+
+    private static String getSizeKey(int width, int height) {
+        return "_" + width + "_" + height;
     }
 
     private static String getKey(String path){
@@ -227,7 +270,7 @@ public class PhotoManager {
     }
 
     private static String getKey(String path, int width, int height){
-        return sha1Hash(path) + "_" + String.valueOf(width) + "_" + String.valueOf(height);
+        return sha1Hash(path) + getSizeKey(width, height);
     }
 
     private static String sha1Hash(String toHash) {

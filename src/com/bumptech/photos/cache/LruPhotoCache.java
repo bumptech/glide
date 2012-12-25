@@ -19,6 +19,11 @@ import android.support.v4.util.LruCache;
 public class LruPhotoCache{
     private static final float SIZE_RATIO = 1f/8f;
     private final PhotoCache photoCache;
+    private PhotoRemovedListener photoRemovedListener;
+
+    public interface PhotoRemovedListener {
+        public void onPhotoRemoved(String key, Bitmap bitmap);
+    }
 
     /*
     Can only call after context is created (ie in onCreate or later...)
@@ -40,10 +45,23 @@ public class LruPhotoCache{
             //get the size, getByteCount() is API 12+...
             return value.getHeight() * value.getRowBytes();
         }
+
+        @Override
+        protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+            super.entryRemoved(evicted, key, oldValue, newValue);    //To change body of overridden methods use File | Settings | File Templates.
+            Log.d("RECYCLE entryRemoved evicted=" + evicted + " oldValue=" + oldValue + " newValue=" + newValue);
+            if (evicted && photoRemovedListener != null) {
+                photoRemovedListener.onPhotoRemoved(key, oldValue);
+            }
+        }
     }
 
     public LruPhotoCache(int size) {
         photoCache = new PhotoCache(size);
+    }
+
+    public void setPhotoRemovedListener(PhotoRemovedListener listener) {
+        this.photoRemovedListener = listener;
     }
 
     public void put(String key, Bitmap bitmap) {
