@@ -41,13 +41,13 @@ public class PhotoDiskCache {
         this.getHandler = loadHandler;
     }
 
-    public void put(final String key, final Bitmap bitmap) {
-        if (bitmap == null) return;
-
+    public Runnable put(final String key, final Bitmap bitmap) {
         Log.d("DLRU: doPut key=" + key);
-        putHandler.post(new Runnable() {
+        return new Runnable() {
             @Override
             public void run() {
+                if (bitmap == null) return;
+
                 Log.d("DLRU: run put key=" + key);
                 DiskLruCache.Editor edit = null;
                 OutputStream out = null;
@@ -81,12 +81,12 @@ public class PhotoDiskCache {
 
                 }
             }
-        });
+        };
     }
 
-    public void get(final String key, final GetCallback cb) {
+    public Runnable get(final String key, final GetCallback cb) {
         Log.d("DLRU: get key=" + key);
-        getHandler.post(new Runnable() {
+        return new Runnable() {
             @Override
             public void run() {
                 InputStream result = null;
@@ -117,6 +117,6 @@ public class PhotoDiskCache {
                     }
                 });
             }
-        });
+        };
     }
 }

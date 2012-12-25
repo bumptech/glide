@@ -41,22 +41,17 @@ public class PhotoManager {
         this.resizer = new PhotoStreamResizer(mainHandler);
     }
 
-    public Object getImage(final String path, final LoadedCallback cb) {
-        return getImage(path, null, cb);
-    }
-
     /**
      * Loads the image for the given id
      * @param path - the path id to the image
-     * @param recycled - a mutable bitmap of the same width and height as image at path to be reused
      * @param cb - the callback called when the load completes
      * @return A token tracking this request
      */
-    public Object getImage(final String path, final Bitmap recycled, final LoadedCallback cb){
+    public Object getImage(final String path, final LoadedCallback cb){
         final Object token = cb;
         final String key = getKey(path);
         if (!returnFromCache(key, cb)) {
-            final Runnable task = resizer.loadAsIs(path, recycled, getResizeCb(key, token, cb, false, false));
+            final Runnable task = resizer.loadAsIs(path, getResizeCb(key, token, cb, false, false));
             postJob(task, token);
         }
         return token;
