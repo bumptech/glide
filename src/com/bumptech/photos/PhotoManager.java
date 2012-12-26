@@ -38,7 +38,6 @@ public class PhotoManager {
         memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {
             @Override
             public void onPhotoRemoved(String key, Bitmap bitmap) {
-                Log.d("RECYCLE: onPhotoRemoved key=" + key + " bitmap=" + bitmap);
                 releaseBitmap(bitmap);
             }
         });
@@ -94,7 +93,7 @@ public class PhotoManager {
      * @param cb - the callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object centerSlice(final String path, final int width, final int height, final LoadedCallback cb){
+    public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
         final Object token = cb;
         final String key = getKey(path, width, height);
         if (!returnFromCache(key, cb)) {
@@ -205,14 +204,11 @@ public class PhotoManager {
         if (currentCount == null) {
             currentCount = 0;
         }
-        bitmapReferenceCounter.put(b, currentCount+1);
+        bitmapReferenceCounter.put(b, currentCount + 1);
     }
 
     public void releaseBitmap(Bitmap b) {
-        if (!b.isMutable()) return;
-
-        Integer currentCount = bitmapReferenceCounter.get(b);
-        currentCount--;
+        Integer currentCount = bitmapReferenceCounter.get(b) - 1;
         if (currentCount == 0) {
             bitmapReferenceCounter.remove(b);
             bitmapCache.put(b);
@@ -221,19 +217,11 @@ public class PhotoManager {
         }
     }
 
-    private static String getSizeKey(int width, int height) {
-        return width + "_" + height;
-    }
-
     private static String getKey(String path){
         return getKey(path, 0, 0);
     }
 
     private static String getKey(String path, int width, int height){
-        return getKey(path, getSizeKey(width, height));
-    }
-
-    private static String getKey(String path, String sizeKey) {
-        return path + sizeKey;
+        return path + width + "_" + height;
     }
 }

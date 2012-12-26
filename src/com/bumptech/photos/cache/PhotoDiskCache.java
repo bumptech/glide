@@ -22,12 +22,10 @@ import java.security.NoSuchAlgorithmException;
  * To change this template use File | Settings | File Templates.
  */
 public class PhotoDiskCache {
-    private static int APP_VERSION = 0;
-    private static int VALUE_COUNT = 1; //values per cache entry
+    private final static int APP_VERSION = 0;
+    private final static int VALUE_COUNT = 1; //values per cache entry
     private DiskLruCache cache;
     private Handler mainHandler;
-    private Handler getHandler;
-    private Handler putHandler;
 
     public interface GetCallback {
         public void onGet(InputStream is1, InputStream is2);
@@ -39,20 +37,16 @@ public class PhotoDiskCache {
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        this.putHandler = loadHandler;
         this.mainHandler = mainHandler;
-        this.getHandler = loadHandler;
     }
 
     public Runnable put(final String key, final Bitmap bitmap) {
-        Log.d("DLRU: doPut key=" + key);
         return new Runnable() {
             @Override
             public void run() {
                 if (bitmap == null) return;
                 final String safeKey = sha1Hash(key);
 
-                Log.d("DLRU: run put key=" + key);
                 DiskLruCache.Editor edit = null;
                 OutputStream out = null;
                 try {
@@ -89,7 +83,6 @@ public class PhotoDiskCache {
     }
 
     public Runnable get(final String key, final GetCallback cb) {
-        Log.d("DLRU: get key=" + key);
         return new Runnable() {
             @Override
             public void run() {

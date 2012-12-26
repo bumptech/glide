@@ -160,15 +160,10 @@ public class Utils {
     }
 
     public static int[] getDimension(InputStream is) {
-        int originalWidth = -1;
-        int originalHeight = -1;
         final BitmapFactory.Options decodeBoundsOptions = new BitmapFactory.Options();
         decodeBoundsOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(is, null, decodeBoundsOptions); //doesn't load, just sets the decodeBounds
-
-        originalWidth = decodeBoundsOptions.outWidth;
-        originalHeight = decodeBoundsOptions.outHeight;
-        return new int[] { originalWidth, originalHeight };
+        return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
     }
     //from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
     //streams in to near, but not exactly at the desired width and height.
@@ -196,18 +191,17 @@ public class Utils {
             decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565; // Uses 2-bytes instead of default 4 per pixel
             decodeBitmapOptions.inDither = false;
 
-            InputStream second = new BufferedInputStream(new FileInputStream(path), 16384);
+            InputStream is = new BufferedInputStream(new FileInputStream(path), 16384);
 
             decodeBitmapOptions.inSampleSize = sampleSize;
             if (Build.VERSION.SDK_INT > 11) {
                 decodeBitmapOptions.inMutable = true;
             }
-            Log.d("PSR: Loading image with sample size: " + sampleSize);
-            result = BitmapFactory.decodeStream(second, null, decodeBitmapOptions);
-            if(orientation != 0) {
+            result = BitmapFactory.decodeStream(is, null, decodeBitmapOptions);
+            if (orientation != 0) {
                 result = Photo.rotateImage(result, orientation);
             }
-            second.close();
+            is.close();
         } catch (Exception e){
             Log.d("PSR: error decoding image: " + e);
         } catch (OutOfMemoryError e){
