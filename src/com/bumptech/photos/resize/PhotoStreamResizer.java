@@ -26,6 +26,10 @@ public class PhotoStreamResizer {
         void onResizeFailed(Exception e);
     }
 
+    public PhotoStreamResizer(Handler mainHandler) {
+        this(mainHandler, null);
+    }
+
     public PhotoStreamResizer(Handler mainHandler, SizedBitmapCache bitmapCache){
         this.mainHandler = mainHandler;
         this.bitmapCache = bitmapCache;
@@ -33,6 +37,7 @@ public class PhotoStreamResizer {
 
     public Runnable resizeCenterCrop(final String path, final int width, final int height, ResizeCallback callback){
         return new SimpleStreamResizeRunnable(callback) {
+
             @Override
             public Bitmap resize(Bitmap recycled) {
                 Bitmap streamed = Utils.streamIn(path, width, height);
@@ -48,6 +53,7 @@ public class PhotoStreamResizer {
 
     public Runnable fitInSpace(final String path, final int width, final int height, ResizeCallback callback){
         return new SimpleStreamResizeRunnable(callback) {
+
             @Override
             public Bitmap resize(Bitmap recycled) {
                 final Bitmap streamed = Utils.streamIn(path, width > height ? 1 : width, height > width ? 1 : height);
@@ -68,6 +74,7 @@ public class PhotoStreamResizer {
 
     public Runnable loadAsIs(final InputStream is1, final InputStream is2, final ResizeCallback callback) {
         return new StreamResizeRunnable(callback) {
+
             @Override
             public Bitmap getRecycledBitmap() {
                 int[] dimens = new int[] {-1, -1};
@@ -137,7 +144,7 @@ public class PhotoStreamResizer {
         public final void run() {
             try {
                 Bitmap recycled = null;
-                if (CAN_RECYCLE) {
+                if (CAN_RECYCLE && bitmapCache != null) {
                     recycled = getRecycledBitmap();
                 }
                 final Bitmap result = resize(recycled);
