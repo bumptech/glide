@@ -5,7 +5,6 @@
 package com.bumptech.photos.cache;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.util.Log;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,6 +19,7 @@ import java.util.Queue;
  * To change this template use File | Settings | File Templates.
  */
 public class SizedBitmapCache {
+    private static final int MAX_PER_SIZE = 5;
     private Map<String, Queue<Bitmap>> availableBitmaps = new HashMap<String, Queue<Bitmap>>();
 
     public void put(Bitmap bitmap) {
@@ -30,8 +30,9 @@ public class SizedBitmapCache {
             availableBitmaps.put(sizeKey, available);
         }
 
-        available.add(bitmap);
-        Log.d("SBC: added bitmap sizeKey=" + sizeKey + " available=" + available.size());
+        if (available.size() < MAX_PER_SIZE) {
+            available.add(bitmap);
+        }
     }
 
     public Bitmap get(int width, int height) {
@@ -40,7 +41,6 @@ public class SizedBitmapCache {
         if (available == null || available.size() == 0) {
             return null;
         } else {
-            Log.d("SBC: removed bitmap sizeKey=" + sizeKey + " available=" + (available.size()-1));
             return available.remove();
         }
     }
