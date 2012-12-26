@@ -13,9 +13,6 @@ import com.bumptech.photos.resize.PhotoStreamResizer;
 
 import java.io.File;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -248,7 +245,7 @@ public class PhotoManager {
     }
 
     private static String getSizeKey(int width, int height) {
-        return "_" + width + "_" + height;
+        return width + "_" + height;
     }
 
     private static String getKey(String path){
@@ -256,20 +253,10 @@ public class PhotoManager {
     }
 
     private static String getKey(String path, int width, int height){
-        return sha1Hash(path) + getSizeKey(width, height);
+        return getKey(path, getSizeKey(width, height));
     }
 
-    private static String sha1Hash(String toHash) {
-        String hash = null;
-        try {
-            byte[] bytes = toHash.getBytes();
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            digest.update(bytes, 0, bytes.length);
-            hash = new BigInteger(1, digest.digest()).toString(16);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        return hash;
+    private static String getKey(String path, String sizeKey) {
+        return path + sizeKey;
     }
-
 }

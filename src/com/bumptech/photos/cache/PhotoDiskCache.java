@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,17 +50,18 @@ public class PhotoDiskCache {
             @Override
             public void run() {
                 if (bitmap == null) return;
+                final String safeKey = sha1Hash(key);
 
                 Log.d("DLRU: run put key=" + key);
                 DiskLruCache.Editor edit = null;
                 OutputStream out = null;
                 try {
-                    DiskLruCache.Snapshot snapshot = cache.get(key);
+                    DiskLruCache.Snapshot snapshot = cache.get(safeKey);
                     if (snapshot != null) {
                         Log.d("DLRU: not putting, already exists key=" + key);
                         return;
                     }
-                    edit = cache.edit(key);
+                    edit = cache.edit(safeKey);
                     out = new BufferedOutputStream(edit.newOutputStream(VALUE_COUNT - 1));
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
                     edit.commit();
@@ -89,9 +93,10 @@ public class PhotoDiskCache {
         return new Runnable() {
             @Override
             public void run() {
+                final String safeKey = sha1Hash(key);
                 InputStream result = null;
                 try {
-                    DiskLruCache.Snapshot snapshot = cache.get(key);
+                    DiskLruCache.Snapshot snapshot = cache.get(safeKey);
 
                     if (snapshot != null) {
                         result = snapshot.getInputStream(VALUE_COUNT - 1);
@@ -102,7 +107,7 @@ public class PhotoDiskCache {
                     Log.d("DLRU: IOException? key=" + key);
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                     try {
-                        cache.remove(key);
+                        cache.remove(safeKey);
                     } catch (IOException e1) {
                         Log.d("DLRU: error removing bitmap key=" + key);
                         e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -118,5 +123,18 @@ public class PhotoDiskCache {
                 });
             }
         };
+    }
+
+    private static String sha1Hash(String toHash) {
+        String hash = null;
+        try {
+            byte[] bytes = toHash.getBytes();
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            digest.update(bytes, 0, bytes.length);
+            hash = new BigInteger(1, digest.digest()).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return hash;
     }
 }
