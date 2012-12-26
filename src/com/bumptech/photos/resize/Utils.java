@@ -145,6 +145,31 @@ public class Utils {
         return result;
     }
 
+    public static int[] getDimensions(String path) {
+        int[] dimens = new int[]{-1, -1};
+        try {
+            InputStream is = new BufferedInputStream(new FileInputStream(path));
+            dimens = getDimension(is);
+            is.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return dimens;
+    }
+
+    public static int[] getDimension(InputStream is) {
+        int originalWidth = -1;
+        int originalHeight = -1;
+        final BitmapFactory.Options decodeBoundsOptions = new BitmapFactory.Options();
+        decodeBoundsOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(is, null, decodeBoundsOptions); //doesn't load, just sets the decodeBounds
+
+        originalWidth = decodeBoundsOptions.outWidth;
+        originalHeight = decodeBoundsOptions.outHeight;
+        return new int[] { originalWidth, originalHeight };
+    }
     //from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
     //streams in to near, but not exactly at the desired width and height.
     public static Bitmap streamIn(String path, int width, int height) {
@@ -159,25 +184,18 @@ public class Utils {
 
         Bitmap result = null;
         try {
+            final int[] dimens = getDimensions(path);
+            final int originalWidth = dimens[0];
+            final int originalHeight = dimens[1];
+
+            // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
+            int sampleSize = Math.min(originalHeight / height, originalWidth / width);
+
             final BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
             // For further memory savings, you may want to consider using this option
             decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565; // Uses 2-bytes instead of default 4 per pixel
             decodeBitmapOptions.inDither = false;
-            //avoid markInvalidated by creating two streams, rather than one and resetting it
-            //readLimit would have to be size of entire photo, which can be huge
-            InputStream first = new BufferedInputStream(new FileInputStream(path), 16384);
 
-            //find the dimensions of the actual image
-            final BitmapFactory.Options decodeBoundsOptions = new BitmapFactory.Options();
-            decodeBoundsOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(first, null, decodeBoundsOptions); //doesn't load, just sets the decodeBounds
-            first.close();
-
-            final int originalWidth = decodeBoundsOptions.outWidth;
-            final int originalHeight = decodeBoundsOptions.outHeight;
-
-            // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
-            int sampleSize = Math.min(originalHeight / height, originalWidth / width);
             InputStream second = new BufferedInputStream(new FileInputStream(path), 16384);
 
             decodeBitmapOptions.inSampleSize = sampleSize;
