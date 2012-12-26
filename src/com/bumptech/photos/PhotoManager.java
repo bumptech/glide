@@ -82,7 +82,7 @@ public class PhotoManager {
         if (!returnFromCache(key, cb)) {
             Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
-                public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
+                public Runnable resizeIfNotFound(LoadedCallback resizeCallback) {
                     return resizer.loadApproximate(path, width, height, resizeCallback);
                 }
             });
@@ -106,7 +106,7 @@ public class PhotoManager {
         if (!returnFromCache(key, cb)) {
             Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
-                public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
+                public Runnable resizeIfNotFound(LoadedCallback resizeCallback) {
                     return resizer.resizeCenterCrop(path, width, height, resizeCallback);
                 }
             });
@@ -130,7 +130,7 @@ public class PhotoManager {
         if (!returnFromCache(key, cb)) {
             Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
-                public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
+                public Runnable resizeIfNotFound(LoadedCallback resizeCallback) {
                     return resizer.fitInSpace(path, width, height, resizeCallback);
                 }
             });
@@ -144,7 +144,7 @@ public class PhotoManager {
         Bitmap inCache = memoryCache.get(key);
         if (inCache != null) {
             found = true;
-            cb.loadCompleted(inCache);
+            cb.onLoadCompleted(inCache);
         }
         return found;
     }
@@ -164,7 +164,7 @@ public class PhotoManager {
         public void onGet(InputStream is1, InputStream is2) {
             final Runnable task;
             final boolean inDiskCache = is1 != null && is2 != null;
-            final PhotoStreamResizer.ResizeCallback resizeCb = getResizeCb(key, token, cb, inDiskCache, true);
+            final LoadedCallback resizeCb = getResizeCb(key, token, cb, inDiskCache, true);
             if (inDiskCache) {
                 task = resizer.loadAsIs(is1, is2, resizeCb);
             } else {
@@ -173,24 +173,24 @@ public class PhotoManager {
             postJob(task, token);
         }
 
-        public abstract Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback cb);
+        public abstract Runnable resizeIfNotFound(LoadedCallback cb);
     }
 
-    private PhotoStreamResizer.ResizeCallback getResizeCb(final String key, final Object token, final LoadedCallback cb, final boolean inDiskCache, final boolean useDiskCache) {
-        return new PhotoStreamResizer.ResizeCallback() {
+    private LoadedCallback getResizeCb(final String key, final Object token, final LoadedCallback cb, final boolean inDiskCache, final boolean useDiskCache) {
+        return new LoadedCallback() {
             @Override
-            public void onResizeComplete(Bitmap resized) {
+            public void onLoadCompleted(Bitmap resized) {
                 memoryCache.put(key, resized);
                 acquireBitmap(resized);
                 if (!inDiskCache && useDiskCache) {
                     Runnable putToDiskCache = diskCache.put(key, resized);
                     postJob(putToDiskCache, token);
                 }
-                cb.loadCompleted(resized);
+                cb.onLoadCompleted(resized);
             }
 
             @Override
-            public void onResizeFailed(Exception e) {
+            public void onLoadFailed(Exception e) {
                 cb.onLoadFailed(e);
             }
         };

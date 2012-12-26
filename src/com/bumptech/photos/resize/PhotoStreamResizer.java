@@ -6,6 +6,7 @@ package com.bumptech.photos.resize;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
+import com.bumptech.photos.LoadedCallback;
 import com.bumptech.photos.cache.SizedBitmapCache;
 
 import java.io.IOException;
@@ -21,11 +22,6 @@ public class PhotoStreamResizer {
     private Handler mainHandler;
     private final SizedBitmapCache bitmapCache;
 
-    public interface ResizeCallback {
-        void onResizeComplete(Bitmap resized);
-        void onResizeFailed(Exception e);
-    }
-
     public PhotoStreamResizer(Handler mainHandler) {
         this(mainHandler, null);
     }
@@ -35,7 +31,7 @@ public class PhotoStreamResizer {
         this.bitmapCache = bitmapCache;
     }
 
-    public Runnable resizeCenterCrop(final String path, final int width, final int height, ResizeCallback callback){
+    public Runnable resizeCenterCrop(final String path, final int width, final int height, LoadedCallback callback){
         return new SimpleStreamResizeRunnable(callback) {
 
             @Override
@@ -51,7 +47,7 @@ public class PhotoStreamResizer {
         };
     }
 
-    public Runnable fitInSpace(final String path, final int width, final int height, ResizeCallback callback){
+    public Runnable fitInSpace(final String path, final int width, final int height, LoadedCallback callback){
         return new SimpleStreamResizeRunnable(callback) {
 
             @Override
@@ -62,7 +58,7 @@ public class PhotoStreamResizer {
         };
     }
 
-    public Runnable loadApproximate(final String path, final int width, final int height, ResizeCallback callback){
+    public Runnable loadApproximate(final String path, final int width, final int height, LoadedCallback callback){
         return new SimpleStreamResizeRunnable(callback) {
 
             @Override
@@ -72,7 +68,7 @@ public class PhotoStreamResizer {
         };
     }
 
-    public Runnable loadAsIs(final InputStream is1, final InputStream is2, final ResizeCallback callback) {
+    public Runnable loadAsIs(final InputStream is1, final InputStream is2, final LoadedCallback callback) {
         return new StreamResizeRunnable(callback) {
 
             @Override
@@ -106,7 +102,7 @@ public class PhotoStreamResizer {
         };
     }
 
-    public Runnable loadAsIs(final String path, ResizeCallback callback){
+    public Runnable loadAsIs(final String path, LoadedCallback callback){
         return new StreamResizeRunnable(callback) {
             @Override
             public Bitmap getRecycledBitmap() {
@@ -123,7 +119,7 @@ public class PhotoStreamResizer {
 
     private abstract class SimpleStreamResizeRunnable extends StreamResizeRunnable {
 
-        public SimpleStreamResizeRunnable(ResizeCallback callback) {
+        public SimpleStreamResizeRunnable(LoadedCallback callback) {
             super(callback);
         }
 
@@ -134,9 +130,9 @@ public class PhotoStreamResizer {
     }
 
     private abstract class StreamResizeRunnable implements Runnable {
-        private final PhotoStreamResizer.ResizeCallback callback;
+        private final LoadedCallback callback;
 
-        public StreamResizeRunnable(ResizeCallback callback) {
+        public StreamResizeRunnable(LoadedCallback callback) {
             this.callback = callback;
         }
 
@@ -151,7 +147,7 @@ public class PhotoStreamResizer {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onResizeComplete(result);
+                        callback.onLoadCompleted(result);
                     }
                 });
             } catch (final Exception e) {
@@ -159,7 +155,7 @@ public class PhotoStreamResizer {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onResizeFailed(e);
+                        callback.onLoadFailed(e);
                     }
                 });
             }

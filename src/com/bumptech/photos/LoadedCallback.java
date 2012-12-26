@@ -14,6 +14,6 @@ import android.graphics.Bitmap;
  * To change this template use File | Settings | File Templates.
  */
 public interface LoadedCallback {
-    public void loadCompleted(Bitmap loaded);
+    public void onLoadCompleted(Bitmap loaded);
     public void onLoadFailed(Exception e);
 }
