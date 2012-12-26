@@ -32,6 +32,13 @@ public class PhotoManager {
     private Map<Bitmap, Integer> bitmapReferenceCounter = new HashMap<Bitmap, Integer>();
     private SizedBitmapCache bitmapCache = new SizedBitmapCache();
 
+    private enum ResizeType {
+        CENTER_CROP,
+        FIT_CENTER,
+        APPROXIMATE,
+        AS_IS
+    }
+
     public PhotoManager(int maxMemCacheSize, long maxDiskCacheSize, File diskCacheDir, Handler mainHandler, Handler backgroundHandler) {
         this.backgroundHandler = backgroundHandler;
         this.memoryCache = new LruPhotoCache(maxMemCacheSize);
@@ -53,7 +60,7 @@ public class PhotoManager {
      */
     public Object getImage(final String path, final LoadedCallback cb){
         final Object token = cb;
-        final String key = getKey(path);
+        final String key = getKey(path, 0, 0, ResizeType.AS_IS);
         if (!returnFromCache(key, cb)) {
             final Runnable task = resizer.loadAsIs(path, getResizeCb(key, token, cb, false, false));
             postJob(task, token);
@@ -71,7 +78,7 @@ public class PhotoManager {
      */
     public Object getImage(final String path, final int width, final int height, final LoadedCallback cb){
         final Object token = cb;
-        final String key = getKey(path, width, height);
+        final String key = getKey(path, width, height, ResizeType.APPROXIMATE);
         if (!returnFromCache(key, cb)) {
             Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
@@ -95,7 +102,7 @@ public class PhotoManager {
      */
     public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
         final Object token = cb;
-        final String key = getKey(path, width, height);
+        final String key = getKey(path, width, height, ResizeType.CENTER_CROP);
         if (!returnFromCache(key, cb)) {
             Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
@@ -119,7 +126,7 @@ public class PhotoManager {
      */
     public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
         final Object token = cb;
-        final String key = getKey(path, width, height);
+        final String key = getKey(path, width, height, ResizeType.FIT_CENTER);
         if (!returnFromCache(key, cb)) {
             Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
@@ -217,11 +224,7 @@ public class PhotoManager {
         }
     }
 
-    private static String getKey(String path){
-        return getKey(path, 0, 0);
-    }
-
-    private static String getKey(String path, int width, int height){
-        return path + width + "_" + height;
+    private static String getKey(String path, int width, int height, ResizeType type){
+        return path + width + "_" + height + type.name();
     }
 }
