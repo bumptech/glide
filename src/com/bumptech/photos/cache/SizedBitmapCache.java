@@ -19,7 +19,7 @@ import java.util.Queue;
  * To change this template use File | Settings | File Templates.
  */
 public class SizedBitmapCache {
-    private static final int MAX_PER_SIZE = 5;
+    private static final int MAX_PER_SIZE = 8;
     private Map<String, Queue<Bitmap>> availableBitmaps = new HashMap<String, Queue<Bitmap>>();
 
     public void put(Bitmap bitmap) {
