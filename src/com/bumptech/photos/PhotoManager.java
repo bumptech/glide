@@ -201,7 +201,9 @@ public class PhotoManager {
     }
 
     public void cancelTask(Object token){
-        backgroundHandler.removeCallbacksAndMessages(token);
+        if (token != null) {
+            backgroundHandler.removeCallbacksAndMessages(token);
+        }
     }
 
     public void acquireBitmap(Bitmap b) {
