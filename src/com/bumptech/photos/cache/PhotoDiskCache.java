@@ -30,7 +30,7 @@ public class PhotoDiskCache {
     private Handler putHandler;
 
     public interface GetCallback {
-        public void onGet(InputStream is);
+        public void onGet(InputStream is1, InputStream is2);
     };
 
     public PhotoDiskCache(File directory, long maxSize, Handler mainHandler, Handler loadHandler) {
@@ -93,16 +93,27 @@ public class PhotoDiskCache {
         return new Runnable() {
             @Override
             public void run() {
+                //disk cache doesn't allow keys with anything but a-zA-Z0-9 :(
                 final String safeKey = sha1Hash(key);
-                InputStream result = null;
+                InputStream result1 = null;
+                InputStream result2 = null;
                 try {
-                    DiskLruCache.Snapshot snapshot = cache.get(safeKey);
+                    DiskLruCache.Snapshot snapshot1 = cache.get(safeKey);
 
-                    if (snapshot != null) {
-                        result = snapshot.getInputStream(VALUE_COUNT - 1);
+                    if (snapshot1 != null) {
+                        result1 = snapshot1.getInputStream(VALUE_COUNT - 1);
                     } else {
                         Log.d("DLRU: not found key=" + key);
                     }
+                     DiskLruCache.Snapshot snapshot2 = cache.get(safeKey);
+
+                    if (snapshot2 != null) {
+                        result2 = snapshot2.getInputStream(VALUE_COUNT - 1);
+                    } else {
+                        Log.d("DLRU: not found key=" + key);
+                    }
+
+
                 } catch (IOException e) {
                     Log.d("DLRU: IOException? key=" + key);
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -114,11 +125,12 @@ public class PhotoDiskCache {
                     }
                 }
 
-                final InputStream finalResult = result;
+                final InputStream finalResult1 = result1;
+                final InputStream finalResult2 = result2;
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        cb.onGet(finalResult);
+                        cb.onGet(finalResult1, finalResult2);
                     }
                 });
             }

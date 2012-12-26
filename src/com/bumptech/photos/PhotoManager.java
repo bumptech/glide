@@ -9,14 +9,13 @@ import android.os.Handler;
 import android.os.SystemClock;
 import com.bumptech.photos.cache.LruPhotoCache;
 import com.bumptech.photos.cache.PhotoDiskCache;
+import com.bumptech.photos.cache.SizedBitmapCache;
 import com.bumptech.photos.resize.PhotoStreamResizer;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,7 +30,7 @@ public class PhotoManager {
     private PhotoStreamResizer resizer;
     private Handler backgroundHandler;
     private Map<Bitmap, Integer> bitmapReferenceCounter = new HashMap<Bitmap, Integer>();
-    private Map<String, Queue<Bitmap>> recycledBitmapsForSize = new HashMap<String, Queue<Bitmap>>();
+    private SizedBitmapCache bitmapCache = new SizedBitmapCache();
 
     public PhotoManager(int maxMemCacheSize, long maxDiskCacheSize, File diskCacheDir, Handler mainHandler, Handler backgroundHandler) {
         this.backgroundHandler = backgroundHandler;
@@ -44,7 +43,7 @@ public class PhotoManager {
             }
         });
         this.diskCache = new PhotoDiskCache(diskCacheDir, maxDiskCacheSize, mainHandler, backgroundHandler);
-        this.resizer = new PhotoStreamResizer(mainHandler);
+        this.resizer = new PhotoStreamResizer(mainHandler, bitmapCache);
     }
 
     /**
@@ -75,8 +74,7 @@ public class PhotoManager {
         final Object token = cb;
         final String key = getKey(path, width, height);
         if (!returnFromCache(key, cb)) {
-            final Bitmap recycled = getRecycledBitmap(width, height);
-            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
+            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
                 public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
                     return resizer.loadApproximate(path, width, height, resizeCallback);
@@ -85,17 +83,6 @@ public class PhotoManager {
             postJob(checkDiskCache, token);
         }
         return token;
-    }
-
-    private Bitmap getRecycledBitmap(int width, int height) {
-        Bitmap result = null;
-        if (width != 0 && height != 0) {
-            Queue<Bitmap> available = recycledBitmapsForSize.get(getSizeKey(width, height));
-            if (available != null && available.size() > 0) {
-                result = available.remove();
-            }
-        }
-        return result;
     }
 
     /**
@@ -111,8 +98,7 @@ public class PhotoManager {
         final Object token = cb;
         final String key = getKey(path, width, height);
         if (!returnFromCache(key, cb)) {
-            final Bitmap recycled = getRecycledBitmap(width, height);
-            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
+            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
                 public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
                     return resizer.resizeCenterCrop(path, width, height, resizeCallback);
@@ -136,8 +122,7 @@ public class PhotoManager {
         final Object token = cb;
         final String key = getKey(path, width, height);
         if (!returnFromCache(key, cb)) {
-            final Bitmap recycled = getRecycledBitmap(width, height);
-            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, recycled, cb) {
+            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
                 @Override
                 public Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback resizeCallback) {
                     return resizer.fitInSpace(path, width, height, resizeCallback);
@@ -159,25 +144,23 @@ public class PhotoManager {
     }
 
     private abstract class DiskCacheCallback implements PhotoDiskCache.GetCallback {
-        private String key;
         private Object token;
-        private Bitmap recycled;
         private LoadedCallback cb;
+        private final String key;
 
-        public DiskCacheCallback(String key, Object token, Bitmap recycled, LoadedCallback cb) {
+        public DiskCacheCallback(String key, Object token, LoadedCallback cb) {
             this.key = key;
             this.token = token;
-            this.recycled = recycled;
             this.cb = cb;
         }
 
         @Override
-        public void onGet(InputStream is) {
+        public void onGet(InputStream is1, InputStream is2) {
             final Runnable task;
-            final boolean inDiskCache = is != null;
+            final boolean inDiskCache = is1 != null && is2 != null;
             final PhotoStreamResizer.ResizeCallback resizeCb = getResizeCb(key, token, cb, inDiskCache, true);
             if (inDiskCache) {
-                task = resizer.loadAsIs(is, recycled, resizeCb);
+                task = resizer.loadAsIs(is1, is2, resizeCb);
             } else {
                 task = resizeIfNotFound(resizeCb);
             }
@@ -187,7 +170,7 @@ public class PhotoManager {
         public abstract Runnable resizeIfNotFound(PhotoStreamResizer.ResizeCallback cb);
     }
 
-    private PhotoStreamResizer.ResizeCallback getResizeCb(final String key, final Object token, final LoadedCallback cb, final boolean inDiskCache, final boolean useDiskCache ) {
+    private PhotoStreamResizer.ResizeCallback getResizeCb(final String key, final Object token, final LoadedCallback cb, final boolean inDiskCache, final boolean useDiskCache) {
         return new PhotoStreamResizer.ResizeCallback() {
             @Override
             public void onResizeComplete(Bitmap resized) {
@@ -232,13 +215,7 @@ public class PhotoManager {
         currentCount--;
         if (currentCount == 0) {
             bitmapReferenceCounter.remove(b);
-            final String sizeKey = getSizeKey(b.getWidth(), b.getHeight());
-            Queue<Bitmap> available = recycledBitmapsForSize.get(sizeKey);
-            if (available == null) {
-                available = new LinkedList<Bitmap>();
-                recycledBitmapsForSize.put(sizeKey, available);
-            }
-            available.add(b);
+            bitmapCache.put(b);
         } else {
             bitmapReferenceCounter.put(b, currentCount);
         }
