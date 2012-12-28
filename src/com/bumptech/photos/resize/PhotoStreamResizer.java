@@ -4,7 +4,6 @@
 package com.bumptech.photos.resize;
 
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Handler;
 import com.bumptech.photos.LoadedCallback;
 import com.bumptech.photos.cache.SizedBitmapCache;
@@ -17,7 +16,6 @@ import java.io.InputStream;
  *
  */
 public class PhotoStreamResizer {
-    private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
     private Handler mainHandler;
     private final SizedBitmapCache bitmapCache;
@@ -140,7 +138,7 @@ public class PhotoStreamResizer {
         public final void run() {
             try {
                 Bitmap recycled = null;
-                if (CAN_RECYCLE && bitmapCache != null) {
+                if (bitmapCache != null) {
                     recycled = getRecycledBitmap();
                 }
                 final Bitmap result = resize(recycled);

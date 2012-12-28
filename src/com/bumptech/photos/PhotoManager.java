@@ -5,6 +5,7 @@
 package com.bumptech.photos;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import com.bumptech.photos.cache.LruPhotoCache;
@@ -25,6 +26,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class PhotoManager {
+    public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
+
     private PhotoDiskCache diskCache;
     private LruPhotoCache memoryCache;
     private PhotoStreamResizer resizer;
@@ -49,7 +52,7 @@ public class PhotoManager {
             }
         });
         this.diskCache = new PhotoDiskCache(diskCacheDir, maxDiskCacheSize, mainHandler, backgroundHandler);
-        this.resizer = new PhotoStreamResizer(mainHandler, bitmapCache);
+        this.resizer = new PhotoStreamResizer(mainHandler, CAN_RECYCLE ? bitmapCache : null);
     }
 
     /**
@@ -207,6 +210,8 @@ public class PhotoManager {
     }
 
     public void acquireBitmap(Bitmap b) {
+        if (!CAN_RECYCLE) return;
+
         Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
         if (currentCount == null) {
             currentCount = 0;
@@ -215,8 +220,9 @@ public class PhotoManager {
     }
 
     public void releaseBitmap(Bitmap b) {
+        if (!CAN_RECYCLE) return;
+
         Integer currentCount = bitmapReferenceCounter.get(b.hashCode()) - 1;
-        Log.d("PhotoManager: releaseBitmap currentCount=" + (currentCount));
         if (currentCount == 0) {
             bitmapReferenceCounter.remove(b.hashCode());
             bitmapCache.put(b);
