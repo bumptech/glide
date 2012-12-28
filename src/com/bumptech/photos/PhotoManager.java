@@ -184,7 +184,7 @@ public class PhotoManager {
                 acquireBitmap(resized);
                 if (!inDiskCache && useDiskCache) {
                     Runnable putToDiskCache = diskCache.put(key, resized);
-                    postJob(putToDiskCache, token);
+                    postJob(putToDiskCache, null);
                 }
                 cb.onLoadCompleted(resized);
             }
