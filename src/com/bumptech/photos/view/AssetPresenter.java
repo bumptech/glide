@@ -33,7 +33,12 @@ public class AssetPresenter<T> {
 
     private final AssetPathConverter<T> assetIdToPath;
     private final ImageLoader imageLoader;
+    private AssetPresenterCoordinator coordinator;
 
+    public interface AssetPresenterCoordinator<T> {
+        public boolean canSetImage(AssetPresenter<T> presenter);
+        public boolean canSetPlaceholder(AssetPresenter<T> presenter);
+    }
 
     public AssetPresenter(ImageView imageView, AssetPathConverter<T> assetIdToPath, ImageLoader imageLoader) {
         this.imageView = imageView;
@@ -46,6 +51,9 @@ public class AssetPresenter<T> {
         this.height = height;
     }
 
+    public void setCoordinator(AssetPresenterCoordinator<T> controller) {
+        this.coordinator = controller;
+    }
 
     public void setPlaceholderDrawable(Drawable placeholderDrawable) {
         this.placeholderDrawable = placeholderDrawable;
