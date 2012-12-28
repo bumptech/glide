@@ -95,17 +95,16 @@ public class PhotoDiskCache {
 
                     if (snapshot1 != null) {
                         result1 = snapshot1.getInputStream(VALUE_COUNT - 1);
-                    } else {
-                        Log.d("DLRU: not found key=" + key);
-                    }
-                     DiskLruCache.Snapshot snapshot2 = cache.get(safeKey);
+                        DiskLruCache.Snapshot snapshot2 = cache.get(safeKey);
 
-                    if (snapshot2 != null) {
-                        result2 = snapshot2.getInputStream(VALUE_COUNT - 1);
+                        if (snapshot2 != null) {
+                            result2 = snapshot2.getInputStream(VALUE_COUNT - 1);
+                        } else {
+                            Log.d("DLRU: second snapshot not found key=" + key);
+                        }
                     } else {
-                        Log.d("DLRU: not found key=" + key);
+                        Log.d("DLRU: first snapshot not found key=" + key);
                     }
-
 
                 } catch (IOException e) {
                     Log.d("DLRU: IOException? key=" + key);
