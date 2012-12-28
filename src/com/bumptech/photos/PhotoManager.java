@@ -29,7 +29,7 @@ public class PhotoManager {
     private LruPhotoCache memoryCache;
     private PhotoStreamResizer resizer;
     private Handler backgroundHandler;
-    private Map<Bitmap, Integer> bitmapReferenceCounter = new HashMap<Bitmap, Integer>();
+    private Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
     private SizedBitmapCache bitmapCache = new SizedBitmapCache();
 
     private enum ResizeType {
@@ -207,22 +207,21 @@ public class PhotoManager {
     }
 
     public void acquireBitmap(Bitmap b) {
-        if (!b.isMutable()) return;
-
-        Integer currentCount = bitmapReferenceCounter.get(b);
+        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
         if (currentCount == null) {
             currentCount = 0;
         }
-        bitmapReferenceCounter.put(b, currentCount + 1);
+        bitmapReferenceCounter.put(b.hashCode(), currentCount + 1);
     }
 
     public void releaseBitmap(Bitmap b) {
-        Integer currentCount = bitmapReferenceCounter.get(b) - 1;
+        Integer currentCount = bitmapReferenceCounter.get(b.hashCode()) - 1;
+        Log.d("PhotoManager: releaseBitmap currentCount=" + (currentCount));
         if (currentCount == 0) {
-            bitmapReferenceCounter.remove(b);
+            bitmapReferenceCounter.remove(b.hashCode());
             bitmapCache.put(b);
         } else {
-            bitmapReferenceCounter.put(b, currentCount);
+            bitmapReferenceCounter.put(b.hashCode(), currentCount);
         }
     }
 
