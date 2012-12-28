@@ -14,12 +14,13 @@ import com.bumptech.photos.PhotoManager;
  * Time: 10:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CenterCrop implements ImageLoader {
-    @Override
-    public Object loadImage(PhotoManager photoManager, String path, int width, int height, LoadedCallback cb) {
-        return photoManager.centerCrop(path, width, height, cb);
+public class CenterCrop extends ImageLoader {
+    public CenterCrop(PhotoManager photoManager) {
+        super(photoManager);
     }
 
     @Override
-    public void onLoadFailed(Exception e) { }
+    protected Object doLoad(String path, int width, int height, LoadedCallback cb) {
+        return photoManager.centerCrop(path, width, height, cb);
+    }
 }

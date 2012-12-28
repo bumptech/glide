@@ -14,12 +14,14 @@ import com.bumptech.photos.PhotoManager;
  * Time: 10:57 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AsIs implements ImageLoader {
-    @Override
-    public Object loadImage(PhotoManager photoManager, String path, int width, int height, LoadedCallback cb) {
-        return photoManager.getImage(path, width, height, cb);
+public class AsIs extends ImageLoader {
+
+    public AsIs(PhotoManager photoManager) {
+        super(photoManager);
     }
 
     @Override
-    public void onLoadFailed(Exception e) { }
+    protected Object doLoad(String path, int width, int height, LoadedCallback cb) {
+        return photoManager.getImage(path, cb);
+    }
 }

@@ -4,13 +4,12 @@
 
 package com.bumptech.photos.view;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-import com.bumptech.photos.LoadedCallback;
-import com.bumptech.photos.PhotoManager;
 import com.bumptech.photos.view.assetpath.AssetPathConverter;
 import com.bumptech.photos.view.loader.ImageLoader;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,27 +18,25 @@ import com.bumptech.photos.view.loader.ImageLoader;
  * Time: 10:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AssetPresenter {
-    private final PhotoManager photoManager;
-
+public class AssetPresenter<T> {
     private int height = 0;
     private int width = 0;
-    private Drawable placeholderDrawable;
-    private ImageSetCallback fullSetCallback;
 
-    private String fullAssetId;
+    private Drawable placeholderDrawable;
+    private ImageSetCallback imageSetCallback;
+
+    private T currentModel;
+    private int currentCount;
+
     private boolean isImageSet;
-    private Object fullToken;
-    private int fullCount;
     protected final ImageView imageView;
 
-    private final AssetPathConverter assetIdToPath;
-    private Bitmap showing = null;
+    private final AssetPathConverter<T> assetIdToPath;
     private final ImageLoader imageLoader;
 
-    public AssetPresenter(ImageView imageView, PhotoManager photoManager, AssetPathConverter assetIdToPath, ImageLoader imageLoader) {
+
+    public AssetPresenter(ImageView imageView, AssetPathConverter<T> assetIdToPath, ImageLoader imageLoader) {
         this.imageView = imageView;
-        this.photoManager = photoManager;
         this.assetIdToPath = assetIdToPath;
         this.imageLoader = imageLoader;
     }
@@ -49,106 +46,115 @@ public class AssetPresenter {
         this.height = height;
     }
 
+
     public void setPlaceholderDrawable(Drawable placeholderDrawable) {
         this.placeholderDrawable = placeholderDrawable;
     }
 
     public void setOnImageSetCallback(ImageSetCallback cb) {
-        this.fullSetCallback = cb;
+        this.imageSetCallback = cb;
     }
 
-    public void setAssetId(final String assetId) {
-        if (fullAssetId != null && fullAssetId.equals(assetId)) return;
+    public void setAssetModel(final T model) {
+        if (model == null || model.equals(currentModel)) return;
 
-        final int loadCount = ++fullCount;
-        prepareResize(assetId);
-        maybeCancelOldTask();
+        final int loadCount = ++currentCount;
+        currentModel = model;
+        isImageSet = false;
 
-        if (assetId != null) {
-            fetchPath(assetId, new AssetPathConverter.PathReadyListener() {
-                @Override
-                public void onPathReady(String path) {
-                    if (loadCount == fullCount) {
-                        fullToken = loadImage(path, imageLoader, fullResizeCallback(loadCount));
-                    }
-                }
-            });
-        }
+        assetIdToPath.fetchPath(model, new PathReadyCallback(this, loadCount));
 
         if (!isImageSet()) {
             resetPlaceHolder();
         }
     }
 
+    public void onPathReady(String path, int loadCount) {
+        if (loadCount != currentCount) return;
+
+        imageLoader.loadImage(path, width, height, new ImageReadyCallback(this, loadCount));
+    }
+
+    public void onImageReady(int loadCount) {
+        if (loadCount != currentCount || !canSetImage()) return;
+
+        if (imageSetCallback != null)
+            imageSetCallback.onImageSet(imageView, false);
+        imageView.setImageBitmap(imageLoader.getReadyBitmap());
+        isImageSet = true;
+    }
+
     public void resetPlaceHolder() {
-        if (placeholderDrawable != null) {
-            imageView.setImageDrawable(placeholderDrawable);
-        }
+        if (placeholderDrawable == null || !canSetPlaceholder()) return;
+
+        imageView.setImageDrawable(placeholderDrawable);
     }
 
     public void clear() {
-        fullCount++;
-        maybeCancelOldTask();
+        currentCount++;
         imageView.setImageBitmap(null);
-        prepareResize(null);
+        currentModel = null;
+        isImageSet = false;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     protected boolean isImageSet() {
         return isImageSet;
     }
 
-    protected void maybeCancelOldTask() {
-        if (fullToken != null) {
-            cancelTask(fullToken);
-            fullToken = null;
+    private boolean canSetImage() {
+        return coordinator == null || coordinator.canSetImage(this);
+    }
+
+    private boolean canSetPlaceholder() {
+        return coordinator == null || coordinator.canSetPlaceholder(this);
+    }
+
+    private static class ImageReadyCallback implements ImageLoader.ImageReadyCallback{
+
+        private final WeakReference<AssetPresenter> assetPresenterRef;
+        private final int loadCount;
+
+        public ImageReadyCallback(AssetPresenter assetPresenter, int loadCount) {
+            this.assetPresenterRef = new WeakReference<AssetPresenter>(assetPresenter);
+            this.loadCount = loadCount;
         }
-    }
 
-    protected void cancelTask(Object token) {
-        photoManager.cancelTask(token);
-    }
-
-    protected Object loadImage(String path, ImageLoader loader, LoadedCallback cb) {
-        return loader.loadImage(photoManager, path, width, height, cb);
-    }
-
-    protected void fetchPath(String assetId, AssetPathConverter.PathReadyListener listener) {
-        assetIdToPath.fetchPath(assetId, listener);
-    }
-
-    protected void updateAcquiredBitmap(Bitmap old, Bitmap next) {
-        if (old != null) {
-            photoManager.releaseBitmap(old);
-        }
-        if (next != null) {
-            photoManager.acquireBitmap(next);
-        }
-    }
-
-    private LoadedCallback fullResizeCallback(final int loadCount){
-        return new LoadedCallback() {
-            @Override
-            public void onLoadCompleted(Bitmap loaded) {
-                if (loadCount == fullCount) {
-                    if (fullSetCallback != null)
-                        fullSetCallback.onImageSet(imageView, false);
-                    imageView.setImageBitmap(loaded);
-                    isImageSet = true;
-
-                    updateAcquiredBitmap(showing, loaded);
-                    showing = loaded;
-                }
+        @Override
+        public void onImageReady() {
+            final AssetPresenter assetPresenter = assetPresenterRef.get();
+            if (assetPresenter != null ) {
+                assetPresenter.onImageReady(loadCount);
             }
+        }
 
-            @Override
-            public void onLoadFailed(Exception e) {
-                imageLoader.onLoadFailed(e);
-            }
-        };
+        @Override
+        public void onLoadFailed(Exception e) { }
     }
 
-    private void prepareResize(String fullId) {
-        fullAssetId = fullId;
-        isImageSet = false;
+    private static class PathReadyCallback implements AssetPathConverter.PathReadyListener {
+
+        private final int loadCount;
+        private final WeakReference<AssetPresenter> assetPresenterRef;
+
+        public PathReadyCallback(AssetPresenter assetPresenter, int loadCount) {
+            this.assetPresenterRef = new WeakReference<AssetPresenter>(assetPresenter);
+            this.loadCount = loadCount;
+        }
+
+        @Override
+        public void onPathReady(String path) {
+            final AssetPresenter assetPresenter = assetPresenterRef.get();
+            if (assetPresenter != null) {
+                assetPresenter.onPathReady(path, loadCount);
+            }
+        }
     }
 }

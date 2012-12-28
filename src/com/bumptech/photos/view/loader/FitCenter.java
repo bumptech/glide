@@ -14,12 +14,14 @@ import com.bumptech.photos.PhotoManager;
  * Time: 10:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FitCenter implements ImageLoader {
-    @Override
-    public Object loadImage(PhotoManager photoManager, String path, int width, int height, LoadedCallback cb) {
-        return photoManager.fitCenter(path, width, height, cb);
+public class FitCenter extends ImageLoader {
+
+    public FitCenter(PhotoManager photoManager) {
+        super(photoManager);
     }
 
     @Override
-    public void onLoadFailed(Exception e) { }
+    protected Object doLoad(String path, int width, int height, LoadedCallback cb) {
+        return photoManager.fitCenter(path, width, height, cb);
+    }
 }
