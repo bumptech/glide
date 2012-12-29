@@ -6,6 +6,7 @@ package com.bumptech.photos.view;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+import com.bumptech.photos.util.Log;
 import com.bumptech.photos.view.assetpath.AssetPathConverter;
 import com.bumptech.photos.view.loader.ImageLoader;
 
@@ -34,21 +35,33 @@ public class AssetPresenter<T> {
     private final AssetPathConverter<T> assetIdToPath;
     private final ImageLoader imageLoader;
     private AssetPresenterCoordinator coordinator;
+    final Runnable getDimens = new Runnable() {
+        @Override
+        public void run() {
+            width = imageView.getWidth();
+            height = imageView.getHeight();
+            Log.d("AP: getDimens run width=" + width + " height=" + height);
+            if (pendingLoad != null) {
+                if (width != 0 && height != 0) {
+                    imageView.post(pendingLoad);
+                    pendingLoad = null;
+                } else {
+                    imageView.postDelayed(getDimens, 50);
+                }
+            }
+        }
+    };
+    private Runnable pendingLoad = null;
 
     public interface AssetPresenterCoordinator<T> {
         public boolean canSetImage(AssetPresenter<T> presenter);
         public boolean canSetPlaceholder(AssetPresenter<T> presenter);
     }
 
-    public AssetPresenter(ImageView imageView, AssetPathConverter<T> assetIdToPath, ImageLoader imageLoader) {
+    public AssetPresenter(final ImageView imageView, AssetPathConverter<T> assetIdToPath, final ImageLoader imageLoader) {
         this.imageView = imageView;
         this.assetIdToPath = assetIdToPath;
         this.imageLoader = imageLoader;
-    }
-
-    public void setDimens(int width, int height) {
-        this.width = width;
-        this.height = height;
     }
 
     public void setCoordinator(AssetPresenterCoordinator<T> controller) {
@@ -57,6 +70,10 @@ public class AssetPresenter<T> {
 
     public void setPlaceholderDrawable(Drawable placeholderDrawable) {
         this.placeholderDrawable = placeholderDrawable;
+    }
+
+    public void setPlaceholderResource(int resourceId) {
+        this.placeholderDrawable = imageView.getResources().getDrawable(resourceId);
     }
 
     public void setOnImageSetCallback(ImageSetCallback cb) {
@@ -77,9 +94,23 @@ public class AssetPresenter<T> {
         }
     }
 
-    public void onPathReady(String path, int loadCount) {
+    public void onPathReady(final String path, final int loadCount) {
         if (loadCount != currentCount) return;
 
+        if (width == 0 || height == 0) {
+            pendingLoad = new Runnable() {
+                @Override
+                public void run() {
+                    doLoad(path, loadCount);
+                }
+            };
+            imageView.post(getDimens);
+        } else {
+            doLoad(path, loadCount);
+        }
+    }
+
+    private void doLoad(String path, int loadCount) {
         imageLoader.loadImage(path, width, height, new ImageReadyCallback(this, loadCount));
     }
 

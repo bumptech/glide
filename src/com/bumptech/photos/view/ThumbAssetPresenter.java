@@ -38,11 +38,6 @@ public class ThumbAssetPresenter<T> implements AssetPresenter.AssetPresenterCoor
         }
     }
 
-    public void setDimens(int width, int height) {
-        fullPresenter.setDimens(width, height);
-        thumbPresenter.setDimens(width, height);
-    }
-
     public void setOnFullSetCallback(ImageSetCallback cb) {
         fullPresenter.setOnImageSetCallback(cb);
     }
