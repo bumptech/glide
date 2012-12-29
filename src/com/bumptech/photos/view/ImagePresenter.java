@@ -5,6 +5,7 @@
 package com.bumptech.photos.view;
 
 import android.graphics.drawable.Drawable;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import com.bumptech.photos.util.Log;
 import com.bumptech.photos.view.assetpath.AssetPathConverter;
@@ -77,35 +78,34 @@ public class ImagePresenter<T> {
         }
     }
 
-    private int height = 0;
-    private int width = 0;
-
+    private final AssetPathConverter<T> assetIdToPath;
+    private final ImageLoader imageLoader;
     private final Drawable placeholderDrawable;
     private final ImageSetCallback imageSetCallback;
+    private final AssetPresenterCoordinator coordinator;
+    protected final ImageView imageView;
+
+    private int height = 0;
+    private int width = 0;
 
     private T currentModel;
     private int currentCount;
 
     private boolean isImageSet;
-    protected final ImageView imageView;
 
-    private final AssetPathConverter<T> assetIdToPath;
-    private final ImageLoader imageLoader;
-    private final AssetPresenterCoordinator coordinator;
+    private boolean setLayoutListener = false;
+    private final Runnable getDimens = new Runnable() {
 
-    final Runnable getDimens = new Runnable() {
         @Override
         public void run() {
+            Log.d("AP: getDimens run width=" + width + " height=" + height);
             width = imageView.getWidth();
             height = imageView.getHeight();
-            Log.d("AP: getDimens run width=" + width + " height=" + height);
-            if (pendingLoad != null) {
-                if (width != 0 && height != 0) {
-                    imageView.post(pendingLoad);
-                    pendingLoad = null;
-                } else {
-                    imageView.postDelayed(getDimens, 50);
-                }
+            if ((width == 0 || height == 0) && !setLayoutListener) {
+                imageView.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(imageView, ImagePresenter.this));
+                setLayoutListener = true;
+            } else if (pendingLoad != null) {
+                imageView.post(pendingLoad);
             }
         }
     };
@@ -157,7 +157,7 @@ public class ImagePresenter<T> {
                     doLoad(path, loadCount);
                 }
             };
-            imageView.post(getDimens);
+            getDimens();
         } else {
             doLoad(path, loadCount);
         }
@@ -191,6 +191,10 @@ public class ImagePresenter<T> {
 
     public int getHeight() {
         return height;
+    }
+
+    public void getDimens() {
+        imageView.post(getDimens);
     }
 
     protected boolean isImageSet() {
@@ -246,6 +250,26 @@ public class ImagePresenter<T> {
             final ImagePresenter imagePresenter = assetPresenterRef.get();
             if (imagePresenter != null) {
                 imagePresenter.onPathReady(path, loadCount);
+            }
+        }
+    }
+
+    private static class SizeObserver implements ViewTreeObserver.OnGlobalLayoutListener {
+
+        private final WeakReference<ImageView> imageViewRef;
+        private final WeakReference<ImagePresenter> imagePresenterRef;
+
+        public SizeObserver(ImageView imageVew, ImagePresenter imagePresenter) {
+            imageViewRef = new WeakReference<ImageView>(imageVew);
+            imagePresenterRef = new WeakReference<ImagePresenter>(imagePresenter);
+        }
+
+        @Override
+        public void onGlobalLayout() {
+            ImageView imageView = imageViewRef.get();
+            ImagePresenter presenter = imagePresenterRef.get();
+            if (imageView != null && presenter != null && imageView.getWidth() > 0 && imageView.getHeight() > 0) {
+                presenter.getDimens();
             }
         }
     }
