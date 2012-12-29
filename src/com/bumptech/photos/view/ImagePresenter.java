@@ -19,7 +19,7 @@ import java.lang.ref.WeakReference;
  * Time: 10:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AssetPresenter<T> {
+public class ImagePresenter<T> {
     private int height = 0;
     private int width = 0;
 
@@ -54,11 +54,11 @@ public class AssetPresenter<T> {
     private Runnable pendingLoad = null;
 
     public interface AssetPresenterCoordinator<T> {
-        public boolean canSetImage(AssetPresenter<T> presenter);
-        public boolean canSetPlaceholder(AssetPresenter<T> presenter);
+        public boolean canSetImage(ImagePresenter<T> presenter);
+        public boolean canSetPlaceholder(ImagePresenter<T> presenter);
     }
 
-    public AssetPresenter(final ImageView imageView, AssetPathConverter<T> assetIdToPath, final ImageLoader imageLoader) {
+    public ImagePresenter(final ImageView imageView, AssetPathConverter<T> assetIdToPath, final ImageLoader imageLoader) {
         this.imageView = imageView;
         this.assetIdToPath = assetIdToPath;
         this.imageLoader = imageLoader;
@@ -158,19 +158,19 @@ public class AssetPresenter<T> {
 
     private static class ImageReadyCallback implements ImageLoader.ImageReadyCallback{
 
-        private final WeakReference<AssetPresenter> assetPresenterRef;
+        private final WeakReference<ImagePresenter> assetPresenterRef;
         private final int loadCount;
 
-        public ImageReadyCallback(AssetPresenter assetPresenter, int loadCount) {
-            this.assetPresenterRef = new WeakReference<AssetPresenter>(assetPresenter);
+        public ImageReadyCallback(ImagePresenter imagePresenter, int loadCount) {
+            this.assetPresenterRef = new WeakReference<ImagePresenter>(imagePresenter);
             this.loadCount = loadCount;
         }
 
         @Override
         public void onImageReady() {
-            final AssetPresenter assetPresenter = assetPresenterRef.get();
-            if (assetPresenter != null ) {
-                assetPresenter.onImageReady(loadCount);
+            final ImagePresenter imagePresenter = assetPresenterRef.get();
+            if (imagePresenter != null ) {
+                imagePresenter.onImageReady(loadCount);
             }
         }
 
@@ -181,18 +181,18 @@ public class AssetPresenter<T> {
     private static class PathReadyCallback implements AssetPathConverter.PathReadyListener {
 
         private final int loadCount;
-        private final WeakReference<AssetPresenter> assetPresenterRef;
+        private final WeakReference<ImagePresenter> assetPresenterRef;
 
-        public PathReadyCallback(AssetPresenter assetPresenter, int loadCount) {
-            this.assetPresenterRef = new WeakReference<AssetPresenter>(assetPresenter);
+        public PathReadyCallback(ImagePresenter imagePresenter, int loadCount) {
+            this.assetPresenterRef = new WeakReference<ImagePresenter>(imagePresenter);
             this.loadCount = loadCount;
         }
 
         @Override
         public void onPathReady(String path) {
-            final AssetPresenter assetPresenter = assetPresenterRef.get();
-            if (assetPresenter != null) {
-                assetPresenter.onPathReady(path, loadCount);
+            final ImagePresenter imagePresenter = assetPresenterRef.get();
+            if (imagePresenter != null) {
+                imagePresenter.onPathReady(path, loadCount);
             }
         }
     }

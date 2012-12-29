@@ -16,15 +16,15 @@ import com.bumptech.photos.view.loader.ImageLoader;
  * Time: 12:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ThumbAssetPresenter<T> implements AssetPresenter.AssetPresenterCoordinator<T> {
-    private final AssetPresenter<T> fullPresenter;
-    private final AssetPresenter<T> thumbPresenter;
+public class ThumbImagePresenter<T> implements ImagePresenter.AssetPresenterCoordinator<T> {
+    private final ImagePresenter<T> fullPresenter;
+    private final ImagePresenter<T> thumbPresenter;
 
-    public ThumbAssetPresenter(ImageView imageView, AssetPathConverter<T> converter, ImageLoader fullLoader, ImageLoader thumbLoader) {
-        this(new AssetPresenter<T>(imageView, converter,  fullLoader), new AssetPresenter<T>(imageView, converter, thumbLoader));
+    public ThumbImagePresenter(ImageView imageView, AssetPathConverter<T> converter, ImageLoader fullLoader, ImageLoader thumbLoader) {
+        this(new ImagePresenter<T>(imageView, converter,  fullLoader), new ImagePresenter<T>(imageView, converter, thumbLoader));
     }
 
-    public ThumbAssetPresenter(AssetPresenter<T> full, AssetPresenter<T> thumb) {
+    public ThumbImagePresenter(ImagePresenter<T> full, ImagePresenter<T> thumb) {
         fullPresenter = full;
         thumbPresenter = thumb;
         thumbPresenter.setCoordinator(this);
@@ -56,12 +56,12 @@ public class ThumbAssetPresenter<T> implements AssetPresenter.AssetPresenterCoor
     }
 
     @Override
-    public boolean canSetImage(AssetPresenter presenter) {
+    public boolean canSetImage(ImagePresenter presenter) {
         return presenter == fullPresenter || !fullPresenter.isImageSet();
     }
 
     @Override
-    public boolean canSetPlaceholder(AssetPresenter presenter) {
+    public boolean canSetPlaceholder(ImagePresenter presenter) {
         return presenter == fullPresenter;
     }
 }
