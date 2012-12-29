@@ -15,16 +15,16 @@ import java.io.InputStream;
  * @author sam
  *
  */
-public class PhotoStreamResizer {
+public class ResizeJobGenerator {
 
     private Handler mainHandler;
     private final SizedBitmapCache bitmapCache;
 
-    public PhotoStreamResizer(Handler mainHandler) {
+    public ResizeJobGenerator(Handler mainHandler) {
         this(mainHandler, null);
     }
 
-    public PhotoStreamResizer(Handler mainHandler, SizedBitmapCache bitmapCache){
+    public ResizeJobGenerator(Handler mainHandler, SizedBitmapCache bitmapCache){
         this.mainHandler = mainHandler;
         this.bitmapCache = bitmapCache;
     }

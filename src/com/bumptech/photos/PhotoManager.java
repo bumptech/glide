@@ -11,7 +11,7 @@ import android.os.SystemClock;
 import com.bumptech.photos.cache.LruPhotoCache;
 import com.bumptech.photos.cache.PhotoDiskCache;
 import com.bumptech.photos.cache.SizedBitmapCache;
-import com.bumptech.photos.resize.PhotoStreamResizer;
+import com.bumptech.photos.resize.ResizeJobGenerator;
 
 import java.io.File;
 import java.io.InputStream;
@@ -30,7 +30,7 @@ public class PhotoManager {
 
     private PhotoDiskCache diskCache;
     private LruPhotoCache memoryCache;
-    private PhotoStreamResizer resizer;
+    private ResizeJobGenerator resizer;
     private Handler backgroundHandler;
     private Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
     private SizedBitmapCache bitmapCache = new SizedBitmapCache();
@@ -52,7 +52,7 @@ public class PhotoManager {
             }
         });
         this.diskCache = new PhotoDiskCache(diskCacheDir, maxDiskCacheSize, mainHandler, backgroundHandler);
-        this.resizer = new PhotoStreamResizer(mainHandler, CAN_RECYCLE ? bitmapCache : null);
+        this.resizer = new ResizeJobGenerator(mainHandler, CAN_RECYCLE ? bitmapCache : null);
     }
 
     /**
