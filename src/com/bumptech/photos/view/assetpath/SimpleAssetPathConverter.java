@@ -12,8 +12,12 @@ package com.bumptech.photos.view.assetpath;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class SimpleAssetPathConverter implements AssetPathConverter<String> {
-    @Override
     public void fetchPath(String path, PathReadyListener listener) {
-        listener.onPathReady(path);
+        fetchPath(path, 0, 0, listener);
+    }
+
+    @Override
+    public void fetchPath(String path, int width, int height, PathReadyListener listener) {
+        listener.pathReady(path);
     }
 }

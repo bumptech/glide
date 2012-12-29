@@ -4,11 +4,11 @@
 
 package com.bumptech.photos.view;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import com.bumptech.photos.util.Log;
-import com.bumptech.photos.view.assetpath.AssetPathConverter;
 import com.bumptech.photos.view.loader.ImageLoader;
 
 import java.lang.ref.WeakReference;
@@ -21,10 +21,12 @@ import java.lang.ref.WeakReference;
  * To change this template use File | Settings | File Templates.
  */
 public class ImagePresenter<T> {
+    private Object pathToken;
+    private Object imageToken;
+
     public static class Builder<T> {
         private ImageView imageView;
-        private AssetPathConverter<T> assetPathConverter;
-        private ImageLoader imageLoader;
+        private ImageLoader<T> imageLoader;
         private int placeholderResourceId;
         private Drawable placeholderDrawable;
         private ImageSetCallback imageSetCallback;
@@ -32,7 +34,6 @@ public class ImagePresenter<T> {
 
         public ImagePresenter<T> build(){
             assert imageView != null : "cannot create presenter without an image view";
-            assert assetPathConverter != null : "cannot create presenter without an asset to path converter";
             assert imageLoader != null : "cannot create presenter without an image loader";
 
             return new ImagePresenter<T>(this);
@@ -43,12 +44,7 @@ public class ImagePresenter<T> {
             return this;
         }
 
-        public Builder<T> setAssetPathConverter(AssetPathConverter<T> converter) {
-            this.assetPathConverter = converter;
-            return this;
-        }
-
-        public Builder<T> setImageLoader(ImageLoader imageLoader) {
+        public Builder<T> setImageLoader(ImageLoader<T> imageLoader) {
             this.imageLoader = imageLoader;
             return this;
         }
@@ -78,8 +74,7 @@ public class ImagePresenter<T> {
         }
     }
 
-    private final AssetPathConverter<T> assetIdToPath;
-    private final ImageLoader imageLoader;
+    private final ImageLoader<T> imageLoader;
     private final Drawable placeholderDrawable;
     private final ImageSetCallback imageSetCallback;
     private final AssetPresenterCoordinator coordinator;
@@ -101,9 +96,11 @@ public class ImagePresenter<T> {
             Log.d("AP: getDimens run width=" + width + " height=" + height);
             width = imageView.getWidth();
             height = imageView.getHeight();
-            if ((width == 0 || height == 0) && !setLayoutListener) {
-                imageView.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(imageView, ImagePresenter.this));
-                setLayoutListener = true;
+            if (width == 0 || height == 0) {
+                if (!setLayoutListener) {
+                    imageView.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(imageView, ImagePresenter.this));
+                    setLayoutListener = true;
+                }
             } else if (pendingLoad != null) {
                 imageView.post(pendingLoad);
             }
@@ -118,7 +115,6 @@ public class ImagePresenter<T> {
 
     private ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
-        this.assetIdToPath = builder.assetPathConverter;
         this.imageLoader = builder.imageLoader;
         if (builder.placeholderResourceId != 0) {
             this.placeholderDrawable = imageView.getResources().getDrawable(builder.placeholderResourceId);
@@ -140,36 +136,21 @@ public class ImagePresenter<T> {
         currentModel = model;
         isImageSet = false;
 
-        assetIdToPath.fetchPath(model, new PathReadyCallback(this, loadCount));
-
-        if (!isImageSet()) {
-            resetPlaceHolder();
-        }
-    }
-
-    public void onPathReady(final String path, final int loadCount) {
-        if (loadCount != currentCount) return;
-
         if (width == 0 || height == 0) {
             pendingLoad = new Runnable() {
                 @Override
                 public void run() {
-                    doLoad(path, loadCount);
+                    fetchPath(model, loadCount);
                 }
             };
             getDimens();
         } else {
-            doLoad(path, loadCount);
+            fetchPath(model, loadCount);
         }
-    }
 
-    public void onImageReady(int loadCount) {
-        if (loadCount != currentCount || !canSetImage()) return;
-
-        if (imageSetCallback != null)
-            imageSetCallback.onImageSet(imageView, false);
-        imageView.setImageBitmap(imageLoader.getReadyBitmap());
-        isImageSet = true;
+        if (!isImageSet()) {
+            resetPlaceHolder();
+        }
     }
 
     public void resetPlaceHolder() {
@@ -183,6 +164,8 @@ public class ImagePresenter<T> {
         imageView.setImageBitmap(null);
         currentModel = null;
         isImageSet = false;
+        imageToken = null;
+        pathToken = null;
     }
 
     public int getWidth() {
@@ -193,16 +176,45 @@ public class ImagePresenter<T> {
         return height;
     }
 
-    public void getDimens() {
+    private void fetchPath(final T model, final int loadCount) {
+        pathToken = imageLoader.fetchPath(model, getWidth(), getHeight(), new ImageLoader.PathReadyCallback() {
+            @Override
+            public boolean onPathReady(String path) {
+                if (loadCount != currentCount) return false;
+
+                fetchImage(path, model, loadCount);
+                return true;
+            }
+
+            @Override
+            public void onError(Exception e) { }
+        });
+    }
+
+    private void fetchImage(String path, T model, final int loadCount) {
+         imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
+            @Override
+            public boolean onImageReady(Bitmap image) {
+                if (loadCount != currentCount || !canSetImage()) return false;
+
+                if (imageSetCallback != null)
+                    imageSetCallback.onImageSet(imageView, false);
+                imageView.setImageBitmap(image);
+                isImageSet = true;
+                return true;
+            }
+
+            @Override
+            public void onError(Exception e) { }
+        });
+    }
+
+    private void getDimens() {
         imageView.post(getDimens);
     }
 
     protected boolean isImageSet() {
         return isImageSet;
-    }
-
-    private void doLoad(String path, int loadCount) {
-        imageLoader.loadImage(path, width, height, new ImageReadyCallback(this, loadCount));
     }
 
     private boolean canSetImage() {
@@ -211,47 +223,6 @@ public class ImagePresenter<T> {
 
     private boolean canSetPlaceholder() {
         return coordinator == null || coordinator.canSetPlaceholder(this);
-    }
-
-    private static class ImageReadyCallback implements ImageLoader.ImageReadyCallback{
-
-        private final WeakReference<ImagePresenter> assetPresenterRef;
-        private final int loadCount;
-
-        public ImageReadyCallback(ImagePresenter imagePresenter, int loadCount) {
-            this.assetPresenterRef = new WeakReference<ImagePresenter>(imagePresenter);
-            this.loadCount = loadCount;
-        }
-
-        @Override
-        public void onImageReady() {
-            final ImagePresenter imagePresenter = assetPresenterRef.get();
-            if (imagePresenter != null ) {
-                imagePresenter.onImageReady(loadCount);
-            }
-        }
-
-        @Override
-        public void onLoadFailed(Exception e) { }
-    }
-
-    private static class PathReadyCallback implements AssetPathConverter.PathReadyListener {
-
-        private final int loadCount;
-        private final WeakReference<ImagePresenter> assetPresenterRef;
-
-        public PathReadyCallback(ImagePresenter imagePresenter, int loadCount) {
-            this.assetPresenterRef = new WeakReference<ImagePresenter>(imagePresenter);
-            this.loadCount = loadCount;
-        }
-
-        @Override
-        public void onPathReady(String path) {
-            final ImagePresenter imagePresenter = assetPresenterRef.get();
-            if (imagePresenter != null) {
-                imagePresenter.onPathReady(path, loadCount);
-            }
-        }
     }
 
     private static class SizeObserver implements ViewTreeObserver.OnGlobalLayoutListener {

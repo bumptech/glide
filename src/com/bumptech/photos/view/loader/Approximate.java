@@ -6,6 +6,7 @@ package com.bumptech.photos.view.loader;
 
 import com.bumptech.photos.LoadedCallback;
 import com.bumptech.photos.PhotoManager;
+import com.bumptech.photos.view.assetpath.AssetPathConverter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,14 +15,14 @@ import com.bumptech.photos.PhotoManager;
  * Time: 10:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Approximate extends ImageLoader {
+public class Approximate<T> extends PhotoManagerLoader<T> {
 
-    public Approximate(PhotoManager photoManager) {
-        super(photoManager);
+    public Approximate(PhotoManager photoManager, AssetPathConverter<T> assetToPath) {
+        super(photoManager, assetToPath);
     }
 
     @Override
-    protected Object doLoad(String path, int width, int height, LoadedCallback cb) {
+    protected Object doFetchImage(String path, T model, int width, int height, LoadedCallback cb) {
         return photoManager.getImage(path, width, height, cb);
     }
 }

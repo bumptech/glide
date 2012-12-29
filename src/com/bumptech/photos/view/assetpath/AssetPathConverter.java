@@ -13,8 +13,9 @@ package com.bumptech.photos.view.assetpath;
  */
 public interface AssetPathConverter<T> {
     public interface PathReadyListener {
-        public void onPathReady(String path);
+        public void pathReady(String path);
+        public void onError(Exception e);
     }
 
-    public void fetchPath(T model, PathReadyListener listener);
+    public void fetchPath(T model, int width, int height, PathReadyListener listener);
 }
