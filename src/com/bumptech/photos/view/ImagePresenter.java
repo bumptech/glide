@@ -20,11 +20,68 @@ import java.lang.ref.WeakReference;
  * To change this template use File | Settings | File Templates.
  */
 public class ImagePresenter<T> {
+    public static class Builder<T> {
+        private ImageView imageView;
+        private AssetPathConverter<T> assetPathConverter;
+        private ImageLoader imageLoader;
+        private int placeholderResourceId;
+        private Drawable placeholderDrawable;
+        private ImageSetCallback imageSetCallback;
+        private AssetPresenterCoordinator coordinator;
+
+        public ImagePresenter<T> build(){
+            assert imageView != null : "cannot create presenter without an image view";
+            assert assetPathConverter != null : "cannot create presenter without an asset to path converter";
+            assert imageLoader != null : "cannot create presenter without an image loader";
+
+            return new ImagePresenter<T>(this);
+        }
+
+        public Builder<T> setImageView(ImageView imageView) {
+            this.imageView = imageView;
+            return this;
+        }
+
+        public Builder<T> setAssetPathConverter(AssetPathConverter<T> converter) {
+            this.assetPathConverter = converter;
+            return this;
+        }
+
+        public Builder<T> setImageLoader(ImageLoader imageLoader) {
+            this.imageLoader = imageLoader;
+            return this;
+        }
+
+        public Builder<T> setPlaceholderResource(int resourceId) {
+            assert resourceId == 0 || placeholderDrawable == null : "Can't set both a placeholder drawable and a placeholder resource";
+
+            this.placeholderResourceId = resourceId;
+            return this;
+        }
+
+        public Builder<T> setPlaceholderDrawable(Drawable placeholderDrawable) {
+            assert placeholderDrawable == null || placeholderResourceId == 0 : "Can't set both a placeholder drawable and a placeholder resource";
+
+            this.placeholderDrawable = placeholderDrawable;
+            return this;
+        }
+
+        public Builder<T> setImageSetCallback(ImageSetCallback cb) {
+            this.imageSetCallback = cb;
+            return this;
+        }
+
+        public Builder<T> setAssetPresenterCoordinator(AssetPresenterCoordinator<T> coordinator) {
+            this.coordinator = coordinator;
+            return this;
+        }
+    }
+
     private int height = 0;
     private int width = 0;
 
-    private Drawable placeholderDrawable;
-    private ImageSetCallback imageSetCallback;
+    private final Drawable placeholderDrawable;
+    private final ImageSetCallback imageSetCallback;
 
     private T currentModel;
     private int currentCount;
@@ -34,7 +91,8 @@ public class ImagePresenter<T> {
 
     private final AssetPathConverter<T> assetIdToPath;
     private final ImageLoader imageLoader;
-    private AssetPresenterCoordinator coordinator;
+    private final AssetPresenterCoordinator coordinator;
+
     final Runnable getDimens = new Runnable() {
         @Override
         public void run() {
@@ -58,26 +116,21 @@ public class ImagePresenter<T> {
         public boolean canSetPlaceholder(ImagePresenter<T> presenter);
     }
 
-    public ImagePresenter(final ImageView imageView, AssetPathConverter<T> assetIdToPath, final ImageLoader imageLoader) {
-        this.imageView = imageView;
-        this.assetIdToPath = assetIdToPath;
-        this.imageLoader = imageLoader;
+    private ImagePresenter(Builder<T> builder) {
+        this.imageView = builder.imageView;
+        this.assetIdToPath = builder.assetPathConverter;
+        this.imageLoader = builder.imageLoader;
+        if (builder.placeholderResourceId != 0) {
+            this.placeholderDrawable = imageView.getResources().getDrawable(builder.placeholderResourceId);
+        } else {
+            this.placeholderDrawable = builder.placeholderDrawable;
+        }
+        this.coordinator = builder.coordinator;
+        this.imageSetCallback = builder.imageSetCallback;
     }
 
-    public void setCoordinator(AssetPresenterCoordinator<T> controller) {
-        this.coordinator = controller;
-    }
-
-    public void setPlaceholderDrawable(Drawable placeholderDrawable) {
-        this.placeholderDrawable = placeholderDrawable;
-    }
-
-    public void setPlaceholderResource(int resourceId) {
-        this.placeholderDrawable = imageView.getResources().getDrawable(resourceId);
-    }
-
-    public void setOnImageSetCallback(ImageSetCallback cb) {
-        this.imageSetCallback = cb;
+    public ImageView getImageView() {
+        return imageView;
     }
 
     public void setAssetModel(final T model) {
@@ -108,10 +161,6 @@ public class ImagePresenter<T> {
         } else {
             doLoad(path, loadCount);
         }
-    }
-
-    private void doLoad(String path, int loadCount) {
-        imageLoader.loadImage(path, width, height, new ImageReadyCallback(this, loadCount));
     }
 
     public void onImageReady(int loadCount) {
@@ -146,6 +195,10 @@ public class ImagePresenter<T> {
 
     protected boolean isImageSet() {
         return isImageSet;
+    }
+
+    private void doLoad(String path, int loadCount) {
+        imageLoader.loadImage(path, width, height, new ImageReadyCallback(this, loadCount));
     }
 
     private boolean canSetImage() {

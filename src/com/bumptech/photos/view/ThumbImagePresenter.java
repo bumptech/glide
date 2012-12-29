@@ -7,7 +7,6 @@ package com.bumptech.photos.view;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 import com.bumptech.photos.view.assetpath.AssetPathConverter;
-import com.bumptech.photos.view.loader.ImageLoader;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,18 +16,69 @@ import com.bumptech.photos.view.loader.ImageLoader;
  * To change this template use File | Settings | File Templates.
  */
 public class ThumbImagePresenter<T> implements ImagePresenter.AssetPresenterCoordinator<T> {
+
+    public static class Builder<T> {
+        private ImagePresenter.Builder<T> fullPresenterBuilder;
+        private ImagePresenter.Builder<T> thumbPresenterBuilder;
+        private ImageView imageView;
+        private Drawable placeholderDrawable;
+        private int placeholderResourceId;
+
+        public ThumbImagePresenter<T> build(){
+            assert fullPresenterBuilder != null : "you must include a builder for the full image presenter";
+            assert thumbPresenterBuilder != null : "you must include a builder for the thumb image presenter";
+            assert imageView != null : "cannot create presenter without an image view";
+
+            return new ThumbImagePresenter<T>(this);
+        }
+
+        public Builder<T> setFullPresenterBuilder(ImagePresenter.Builder<T> builder) {
+            this.fullPresenterBuilder = builder;
+            return this;
+        }
+
+        public Builder<T> setThumbPresenterBuilder(ImagePresenter.Builder<T> builder) {
+            this.thumbPresenterBuilder = builder;
+            return this;
+        }
+
+        public Builder<T> setImageView(ImageView imageView) {
+            this.imageView = imageView;
+            return this;
+        }
+
+        public Builder<T> setPlaceholderDrawable(Drawable drawable) {
+            assert drawable == null || placeholderResourceId == 0 : "Can't set both a placeholder drawable and a placeholder resource";
+
+            this.placeholderDrawable = drawable;
+            return this;
+        }
+
+        public Builder<T> setPlaceholderResource(int resourceId) {
+            assert resourceId == 0 || placeholderDrawable == null : "Can't set both a placeholder drawable and a placeholder resource";
+
+            this.placeholderResourceId = resourceId;
+            return this;
+        }
+    }
+
     private final ImagePresenter<T> fullPresenter;
     private final ImagePresenter<T> thumbPresenter;
 
-    public ThumbImagePresenter(ImageView imageView, AssetPathConverter<T> converter, ImageLoader fullLoader, ImageLoader thumbLoader) {
-        this(new ImagePresenter<T>(imageView, converter,  fullLoader), new ImagePresenter<T>(imageView, converter, thumbLoader));
-    }
-
-    public ThumbImagePresenter(ImagePresenter<T> full, ImagePresenter<T> thumb) {
-        fullPresenter = full;
-        thumbPresenter = thumb;
-        thumbPresenter.setCoordinator(this);
-        fullPresenter.setCoordinator(this);
+    private ThumbImagePresenter(Builder<T> builder) {
+        fullPresenter = builder.fullPresenterBuilder
+                .setAssetPresenterCoordinator(this)
+                .setImageView(builder.imageView)
+                .setPlaceholderResource(0)
+                .setPlaceholderDrawable(builder.placeholderDrawable == null ?
+                        builder.imageView.getResources().getDrawable(builder.placeholderResourceId) : builder.placeholderDrawable)
+                .build();
+        thumbPresenter = builder.thumbPresenterBuilder
+                .setAssetPresenterCoordinator(this)
+                .setImageView(builder.imageView)
+                .setPlaceholderDrawable(null)
+                .setPlaceholderResource(0)
+                .build();
     }
 
     public void setAssetModels(T fullModel, T thumbModel) {
@@ -38,16 +88,8 @@ public class ThumbImagePresenter<T> implements ImagePresenter.AssetPresenterCoor
         }
     }
 
-    public void setOnFullSetCallback(ImageSetCallback cb) {
-        fullPresenter.setOnImageSetCallback(cb);
-    }
-
-    public void setOnThumbSetCallback(ImageSetCallback cb) {
-        thumbPresenter.setOnImageSetCallback(cb);
-    }
-
-    public void setPlaceholderDrawable(Drawable placeholderDrawable) {
-        fullPresenter.setPlaceholderDrawable(placeholderDrawable);
+    public ImageView getImageView() {
+        return fullPresenter.getImageView();
     }
 
     public void clear(){
