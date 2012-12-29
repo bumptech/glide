@@ -49,7 +49,6 @@ public class LruPhotoCache{
         @Override
         protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
             super.entryRemoved(evicted, key, oldValue, newValue);    //To change body of overridden methods use File | Settings | File Templates.
-            Log.d("RECYCLE entryRemoved evicted=" + evicted + " oldValue=" + oldValue + " newValue=" + newValue);
             if (evicted && photoRemovedListener != null) {
                 photoRemovedListener.onPhotoRemoved(key, oldValue);
             }
