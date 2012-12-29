@@ -13,7 +13,7 @@ package com.bumptech.photos.view.assetpath;
  */
 public abstract class SimpleAssetPathConverter implements AssetPathConverter<String> {
     @Override
-    public void fetchPath(String assetId, PathReadyListener listener) {
-        listener.onPathReady(assetId);
+    public void fetchPath(String path, PathReadyListener listener) {
+        listener.onPathReady(path);
     }
 }
