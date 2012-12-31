@@ -38,6 +38,10 @@ public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
         if (loadToken != null)  {
             photoManager.cancelTask(loadToken);
         }
+        if (acquired != null) {
+            photoManager.releaseBitmap(acquired);
+            acquired = null;
+        }
 
         loadToken = doFetchImage(path, model, width, height, new ImageReadyCallback(this, cb));
     }
