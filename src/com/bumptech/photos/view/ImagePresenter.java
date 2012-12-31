@@ -87,6 +87,7 @@ public class ImagePresenter<T> {
     private int currentCount;
 
     private boolean isImageSet;
+    private boolean loadedFromCache = false;
 
     private boolean setLayoutListener = false;
     private final Runnable getDimens = new Runnable() {
@@ -132,6 +133,7 @@ public class ImagePresenter<T> {
     public void setAssetModel(final T model) {
         if (model == null || model.equals(currentModel)) return;
 
+        loadedFromCache = true;
         final int loadCount = ++currentCount;
         currentModel = model;
         isImageSet = false;
@@ -147,6 +149,8 @@ public class ImagePresenter<T> {
         } else {
             fetchPath(model, loadCount);
         }
+
+        loadedFromCache = false;
 
         if (!isImageSet()) {
             resetPlaceHolder();
@@ -191,14 +195,14 @@ public class ImagePresenter<T> {
         });
     }
 
-    private void fetchImage(String path, T model, final int loadCount) {
-         imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
+    private void fetchImage(final String path, T model, final int loadCount) {
+        imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage()) return false;
 
                 if (imageSetCallback != null)
-                    imageSetCallback.onImageSet(imageView, false);
+                    imageSetCallback.onImageSet(imageView, loadedFromCache);
                 imageView.setImageBitmap(image);
                 isImageSet = true;
                 return true;
