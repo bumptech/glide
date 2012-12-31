@@ -30,7 +30,12 @@ public class ResizeJobGenerator {
     }
 
     public Runnable resizeCenterCrop(final String path, final int width, final int height, LoadedCallback callback){
-        return new SimpleStreamResizeRunnable(callback) {
+        return new StreamResizeRunnable(callback) {
+
+            @Override
+            public Bitmap getRecycledBitmap() {
+                return bitmapCache.get(width, height);
+            }
 
             @Override
             public Bitmap resize(Bitmap recycled) {
@@ -39,7 +44,7 @@ public class ResizeJobGenerator {
                 if (streamed.getWidth() == width && streamed.getHeight() == height) {
                     return streamed;
                 } else {
-                    return Utils.centerCrop(streamed, width, height);
+                    return Utils.centerCrop(recycled, streamed, width, height);
                 }
             }
         };

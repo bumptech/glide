@@ -25,6 +25,10 @@ import java.io.InputStream;
 public class Utils {
 
     public static Bitmap centerCrop(Bitmap toCrop, int width, int height) {
+        return centerCrop(null, toCrop, width, height);
+    }
+
+    public static Bitmap centerCrop(Bitmap recycled, Bitmap toCrop, int width, int height) {
         if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
             return toCrop;
         }
@@ -44,7 +48,7 @@ public class Utils {
 
         m.setScale(scale, scale);
         m.postTranslate((int) dx + 0.5f, (int) dy + 0.5f);
-        Bitmap result = Bitmap.createBitmap(width, height, toCrop.getConfig());
+        Bitmap result = recycled != null ? recycled : Bitmap.createBitmap(width, height, toCrop.getConfig());
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
         //only if scaling up
