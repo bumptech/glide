@@ -209,6 +209,16 @@ public class PhotoManager {
         }
     }
 
+    public void rejectBitmap(Bitmap b) {
+        if (!CAN_RECYCLE) return;
+
+        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
+        if (currentCount == null || currentCount == 0) {
+            bitmapReferenceCounter.remove(b.hashCode());
+            bitmapCache.put(b);
+        }
+    }
+
     public void acquireBitmap(Bitmap b) {
         if (!CAN_RECYCLE) return;
 

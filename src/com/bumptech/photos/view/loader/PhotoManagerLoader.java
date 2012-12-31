@@ -46,12 +46,14 @@ public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
 
     @Override
     protected void onImageReady(Bitmap image, boolean isUsed) {
-         if (isUsed) {
+        if (isUsed) {
             if (acquired != null) {
                 photoManager.releaseBitmap(acquired);
             }
             photoManager.acquireBitmap(image);
             acquired = image;
+        } else {
+            photoManager.rejectBitmap(image);
         }
     }
 
