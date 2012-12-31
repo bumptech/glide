@@ -11,7 +11,7 @@ package com.bumptech.photos.view.assetpath;
  * Time: 8:52 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SimpleAssetPathConverter implements AssetPathConverter<String> {
+public class SimpleAssetPathConverter implements AssetPathConverter<String> {
     public void fetchPath(String path, PathReadyListener listener) {
         fetchPath(path, 0, 0, listener);
     }
