@@ -26,5 +26,6 @@ public interface ImageLoader<T>  {
 
     public Object fetchPath(T model, int width, int height, PathReadyCallback cb);
     public Object fetchImage(String path, T model, int width, int height, ImageReadyCallback cb);
+    public void clear();
 
 }

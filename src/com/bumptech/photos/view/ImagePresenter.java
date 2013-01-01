@@ -168,8 +168,7 @@ public class ImagePresenter<T> {
         imageView.setImageBitmap(null);
         currentModel = null;
         isImageSet = false;
-        imageToken = null;
-        pathToken = null;
+        imageLoader.clear();
     }
 
     public int getWidth() {

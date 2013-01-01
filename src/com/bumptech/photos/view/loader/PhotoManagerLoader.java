@@ -66,6 +66,14 @@ public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
         cb.onError(e);
     }
 
+    @Override
+    public void clear() {
+        if (acquired != null) {
+            photoManager.releaseBitmap(acquired);
+            acquired = null;
+        }
+    }
+
     private static class PathReadyCallback<T> extends BaseImageLoader.InternalPathReadyCallback<T> implements AssetPathConverter.PathReadyListener {
 
         public PathReadyCallback(BaseImageLoader<T> imageLoader, ImageLoader.PathReadyCallback cb) {
