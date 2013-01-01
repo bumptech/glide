@@ -6,9 +6,10 @@ package com.bumptech.photos.view;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import com.bumptech.photos.util.Log;
 import com.bumptech.photos.view.loader.ImageLoader;
 
 import java.lang.ref.WeakReference;
@@ -21,8 +22,6 @@ import java.lang.ref.WeakReference;
  * To change this template use File | Settings | File Templates.
  */
 public class ImagePresenter<T> {
-    private Object pathToken;
-    private Object imageToken;
 
     public static class Builder<T> {
         private ImageView imageView;
@@ -74,6 +73,12 @@ public class ImagePresenter<T> {
         }
     }
 
+    private static final String PENDING_LOAD_TOKEN = "pending_load";
+    private static final int PENDING_LOAD_DELAY = 20; //60 fps = 1000/60 = 16.67 ms
+
+    private Object pathToken;
+    private Object imageToken;
+
     private final ImageLoader<T> imageLoader;
     private final Drawable placeholderDrawable;
     private final ImageSetCallback imageSetCallback;
@@ -83,27 +88,21 @@ public class ImagePresenter<T> {
     private int height = 0;
     private int width = 0;
 
+    private Handler handler = new Handler();
+
     private T currentModel;
     private int currentCount;
 
     private boolean isImageSet;
     private boolean loadedFromCache = false;
 
-    private boolean setLayoutListener = false;
     private final Runnable getDimens = new Runnable() {
-
         @Override
         public void run() {
-            Log.d("AP: getDimens run width=" + width + " height=" + height);
             width = imageView.getWidth();
             height = imageView.getHeight();
-            if (width == 0 || height == 0) {
-                if (!setLayoutListener) {
-                    imageView.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(imageView, ImagePresenter.this));
-                    setLayoutListener = true;
-                }
-            } else if (pendingLoad != null) {
-                imageView.post(pendingLoad);
+            if (width != 0 && height != 0) {
+                postPendingLoad();
             }
         }
     };
@@ -124,6 +123,7 @@ public class ImagePresenter<T> {
         }
         this.coordinator = builder.coordinator;
         this.imageSetCallback = builder.imageSetCallback;
+        imageView.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(imageView, ImagePresenter.this));
     }
 
     public ImageView getImageView() {
@@ -143,6 +143,7 @@ public class ImagePresenter<T> {
                 @Override
                 public void run() {
                     fetchPath(model, loadCount);
+                    pendingLoad = null;
                 }
             };
             getDimens();
@@ -177,6 +178,17 @@ public class ImagePresenter<T> {
 
     public int getHeight() {
         return height;
+    }
+
+    private void postPendingLoad() {
+        if (pendingLoad == null) return;
+
+        //If an image view is actively changing sizes, we want to delay our resize job until
+        //the size has stabilized so that the image we load will match the final size, rather than some
+        //size part way through the change. One example of this is as part of an animation where a view is
+        //expanding or shrinking
+        handler.removeCallbacksAndMessages(PENDING_LOAD_TOKEN);
+        handler.postAtTime(pendingLoad, PENDING_LOAD_TOKEN, SystemClock.uptimeMillis() + PENDING_LOAD_DELAY);
     }
 
     private void fetchPath(final T model, final int loadCount) {
