@@ -1,7 +1,7 @@
-package com.bumptech.photos.photomanager.loader;
+package com.bumptech.photos.imagemanager.loader;
 
-import com.bumptech.photos.photomanager.LoadedCallback;
-import com.bumptech.photos.photomanager.PhotoManager;
+import com.bumptech.photos.imagemanager.LoadedCallback;
+import com.bumptech.photos.imagemanager.ImageManager;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,12 +12,12 @@ import com.bumptech.photos.photomanager.PhotoManager;
  */
 public class AsIs<T> extends PhotoManagerLoader<T> {
 
-    public AsIs(PhotoManager photoManager) {
-        super(photoManager);
+    public AsIs(ImageManager imageManager) {
+        super(imageManager);
     }
 
     @Override
     protected Object doFetchImage(String path, int width, int height, LoadedCallback cb) {
-        return photoManager.getImage(path, cb);
+        return imageManager.getImage(path, cb);
     }
 }

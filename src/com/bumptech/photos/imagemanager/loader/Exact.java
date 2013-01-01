@@ -2,10 +2,10 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.photomanager.loader;
+package com.bumptech.photos.imagemanager.loader;
 
-import com.bumptech.photos.photomanager.LoadedCallback;
-import com.bumptech.photos.photomanager.PhotoManager;
+import com.bumptech.photos.imagemanager.LoadedCallback;
+import com.bumptech.photos.imagemanager.ImageManager;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,12 +16,12 @@ import com.bumptech.photos.photomanager.PhotoManager;
  */
 public class Exact<T> extends PhotoManagerLoader<T> {
 
-    public Exact(PhotoManager photoManager) {
-        super(photoManager);
+    public Exact(ImageManager imageManager) {
+        super(imageManager);
     }
 
     @Override
     protected Object doFetchImage(String path, int width, int height, LoadedCallback cb) {
-        return photoManager.getImageExact(path, width, height, cb);
+        return imageManager.getImageExact(path, width, height, cb);
     }
 }

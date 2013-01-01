@@ -2,7 +2,7 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.photomanager;
+package com.bumptech.photos.imagemanager;
 
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -25,7 +25,7 @@ import java.util.Map;
  * Time: 5:02 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PhotoManager {
+public class ImageManager {
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
     private PhotoDiskCache diskCache;
@@ -42,7 +42,7 @@ public class PhotoManager {
         AS_IS
     }
 
-    public PhotoManager(int maxMemCacheSize, long maxDiskCacheSize, File diskCacheDir, Handler mainHandler, Handler backgroundHandler) {
+    public ImageManager(int maxMemCacheSize, long maxDiskCacheSize, File diskCacheDir, Handler mainHandler, Handler backgroundHandler) {
         this.backgroundHandler = backgroundHandler;
         this.memoryCache = new LruPhotoCache(maxMemCacheSize);
         memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {

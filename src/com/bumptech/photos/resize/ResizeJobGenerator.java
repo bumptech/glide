@@ -5,7 +5,7 @@ package com.bumptech.photos.resize;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
-import com.bumptech.photos.photomanager.LoadedCallback;
+import com.bumptech.photos.imagemanager.LoadedCallback;
 import com.bumptech.photos.cache.SizedBitmapCache;
 
 import java.io.IOException;

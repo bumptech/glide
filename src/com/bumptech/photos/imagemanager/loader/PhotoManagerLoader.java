@@ -1,9 +1,9 @@
-package com.bumptech.photos.photomanager.loader;
+package com.bumptech.photos.imagemanager.loader;
 
 import android.graphics.Bitmap;
 import com.bumptech.photos.loader.image.BaseImageLoader;
-import com.bumptech.photos.photomanager.LoadedCallback;
-import com.bumptech.photos.photomanager.PhotoManager;
+import com.bumptech.photos.imagemanager.LoadedCallback;
+import com.bumptech.photos.imagemanager.ImageManager;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,12 +14,12 @@ import com.bumptech.photos.photomanager.PhotoManager;
  */
 public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
 
-    protected final PhotoManager photoManager;
+    protected final ImageManager imageManager;
     private Bitmap acquired;
     private Object loadToken;
 
-    public PhotoManagerLoader(PhotoManager photoManager) {
-        this.photoManager = photoManager;
+    public PhotoManagerLoader(ImageManager imageManager) {
+        this.imageManager = imageManager;
     }
     @Override
     protected final void doFetchImage(String path, T model, int width, int height, ImageReadyCallback cb) {
@@ -33,10 +33,10 @@ public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
     protected void onImageReady(Bitmap image, boolean isUsed) {
         if (isUsed) {
             releaseAcquired();
-            photoManager.acquireBitmap(image);
+            imageManager.acquireBitmap(image);
             acquired = image;
         } else {
-            photoManager.rejectBitmap(image);
+            imageManager.rejectBitmap(image);
         }
     }
 
@@ -47,7 +47,7 @@ public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
 
     private void releaseAcquired() {
         if (acquired != null) {
-            photoManager.releaseBitmap(acquired);
+            imageManager.releaseBitmap(acquired);
             acquired = null;
         }
     }
