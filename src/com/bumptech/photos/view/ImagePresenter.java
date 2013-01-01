@@ -159,7 +159,7 @@ public class ImagePresenter<T> {
     }
 
     public void resetPlaceHolder() {
-        if (placeholderDrawable == null || !canSetPlaceholder()) return;
+        if (!canSetPlaceholder()) return;
 
         imageView.setImageDrawable(placeholderDrawable);
     }
