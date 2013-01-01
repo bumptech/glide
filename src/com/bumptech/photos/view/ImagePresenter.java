@@ -74,7 +74,7 @@ public class ImagePresenter<T> {
     }
 
     private static final String PENDING_LOAD_TOKEN = "pending_load";
-    private static final int PENDING_LOAD_DELAY = 20; //60 fps = 1000/60 = 16.67 ms
+    private static final int PENDING_LOAD_DELAY = 100; //60 fps = 1000/60 = 16.67 ms
 
     private Object pathToken;
     private Object imageToken;
@@ -99,6 +99,8 @@ public class ImagePresenter<T> {
     private final Runnable getDimens = new Runnable() {
         @Override
         public void run() {
+            if (imageView.getWidth() == width && imageView.getHeight() == height) return;
+
             width = imageView.getWidth();
             height = imageView.getHeight();
             if (width != 0 && height != 0) {
