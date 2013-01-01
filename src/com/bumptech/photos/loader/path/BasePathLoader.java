@@ -1,4 +1,4 @@
-package com.bumptech.photos.view.assetpath;
+package com.bumptech.photos.loader.path;
 
 import java.lang.ref.WeakReference;
 

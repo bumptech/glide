@@ -1,9 +1,9 @@
-package com.bumptech.photos.photomanager;
+package com.bumptech.photos.photomanager.loader;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.loader.image.BaseImageLoader;
 import com.bumptech.photos.photomanager.LoadedCallback;
 import com.bumptech.photos.photomanager.PhotoManager;
-import com.bumptech.photos.view.loader.BaseImageLoader;
 
 /**
  * Created with IntelliJ IDEA.

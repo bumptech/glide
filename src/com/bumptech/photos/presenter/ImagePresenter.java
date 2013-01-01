@@ -2,7 +2,7 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.view;
+package com.bumptech.photos.presenter;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -11,8 +11,8 @@ import android.os.SystemClock;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import com.bumptech.photos.util.Log;
-import com.bumptech.photos.view.assetpath.PathLoader;
-import com.bumptech.photos.view.loader.ImageLoader;
+import com.bumptech.photos.loader.path.PathLoader;
+import com.bumptech.photos.loader.image.ImageLoader;
 
 import java.lang.ref.WeakReference;
 
@@ -24,8 +24,6 @@ import java.lang.ref.WeakReference;
  * To change this template use File | Settings | File Templates.
  */
 public class ImagePresenter<T> {
-
-
 
     public static class Builder<T> {
         private ImageView imageView;

@@ -2,7 +2,7 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.view;
+package com.bumptech.photos.presenter;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;

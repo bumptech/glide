@@ -2,7 +2,7 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.view.assetpath;
+package com.bumptech.photos.loader.path;
 
 /**
  * Created with IntelliJ IDEA.

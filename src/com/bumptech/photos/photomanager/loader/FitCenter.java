@@ -6,7 +6,6 @@ package com.bumptech.photos.photomanager.loader;
 
 import com.bumptech.photos.photomanager.LoadedCallback;
 import com.bumptech.photos.photomanager.PhotoManager;
-import com.bumptech.photos.photomanager.PhotoManagerLoader;
 
 /**
  * Created with IntelliJ IDEA.

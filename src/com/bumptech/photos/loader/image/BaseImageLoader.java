@@ -1,4 +1,4 @@
-package com.bumptech.photos.view.loader;
+package com.bumptech.photos.loader.image;
 
 import android.graphics.Bitmap;
 
