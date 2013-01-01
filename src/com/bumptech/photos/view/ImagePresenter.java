@@ -166,7 +166,7 @@ public class ImagePresenter<T> {
 
     public void clear() {
         currentCount++;
-        imageView.setImageBitmap(null);
+        resetPlaceHolder();
         currentModel = null;
         isImageSet = false;
         imageLoader.clear();
