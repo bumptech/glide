@@ -15,14 +15,14 @@ import com.bumptech.photos.view.assetpath.AssetPathConverter;
  * Time: 10:57 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AsIs<T> extends PhotoManagerLoader<T> {
+public class Exact<T> extends PhotoManagerLoader<T> {
 
-    public AsIs(PhotoManager photoManager, AssetPathConverter<T> assetToPath) {
+    public Exact(PhotoManager photoManager, AssetPathConverter<T> assetToPath) {
         super(photoManager, assetToPath);
     }
 
     @Override
     protected Object doFetchImage(String path, T model, int width, int height, LoadedCallback cb) {
-        return photoManager.getImage(path, cb);
+        return photoManager.getImageExact(path, width, height, cb);
     }
 }

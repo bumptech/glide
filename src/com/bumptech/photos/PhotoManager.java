@@ -72,6 +72,24 @@ public class PhotoManager {
     }
 
     /**
+     * Loads the image for the given id assuming its width and height are exactly those given
+     * @param path - the path to the image
+     * @param width - the width of the image on disk
+     * @param height - the height of the image on disk
+     * @param cb - the callback called when the load completes
+     * @return A token tracking this request
+     */
+    public Object getImageExact(final String path, int width, int height, final LoadedCallback cb) {
+        final Object token = cb;
+        final String key = getKey(path, width, height, ResizeType.AS_IS);
+        if (!returnFromCache(key, cb)) {
+            final Runnable task = resizer.loadAsIs(path, width, height, getResizeCb(key, token, cb, false, false));
+            postJob(task, token);
+        }
+        return token;
+    }
+
+    /**
      * Loads the image for the given id to nearly the given width and height maintaining the original proportions
      * @param path - the id of the image
      * @param width - the desired width in pixels
@@ -79,7 +97,7 @@ public class PhotoManager {
      * @param cb - the callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object getImage(final String path, final int width, final int height, final LoadedCallback cb){
+    public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
         final Object token = cb;
         final String key = getKey(path, width, height, ResizeType.APPROXIMATE);
         if (!returnFromCache(key, cb)) {

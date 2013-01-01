@@ -105,6 +105,20 @@ public class ResizeJobGenerator {
         };
     }
 
+    public Runnable loadAsIs(final String path, final int width, final int height, LoadedCallback cb) {
+        return new StreamResizeRunnable(cb) {
+            @Override
+            public Bitmap getRecycledBitmap() {
+                return bitmapCache.get(width, height);
+            }
+
+            @Override
+            public Bitmap resize(Bitmap recycled) {
+                return Utils.load(path, recycled);
+            }
+        };
+    }
+
     public Runnable loadAsIs(final String path, LoadedCallback callback){
         return new StreamResizeRunnable(callback) {
             @Override
@@ -118,7 +132,7 @@ public class ResizeJobGenerator {
                 return Utils.load(path, recycled);
             }
         };
-    };
+    }
 
     private abstract class SimpleStreamResizeRunnable extends StreamResizeRunnable {
 

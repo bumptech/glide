@@ -23,6 +23,6 @@ public class Approximate<T> extends PhotoManagerLoader<T> {
 
     @Override
     protected Object doFetchImage(String path, T model, int width, int height, LoadedCallback cb) {
-        return photoManager.getImage(path, width, height, cb);
+        return photoManager.getImageApproximate(path, width, height, cb);
     }
 }
