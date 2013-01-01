@@ -6,7 +6,6 @@ package com.bumptech.photos.view;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-import com.bumptech.photos.view.assetpath.AssetPathConverter;
 
 /**
  * Created with IntelliJ IDEA.

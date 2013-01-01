@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import com.bumptech.photos.util.Log;
+import com.bumptech.photos.view.assetpath.PathLoader;
 import com.bumptech.photos.view.loader.ImageLoader;
 
 import java.lang.ref.WeakReference;
@@ -23,23 +25,32 @@ import java.lang.ref.WeakReference;
  */
 public class ImagePresenter<T> {
 
+
+
     public static class Builder<T> {
         private ImageView imageView;
-        private ImageLoader<T> imageLoader;
         private int placeholderResourceId;
         private Drawable placeholderDrawable;
         private ImageSetCallback imageSetCallback;
         private AssetPresenterCoordinator coordinator;
+        private ImageLoader<T> imageLoader;
+        private PathLoader<T> pathLoader;
 
         public ImagePresenter<T> build(){
             assert imageView != null : "cannot create presenter without an image view";
             assert imageLoader != null : "cannot create presenter without an image loader";
+            assert pathLoader != null : "cannot create presenter without a path loader";
 
             return new ImagePresenter<T>(this);
         }
 
         public Builder<T> setImageView(ImageView imageView) {
             this.imageView = imageView;
+            return this;
+        }
+
+        public Builder<T> setPathLoader(PathLoader<T> pathLoader) {
+            this.pathLoader = pathLoader;
             return this;
         }
 
@@ -79,6 +90,7 @@ public class ImagePresenter<T> {
     private Object pathToken;
     private Object imageToken;
 
+    private final PathLoader<T> pathLoader;
     private final ImageLoader<T> imageLoader;
     private final Drawable placeholderDrawable;
     private final ImageSetCallback imageSetCallback;
@@ -103,6 +115,8 @@ public class ImagePresenter<T> {
 
             width = imageView.getWidth();
             height = imageView.getHeight();
+            if (pendingLoad != null)
+                Log.d("IP: getDimens width=" + width + " height=" + height);
             if (width != 0 && height != 0) {
                 postPendingLoad();
             }
@@ -118,6 +132,7 @@ public class ImagePresenter<T> {
     private ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
+        this.pathLoader = builder.pathLoader;
         if (builder.placeholderResourceId != 0) {
             this.placeholderDrawable = imageView.getResources().getDrawable(builder.placeholderResourceId);
         } else {
@@ -144,6 +159,7 @@ public class ImagePresenter<T> {
             pendingLoad = new Runnable() {
                 @Override
                 public void run() {
+                    Log.d("IP: pendingLoad run width=" + width + " height=" + height);
                     fetchPath(model, loadCount);
                     pendingLoad = null;
                 }
@@ -171,6 +187,7 @@ public class ImagePresenter<T> {
         resetPlaceHolder();
         currentModel = null;
         isImageSet = false;
+        pathLoader.clear();
         imageLoader.clear();
     }
 
@@ -194,7 +211,7 @@ public class ImagePresenter<T> {
     }
 
     private void fetchPath(final T model, final int loadCount) {
-        pathToken = imageLoader.fetchPath(model, getWidth(), getHeight(), new ImageLoader.PathReadyCallback() {
+        pathToken = pathLoader.fetchPath(model, getWidth(), getHeight(), new PathLoader.PathReadyCallback() {
             @Override
             public boolean onPathReady(String path) {
                 if (loadCount != currentCount) return false;

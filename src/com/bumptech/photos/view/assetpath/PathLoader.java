@@ -11,11 +11,14 @@ package com.bumptech.photos.view.assetpath;
  * Time: 8:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface AssetPathConverter<T> {
-    public interface PathReadyListener {
-        public void pathReady(String path);
+public interface PathLoader<T> {
+
+    public interface PathReadyCallback {
+        public boolean onPathReady(String path);
         public void onError(Exception e);
     }
 
-    public void fetchPath(T model, int width, int height, PathReadyListener listener);
+    public Object fetchPath(T model, int width, int height, PathReadyCallback cb);
+
+    public void clear();
 }
