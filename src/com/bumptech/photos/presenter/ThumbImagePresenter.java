@@ -105,4 +105,8 @@ public class ThumbImagePresenter<T> implements ImagePresenter.AssetPresenterCoor
     public boolean canSetPlaceholder(ImagePresenter presenter) {
         return presenter == fullPresenter;
     }
+
+    public void resetPlaceholder() {
+        fullPresenter.resetPlaceHolder();
+    }
 }
