@@ -9,10 +9,9 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import com.bumptech.photos.cache.LruPhotoCache;
-import com.bumptech.photos.cache.PhotoDiskCache;
-import com.bumptech.photos.cache.SizedBitmapCache;
-import com.bumptech.photos.resize.ResizeJobGenerator;
+import com.bumptech.photos.imagemanager.cache.LruPhotoCache;
+import com.bumptech.photos.imagemanager.cache.PhotoDiskCache;
+import com.bumptech.photos.imagemanager.cache.SizedBitmapCache;
 
 import java.io.File;
 import java.io.InputStream;
@@ -46,7 +45,7 @@ public class ImageManager {
 
     private final Handler mainHandler;
     private final LruPhotoCache memoryCache;
-    private final ResizeJobGenerator resizer;
+    private final ImageResizer resizer;
     private final Executor executor;
     private final Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
     private final SizedBitmapCache bitmapCache;
@@ -124,7 +123,7 @@ public class ImageManager {
             bitmapCache = null;
         }
 
-        this.resizer = new ResizeJobGenerator(bitmapCache);
+        this.resizer = new ImageResizer(bitmapCache);
         this.mainHandler = mainHandler;
         this.executor = executor;
     }
