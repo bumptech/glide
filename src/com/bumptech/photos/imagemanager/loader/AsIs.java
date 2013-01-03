@@ -11,7 +11,7 @@ import com.bumptech.photos.imagemanager.ImageManager;
  * Time: 4:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AsIs<T> extends PhotoManagerLoader<T> {
+public class AsIs<T> extends ImageManagerLoader<T> {
 
     public AsIs(ImageManager imageManager) {
         super(imageManager);

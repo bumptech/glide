@@ -15,7 +15,7 @@ import com.bumptech.photos.imagemanager.ImageManager;
  * Time: 10:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CenterCrop<T> extends PhotoManagerLoader<T> {
+public class CenterCrop<T> extends ImageManagerLoader<T> {
 
     public CenterCrop(ImageManager imageManager) {
         super(imageManager);

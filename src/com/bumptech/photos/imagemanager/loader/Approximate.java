@@ -15,7 +15,7 @@ import com.bumptech.photos.imagemanager.ImageManager;
  * Time: 10:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Approximate<T> extends PhotoManagerLoader<T> {
+public class Approximate<T> extends ImageManagerLoader<T> {
 
     public Approximate(ImageManager imageManager) {
         super(imageManager);

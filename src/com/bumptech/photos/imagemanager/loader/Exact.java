@@ -15,7 +15,7 @@ import com.bumptech.photos.imagemanager.ImageManager;
  * Time: 10:57 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exact<T> extends PhotoManagerLoader<T> {
+public class Exact<T> extends ImageManagerLoader<T> {
 
     public Exact(ImageManager imageManager) {
         super(imageManager);

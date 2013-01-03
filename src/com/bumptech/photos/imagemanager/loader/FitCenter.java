@@ -15,7 +15,7 @@ import com.bumptech.photos.imagemanager.ImageManager;
  * Time: 10:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FitCenter<T> extends PhotoManagerLoader<T> {
+public class FitCenter<T> extends ImageManagerLoader<T> {
 
     public FitCenter(ImageManager imageManager) {
         super(imageManager);

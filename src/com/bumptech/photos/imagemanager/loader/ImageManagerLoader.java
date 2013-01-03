@@ -11,13 +11,13 @@ import com.bumptech.photos.loader.image.BaseImageLoader;
  * Time: 2:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
+public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
 
     protected final ImageManager imageManager;
     private Bitmap acquired;
     private Object loadToken;
 
-    public PhotoManagerLoader(ImageManager imageManager) {
+    public ImageManagerLoader(ImageManager imageManager) {
         this.imageManager = imageManager;
     }
     @Override
