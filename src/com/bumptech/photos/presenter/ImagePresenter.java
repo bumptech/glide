@@ -103,7 +103,7 @@ public class ImagePresenter<T> {
     private T currentModel;
     private int currentCount;
 
-    private boolean isImageSet;
+    private boolean isImageSet = false;
     private boolean loadedFromCache = false;
 
     private final Runnable getDimens = new Runnable() {
@@ -227,7 +227,7 @@ public class ImagePresenter<T> {
         imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
-                if (loadCount != currentCount || !canSetImage()) return false;
+                if (loadCount != currentCount || !canSetImage() || image == null) return false;
 
                 if (imageSetCallback != null)
                     imageSetCallback.onImageSet(imageView, loadedFromCache);
