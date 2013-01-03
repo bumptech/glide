@@ -4,7 +4,6 @@
 package com.bumptech.photos.resize;
 
 import android.graphics.Bitmap;
-import android.os.Handler;
 import com.bumptech.photos.cache.SizedBitmapCache;
 
 import java.io.IOException;
@@ -18,11 +17,11 @@ public class ResizeJobGenerator {
 
     private final SizedBitmapCache bitmapCache;
 
-    public ResizeJobGenerator(Handler mainHandler) {
-        this(mainHandler, null);
+    public ResizeJobGenerator() {
+        this(null);
     }
 
-    public ResizeJobGenerator(Handler mainHandler, SizedBitmapCache bitmapCache){
+    public ResizeJobGenerator(SizedBitmapCache bitmapCache){
         this.bitmapCache = bitmapCache;
     }
 

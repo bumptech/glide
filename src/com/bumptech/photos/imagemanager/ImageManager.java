@@ -4,10 +4,11 @@
 
 package com.bumptech.photos.imagemanager;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
-import android.os.SystemClock;
 import com.bumptech.photos.cache.LruPhotoCache;
 import com.bumptech.photos.cache.PhotoDiskCache;
 import com.bumptech.photos.cache.SizedBitmapCache;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,14 +28,30 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ImageManager {
+    private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
+
+    public static class Options {
+        public int appVersion = 0;
+
+        public boolean useMemoryCache = true;
+        public int maxMemorySize;
+
+        public boolean useDiskCache = true;
+        public int maxDiskCacheSize = 10 * 1024 * 1024;
+
+        public boolean recycleBitmaps = true;
+    }
+
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
-    private PhotoDiskCache diskCache;
-    private LruPhotoCache memoryCache;
-    private ResizeJobGenerator resizer;
-    private Handler backgroundHandler;
-    private Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
-    private SizedBitmapCache bitmapCache = new SizedBitmapCache();
+    private final Handler mainHandler;
+    private final LruPhotoCache memoryCache;
+    private final ResizeJobGenerator resizer;
+    private final Executor executor;
+    private final Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
+    private final SizedBitmapCache bitmapCache;
+    private final PhotoDiskCache diskCache;
+    private final boolean isBitmapRecyclingEnabled;
 
     private enum ResizeType {
         CENTER_CROP,
@@ -42,17 +60,73 @@ public class ImageManager {
         AS_IS
     }
 
-    public ImageManager(int maxMemCacheSize, long maxDiskCacheSize, File diskCacheDir, Handler mainHandler, Handler backgroundHandler) {
-        this.backgroundHandler = backgroundHandler;
-        this.memoryCache = new LruPhotoCache(maxMemCacheSize);
-        memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {
-            @Override
-            public void onPhotoRemoved(String key, Bitmap bitmap) {
-                releaseBitmap(bitmap);
+    public static File getPhotoCacheDir(Context context) {
+        final String cachePath;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
+                !Environment.isExternalStorageRemovable()) {
+            cachePath = context.getExternalCacheDir().getPath();
+        } else {
+            cachePath = context.getCacheDir().getPath();
+        }
+
+        File result = new File(cachePath + File.separatorChar + DISK_CACHE_DIR);
+        if (!result.exists()) {
+            result.mkdir();
+        }
+        return result;
+    }
+
+    public ImageManager(Context context) {
+        this(context, new Options());
+    }
+
+    public ImageManager(Context context, Options options) {
+        this(context, new HandlerExecutor(), options);
+    }
+
+    public ImageManager(Context context, Executor executor, Options options) {
+        this(context, executor, new Handler(), options);
+    }
+
+    public ImageManager(Context context, Executor executor, Handler mainHandler, Options options) {
+        this(context, getPhotoCacheDir(context), executor, mainHandler, options);
+    }
+
+    public ImageManager(Context context, File diskCacheDir, Executor executor, Handler mainHandler, Options options) {
+        isBitmapRecyclingEnabled = options.recycleBitmaps && CAN_RECYCLE;
+        if (options.useMemoryCache && options.maxMemorySize <= 0) {
+            options.maxMemorySize = LruPhotoCache.getMaxCacheSize(context);
+        }
+
+        if (diskCacheDir == null || !options.useDiskCache || options.maxDiskCacheSize <= 0) {
+            diskCache = null;
+        } else {
+            diskCache = new PhotoDiskCache(diskCacheDir, options.maxDiskCacheSize, options.appVersion);
+        }
+
+        if (!options.useMemoryCache || options.maxMemorySize <= 0) {
+            memoryCache = null;
+        } else {
+            memoryCache = new LruPhotoCache(options.maxMemorySize);
+        }
+
+        if (isBitmapRecyclingEnabled) {
+            if (memoryCache != null) {
+                memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {
+                    @Override
+                    public void onPhotoRemoved(String key, Bitmap bitmap) {
+                        releaseBitmap(bitmap);
+                    }
+                });
             }
-        });
-        this.diskCache = new PhotoDiskCache(diskCacheDir, maxDiskCacheSize, mainHandler, backgroundHandler);
-        this.resizer = new ResizeJobGenerator(mainHandler, CAN_RECYCLE ? bitmapCache : null);
+            bitmapCache = new SizedBitmapCache();
+        } else {
+            bitmapCache = null;
+        }
+
+        this.resizer = new ResizeJobGenerator(bitmapCache);
+        this.mainHandler = mainHandler;
+        this.executor = executor;
     }
 
     /**

@@ -21,16 +21,14 @@ import java.security.NoSuchAlgorithmException;
  * To change this template use File | Settings | File Templates.
  */
 public class PhotoDiskCache {
-    private final static int APP_VERSION = 0;
     private final static int VALUE_COUNT = 1; //values per cache entry
     private DiskLruCache cache;
 
-
-    public PhotoDiskCache(File directory, long maxSize, Handler mainHandler, Handler loadHandler) {
+    public PhotoDiskCache(File directory, long maxSize, int appVersion) {
         try {
-            cache = DiskLruCache.open(directory, APP_VERSION, VALUE_COUNT, maxSize);
+            cache = DiskLruCache.open(directory, appVersion, VALUE_COUNT, maxSize);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
     }
 
