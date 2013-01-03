@@ -29,7 +29,7 @@ public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
     protected abstract Object doFetchImage(String path, int width, int height, ImageReadyCallback cb);
 
     @Override
-    protected void onImageReady(Bitmap image, boolean isUsed) {
+    protected void onImageReady(String path, T model, Bitmap image, boolean isUsed) {
         if (isUsed) {
             releaseAcquired();
             imageManager.acquireBitmap(image);

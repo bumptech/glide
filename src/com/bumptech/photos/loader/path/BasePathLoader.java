@@ -12,7 +12,7 @@ import java.lang.ref.WeakReference;
 public abstract class BasePathLoader<T> implements PathLoader<T> {
     @Override
     public final Object fetchPath(T model, int width, int height, PathReadyCallback cb) {
-        doFetchPath(model, width, height, new InternalPathReadyCallback(cb));
+        doFetchPath(model, width, height, new InternalPathReadyCallback(cb, model));
         return cb;
     }
 
@@ -21,25 +21,28 @@ public abstract class BasePathLoader<T> implements PathLoader<T> {
 
     protected abstract void doFetchPath(T model, int width, int height, PathReadyCallback cb);
 
-    protected void onPathReady(String path, boolean isUsed) { }
+    protected void onPathReady(String path, T model, boolean isUsed) { }
 
-    protected void onPathFetchFailed(Exception e) { }
+    protected void onPathFetchFailed(T model, Exception e) { }
 
 
     protected class InternalPathReadyCallback implements PathReadyCallback{
         private final WeakReference<PathReadyCallback> cbRef;
+        private final WeakReference<T> modelRef;
 
-        public InternalPathReadyCallback(PathReadyCallback cb) {
+        public InternalPathReadyCallback(PathReadyCallback cb, T model) {
             this.cbRef = new WeakReference<PathReadyCallback>(cb);
+            this.modelRef = new WeakReference<T>(model);
         }
 
         @Override
         public final boolean onPathReady(String path) {
             final PathReadyCallback cb = cbRef.get();
+            final T model = modelRef.get();
             boolean result = false;
-            if (cb != null) {
+            if (cb != null && model != null) {
                 result = cb.onPathReady(path);
-                BasePathLoader.this.onPathReady(path, result);
+                BasePathLoader.this.onPathReady(path, model, result);
             }
             return result;
         }
@@ -47,9 +50,10 @@ public abstract class BasePathLoader<T> implements PathLoader<T> {
         @Override
         public final void onError(Exception e) {
             final PathReadyCallback cb = cbRef.get();
-            if (cb != null) {
+            final T model = modelRef.get();
+            if (cb != null && model != null) {
                 cb.onError(e);
-                BasePathLoader.this.onPathFetchFailed(e);
+                BasePathLoader.this.onPathFetchFailed(model, e);
             }
         }
     }
