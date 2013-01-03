@@ -11,8 +11,8 @@ import java.lang.ref.WeakReference;
  */
 public abstract class BasePathLoader<T> implements PathLoader<T> {
     @Override
-    public Object fetchPath(T model, int width, int height, PathReadyCallback cb) {
-        doFetchPath(model, width, height, cb);
+    public final Object fetchPath(T model, int width, int height, PathReadyCallback cb) {
+        doFetchPath(model, width, height, new InternalPathReadyCallback(cb));
         return cb;
     }
 
@@ -26,30 +26,30 @@ public abstract class BasePathLoader<T> implements PathLoader<T> {
     protected void onPathFetchFailed(Exception e) { }
 
 
-    protected static class InternalPathReadyCallback {
+    protected class InternalPathReadyCallback implements PathReadyCallback{
         private final WeakReference<PathReadyCallback> cbRef;
-        private final WeakReference<BasePathLoader> pathLoaderRef;
 
-
-        public InternalPathReadyCallback(BasePathLoader pathLoader, PathReadyCallback cb) {
-            this.pathLoaderRef = new WeakReference<BasePathLoader>(pathLoader);
+        public InternalPathReadyCallback(PathReadyCallback cb) {
             this.cbRef = new WeakReference<PathReadyCallback>(cb);
         }
 
-        protected final void onPathReady(String path) {
-            final BasePathLoader pathLoader = pathLoaderRef.get();
+        @Override
+        public final boolean onPathReady(String path) {
             final PathReadyCallback cb = cbRef.get();
-            if (pathLoader != null && cb != null) {
-                pathLoader.onPathReady(path, cb.onPathReady(path));
+            boolean result = false;
+            if (cb != null) {
+                result = cb.onPathReady(path);
+                BasePathLoader.this.onPathReady(path, result);
             }
+            return result;
         }
 
-        protected final void onError(Exception e) {
-            final BasePathLoader pathLoader = pathLoaderRef.get();
+        @Override
+        public final void onError(Exception e) {
             final PathReadyCallback cb = cbRef.get();
-            if (pathLoader != null && cb != null) {
+            if (cb != null) {
                 cb.onError(e);
-                pathLoader.onPathFetchFailed(e);
+                BasePathLoader.this.onPathFetchFailed(e);
             }
         }
     }

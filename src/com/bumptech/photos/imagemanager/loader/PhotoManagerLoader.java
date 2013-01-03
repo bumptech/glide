@@ -1,9 +1,8 @@
 package com.bumptech.photos.imagemanager.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.loader.image.BaseImageLoader;
-import com.bumptech.photos.imagemanager.LoadedCallback;
 import com.bumptech.photos.imagemanager.ImageManager;
+import com.bumptech.photos.loader.image.BaseImageLoader;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,10 +23,10 @@ public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
     @Override
     protected final void doFetchImage(String path, T model, int width, int height, ImageReadyCallback cb) {
         releaseAcquired();
-        loadToken = doFetchImage(path, width, height, new PhotoManagerLoaderCallback(this, cb));
+        loadToken = doFetchImage(path, width, height, cb);
     }
 
-    protected abstract Object doFetchImage(String path, int width, int height, LoadedCallback cb);
+    protected abstract Object doFetchImage(String path, int width, int height, ImageReadyCallback cb);
 
     @Override
     protected void onImageReady(Bitmap image, boolean isUsed) {
@@ -52,20 +51,4 @@ public abstract class PhotoManagerLoader<T> extends BaseImageLoader<T> {
         }
     }
 
-    protected static class PhotoManagerLoaderCallback extends InternalImageReadyCallback implements LoadedCallback {
-
-        public PhotoManagerLoaderCallback(BaseImageLoader imageLoader, ImageReadyCallback cb) {
-            super(imageLoader, cb);
-        }
-
-        @Override
-        public void onLoadCompleted(Bitmap loaded) {
-            onImageReady(loaded);
-        }
-
-        @Override
-        public void onLoadFailed(Exception e) {
-            onError(e);
-        }
-    }
 }

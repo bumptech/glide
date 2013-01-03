@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 public abstract class BaseImageLoader<T> implements ImageLoader<T> {
     @Override
     public final Object fetchImage(String path, T model, int width, int height, ImageReadyCallback cb) {
-        doFetchImage(path, model, width, height, cb);
+        doFetchImage(path, model, width, height, new InternalImageReadyCallback(cb));
         return cb;
     }
 
@@ -28,29 +28,30 @@ public abstract class BaseImageLoader<T> implements ImageLoader<T> {
     protected void onImageLoadFailed(Exception e) { }
 
 
-    protected static class InternalImageReadyCallback {
+    protected class InternalImageReadyCallback implements ImageReadyCallback {
         private final WeakReference<ImageReadyCallback> cbRef;
-        private final WeakReference<BaseImageLoader> imageLoaderRef;
 
-        public InternalImageReadyCallback(BaseImageLoader imageLoader, ImageReadyCallback cb) {
-            this.imageLoaderRef = new WeakReference<BaseImageLoader>(imageLoader);
+        public InternalImageReadyCallback(ImageReadyCallback cb) {
             this.cbRef = new WeakReference<ImageReadyCallback>(cb);
         }
 
-        protected final void onImageReady(Bitmap image) {
-            final BaseImageLoader imageLoader = imageLoaderRef.get();
+        @Override
+        public final boolean onImageReady(Bitmap image) {
             final ImageReadyCallback cb = cbRef.get();
-            if (imageLoader != null && cb != null) {
-                imageLoader.onImageReady(image, cb.onImageReady(image));
+            boolean result = false;
+            if (cb != null) {
+                result = cb.onImageReady(image);
+                BaseImageLoader.this.onImageReady(image, result);
             }
+            return result;
         }
 
-        protected final void onError(Exception e) {
-            final BaseImageLoader imageLoader = imageLoaderRef.get();
+        @Override
+        public void onError(Exception e) {
             final ImageReadyCallback cb = cbRef.get();
-            if (imageLoader != null && cb != null) {
+            if (cb != null) {
                 cb.onError(e);
-                imageLoader.onImageLoadFailed(e);
+                BaseImageLoader.this.onImageLoadFailed(e);
             }
         }
     }
