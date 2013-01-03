@@ -1,4 +1,7 @@
-package com.bumptech.photos.resize;
+/*
+ * Copyright (c) 2012 Bump Technologies Inc. All rights reserved.
+ */
+package com.bumptech.photos.imagemanager;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -6,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Build;
+import com.bumptech.photos.imagemanager.cache.SizedBitmapCache;
 import com.bumptech.photos.util.Log;
 import com.bumptech.photos.util.Photo;
 
@@ -16,15 +20,86 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/20/12
- * Time: 1:55 PM
- * To change this template use File | Settings | File Templates.
+ * @author sam
+ *
  */
-public class Utils {
+public class ImageResizer {
 
-    public static Bitmap centerCrop(Bitmap toCrop, int width, int height) {
+    private final SizedBitmapCache bitmapCache;
+
+    public ImageResizer() {
+        this(null);
+    }
+
+    public ImageResizer(SizedBitmapCache bitmapCache){
+        this.bitmapCache = bitmapCache;
+    }
+
+    public Bitmap resizeCenterCrop(final String path, final int width, final int height){
+        final Bitmap streamed = streamIn(path, width, height);
+
+        if (streamed.getWidth() == width && streamed.getHeight() == height) {
+            return streamed;
+        }
+
+        return centerCrop(getRecycled(width, height), streamed, width, height);
+    }
+
+    public Bitmap fitInSpace(final String path, final int width, final int height){
+        final Bitmap streamed = streamIn(path, width > height ? 1 : width, height > width ? 1 : height);
+        return fitInSpace(streamed, width, height);
+    }
+
+    public Bitmap loadApproximate(final String path, final int width, final int height){
+        return streamIn(path, width, height);
+    }
+
+    public Bitmap loadAsIs(final InputStream is1, final InputStream is2) {
+        int[] dimens = new int[] {-1, -1};
+        try {
+            dimens = getDimension(is1);
+        } finally {
+            try {
+                is1.close();
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+        Bitmap resized = null;
+        try {
+            resized = load(is2, getRecycled(dimens));
+        } finally {
+            try {
+                is2.close();
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+        return resized;
+    }
+
+    public Bitmap loadAsIs(final String path, final int width, final int height) {
+        return load(path, getRecycled(width, height));
+    }
+
+    public Bitmap loadAsIs(final String path){
+        int[] dimens = getDimensions(path);
+        return load(path, getRecycled(dimens));
+    }
+
+    private Bitmap getRecycled(int[] dimens) {
+        return getRecycled(dimens[0], dimens[1]);
+    }
+
+    private Bitmap getRecycled(int width, int height) {
+        Bitmap result = null;
+        if (bitmapCache != null) {
+            result = bitmapCache.get(width, height);
+        }
+        return result;
+    }
+
+      public static Bitmap centerCrop(Bitmap toCrop, int width, int height) {
         return centerCrop(null, toCrop, width, height);
     }
 
