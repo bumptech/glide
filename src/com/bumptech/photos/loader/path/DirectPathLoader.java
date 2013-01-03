@@ -11,9 +11,16 @@ package com.bumptech.photos.loader.path;
  * Time: 8:52 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DirectPathLoader extends BasePathLoader<String> {
+public abstract class DirectPathLoader<T> implements PathLoader<T> {
+
     @Override
-    protected void doFetchPath(String model, int width, int height, PathReadyCallback cb) {
-        cb.onPathReady(model);
+    public final Object fetchPath(T model, int width, int height, PathReadyCallback cb) {
+        cb.onPathReady(getPath(model, width, height));
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    protected abstract String getPath(T model, int width, int height);
+
+    @Override
+    public final void clear() { }
 }
