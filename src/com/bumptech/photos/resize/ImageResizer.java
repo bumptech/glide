@@ -138,7 +138,6 @@ public class ImageResizer {
         if (toCrop.getWidth() > width) {
             int extraWidth = toCrop.getWidth() - width;
             cropped = Bitmap.createBitmap(toCrop, extraWidth / 2, 0, width, toCrop.getHeight());
-            toCrop.recycle();
         }
         return cropped;
     }
@@ -150,7 +149,6 @@ public class ImageResizer {
         if (toCrop.getHeight() > height){
             int extraHeight = toCrop.getHeight() - height;
             cropped = Bitmap.createBitmap(toCrop, 0, extraHeight / 2, toCrop.getWidth(), height);
-            toCrop.recycle();
         }
         return cropped;
     }
@@ -161,7 +159,6 @@ public class ImageResizer {
         float widthPercent = ((float) width/toShrink.getWidth());
         int shrunkImageHeight = Math.round(widthPercent * toShrink.getHeight());
         Bitmap shrunk = Bitmap.createScaledBitmap(toShrink, width, shrunkImageHeight, true);
-        toShrink.recycle();
         return shrunk;
     }
 
@@ -169,7 +166,6 @@ public class ImageResizer {
         float heightPercent = ((float) height/toShrink.getHeight());
         int shrunkImageWidth = Math.round(heightPercent * toShrink.getWidth());
         Bitmap shrunk = Bitmap.createScaledBitmap(toShrink, shrunkImageWidth, height, true);
-        toShrink.recycle();
         return shrunk;
     }
 
