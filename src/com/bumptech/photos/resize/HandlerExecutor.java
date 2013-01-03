@@ -2,7 +2,7 @@
  * Copyright (c) 2013. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.imagemanager;
+package com.bumptech.photos.resize;
 
 import android.os.Handler;
 import android.os.HandlerThread;

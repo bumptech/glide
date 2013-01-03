@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2012 Bump Technologies Inc. All rights reserved.
  */
-package com.bumptech.photos.imagemanager;
+package com.bumptech.photos.resize;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,7 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.os.Build;
-import com.bumptech.photos.imagemanager.cache.SizedBitmapCache;
+import com.bumptech.photos.resize.cache.SizedBitmapCache;
 import com.bumptech.photos.util.Log;
 
 import java.io.BufferedInputStream;

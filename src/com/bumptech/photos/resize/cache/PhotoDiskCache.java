@@ -1,4 +1,4 @@
-package com.bumptech.photos.imagemanager.cache;
+package com.bumptech.photos.resize.cache;
 
 import android.graphics.Bitmap;
 import com.bumptech.photos.util.Log;

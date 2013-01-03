@@ -1,7 +1,7 @@
-package com.bumptech.photos.imagemanager.loader;
+package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.imagemanager.ImageManager;
+import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.loader.image.BaseImageLoader;
 
 /**

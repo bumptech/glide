@@ -2,7 +2,7 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.imagemanager.cache;
+package com.bumptech.photos.resize.cache;
 
 import android.graphics.Bitmap;
 import com.bumptech.photos.util.Log;

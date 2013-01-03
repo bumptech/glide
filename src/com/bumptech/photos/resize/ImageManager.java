@@ -2,16 +2,16 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.imagemanager;
+package com.bumptech.photos.resize;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import com.bumptech.photos.imagemanager.cache.LruPhotoCache;
-import com.bumptech.photos.imagemanager.cache.PhotoDiskCache;
-import com.bumptech.photos.imagemanager.cache.SizedBitmapCache;
+import com.bumptech.photos.resize.cache.LruPhotoCache;
+import com.bumptech.photos.resize.cache.PhotoDiskCache;
+import com.bumptech.photos.resize.cache.SizedBitmapCache;
 
 import java.io.File;
 import java.io.InputStream;

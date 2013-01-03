@@ -11,7 +11,7 @@ package com.bumptech.photos.loader.path;
  * Time: 8:52 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SimplePathLoader extends BasePathLoader<String> {
+public class DirectPathLoader extends BasePathLoader<String> {
     @Override
     protected void doFetchPath(String model, int width, int height, PathReadyCallback cb) {
         cb.onPathReady(model);

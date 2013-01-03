@@ -1,29 +1,25 @@
-/*
- * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
- */
-
-package com.bumptech.photos.imagemanager.loader;
+package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.imagemanager.LoadedCallback;
-import com.bumptech.photos.imagemanager.ImageManager;
+import com.bumptech.photos.resize.LoadedCallback;
+import com.bumptech.photos.resize.ImageManager;
 
 /**
  * Created with IntelliJ IDEA.
  * User: sam
- * Date: 12/25/12
- * Time: 10:57 PM
+ * Date: 12/31/12
+ * Time: 4:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exact<T> extends ImageManagerLoader<T> {
+public class AsIs<T> extends ImageManagerLoader<T> {
 
-    public Exact(ImageManager imageManager) {
+    public AsIs(ImageManager imageManager) {
         super(imageManager);
     }
 
     @Override
     protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.getImageExact(path, width, height, new LoadedCallback() {
+        return imageManager.getImage(path, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);
