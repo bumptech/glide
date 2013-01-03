@@ -62,13 +62,13 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImage(final String path, final LoadedCallback cb){
-        final Object token = cb;
         final String key = getKey(path, 0, 0, ResizeType.AS_IS);
-        if (!returnFromCache(key, cb)) {
-            final Runnable task = resizer.loadAsIs(path, getResizeCb(key, token, cb, false, false));
-            postJob(task, token);
-        }
-        return token;
+        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+            @Override
+            protected Bitmap resizeIfNotFound() {
+                return resizer.loadAsIs(path);
+            }
+        });
     }
 
     /**
@@ -79,14 +79,14 @@ public class ImageManager {
      * @param cb - the callback called when the load completes
      * @return A token tracking this request
      */
-    public Object getImageExact(final String path, int width, int height, final LoadedCallback cb) {
-        final Object token = cb;
+    public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
         final String key = getKey(path, width, height, ResizeType.AS_IS);
-        if (!returnFromCache(key, cb)) {
-            final Runnable task = resizer.loadAsIs(path, width, height, getResizeCb(key, token, cb, false, false));
-            postJob(task, token);
-        }
-        return token;
+        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+            @Override
+            protected Bitmap resizeIfNotFound() {
+                return resizer.loadAsIs(path, width, height);
+            }
+        });
     }
 
     /**
@@ -98,18 +98,13 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
-        final Object token = cb;
         final String key = getKey(path, width, height, ResizeType.APPROXIMATE);
-        if (!returnFromCache(key, cb)) {
-            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
-                @Override
-                public Runnable resizeIfNotFound(LoadedCallback resizeCallback) {
-                    return resizer.loadApproximate(path, width, height, resizeCallback);
-                }
-            });
-            postJob(checkDiskCache, token);
-        }
-        return token;
+        return runJob(key, cb, new ImageManagerJob(key, cb) {
+            @Override
+            protected Bitmap resizeIfNotFound() {
+                return resizer.loadApproximate(path, width, height);
+            }
+        });
     }
 
     /**
@@ -122,18 +117,13 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
-        final Object token = cb;
         final String key = getKey(path, width, height, ResizeType.CENTER_CROP);
-        if (!returnFromCache(key, cb)) {
-            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
-                @Override
-                public Runnable resizeIfNotFound(LoadedCallback resizeCallback) {
-                    return resizer.resizeCenterCrop(path, width, height, resizeCallback);
-                }
-            });
-            postJob(checkDiskCache, token);
-        }
-        return token;
+        return runJob(key, cb, new ImageManagerJob(key, cb) {
+            @Override
+            protected Bitmap resizeIfNotFound() {
+                return resizer.resizeCenterCrop(path, width, height);
+            }
+        });
     }
 
     /**
@@ -146,23 +136,26 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
-        final Object token = cb;
         final String key = getKey(path, width, height, ResizeType.FIT_CENTER);
+        return runJob(key, cb, new ImageManagerJob(key, cb) {
+            @Override
+            protected Bitmap resizeIfNotFound() {
+                return resizer.fitInSpace(path, width, height);
+            }
+        });
+    }
+
+    private Object runJob(String key,final LoadedCallback cb, ImageManagerJob job) {
+        final Object token = cb;
         if (!returnFromCache(key, cb)) {
-            Runnable checkDiskCache = diskCache.get(key, new DiskCacheCallback(key, token, cb) {
-                @Override
-                public Runnable resizeIfNotFound(LoadedCallback resizeCallback) {
-                    return resizer.fitInSpace(path, width, height, resizeCallback);
-                }
-            });
-            postJob(checkDiskCache, token);
+            executor.execute(job);
         }
         return token;
     }
 
     private boolean returnFromCache(String key, LoadedCallback cb) {
         boolean found = false;
-        Bitmap inCache = memoryCache.get(key);
+        Bitmap inCache = getFromMemoryCache(key);
         if (inCache != null) {
             found = true;
             cb.onLoadCompleted(inCache);
@@ -170,65 +163,91 @@ public class ImageManager {
         return found;
     }
 
-    private abstract class DiskCacheCallback implements PhotoDiskCache.GetCallback {
-        private Object token;
-        private LoadedCallback cb;
+    private abstract class ImageManagerJob implements Runnable {
         private final String key;
+        private final LoadedCallback cb;
+        private final boolean useDiskCache;
 
-        public DiskCacheCallback(String key, Object token, LoadedCallback cb) {
+        public ImageManagerJob(String key, LoadedCallback cb) {
+            this(key, cb, true);
+        }
+
+        public ImageManagerJob(String key, LoadedCallback cb, boolean useDiskCache) {
             this.key = key;
-            this.token = token;
             this.cb = cb;
+            this.useDiskCache = useDiskCache;
         }
 
         @Override
-        public void onGet(InputStream is1, InputStream is2) {
-            final Runnable task;
-            final boolean inDiskCache = is1 != null && is2 != null;
-            final LoadedCallback resizeCb = getResizeCb(key, token, cb, inDiskCache, true);
-            if (inDiskCache) {
-                task = resizer.loadAsIs(is1, is2, resizeCb);
-            } else {
-                task = resizeIfNotFound(resizeCb);
+        public void run() {
+            InputStream is1 = getFromDiskCache(key);
+            InputStream is2 = null;
+            if (is1 != null) {
+                is2 = getFromDiskCache(key);
             }
-            postJob(task, token);
-        }
 
-        public abstract Runnable resizeIfNotFound(LoadedCallback cb);
-    }
-
-    private LoadedCallback getResizeCb(final String key, final Object token, final LoadedCallback cb, final boolean inDiskCache, final boolean useDiskCache) {
-        return new LoadedCallback() {
-            @Override
-            public void onLoadCompleted(Bitmap resized) {
-                memoryCache.put(key, resized);
-                acquireBitmap(resized);
-                if (!inDiskCache && useDiskCache) {
-                    Runnable putToDiskCache = diskCache.put(key, resized);
-                    postJob(putToDiskCache, null);
+            final boolean isInDiskCache = is1 != null && is2 != null;
+            Bitmap result = null;
+            try {
+                if (isInDiskCache && useDiskCache) {
+                    result = resizer.loadAsIs(is1, is2);
+                } else {
+                    result = resizeIfNotFound();
                 }
-                cb.onLoadCompleted(resized);
-            }
-
-            @Override
-            public void onLoadFailed(Exception e) {
+            } catch (Exception e) {
                 cb.onLoadFailed(e);
             }
-        };
+
+            if (result != null) {
+                final Bitmap finalResult = result;
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        acquireBitmap(finalResult);
+                        putInMemoryCache(key, finalResult);
+                        cb.onLoadCompleted(finalResult);
+                    }
+                });
+                //this is time consuming so do it after posting the result
+                if (!isInDiskCache && useDiskCache) {
+                    putInDiskCache(key, result);
+                }
+            }
+        }
+
+        protected abstract Bitmap resizeIfNotFound();
     }
 
-    private void postJob(Runnable job, Object token) {
-        backgroundHandler.postAtTime(job, token, SystemClock.uptimeMillis());
+    private InputStream getFromDiskCache(String key) {
+        InputStream result = null;
+        if (diskCache != null) {
+            result = diskCache.get(key);
+        }
+        return result;
     }
 
-    public void cancelTask(Object token){
-        if (token != null) {
-            backgroundHandler.removeCallbacksAndMessages(token);
+    private void putInDiskCache(String key, Bitmap value) {
+        if (diskCache != null) {
+            diskCache.put(key, value);
+        }
+    }
+
+    private Bitmap getFromMemoryCache(String key) {
+        Bitmap result = null;
+        if (memoryCache != null) {
+            result = memoryCache.get(key);
+        }
+        return result;
+    }
+
+    private void putInMemoryCache(String key, Bitmap bitmap) {
+        if (memoryCache != null) {
+            memoryCache.put(key, bitmap);
         }
     }
 
     public void rejectBitmap(Bitmap b) {
-        if (!CAN_RECYCLE) return;
+        if (!isBitmapRecyclingEnabled) return;
 
         Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
         if (currentCount == null || currentCount == 0) {
@@ -238,7 +257,7 @@ public class ImageManager {
     }
 
     public void acquireBitmap(Bitmap b) {
-        if (!CAN_RECYCLE) return;
+        if (!isBitmapRecyclingEnabled) return;
 
         Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
         if (currentCount == null) {
@@ -248,7 +267,7 @@ public class ImageManager {
     }
 
     public void releaseBitmap(Bitmap b) {
-        if (!CAN_RECYCLE) return;
+        if (!isBitmapRecyclingEnabled) return;
 
         Integer currentCount = bitmapReferenceCounter.get(b.hashCode()) - 1;
         if (currentCount == 0) {

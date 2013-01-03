@@ -1,7 +1,6 @@
 package com.bumptech.photos.cache;
 
 import android.graphics.Bitmap;
-import android.os.Handler;
 import com.bumptech.photos.util.Log;
 import com.jakewharton.DiskLruCache;
 
@@ -25,11 +24,7 @@ public class PhotoDiskCache {
     private final static int APP_VERSION = 0;
     private final static int VALUE_COUNT = 1; //values per cache entry
     private DiskLruCache cache;
-    private Handler mainHandler;
 
-    public interface GetCallback {
-        public void onGet(InputStream is1, InputStream is2);
-    };
 
     public PhotoDiskCache(File directory, long maxSize, Handler mainHandler, Handler loadHandler) {
         try {
@@ -37,96 +32,69 @@ public class PhotoDiskCache {
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        this.mainHandler = mainHandler;
     }
 
-    public Runnable put(final String key, final Bitmap bitmap) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                if (bitmap == null) return;
-                final String safeKey = sha1Hash(key);
+    public void put(final String key, final Bitmap bitmap) {
+        if (bitmap == null) return;
+        final String safeKey = sha1Hash(key);
 
-                DiskLruCache.Editor edit = null;
-                OutputStream out = null;
+        DiskLruCache.Editor edit = null;
+        OutputStream out = null;
+        try {
+            DiskLruCache.Snapshot snapshot = cache.get(safeKey);
+            if (snapshot != null) {
+                Log.d("DLRU: not putting, already exists key=" + key);
+                return;
+            }
+            edit = cache.edit(safeKey);
+            out = new BufferedOutputStream(edit.newOutputStream(VALUE_COUNT - 1));
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            edit.commit();
+        } catch (IOException e) {
+            if (edit != null) {
                 try {
-                    DiskLruCache.Snapshot snapshot = cache.get(safeKey);
-                    if (snapshot != null) {
-                        Log.d("DLRU: not putting, already exists key=" + key);
-                        return;
-                    }
-                    edit = cache.edit(safeKey);
-                    out = new BufferedOutputStream(edit.newOutputStream(VALUE_COUNT - 1));
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                    edit.commit();
+                    edit.abort();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
                 } catch (IOException e) {
-                    if (edit != null) {
-                        try {
-                            edit.abort();
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
                     e.printStackTrace();
-                } finally {
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
                 }
             }
-        };
+        }
     }
 
-    public Runnable get(final String key, final GetCallback cb) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                //disk cache doesn't allow keys with anything but a-zA-Z0-9 :(
-                final String safeKey = sha1Hash(key);
-                InputStream result1 = null;
-                InputStream result2 = null;
-                try {
-                    DiskLruCache.Snapshot snapshot1 = cache.get(safeKey);
+    public InputStream get(final String key) {
+        //disk cache doesn't allow keys with anything but a-zA-Z0-9 :(
+        final String safeKey = sha1Hash(key);
+        InputStream result = null;
+        try {
+            DiskLruCache.Snapshot snapshot = cache.get(safeKey);
 
-                    if (snapshot1 != null) {
-                        result1 = snapshot1.getInputStream(VALUE_COUNT - 1);
-                        DiskLruCache.Snapshot snapshot2 = cache.get(safeKey);
-
-                        if (snapshot2 != null) {
-                            result2 = snapshot2.getInputStream(VALUE_COUNT - 1);
-                        } else {
-                            Log.d("DLRU: second snapshot not found key=" + key);
-                        }
-                    } else {
-                        Log.d("DLRU: first snapshot not found key=" + key);
-                    }
-
-                } catch (IOException e) {
-                    Log.d("DLRU: IOException? key=" + key);
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                    try {
-                        cache.remove(safeKey);
-                    } catch (IOException e1) {
-                        Log.d("DLRU: error removing bitmap key=" + key);
-                        e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                    }
-                }
-
-                final InputStream finalResult1 = result1;
-                final InputStream finalResult2 = result2;
-                mainHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        cb.onGet(finalResult1, finalResult2);
-                    }
-                });
+            if (snapshot != null) {
+                result = snapshot.getInputStream(VALUE_COUNT - 1);
+            } else {
+                Log.d("DLRU: snapshot not found key=" + key);
             }
-        };
+
+        } catch (IOException e) {
+            Log.d("DLRU: IOException? key=" + key);
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            try {
+                cache.remove(safeKey);
+            } catch (IOException e1) {
+                Log.d("DLRU: error removing bitmap key=" + key);
+                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+
+        return result;
     }
 
     private static String sha1Hash(String toHash) {
