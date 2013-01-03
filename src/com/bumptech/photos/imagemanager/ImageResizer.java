@@ -8,10 +8,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.media.ExifInterface;
 import android.os.Build;
 import com.bumptech.photos.imagemanager.cache.SizedBitmapCache;
 import com.bumptech.photos.util.Log;
-import com.bumptech.photos.util.Photo;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -193,7 +193,7 @@ public class ImageResizer {
             Log.d("PSR: file not found loading bitmap at: " + path);
             e.printStackTrace();
         }
-        return result == null ? null : Photo.orientImage(path, result);
+        return result == null ? null : orientImage(path, result);
     }
 
     public static Bitmap load(InputStream is) {
@@ -247,7 +247,7 @@ public class ImageResizer {
     //from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
     //streams in to near, but not exactly at the desired width and height.
     public static Bitmap streamIn(String path, int width, int height) {
-        int orientation = Photo.getOrientation(path);
+        int orientation = getOrientation(path);
         if(orientation == 90 || orientation == 270) {
             //Swap width and height for initial downsample calculation if its oriented so.
             //The image will then be rotated back to normal.
@@ -278,7 +278,7 @@ public class ImageResizer {
             }
             result = BitmapFactory.decodeStream(is, null, decodeBitmapOptions);
             if (orientation != 0) {
-                result = Photo.rotateImage(result, orientation);
+                result = rotateImage(result, orientation);
             }
             is.close();
         } catch (Exception e){
@@ -289,4 +289,74 @@ public class ImageResizer {
         }
         return result;
     }
+        /**
+     * Returns a matrix with rotation set based on Exif orientation tag.
+     * If the orientation is undefined or 0 null is returned.
+     *
+     * @param pathToOriginal Path to original image file that may have exif data.
+     * @return  A rotation in degrees based on exif orientation
+     */
+    public static int getOrientation(String pathToOriginal) {
+        int degreesToRotate = 0;
+        try{
+            ExifInterface exif = new ExifInterface(pathToOriginal);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90){
+                degreesToRotate = 90;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180){
+                degreesToRotate = 180;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270){
+                degreesToRotate = 270;
+            }
+        } catch (IOException e){
+            Log.w("IOException for image with filePath=" + pathToOriginal);
+        } catch (Exception e) {
+            Log.w("Exception when trying to get image orientation matrix");
+            e.printStackTrace();
+        }
+        return degreesToRotate;
+    }
+
+    /**
+     * This is an expensive operation that copies the image in place with the pixels rotated.
+     * If possible rather use getOrientationMatrix, and set that as the imageMatrix on an ImageView.
+     *
+     * @param pathToOriginal Path to original image file that may have exif data.
+     * @param imageToOrient Image Bitmap to orient.
+     * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
+     */
+    public static Bitmap orientImage(String pathToOriginal, Bitmap imageToOrient){
+        int degreesToRotate = getOrientation(pathToOriginal);
+        return rotateImage(imageToOrient, degreesToRotate);
+    }
+
+    /**
+     * This is an expensive operation that copies the image in place with the pixels rotated.
+     * If possible rather use getOrientationMatrix, and set that as the imageMatrix on an ImageView.
+     *
+     * @param imageToOrient Image Bitmap to orient.
+     * @param degreesToRotate number of degrees to rotate the image by. If zero the original image is returned unmodified.
+     * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
+     */
+    public static Bitmap rotateImage(Bitmap imageToOrient, int degreesToRotate) {
+        try{
+            if(degreesToRotate != 0) {
+                Matrix matrix = new Matrix();
+                matrix.setRotate(degreesToRotate);
+                imageToOrient = Bitmap.createBitmap(
+                        imageToOrient,
+                        0,
+                        0,
+                        imageToOrient.getWidth(),
+                        imageToOrient.getHeight(),
+                        matrix,
+                        true);
+            }
+        } catch (Exception e) {
+            Log.w("Exception when trying to orient image");
+            e.printStackTrace();
+        }
+        return imageToOrient;
+    }
+
 }
