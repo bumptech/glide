@@ -4,12 +4,12 @@ import android.graphics.Bitmap;
 
 import java.lang.ref.WeakReference;
 
+
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 1/1/13
- * Time: 2:45 PM
- * To change this template use File | Settings | File Templates.
+ * A base class for {@link ImageLoader} that provides some lifecycle methods and prevents memory leaks by only providing
+ * subclasses with a weak reference to the calling object.
+ *
+ * @param <T> The type of the model this loader must be able to load a {@link android.graphics.Bitmap} for
  */
 public abstract class BaseImageLoader<T> implements ImageLoader<T> {
     @Override
@@ -21,12 +21,44 @@ public abstract class BaseImageLoader<T> implements ImageLoader<T> {
     @Override
     public void clear() { }
 
+    /**
+     * The method where subclasses should actually begin any long running load for the given path and model. It is
+     * safe to strongly reference the given callback since that callback only weakly references the object that created
+     * it. Once a load completes or fails the given callback should be called to signal to the calling object that the
+     * image is ready.
+     *
+     * @see ImageLoader#fetchImage(String, Object, int, int, com.bumptech.photos.loader.image.ImageLoader.ImageReadyCallback)
+     *
+     * @param path The path to the image or null if the required information is contained in the model
+     * @param model The object that represents or contains an image that can be displayed
+     * @param width The width of the view where the image will be displayed
+     * @param height The height of the view where the image will be displayed
+     * @param cb The callback to call when the bitmap is loaded into memory, or when a load fails
+     */
     protected abstract void doFetchImage(String path, T model, int width, int height, ImageReadyCallback cb);
 
+    /**
+     * A lifecycle method called after the requesting object is notified that this loader has loaded a bitmap. Should be
+     * used to cleanup or update any data related to the completed load. Should not be used as a callback to change how
+     * an image is displayed. See {@link com.bumptech.photos.presenter.ImageSetCallback} instead to make a visual change
+     * when a load completes.
+     *
+     * @param path The path to the loaded image
+     * @param model The model representing the loaded image
+     * @param image The loaded image
+     * @param isUsed True iff the requesting object is going to display the image
+     */
     protected void onImageReady(String path, T model, Bitmap image, boolean isUsed) { }
 
+    /**
+     * A lifecycle method called after the requesting object is notified that this loader failed to loada Bitmap. Should
+     * be used to cleanup or update any data related to the failed load.
+     *
+     * @param path The path to the image this loader failed to load
+     * @param model The model representing the image this loader failed to load
+     * @param e The exception that caused the failure, or null
+     */
     protected void onImageLoadFailed(String path, T model, Exception e) { }
-
 
     protected class InternalImageReadyCallback implements ImageReadyCallback {
         private final WeakReference<ImageReadyCallback> cbRef;

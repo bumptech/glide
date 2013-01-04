@@ -7,12 +7,16 @@ package com.bumptech.photos.presenter;
 import android.widget.ImageView;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/25/12
- * Time: 10:04 PM
- * To change this template use File | Settings | File Templates.
+ * A callback interface used to perform some action when an {@link ImagePresenter} sets an
+ * {@link android.widget.ImageView} object's bitmap
  */
 public interface ImageSetCallback {
+
+    /**
+     * The method called when a bitmap is set
+     *
+     * @param view The view that will display the bitmap
+     * @param fromCache True iff the bitmap was loaded synchronously.
+     */
     public void onImageSet(ImageView view, boolean fromCache);
 }

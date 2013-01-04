@@ -11,16 +11,15 @@ import android.os.SystemClock;
 import java.util.concurrent.Executor;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 1/2/13
- * Time: 1:49 PM
- * To change this template use File | Settings | File Templates.
+ * A simple Executor implemented using an Android {@link android.os.Handler}
  */
 public class HandlerExecutor implements Executor {
     private final Handler worker;
     private final Object token;
 
+    /**
+     * Create a new executor with a new HandlerThread called "HandlerExecutor"
+     */
     public HandlerExecutor() {
         HandlerThread workerThread = new HandlerThread("HandlerExecutor");
         workerThread.start();
@@ -28,6 +27,11 @@ public class HandlerExecutor implements Executor {
         token = hashCode();
     }
 
+    /**
+     * Create a new executor that uses the given Handler's thread
+     *
+     * @param bgHandler The handler to post Runnables to
+     */
     public HandlerExecutor(Handler bgHandler) {
         this.worker = bgHandler;
         token = hashCode();

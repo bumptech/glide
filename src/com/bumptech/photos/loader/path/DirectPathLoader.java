@@ -5,11 +5,9 @@
 package com.bumptech.photos.loader.path;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/25/12
- * Time: 8:52 PM
- * To change this template use File | Settings | File Templates.
+ * A simple synchronous implementation of a {@link PathLoader}
+ *
+ * @param <T> The type of the model that contains a path
  */
 public abstract class DirectPathLoader<T> implements PathLoader<T> {
 
@@ -19,6 +17,15 @@ public abstract class DirectPathLoader<T> implements PathLoader<T> {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    /**
+     * A method to be implemented by subclasses that should return a path for a given model (or null if the model
+     * contains some other mechanism to load the image directly)
+     *
+     * @param model The object containing the path
+     * @param width The width of the {@link android.widget.ImageView} that will be displaying the image
+     * @param height The height of the {@link android.widget.ImageView} that will be displaying the image
+     * @return The path where the image is located, or null
+     */
     protected abstract String getPath(T model, int width, int height);
 
     @Override

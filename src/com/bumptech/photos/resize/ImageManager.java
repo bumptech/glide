@@ -20,24 +20,65 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
- * Created by IntelliJ IDEA.
- * User: sam
- * Date: 2/9/12
- * Time: 5:02 PM
- * To change this template use File | Settings | File Templates.
+ * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
+ * sdk version, uses a  combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
+ * load and resize  * operations performed and to maximize the number of times Bitmaps are recycled as opposed to
+ * allocated.
+ *
+ * If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if possible. Note
+ * that Bitmap recycling is only available on Honeycomb and up.
  */
 public class ImageManager {
     private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
+    private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
 
+    /**
+     * A class for setting options for an ImageManager
+     *
+     * Boolean use options for the caches superseed sizes, and invalid * sizes (<= 0) are equivalent to setting the
+     * corresponding use option to false.
+     */
     public static class Options {
+        /**
+         * @see com.jakewharton.DiskLruCache#open(java.io.File, int, int, long)
+         */
         public int appVersion = 0;
 
+        /**
+         * If true caches bitmaps in memory.
+         *
+         * Defaults to true
+         */
         public boolean useMemoryCache = true;
+
+        /**
+         * The maximum memory cache size. This should be decreased on devices where recycling Bitmaps is possible and
+         * enabled because the Bitmap cache used to recycle Bitmaps will take a substantial amount of memory.
+         *
+         * Defaults to 1/8th of the total application memory
+         */
         public int maxMemorySize;
 
+        /**
+         * If true, caches resized bitmaps on disk.
+         */
         public boolean useDiskCache = true;
-        public int maxDiskCacheSize = 10 * 1024 * 1024;
 
+        /**
+         * The maximum disk cache size.
+         *
+         * Defaults to 30mb
+         */
+        public int maxDiskCacheSize;
+
+        /**
+         * If true, will attempt to recycle Bitmaps and all loaded Bitmaps will be mutable. If true and a memory cache
+         * is used, the memory cache size should be decreased since the Bitmap cache used to recycle Bitmaps will
+         * take a substantial amount of memory.
+         *
+         * Defaults to true if Android version is 3.0 or greater and will always be false, regardless of this attribute
+         * otherwise.
+         */
         public boolean recycleBitmaps = true;
     }
 
@@ -59,7 +100,15 @@ public class ImageManager {
         AS_IS
     }
 
+    /**
+     * Try to get the external cache directory if available and default to the internal. Use a default name for the
+     * cache directory if no name is provided
+     */
     public static File getPhotoCacheDir(Context context) {
+        return getPhotoCacheDir(context, DISK_CACHE_DIR);
+    }
+
+    public static File getPhotoCacheDir(Context context, String cacheName) {
         final String cachePath;
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
                 !Environment.isExternalStorageRemovable()) {
@@ -68,42 +117,101 @@ public class ImageManager {
             cachePath = context.getCacheDir().getPath();
         }
 
-        File result = new File(cachePath + File.separatorChar + DISK_CACHE_DIR);
+        File result = new File(cachePath + File.separatorChar + cacheName);
         if (!result.exists()) {
             result.mkdir();
         }
         return result;
     }
 
+    /**
+     * Create an ImageManager using the default options. Note that this will create a single background thread to use
+     * to resize and load images from disk. Must be created in the UI thread!
+     *
+     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
+     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
+     *                in Activities.
+     */
     public ImageManager(Context context) {
         this(context, new Options());
     }
 
+    /**
+     * Create an ImageManager using the given options. Note that this will create a single background thread to use
+     * to resize and load images from disk. Must be created in the UI thread!
+     *
+     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
+     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
+     *                in Activities.
+     * @param options The specified Options
+     */
     public ImageManager(Context context, Options options) {
         this(context, new HandlerExecutor(), options);
     }
 
+    /**
+     * Create an ImageManager using the given options and that performs image loads and resize operations using the
+     * given Executor. Must be created in the UI thread!
+     *
+     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
+     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
+     *                in Activities.
+     * @param executor The Executor used to perform resize operations and image loads. Must not execute Runnables on the
+     *                 UI thread!
+     * @param options The specified options
+     */
     public ImageManager(Context context, Executor executor, Options options) {
         this(context, executor, new Handler(), options);
     }
 
+    /**
+     * Create an ImageManager using the given options and that performs image loads and resize operations using the
+     * given Executor. Can be created in any thread, but the mainHandler must be a Handler for the UI thread.
+     *
+     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
+     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
+     *                in Activities.
+     * @param executor The Executor used to perform resize operations and image loads. Must not execute Runnables on the
+     *                 UI thread!
+     * @param mainHandler A Handler to the UI thread.
+     * @param options The specified options
+     */
     public ImageManager(Context context, Executor executor, Handler mainHandler, Options options) {
         this(context, getPhotoCacheDir(context), executor, mainHandler, options);
     }
 
+    /**
+     * Create an ImageManager using the given options and that performs image loads and resize operations using the
+     * given Executor. Can be created in any thread, but the mainHandler must be a Handler for the UI thread.
+     *
+     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
+     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
+     *                in Activities.
+     * @param diskCacheDir The directory containing the disk cache or in which to create a disk cache if one does not
+     *                     already exist
+     * @param executor The Executor used to perform resize operations and image loads. Must not execute Runnables on the
+     *                 UI thread!
+     * @param mainHandler A Handler to the UI thread.
+     * @param options The specified options
+     */
     public ImageManager(Context context, File diskCacheDir, Executor executor, Handler mainHandler, Options options) {
         isBitmapRecyclingEnabled = options.recycleBitmaps && CAN_RECYCLE;
+
         if (options.useMemoryCache && options.maxMemorySize <= 0) {
             options.maxMemorySize = LruPhotoCache.getMaxCacheSize(context);
         }
 
-        if (diskCacheDir == null || !options.useDiskCache || options.maxDiskCacheSize <= 0) {
+        if (options.useDiskCache && options.maxDiskCacheSize <= 0) {
+            options.maxDiskCacheSize = MAX_DISK_CACHE_SIZE;
+        }
+
+        if (diskCacheDir == null || !options.useDiskCache) {
             diskCache = null;
         } else {
             diskCache = new PhotoDiskCache(diskCacheDir, options.maxDiskCacheSize, options.appVersion);
         }
 
-        if (!options.useMemoryCache || options.maxMemorySize <= 0) {
+        if (!options.useMemoryCache) {
             memoryCache = null;
         } else {
             memoryCache = new LruPhotoCache(options.maxMemorySize);
@@ -129,9 +237,10 @@ public class ImageManager {
     }
 
     /**
-     * Loads the image for the given id
-     * @param path - the path id to the image
-     * @param cb - the callback called when the load completes
+     * Loads the image at the given path at its original dimensions.
+     *
+     * @param path The path id to the image
+     * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
     public Object getImage(final String path, final LoadedCallback cb){
@@ -145,11 +254,12 @@ public class ImageManager {
     }
 
     /**
-     * Loads the image for the given id assuming its width and height are exactly those given
-     * @param path - the path to the image
-     * @param width - the width of the image on disk
-     * @param height - the height of the image on disk
-     * @param cb - the callback called when the load completes
+     * Loads the image for the given path assuming its width and height are exactly those given.
+     *
+     * @param path The path to the image
+     * @param width The width of the image on disk
+     * @param height The height of the image on disk
+     * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
     public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
@@ -163,11 +273,12 @@ public class ImageManager {
     }
 
     /**
-     * Loads the image for the given id to nearly the given width and height maintaining the original proportions
-     * @param path - the id of the image
-     * @param width - the desired width in pixels
-     * @param height - the desired height of the slice
-     * @param cb - the callback called when the task finishes
+     * Loads the image for the given path to nearly the given width and height maintaining the original proportions.
+     *
+     * @param path The id of the image
+     * @param width The desired width in pixels
+     * @param height The desired height of the slice
+     * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
     public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
@@ -181,12 +292,13 @@ public class ImageManager {
     }
 
     /**
-     * Loads the image for the given id, resizes it to be exactly width pixels wide keeping proportions,
-     * and then returns a section from the center of image exactly height pixels tall
-     * @param path - the id of the image
-     * @param width - the desired width in pixels
-     * @param height - the desired height of the slice
-     * @param cb - the callback called when the task finishes
+     * Loads the image for the given path , resizes it to be exactly width pixels wide keeping proportions,
+     * and then returns a section from the center of image exactly height pixels tall.
+     *
+     * @param path The id of the image
+     * @param width The desired width in pixels
+     * @param height The desired height of the slice
+     * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
     public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
@@ -202,10 +314,11 @@ public class ImageManager {
     /**
      * Loads the image for the given id and resizes it, maintaining the original proportions, so that the image fills
      * an area of width*height.
-     * @param path - the id of the image
-     * @param width - the width of the space
-     * @param height - the height of the space
-     * @param cb - the callback called when the task finishes
+     *
+     * @param path The id of the image
+     * @param width The width of the space
+     * @param height The height of the space
+     * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
     public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
@@ -216,6 +329,60 @@ public class ImageManager {
                 return resizer.fitInSpace(path, width, height);
             }
         });
+    }
+
+    /**
+     * Notify the ImageManager that a bitmap it loaded is not going to be displayed and can go into a queue to be
+     * reused. Does nothing if recycling is disabled or impossible.
+     *
+     * @param b The rejected Bitmap
+     */
+    public void rejectBitmap(Bitmap b) {
+        if (!isBitmapRecyclingEnabled) return;
+
+        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
+        if (currentCount == null || currentCount == 0) {
+            bitmapReferenceCounter.remove(b.hashCode());
+            bitmapCache.put(b);
+        }
+    }
+
+    /**
+     * Notify the ImageManager that a Bitmap it loaded is going to be used and increment the reference counter for that
+     * Bitmap. Though it won't cause a memory leak, we expect releaseBitmap to be called for this Bitmap at some point.
+     * If release is not called, then we will never be able to recycle the Bitmap. Does nothing if recycling is disabled
+     * or impossible.
+     *
+     * @param b The acquired Bitmap
+     */
+    public void acquireBitmap(Bitmap b) {
+        if (!isBitmapRecyclingEnabled) return;
+
+        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
+        if (currentCount == null) {
+            currentCount = 0;
+        }
+        bitmapReferenceCounter.put(b.hashCode(), currentCount + 1);
+    }
+
+    /**
+     * Notify the ImageManager that a Bitmap it loaded is no longer being used and decrement the reference counter for
+     * that Bitmap. This will cause an exception if acquire was not called first, or if each call to release does not
+     * come after a call to acquire. If the reference count drops to zero, places the Bitmap into a queue to be
+     * recycled. Does nothing if recycling is disabled or impossible.
+     *
+     * @param b The releasedBitmap
+     */
+    public void releaseBitmap(Bitmap b) {
+        if (!isBitmapRecyclingEnabled) return;
+
+        Integer currentCount = bitmapReferenceCounter.get(b.hashCode()) - 1;
+        if (currentCount == 0) {
+            bitmapReferenceCounter.remove(b.hashCode());
+            bitmapCache.put(b);
+        } else {
+            bitmapReferenceCounter.put(b.hashCode(), currentCount);
+        }
     }
 
     private Object runJob(String key,final LoadedCallback cb, ImageManagerJob job) {
@@ -291,6 +458,7 @@ public class ImageManager {
         protected abstract Bitmap resizeIfNotFound();
     }
 
+
     private InputStream getFromDiskCache(String key) {
         InputStream result = null;
         if (diskCache != null) {
@@ -316,38 +484,6 @@ public class ImageManager {
     private void putInMemoryCache(String key, Bitmap bitmap) {
         if (memoryCache != null) {
             memoryCache.put(key, bitmap);
-        }
-    }
-
-    public void rejectBitmap(Bitmap b) {
-        if (!isBitmapRecyclingEnabled) return;
-
-        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
-        if (currentCount == null || currentCount == 0) {
-            bitmapReferenceCounter.remove(b.hashCode());
-            bitmapCache.put(b);
-        }
-    }
-
-    public void acquireBitmap(Bitmap b) {
-        if (!isBitmapRecyclingEnabled) return;
-
-        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
-        if (currentCount == null) {
-            currentCount = 0;
-        }
-        bitmapReferenceCounter.put(b.hashCode(), currentCount + 1);
-    }
-
-    public void releaseBitmap(Bitmap b) {
-        if (!isBitmapRecyclingEnabled) return;
-
-        Integer currentCount = bitmapReferenceCounter.get(b.hashCode()) - 1;
-        if (currentCount == 0) {
-            bitmapReferenceCounter.remove(b.hashCode());
-            bitmapCache.put(b);
-        } else {
-            bitmapReferenceCounter.put(b.hashCode(), currentCount);
         }
     }
 

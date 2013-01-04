@@ -9,11 +9,12 @@ import com.bumptech.photos.resize.LoadedCallback;
 import com.bumptech.photos.resize.ImageManager;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/25/12
- * Time: 10:57 PM
- * To change this template use File | Settings | File Templates.
+ * An ImageLoader implementation that loads an image at the given path and expects that the image at that path
+ * will exactly match the width and height of the view that will display it. Less expensive than other implementations,
+ * but requires some other process to make sure the image on disk matches the given dimension (for example a server side
+ * resize).
+ *
+ * @see ImageManager#getImageExact(String, int, int, com.bumptech.photos.resize.LoadedCallback)
  */
 public class Exact<T> extends ImageManagerLoader<T> {
 

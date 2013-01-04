@@ -5,11 +5,8 @@ import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.loader.image.BaseImageLoader;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 1/1/13
- * Time: 2:51 PM
- * To change this template use File | Settings | File Templates.
+ * A base class for loaders that user ImageManager. Primarily responsible for keeping track of bitmaps for recycling
+ * purposes.
  */
 public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
 

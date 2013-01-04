@@ -20,21 +20,36 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @author sam
- *
+ * A class for synchronously resizing bitmaps with or without Bitmaps to recycle
  */
 public class ImageResizer {
-
     private final SizedBitmapCache bitmapCache;
 
+    /**
+     * Creates a new resizer that will not recycle Bitmaps
+     */
     public ImageResizer() {
         this(null);
     }
 
+    /**
+     * Creates a new resizer that will attempt to recycle {@link android.graphics.Bitmap}s if any are available in the given dimensions
+     *
+     * @param bitmapCache The cache to try to recycle {@link android.graphics.Bitmap}s from
+     */
     public ImageResizer(SizedBitmapCache bitmapCache){
         this.bitmapCache = bitmapCache;
     }
 
+    /**
+     * Load the image at the given path at approximately the given dimensions, maintaining the original proportions,
+     * and then crop the image down so that it fills the given dimensions
+     *
+     * @param path The path where the image is located
+     * @param width The width the final image will fill
+     * @param height The height the final image will fill
+     * @return The resized image
+     */
     public Bitmap resizeCenterCrop(final String path, final int width, final int height){
         final Bitmap streamed = streamIn(path, width, height);
 
@@ -45,15 +60,43 @@ public class ImageResizer {
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
+    /**
+     * Load the image at the given path at approximately the given dimensions, maintaining the original proportions,
+     * and then shrink the image down, again maintaining the original proportions, so that it fits entirely within the
+     * given dimensions.
+     *
+     * @param path The path where the image is located
+     * @param width The width the final image will fit within
+     * @param height The height the final image will fit within
+     * @return The resized image
+     */
     public Bitmap fitInSpace(final String path, final int width, final int height){
         final Bitmap streamed = streamIn(path, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
 
+    /**
+     * Load the image at the given path at approximately the given dimensions, maintaining the original proportions
+     *
+     * @param path The path where the image is located
+     * @param width The target width
+     * @param height The target height
+     * @return The resized image
+     */
     public Bitmap loadApproximate(final String path, final int width, final int height){
         return streamIn(path, width, height);
     }
 
+    /**
+     * Load the image represented by the given InputStreams at its original size. Use the first InputStream to
+     * try to determine the proportions of the image so that we can try to retrieve a recycled Bitmap of the correct
+     * size. Use the second InputStream to actually load the image into a Bitmap. Note both InputStreams must represent
+     * the same image and this method will close both InputStreams.
+     *
+     * @param is1 The InputStream used to get the dimensions of the image
+     * @param is2 The InputStream used to load the image into memory
+     * @return The loaded image
+     */
     public Bitmap loadAsIs(final InputStream is1, final InputStream is2) {
         int[] dimens = new int[] {-1, -1};
         try {
@@ -62,7 +105,7 @@ public class ImageResizer {
             try {
                 is1.close();
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
         Bitmap resized = null;
@@ -72,16 +115,37 @@ public class ImageResizer {
             try {
                 is2.close();
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
         return resized;
     }
 
+    /**
+     * Load the image at the given path at its original size. Assume that the dimensions of the image at the given path
+     * will match the given dimensions and use the given dimensions to retrieve a recycled Bitmap of the correct size.
+     * Note this method will throw an exception if the dimensions of the image at the given path do not exactly match
+     * the given dimensions and there is a bitmap of the given dimensions available to be recycled.
+     *
+     * The dimensions are given to avoid opening an InputStream specifically to determine the size of the image at the
+     * given path and should be used when the dimensions of the image are known.
+     *
+     * @param path The path where the image is stored
+     * @param width The width of the image at the given path
+     * @param height The height of the image at the given path
+     * @return The loaded image
+     */
     public Bitmap loadAsIs(final String path, final int width, final int height) {
         return load(path, getRecycled(width, height));
     }
 
+    /**
+     * Load the image at the given path at its original size. Will create a second InputStream to first try to determine
+     * the size of the image to attempt to retrieve a recycled Bitmap.
+     *
+     * @param path The path where the image is stored
+     * @return The loaded image
+     */
     public Bitmap loadAsIs(final String path){
         int[] dimens = getDimensions(path);
         return load(path, getRecycled(dimens));
@@ -99,10 +163,31 @@ public class ImageResizer {
         return result;
     }
 
-      public static Bitmap centerCrop(Bitmap toCrop, int width, int height) {
+    /**
+     * An expensive operation to crop the given Bitmap so that it fills the given dimensions. This will not maintain
+     * the original proportions of the image
+     *
+     * @param toCrop The Bitmap to crop
+     * @param width The width of the final Bitmap
+     * @param height The height of the final Bitmap
+     * @return The resized image
+     */
+    public static Bitmap centerCrop(Bitmap toCrop, int width, int height) {
         return centerCrop(null, toCrop, width, height);
     }
 
+    /**
+     * A potentially expensive operation to crop the given Bitmap so that it fills the given dimensions. This operation
+     * is significantly less expensive in terms of memory if a mutable Bitmap with the given dimensions is passed in
+     * as well.
+     *
+     * @param recycled A mutable Bitmap with dimensions width and height that we can load the cropped portion of toCrop
+     *                 into
+     * @param toCrop The Bitmap to resize
+     * @param width The width of the final Bitmap
+     * @param height The height of the final Bitmap
+     * @return The resized Bitmap (will be recycled if recycled is not null)
+     */
     public static Bitmap centerCrop(Bitmap recycled, Bitmap toCrop, int width, int height) {
         if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
             return toCrop;
@@ -133,6 +218,14 @@ public class ImageResizer {
         return result;
     }
 
+    /**
+     * An expensive operation to crop the given Bitmap to the given width by removing equal amounts from either side
+     * so that the center of image remains
+     *
+     * @param toCrop The Bitmap to crop
+     * @param width The width to crop the Bitmap to
+     * @return A new Bitmap cropped to the given width, or toCrop if toCrop's width is equivalent to the given width
+     */
     public static Bitmap cropToWidth(Bitmap toCrop, int width) {
         Bitmap cropped = toCrop;
         if (toCrop.getWidth() > width) {
@@ -144,6 +237,15 @@ public class ImageResizer {
 
     //crops a section height pixels tall in the center of the image with equal
     //amounts discarded above and below
+
+    /**
+     * An expensive operation to crop the given Bitmap to the given height by removing equal amounts from the top and
+     * bottom so that the center of the image remains
+     *
+     * @param toCrop The Bitmap to crop
+     * @param height The height to crop the Bitmap to
+     * @return A new Bitmap cropped to the given height, or toCrop if toCrop's height is equivalent to the given height
+     */
     public static Bitmap cropToHeight(Bitmap toCrop, int height){
         Bitmap cropped = toCrop;
         if (toCrop.getHeight() > height){
@@ -154,21 +256,54 @@ public class ImageResizer {
     }
 
     //shrinks to the given width, shrinking the height to maintain the original image proportions
+
+    /**
+     * An expensive operation to resize the given image, maintaining the original proportions, so that its width
+     * matches the given width
+     *
+     * @param toShrink The Bitmap to shrink
+     * @param width The width of the final Bitmap
+     * @return A new Bitmap shrunk to the given width, or toShrink if toShrink's width is equivalent to the given width
+     */
     public static Bitmap shrinkToWidth(Bitmap toShrink, int width){
-        //get exactly the right width
+        Bitmap shrunk = toShrink;
         float widthPercent = ((float) width/toShrink.getWidth());
-        int shrunkImageHeight = Math.round(widthPercent * toShrink.getHeight());
-        Bitmap shrunk = Bitmap.createScaledBitmap(toShrink, width, shrunkImageHeight, true);
+        if (widthPercent != 1) {
+            int shrunkImageHeight = Math.round(widthPercent * toShrink.getHeight());
+            shrunk = Bitmap.createScaledBitmap(toShrink, width, shrunkImageHeight, true);
+        }
         return shrunk;
     }
 
+    /**
+     * An expensive operation to resize the given image, maintaining the original proportions, so that its height
+     * matches the given height
+     *
+     * @param toShrink The Bitmap to shrink
+     * @param height The height of the final Bitmap
+     * @return A new Bitmap shrunk to the given height, or toShrink if toShink's height is equivalent to the given
+     *          height
+     */
     public static Bitmap shrinkToHeight(Bitmap toShrink, int height){
+        Bitmap shrunk = toShrink;
         float heightPercent = ((float) height/toShrink.getHeight());
-        int shrunkImageWidth = Math.round(heightPercent * toShrink.getWidth());
-        Bitmap shrunk = Bitmap.createScaledBitmap(toShrink, shrunkImageWidth, height, true);
+        if (heightPercent != 1) {
+            int shrunkImageWidth = Math.round(heightPercent * toShrink.getWidth());
+            shrunk = Bitmap.createScaledBitmap(toShrink, shrunkImageWidth, height, true);
+        }
         return shrunk;
     }
 
+    /**
+     * An expensive operation to resize the given Bitmap down so that it fits within the given dimensions maintaining
+     * the original proportions
+     *
+     * @param toFit The Bitmap to shrink
+     * @param width The width the final image will fit within
+     * @param height The height the final image will fit within
+     * @return A new Bitmap shrunk to fit within the given dimesions, or toFit if toFit's width or height matches the
+     * given dimensions and toFit fits within the given dimensions
+     */
     public static Bitmap fitInSpace(Bitmap toFit, int width, int height){
         if (height > width){
             return shrinkToWidth(toFit, width);
@@ -177,10 +312,28 @@ public class ImageResizer {
         }
     }
 
+    /**
+     * An expensive operation to load the image at the given path
+     *
+     * @param path The path where the image is stored
+     * @return A Bitmap representing the image at the given path
+     */
     public static Bitmap load(String path) {
         return load(path, null);
     }
 
+    /**
+     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
+     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
+     * of memory.
+     *
+     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
+     * is provided.
+     *
+     * @param path The path where the image is stored
+     * @param recycle A Bitmap we can load the image into, or null
+     * @return A new bitmap containing the image at the given path, or recycle if recycle is not null
+     */
     public static Bitmap load(String path, Bitmap recycle) {
         Bitmap result = null;
         try {
@@ -192,10 +345,28 @@ public class ImageResizer {
         return result == null ? null : orientImage(path, result);
     }
 
+    /**
+     * An expensive operation to load the image from the given InputStream
+     *
+     * @param is The input stream representing the image data
+     * @return A Bitmap representing the image at the given path
+     */
     public static Bitmap load(InputStream is) {
         return load(is, null);
     }
 
+    /**
+     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
+     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
+     * of memory.
+     *
+     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
+     * is provided.
+     *
+     * @param is The InputStream representing the image data
+     * @param recycle A Bitmap we can load the image into, or null
+     * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
+     */
     public static Bitmap load(InputStream is, Bitmap recycle){
         final BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
         decodeBitmapOptions.inSampleSize = 1;
@@ -220,6 +391,12 @@ public class ImageResizer {
         return result;
     }
 
+    /**
+     * A method for getting the dimensions of an image at the given path
+     *
+     * @param path The path wher ethe image is stored
+     * @return an array containing the dimensions of the image in the form {width, height}
+     */
     public static int[] getDimensions(String path) {
         int[] dimens = new int[]{-1, -1};
         try {
@@ -234,14 +411,31 @@ public class ImageResizer {
         return dimens;
     }
 
-    public static int[] getDimension(InputStream is) {
+     /**
+     * A method for getting the dimensions of an image from the given InputStream
+     *
+     * @param is The InputStream representing the image
+     * @return an array containing the dimensions of the image in the form {width, height}
+     */
+     public static int[] getDimension(InputStream is) {
         final BitmapFactory.Options decodeBoundsOptions = new BitmapFactory.Options();
         decodeBoundsOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(is, null, decodeBoundsOptions); //doesn't load, just sets the decodeBounds
         return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
     }
-    //from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
-    //streams in to near, but not exactly at the desired width and height.
+
+
+    /**
+     * Load the image at the given path at nearly the given dimensions maintaining the original proportions. Will also
+     * rotate the image according to the orientation in the images EXIF data if available.
+     *
+     * from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
+     *
+     * @param path The path where the image is stored
+     * @param width The target width
+     * @param height The target height
+     * @return A Bitmap containing the image
+     */
     public static Bitmap streamIn(String path, int width, int height) {
         int orientation = getOrientation(path);
         if(orientation == 90 || orientation == 270) {
@@ -285,7 +479,8 @@ public class ImageResizer {
         }
         return result;
     }
-        /**
+
+   /**
      * Returns a matrix with rotation set based on Exif orientation tag.
      * If the orientation is undefined or 0 null is returned.
      *

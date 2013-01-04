@@ -5,11 +5,12 @@ import com.bumptech.photos.resize.LoadedCallback;
 import com.bumptech.photos.resize.ImageManager;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/31/12
- * Time: 4:56 PM
- * To change this template use File | Settings | File Templates.
+ * An ImageLoader implementation that loads an image at the given path at its original dimensions. Should be used
+ * when an image is roughly the same size as the view that will display it and you want to use some external process
+ * (like the view) to do the resizing for you. Not memory efficient and more expensive to use recycled Bitmaps for than
+ * other implementations
+ *
+ * @see ImageManager#getImage(String, com.bumptech.photos.resize.LoadedCallback)
  */
 public class AsIs<T> extends ImageManagerLoader<T> {
 

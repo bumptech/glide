@@ -14,11 +14,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Created by IntelliJ IDEA.
- * User: sam
- * Date: 10/20/12
- * Time: 1:25 PM
- * To change this template use File | Settings | File Templates.
+ * A thin wrapper around Jake Wharton's disk cache library.
+ *
+ * @see com.jakewharton.DiskLruCache
  */
 public class PhotoDiskCache {
     private final static int VALUE_COUNT = 1; //values per cache entry
@@ -83,12 +81,12 @@ public class PhotoDiskCache {
 
         } catch (IOException e) {
             Log.d("DLRU: IOException? key=" + key);
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
             try {
                 cache.remove(safeKey);
             } catch (IOException e1) {
                 Log.d("DLRU: error removing bitmap key=" + key);
-                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e1.printStackTrace();
             }
         }
 
@@ -103,7 +101,7 @@ public class PhotoDiskCache {
             digest.update(bytes, 0, bytes.length);
             hash = new BigInteger(1, digest.digest()).toString(16);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return hash;
     }

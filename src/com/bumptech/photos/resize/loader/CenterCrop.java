@@ -9,11 +9,9 @@ import com.bumptech.photos.resize.LoadedCallback;
 import com.bumptech.photos.resize.ImageManager;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/25/12
- * Time: 10:54 PM
- * To change this template use File | Settings | File Templates.
+ * An ImageLoader implementation that loads and crops in image down to the given width and height.
+ *
+ * @see ImageManager#centerCrop(String, int, int, com.bumptech.photos.resize.LoadedCallback)
  */
 public class CenterCrop<T> extends ImageManagerLoader<T> {
 

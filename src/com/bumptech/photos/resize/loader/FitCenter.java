@@ -9,11 +9,10 @@ import com.bumptech.photos.resize.LoadedCallback;
 import com.bumptech.photos.resize.ImageManager;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/25/12
- * Time: 10:56 PM
- * To change this template use File | Settings | File Templates.
+ * An ImageLoader implementation that loads an image into within the given dimensions maintaining the original
+ * proportions
+ *
+ * @see ImageManager#fitCenter(String, int, int, com.bumptech.photos.resize.LoadedCallback)
  */
 public class FitCenter<T> extends ImageManagerLoader<T> {
 

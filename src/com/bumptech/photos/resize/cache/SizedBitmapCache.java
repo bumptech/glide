@@ -13,11 +13,7 @@ import java.util.Map;
 import java.util.Queue;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/25/12
- * Time: 4:31 PM
- * To change this template use File | Settings | File Templates.
+ * A cache of Bitmaps made available by size used to manage recycled bitmaps
  */
 public class SizedBitmapCache {
     private static final int MAX_PER_SIZE = 20;

@@ -9,11 +9,11 @@ import com.bumptech.photos.resize.LoadedCallback;
 import com.bumptech.photos.resize.ImageManager;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 12/25/12
- * Time: 10:58 PM
- * To change this template use File | Settings | File Templates.
+ * An ImageLoader implementation that loads an image to roughly the width and height of the view that will display it.
+ * Should be used when the image is larger than the view that will display it but the expense of cropping or resizing
+ * the image more precisely is not worth it. Can save a substantial amount of memory depending on the size discrepancy
+ *
+ * @see ImageManager#getImageApproximate(String, int, int, com.bumptech.photos.resize.LoadedCallback)
  */
 public class Approximate<T> extends ImageManagerLoader<T> {
 

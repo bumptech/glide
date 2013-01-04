@@ -10,11 +10,9 @@ import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
 /**
- * Created by IntelliJ IDEA.
- * User: sam
- * Date: 2/9/12
- * Time: 5:57 PM
- * To change this template use File | Settings | File Templates.
+ * A thin wrapper around the LruCache provided in the Android support libraries.
+ *
+ * @see android.support.v4.util.LruCache
  */
 public class LruPhotoCache{
     private static final float SIZE_RATIO = 1f/8f;
