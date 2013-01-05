@@ -1,6 +1,8 @@
-bin/*
-gen/*
-local.properties
+library/bin/*
+library/gen/*
+library/local.properties
 *.iml
 .idea/*
+*.DS_Store
+*.swp
 proguard-project.txt
