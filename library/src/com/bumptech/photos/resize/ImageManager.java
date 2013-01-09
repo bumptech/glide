@@ -331,6 +331,18 @@ public class ImageManager {
         });
     }
 
+    public void pause() {
+        if (diskCache != null) {
+            diskCache.stop();
+        }
+    }
+
+    public void resume() {
+        if (diskCache != null) {
+            diskCache.start();
+        }
+    }
+
     /**
      * Notify the ImageManager that a bitmap it loaded is not going to be displayed and can go into a queue to be
      * reused. Does nothing if recycling is disabled or impossible.

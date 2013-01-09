@@ -21,8 +21,20 @@ import java.security.NoSuchAlgorithmException;
 public class PhotoDiskCache {
     private final static int VALUE_COUNT = 1; //values per cache entry
     private DiskLruCache cache;
+    private final File directory;
+    private final long maxSize;
+    private final int appVersion;
 
     public PhotoDiskCache(File directory, long maxSize, int appVersion) {
+        this.directory = directory;
+        this.maxSize = maxSize;
+        this.appVersion = appVersion;
+        start();
+    }
+
+    public void start() {
+        if (cache != null && !cache.isClosed()) return;
+
         try {
             cache = DiskLruCache.open(directory, appVersion, VALUE_COUNT, maxSize);
         } catch (IOException e) {
@@ -30,7 +42,22 @@ public class PhotoDiskCache {
         }
     }
 
+    public void stop() {
+        if (cache == null) return;
+
+        try {
+            cache.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void put(final String key, final Bitmap bitmap) {
+        if (cache.isClosed()) {
+            Log.d("DLRU: put while cache is closed!");
+            return;
+        }
+
         if (bitmap == null) return;
         final String safeKey = sha1Hash(key);
 
@@ -67,6 +94,10 @@ public class PhotoDiskCache {
     }
 
     public InputStream get(final String key) {
+        if (cache.isClosed()) {
+            Log.d("DLRU: get while cache is closed key=" + key);
+            return null;
+        }
         //disk cache doesn't allow keys with anything but a-zA-Z0-9 :(
         final String safeKey = sha1Hash(key);
         InputStream result = null;
@@ -80,7 +111,6 @@ public class PhotoDiskCache {
             }
 
         } catch (IOException e) {
-            Log.d("DLRU: IOException? key=" + key);
             e.printStackTrace();
             try {
                 cache.remove(safeKey);
