@@ -25,13 +25,34 @@ import java.util.Queue;
  */
 public class ImageResizer {
     private Queue<byte[]> tempQueue = new LinkedList<byte[]>();
-    private final SizedBitmapCache bitmapCache;
+    private SizedBitmapCache bitmapCache = null;
+    private final BitmapFactory.Options defaultOptions;
+
+    public static BitmapFactory.Options getDefaultOptions() {
+       BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
+       decodeBitmapOptions.inDither = false;
+       decodeBitmapOptions.inScaled = false;
+       decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+       decodeBitmapOptions.inSampleSize = 1;
+       if (Build.VERSION.SDK_INT >= 11)  {
+           decodeBitmapOptions.inMutable = true;
+       }
+       return decodeBitmapOptions;
+    }
 
     /**
      * Creates a new resizer that will not recycle Bitmaps
      */
     public ImageResizer() {
-        this(null);
+        this(null, null);
+    }
+
+    public ImageResizer(SizedBitmapCache bitmapCache) {
+        this(bitmapCache, null);
+    }
+
+    public ImageResizer(BitmapFactory.Options options) {
+        this(null, options);
     }
 
     /**
@@ -39,8 +60,13 @@ public class ImageResizer {
      *
      * @param bitmapCache The cache to try to recycle {@link android.graphics.Bitmap}s from
      */
-    public ImageResizer(SizedBitmapCache bitmapCache){
+    public ImageResizer(SizedBitmapCache bitmapCache, BitmapFactory.Options defaultOptions){
         this.bitmapCache = bitmapCache;
+        if (defaultOptions == null) {
+            this.defaultOptions = getDefaultOptions();
+        } else {
+            this.defaultOptions = defaultOptions;
+        }
     }
 
     /**
@@ -143,6 +169,13 @@ public class ImageResizer {
         return load(path, getRecycled(dimens));
     }
 
+    private BitmapFactory.Options getDefaultOptions(Bitmap recycle) {
+        BitmapFactory.Options result = new BitmapFactory.Options();
+        copyOptions(defaultOptions, result);
+        result.inBitmap = recycle;
+        return result;
+    }
+
     private Bitmap getRecycled(int[] dimens) {
         return getRecycled(dimens[0], dimens[1]);
     }
@@ -174,6 +207,21 @@ public class ImageResizer {
 
     private void releaseTempBytes(byte[] bytes) {
         tempQueue.add(bytes);
+    }
+
+    private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to) {
+        to.inDensity = from.inDensity;
+        to.inDither = from.inDither;
+        to.inInputShareable = from.inInputShareable;
+        to.inMutable = from.inMutable;
+        to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
+        to.inPreferredConfig = from.inPreferredConfig;
+        to.inPurgeable = from.inPurgeable;
+        to.inSampleSize = from.inSampleSize;
+        to.inScaled = from.inScaled;
+        to.inScreenDensity = from.inScreenDensity;
+        to.inTargetDensity = from.inTargetDensity;
+
     }
 
     /**

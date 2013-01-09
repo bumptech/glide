@@ -6,6 +6,7 @@ package com.bumptech.photos.resize;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -91,6 +92,14 @@ public class ImageManager {
          * Defaults to 20
          */
         public int maxPerSize = 0;
+
+        /**
+         * Options for loading bitmaps. Some of these fields will be overwritten, including inSampleSize, inBitmap,
+         * and maybe inMutable depending on how recycleBitmaps is set.
+         *
+         * Config and dither for example can be set
+         */
+        public BitmapFactory.Options bitmapDecodeOptions = ImageResizer.getDefaultOptions();
     }
 
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
@@ -239,10 +248,11 @@ public class ImageManager {
             }
             bitmapCache = new SizedBitmapCache(options.maxPerSize);
         } else {
+            options.bitmapDecodeOptions.inMutable = false;
             bitmapCache = null;
         }
 
-        this.resizer = new ImageResizer(bitmapCache);
+        this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
         this.mainHandler = mainHandler;
         this.executor = executor;
     }
