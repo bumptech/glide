@@ -69,6 +69,8 @@ public class ImageResizer {
         }
     }
 
+
+
     /**
      * Load the image at the given path at approximately the given dimensions, maintaining the original proportions,
      * and then crop the image down so that it fills the given dimensions
@@ -79,7 +81,7 @@ public class ImageResizer {
      * @return The resized image
      */
     public Bitmap resizeCenterCrop(final String path, final int width, final int height){
-        final Bitmap streamed = streamIn(path, width, height);
+        final Bitmap streamed = loadApproximate(path, width, height);
 
         if (streamed.getWidth() == width && streamed.getHeight() == height) {
             return streamed;
@@ -99,20 +101,48 @@ public class ImageResizer {
      * @return The resized image
      */
     public Bitmap fitInSpace(final String path, final int width, final int height){
-        final Bitmap streamed = streamIn(path, width > height ? 1 : width, height > width ? 1 : height);
+        final Bitmap streamed = loadApproximate(path, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
 
     /**
-     * Load the image at the given path at approximately the given dimensions, maintaining the original proportions
+     * Load the image at the given path at nearly the given dimensions maintaining the original proportions. Will also
+     * rotate the image according to the orientation in the images EXIF data if available.
      *
-     * @param path The path where the image is located
+     * from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
+     *
+     * @param path The path where the image is stored
      * @param width The target width
      * @param height The target height
-     * @return The resized image
+     * @return A Bitmap containing the image
      */
-    public Bitmap loadApproximate(final String path, final int width, final int height){
-        return streamIn(path, width, height);
+    public Bitmap loadApproximate(String path, int width, int height) {
+        int orientation = getOrientation(path);
+        if(orientation == 90 || orientation == 270) {
+            //Swap width and height for initial downsample calculation if its oriented so.
+            //The image will then be rotated back to normal.
+            int w = width;
+            width = height;
+            height = w;
+        }
+
+        final int[] dimens = getDimensions(path);
+        final int originalWidth = dimens[0];
+        final int originalHeight = dimens[1];
+
+        // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
+        int sampleSize = Math.min(originalHeight / height, originalWidth / width);
+
+        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions();
+        decodeBitmapOptions.inSampleSize = sampleSize;
+
+        Bitmap result = decodeStream(path, decodeBitmapOptions);
+
+        if (orientation != 0) {
+            result = rotateImage(result, orientation);
+        }
+
+        return result;
     }
 
     /**
@@ -169,6 +199,106 @@ public class ImageResizer {
         return load(path, getRecycled(dimens));
     }
 
+    /**
+     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
+     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
+     * of memory.
+     *
+     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
+     * is provided.
+     *
+     * @param path The path where the image is stored
+     * @param recycle A Bitmap we can load the image into, or null
+     * @return A new bitmap containing the image at the given path, or recycle if recycle is not null
+     */
+    private Bitmap load(String path, Bitmap recycle) {
+        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(recycle);
+        final Bitmap result = decodeStream(path, decodeBitmapOptions);
+        return result == null ? null : orientImage(path, result);
+    }
+
+    /**
+     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
+     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
+     * of memory.
+     *
+     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
+     * is provided.
+     *
+     * @param is The InputStream representing the image data
+     * @param recycle A Bitmap we can load the image into, or null
+     * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
+     */
+    private Bitmap load(InputStream is, Bitmap recycle){
+        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(recycle);
+        return decodeStream(is, decodeBitmapOptions);
+    }
+
+    /**
+     * A method for getting the dimensions of an image at the given path
+     *
+     * @param path The path where the image is stored
+     * @return an array containing the dimensions of the image in the form {width, height}
+     */
+    private int[] getDimensions(String path) {
+        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
+        decodeBoundsOptions.inJustDecodeBounds = true;
+        decodeStream(path, decodeBoundsOptions);
+        return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
+    }
+
+     /**
+     * A method for getting the dimensions of an image from the given InputStream
+     *
+     * @param is The InputStream representing the image
+     * @return an array containing the dimensions of the image in the form {width, height}
+     */
+    private int[] getDimension(InputStream is) {
+        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
+        decodeBoundsOptions.inJustDecodeBounds = true;
+        decodeStream(is, decodeBoundsOptions);
+        return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
+    }
+
+    private Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions) {
+        InputStream is = null;
+        Bitmap result = null;
+        try {
+            is = new FileInputStream(path);
+            result = decodeStream(is, decodeBitmapOptions);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (is !=null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    private Bitmap decodeStream(InputStream is, BitmapFactory.Options decodeBitmapOptions) {
+        byte[] tempStorage = getTempBytes();
+        byte[] bufStorage = getTempBytes();
+        ReycleableBufferedInputStream bis = new ReycleableBufferedInputStream(is, bufStorage);
+        decodeBitmapOptions.inTempStorage = tempStorage;
+        Bitmap result = null;
+        try {
+            result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
+        } finally {
+            try {
+                bis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            releaseTempBytes(tempStorage, bufStorage);
+        }
+        return result;
+    }
+
     private BitmapFactory.Options getDefaultOptions(Bitmap recycle) {
         BitmapFactory.Options result = new BitmapFactory.Options();
         copyOptions(defaultOptions, result);
@@ -223,6 +353,7 @@ public class ImageResizer {
         to.inTargetDensity = from.inTargetDensity;
 
     }
+
 
     /**
      * An expensive operation to crop the given Bitmap so that it fills the given dimensions. This will not maintain
@@ -370,133 +501,6 @@ public class ImageResizer {
         }
     }
 
-
-    /**
-     * An expensive operation to load the image at the given path
-     *
-     * @param path The path where the image is stored
-     * @return A Bitmap representing the image at the given path
-     */
-    public Bitmap load(String path) {
-        return load(path, null);
-    }
-
-    /**
-     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
-     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
-     * of memory.
-     *
-     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
-     * is provided.
-     *
-     * @param path The path where the image is stored
-     * @param recycle A Bitmap we can load the image into, or null
-     * @return A new bitmap containing the image at the given path, or recycle if recycle is not null
-     */
-    public Bitmap load(String path, Bitmap recycle) {
-        Bitmap result = null;
-        try {
-            result = load(new FileInputStream(path), recycle);
-        } catch (FileNotFoundException e) {
-            Log.d("PSR: file not found loading bitmap at: " + path);
-            e.printStackTrace();
-        }
-        return result == null ? null : orientImage(path, result);
-    }
-
-    /**
-     * An expensive operation to load the image from the given InputStream
-     *
-     * @param is The input stream representing the image data
-     * @return A Bitmap representing the image at the given path
-     */
-    public Bitmap load(InputStream is) {
-        return load(is, null);
-    }
-
-    /**
-     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
-     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
-     * of memory.
-     *
-     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
-     * is provided.
-     *
-     * @param is The InputStream representing the image data
-     * @param recycle A Bitmap we can load the image into, or null
-     * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
-     */
-    public Bitmap load(InputStream is, Bitmap recycle){
-        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(recycle);
-        return decodeStream(is, decodeBitmapOptions);
-    }
-
-    /**
-     * A method for getting the dimensions of an image at the given path
-     *
-     * @param path The path where the image is stored
-     * @return an array containing the dimensions of the image in the form {width, height}
-     */
-    public int[] getDimensions(String path) {
-        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
-        decodeBoundsOptions.inJustDecodeBounds = true;
-        decodeStream(path, decodeBoundsOptions);
-        return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
-    }
-
-     /**
-     * A method for getting the dimensions of an image from the given InputStream
-     *
-     * @param is The InputStream representing the image
-     * @return an array containing the dimensions of the image in the form {width, height}
-     */
-    public int[] getDimension(InputStream is) {
-        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
-        decodeBoundsOptions.inJustDecodeBounds = true;
-        decodeStream(is, decodeBoundsOptions);
-        return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
-    }
-
-    /**
-     * Load the image at the given path at nearly the given dimensions maintaining the original proportions. Will also
-     * rotate the image according to the orientation in the images EXIF data if available.
-     *
-     * from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
-     *
-     * @param path The path where the image is stored
-     * @param width The target width
-     * @param height The target height
-     * @return A Bitmap containing the image
-     */
-    public Bitmap streamIn(String path, int width, int height) {
-        int orientation = getOrientation(path);
-        if(orientation == 90 || orientation == 270) {
-            //Swap width and height for initial downsample calculation if its oriented so.
-            //The image will then be rotated back to normal.
-            int w = width;
-            width = height;
-            height = w;
-        }
-
-        final int[] dimens = getDimensions(path);
-        final int originalWidth = dimens[0];
-        final int originalHeight = dimens[1];
-
-        // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
-        int sampleSize = Math.min(originalHeight / height, originalWidth / width);
-
-        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions();
-        decodeBitmapOptions.inSampleSize = sampleSize;
-
-        Bitmap result = decodeStream(path, decodeBitmapOptions);
-
-        if (orientation != 0) {
-            result = rotateImage(result, orientation);
-        }
-
-        return result;
-    }
-
    /**
      * Returns a matrix with rotation set based on Exif orientation tag.
      * If the orientation is undefined or 0 null is returned.
@@ -567,59 +571,7 @@ public class ImageResizer {
         return imageToOrient;
    }
 
-   private Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions) {
-       InputStream is = null;
-       Bitmap result = null;
-       try {
-           is = new FileInputStream(path);
-           result = decodeStream(is, decodeBitmapOptions);
-       } catch (FileNotFoundException e) {
-           e.printStackTrace();
-       } finally {
-           if (is !=null) {
-               try {
-                   is.close();
-               } catch (IOException e) {
-                   e.printStackTrace();
-               }
-           }
-       }
-       return result;
-   }
 
-   private Bitmap decodeStream(InputStream is, BitmapFactory.Options decodeBitmapOptions) {
-       byte[] tempStorage = getTempBytes();
-       byte[] bufStorage = getTempBytes();
-       ReycleableBufferedInputStream bis = new ReycleableBufferedInputStream(is, bufStorage);
-       decodeBitmapOptions.inTempStorage = tempStorage;
-       Bitmap result = null;
-       try {
-           result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
-       } finally {
-           try {
-               bis.close();
-           } catch (IOException e) {
-               e.printStackTrace();
-           }
-           releaseTempBytes(tempStorage, bufStorage);
-       }
-       return result;
-   }
 
-   private static BitmapFactory.Options getDefaultOptions() {
-      return getDefaultOptions(null);
-   }
 
-   private static BitmapFactory.Options getDefaultOptions(Bitmap recycle) {
-       BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
-       decodeBitmapOptions.inDither = false;
-       decodeBitmapOptions.inScaled = false;
-       decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
-       decodeBitmapOptions.inSampleSize = 1;
-       if (Build.VERSION.SDK_INT >= 11)  {
-           decodeBitmapOptions.inMutable = true;
-           decodeBitmapOptions.inBitmap = recycle;
-       }
-       return decodeBitmapOptions;
-    }
 }
