@@ -462,6 +462,10 @@ public class ImageManager {
             }
 
             if (result != null) {
+                if (!isInDiskCache && useDiskCache) {
+                    putInDiskCache(key, result);
+                }
+
                 final Bitmap finalResult = result;
                 mainHandler.post(new Runnable() {
                     @Override
@@ -470,11 +474,8 @@ public class ImageManager {
                         putInMemoryCache(key, finalResult);
                         cb.onLoadCompleted(finalResult);
                     }
+
                 });
-                //this is time consuming so do it after posting the result
-                if (!isInDiskCache && useDiskCache) {
-                    putInDiskCache(key, result);
-                }
             }
         }
 
