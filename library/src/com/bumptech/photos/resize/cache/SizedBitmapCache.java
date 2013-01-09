@@ -16,8 +16,13 @@ import java.util.Queue;
  * A cache of Bitmaps made available by size used to manage recycled bitmaps
  */
 public class SizedBitmapCache {
-    private static final int MAX_PER_SIZE = 20;
+    private static final int DEFAULT_MAX_PER_SIZE = 20;
     private Map<String, Queue<Bitmap>> availableBitmaps = new HashMap<String, Queue<Bitmap>>();
+    private final int maxPerSize;
+
+    public SizedBitmapCache(int maxPerSize) {
+        this.maxPerSize = maxPerSize == 0 ? DEFAULT_MAX_PER_SIZE : maxPerSize;
+    }
 
     public void put(Bitmap bitmap) {
         final String sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
@@ -27,7 +32,7 @@ public class SizedBitmapCache {
             availableBitmaps.put(sizeKey, available);
         }
 
-        if (available.size() < MAX_PER_SIZE) {
+        if (available.size() < maxPerSize) {
             available.add(bitmap);
         }
         //Log.d("SBC: put key=" + sizeKey + " available=" + available.size());

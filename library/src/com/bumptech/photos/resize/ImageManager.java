@@ -80,6 +80,17 @@ public class ImageManager {
          * otherwise.
          */
         public boolean recycleBitmaps = true;
+
+        /**
+         * The maximum number of recycled bitmaps of any requested size to keep around. Only used if recycleBitmaps
+         * is true. A higher number means loads are more likely to be able to reuse a bitmap but also that this object
+         * will use more memory. Increase this if there are few varieties of bitmaps that will be scrolled rapidly (ie
+         * a GridView of images with lots of columns), and decrease it if there are a lot of different sizes of bitmaps
+         * and limited memory is available.
+         *
+         * Defaults to 20
+         */
+        public int maxPerSize = 0;
     }
 
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
@@ -226,7 +237,7 @@ public class ImageManager {
                     }
                 });
             }
-            bitmapCache = new SizedBitmapCache();
+            bitmapCache = new SizedBitmapCache(options.maxPerSize);
         } else {
             bitmapCache = null;
         }
