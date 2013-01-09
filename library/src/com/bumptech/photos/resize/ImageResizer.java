@@ -53,10 +53,7 @@ public class ImageResizer {
      * @return The resized image
      */
     public Bitmap resizeCenterCrop(final String path, final int width, final int height){
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
-        final Bitmap streamed = streamIn(path, width, height, tempStorage, bufStorage);
-        releaseTempBytes(tempStorage, bufStorage);
+        final Bitmap streamed = streamIn(path, width, height);
 
         if (streamed.getWidth() == width && streamed.getHeight() == height) {
             return streamed;
@@ -76,10 +73,7 @@ public class ImageResizer {
      * @return The resized image
      */
     public Bitmap fitInSpace(final String path, final int width, final int height){
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
-        final Bitmap streamed = streamIn(path, width > height ? 1 : width, height > width ? 1 : height, tempStorage, bufStorage);
-        releaseTempBytes(tempStorage, bufStorage);
+        final Bitmap streamed = streamIn(path, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
 
@@ -92,12 +86,7 @@ public class ImageResizer {
      * @return The resized image
      */
     public Bitmap loadApproximate(final String path, final int width, final int height){
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
-        final Bitmap result = streamIn(path, width, height, tempStorage, bufStorage);
-        releaseTempBytes(tempStorage, bufStorage);
-
-        return result;
+        return streamIn(path, width, height);
     }
 
     /**
@@ -112,10 +101,8 @@ public class ImageResizer {
      */
     public Bitmap loadAsIs(final InputStream is1, final InputStream is2) {
         int[] dimens = new int[] {-1, -1};
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
         try {
-            dimens = getDimension(is1, tempStorage, bufStorage);
+            dimens = getDimension(is1);
         } finally {
             try {
                 is1.close();
@@ -123,17 +110,7 @@ public class ImageResizer {
                 e.printStackTrace();
             }
         }
-        releaseTempBytes(tempStorage, bufStorage);
-
-        return loadAsIs(is2, getRecycled(dimens));
-    }
-
-    public Bitmap loadAsIs(final InputStream is, final Bitmap recycled) {
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
-        final Bitmap result = load(is, recycled, tempStorage, bufStorage);
-        releaseTempBytes(tempStorage, bufStorage);
-        return result;
+        return load(is2, getRecycled(dimens));
     }
 
     /**
@@ -151,11 +128,7 @@ public class ImageResizer {
      * @return The loaded image
      */
     public Bitmap loadAsIs(final String path, final int width, final int height) {
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
-        final Bitmap result = load(path, getRecycled(width, height), tempStorage, bufStorage);
-        releaseTempBytes(tempStorage, bufStorage);
-        return result;
+        return load(path, getRecycled(width, height));
     }
 
     /**
@@ -166,12 +139,8 @@ public class ImageResizer {
      * @return The loaded image
      */
     public Bitmap loadAsIs(final String path){
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
-        int[] dimens = getDimensions(path, tempStorage, bufStorage);
-        final Bitmap result = load(path, getRecycled(dimens), tempStorage, bufStorage);
-        releaseTempBytes(tempStorage, bufStorage);
-        return result;
+        final int[] dimens = getDimensions(path);
+        return load(path, getRecycled(dimens));
     }
 
     private Bitmap getRecycled(int[] dimens) {
@@ -185,7 +154,6 @@ public class ImageResizer {
         }
         return result;
     }
-
 
     private byte[] getTempBytes() {
         final byte[] result;
@@ -361,8 +329,8 @@ public class ImageResizer {
      * @param path The path where the image is stored
      * @return A Bitmap representing the image at the given path
      */
-    public static Bitmap load(String path, byte[] tempStorage, byte[] bufStorage) {
-        return load(path, null, tempStorage, bufStorage);
+    public Bitmap load(String path) {
+        return load(path, null);
     }
 
     /**
@@ -377,10 +345,10 @@ public class ImageResizer {
      * @param recycle A Bitmap we can load the image into, or null
      * @return A new bitmap containing the image at the given path, or recycle if recycle is not null
      */
-    public static Bitmap load(String path, Bitmap recycle, byte[] tempStorage, byte[] bufStorage) {
+    public Bitmap load(String path, Bitmap recycle) {
         Bitmap result = null;
         try {
-            result = load(new FileInputStream(path), recycle, tempStorage, bufStorage);
+            result = load(new FileInputStream(path), recycle);
         } catch (FileNotFoundException e) {
             Log.d("PSR: file not found loading bitmap at: " + path);
             e.printStackTrace();
@@ -394,8 +362,8 @@ public class ImageResizer {
      * @param is The input stream representing the image data
      * @return A Bitmap representing the image at the given path
      */
-    public static Bitmap load(InputStream is, byte[] tempSpace, byte[] bufSpace) {
-        return load(is, null, tempSpace, bufSpace);
+    public Bitmap load(InputStream is) {
+        return load(is, null);
     }
 
     /**
@@ -410,21 +378,21 @@ public class ImageResizer {
      * @param recycle A Bitmap we can load the image into, or null
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
      */
-    public static Bitmap load(InputStream is, Bitmap recycle, byte[] tempSpace, byte[] bufSpace){
-        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(recycle, tempSpace);
-        return decodeStream(is, decodeBitmapOptions, bufSpace);
+    public Bitmap load(InputStream is, Bitmap recycle){
+        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(recycle);
+        return decodeStream(is, decodeBitmapOptions);
     }
 
     /**
      * A method for getting the dimensions of an image at the given path
      *
-     * @param path The path wher ethe image is stored
+     * @param path The path where the image is stored
      * @return an array containing the dimensions of the image in the form {width, height}
      */
-    public static int[] getDimensions(String path, byte[] tempStorage, byte[] bufStorage) {
-        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions(tempStorage);
+    public int[] getDimensions(String path) {
+        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
         decodeBoundsOptions.inJustDecodeBounds = true;
-        decodeStream(path, decodeBoundsOptions, bufStorage);
+        decodeStream(path, decodeBoundsOptions);
         return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
     }
 
@@ -434,10 +402,10 @@ public class ImageResizer {
      * @param is The InputStream representing the image
      * @return an array containing the dimensions of the image in the form {width, height}
      */
-    public static int[] getDimension(InputStream is, byte[] tempSpace, byte[] bufSpace) {
-        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions(tempSpace);
+    public int[] getDimension(InputStream is) {
+        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
         decodeBoundsOptions.inJustDecodeBounds = true;
-        decodeStream(is, decodeBoundsOptions, bufSpace);
+        decodeStream(is, decodeBoundsOptions);
         return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
     }
 
@@ -452,7 +420,7 @@ public class ImageResizer {
      * @param height The target height
      * @return A Bitmap containing the image
      */
-    public static Bitmap streamIn(String path, int width, int height, byte[] tempSpace, byte[] bufSpace) {
+    public Bitmap streamIn(String path, int width, int height) {
         int orientation = getOrientation(path);
         if(orientation == 90 || orientation == 270) {
             //Swap width and height for initial downsample calculation if its oriented so.
@@ -462,18 +430,17 @@ public class ImageResizer {
             height = w;
         }
 
-        Bitmap result = null;
-        final int[] dimens = getDimensions(path, tempSpace, bufSpace);
+        final int[] dimens = getDimensions(path);
         final int originalWidth = dimens[0];
         final int originalHeight = dimens[1];
 
         // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
         int sampleSize = Math.min(originalHeight / height, originalWidth / width);
 
-        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(tempSpace);
+        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions();
         decodeBitmapOptions.inSampleSize = sampleSize;
 
-        result = decodeStream(path, decodeBitmapOptions, bufSpace);
+        Bitmap result = decodeStream(path, decodeBitmapOptions);
 
         if (orientation != 0) {
             result = rotateImage(result, orientation);
@@ -552,12 +519,12 @@ public class ImageResizer {
         return imageToOrient;
    }
 
-   private static Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions, byte[] bufSpace) {
+   private Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions) {
        InputStream is = null;
        Bitmap result = null;
        try {
            is = new FileInputStream(path);
-           result = decodeStream(is, decodeBitmapOptions, bufSpace);
+           result = decodeStream(is, decodeBitmapOptions);
        } catch (FileNotFoundException e) {
            e.printStackTrace();
        } finally {
@@ -572,8 +539,11 @@ public class ImageResizer {
        return result;
    }
 
-   private static Bitmap decodeStream(InputStream is, BitmapFactory.Options decodeBitmapOptions, byte[] bufSpace) {
-       ReycleableBufferedInputStream bis = new ReycleableBufferedInputStream(is, bufSpace);
+   private Bitmap decodeStream(InputStream is, BitmapFactory.Options decodeBitmapOptions) {
+       byte[] tempStorage = getTempBytes();
+       byte[] bufStorage = getTempBytes();
+       ReycleableBufferedInputStream bis = new ReycleableBufferedInputStream(is, bufStorage);
+       decodeBitmapOptions.inTempStorage = tempStorage;
        Bitmap result = null;
        try {
            result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
@@ -583,20 +553,20 @@ public class ImageResizer {
            } catch (IOException e) {
                e.printStackTrace();
            }
+           releaseTempBytes(tempStorage, bufStorage);
        }
        return result;
    }
 
-   private static BitmapFactory.Options getDefaultOptions(byte[] tempStorage) {
-      return getDefaultOptions(null, tempStorage);
+   private static BitmapFactory.Options getDefaultOptions() {
+      return getDefaultOptions(null);
    }
 
-   private static BitmapFactory.Options getDefaultOptions(Bitmap recycle, byte[] tempStorage) {
+   private static BitmapFactory.Options getDefaultOptions(Bitmap recycle) {
        BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
        decodeBitmapOptions.inDither = false;
        decodeBitmapOptions.inScaled = false;
        decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
-       decodeBitmapOptions.inTempStorage = tempStorage;
        decodeBitmapOptions.inSampleSize = 1;
        if (Build.VERSION.SDK_INT >= 11)  {
            decodeBitmapOptions.inMutable = true;
