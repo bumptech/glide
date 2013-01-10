@@ -2,7 +2,6 @@ package com.bumptech.flickr.api;
 
 import android.os.Handler;
 import android.os.HandlerThread;
-import com.bumptech.photos.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -57,7 +56,7 @@ public class Downloader {
     }
 
     public void download(String url, MemoryCallback cb) {
-        post(new DownloadWorker(url, cb));
+        post(new MemoryDownloadWorker(url, cb));
     }
 
     public void download(String url, File out, DiskCallback cb) {
@@ -77,7 +76,6 @@ public class Downloader {
 
         @Override
         public void run() {
-            Log.d("Downloader: run");
             HttpURLConnection urlConnection = null;
             try {
                 final URL targetUrl = new URL(url);
@@ -111,12 +109,12 @@ public class Downloader {
         }
     }
 
-    private class DownloadWorker implements Runnable {
+    private class MemoryDownloadWorker implements Runnable {
 
         private final String url;
         private final MemoryCallback cb;
 
-        public DownloadWorker(String url, MemoryCallback cb) {
+        public MemoryDownloadWorker(String url, MemoryCallback cb) {
             this.url = url;
             this.cb = cb;
         }
