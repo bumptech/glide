@@ -9,8 +9,10 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,6 +26,7 @@ public class Api {
     private static final String SIGNED_API_URL = "http://api.flickr.com/services/rest/?method=%s&format=json&api_key=" + API_KEY;
     private static final String PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_%s.jpg";
     private final Downloader downloader;
+    private Set<String> downloadedFilesNames = new HashSet<String>();
 
     private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() {{
         put(75, "s");
@@ -100,16 +103,18 @@ public class Api {
 
     public void downloadPhoto(Photo photo, int width, int height, File cacheDir, final PhotoCallback cb) {
         File out = new File(cacheDir.getPath() + File.separator + photo.id + photo.secret + width + height);
-        if (out.exists()) {
-            cb.onDownloadComplete(out.getPath());
+        final String path = out.getPath();
+        if (downloadedFilesNames.contains(path)) {
+            cb.onDownloadComplete(path);
         } else {
             Log.d("API: missing photo, downloading");
             downloader.download(getPhotoUrl(photo, width, height), out, new Downloader.DiskCallback() {
                 @Override
                 public void onDownloadReady(String path) {
+                    downloadedFilesNames.add(path);
                     cb.onDownloadComplete(path);
                 }
             });
-        }
+       }
     }
 }

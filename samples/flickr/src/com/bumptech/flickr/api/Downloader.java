@@ -76,6 +76,15 @@ public class Downloader {
 
         @Override
         public void run() {
+            if (output.exists()) {
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        cb.onDownloadReady(output.getPath());
+                    }
+                });
+                return;
+            }
             HttpURLConnection urlConnection = null;
             try {
                 final URL targetUrl = new URL(url);
