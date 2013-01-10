@@ -5,11 +5,10 @@
   android:fadingEdge="none"
   android:scrollingCache="false"
   android:numColumns="auto_fit"
-  android:horizontalSpacing="15dp"
-  android:verticalSpacing="15dp"
+  android:horizontalSpacing="10dp"
+  android:verticalSpacing="10dp"
   android:gravity="center"
-  android:stretchMode="spacingWidthUniform"
+  android:layout_gravity="center"
+  android:stretchMode="columnWidth"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent"
-  android:layout_marginLeft="10dp"
-  android:layout_marginRight="10dp"/>
+  android:layout_height="fill_parent" />
