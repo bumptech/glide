@@ -24,7 +24,7 @@ public class FlickrPathLoader extends BasePathLoader<Photo> {
 
     @Override
     protected void doFetchPath(Photo model, int width, int height, final PathReadyCallback cb) {
-        flickrApi.downloadPhoto(model, width, height, cacheDir, new Api.PhotoCallback() {
+        flickrApi.downloadPhoto(model, cacheDir, new Api.PhotoCallback() {
             @Override
             public void onDownloadComplete(String path) {
                 cb.onPathReady(path);

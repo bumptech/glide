@@ -46,7 +46,8 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         options.maxDiskCacheSize = 50 * 1024 * 1024;
         imageManager = new ImageManager(this, options);
 
-        flickerApi = new Api();
+        final Resources res = getResources();
+        flickerApi = new Api(res.getDimensionPixelSize(R.dimen.large_photo_side));
 
         final View searching = findViewById(R.id.searching);
         final TextView searchTerm = (TextView) findViewById(R.id.search_term);
@@ -82,7 +83,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             }
         });
 
-        final Resources res = getResources();
         ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
         pager.setPageMargin(50);
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {

@@ -39,6 +39,7 @@ public class Api {
         put(1024, "b");
         put(Integer.MAX_VALUE, "o");
     }};
+    private final String sizeKey;
 
     private static String getSizeKey(int width, int height) {
         final int largestEdge = width > height ? width : height;
@@ -60,8 +61,9 @@ public class Api {
         public void onDownloadComplete(String path);
     }
 
-    public Api() {
+    public Api(int maxPhotoSize) {
         this.downloader = Downloader.get();
+        this.sizeKey = getSizeKey(maxPhotoSize, maxPhotoSize);
     }
 
     private static String getUrlForMethod(String method) {
@@ -72,8 +74,7 @@ public class Api {
         return getUrlForMethod("flickr.photos.search") + "&text=" + text + "&per_page=500";
     }
 
-    private static String getPhotoUrl(Photo photo, int width, int height) {
-        String sizeKey = getSizeKey(width, height);
+    private static String getPhotoUrl(Photo photo, String sizeKey) {
         return String.format(PHOTO_URL, photo.farm, photo.server, photo.id, photo.secret, sizeKey);
     }
 
@@ -101,14 +102,14 @@ public class Api {
         });
     }
 
-    public void downloadPhoto(Photo photo, int width, int height, File cacheDir, final PhotoCallback cb) {
-        File out = new File(cacheDir.getPath() + File.separator + photo.id + photo.secret + width + height);
+    public void downloadPhoto(Photo photo, File cacheDir, final PhotoCallback cb) {
+        File out = new File(cacheDir.getPath() + File.separator + photo.id + photo.secret + sizeKey);
         final String path = out.getPath();
         if (downloadedFilesNames.contains(path)) {
             cb.onDownloadComplete(path);
         } else {
             Log.d("API: missing photo, downloading");
-            downloader.download(getPhotoUrl(photo, width, height), out, new Downloader.DiskCallback() {
+            downloader.download(getPhotoUrl(photo, sizeKey), out, new Downloader.DiskCallback() {
                 @Override
                 public void onDownloadReady(String path) {
                     downloadedFilesNames.add(path);
