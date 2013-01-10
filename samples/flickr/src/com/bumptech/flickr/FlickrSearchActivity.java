@@ -23,7 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyActivity extends SherlockFragmentActivity {
+public class FlickrSearchActivity extends SherlockFragmentActivity {
     private Api flickerApi;
     private ImageManager imageManager;
     private File cacheDir;
@@ -92,12 +92,12 @@ public class MyActivity extends SherlockFragmentActivity {
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         final Resources res = getResources();
 
-        GridFragment small = new GridFragment();
+        FlickrPhotoGrid small = new FlickrPhotoGrid();
         small.setup(flickerApi, imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.small_photo_side));
         fragments.add(small);
         photoViewers.add(small);
 
-        final GridFragment medium = new GridFragment();
+        final FlickrPhotoGrid medium = new FlickrPhotoGrid();
         medium.setup(flickerApi,  imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.medium_photo_side));
         fragments.add(medium);
         photoViewers.add(medium);

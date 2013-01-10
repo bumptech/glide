@@ -7,7 +7,7 @@
       android:hardwareAccelerated="true"
       android:theme="@style/Theme.Sherlock">
 
-        <activity android:name="MyActivity"
+        <activity android:name=".FlickrSearchActivity"
                   android:label="@string/app_name"
           android:launchMode="singleTask"
           android:screenOrientation="portrait">

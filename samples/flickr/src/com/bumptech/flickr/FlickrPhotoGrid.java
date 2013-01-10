@@ -28,7 +28,7 @@ import java.util.List;
  * Time: 9:48 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GridFragment extends SherlockFragment implements PhotoViewer{
+public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
     private Api api;
@@ -104,7 +104,7 @@ public class GridFragment extends SherlockFragment implements PhotoViewer{
                 final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
                 presenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
-                        .setPathLoader(new FlickPathLoader(api, cacheDir))
+                        .setPathLoader(new FlickrPathLoader(api, cacheDir))
                         .setImageLoader(new CenterCrop<Photo>(imageManager))
                         .setImageSetCallback(new ImageSetCallback() {
                             @Override

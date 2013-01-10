@@ -13,11 +13,11 @@ import java.io.File;
  * Time: 11:55 AM
  * To change this template use File | Settings | File Templates.
  */
-public class FlickPathLoader extends BasePathLoader<Photo> {
+public class FlickrPathLoader extends BasePathLoader<Photo> {
     private final Api flickrApi;
     private final File cacheDir;
 
-    public FlickPathLoader(Api flickApi, File cacheDir) {
+    public FlickrPathLoader(Api flickApi, File cacheDir) {
         this.flickrApi = flickApi;
         this.cacheDir = cacheDir;
     }
