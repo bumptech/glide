@@ -45,6 +45,7 @@ public class Downloader {
     }
 
     protected Downloader() {
+        System.setProperty("http.keepAlive", "false");
         HandlerThread workerThread = new HandlerThread("downloader_thread");
         workerThread.start();
         executor = Executors.newFixedThreadPool(6);
@@ -126,6 +127,12 @@ public class Downloader {
             try {
                 final URL targetUrl = new URL(url);
                 urlConnection = (HttpURLConnection) targetUrl.openConnection();
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(false);
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("Connection", "close");
+
+                urlConnection.connect();
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 final List<Byte> data = new ArrayList<Byte>(1024);
                 byte[] buffer = new byte[1024];
