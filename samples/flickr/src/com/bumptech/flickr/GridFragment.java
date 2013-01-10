@@ -16,7 +16,6 @@ import com.bumptech.photos.presenter.ImagePresenter;
 import com.bumptech.photos.presenter.ImageSetCallback;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.loader.CenterCrop;
-import com.bumptech.photos.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import java.util.List;
  * Time: 9:48 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GridFragment extends SherlockFragment{
+public class GridFragment extends SherlockFragment implements PhotoViewer{
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
     private Api api;
@@ -57,7 +56,8 @@ public class GridFragment extends SherlockFragment{
         return result;
     }
 
-    public void setPhotos(List<Photo> photos) {
+    @Override
+    public void onPhotosUpdated(List<Photo> photos) {
         currentPhotos = photos;
         if (adapter != null)
             adapter.setPhotos(currentPhotos);
@@ -96,7 +96,6 @@ public class GridFragment extends SherlockFragment{
         public View getView(int position, View view, ViewGroup container) {
             final ImagePresenter<Photo> presenter;
             if (view == null) {
-                Log.d("MyActivity: inflate");
                 ImageView imageView = (ImageView) inflater.inflate(R.layout.photo_grid_square, container, false);
                 ViewGroup.LayoutParams params = imageView.getLayoutParams();
                 params.width = photoSize;

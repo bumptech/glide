@@ -2,13 +2,17 @@ package com.bumptech.flickr;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
@@ -24,7 +28,9 @@ public class MyActivity extends SherlockFragmentActivity {
     private ImageManager imageManager;
     private File cacheDir;
     private int searchCount = 0;
+
     private List<Photo> currentPhotos = new ArrayList<Photo>(0);
+    private List<PhotoViewer> photoViewers = new ArrayList<PhotoViewer>();
 
     /** Called when the activity is first created. */
     @Override
@@ -41,6 +47,7 @@ public class MyActivity extends SherlockFragmentActivity {
         options.maxPerSize = 40;
         options.maxDiskCacheSize = 50 * 1024 * 1024;
         imageManager = new ImageManager(this, options);
+
         flickerApi = new Api();
 
         final View searching = findViewById(R.id.searching);
@@ -70,31 +77,38 @@ public class MyActivity extends SherlockFragmentActivity {
                         searching.setVisibility(View.INVISIBLE);
 
                         currentPhotos = photos;
-                        getSupportActionBar().getSelectedTab().select(); //reselect
+                        for (PhotoViewer viewer : photoViewers) {
+                            viewer.onPhotosUpdated(photos);
+                        }
                     }
                 });
             }
         });
 
+        ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
+
+        final List<Fragment> fragments = new ArrayList<Fragment>();
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        final GridFragment medium = new GridFragment();
         final Resources res = getResources();
-        medium.setup(flickerApi,  imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.medium_photo_side));
+
         GridFragment small = new GridFragment();
         small.setup(flickerApi, imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.small_photo_side));
-        actionBar.addTab(actionBar.newTab().setText(R.string.small).setTabListener(new TabListener<GridFragment>("small", small) {
+        fragments.add(small);
+        photoViewers.add(small);
+
+        final GridFragment medium = new GridFragment();
+        medium.setup(flickerApi,  imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.medium_photo_side));
+        fragments.add(medium);
+        photoViewers.add(medium);
+
+        actionBar.addTab(actionBar.newTab().setText(R.string.small).setTabListener(new TabListener2(pager)));
+        actionBar.addTab(actionBar.newTab().setText(R.string.medium).setTabListener(new TabListener2(pager)));
+
+        pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager(), fragments, new FlickrPagerAdapter.PrimaryItemListener() {
             @Override
-            protected void refreshFragment(GridFragment fragment) {
-                if (currentPhotos != null)
-                    fragment.setPhotos(currentPhotos);
-            }
-        }));
-        actionBar.addTab(actionBar.newTab().setText(R.string.medium).setTabListener(new TabListener<GridFragment>("medium", medium) {
-            @Override
-            protected void refreshFragment(GridFragment fragment) {
-                if (currentPhotos != null)
-                    fragment.setPhotos(currentPhotos);
+            public void onPrimaryItemSet(int position) {
+                actionBar.getTabAt(position).select();
             }
         }));
 
@@ -112,39 +126,57 @@ public class MyActivity extends SherlockFragmentActivity {
         imageManager.pause();
     }
 
-    private abstract class TabListener<T extends SherlockFragment> implements ActionBar.TabListener {
-        private final String tag;
-        private final T fragment;
-        private boolean added = false;
+    private static class TabListener2 implements ActionBar.TabListener {
+        private final ViewPager pager;
 
-        public TabListener(String tag, T fragment) {
-            this.tag = tag;
-            this.fragment = fragment;
+        public TabListener2(ViewPager pager) {
+            this.pager = pager;
         }
 
         @Override
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-            if (!added) {
-                ft.add(R.id.fragment_container, fragment, tag);
-                added = true;
-            } else {
-                ft.attach(fragment);
-            }
-            refreshFragment(fragment);
+            pager.setCurrentItem(tab.getPosition());
         }
 
         @Override
-        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            if (fragment != null) {
-                ft.detach(fragment);
-            }
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) { }
+
+        @Override
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) { }
+    }
+
+    private static class FlickrPagerAdapter extends FragmentPagerAdapter {
+        private final PrimaryItemListener listener;
+
+        private interface PrimaryItemListener {
+            public void onPrimaryItemSet(int position);
+        }
+        private final List<Fragment> fragments;
+        private int lastPosition = 0;
+
+        public FlickrPagerAdapter(FragmentManager fm, List<Fragment> fragments, PrimaryItemListener listener) {
+            super(fm);
+            this.fragments = fragments;
+            this.listener = listener;
         }
 
         @Override
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            refreshFragment(fragment);
+        public Fragment getItem(int i) {
+            return fragments.get(i);  //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        protected abstract void refreshFragment(T fragment);
+        @Override
+        public int getCount() {
+            return fragments.size();  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+            if (lastPosition != position) {
+                listener.onPrimaryItemSet(position);
+                lastPosition = position;
+            }
+            super.setPrimaryItem(container, position, object);    //To change body of overridden methods use File | Settings | File Templates.
+        }
     }
 }
