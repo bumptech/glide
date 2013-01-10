@@ -5,4 +5,5 @@
     <string name="searching_for">Searching for \"%s\" on Flickr</string>
   <string name="small">Small</string>
   <string name="medium">Medium</string>
+  <string name="list">List</string>
 </resources>

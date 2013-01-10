@@ -102,8 +102,10 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         fragments.add(medium);
         photoViewers.add(medium);
 
-        actionBar.addTab(actionBar.newTab().setText(R.string.small).setTabListener(new TabListener2(pager)));
-        actionBar.addTab(actionBar.newTab().setText(R.string.medium).setTabListener(new TabListener2(pager)));
+        FlickrPhotoList list =  new FlickrPhotoList();
+        list.setup(flickerApi, imageManager, cacheDir);
+        fragments.add(list);
+        photoViewers.add(list);
 
         pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager(), fragments, new FlickrPagerAdapter.PrimaryItemListener() {
             @Override
@@ -111,6 +113,11 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 actionBar.getTabAt(position).select();
             }
         }));
+        actionBar.addTab(actionBar.newTab().setText(R.string.small).setTabListener(new TabListener(pager)));
+        actionBar.addTab(actionBar.newTab().setText(R.string.medium).setTabListener(new TabListener(pager)));
+        actionBar.addTab(actionBar.newTab().setText(R.string.list).setTabListener(new TabListener(pager)));
+
+        pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager(), fragments));
 
     }
 
