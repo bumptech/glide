@@ -24,6 +24,7 @@ import java.util.Queue;
  * A class for synchronously resizing bitmaps with or without Bitmaps to recycle
  */
 public class ImageResizer {
+    private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private SizedBitmapCache bitmapCache = null;
     private final BitmapFactory.Options defaultOptions;
@@ -34,7 +35,7 @@ public class ImageResizer {
        decodeBitmapOptions.inScaled = false;
        decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
        decodeBitmapOptions.inSampleSize = 1;
-       if (Build.VERSION.SDK_INT >= 11)  {
+       if (CAN_RECYCLE)  {
            decodeBitmapOptions.inMutable = true;
        }
        return decodeBitmapOptions;
@@ -302,7 +303,8 @@ public class ImageResizer {
     private BitmapFactory.Options getDefaultOptions(Bitmap recycle) {
         BitmapFactory.Options result = new BitmapFactory.Options();
         copyOptions(defaultOptions, result);
-        result.inBitmap = recycle;
+        if (CAN_RECYCLE)
+            result.inBitmap = recycle;
         return result;
     }
 
@@ -343,7 +345,8 @@ public class ImageResizer {
         to.inDensity = from.inDensity;
         to.inDither = from.inDither;
         to.inInputShareable = from.inInputShareable;
-        to.inMutable = from.inMutable;
+        if (CAN_RECYCLE)
+            to.inMutable = from.inMutable;
         to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
         to.inPreferredConfig = from.inPreferredConfig;
         to.inPurgeable = from.inPurgeable;

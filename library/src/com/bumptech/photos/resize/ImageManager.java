@@ -248,7 +248,8 @@ public class ImageManager {
             }
             bitmapCache = new SizedBitmapCache(options.maxPerSize);
         } else {
-            options.bitmapDecodeOptions.inMutable = false;
+            if (CAN_RECYCLE)
+                options.bitmapDecodeOptions.inMutable = false;
             bitmapCache = null;
         }
 
