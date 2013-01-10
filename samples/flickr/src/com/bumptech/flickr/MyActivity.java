@@ -8,8 +8,11 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.photos.presenter.ImagePresenter;
@@ -25,6 +28,7 @@ public class MyActivity extends Activity {
     private Api flickerApi;
     private ImageManager imageManager;
     private File cacheDir;
+    private int searchCount = 0;
 
     /** Called when the activity is first created. */
     @Override
@@ -38,18 +42,41 @@ public class MyActivity extends Activity {
         }
 
         ImageManager.Options options = new ImageManager.Options();
-        options.maxMemorySize = 2 * 1024 * 1024;
         options.maxPerSize = 40;
         imageManager = new ImageManager(this, options);
-
         flickerApi = new Api();
+
         final GridView images = (GridView) findViewById(R.id.images);
 
-        flickerApi.search("cat", new Api.SearchCallback() {
+        final View searching = findViewById(R.id.searching);
+        final TextView searchTerm = (TextView) findViewById(R.id.search_term);
+
+        final EditText searchText = (EditText) findViewById(R.id.search_text);
+        final Button search = (Button) findViewById(R.id.search);
+        search.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onSearchCompleted(List<Photo> photos) {
-                Log.d("SEARCH: completed, got " + photos.size() + " results");
-                images.setAdapter(new PhotoAdapter(photos));
+            public void onClick(View view) {
+                final String searchString = searchText.getText().toString();
+                searchText.getText().clear();
+
+                if ("".equals(searchString.trim())) return;
+
+                final int currentSearch = ++searchCount;
+
+                images.setAdapter(null);
+                searching.setVisibility(View.VISIBLE);
+                searchTerm.setText(getString(R.string.searching_for, searchString));
+
+                flickerApi.search(searchString, new Api.SearchCallback() {
+                    @Override
+                    public void onSearchCompleted(List<Photo> photos) {
+                        if (currentSearch != searchCount) return;
+
+                        Log.d("SEARCH: completed, got " + photos.size() + " results");
+                        searching.setVisibility(View.INVISIBLE);
+                        images.setAdapter(new PhotoAdapter(photos));
+                    }
+                });
             }
         });
     }

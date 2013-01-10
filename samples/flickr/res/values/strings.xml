@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MyActivity</string>
+    <string name="search">Search</string>
+    <string name="searching_for">Searching for \"%s\" on Flickr</string>
 </resources>
