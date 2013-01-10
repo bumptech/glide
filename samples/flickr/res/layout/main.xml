@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+  <TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="Hello World, MyActivity" />
+  <GridView
+    android:id="@+id/images"
+    android:columnWidth="@dimen/photo_side"
+    android:cacheColorHint="#00000000"
+    android:fadingEdge="none"
+    android:scrollingCache="false"
+    android:numColumns="auto_fit"
+    android:horizontalSpacing="15dp"
+    android:verticalSpacing="15dp"
+    android:layout_width="fill_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"/>
+</LinearLayout>
+
