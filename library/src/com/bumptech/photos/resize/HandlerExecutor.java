@@ -6,7 +6,6 @@ package com.bumptech.photos.resize;
 
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.SystemClock;
 
 import java.util.concurrent.Executor;
 
@@ -15,7 +14,6 @@ import java.util.concurrent.Executor;
  */
 public class HandlerExecutor implements Executor {
     private final Handler worker;
-    private final Object token;
 
     /**
      * Create a new executor with a new HandlerThread called "HandlerExecutor"
@@ -24,7 +22,6 @@ public class HandlerExecutor implements Executor {
         HandlerThread workerThread = new HandlerThread("HandlerExecutor");
         workerThread.start();
         this.worker = new Handler(workerThread.getLooper());
-        token = hashCode();
     }
 
     /**
@@ -34,11 +31,10 @@ public class HandlerExecutor implements Executor {
      */
     public HandlerExecutor(Handler bgHandler) {
         this.worker = bgHandler;
-        token = hashCode();
     }
 
     @Override
     public void execute(Runnable runnable) {
-        worker.postAtTime(runnable,  token, SystemClock.uptimeMillis());
+        worker.postAtFrontOfQueue(runnable);
     }
 }
