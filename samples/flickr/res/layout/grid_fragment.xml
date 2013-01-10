@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/images"
+  android:cacheColorHint="#00000000"
+  android:fadingEdge="none"
+  android:scrollingCache="false"
+  android:numColumns="auto_fit"
+  android:horizontalSpacing="15dp"
+  android:verticalSpacing="15dp"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:layout_marginLeft="10dp"
+  android:layout_marginRight="10dp"/>

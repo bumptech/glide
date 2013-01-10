@@ -80,6 +80,13 @@ public class Downloader {
             try {
                 final URL targetUrl = new URL(url);
                 urlConnection = (HttpURLConnection) targetUrl.openConnection();
+                urlConnection = (HttpURLConnection) targetUrl.openConnection();
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(false);
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("Connection", "close");
+
+                urlConnection.connect();
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 OutputStream out = new FileOutputStream(output);
                 writeToOutput(in, out);

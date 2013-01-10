@@ -1,34 +1,30 @@
 package com.bumptech.flickr;
 
-import android.app.Activity;
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
-import com.bumptech.photos.presenter.ImagePresenter;
-import com.bumptech.photos.presenter.ImageSetCallback;
 import com.bumptech.photos.resize.ImageManager;
-import com.bumptech.photos.resize.loader.CenterCrop;
 import com.bumptech.photos.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
-public class MyActivity extends Activity {
+public class MyActivity extends SherlockFragmentActivity {
     private Api flickerApi;
     private ImageManager imageManager;
     private File cacheDir;
     private int searchCount = 0;
+    private List<Photo> currentPhotos = new ArrayList<Photo>(0);
 
     /** Called when the activity is first created. */
     @Override
@@ -43,10 +39,9 @@ public class MyActivity extends Activity {
 
         ImageManager.Options options = new ImageManager.Options();
         options.maxPerSize = 40;
+        options.maxDiskCacheSize = 50 * 1024 * 1024;
         imageManager = new ImageManager(this, options);
         flickerApi = new Api();
-
-        final GridView images = (GridView) findViewById(R.id.images);
 
         final View searching = findViewById(R.id.searching);
         final TextView searchTerm = (TextView) findViewById(R.id.search_term);
@@ -63,7 +58,6 @@ public class MyActivity extends Activity {
 
                 final int currentSearch = ++searchCount;
 
-                images.setAdapter(null);
                 searching.setVisibility(View.VISIBLE);
                 searchTerm.setText(getString(R.string.searching_for, searchString));
 
@@ -74,11 +68,36 @@ public class MyActivity extends Activity {
 
                         Log.d("SEARCH: completed, got " + photos.size() + " results");
                         searching.setVisibility(View.INVISIBLE);
-                        images.setAdapter(new PhotoAdapter(photos));
+
+                        currentPhotos = photos;
+                        getSupportActionBar().getSelectedTab().select(); //reselect
                     }
                 });
             }
         });
+
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        final GridFragment medium = new GridFragment();
+        final Resources res = getResources();
+        medium.setup(flickerApi,  imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.medium_photo_side));
+        GridFragment small = new GridFragment();
+        small.setup(flickerApi, imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.small_photo_side));
+        actionBar.addTab(actionBar.newTab().setText(R.string.small).setTabListener(new TabListener<GridFragment>("small", small) {
+            @Override
+            protected void refreshFragment(GridFragment fragment) {
+                if (currentPhotos != null)
+                    fragment.setPhotos(currentPhotos);
+            }
+        }));
+        actionBar.addTab(actionBar.newTab().setText(R.string.medium).setTabListener(new TabListener<GridFragment>("medium", medium) {
+            @Override
+            protected void refreshFragment(GridFragment fragment) {
+                if (currentPhotos != null)
+                    fragment.setPhotos(currentPhotos);
+            }
+        }));
+
     }
 
     @Override
@@ -93,59 +112,39 @@ public class MyActivity extends Activity {
         imageManager.pause();
     }
 
-    private class PhotoAdapter extends BaseAdapter {
+    private abstract class TabListener<T extends SherlockFragment> implements ActionBar.TabListener {
+        private final String tag;
+        private final T fragment;
+        private boolean added = false;
 
-        private final List<Photo> photos;
-        private final LayoutInflater inflater;
-
-        public PhotoAdapter(List<Photo> photos) {
-            this.photos = photos;
-            this.inflater = getLayoutInflater();
+        public TabListener(String tag, T fragment) {
+            this.tag = tag;
+            this.fragment = fragment;
         }
 
         @Override
-        public int getCount() {
-            return photos.size();
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return photos.get(i);
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View view, ViewGroup container) {
-            final ImagePresenter<Photo> presenter;
-            if (view == null) {
-                Log.d("MyActivity: inflate");
-                ImageView imageView = (ImageView) inflater.inflate(R.layout.photo_grid_square, container, false);
-                final Animation fadeIn = AnimationUtils.loadAnimation(MyActivity.this, R.anim.fade_in);
-                presenter = new ImagePresenter.Builder<Photo>()
-                        .setImageView(imageView)
-                        .setPathLoader(new FlickPathLoader(flickerApi, cacheDir))
-                        .setImageLoader(new CenterCrop<Photo>(imageManager))
-                        .setImageSetCallback(new ImageSetCallback() {
-                            @Override
-                            public void onImageSet(ImageView view, boolean fromCache) {
-                                view.clearAnimation();
-                                if (!fromCache)
-                                    view.startAnimation(fadeIn);
-                            }
-                        })
-                        .build();
-                imageView.setTag(presenter);
-                view = imageView;
+        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+            if (!added) {
+                ft.add(R.id.fragment_container, fragment, tag);
+                added = true;
             } else {
-                presenter = (ImagePresenter<Photo>) view.getTag();
+                ft.attach(fragment);
             }
-
-            presenter.setModel(photos.get(position));
-            return view;
+            refreshFragment(fragment);
         }
+
+        @Override
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            if (fragment != null) {
+                ft.detach(fragment);
+            }
+        }
+
+        @Override
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            refreshFragment(fragment);
+        }
+
+        protected abstract void refreshFragment(T fragment);
     }
 }

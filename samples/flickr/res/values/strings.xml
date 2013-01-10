@@ -3,4 +3,6 @@
     <string name="app_name">MyActivity</string>
     <string name="search">Search</string>
     <string name="searching_for">Searching for \"%s\" on Flickr</string>
+  <string name="small">Small</string>
+  <string name="medium">Medium</string>
 </resources>
