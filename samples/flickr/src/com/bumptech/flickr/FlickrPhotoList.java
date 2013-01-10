@@ -50,7 +50,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View result = inflater.inflate(R.layout.flick_photo_list, container, false);
+        final View result = inflater.inflate(R.layout.flickr_photo_list, container, false);
         ListView list = (ListView) result.findViewById(R.id.flickr_photo_list);
         adapter = new FlickrPhotoListAdapter();
         list.setAdapter(adapter);
@@ -101,7 +101,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         public View getView(int position, View view, ViewGroup container) {
             final ViewHolder viewHolder;
             if (view == null) {
-                view = inflater.inflate(R.layout.flick_photo_list_item, container, false);
+                view = inflater.inflate(R.layout.flickr_photo_list_item, container, false);
                 ImageView imageView = (ImageView) view.findViewById(R.id.photo_view);
 
                 final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);

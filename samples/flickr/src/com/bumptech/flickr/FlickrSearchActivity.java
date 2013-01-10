@@ -34,7 +34,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.flickr_search_activity);
         String cacheName = "flickr_cache";
         cacheDir = ImageManager.getPhotoCacheDir(this, cacheName);
         if (!cacheDir.exists()) {

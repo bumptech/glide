@@ -45,7 +45,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View result = inflater.inflate(R.layout.grid_fragment, container, false);
+        final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
         GridView grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
         adapter = new PhotoAdapter();
@@ -96,7 +96,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
         public View getView(int position, View view, ViewGroup container) {
             final ImagePresenter<Photo> presenter;
             if (view == null) {
-                ImageView imageView = (ImageView) inflater.inflate(R.layout.photo_grid_square, container, false);
+                ImageView imageView = (ImageView) inflater.inflate(R.layout.flickr_photo_grid_item, container, false);
                 ViewGroup.LayoutParams params = imageView.getLayoutParams();
                 params.width = photoSize;
                 params.height = photoSize;
