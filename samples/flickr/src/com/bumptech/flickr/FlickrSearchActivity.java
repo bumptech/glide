@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -29,7 +28,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     private File cacheDir;
     private int searchCount = 0;
 
-    private List<Photo> currentPhotos = new ArrayList<Photo>(0);
     private List<PhotoViewer> photoViewers = new ArrayList<PhotoViewer>();
 
     /** Called when the activity is first created. */
@@ -76,7 +74,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                         Log.d("SEARCH: completed, got " + photos.size() + " results");
                         searching.setVisibility(View.INVISIBLE);
 
-                        currentPhotos = photos;
                         for (PhotoViewer viewer : photoViewers) {
                             viewer.onPhotosUpdated(photos);
                         }
@@ -85,12 +82,25 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             }
         });
 
+        final Resources res = getResources();
         ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
+        pager.setPageMargin(50);
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) { }
+
+            @Override
+            public void onPageSelected(int position) {
+                getSupportActionBar().getTabAt(position).select();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) { }
+        });
 
         final List<Fragment> fragments = new ArrayList<Fragment>();
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        final Resources res = getResources();
 
         FlickrPhotoGrid small = new FlickrPhotoGrid();
         small.setup(flickerApi, imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.small_photo_side));
@@ -107,12 +117,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         fragments.add(list);
         photoViewers.add(list);
 
-        pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager(), fragments, new FlickrPagerAdapter.PrimaryItemListener() {
-            @Override
-            public void onPrimaryItemSet(int position) {
-                actionBar.getTabAt(position).select();
-            }
-        }));
         actionBar.addTab(actionBar.newTab().setText(R.string.small).setTabListener(new TabListener(pager)));
         actionBar.addTab(actionBar.newTab().setText(R.string.medium).setTabListener(new TabListener(pager)));
         actionBar.addTab(actionBar.newTab().setText(R.string.list).setTabListener(new TabListener(pager)));
@@ -133,10 +137,10 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         imageManager.pause();
     }
 
-    private static class TabListener2 implements ActionBar.TabListener {
+    private static class TabListener implements ActionBar.TabListener {
         private final ViewPager pager;
 
-        public TabListener2(ViewPager pager) {
+        public TabListener(ViewPager pager) {
             this.pager = pager;
         }
 
@@ -153,18 +157,11 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     }
 
     private static class FlickrPagerAdapter extends FragmentPagerAdapter {
-        private final PrimaryItemListener listener;
-
-        private interface PrimaryItemListener {
-            public void onPrimaryItemSet(int position);
-        }
         private final List<Fragment> fragments;
-        private int lastPosition = 0;
 
-        public FlickrPagerAdapter(FragmentManager fm, List<Fragment> fragments, PrimaryItemListener listener) {
+        public FlickrPagerAdapter(FragmentManager fm, List<Fragment> fragments){
             super(fm);
             this.fragments = fragments;
-            this.listener = listener;
         }
 
         @Override
@@ -175,15 +172,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         @Override
         public int getCount() {
             return fragments.size();  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        @Override
-        public void setPrimaryItem(ViewGroup container, int position, Object object) {
-            if (lastPosition != position) {
-                listener.onPrimaryItemSet(position);
-                lastPosition = position;
-            }
-            super.setPrimaryItem(container, position, object);    //To change body of overridden methods use File | Settings | File Templates.
         }
     }
 }
