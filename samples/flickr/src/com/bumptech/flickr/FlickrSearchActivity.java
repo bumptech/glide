@@ -7,7 +7,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -29,6 +31,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     private int searchCount = 0;
 
     private List<PhotoViewer> photoViewers = new ArrayList<PhotoViewer>();
+    private EditText searchText;
+    private View searching;
+    private TextView searchTerm;
 
     /** Called when the activity is first created. */
     @Override
@@ -49,37 +54,26 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         final Resources res = getResources();
         flickerApi = new Api(res.getDimensionPixelSize(R.dimen.large_photo_side));
 
-        final View searching = findViewById(R.id.searching);
-        final TextView searchTerm = (TextView) findViewById(R.id.search_term);
+        searching = findViewById(R.id.searching);
+        searchTerm = (TextView) findViewById(R.id.search_term);
 
-        final EditText searchText = (EditText) findViewById(R.id.search_text);
+        searchText = (EditText) findViewById(R.id.search_text);
+        searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    executeSearch();
+                    return true;
+                }
+                return false;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
+
         final Button search = (Button) findViewById(R.id.search);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String searchString = searchText.getText().toString();
-                searchText.getText().clear();
-
-                if ("".equals(searchString.trim())) return;
-
-                final int currentSearch = ++searchCount;
-
-                searching.setVisibility(View.VISIBLE);
-                searchTerm.setText(getString(R.string.searching_for, searchString));
-
-                flickerApi.search(searchString, new Api.SearchCallback() {
-                    @Override
-                    public void onSearchCompleted(List<Photo> photos) {
-                        if (currentSearch != searchCount) return;
-
-                        Log.d("SEARCH: completed, got " + photos.size() + " results");
-                        searching.setVisibility(View.INVISIBLE);
-
-                        for (PhotoViewer viewer : photoViewers) {
-                            viewer.onPhotosUpdated(photos);
-                        }
-                    }
-                });
+                executeSearch();
             }
         });
 
@@ -122,6 +116,33 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         actionBar.addTab(actionBar.newTab().setText(R.string.list).setTabListener(new TabListener(pager)));
 
         pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager(), fragments));
+
+    }
+
+    private void executeSearch() {
+        final String searchString = searchText.getText().toString();
+        searchText.getText().clear();
+
+        if ("".equals(searchString.trim())) return;
+
+        final int currentSearch = ++searchCount;
+
+        searching.setVisibility(View.VISIBLE);
+        searchTerm.setText(getString(R.string.searching_for, searchString));
+
+        flickerApi.search(searchString, new Api.SearchCallback() {
+            @Override
+            public void onSearchCompleted(List<Photo> photos) {
+                if (currentSearch != searchCount) return;
+
+                Log.d("SEARCH: completed, got " + photos.size() + " results");
+                searching.setVisibility(View.INVISIBLE);
+
+                for (PhotoViewer viewer : photoViewers) {
+                    viewer.onPhotosUpdated(photos);
+                }
+            }
+        });
 
     }
 
