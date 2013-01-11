@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.SystemClock;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
 import com.bumptech.photos.resize.cache.PhotoDiskCache;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
@@ -18,9 +20,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
@@ -107,9 +106,9 @@ public class ImageManager {
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
     private final Handler mainHandler;
+    private final Handler bgHandler;
     private final LruPhotoCache memoryCache;
     private final ImageResizer resizer;
-    private final ExecutorService executor;
     private final Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
     private final SizedBitmapCache bitmapCache;
     private final PhotoDiskCache diskCache;
@@ -158,18 +157,6 @@ public class ImageManager {
         this(context, new Options());
     }
 
-    /**
-     * Create an ImageManager using the given options. Note that this will create a single background thread to use
-     * to resize and load images from disk. Must be created in the UI thread!
-     *
-     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
-     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
-     *                in Activities.
-     * @param options The specified Options
-     */
-    public ImageManager(Context context, Options options) {
-        this(context, Executors.newSingleThreadExecutor(), options);
-    }
 
     /**
      * Create an ImageManager using the given options and that performs image loads and resize operations using the
@@ -178,12 +165,10 @@ public class ImageManager {
      * @param context A Context used once to find or create a directory for the disk cache. This reference will not
      *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
      *                in Activities.
-     * @param executor The ExecutorService used to perform resize operations and image loads. Must not execute Runnables on the
-     *                 UI thread!
      * @param options The specified options
      */
-    public ImageManager(Context context, ExecutorService executor, Options options) {
-        this(context, executor, new Handler(), options);
+    public ImageManager(Context context, Options options) {
+        this(context, new Handler(), options);
     }
 
     /**
@@ -193,13 +178,11 @@ public class ImageManager {
      * @param context A Context used once to find or create a directory for the disk cache. This reference will not
      *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
      *                in Activities.
-     * @param executor The ExecutorService used to perform resize operations and image loads. Must not execute Runnables on the
-     *                 UI thread!
      * @param mainHandler A Handler to the UI thread.
      * @param options The specified options
      */
-    public ImageManager(Context context, ExecutorService executor, Handler mainHandler, Options options) {
-        this(context, getPhotoCacheDir(context), executor, mainHandler, options);
+    public ImageManager(Context context, Handler mainHandler, Options options) {
+        this(context, getPhotoCacheDir(context), mainHandler, options);
     }
 
     /**
@@ -211,12 +194,10 @@ public class ImageManager {
      *                in Activities.
      * @param diskCacheDir The directory containing the disk cache or in which to create a disk cache if one does not
      *                     already exist
-     * @param executor The ExecutorService used to perform resize operations and image loads. Must not execute Runnables on the
-     *                 UI thread!
      * @param mainHandler A Handler to the UI thread.
      * @param options The specified options
      */
-    public ImageManager(Context context, File diskCacheDir, ExecutorService executor, Handler mainHandler, Options options) {
+    public ImageManager(Context context, File diskCacheDir, Handler mainHandler, Options options) {
         isBitmapRecyclingEnabled = options.recycleBitmaps && CAN_RECYCLE;
 
         if (options.useMemoryCache && options.maxMemorySize <= 0) {
@@ -255,9 +236,12 @@ public class ImageManager {
             bitmapCache = null;
         }
 
+        HandlerThread bgThread = new HandlerThread("image_manager_bg");
+        bgThread.start();
+        bgHandler = new Handler(bgThread.getLooper());
+
         this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
         this.mainHandler = mainHandler;
-        this.executor = executor;
     }
 
     /**
@@ -267,7 +251,7 @@ public class ImageManager {
      * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
-    public Future getImage(final String path, final LoadedCallback cb){
+    public Object getImage(final String path, final LoadedCallback cb){
         final String key = getKey(path, 0, 0, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
@@ -286,7 +270,7 @@ public class ImageManager {
      * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
-    public Future getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
+    public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
         final String key = getKey(path, width, height, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
@@ -305,7 +289,7 @@ public class ImageManager {
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Future getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
+    public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
         final String key = getKey(path, width, height, ResizeType.APPROXIMATE);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
@@ -325,7 +309,7 @@ public class ImageManager {
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Future centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
+    public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
         final String key = getKey(path, width, height, ResizeType.CENTER_CROP);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
@@ -345,7 +329,7 @@ public class ImageManager {
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Future fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
+    public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
         final String key = getKey(path, width, height, ResizeType.FIT_CENTER);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
@@ -421,12 +405,18 @@ public class ImageManager {
         }
     }
 
-    private Future runJob(String key,final LoadedCallback cb, ImageManagerJob job) {
-        Future result = null;
+    public void cancelTask(Object token) {
+        if (token != null)
+            bgHandler.removeCallbacksAndMessages(token);
+    }
+
+
+    private Object runJob(String key,final LoadedCallback cb, final ImageManagerJob job) {
+        final Object token = cb;
         if (!returnFromCache(key, cb)) {
-            result = executor.submit(job);
+            bgHandler.postAtTime(job, token, SystemClock.uptimeMillis());
         }
-        return result;
+        return token;
     }
 
     private boolean returnFromCache(String key, LoadedCallback cb) {

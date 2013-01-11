@@ -4,8 +4,6 @@ import android.graphics.Bitmap;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.LoadedCallback;
 
-import java.util.concurrent.Future;
-
 /**
  * An ImageLoader implementation that loads an image at the given path at its original dimensions. Should be used
  * when an image is roughly the same size as the view that will display it and you want to use some external process
@@ -21,7 +19,7 @@ public class AsIs<T> extends ImageManagerLoader<T> {
     }
 
     @Override
-    protected Future doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
+    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
         return imageManager.getImage(path, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {

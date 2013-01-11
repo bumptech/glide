@@ -8,8 +8,6 @@ import android.graphics.Bitmap;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.LoadedCallback;
 
-import java.util.concurrent.Future;
-
 /**
  * An ImageLoader implementation that loads an image at the given path and expects that the image at that path
  * will exactly match the width and height of the view that will display it. Less expensive than other implementations,
@@ -25,7 +23,7 @@ public class Exact<T> extends ImageManagerLoader<T> {
     }
 
     @Override
-    protected Future doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
+    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
         return imageManager.getImageExact(path, width, height, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
