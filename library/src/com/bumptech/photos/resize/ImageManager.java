@@ -18,7 +18,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
@@ -107,7 +109,7 @@ public class ImageManager {
     private final Handler mainHandler;
     private final LruPhotoCache memoryCache;
     private final ImageResizer resizer;
-    private final Executor executor;
+    private final ExecutorService executor;
     private final Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
     private final SizedBitmapCache bitmapCache;
     private final PhotoDiskCache diskCache;
@@ -166,7 +168,7 @@ public class ImageManager {
      * @param options The specified Options
      */
     public ImageManager(Context context, Options options) {
-        this(context, new HandlerExecutor(), options);
+        this(context, Executors.newSingleThreadExecutor(), options);
     }
 
     /**
@@ -176,11 +178,11 @@ public class ImageManager {
      * @param context A Context used once to find or create a directory for the disk cache. This reference will not
      *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
      *                in Activities.
-     * @param executor The Executor used to perform resize operations and image loads. Must not execute Runnables on the
+     * @param executor The ExecutorService used to perform resize operations and image loads. Must not execute Runnables on the
      *                 UI thread!
      * @param options The specified options
      */
-    public ImageManager(Context context, Executor executor, Options options) {
+    public ImageManager(Context context, ExecutorService executor, Options options) {
         this(context, executor, new Handler(), options);
     }
 
@@ -191,12 +193,12 @@ public class ImageManager {
      * @param context A Context used once to find or create a directory for the disk cache. This reference will not
      *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
      *                in Activities.
-     * @param executor The Executor used to perform resize operations and image loads. Must not execute Runnables on the
+     * @param executor The ExecutorService used to perform resize operations and image loads. Must not execute Runnables on the
      *                 UI thread!
      * @param mainHandler A Handler to the UI thread.
      * @param options The specified options
      */
-    public ImageManager(Context context, Executor executor, Handler mainHandler, Options options) {
+    public ImageManager(Context context, ExecutorService executor, Handler mainHandler, Options options) {
         this(context, getPhotoCacheDir(context), executor, mainHandler, options);
     }
 
@@ -209,12 +211,12 @@ public class ImageManager {
      *                in Activities.
      * @param diskCacheDir The directory containing the disk cache or in which to create a disk cache if one does not
      *                     already exist
-     * @param executor The Executor used to perform resize operations and image loads. Must not execute Runnables on the
+     * @param executor The ExecutorService used to perform resize operations and image loads. Must not execute Runnables on the
      *                 UI thread!
      * @param mainHandler A Handler to the UI thread.
      * @param options The specified options
      */
-    public ImageManager(Context context, File diskCacheDir, Executor executor, Handler mainHandler, Options options) {
+    public ImageManager(Context context, File diskCacheDir, ExecutorService executor, Handler mainHandler, Options options) {
         isBitmapRecyclingEnabled = options.recycleBitmaps && CAN_RECYCLE;
 
         if (options.useMemoryCache && options.maxMemorySize <= 0) {
@@ -265,7 +267,7 @@ public class ImageManager {
      * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
-    public Object getImage(final String path, final LoadedCallback cb){
+    public Future getImage(final String path, final LoadedCallback cb){
         final String key = getKey(path, 0, 0, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
@@ -284,7 +286,7 @@ public class ImageManager {
      * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
-    public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
+    public Future getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
         final String key = getKey(path, width, height, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
@@ -303,7 +305,7 @@ public class ImageManager {
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
+    public Future getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
         final String key = getKey(path, width, height, ResizeType.APPROXIMATE);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
@@ -323,7 +325,7 @@ public class ImageManager {
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
+    public Future centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
         final String key = getKey(path, width, height, ResizeType.CENTER_CROP);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
@@ -343,7 +345,7 @@ public class ImageManager {
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
+    public Future fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
         final String key = getKey(path, width, height, ResizeType.FIT_CENTER);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
@@ -419,12 +421,12 @@ public class ImageManager {
         }
     }
 
-    private Object runJob(String key,final LoadedCallback cb, ImageManagerJob job) {
-        final Object token = cb;
+    private Future runJob(String key,final LoadedCallback cb, ImageManagerJob job) {
+        Future result = null;
         if (!returnFromCache(key, cb)) {
-            executor.execute(job);
+            result = executor.submit(job);
         }
-        return token;
+        return result;
     }
 
     private boolean returnFromCache(String key, LoadedCallback cb) {

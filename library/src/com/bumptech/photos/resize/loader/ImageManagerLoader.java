@@ -1,8 +1,10 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.loader.image.BaseImageLoader;
+import com.bumptech.photos.resize.ImageManager;
+
+import java.util.concurrent.Future;
 
 /**
  * A base class for loaders that user ImageManager. Primarily responsible for keeping track of bitmaps for recycling
@@ -12,18 +14,18 @@ public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
 
     protected final ImageManager imageManager;
     private Bitmap acquired;
-    private Object loadToken;
+    private Future current;
 
     public ImageManagerLoader(ImageManager imageManager) {
         this.imageManager = imageManager;
     }
     @Override
     protected final void doFetchImage(String path, T model, int width, int height, ImageReadyCallback cb) {
-        releaseAcquired();
-        loadToken = doFetchImage(path, width, height, cb);
+        clear();
+        current = doFetchImage(path, width, height, cb);
     }
 
-    protected abstract Object doFetchImage(String path, int width, int height, ImageReadyCallback cb);
+    protected abstract Future doFetchImage(String path, int width, int height, ImageReadyCallback cb);
 
     @Override
     protected void onImageReady(String path, T model, Bitmap image, boolean isUsed) {
@@ -39,6 +41,10 @@ public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
     @Override
     public void clear() {
         releaseAcquired();
+        if (current != null) {
+            current.cancel(false);
+            current = null;
+        }
     }
 
     private void releaseAcquired() {

@@ -1,8 +1,10 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.resize.LoadedCallback;
 import com.bumptech.photos.resize.ImageManager;
+import com.bumptech.photos.resize.LoadedCallback;
+
+import java.util.concurrent.Future;
 
 /**
  * An ImageLoader implementation that loads an image at the given path at its original dimensions. Should be used
@@ -19,7 +21,7 @@ public class AsIs<T> extends ImageManagerLoader<T> {
     }
 
     @Override
-    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
+    protected Future doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
         return imageManager.getImage(path, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {

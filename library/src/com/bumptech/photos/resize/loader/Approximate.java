@@ -5,8 +5,10 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.resize.LoadedCallback;
 import com.bumptech.photos.resize.ImageManager;
+import com.bumptech.photos.resize.LoadedCallback;
+
+import java.util.concurrent.Future;
 
 /**
  * An ImageLoader implementation that loads an image to roughly the width and height of the view that will display it.
@@ -22,7 +24,7 @@ public class Approximate<T> extends ImageManagerLoader<T> {
     }
 
     @Override
-    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
+    protected Future doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
         return imageManager.getImageApproximate(path, width, height, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
