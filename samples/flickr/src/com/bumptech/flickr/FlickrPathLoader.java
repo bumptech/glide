@@ -5,6 +5,7 @@ import com.bumptech.flickr.api.Photo;
 import com.bumptech.photos.loader.path.BasePathLoader;
 
 import java.io.File;
+import java.util.concurrent.Future;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,6 +17,7 @@ import java.io.File;
 public class FlickrPathLoader extends BasePathLoader<Photo> {
     private final Api flickrApi;
     private final File cacheDir;
+    private Future current;
 
     public FlickrPathLoader(Api flickApi, File cacheDir) {
         this.flickrApi = flickApi;
@@ -24,11 +26,21 @@ public class FlickrPathLoader extends BasePathLoader<Photo> {
 
     @Override
     protected void doFetchPath(Photo model, int width, int height, final PathReadyCallback cb) {
-        flickrApi.downloadPhoto(model, cacheDir, new Api.PhotoCallback() {
+        clear();
+        current = flickrApi.downloadPhoto(model, cacheDir, new Api.PhotoCallback() {
             @Override
             public void onDownloadComplete(String path) {
                 cb.onPathReady(path);
             }
         });
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        if (current != null) {
+            current.cancel(false);
+            current = null;
+        }
     }
 }

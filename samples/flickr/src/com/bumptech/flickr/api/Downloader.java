@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created with IntelliJ IDEA.
@@ -51,16 +52,16 @@ public class Downloader {
         mainHandler = new Handler();
     }
 
-    private void post(Runnable runnable) {
-        executor.execute(runnable);
+    private Future post(Runnable runnable) {
+        return executor.submit(runnable);
     }
 
     public void download(String url, MemoryCallback cb) {
         post(new MemoryDownloadWorker(url, cb));
     }
 
-    public void download(String url, File out, DiskCallback cb) {
-        post(new DiskDownloadWorker(url, out, cb));
+    public Future download(String url, File out, DiskCallback cb) {
+        return post(new DiskDownloadWorker(url, out, cb));
     }
 
     private class DiskDownloadWorker implements Runnable {

@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 /**
  * Created with IntelliJ IDEA.
@@ -102,14 +103,15 @@ public class Api {
         });
     }
 
-    public void downloadPhoto(Photo photo, File cacheDir, final PhotoCallback cb) {
+    public Future downloadPhoto(Photo photo, File cacheDir, final PhotoCallback cb) {
         File out = new File(cacheDir.getPath() + File.separator + photo.id + photo.secret + sizeKey);
         final String path = out.getPath();
+        Future result = null;
         if (downloadedFilesNames.contains(path)) {
             cb.onDownloadComplete(path);
         } else {
             Log.d("API: missing photo, downloading");
-            downloader.download(getPhotoUrl(photo, sizeKey), out, new Downloader.DiskCallback() {
+            result = downloader.download(getPhotoUrl(photo, sizeKey), out, new Downloader.DiskCallback() {
                 @Override
                 public void onDownloadReady(String path) {
                     downloadedFilesNames.add(path);
@@ -117,5 +119,6 @@ public class Api {
                 }
             });
        }
+        return result;
     }
 }
