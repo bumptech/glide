@@ -357,13 +357,19 @@ public class ImageManager {
      *
      * @param b The rejected Bitmap
      */
-    public void rejectBitmap(Bitmap b) {
+    public void rejectBitmap(final Bitmap b) {
         if (!isBitmapRecyclingEnabled) return;
 
         Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
         if (currentCount == null || currentCount == 0) {
             bitmapReferenceCounter.remove(b.hashCode());
-            bitmapCache.put(b);
+            //can only put or take from bitmap cache on one thread
+            bgHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    bitmapCache.put(b);
+                }
+            });
         }
     }
 
@@ -393,13 +399,19 @@ public class ImageManager {
      *
      * @param b The releasedBitmap
      */
-    public void releaseBitmap(Bitmap b) {
+    public void releaseBitmap(final Bitmap b) {
         if (!isBitmapRecyclingEnabled) return;
 
         Integer currentCount = bitmapReferenceCounter.get(b.hashCode()) - 1;
         if (currentCount == 0) {
             bitmapReferenceCounter.remove(b.hashCode());
-            bitmapCache.put(b);
+            //can only put or take from bitmap cache on one thread
+            bgHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    bitmapCache.put(b);
+                }
+            });
         } else {
             bitmapReferenceCounter.put(b.hashCode(), currentCount);
         }
