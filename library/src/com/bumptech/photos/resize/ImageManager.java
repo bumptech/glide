@@ -458,26 +458,30 @@ public class ImageManager {
 
         @Override
         public void run() {
-            InputStream is1 = getFromDiskCache(key);
+            final boolean isInDiskCache;
+            InputStream is1 = null;
             InputStream is2 = null;
-            if (is1 != null) {
-                is2 = getFromDiskCache(key);
+            if (useDiskCache) {
+                is1 = getFromDiskCache(key);
+                is2 = null;
+                if (is1 != null) {
+                    is2 = getFromDiskCache(key);
+                }
+
+                isInDiskCache = is1 != null && is2 != null;
+            } else {
+                isInDiskCache = false;
             }
 
-            final boolean isInDiskCache = is1 != null && is2 != null;
-            Bitmap result = null;
-            try {
-                if (isInDiskCache && useDiskCache) {
-                    result = resizer.loadAsIs(is1, is2);
-                } else {
-                    result = resizeIfNotFound();
-                }
-            } catch (Exception e) {
-                cb.onLoadFailed(e);
+            final Bitmap result;
+            if (isInDiskCache) {
+                result = resizer.loadAsIs(is1, is2);
+            } else {
+                result = resizeIfNotFound();
             }
 
             if (result != null) {
-                if (!isInDiskCache && useDiskCache) {
+                if (useDiskCache && !isInDiskCache) {
                     putInDiskCache(key, result);
                 }
 
