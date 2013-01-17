@@ -406,7 +406,7 @@ public class ImageManager {
         if (currentCount == 0) {
             bitmapReferenceCounter.remove(b.hashCode());
             //can only put or take from bitmap cache on one thread
-            bgHandler.post(new Runnable() {
+            bgHandler.postAtFrontOfQueue(new Runnable() {
                 @Override
                 public void run() {
                     bitmapCache.put(b);
