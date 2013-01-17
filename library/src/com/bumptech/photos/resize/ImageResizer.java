@@ -347,7 +347,8 @@ public class ImageResizer {
         to.inInputShareable = from.inInputShareable;
         if (CAN_RECYCLE)
             to.inMutable = from.inMutable;
-        to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
+        if (Build.VERSION.SDK_INT >= 10)
+            to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
         to.inPreferredConfig = from.inPreferredConfig;
         to.inPurgeable = from.inPurgeable;
         to.inSampleSize = from.inSampleSize;
