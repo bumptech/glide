@@ -473,11 +473,15 @@ public class ImageManager {
                 isInDiskCache = false;
             }
 
-            final Bitmap result;
-            if (isInDiskCache) {
-                result = resizer.loadAsIs(is1, is2);
-            } else {
-                result = resizeIfNotFound();
+            Bitmap result = null;
+            try {
+                if (isInDiskCache) {
+                    result = resizer.loadAsIs(is1, is2);
+                } else {
+                    result = resizeIfNotFound();
+                }
+            } catch (Exception e) {
+                cb.onLoadFailed(e);
             }
 
             if (result != null) {
