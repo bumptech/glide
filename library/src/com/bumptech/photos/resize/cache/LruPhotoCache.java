@@ -15,7 +15,7 @@ import android.support.v4.util.LruCache;
  * @see android.support.v4.util.LruCache
  */
 public class LruPhotoCache{
-    private static final float SIZE_RATIO = 1f/8f;
+    private static final float SIZE_RATIO = 1f/10f;
     private final PhotoCache photoCache;
     private PhotoRemovedListener photoRemovedListener;
 
