@@ -84,6 +84,8 @@ public class ImageResizer {
     public Bitmap resizeCenterCrop(final String path, final int width, final int height){
         final Bitmap streamed = loadApproximate(path, width, height);
 
+        if (streamed == null) return null;
+
         if (streamed.getWidth() == width && streamed.getHeight() == height) {
             return streamed;
         }
@@ -103,6 +105,9 @@ public class ImageResizer {
      */
     public Bitmap fitInSpace(final String path, final int width, final int height){
         final Bitmap streamed = loadApproximate(path, width > height ? 1 : width, height > width ? 1 : height);
+
+        if (streamed == null) return null;
+
         return fitInSpace(streamed, width, height);
     }
 
