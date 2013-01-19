@@ -474,14 +474,21 @@ public class ImageManager {
             }
 
             Bitmap result = null;
-            try {
-                if (isInDiskCache) {
+            if (isInDiskCache) {
+                try {
                     result = resizer.loadAsIs(is1, is2);
-                } else {
-                    result = resizeIfNotFound();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                cb.onLoadFailed(e);
+            }
+
+            if (result == null) {
+                try {
+                    result = resizeIfNotFound();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    cb.onLoadFailed(e);
+                }
             }
 
             if (result != null) {
