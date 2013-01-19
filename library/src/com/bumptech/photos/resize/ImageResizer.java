@@ -134,7 +134,7 @@ public class ImageResizer {
         // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
         int sampleSize = Math.min(originalHeight / height, originalWidth / width);
 
-        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions();
+        final BitmapFactory.Options decodeBitmapOptions = getOptions();
         decodeBitmapOptions.inSampleSize = sampleSize;
 
         Bitmap result = decodeStream(path, decodeBitmapOptions);
@@ -213,7 +213,7 @@ public class ImageResizer {
      * @return A new bitmap containing the image at the given path, or recycle if recycle is not null
      */
     private Bitmap load(String path, Bitmap recycle) {
-        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(recycle);
+        final BitmapFactory.Options decodeBitmapOptions = getOptions(recycle);
         final Bitmap result = decodeStream(path, decodeBitmapOptions);
         return result == null ? null : orientImage(path, result);
     }
@@ -231,7 +231,7 @@ public class ImageResizer {
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
      */
     private Bitmap load(InputStream is, Bitmap recycle){
-        final BitmapFactory.Options decodeBitmapOptions = getDefaultOptions(recycle);
+        final BitmapFactory.Options decodeBitmapOptions = getOptions(recycle);
         return decodeStream(is, decodeBitmapOptions);
     }
 
@@ -242,7 +242,7 @@ public class ImageResizer {
      * @return an array containing the dimensions of the image in the form {width, height}
      */
     private int[] getDimensions(String path) {
-        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
+        final BitmapFactory.Options decodeBoundsOptions = getOptions();
         decodeBoundsOptions.inJustDecodeBounds = true;
         decodeStream(path, decodeBoundsOptions);
         return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
@@ -255,7 +255,7 @@ public class ImageResizer {
      * @return an array containing the dimensions of the image in the form {width, height}
      */
     private int[] getDimension(InputStream is) {
-        final BitmapFactory.Options decodeBoundsOptions = getDefaultOptions();
+        final BitmapFactory.Options decodeBoundsOptions = getOptions();
         decodeBoundsOptions.inJustDecodeBounds = true;
         decodeStream(is, decodeBoundsOptions);
         return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
@@ -300,7 +300,11 @@ public class ImageResizer {
         return result;
     }
 
-    private BitmapFactory.Options getDefaultOptions(Bitmap recycle) {
+    private BitmapFactory.Options getOptions() {
+        return getOptions(null);
+    }
+
+    private BitmapFactory.Options getOptions(Bitmap recycle) {
         BitmapFactory.Options result = new BitmapFactory.Options();
         copyOptions(defaultOptions, result);
         if (CAN_RECYCLE)
