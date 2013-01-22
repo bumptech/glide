@@ -253,7 +253,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImage(final String path, final LoadedCallback cb){
-        final int key = getKey(path, 0, 0, ResizeType.AS_IS);
+        final int key = getKey(path, -1, -1, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
             protected Bitmap resizeIfNotFound() {
