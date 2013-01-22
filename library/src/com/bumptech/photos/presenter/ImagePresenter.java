@@ -181,8 +181,8 @@ public class ImagePresenter<T> {
 
             width = imageView.getWidth();
             height = imageView.getHeight();
-            if (pendingLoad != null)
-                Log.d("IP: getDimens width=" + width + " height=" + height);
+//            if (pendingLoad != null)
+//                Log.d("IP: getDimens width=" + width + " height=" + height);
             if (width != 0 && height != 0) {
                 postPendingLoad();
             }
