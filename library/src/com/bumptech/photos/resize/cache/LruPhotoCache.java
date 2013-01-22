@@ -20,7 +20,7 @@ public class LruPhotoCache{
     private PhotoRemovedListener photoRemovedListener;
 
     public interface PhotoRemovedListener {
-        public void onPhotoRemoved(String key, Bitmap bitmap);
+        public void onPhotoRemoved(Integer key, Bitmap bitmap);
     }
 
     /*
@@ -31,7 +31,7 @@ public class LruPhotoCache{
         return Math.round(SIZE_RATIO * activityManager.getMemoryClass() * 1024 * 1024);
     }
 
-    private class PhotoCache extends LruCache<String, Bitmap> {
+    private class PhotoCache extends LruCache<Integer, Bitmap> {
 
         private PhotoCache(int maxSize) {
             super(maxSize);
@@ -39,13 +39,13 @@ public class LruPhotoCache{
 
 
         @Override
-        protected int sizeOf(String key, Bitmap value) {
+        protected int sizeOf(Integer key, Bitmap value) {
             //get the size, getByteCount() is API 12+...
             return value.getHeight() * value.getRowBytes();
         }
 
         @Override
-        protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+        protected void entryRemoved(boolean evicted, Integer key, Bitmap oldValue, Bitmap newValue) {
             super.entryRemoved(evicted, key, oldValue, newValue);    //To change body of overridden methods use File | Settings | File Templates.
             if (photoRemovedListener != null) {
                 photoRemovedListener.onPhotoRemoved(key, oldValue);
@@ -61,15 +61,15 @@ public class LruPhotoCache{
         this.photoRemovedListener = listener;
     }
 
-    public void put(String key, Bitmap bitmap) {
+    public void put(int key, Bitmap bitmap) {
         photoCache.put(key, bitmap);
     }
 
-    public Bitmap get(String key) {
+    public Bitmap get(int key) {
         return photoCache.get(key);
     }
 
-    public void remove(String key){
+    public void remove(int key){
         photoCache.remove(key);
     }
 

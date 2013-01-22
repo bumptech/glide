@@ -15,6 +15,7 @@ import android.os.SystemClock;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
 import com.bumptech.photos.resize.cache.PhotoDiskCache;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
+import com.bumptech.photos.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -224,7 +225,7 @@ public class ImageManager {
             if (memoryCache != null) {
                 memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {
                     @Override
-                    public void onPhotoRemoved(String key, Bitmap bitmap) {
+                    public void onPhotoRemoved(Integer key, Bitmap bitmap) {
                         releaseBitmap(bitmap);
                     }
                 });
@@ -252,7 +253,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImage(final String path, final LoadedCallback cb){
-        final String key = getKey(path, 0, 0, ResizeType.AS_IS);
+        final int key = getKey(path, 0, 0, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
             protected Bitmap resizeIfNotFound() {
@@ -271,7 +272,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
-        final String key = getKey(path, width, height, ResizeType.AS_IS);
+        final int key = getKey(path, width, height, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
             protected Bitmap resizeIfNotFound() {
@@ -290,7 +291,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
-        final String key = getKey(path, width, height, ResizeType.APPROXIMATE);
+        final int key = getKey(path, width, height, ResizeType.APPROXIMATE);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
             protected Bitmap resizeIfNotFound() {
@@ -310,7 +311,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
-        final String key = getKey(path, width, height, ResizeType.CENTER_CROP);
+        final int key = getKey(path, width, height, ResizeType.CENTER_CROP);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
             protected Bitmap resizeIfNotFound() {
@@ -330,7 +331,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
-        final String key = getKey(path, width, height, ResizeType.FIT_CENTER);
+        final int key = getKey(path, width, height, ResizeType.FIT_CENTER);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
             protected Bitmap resizeIfNotFound() {
@@ -423,7 +424,7 @@ public class ImageManager {
     }
 
 
-    private Object runJob(String key,final LoadedCallback cb, final ImageManagerJob job) {
+    private Object runJob(int key,final LoadedCallback cb, final ImageManagerJob job) {
         final Object token = cb;
         if (!returnFromCache(key, cb)) {
             bgHandler.postAtTime(job, token, SystemClock.uptimeMillis());
@@ -431,26 +432,25 @@ public class ImageManager {
         return token;
     }
 
-    private boolean returnFromCache(String key, LoadedCallback cb) {
-        boolean found = false;
+    private boolean returnFromCache(int key, LoadedCallback cb) {
         Bitmap inCache = getFromMemoryCache(key);
-        if (inCache != null) {
-            found = true;
+        boolean found = inCache != null;
+        if (found) {
             cb.onLoadCompleted(inCache);
         }
         return found;
     }
 
     private abstract class ImageManagerJob implements Runnable {
-        private final String key;
+        private final int key;
         private final LoadedCallback cb;
         private final boolean useDiskCache;
 
-        public ImageManagerJob(String key, LoadedCallback cb) {
+        public ImageManagerJob(int key, LoadedCallback cb) {
             this(key, cb, true);
         }
 
-        public ImageManagerJob(String key, LoadedCallback cb, boolean useDiskCache) {
+        public ImageManagerJob(int key, LoadedCallback cb, boolean useDiskCache) {
             this.key = key;
             this.cb = cb;
             this.useDiskCache = useDiskCache;
@@ -513,7 +513,7 @@ public class ImageManager {
     }
 
 
-    private InputStream getFromDiskCache(String key) {
+    private InputStream getFromDiskCache(int key) {
         InputStream result = null;
         if (diskCache != null) {
             result = diskCache.get(key);
@@ -521,13 +521,13 @@ public class ImageManager {
         return result;
     }
 
-    private void putInDiskCache(String key, Bitmap value) {
+    private void putInDiskCache(int key, Bitmap value) {
         if (diskCache != null) {
             diskCache.put(key, value);
         }
     }
 
-    private Bitmap getFromMemoryCache(String key) {
+    private Bitmap getFromMemoryCache(int key) {
         Bitmap result = null;
         if (memoryCache != null) {
             result = memoryCache.get(key);
@@ -535,13 +535,13 @@ public class ImageManager {
         return result;
     }
 
-    private void putInMemoryCache(String key, Bitmap bitmap) {
+    private void putInMemoryCache(int key, Bitmap bitmap) {
         if (memoryCache != null) {
             memoryCache.put(key, bitmap);
         }
     }
 
-    private static String getKey(String path, int width, int height, ResizeType type){
-        return path + width + "_" + height + type.name();
+    private static int getKey(String path, int width, int height, ResizeType type){
+        return Util.hash(path.hashCode(), width, height, type.hashCode());
     }
 }

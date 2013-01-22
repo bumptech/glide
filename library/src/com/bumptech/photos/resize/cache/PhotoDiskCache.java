@@ -52,14 +52,14 @@ public class PhotoDiskCache {
         }
     }
 
-    public void put(final String key, final Bitmap bitmap) {
+    public void put(final int key, final Bitmap bitmap) {
         if (cache.isClosed()) {
             Log.d("DLRU: put while cache is closed!");
             return;
         }
 
         if (bitmap == null) return;
-        final String safeKey = sha1Hash(key);
+        final String safeKey = sha1Hash(String.valueOf(key));
 
         DiskLruCache.Editor edit = null;
         OutputStream out = null;
@@ -93,13 +93,13 @@ public class PhotoDiskCache {
         }
     }
 
-    public InputStream get(final String key) {
+    public InputStream get(final int key) {
         if (cache.isClosed()) {
             Log.d("DLRU: get while cache is closed key=" + key);
             return null;
         }
         //disk cache doesn't allow keys with anything but a-zA-Z0-9 :(
-        final String safeKey = sha1Hash(key);
+        final String safeKey = sha1Hash(String.valueOf(key));
         InputStream result = null;
         try {
             DiskLruCache.Snapshot snapshot = cache.get(safeKey);
