@@ -72,8 +72,12 @@ public class PhotoDiskCache {
             edit = cache.edit(safeKey);
             out = new BufferedOutputStream(edit.newOutputStream(VALUE_COUNT - 1));
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            edit.commit();
-        } catch (IOException e) {
+            if (cache.isClosed()) {
+                edit.abort();
+            } else {
+                edit.commit();
+            }
+        } catch (Exception e) {
             if (edit != null) {
                 try {
                     edit.abort();
