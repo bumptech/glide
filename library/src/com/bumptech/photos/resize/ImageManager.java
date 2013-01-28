@@ -13,12 +13,11 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
-import com.bumptech.photos.resize.cache.PhotoDiskCache;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
+import com.bumptech.photos.resize.cache.disk.DiskCache;
 import com.bumptech.photos.util.Util;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,7 +111,7 @@ public class ImageManager {
     private final ImageResizer resizer;
     private final Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
     private final SizedBitmapCache bitmapCache;
-    private final PhotoDiskCache diskCache;
+    private final DiskCache diskCache;
     private final boolean isBitmapRecyclingEnabled;
 
     private enum ResizeType {
@@ -199,6 +198,10 @@ public class ImageManager {
      * @param options The specified options
      */
     public ImageManager(Context context, File diskCacheDir, Handler mainHandler, Options options) {
+        HandlerThread bgThread = new HandlerThread("image_manager_bg");
+        bgThread.start();
+        bgHandler = new Handler(bgThread.getLooper());
+
         isBitmapRecyclingEnabled = options.recycleBitmaps && CAN_RECYCLE;
 
         if (options.useMemoryCache && options.maxMemorySize <= 0) {
@@ -212,7 +215,7 @@ public class ImageManager {
         if (diskCacheDir == null || !options.useDiskCache) {
             diskCache = null;
         } else {
-            diskCache = new PhotoDiskCache(diskCacheDir, options.maxDiskCacheSize, options.appVersion);
+            diskCache = DiskCache.get(diskCacheDir, options.maxDiskCacheSize);
         }
 
         if (!options.useMemoryCache) {
@@ -237,9 +240,6 @@ public class ImageManager {
             bitmapCache = null;
         }
 
-        HandlerThread bgThread = new HandlerThread("image_manager_bg");
-        bgThread.start();
-        bgHandler = new Handler(bgThread.getLooper());
 
         this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
         this.mainHandler = mainHandler;
@@ -342,13 +342,23 @@ public class ImageManager {
 
     public void pause() {
         if (diskCache != null) {
-            diskCache.stop();
+            bgHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    diskCache.close();
+                }
+            });
         }
     }
 
     public void resume() {
         if (diskCache != null) {
-            diskCache.start();
+            bgHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    diskCache.open();
+                }
+            });
         }
     }
 
@@ -459,24 +469,17 @@ public class ImageManager {
         @Override
         public void run() {
             final boolean isInDiskCache;
-            InputStream is1 = null;
-            InputStream is2 = null;
+            String path = null;
             if (useDiskCache) {
-                is1 = getFromDiskCache(key);
-                is2 = null;
-                if (is1 != null) {
-                    is2 = getFromDiskCache(key);
-                }
-
-                isInDiskCache = is1 != null && is2 != null;
-            } else {
-                isInDiskCache = false;
+                path = getFromDiskCache(key);
             }
+
+            isInDiskCache = path != null;
 
             Bitmap result = null;
             if (isInDiskCache) {
                 try {
-                    result = resizer.loadAsIs(is1, is2);
+                    result = resizer.loadAsIs(path);//resizer.loadAsIs(is1, is2);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -513,17 +516,17 @@ public class ImageManager {
     }
 
 
-    private InputStream getFromDiskCache(int key) {
-        InputStream result = null;
+    private String getFromDiskCache(int key) {
+        String result = null;
         if (diskCache != null) {
-            result = diskCache.get(key);
+            result = diskCache.get(String.valueOf(key));
         }
         return result;
     }
 
     private void putInDiskCache(int key, Bitmap value) {
         if (diskCache != null) {
-            diskCache.put(key, value);
+            diskCache.put(String.valueOf(key), value);
         }
     }
 
