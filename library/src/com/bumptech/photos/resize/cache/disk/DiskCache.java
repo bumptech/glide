@@ -50,7 +50,7 @@ public class DiskCache implements Closeable {
         });
     }
 
-    public void open() {
+    public synchronized void open() {
         if (isOpen) return;
         isOpen = true;
         try {
@@ -61,7 +61,7 @@ public class DiskCache implements Closeable {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (!isOpen) return;
         isOpen = false;
         try {
@@ -71,7 +71,7 @@ public class DiskCache implements Closeable {
         }
     }
 
-    public void put(String key, final Bitmap bitmap) {
+    public synchronized void put(String key, final Bitmap bitmap) {
         if (!isOpen) return;
 
         final String safeKey = sha1Hash(key);
@@ -102,7 +102,7 @@ public class DiskCache implements Closeable {
         }
     }
 
-    public String get(String key) {
+    public synchronized String get(String key) {
         if (!isOpen) return null;
 
         final String safeKey = sha1Hash(key);
@@ -119,12 +119,12 @@ public class DiskCache implements Closeable {
         return inFile.getAbsolutePath();
     }
 
-    public void remove(String key) {
+    public synchronized void remove(String key) {
         if (!isOpen) return;
         delete(sha1Hash(key));
     }
 
-    private void delete(String safeKey) {
+    private synchronized void delete(String safeKey) {
         final File toDelete = getFile(safeKey);
         toDelete.delete();
         try {
