@@ -15,6 +15,7 @@ import android.os.SystemClock;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
 import com.bumptech.photos.resize.cache.disk.DiskCache;
+import com.bumptech.photos.util.Log;
 import com.bumptech.photos.util.Util;
 
 import java.io.File;
@@ -130,19 +131,43 @@ public class ImageManager {
     }
 
     public static File getPhotoCacheDir(Context context, String cacheName) {
-        final String cachePath;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                !Environment.isExternalStorageRemovable()) {
-            cachePath = context.getExternalCacheDir().getPath();
-        } else {
-            cachePath = context.getCacheDir().getPath();
+        String cachePath = null;
+
+        Boolean isExternalStorageRemoveable = null;
+        if (Build.VERSION.SDK_INT >= 9) {
+            isExternalStorageRemoveable = Environment.isExternalStorageRemovable();
         }
 
-        File result = new File(cachePath + File.separatorChar + cacheName);
-        if (!result.exists()) {
-            result.mkdir();
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
+                (isExternalStorageRemoveable != null && !isExternalStorageRemoveable)) {
+            //seems like this can still be null even if the above are true
+            final File externalCacheDir = context.getExternalCacheDir();
+            if (externalCacheDir != null) {
+                cachePath = externalCacheDir.getPath();
+            } else {
+                Log.e("IM: external cache dir is null");
+            }
         }
-        return result;
+
+        if (cachePath == null) {
+            final File internalCacheDir = context.getCacheDir();
+            if (internalCacheDir != null) {
+                cachePath = internalCacheDir.getPath();
+            } else {
+                Log.e("IM: internal cache dir is null");
+            }
+        }
+
+        if (cachePath != null) {
+            File result = new File(cachePath + File.separatorChar + cacheName);
+            if (!result.exists()) {
+                result.mkdir();
+            }
+            return result;
+        } else {
+            Log.d("IM: default disk cache dir is null");
+            return null;
+        }
     }
 
     /**
