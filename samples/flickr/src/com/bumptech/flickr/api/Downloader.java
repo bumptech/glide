@@ -90,7 +90,6 @@ public class Downloader {
             try {
                 final URL targetUrl = new URL(url);
                 urlConnection = (HttpURLConnection) targetUrl.openConnection();
-                urlConnection = (HttpURLConnection) targetUrl.openConnection();
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(false);
                 urlConnection.setUseCaches(false);
