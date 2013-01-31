@@ -8,9 +8,9 @@ import android.graphics.Bitmap;
 import com.bumptech.photos.util.Log;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A cache of Bitmaps made available by size used to manage recycled bitmaps
@@ -26,12 +26,17 @@ public class SizedBitmapCache {
 
     public void put(Bitmap bitmap) {
         final String sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
-        Queue<Bitmap> available = availableBitmaps.get(sizeKey);
-        if (available == null) {
-            available = new LinkedList<Bitmap>();
-            availableBitmaps.put(sizeKey, available);
+        Queue<Bitmap> available;
+        synchronized (availableBitmaps) {
+            available = availableBitmaps.get(sizeKey);
+            if (available == null) {
+                available = new ConcurrentLinkedQueue<Bitmap>();
+                availableBitmaps.put(sizeKey, available);
+            }
         }
 
+
+        //Log.d("SBC: put bitmap key=" + sizeKey + " size=" + available.size() + " maxPerSize=" + maxPerSize);
         if (available.size() < maxPerSize) {
             available.add(bitmap);
         }
@@ -40,7 +45,12 @@ public class SizedBitmapCache {
 
     public Bitmap get(int width, int height) {
         final String sizeKey = getSizeKey(width, height);
-        Queue<Bitmap> available = availableBitmaps.get(sizeKey);
+        final Queue<Bitmap> available;
+
+        synchronized (availableBitmaps) {
+             available = availableBitmaps.get(sizeKey);
+        }
+
         if (available == null || available.size() == 0) {
             Log.d("SBC: missing bitmap for key= " + sizeKey);
             return null;

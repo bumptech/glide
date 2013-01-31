@@ -35,18 +35,13 @@ public class ImageManager {
     private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
 
-    /**
+   /**
      * A class for setting options for an ImageManager
      *
      * Boolean use options for the caches superseed sizes, and invalid * sizes (<= 0) are equivalent to setting the
      * corresponding use option to false.
      */
     public static class Options {
-        /**
-         * @see com.jakewharton.DiskLruCache#open(java.io.File, int, int, long)
-         */
-        public int appVersion = 0;
-
         /**
          * If true caches bitmaps in memory.
          *

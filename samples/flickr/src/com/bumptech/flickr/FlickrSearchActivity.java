@@ -48,7 +48,10 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
         ImageManager.Options options = new ImageManager.Options();
         options.maxPerSize = 40;
+        options.useDiskCache = false;
+        options.useMemoryCache = false;
         options.maxDiskCacheSize = 50 * 1024 * 1024;
+        options.maxMemorySize = 2 * 1024 * 1024;
         imageManager = new ImageManager(this, options);
 
         final Resources res = getResources();

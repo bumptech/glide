@@ -25,8 +25,8 @@ import java.util.Queue;
  */
 public class ImageResizer {
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
-    private Queue<byte[]> tempQueue = new LinkedList<byte[]>();
-    private SizedBitmapCache bitmapCache = null;
+    private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
+    private final SizedBitmapCache bitmapCache;
     private final BitmapFactory.Options defaultOptions;
 
     public static BitmapFactory.Options getDefaultOptions() {
@@ -69,8 +69,6 @@ public class ImageResizer {
             this.defaultOptions = defaultOptions;
         }
     }
-
-
 
     /**
      * Load the image at the given path at approximately the given dimensions, maintaining the original proportions,
@@ -330,10 +328,13 @@ public class ImageResizer {
     }
 
     private byte[] getTempBytes() {
-        final byte[] result;
-        if (tempQueue.size() > 0) {
-            result = tempQueue.remove();
-        } else {
+        byte[] result = null;
+        synchronized (tempQueue) {
+            if (tempQueue.size() > 0) {
+                result = tempQueue.remove();
+            }
+        }
+        if (result == null) {
             Log.d("IR: created temp bytes");
             result = new byte[16 * 1024];
         }
@@ -341,13 +342,11 @@ public class ImageResizer {
     }
 
     private void releaseTempBytes(byte[]... byteArrays) {
-        for (byte[] bytes : byteArrays) {
-            releaseTempBytes(bytes);
+        synchronized (tempQueue) {
+            for (byte[] bytes : byteArrays) {
+                tempQueue.add(bytes);
+            }
         }
-    }
-
-    private void releaseTempBytes(byte[] bytes) {
-        tempQueue.add(bytes);
     }
 
     private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to) {
