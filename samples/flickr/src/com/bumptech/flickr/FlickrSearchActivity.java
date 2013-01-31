@@ -48,10 +48,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
         ImageManager.Options options = new ImageManager.Options();
         options.maxPerSize = 40;
-        options.useDiskCache = false;
-        options.useMemoryCache = false;
         options.maxDiskCacheSize = 50 * 1024 * 1024;
-        options.maxMemorySize = 2 * 1024 * 1024;
         imageManager = new ImageManager(this, options);
 
         final Resources res = getResources();
@@ -68,7 +65,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                     executeSearch();
                     return true;
                 }
-                return false;  //To change body of implemented methods use File | Settings | File Templates.
+                return false;
             }
         });
 
@@ -150,15 +147,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        imageManager.resume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        imageManager.pause();
+    protected void onDestroy() {
+        super.onDestroy();
+        imageManager.shutdown();
     }
 
     private static class TabListener implements ActionBar.TabListener {
