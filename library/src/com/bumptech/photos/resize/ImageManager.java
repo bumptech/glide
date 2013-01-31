@@ -528,7 +528,6 @@ public class ImageManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        acquireBitmap(finalResult);
                         putInMemoryCache(key, finalResult);
                         cb.onLoadCompleted(finalResult);
                     }
@@ -565,6 +564,7 @@ public class ImageManager {
 
     private void putInMemoryCache(int key, Bitmap bitmap) {
         if (memoryCache != null) {
+            acquireBitmap(bitmap);
             memoryCache.put(key, bitmap);
         }
     }
