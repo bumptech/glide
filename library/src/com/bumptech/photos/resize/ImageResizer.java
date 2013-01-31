@@ -285,10 +285,9 @@ public class ImageResizer {
     }
 
     private Bitmap decodeStream(InputStream is, BitmapFactory.Options decodeBitmapOptions) {
-        byte[] tempStorage = getTempBytes();
-        byte[] bufStorage = getTempBytes();
-        ReycleableBufferedInputStream bis = new ReycleableBufferedInputStream(is, bufStorage);
-        decodeBitmapOptions.inTempStorage = tempStorage;
+        final byte[][] tempBytes = getTempBytes();
+        ReycleableBufferedInputStream bis = new ReycleableBufferedInputStream(is, tempBytes[0]);
+        decodeBitmapOptions.inTempStorage = tempBytes[1];
         Bitmap result = null;
         try {
             result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
@@ -298,7 +297,7 @@ public class ImageResizer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            releaseTempBytes(tempStorage, bufStorage);
+            releaseTempBytes(tempBytes);
         }
         return result;
     }
@@ -327,21 +326,22 @@ public class ImageResizer {
         return result;
     }
 
-    private byte[] getTempBytes() {
-        byte[] result = null;
+    private byte[][] getTempBytes() {
+        byte[][] result = new byte[2][];
         synchronized (tempQueue) {
-            if (tempQueue.size() > 0) {
-                result = tempQueue.remove();
+            for (int i = 0; i < result.length; i++) {
+                if (tempQueue.size() > 0) {
+                    result[i] = tempQueue.remove();
+                } else {
+                    Log.d("IR: created temp bytes");
+                    result[i] = new byte[16 * 1024];
+                }
             }
-        }
-        if (result == null) {
-            Log.d("IR: created temp bytes");
-            result = new byte[16 * 1024];
         }
         return result;
     }
 
-    private void releaseTempBytes(byte[]... byteArrays) {
+    private void releaseTempBytes(byte[][] byteArrays) {
         synchronized (tempQueue) {
             for (byte[] bytes : byteArrays) {
                 tempQueue.add(bytes);

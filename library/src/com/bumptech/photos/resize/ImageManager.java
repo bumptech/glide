@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.SystemClock;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
 import com.bumptech.photos.resize.cache.disk.DiskCache;
@@ -21,6 +20,9 @@ import com.bumptech.photos.util.Util;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
@@ -101,8 +103,9 @@ public class ImageManager {
 
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
-    private final Handler mainHandler;
+    private final Handler mainHandler = new Handler();
     private final Handler bgHandler;
+    private final ExecutorService executor;
     private final LruPhotoCache memoryCache;
     private final ImageResizer resizer;
     private final Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
@@ -188,7 +191,7 @@ public class ImageManager {
      * @param options The specified options
      */
     public ImageManager(Context context, Options options) {
-        this(context, new Handler(), options);
+        this(context, Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors())), options);
     }
 
     /**
@@ -198,11 +201,11 @@ public class ImageManager {
      * @param context A Context used once to find or create a directory for the disk cache. This reference will not
      *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
      *                in Activities.
-     * @param mainHandler A Handler to the UI thread.
-     * @param options The specified options
+     * @param resizeService An executor service that will be used to resize photos
+     * @param options The specified option
      */
-    public ImageManager(Context context, Handler mainHandler, Options options) {
-        this(context, getPhotoCacheDir(context), mainHandler, options);
+    public ImageManager(Context context, ExecutorService resizeService, Options options) {
+        this(context, getPhotoCacheDir(context), resizeService, options);
     }
 
     /**
@@ -214,13 +217,14 @@ public class ImageManager {
      *                in Activities.
      * @param diskCacheDir The directory containing the disk cache or in which to create a disk cache if one does not
      *                     already exist
-     * @param mainHandler A Handler to the UI thread.
+     * @param resizeService An executor service that will be used to resize photos
      * @param options The specified options
      */
-    public ImageManager(Context context, File diskCacheDir, Handler mainHandler, Options options) {
-        HandlerThread bgThread = new HandlerThread("image_manager_bg");
+    public ImageManager(Context context, File diskCacheDir, ExecutorService resizeService, Options options) {
+        HandlerThread bgThread = new HandlerThread("bg_thread");
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
+        executor = resizeService;
 
         isBitmapRecyclingEnabled = options.recycleBitmaps && CAN_RECYCLE;
 
@@ -262,7 +266,6 @@ public class ImageManager {
 
 
         this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
-        this.mainHandler = mainHandler;
     }
 
     /**
@@ -360,28 +363,6 @@ public class ImageManager {
         });
     }
 
-    public void pause() {
-        if (diskCache != null) {
-            bgHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    diskCache.close();
-                }
-            });
-        }
-    }
-
-    public void resume() {
-        if (diskCache != null) {
-            bgHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    diskCache.open();
-                }
-            });
-        }
-    }
-
     /**
      * Notify the ImageManager that a bitmap it loaded is not going to be displayed and can go into a queue to be
      * reused. Does nothing if recycling is disabled or impossible.
@@ -391,16 +372,14 @@ public class ImageManager {
     public void rejectBitmap(final Bitmap b) {
         if (!isBitmapRecyclingEnabled) return;
 
-        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
-        if (currentCount == null || currentCount == 0) {
-            bitmapReferenceCounter.remove(b.hashCode());
-            //can only put or take from bitmap cache on one thread
-            bgHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    bitmapCache.put(b);
-                }
-            });
+        final Bitmap bitmap = b;
+        final int hashCode = b.hashCode();
+        synchronized (bitmapReferenceCounter) {
+            Integer currentCount = bitmapReferenceCounter.get(hashCode);
+            if (currentCount == null || currentCount == 0) {
+                bitmapReferenceCounter.remove(hashCode);
+                bitmapCache.put(bitmap);
+            }
         }
     }
 
@@ -415,11 +394,14 @@ public class ImageManager {
     public void acquireBitmap(Bitmap b) {
         if (!isBitmapRecyclingEnabled) return;
 
-        Integer currentCount = bitmapReferenceCounter.get(b.hashCode());
-        if (currentCount == null) {
-            currentCount = 0;
+        final int hashCode = b.hashCode();
+        synchronized (bitmapReferenceCounter) {
+            Integer currentCount = bitmapReferenceCounter.get(hashCode);
+            if (currentCount == null) {
+                currentCount = 0;
+            }
+            bitmapReferenceCounter.put(hashCode, currentCount + 1);
         }
-        bitmapReferenceCounter.put(b.hashCode(), currentCount + 1);
     }
 
     /**
@@ -433,31 +415,35 @@ public class ImageManager {
     public void releaseBitmap(final Bitmap b) {
         if (!isBitmapRecyclingEnabled) return;
 
-        Integer currentCount = bitmapReferenceCounter.get(b.hashCode()) - 1;
-        if (currentCount == 0) {
-            bitmapReferenceCounter.remove(b.hashCode());
-            //can only put or take from bitmap cache on one thread
-            bgHandler.postAtFrontOfQueue(new Runnable() {
-                @Override
-                public void run() {
-                    bitmapCache.put(b);
-                }
-            });
-        } else {
-            bitmapReferenceCounter.put(b.hashCode(), currentCount);
+        final Bitmap bitmap = b;
+        final int hash = b.hashCode();
+        synchronized (bitmapReferenceCounter) {
+            Integer currentCount = bitmapReferenceCounter.get(hash) - 1;
+            if (currentCount == 0) {
+                bitmapReferenceCounter.remove(hash);
+                bitmapCache.put(bitmap);
+            } else {
+                bitmapReferenceCounter.put(hash, currentCount);
+            }
         }
     }
 
     public void cancelTask(Object token) {
-        if (token != null)
-            bgHandler.removeCallbacksAndMessages(token);
+        if (token != null) {
+            ImageManagerJob job = (ImageManagerJob) token;
+            job.cancel();
+        }
     }
 
+    public void shutdown() {
+        executor.shutdown();
+        bgHandler.getLooper().quit();
+    }
 
     private Object runJob(int key,final LoadedCallback cb, final ImageManagerJob job) {
-        final Object token = cb;
+        final Object token = job;
         if (!returnFromCache(key, cb)) {
-            bgHandler.postAtTime(job, token, SystemClock.uptimeMillis());
+            job.execute();
         }
         return token;
     }
@@ -475,6 +461,8 @@ public class ImageManager {
         private final int key;
         private final LoadedCallback cb;
         private final boolean useDiskCache;
+        private Future future = null;
+        private volatile boolean cancelled = false;
 
         public ImageManagerJob(int key, LoadedCallback cb) {
             this(key, cb, true);
@@ -486,8 +474,26 @@ public class ImageManager {
             this.useDiskCache = useDiskCache;
         }
 
+        public void execute() {
+            bgHandler.post(this);
+        }
+
+        public void cancel() {
+            if (cancelled) return;
+            cancelled = true;
+
+            if (bgHandler != null) {
+                bgHandler.removeCallbacks(this);
+            }
+            if (future != null) {
+                future.cancel(false);
+            }
+        }
+
         @Override
         public void run() {
+            if (cancelled) return;
+
             final boolean isInDiskCache;
             String path = null;
             if (useDiskCache) {
@@ -499,36 +505,48 @@ public class ImageManager {
             Bitmap result = null;
             if (isInDiskCache) {
                 try {
-                    result = resizer.loadAsIs(path);//resizer.loadAsIs(is1, is2);
+                    result = resizer.loadAsIs(path);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
             if (result == null) {
+                if (cancelled) return;
                 try {
-                    result = resizeIfNotFound();
+                    future = executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            Bitmap result = resizeIfNotFound();
+                            finishResize(result, isInDiskCache);
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                     cb.onLoadFailed(e);
                 }
+            } else {
+                finishResize(result, isInDiskCache);
             }
+        }
 
+        private void finishResize(Bitmap result, boolean isInDiskCache) {
             if (result != null) {
                 if (useDiskCache && !isInDiskCache) {
                     putInDiskCache(key, result);
                 }
 
                 final Bitmap finalResult = result;
+                putInMemoryCache(key, finalResult);
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        putInMemoryCache(key, finalResult);
                         cb.onLoadCompleted(finalResult);
                     }
 
                 });
             }
+
         }
 
         protected abstract Bitmap resizeIfNotFound();

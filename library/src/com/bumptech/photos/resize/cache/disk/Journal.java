@@ -72,19 +72,12 @@ public class Journal {
         }
     }
 
-    public void open() throws IOException {
+    public synchronized void open() throws IOException {
         journalFile.createNewFile();
         journalWriter = new BufferedWriter(new FileWriter(journalFile, true));
         if (memoryJournal == null) {
             memoryJournal = new MemoryJournal(maxCacheSize, evictionListener);
             replayFromDisk();
-        }
-    }
-
-    public void close() throws IOException {
-        if (journalWriter != null) {
-            journalWriter.close();
-            journalWriter = null;
         }
     }
 
@@ -155,17 +148,17 @@ public class Journal {
         }
     }
 
-    public void put(String safeKey, int size) throws IOException {
+    public synchronized void put(String safeKey, int size) throws IOException {
         writeLine(buildLine(Action.SET, safeKey, String.valueOf(size)));
         memoryJournal.put(safeKey, size);
     }
 
-    public void get(String safeKey) throws IOException {
+    public synchronized void get(String safeKey) throws IOException {
         writeLine(buildLine(Action.GET, safeKey));
         memoryJournal.get(safeKey);
     }
 
-    public void delete(String safeKey) throws IOException {
+    public synchronized void delete(String safeKey) throws IOException {
         writeLine(buildLine(Action.DEL, safeKey));
         memoryJournal.remove(safeKey);
     }

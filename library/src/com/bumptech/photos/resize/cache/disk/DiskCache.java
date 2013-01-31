@@ -7,7 +7,6 @@ package com.bumptech.photos.resize.cache.disk;
 import android.graphics.Bitmap;
 
 import java.io.BufferedOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -16,6 +15,10 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,13 +27,14 @@ import java.security.NoSuchAlgorithmException;
  * Time: 9:20 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DiskCache implements Closeable {
+public class DiskCache {
     private static String JOURNAL_FILE_NAME = "JOURNAL";
     private static DiskCache CACHE = null;
 
     private final File outputDir;
     private Journal journal;
     private boolean isOpen = false;
+    private Map<String, ReentrantLock> lockMap = new HashMap<String, ReentrantLock>();
 
     public static DiskCache get(File diskCacheDir, int maxCacheSize) {
         if (CACHE == null) {
@@ -50,7 +54,7 @@ public class DiskCache implements Closeable {
         });
     }
 
-    public synchronized void open() {
+    private void open() {
         if (isOpen) return;
         isOpen = true;
         try {
@@ -60,77 +64,100 @@ public class DiskCache implements Closeable {
         }
     }
 
-    @Override
-    public synchronized void close() {
-        if (!isOpen) return;
-        isOpen = false;
+    public void put(String key, final Bitmap bitmap) {
+        synchronized (this) {
+            if (!isOpen) open();
+        }
+
+        final String safeKey = sha1Hash(key);
+        final Lock lock = acquireLockFor(safeKey);
+        lock.lock();
         try {
-            journal.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            final File outFile = getFile(safeKey);
+
+            OutputStream out = null;
+            try {
+                if (!outFile.exists()) outFile.createNewFile();
+
+                out = new BufferedOutputStream(new FileOutputStream(outFile));
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e1) { }
+                }
+            }
+            try {
+                journal.put(safeKey, (int) outFile.length());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
-    public synchronized void put(String key, final Bitmap bitmap) {
-        if (!isOpen) return;
-
-        final String safeKey = sha1Hash(key);
-
-        final File outFile = getFile(safeKey);
-
-        OutputStream out = null;
-        try {
-            if (!outFile.exists()) outFile.createNewFile();
-
-            out = new BufferedOutputStream(new FileOutputStream(outFile));
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e1) { }
+    private Lock acquireLockFor(String safeKey) {
+        ReentrantLock lock;
+        synchronized (lockMap) {
+            lock = lockMap.get(safeKey);
+            if (lock == null) {
+                lock = new ReentrantLock();
+                lockMap.put(safeKey, lock);
             }
         }
-        try {
-            journal.put(safeKey, (int) outFile.length());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return lock;
     }
 
-    public synchronized String get(String key) {
-        if (!isOpen) return null;
+    public String get(String key) {
+        synchronized (this) {
+            if (!isOpen) open();
+        }
 
         final String safeKey = sha1Hash(key);
-
-        final File inFile = getFile(safeKey);
-        if (!inFile.exists()) return null;
-
+        Lock lock = acquireLockFor(safeKey);
+        lock.lock();
         try {
-            journal.get(safeKey);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            final File inFile = getFile(safeKey);
+            if (!inFile.exists()) return null;
 
-        return inFile.getAbsolutePath();
+            try {
+                journal.get(safeKey);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return inFile.getAbsolutePath();
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public synchronized void remove(String key) {
-        if (!isOpen) return;
+    public void remove(String key) {
+        synchronized (this) {
+            if (!isOpen) open();
+        }
         delete(sha1Hash(key));
     }
 
-    private synchronized void delete(String safeKey) {
-        final File toDelete = getFile(safeKey);
-        toDelete.delete();
+    private void delete(String safeKey) {
+        final Lock lock = acquireLockFor(safeKey);
+        lock.lock();
         try {
-            journal.delete(safeKey);
-        } catch (IOException e) {
-            e.printStackTrace();
+            final File toDelete = getFile(safeKey);
+            toDelete.delete();
+            try {
+                journal.delete(safeKey);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
