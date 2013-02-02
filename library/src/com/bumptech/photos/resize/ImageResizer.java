@@ -79,7 +79,7 @@ public class ImageResizer {
      * @param height The height the final image will fill
      * @return The resized image
      */
-    public Bitmap resizeCenterCrop(final String path, final int width, final int height){
+    public Bitmap centerCrop(final String path, final int width, final int height){
         final Bitmap streamed = loadApproximate(path, width, height);
 
         if (streamed == null) return null;

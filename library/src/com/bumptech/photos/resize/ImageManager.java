@@ -338,7 +338,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
             protected Bitmap resizeIfNotFound() {
-                return resizer.resizeCenterCrop(path, width, height);
+                return resizer.centerCrop(path, width, height);
             }
         });
     }
