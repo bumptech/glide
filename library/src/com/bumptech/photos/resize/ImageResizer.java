@@ -81,13 +81,11 @@ public class ImageResizer {
      */
     public Bitmap centerCrop(final String path, final int width, final int height){
         final Bitmap streamed = loadApproximate(path, width, height);
+        return centerCrop(getRecycled(width, height), streamed, width, height);
+    }
 
-        if (streamed == null) return null;
-
-        if (streamed.getWidth() == width && streamed.getHeight() == height) {
-            return streamed;
-        }
-
+    public Bitmap resizeCenterCrop(InputStream is1, InputStream is2, int width, int height) {
+        final Bitmap streamed = loadApproximate(is1, is2, width, height);
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
@@ -103,23 +101,14 @@ public class ImageResizer {
      */
     public Bitmap fitInSpace(final String path, final int width, final int height){
         final Bitmap streamed = loadApproximate(path, width > height ? 1 : width, height > width ? 1 : height);
-
-        if (streamed == null) return null;
-
         return fitInSpace(streamed, width, height);
     }
 
-    /**
-     * Load the image at the given path at nearly the given dimensions maintaining the original proportions. Will also
-     * rotate the image according to the orientation in the images EXIF data if available.
-     *
-     * from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
-     *
-     * @param path The path where the image is stored
-     * @param width The target width
-     * @param height The target height
-     * @return A Bitmap containing the image
-     */
+    public Bitmap fitInSpace(InputStream is1, InputStream is2, int width, int height) {
+        final Bitmap streamed = loadApproximate(is1, is2, width > height ? 1 : width, height > width ? 1 : height);
+        return fitInSpace(streamed, width, height);
+    }
+
     public Bitmap loadApproximate(String path, int width, int height) {
         int orientation = getOrientation(path);
         if(orientation == 90 || orientation == 270) {
@@ -130,7 +119,33 @@ public class ImageResizer {
             height = w;
         }
 
-        final int[] dimens = getDimensions(path);
+        Bitmap result = null;
+        try {
+            result = loadApproximate(new FileInputStream(path), new FileInputStream(path), width, height);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (orientation != 0) {
+            result = rotateImage(result, orientation);
+        }
+        return result;
+    }
+
+    /**
+     * Load the image at the given path at nearly the given dimensions maintaining the original proportions. Will also
+     * rotate the image according to the orientation in the images EXIF data if available.
+     *
+     * from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
+     *
+     * @param is1 An inputStream for the image. Can't be is2
+     * @param is2 An inputStream for the image. Can't be is1
+     * @param width The target width
+     * @param height The target height
+     * @return A Bitmap containing the image
+     */
+    public Bitmap loadApproximate(InputStream is1, InputStream is2, int width, int height) {
+        final int[] dimens = getDimensions(is1);
         final int originalWidth = dimens[0];
         final int originalHeight = dimens[1];
 
@@ -140,11 +155,7 @@ public class ImageResizer {
         final BitmapFactory.Options decodeBitmapOptions = getOptions();
         decodeBitmapOptions.inSampleSize = sampleSize;
 
-        Bitmap result = decodeStream(path, decodeBitmapOptions);
-
-        if (orientation != 0) {
-            result = rotateImage(result, orientation);
-        }
+        Bitmap result = decodeStream(is2, decodeBitmapOptions);
 
         return result;
     }
@@ -162,7 +173,7 @@ public class ImageResizer {
     public Bitmap loadAsIs(final InputStream is1, final InputStream is2) {
         int[] dimens = new int[] {-1, -1};
         try {
-            dimens = getDimension(is1);
+            dimens = getDimensions(is1);
         } finally {
             try {
                 is1.close();
@@ -257,7 +268,7 @@ public class ImageResizer {
      * @param is The InputStream representing the image
      * @return an array containing the dimensions of the image in the form {width, height}
      */
-    private int[] getDimension(InputStream is) {
+    private int[] getDimensions(InputStream is) {
         final BitmapFactory.Options decodeBoundsOptions = getOptions();
         decodeBoundsOptions.inJustDecodeBounds = true;
         decodeStream(is, decodeBoundsOptions);
@@ -393,7 +404,9 @@ public class ImageResizer {
      * @return The resized Bitmap (will be recycled if recycled is not null)
      */
     public static Bitmap centerCrop(Bitmap recycled, Bitmap toCrop, int width, int height) {
-        if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
+        if (toCrop == null) {
+            return null;
+        } else if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
             return toCrop;
         }
         //from ImageView/Bitmap.createScaledBitmap
@@ -506,6 +519,8 @@ public class ImageResizer {
      * given dimensions and toFit fits within the given dimensions
      */
     public static Bitmap fitInSpace(Bitmap toFit, int width, int height){
+        if (toFit == null) return null;
+
         if (height > width){
             return shrinkToWidth(toFit, width);
         } else {
