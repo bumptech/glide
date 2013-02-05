@@ -84,7 +84,7 @@ public class ImageResizer {
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
-    public Bitmap resizeCenterCrop(InputStream is1, InputStream is2, int width, int height) {
+    public Bitmap centerCrop(InputStream is1, InputStream is2, int width, int height) {
         final Bitmap streamed = loadApproximate(is1, is2, width, height);
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
