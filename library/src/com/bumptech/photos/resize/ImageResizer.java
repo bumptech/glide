@@ -425,7 +425,13 @@ public class ImageResizer {
 
         m.setScale(scale, scale);
         m.postTranslate((int) dx + 0.5f, (int) dy + 0.5f);
-        Bitmap result = recycled != null ? recycled : Bitmap.createBitmap(width, height, toCrop.getConfig());
+        final Bitmap result;
+        if (recycled != null) {
+            result = recycled;
+        } else {
+            result = Bitmap.createBitmap(width, height, toCrop.getConfig() == null ?
+                                                            Bitmap.Config.ARGB_8888 : toCrop.getConfig());
+        };
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
         //only if scaling up
