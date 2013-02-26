@@ -36,7 +36,7 @@ public class DiskCache {
     private boolean isOpen = false;
     private Map<String, ReentrantLock> lockMap = new HashMap<String, ReentrantLock>();
 
-    public static DiskCache get(File diskCacheDir, int maxCacheSize) {
+    public static synchronized DiskCache get(File diskCacheDir, int maxCacheSize) {
         if (CACHE == null) {
             CACHE = new DiskCache(diskCacheDir, maxCacheSize);
         }
