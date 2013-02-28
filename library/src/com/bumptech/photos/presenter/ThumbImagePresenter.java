@@ -135,6 +135,11 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
         return fullPresenter.getImageView();
     }
 
+    public void setDimens(int width, int height) {
+        fullPresenter.setDimens(width, height);
+        thumbPresenter.setDimens(width, height);
+    }
+
     /**
      * Calls the corresponding method on both image presenters
      *

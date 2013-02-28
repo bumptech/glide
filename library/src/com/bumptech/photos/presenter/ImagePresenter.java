@@ -163,6 +163,7 @@ public class ImagePresenter<T> {
     private final ImagePresenterCoordinator coordinator;
     protected final ImageView imageView;
 
+    private boolean manualDimensSet = false;
     private int height = 0;
     private int width = 0;
 
@@ -371,7 +372,15 @@ public class ImagePresenter<T> {
     }
 
     private void getDimens() {
-        imageView.post(getDimens);
+        if (!manualDimensSet) {
+            imageView.post(getDimens);
+        }
+    }
+
+    public void setDimens(int width, int height) {
+        manualDimensSet = true;
+        this.width = width;
+        this.height = height;
     }
 
     /**
