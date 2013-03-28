@@ -20,7 +20,9 @@ public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
     @Override
     protected final void doFetchImage(String path, T model, int width, int height, ImageReadyCallback cb) {
         clear();
-        loadToken = doFetchImage(path, width, height, cb);
+        if (path != null) {
+            loadToken = doFetchImage(path, width, height, cb);
+        }
     }
 
     protected abstract Object doFetchImage(String path, int width, int height, ImageReadyCallback cb);
