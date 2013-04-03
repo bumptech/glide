@@ -37,7 +37,7 @@ public class ImageManager {
     private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
 
-   /**
+    /**
      * A class for setting options for an ImageManager
      *
      * Boolean use options for the caches superseed sizes, and invalid * sizes (<= 0) are equivalent to setting the
@@ -71,6 +71,11 @@ public class ImageManager {
          */
         public int maxDiskCacheSize;
 
+       /**
+        * The output format used to store bitmaps on disk in the disk cache
+        */
+        public Bitmap.CompressFormat diskCacheFormat = Bitmap.CompressFormat.JPEG;
+
         /**
          * If true, will attempt to recycle Bitmaps and all loaded Bitmaps will be mutable. If true and a memory cache
          * is used, the memory cache size should be decreased since the Bitmap cache used to recycle Bitmaps will
@@ -99,6 +104,7 @@ public class ImageManager {
          * Config and dither for example can be set
          */
         public BitmapFactory.Options bitmapDecodeOptions = ImageResizer.getDefaultOptions();
+
     }
 
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
@@ -112,6 +118,7 @@ public class ImageManager {
     private final SizedBitmapCache bitmapCache;
     private final DiskCache diskCache;
     private final boolean isBitmapRecyclingEnabled;
+    private final Bitmap.CompressFormat diskCacheFormat;
 
     private enum ResizeType {
         CENTER_CROP,
@@ -241,6 +248,8 @@ public class ImageManager {
         } else {
             diskCache = DiskCache.get(diskCacheDir, options.maxDiskCacheSize);
         }
+
+        diskCacheFormat = options.diskCacheFormat;
 
         if (!options.useMemoryCache) {
             memoryCache = null;
@@ -563,7 +572,7 @@ public class ImageManager {
 
     private void putInDiskCache(int key, Bitmap value) {
         if (diskCache != null) {
-            diskCache.put(String.valueOf(key), value);
+            diskCache.put(String.valueOf(key), value, diskCacheFormat);
         }
     }
 

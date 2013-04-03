@@ -64,7 +64,7 @@ public class DiskCache {
         }
     }
 
-    public void put(String key, final Bitmap bitmap) {
+    public void put(String key, final Bitmap bitmap, Bitmap.CompressFormat format) {
         synchronized (this) {
             if (!isOpen) open();
         }
@@ -80,7 +80,7 @@ public class DiskCache {
                 if (!outFile.exists()) outFile.createNewFile();
 
                 out = new BufferedOutputStream(new FileOutputStream(outFile));
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                bitmap.compress(format, 100, out);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
