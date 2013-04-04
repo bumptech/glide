@@ -8,11 +8,11 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import com.bumptech.photos.util.Log;
-import com.bumptech.photos.loader.path.PathLoader;
 import com.bumptech.photos.loader.image.ImageLoader;
+import com.bumptech.photos.loader.path.PathLoader;
 
 import java.lang.ref.WeakReference;
 
@@ -174,9 +174,8 @@ public class ImagePresenter<T> {
     private final ImagePresenterCoordinator coordinator;
     protected final ImageView imageView;
 
-    private boolean manualDimensSet = false;
-    private int height = 0;
-    private int width = 0;
+    private int lastWidth = 0;
+    private int lastHeight = 0;
 
     private Handler handler = new Handler();
 
@@ -189,13 +188,12 @@ public class ImagePresenter<T> {
     private final Runnable getDimens = new Runnable() {
         @Override
         public void run() {
-            if (imageView.getWidth() == width && imageView.getHeight() == height) return;
+            final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+            if (layoutParams.width == lastWidth && layoutParams.height == lastHeight) return;
 
-            width = imageView.getWidth();
-            height = imageView.getHeight();
-//            if (pendingLoad != null)
-//                Log.d("IP: getDimens width=" + width + " height=" + height);
-            if (width != 0 && height != 0) {
+            lastWidth = layoutParams.width;
+            lastHeight = layoutParams.height;
+            if (lastWidth != 0 && lastHeight != 0) {
                 postPendingLoad();
             }
         }
@@ -238,6 +236,9 @@ public class ImagePresenter<T> {
         this.coordinator = builder.coordinator;
         this.imageSetCallback = builder.imageSetCallback;
         imageView.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(imageView, ImagePresenter.this));
+        ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+        lastWidth = layoutParams.width;
+        lastHeight = layoutParams.height;
     }
 
     /**
@@ -270,11 +271,10 @@ public class ImagePresenter<T> {
         currentModel = model;
         isImageSet = false;
 
-        if (width == 0 || height == 0) {
+        if (getWidth() == 0 || getHeight() == 0) {
             pendingLoad = new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("IP: pendingLoad run width=" + width + " height=" + height);
                     fetchPath(model, loadCount);
                     pendingLoad = null;
                 }
@@ -325,7 +325,7 @@ public class ImagePresenter<T> {
      * @return The width of the wrapped {@link android.widget.ImageView}
      */
     public int getWidth() {
-        return width;
+        return imageView.getLayoutParams().width;
     }
 
     /**
@@ -335,7 +335,7 @@ public class ImagePresenter<T> {
      * @return The width of the wrapped {@link android.widget.ImageView }
      */
     public int getHeight() {
-        return height;
+        return imageView.getLayoutParams().height;
     }
 
     private void postPendingLoad() {
@@ -365,7 +365,7 @@ public class ImagePresenter<T> {
     }
 
     private void fetchImage(final String path, T model, final int loadCount) {
-        imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
+        imageToken = imageLoader.fetchImage(path, model, getWidth(), getHeight(), new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
@@ -378,20 +378,14 @@ public class ImagePresenter<T> {
             }
 
             @Override
-            public void onError(Exception e) { }
+            public void onError(Exception e) {
+            }
         });
     }
 
     private void getDimens() {
-        if (!manualDimensSet) {
-            imageView.post(getDimens);
-        }
-    }
-
-    public void setDimens(int width, int height) {
-        manualDimensSet = true;
-        this.width = width;
-        this.height = height;
+        imageView.removeCallbacks(getDimens);
+        imageView.post(getDimens);
     }
 
     /**
@@ -417,18 +411,30 @@ public class ImagePresenter<T> {
 
         private final WeakReference<ImageView> imageViewRef;
         private final WeakReference<ImagePresenter> imagePresenterRef;
+        private int lastWidth = 0;
+        private int lastHeight = 0;
 
-        public SizeObserver(ImageView imageVew, ImagePresenter imagePresenter) {
-            imageViewRef = new WeakReference<ImageView>(imageVew);
+        public SizeObserver(ImageView imageView, ImagePresenter imagePresenter) {
+            imageViewRef = new WeakReference<ImageView>(imageView);
             imagePresenterRef = new WeakReference<ImagePresenter>(imagePresenter);
+            ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+            lastWidth = layoutParams.width;
+            lastHeight = layoutParams.height;
         }
 
         @Override
         public void onGlobalLayout() {
             ImageView imageView = imageViewRef.get();
             ImagePresenter presenter = imagePresenterRef.get();
-            if (imageView != null && presenter != null && imageView.getWidth() > 0 && imageView.getHeight() > 0) {
-                presenter.getDimens();
+
+            if (presenter != null && imageView != null) {
+                final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+                if (layoutParams.width > 0 && layoutParams.height > 0 &&
+                        (layoutParams.width != lastWidth || layoutParams.height != lastHeight)) {
+                    lastWidth = layoutParams.width;
+                    lastHeight = layoutParams.height;
+                    presenter.getDimens();
+                }
             }
         }
     }
