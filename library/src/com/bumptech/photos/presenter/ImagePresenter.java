@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -28,6 +29,7 @@ import java.lang.ref.WeakReference;
  *            as a String containing a path or a complex data type.
  */
 public class ImagePresenter<T> {
+
 
     /**
      * A builder for an {@link ImagePresenter}. {@link Builder ImagePresenter.Builder#setImageView(android.widget.ImageView)},
@@ -161,8 +163,6 @@ public class ImagePresenter<T> {
         }
     }
 
-    private static final String PENDING_LOAD_TOKEN = "pending_load";
-    private static final int PENDING_LOAD_DELAY = 100; //60 fps = 1000/60 = 16.67 ms
 
     private Object pathToken;
     private Object imageToken;
@@ -174,31 +174,12 @@ public class ImagePresenter<T> {
     private final ImagePresenterCoordinator coordinator;
     protected final ImageView imageView;
 
-    private int lastWidth = 0;
-    private int lastHeight = 0;
-
-    private Handler handler = new Handler();
-
     private T currentModel;
     private int currentCount;
 
     private boolean isImageSet = false;
     private boolean loadedFromCache = false;
-
-    private final Runnable getDimens = new Runnable() {
-        @Override
-        public void run() {
-            final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-            if (layoutParams.width == lastWidth && layoutParams.height == lastHeight) return;
-
-            lastWidth = layoutParams.width;
-            lastHeight = layoutParams.height;
-            if (lastWidth != 0 && lastHeight != 0) {
-                postPendingLoad();
-            }
-        }
-    };
-    private Runnable pendingLoad = null;
+    private final SizeDeterminer sizeDeterminer;
 
     /**
      * An interface used to coordinate multiple {@link ImagePresenter} objects acting on the same view
@@ -235,10 +216,7 @@ public class ImagePresenter<T> {
         }
         this.coordinator = builder.coordinator;
         this.imageSetCallback = builder.imageSetCallback;
-        imageView.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(imageView, ImagePresenter.this));
-        ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-        lastWidth = layoutParams.width;
-        lastHeight = layoutParams.height;
+        sizeDeterminer = new SizeDeterminer(imageView);
     }
 
     /**
@@ -271,18 +249,12 @@ public class ImagePresenter<T> {
         currentModel = model;
         isImageSet = false;
 
-        if (getWidth() == 0 || getHeight() == 0) {
-            pendingLoad = new Runnable() {
-                @Override
-                public void run() {
-                    fetchPath(model, loadCount);
-                    pendingLoad = null;
-                }
-            };
-            getDimens();
-        } else {
-            fetchPath(model, loadCount);
-        }
+        sizeDeterminer.getSize(new SizeDeterminer.SizeReadyCallback() {
+            @Override
+            public void onSizeReady(int width, int height) {
+                fetchPath(model, width, height, loadCount);
+            }
+        });
 
         loadedFromCache = false;
 
@@ -318,44 +290,13 @@ public class ImagePresenter<T> {
         imageLoader.clear();
     }
 
-    /**
-     * Returns the current calculated width of the wrapped view. Will be 0 if the presenter has not yet calcualted a
-     * width. May change at any time
-     *
-     * @return The width of the wrapped {@link android.widget.ImageView}
-     */
-    public int getWidth() {
-        return imageView.getLayoutParams().width;
-    }
-
-    /**
-     * Returns the current calculated height of the wrapped view. Will be 0 if the presenter has not yet calculated a
-     * height. May change at any time.
-     *
-     * @return The width of the wrapped {@link android.widget.ImageView }
-     */
-    public int getHeight() {
-        return imageView.getLayoutParams().height;
-    }
-
-    private void postPendingLoad() {
-        if (pendingLoad == null) return;
-
-        //If an image view is actively changing sizes, we want to delay our resize job until
-        //the size has stabilized so that the image we load will match the final size, rather than some
-        //size part way through the change. One example of this is as part of an animation where a view is
-        //expanding or shrinking
-        handler.removeCallbacksAndMessages(PENDING_LOAD_TOKEN);
-        handler.postAtTime(pendingLoad, PENDING_LOAD_TOKEN, SystemClock.uptimeMillis() + PENDING_LOAD_DELAY);
-    }
-
-    private void fetchPath(final T model, final int loadCount) {
-        pathToken = pathLoader.fetchPath(model, getWidth(), getHeight(), new PathLoader.PathReadyCallback() {
+    private void fetchPath(final T model, final int width, final int height, final int loadCount) {
+        pathToken = pathLoader.fetchPath(model, width, height, new PathLoader.PathReadyCallback() {
             @Override
-            public boolean onPathReady(String path) {
+            public boolean onPathReady(final String path) {
                 if (loadCount != currentCount) return false;
+                fetchImage(path, model, width, height, loadCount);
 
-                fetchImage(path, model, loadCount);
                 return true;
             }
 
@@ -364,8 +305,8 @@ public class ImagePresenter<T> {
         });
     }
 
-    private void fetchImage(final String path, T model, final int loadCount) {
-        imageToken = imageLoader.fetchImage(path, model, getWidth(), getHeight(), new ImageLoader.ImageReadyCallback() {
+    private void fetchImage(final String path, T model, int width, int height, final int loadCount) {
+        imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
@@ -381,11 +322,6 @@ public class ImagePresenter<T> {
             public void onError(Exception e) {
             }
         });
-    }
-
-    private void getDimens() {
-        imageView.removeCallbacks(getDimens);
-        imageView.post(getDimens);
     }
 
     /**
@@ -407,33 +343,92 @@ public class ImagePresenter<T> {
         return coordinator == null || coordinator.canSetPlaceholder(this);
     }
 
-    private static class SizeObserver implements ViewTreeObserver.OnGlobalLayoutListener {
+    private static class SizeDeterminer {
+        private static final String PENDING_SIZE_CHANGE_TOKEN = "pending_load";
+        private static final int PENDING_SIZE_CHANGE_DELAY = 100; //60 fps = 1000/60 = 16.67 ms
 
-        private final WeakReference<ImageView> imageViewRef;
-        private final WeakReference<ImagePresenter> imagePresenterRef;
-        private int lastWidth = 0;
-        private int lastHeight = 0;
+        private final View view;
+        private int width = 0;
+        private int height = 0;
+        private boolean valid = false;
+        private SizeReadyCallback cb = null;
+        private final Runnable getDimens = new Runnable() {
+            @Override
+            public void run() {
+                if (cb == null) return;
 
-        public SizeObserver(ImageView imageView, ImagePresenter imagePresenter) {
-            imageViewRef = new WeakReference<ImageView>(imageView);
-            imagePresenterRef = new WeakReference<ImagePresenter>(imagePresenter);
-            ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-            lastWidth = layoutParams.width;
-            lastHeight = layoutParams.height;
+                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+                if (layoutParams.width > 0 && layoutParams.height > 0) {
+                    cb.onSizeReady(layoutParams.width, layoutParams.height);
+                } else if (view.getWidth() > 0 && view.getHeight() > 0) {
+                    valid = true;
+                    width = view.getWidth();
+                    height = view.getHeight();
+                    cb.onSizeReady(width, height);
+                    cb = null;
+                }
+            }
+        };
+
+        private static class SizeObserver implements ViewTreeObserver.OnGlobalLayoutListener {
+            private final WeakReference<SizeDeterminer> sizeDeterminerRef;
+            private Handler handler = new Handler();
+
+            public SizeObserver(SizeDeterminer sizeDeterminer) {
+                this.sizeDeterminerRef = new WeakReference<SizeDeterminer>(sizeDeterminer);
+            }
+
+            @Override
+            public void onGlobalLayout() {
+                final SizeDeterminer sizeDeterminer = sizeDeterminerRef.get();
+                if (sizeDeterminer != null) {
+                    handler.removeCallbacksAndMessages(PENDING_SIZE_CHANGE_TOKEN);
+                    handler.postAtTime(new Runnable() {
+                        @Override
+                        public void run() {
+                            sizeDeterminer.maybeInvalidate();
+                        }
+                    }, PENDING_SIZE_CHANGE_TOKEN, SystemClock.uptimeMillis() + PENDING_SIZE_CHANGE_DELAY);
+                }
+            }
         }
 
-        @Override
-        public void onGlobalLayout() {
-            ImageView imageView = imageViewRef.get();
-            ImagePresenter presenter = imagePresenterRef.get();
+        public interface SizeReadyCallback {
+            public void onSizeReady(int width, int height);
+        }
 
-            if (presenter != null && imageView != null) {
-                final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-                if (layoutParams.width > 0 && layoutParams.height > 0 &&
-                        (layoutParams.width != lastWidth || layoutParams.height != lastHeight)) {
-                    lastWidth = layoutParams.width;
-                    lastHeight = layoutParams.height;
-                    presenter.getDimens();
+        public SizeDeterminer(View view) {
+            this.view = view;
+            view.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(this));
+        }
+
+        public void getSize(SizeReadyCallback cb) {
+            this.cb = null;
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            if (layoutParams.width > 0 && layoutParams.height > 0) {
+                cb.onSizeReady(layoutParams.width, layoutParams.height);
+            } else if (valid) {
+                cb.onSizeReady(width, height);
+            } else {
+                this.cb = cb;
+                view.removeCallbacks(getDimens);
+                view.post(getDimens);
+            }
+        }
+
+        private void maybeInvalidate() {
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            if (layoutParams.width <= 0 || layoutParams.height <= 0) {
+                if (view.getWidth() >= 0 && view.getHeight() >= 0) {
+                    width = view.getWidth();
+                    height = view.getHeight();
+                    valid = true;
+                    if (cb != null) {
+                        cb.onSizeReady(width, height);
+                        cb = null;
+                    }
+                } else {
+                    valid = false;
                 }
             }
         }
