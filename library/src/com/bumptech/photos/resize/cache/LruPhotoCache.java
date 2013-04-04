@@ -61,16 +61,20 @@ public class LruPhotoCache{
         this.photoRemovedListener = listener;
     }
 
-    public void put(int key, Bitmap bitmap) {
+    public synchronized void put(int key, Bitmap bitmap) {
         photoCache.put(key, bitmap);
     }
 
-    public Bitmap get(int key) {
+    public synchronized Bitmap get(int key) {
         return photoCache.get(key);
     }
 
-    public void remove(int key){
+    public synchronized void remove(int key){
         photoCache.remove(key);
+    }
+
+    public synchronized boolean contains(int key) {
+        return photoCache.get(key) != null;
     }
 
     public void evictAll(){
