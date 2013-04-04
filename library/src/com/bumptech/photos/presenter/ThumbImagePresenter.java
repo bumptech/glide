@@ -34,9 +34,15 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
         private int placeholderResourceId;
 
         public ThumbImagePresenter<T> build(){
-            assert fullPresenterBuilder != null : "you must include a builder for the full image presenter";
-            assert thumbPresenterBuilder != null : "you must include a builder for the thumb image presenter";
-            assert imageView != null : "cannot create presenter without an image view";
+            if (fullPresenterBuilder == null) {
+                throw new IllegalArgumentException("you must include a builder for the full image presenter");
+            }
+            if (thumbPresenterBuilder == null) {
+                throw new IllegalArgumentException("you must include a builder for the thumb image presenter");
+            }
+            if (imageView == null){
+                throw new IllegalArgumentException("cannot create presenter without an image view");
+            }
 
             return new ThumbImagePresenter<T>(this);
         }
@@ -77,7 +83,9 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
          * @see ImagePresenter.Builder ImagePresenter.Builder#setPlaceholderDrawable
          */
         public Builder<T> setPlaceholderDrawable(Drawable drawable) {
-            assert drawable == null || placeholderResourceId == 0 : "Can't set both a placeholder drawable and a placeholder resource";
+            if (drawable != null && this.placeholderResourceId != 0) {
+                throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
+            }
 
             this.placeholderDrawable = drawable;
             return this;
@@ -87,7 +95,9 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
          * @see ImagePresenter.Builder ImagePresenter.Builder#setPlaceholderResource
          */
         public Builder<T> setPlaceholderResource(int resourceId) {
-            assert resourceId == 0 || placeholderDrawable == null : "Can't set both a placeholder drawable and a placeholder resource";
+            if (resourceId != 0 && placeholderDrawable != null) {
+                throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
+            }
 
             this.placeholderResourceId = resourceId;
             return this;

@@ -52,9 +52,16 @@ public class ImagePresenter<T> {
          * @return A new ImagePresenter
          */
         public ImagePresenter<T> build(){
-            assert imageView != null : "cannot create presenter without an image view";
-            assert imageLoader != null : "cannot create presenter without an image loader";
-            assert pathLoader != null : "cannot create presenter without a path loader";
+            if (imageView == null) {
+                throw new IllegalArgumentException("cannot create presenter without an image view");
+            }
+            if (imageLoader == null) {
+                throw new IllegalArgumentException("cannot create presenter without an image loader");
+            }
+            if (pathLoader == null) {
+                throw new IllegalArgumentException("cannot create presenter without a path loader");
+
+            }
 
             return new ImagePresenter<T>(this);
         }
@@ -103,7 +110,9 @@ public class ImagePresenter<T> {
          * @return This Builder object
          */
         public Builder<T> setPlaceholderResource(int resourceId) {
-            assert resourceId == 0 || placeholderDrawable == null : "Can't set both a placeholder drawable and a placeholder resource";
+            if (resourceId != 0 && placeholderDrawable != null) {
+                throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
+            }
 
             this.placeholderResourceId = resourceId;
             return this;
@@ -118,7 +127,9 @@ public class ImagePresenter<T> {
          * @return This Builder object
          */
         public Builder<T> setPlaceholderDrawable(Drawable placeholderDrawable) {
-            assert placeholderDrawable == null || placeholderResourceId == 0 : "Can't set both a placeholder drawable and a placeholder resource";
+            if (placeholderDrawable != null && placeholderResourceId != 0) {
+                throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
+            }
 
             this.placeholderDrawable = placeholderDrawable;
             return this;
