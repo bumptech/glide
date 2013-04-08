@@ -383,12 +383,16 @@ public class ImageManager {
 
         final Bitmap bitmap = b;
         final int hashCode = b.hashCode();
+        final boolean addToCache;
         synchronized (bitmapReferenceCounter) {
-            Integer currentCount = bitmapReferenceCounter.get(hashCode);
-            if (currentCount == null || currentCount == 0) {
+            final Integer currentCount = bitmapReferenceCounter.get(hashCode);
+            addToCache = currentCount == null || currentCount == 0;
+            if (addToCache) {
                 bitmapReferenceCounter.remove(hashCode);
-                bitmapCache.put(bitmap);
             }
+        }
+        if (addToCache) {
+            bitmapCache.put(bitmap);
         }
     }
 
