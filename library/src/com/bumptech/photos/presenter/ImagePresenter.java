@@ -30,7 +30,6 @@ import java.lang.ref.WeakReference;
  */
 public class ImagePresenter<T> {
 
-
     /**
      * A builder for an {@link ImagePresenter}. {@link Builder ImagePresenter.Builder#setImageView(android.widget.ImageView)},
      * {@link Builder ImagePresenter.Builder#setPathLoader}, and {@link Builder ImagePresenter.Builder#setImageLoader}
@@ -47,6 +46,7 @@ public class ImagePresenter<T> {
         private ImagePresenterCoordinator coordinator;
         private ImageLoader<T> imageLoader;
         private PathLoader<T> pathLoader;
+        private ExceptionHandler<T> exceptionHandler;
 
         /**
          * Builds an ImagePresenter
@@ -161,8 +161,19 @@ public class ImagePresenter<T> {
             this.coordinator = coordinator;
             return this;
         }
-    }
 
+        /**
+         * Optional Sets a handler that will be notified if any path or image load causes an exception.
+         * See {@link com.bumptech.photos.presenter.ImagePresenter.ExceptionHandler}.
+         *
+         * @param exceptionHandler The exception handler to set
+         * @return This builder object
+         */
+        public Builder<T> setExceptionHandler(ExceptionHandler<T> exceptionHandler) {
+            this.exceptionHandler = exceptionHandler;
+            return this;
+        }
+    }
 
     private Object pathToken;
     private Object imageToken;
@@ -172,6 +183,7 @@ public class ImagePresenter<T> {
     private final Drawable placeholderDrawable;
     private final ImageSetCallback imageSetCallback;
     private final ImagePresenterCoordinator coordinator;
+    private final ExceptionHandler<T> exceptionHandler;
     protected final ImageView imageView;
 
     private T currentModel;
@@ -205,6 +217,11 @@ public class ImagePresenter<T> {
         public boolean canSetPlaceholder(ImagePresenter<T> presenter);
     }
 
+    public interface ExceptionHandler<T> {
+        public void onPathLoadException(Exception e, T model, boolean isCurrent);
+        public void onImageLoadException(Exception e, T model, String path, boolean isCurrent);
+    }
+
     private ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
@@ -216,6 +233,7 @@ public class ImagePresenter<T> {
         }
         this.coordinator = builder.coordinator;
         this.imageSetCallback = builder.imageSetCallback;
+        this.exceptionHandler = builder.exceptionHandler;
         sizeDeterminer = new SizeDeterminer(imageView);
     }
 
@@ -301,11 +319,15 @@ public class ImagePresenter<T> {
             }
 
             @Override
-            public void onError(Exception e) { }
+            public void onException(Exception e) {
+                if (exceptionHandler != null) {
+                    exceptionHandler.onPathLoadException(e, model, loadCount == currentCount);
+                }
+            }
         });
     }
 
-    private void fetchImage(final String path, T model, int width, int height, final int loadCount) {
+    private void fetchImage(final String path, final T model, int width, int height, final int loadCount) {
         imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
@@ -319,7 +341,10 @@ public class ImagePresenter<T> {
             }
 
             @Override
-            public void onError(Exception e) {
+            public void onException(Exception e) {
+                if (exceptionHandler != null) {
+                    exceptionHandler.onImageLoadException(e, model, path, loadCount == currentCount);
+                }
             }
         });
     }

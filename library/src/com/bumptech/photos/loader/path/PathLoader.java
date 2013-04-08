@@ -30,7 +30,7 @@ public interface PathLoader<T> {
          *
          * @param e The exception that caused the load to fail, or null
          */
-        public void onError(Exception e);
+        public void onException(Exception e);
     }
 
     /**

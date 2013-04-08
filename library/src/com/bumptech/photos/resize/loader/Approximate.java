@@ -31,7 +31,7 @@ public class Approximate<T> extends ImageManagerLoader<T> {
 
             @Override
             public void onLoadFailed(Exception e) {
-                cb.onError(e);
+                cb.onException(e);
             }
         });
     }

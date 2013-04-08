@@ -47,10 +47,13 @@ public abstract class BasePathLoader<T> implements PathLoader<T> {
      * A lifecycle method called after the requesting object is notified that this loader failed to load a Bitmap.
      * SHould be used to cleanup or update any data related to the failed load.
      *
-     * @param model The model representing the image this loader failed to fetch a path for
      * @param e The exception that caused the failure, or null
+     * @param model The model representing the image this loader failed to fetch a path for
+     * @return True iff this path loader has handled the exception and the cb should not be notified.
      */
-    protected void onPathFetchFailed(T model, Exception e) { }
+    protected boolean onPathFetchFailed(Exception e, T model) {
+        return false;
+    }
 
     protected class InternalPathReadyCallback implements PathReadyCallback{
         private final WeakReference<PathReadyCallback> cbRef;
@@ -74,12 +77,13 @@ public abstract class BasePathLoader<T> implements PathLoader<T> {
         }
 
         @Override
-        public final void onError(Exception e) {
+        public final void onException(Exception e) {
             final PathReadyCallback cb = cbRef.get();
             final T model = modelRef.get();
             if (cb != null && model != null) {
-                cb.onError(e);
-                BasePathLoader.this.onPathFetchFailed(model, e);
+                if (!BasePathLoader.this.onPathFetchFailed(e, model)) {
+                    cb.onException(e);
+                }
             }
         }
     }

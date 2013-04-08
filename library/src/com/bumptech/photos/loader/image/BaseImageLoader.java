@@ -54,11 +54,14 @@ public abstract class BaseImageLoader<T> implements ImageLoader<T> {
      * A lifecycle method called after the requesting object is notified that this loader failed to loada Bitmap. Should
      * be used to cleanup or update any data related to the failed load.
      *
-     * @param path The path to the image this loader failed to load
-     * @param model The model representing the image this loader failed to load
      * @param e The exception that caused the failure, or null
+     * @param model The model representing the image this loader failed to load
+     * @param path The path to the image this loader failed to load
+     * @return True iff this image loader has handled the exception and the cb should not be notified.
      */
-    protected void onImageLoadFailed(String path, T model, Exception e) { }
+    protected boolean onImageLoadFailed(Exception e, T model, String path) {
+        return false;
+    }
 
     protected class InternalImageReadyCallback implements ImageReadyCallback {
         private final WeakReference<ImageReadyCallback> cbRef;
@@ -84,12 +87,13 @@ public abstract class BaseImageLoader<T> implements ImageLoader<T> {
         }
 
         @Override
-        public void onError(Exception e) {
+        public void onException(Exception e) {
             final ImageReadyCallback cb = cbRef.get();
             final T model = modelRef.get();
             if (cb != null && model != null) {
-                cb.onError(e);
-                BaseImageLoader.this.onImageLoadFailed(path, model, e);
+                if (!BaseImageLoader.this.onImageLoadFailed(e, model, path)) {
+                    cb.onException(e);
+                }
             }
         }
     }

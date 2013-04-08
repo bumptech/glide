@@ -79,7 +79,7 @@ public class ImageResizer {
      * @param height The height the final image will fill
      * @return The resized image
      */
-    public Bitmap centerCrop(final String path, final int width, final int height){
+    public Bitmap centerCrop(final String path, final int width, final int height) throws FileNotFoundException {
         final Bitmap streamed = loadApproximate(path, width, height);
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
@@ -99,7 +99,7 @@ public class ImageResizer {
      * @param height The height the final image will fit within
      * @return The resized image
      */
-    public Bitmap fitInSpace(final String path, final int width, final int height){
+    public Bitmap fitInSpace(final String path, final int width, final int height) throws FileNotFoundException {
         final Bitmap streamed = loadApproximate(path, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
@@ -109,7 +109,7 @@ public class ImageResizer {
         return fitInSpace(streamed, width, height);
     }
 
-    public Bitmap loadApproximate(String path, int width, int height) {
+    public Bitmap loadApproximate(String path, int width, int height) throws FileNotFoundException {
         int orientation = getOrientation(path);
         if(orientation == 90 || orientation == 270) {
             //Swap width and height for initial downsample calculation if its oriented so.
@@ -119,12 +119,7 @@ public class ImageResizer {
             height = w;
         }
 
-        Bitmap result = null;
-        try {
-            result = loadApproximate(new FileInputStream(path), new FileInputStream(path), width, height);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Bitmap result = loadApproximate(new FileInputStream(path), new FileInputStream(path), width, height);
 
         if (orientation != 0) {
             result = rotateImage(result, orientation);
@@ -198,7 +193,7 @@ public class ImageResizer {
      * @param height The height of the image at the given path
      * @return The loaded image
      */
-    public Bitmap loadAsIs(final String path, final int width, final int height) {
+    public Bitmap loadAsIs(final String path, final int width, final int height) throws FileNotFoundException {
         return load(path, getRecycled(width, height));
     }
 
@@ -209,7 +204,7 @@ public class ImageResizer {
      * @param path The path where the image is stored
      * @return The loaded image
      */
-    public Bitmap loadAsIs(final String path){
+    public Bitmap loadAsIs(final String path) throws FileNotFoundException {
         final int[] dimens = getDimensions(path);
         return load(path, getRecycled(dimens));
     }
@@ -226,7 +221,7 @@ public class ImageResizer {
      * @param recycle A Bitmap we can load the image into, or null
      * @return A new bitmap containing the image at the given path, or recycle if recycle is not null
      */
-    private Bitmap load(String path, Bitmap recycle) {
+    private Bitmap load(String path, Bitmap recycle) throws FileNotFoundException {
         final BitmapFactory.Options decodeBitmapOptions = getOptions(recycle);
         final Bitmap result = decodeStream(path, decodeBitmapOptions);
         return result == null ? null : orientImage(path, result);
@@ -255,7 +250,7 @@ public class ImageResizer {
      * @param path The path where the image is stored
      * @return an array containing the dimensions of the image in the form {width, height}
      */
-    private int[] getDimensions(String path) {
+    private int[] getDimensions(String path) throws FileNotFoundException {
         final BitmapFactory.Options decodeBoundsOptions = getOptions();
         decodeBoundsOptions.inJustDecodeBounds = true;
         decodeStream(path, decodeBoundsOptions);
@@ -275,14 +270,12 @@ public class ImageResizer {
         return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
     }
 
-    private Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions) {
+    private Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions) throws FileNotFoundException {
         InputStream is = null;
         Bitmap result = null;
         try {
             is = new FileInputStream(path);
             result = decodeStream(is, decodeBitmapOptions);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } finally {
             if (is !=null) {
                 try {

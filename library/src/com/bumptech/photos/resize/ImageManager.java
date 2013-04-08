@@ -18,6 +18,7 @@ import com.bumptech.photos.util.Log;
 import com.bumptech.photos.util.Util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -288,7 +289,7 @@ public class ImageManager {
         final int key = getKey(path, -1, -1, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
-            protected Bitmap resizeIfNotFound() {
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadAsIs(path);
             }
         });
@@ -307,7 +308,7 @@ public class ImageManager {
         final int key = getKey(path, width, height, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(key, cb, false) {
             @Override
-            protected Bitmap resizeIfNotFound() {
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadAsIs(path, width, height);
             }
         });
@@ -326,7 +327,7 @@ public class ImageManager {
         final int key = getKey(path, width, height, ResizeType.APPROXIMATE);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
-            protected Bitmap resizeIfNotFound() {
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadApproximate(path, width, height);
             }
         });
@@ -346,7 +347,7 @@ public class ImageManager {
         final int key = getKey(path, width, height, ResizeType.CENTER_CROP);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
-            protected Bitmap resizeIfNotFound() {
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.centerCrop(path, width, height);
             }
         });
@@ -366,7 +367,7 @@ public class ImageManager {
         final int key = getKey(path, width, height, ResizeType.FIT_CENTER);
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
-            protected Bitmap resizeIfNotFound() {
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.fitInSpace(path, width, height);
             }
         });
@@ -526,18 +527,17 @@ public class ImageManager {
 
             if (result == null) {
                 if (cancelled) return;
-                try {
-                    future = executor.submit(new Runnable() {
-                        @Override
-                        public void run() {
+                future = executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
                             Bitmap result = resizeIfNotFound();
                             finishResize(result, isInDiskCache);
+                        } catch (Exception e) {
+                            cb.onLoadFailed(e);
                         }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    cb.onLoadFailed(e);
-                }
+                    }
+                });
             } else {
                 finishResize(result, isInDiskCache);
             }
@@ -562,7 +562,7 @@ public class ImageManager {
 
         }
 
-        protected abstract Bitmap resizeIfNotFound();
+        protected abstract Bitmap resizeIfNotFound() throws FileNotFoundException;
     }
 
 
