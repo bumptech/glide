@@ -37,7 +37,7 @@ import java.io.InputStream;
  * &lt;/pre&gt;
  *
  */
-public class ReycleableBufferedInputStream extends FilterInputStream {
+public class RecyclableBufferedInputStream extends FilterInputStream {
     /**
      * The buffer containing the current bytes read from the target InputStream.
      */
@@ -74,7 +74,7 @@ public class ReycleableBufferedInputStream extends FilterInputStream {
      *
      * @param in the {@code InputStream} the buffer reads from.
      */
-    public ReycleableBufferedInputStream(InputStream in) {
+    public RecyclableBufferedInputStream(InputStream in) {
         this(in, 8192);
     }
 
@@ -90,11 +90,11 @@ public class ReycleableBufferedInputStream extends FilterInputStream {
      * @param size the size of buffer in bytes.
      * @throws IllegalArgumentException if {@code size &lt;= 0}.
      */
-    public ReycleableBufferedInputStream(InputStream in, int size) {
+    public RecyclableBufferedInputStream(InputStream in, int size) {
         this(in, new byte[size]);
     }
 
-    public ReycleableBufferedInputStream(InputStream in, byte[] buffer) {
+    public RecyclableBufferedInputStream(InputStream in, byte[] buffer) {
         super(in);
         if (buffer == null || buffer.length == 0) {
             throw new IllegalArgumentException("buffer is null or empty");
