@@ -14,9 +14,8 @@ import android.support.v4.util.LruCache;
  *
  * @see android.support.v4.util.LruCache
  */
-public class LruPhotoCache{
+public class LruPhotoCache extends LruCache<Integer, Bitmap> {
     private static final float SIZE_RATIO = 1f/10f;
-    private final PhotoCache photoCache;
     private PhotoRemovedListener photoRemovedListener;
 
     public interface PhotoRemovedListener {
@@ -31,53 +30,29 @@ public class LruPhotoCache{
         return Math.round(SIZE_RATIO * activityManager.getMemoryClass() * 1024 * 1024);
     }
 
-    private class PhotoCache extends LruCache<Integer, Bitmap> {
-
-        private PhotoCache(int maxSize) {
-            super(maxSize);
-        }
-
-
-        @Override
-        protected int sizeOf(Integer key, Bitmap value) {
-            //get the size, getByteCount() is API 12+...
-            return value.getHeight() * value.getRowBytes();
-        }
-
-        @Override
-        protected void entryRemoved(boolean evicted, Integer key, Bitmap oldValue, Bitmap newValue) {
-            super.entryRemoved(evicted, key, oldValue, newValue);    //To change body of overridden methods use File | Settings | File Templates.
-            if (photoRemovedListener != null) {
-                photoRemovedListener.onPhotoRemoved(key, oldValue);
-            }
-        }
+    public LruPhotoCache(int maxSize) {
+        super(maxSize);
     }
 
-    public LruPhotoCache(int size) {
-        photoCache = new PhotoCache(size);
+    @Override
+    protected int sizeOf(Integer key, Bitmap value) {
+        //get the size, getByteCount() is API 12+...
+        return value.getHeight() * value.getRowBytes();
+    }
+
+    @Override
+    protected void entryRemoved(boolean evicted, Integer key, Bitmap oldValue, Bitmap newValue) {
+        super.entryRemoved(evicted, key, oldValue, newValue);    //To change body of overridden methods use File | Settings | File Templates.
+        if (photoRemovedListener != null) {
+            photoRemovedListener.onPhotoRemoved(key, oldValue);
+        }
     }
 
     public void setPhotoRemovedListener(PhotoRemovedListener listener) {
         this.photoRemovedListener = listener;
     }
 
-    public synchronized void put(int key, Bitmap bitmap) {
-        photoCache.put(key, bitmap);
-    }
-
-    public synchronized Bitmap get(int key) {
-        return photoCache.get(key);
-    }
-
-    public synchronized void remove(int key){
-        photoCache.remove(key);
-    }
-
-    public synchronized boolean contains(int key) {
-        return photoCache.get(key) != null;
-    }
-
-    public void evictAll(){
-        photoCache.evictAll();
+    public boolean contains(Integer key) {
+        return get(key) != null;
     }
 }
