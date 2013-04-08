@@ -79,7 +79,7 @@ public class DiskCache {
             try {
                 if (!outFile.exists()) outFile.createNewFile();
 
-                out = new BufferedOutputStream(new FileOutputStream(outFile));
+                out = new BufferedOutputStream(new FileOutputStream(outFile), 8192);
                 bitmap.compress(format, 100, out);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
