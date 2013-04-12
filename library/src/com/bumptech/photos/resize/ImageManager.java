@@ -328,7 +328,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
-                return resizer.loadApproximate(path, width, height);
+                return resizer.loadAtLeast(path, width, height);
             }
         });
     }

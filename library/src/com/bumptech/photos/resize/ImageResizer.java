@@ -80,12 +80,12 @@ public class ImageResizer {
      * @return The resized image
      */
     public Bitmap centerCrop(final String path, final int width, final int height) throws FileNotFoundException {
-        final Bitmap streamed = loadApproximate(path, width, height);
+        final Bitmap streamed = loadAtLeast(path, width, height);
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
     public Bitmap centerCrop(InputStream is1, InputStream is2, int width, int height) {
-        final Bitmap streamed = loadApproximate(is1, is2, width, height);
+        final Bitmap streamed = loadAtLeast(is1, is2, width, height);
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
@@ -100,16 +100,29 @@ public class ImageResizer {
      * @return The resized image
      */
     public Bitmap fitInSpace(final String path, final int width, final int height) throws FileNotFoundException {
-        final Bitmap streamed = loadApproximate(path, width > height ? 1 : width, height > width ? 1 : height);
+        final Bitmap streamed = loadAtLeast(path, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
 
     public Bitmap fitInSpace(InputStream is1, InputStream is2, int width, int height) {
-        final Bitmap streamed = loadApproximate(is1, is2, width > height ? 1 : width, height > width ? 1 : height);
+        final Bitmap streamed = loadAtLeast(is1, is2, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
 
-    public Bitmap loadApproximate(String path, int width, int height) throws FileNotFoundException {
+    /**
+     * Load the image at the given path with dimens greater than or equal to the given dimens. If the image has a
+     * rotation specified in EXIF data, rotates the image accordingly. Maintains the original proportions.
+     *
+     * Note - if the image at the path has dimens less than or equal to the given dimens, the image will not
+     * be enlarged and will instead be loaded at its original dimens.
+     *
+     * @param path The path to the image
+     * @param width The minimum width of the returned Bitmap
+     * @param height The minimum heght of the returned Bitmap
+     * @return
+     * @throws FileNotFoundException
+     */
+    public Bitmap loadAtLeast(String path, int width, int height) throws FileNotFoundException {
         int orientation = getOrientation(path);
         if(orientation == 90 || orientation == 270) {
             //Swap width and height for initial downsample calculation if its oriented so.
@@ -119,7 +132,7 @@ public class ImageResizer {
             height = w;
         }
 
-        Bitmap result = loadApproximate(new FileInputStream(path), new FileInputStream(path), width, height);
+        Bitmap result = loadAtLeast(new FileInputStream(path), new FileInputStream(path), width, height);
 
         if (orientation != 0) {
             result = rotateImage(result, orientation);
@@ -128,24 +141,25 @@ public class ImageResizer {
     }
 
     /**
-     * Load the image at the given path at nearly the given dimensions maintaining the original proportions. Will also
-     * rotate the image according to the orientation in the images EXIF data if available.
+     * Load the image represented by the given input streams with dimens greater than or equal to the given dimens.
+     * Maintains the original proportions.
      *
-     * from http://stackoverflow.com/questions/7051025/how-do-i-scale-a-streaming-bitmap-in-place-without-reading-the-whole-image-first
+     * Note - if the image at the path has dimens less than or equal to the given dimens, the image will not
+     * be enlarged and will instead be loaded at its original dimens.
      *
      * @param is1 An inputStream for the image. Can't be is2
      * @param is2 An inputStream for the image. Can't be is1
-     * @param width The target width
-     * @param height The target height
+     * @param width The minimum width of the returned Bitmap
+     * @param height The minimum height of the returned Bitmap
      * @return A Bitmap containing the image
      */
-    public Bitmap loadApproximate(InputStream is1, InputStream is2, int width, int height) {
+    public Bitmap loadAtLeast(InputStream is1, InputStream is2, int width, int height) {
         final int[] dimens = getDimensions(is1);
         final int originalWidth = dimens[0];
         final int originalHeight = dimens[1];
 
         // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
-        int sampleSize = Math.min(originalHeight / height, originalWidth / width);
+        final int sampleSize = Math.min(originalHeight / height, originalWidth / width);
 
         final BitmapFactory.Options decodeBitmapOptions = getOptions();
         decodeBitmapOptions.inSampleSize = sampleSize;
