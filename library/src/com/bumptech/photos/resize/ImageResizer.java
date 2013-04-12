@@ -338,7 +338,7 @@ public class ImageResizer {
             is = new FileInputStream(path);
             result = decodeStream(is, decodeBitmapOptions);
         } finally {
-            if (is !=null) {
+            if (is != null) {
                 try {
                     is.close();
                 } catch (IOException e) {
@@ -428,9 +428,7 @@ public class ImageResizer {
         to.inScaled = from.inScaled;
         to.inScreenDensity = from.inScreenDensity;
         to.inTargetDensity = from.inTargetDensity;
-
     }
-
 
     /**
      * An expensive operation to crop the given Bitmap so that it fills the given dimensions. This will not maintain
@@ -529,8 +527,6 @@ public class ImageResizer {
         return cropped;
     }
 
-    //shrinks to the given width, shrinking the height to maintain the original image proportions
-
     /**
      * An expensive operation to resize the given image, maintaining the original proportions, so that its width
      * matches the given width
@@ -588,7 +584,7 @@ public class ImageResizer {
         }
     }
 
-   /**
+    /**
      * Returns a matrix with rotation set based on Exif orientation tag.
      * If the orientation is undefined or 0 null is returned.
      *
@@ -656,9 +652,5 @@ public class ImageResizer {
             e.printStackTrace();
         }
         return imageToOrient;
-   }
-
-
-
-
+    }
 }
