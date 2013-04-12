@@ -164,9 +164,56 @@ public class ImageResizer {
         final BitmapFactory.Options decodeBitmapOptions = getOptions();
         decodeBitmapOptions.inSampleSize = sampleSize;
 
-        Bitmap result = decodeStream(is2, decodeBitmapOptions);
+        return decodeStream(is2, decodeBitmapOptions);
+    }
+
+    /**
+     * Load the image at the given path with dimens less than or equal to the given dimens. If the image has a
+     * rotation specified in EXIF data, rotates the image accordingly. Maintains the original proportions.
+     *
+     * @param path The path to the image
+     * @param width The maximum width of the returned Bitmap
+     * @param height The maximum height of the returned Bitmap
+     * @return A Bitmap containing the image
+     * @throws FileNotFoundException
+     */
+    public Bitmap loadAtMost(String path, int width, int height) throws FileNotFoundException {
+        int orientation = getOrientation(path);
+        if (orientation == 90 || orientation == 270) {
+            int w = width;
+            width = height;
+            height = w;
+        }
+
+        Bitmap result = loadAtMost(new FileInputStream(path), new FileInputStream(path), width, height);
+
+        if (orientation != 0) {
+            result = rotateImage(result, orientation);
+        }
 
         return result;
+    }
+
+    /**
+     * Load the image represented by the given input streams with dimens less than or equal to the given dimens.
+     * Maintains the original proportions.
+     *
+     * @param is1 An InputStream for the image. Can't be is2
+     * @param is2 An InputStream for the image. Can't be ss1
+     * @param width The maximum width
+     * @param height The maximum height
+     * @return A bitmap containing the image
+     */
+    public Bitmap loadAtMost(InputStream is1, InputStream is2, int width, int height) {
+        final int[] dimens = getDimensions(is1);
+        final int originalWidth = dimens[0];
+        final int originalHeight = dimens[1];
+
+        final int sampleSize = Math.max(originalHeight / height, originalWidth / width);
+        final BitmapFactory.Options decodeBitmapOptions = getOptions();
+        decodeBitmapOptions.inSampleSize = sampleSize;
+
+        return decodeStream(is2, decodeBitmapOptions);
     }
 
     /**
