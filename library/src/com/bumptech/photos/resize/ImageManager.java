@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
@@ -527,17 +528,24 @@ public class ImageManager {
 
             if (result == null) {
                 if (cancelled) return;
-                future = executor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Bitmap result = resizeIfNotFound();
-                            finishResize(result, isInDiskCache);
-                        } catch (Exception e) {
-                            cb.onLoadFailed(e);
+                try {
+                    future = executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Bitmap result = resizeIfNotFound();
+                                finishResize(result, isInDiskCache);
+                            } catch (Exception e) {
+                                cb.onLoadFailed(e);
+                            }
                         }
-                    }
-                });
+                    });
+                //in almost every case will be because of race after calling shutdown. Not much we can do
+                //either way
+                } catch (RejectedExecutionException e) {
+                    e.printStackTrace();
+                    cb.onLoadFailed(e);
+                }
             } else {
                 finishResize(result, isInDiskCache);
             }
