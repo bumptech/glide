@@ -240,6 +240,10 @@ public class ImageResizer {
         return load(is2, getRecycled(dimens));
     }
 
+    public Bitmap loadAsIs(InputStream is, int width, int height) {
+        return load(is, getRecycled(width, height));
+    }
+
     /**
      * Load the image at the given path at its original size. Assume that the dimensions of the image at the given path
      * will match the given dimensions and use the given dimensions to retrieve a recycled Bitmap of the correct size.

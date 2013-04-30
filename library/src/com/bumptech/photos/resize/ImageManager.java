@@ -19,6 +19,7 @@ import com.bumptech.photos.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -296,6 +297,16 @@ public class ImageManager {
         });
     }
 
+    public Object getImage(final InputStream is1, final InputStream is2, String id, LoadedCallback cb) {
+        final int key = getKey(id, -1, -1, ResizeType.AS_IS);
+        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+            @Override
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
+                return resizer.loadAsIs(is1, is2);
+            }
+        });
+    }
+
     /**
      * Loads the image for the given path assuming its width and height are exactly those given.
      *
@@ -311,6 +322,16 @@ public class ImageManager {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadAsIs(path, width, height);
+            }
+        });
+    }
+
+    public Object getImageExact(final InputStream is, final int width, final int height, String id, LoadedCallback cb) {
+        final int key = getKey(id, width, height, ResizeType.AS_IS);
+        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+            @Override
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
+                return resizer.loadAsIs(is, width, height);
             }
         });
     }
@@ -334,6 +355,17 @@ public class ImageManager {
         });
     }
 
+    public Object getImageApproximate(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
+        final int key = getKey(id, width, height, ResizeType.APPROXIMATE);
+        return runJob(key, cb, new ImageManagerJob(key, cb) {
+            @Override
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
+                return resizer.loadAtLeast(is1, is2, width, height);
+            }
+        });
+    }
+
+
     /**
      * Loads the image for the given path , resizes it to be exactly width pixels wide keeping proportions,
      * and then returns a section from the center of image exactly height pixels tall.
@@ -350,6 +382,16 @@ public class ImageManager {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.centerCrop(path, width, height);
+            }
+        });
+    }
+
+    public Object centerCrop(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
+        final int key = getKey(id, width, height, ResizeType.CENTER_CROP);
+        return runJob(key, cb, new ImageManagerJob(key, cb) {
+            @Override
+            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
+                return resizer.centerCrop(is1, is2, width, height);
             }
         });
     }
