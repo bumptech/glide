@@ -260,24 +260,26 @@ public class ImagePresenter<T> {
      * @param model The model containing the information required to load a path and/or bitmap
      */
     public void setModel(final T model) {
-        if (model == null || model.equals(currentModel)) return;
+        if (model == null) {
+            clear();
+        } else if (!model.equals(currentModel)) {
+            loadedFromCache = true;
+            final int loadCount = ++currentCount;
+            currentModel = model;
+            isImageSet = false;
 
-        loadedFromCache = true;
-        final int loadCount = ++currentCount;
-        currentModel = model;
-        isImageSet = false;
+            sizeDeterminer.getSize(new SizeDeterminer.SizeReadyCallback() {
+                @Override
+                public void onSizeReady(int width, int height) {
+                    fetchPath(model, width, height, loadCount);
+                }
+            });
 
-        sizeDeterminer.getSize(new SizeDeterminer.SizeReadyCallback() {
-            @Override
-            public void onSizeReady(int width, int height) {
-                fetchPath(model, width, height, loadCount);
+            loadedFromCache = false;
+
+            if (!isImageSet()) {
+                resetPlaceHolder();
             }
-        });
-
-        loadedFromCache = false;
-
-        if (!isImageSet()) {
-            resetPlaceHolder();
         }
     }
 
