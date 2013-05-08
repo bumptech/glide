@@ -392,8 +392,8 @@ public class ImagePresenter<T> {
                     width = view.getWidth();
                     height = view.getHeight();
                     cb.onSizeReady(width, height);
-                    cb = null;
                 }
+                cb = null;
             }
         };
 
@@ -407,13 +407,15 @@ public class ImagePresenter<T> {
 
             @Override
             public void onGlobalLayout() {
-                final SizeDeterminer sizeDeterminer = sizeDeterminerRef.get();
-                if (sizeDeterminer != null) {
+                if (sizeDeterminerRef.get() != null) {
                     handler.removeCallbacksAndMessages(PENDING_SIZE_CHANGE_TOKEN);
                     handler.postAtTime(new Runnable() {
                         @Override
                         public void run() {
-                            sizeDeterminer.maybeInvalidate();
+                            final SizeDeterminer sizeDeterminer = sizeDeterminerRef.get();
+                            if (sizeDeterminer != null) {
+                                sizeDeterminer.maybeInvalidate();
+                            }
                         }
                     }, PENDING_SIZE_CHANGE_TOKEN, SystemClock.uptimeMillis() + PENDING_SIZE_CHANGE_DELAY);
                 }
