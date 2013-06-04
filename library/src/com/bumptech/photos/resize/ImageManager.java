@@ -20,8 +20,6 @@ import com.bumptech.photos.util.Util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -39,6 +37,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class ImageManager {
     private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
+    private final BitmapTracker bitmapTracker;
 
     /**
      * A class for setting options for an ImageManager
@@ -117,10 +116,8 @@ public class ImageManager {
     private final ExecutorService executor;
     private final LruPhotoCache memoryCache;
     private final ImageResizer resizer;
-    private final Map<Integer, Integer> bitmapReferenceCounter = new HashMap<Integer, Integer>();
     private final SizedBitmapCache bitmapCache;
     private final DiskCache diskCache;
-    private final boolean isBitmapRecyclingEnabled;
     private final Bitmap.CompressFormat diskCacheFormat;
 
     private enum ResizeType {
@@ -236,7 +233,6 @@ public class ImageManager {
         bgHandler = new Handler(bgThread.getLooper());
         executor = resizeService;
 
-        isBitmapRecyclingEnabled = options.recycleBitmaps && CAN_RECYCLE;
 
         if (options.useMemoryCache && options.maxMemorySize <= 0) {
             options.maxMemorySize = LruPhotoCache.getMaxCacheSize(context);
@@ -260,7 +256,7 @@ public class ImageManager {
             memoryCache = new LruPhotoCache(options.maxMemorySize);
         }
 
-        if (isBitmapRecyclingEnabled) {
+        if (options.recycleBitmaps && CAN_RECYCLE) {
             if (memoryCache != null) {
                 memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {
                     @Override
@@ -270,12 +266,13 @@ public class ImageManager {
                 });
             }
             bitmapCache = new SizedBitmapCache(options.maxPerSize);
+            bitmapTracker = new BitmapTracker(bitmapCache);
         } else {
             if (CAN_RECYCLE)
                 options.bitmapDecodeOptions.inMutable = false;
             bitmapCache = null;
+            bitmapTracker = null;
         }
-
 
         this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
     }
@@ -423,21 +420,8 @@ public class ImageManager {
      * @param b The rejected Bitmap
      */
     public void rejectBitmap(final Bitmap b) {
-        if (!isBitmapRecyclingEnabled) return;
-
-        final Bitmap bitmap = b;
-        final int hashCode = b.hashCode();
-        final boolean addToCache;
-        synchronized (bitmapReferenceCounter) {
-            final Integer currentCount = bitmapReferenceCounter.get(hashCode);
-            addToCache = currentCount == null || currentCount == 0;
-            if (addToCache) {
-                bitmapReferenceCounter.remove(hashCode);
-            }
-        }
-        if (addToCache) {
-            bitmapCache.put(bitmap);
-        }
+        if (bitmapTracker == null) return;
+        bitmapTracker.rejectBitmap(b);
     }
 
     /**
@@ -449,16 +433,8 @@ public class ImageManager {
      * @param b The acquired Bitmap
      */
     public void acquireBitmap(Bitmap b) {
-        if (!isBitmapRecyclingEnabled) return;
-
-        final int hashCode = b.hashCode();
-        synchronized (bitmapReferenceCounter) {
-            Integer currentCount = bitmapReferenceCounter.get(hashCode);
-            if (currentCount == null) {
-                currentCount = 0;
-            }
-            bitmapReferenceCounter.put(hashCode, currentCount + 1);
-        }
+        if (bitmapTracker == null) return;
+        bitmapTracker.acquireBitmap(b);
     }
 
     /**
@@ -470,19 +446,9 @@ public class ImageManager {
      * @param b The releasedBitmap
      */
     public void releaseBitmap(final Bitmap b) {
-        if (!isBitmapRecyclingEnabled) return;
-
-        final Bitmap bitmap = b;
-        final int hash = b.hashCode();
-        synchronized (bitmapReferenceCounter) {
-            Integer currentCount = bitmapReferenceCounter.get(hash) - 1;
-            if (currentCount == 0) {
-                bitmapReferenceCounter.remove(hash);
-                bitmapCache.put(bitmap);
-            } else {
-                bitmapReferenceCounter.put(hash, currentCount);
-            }
-        }
+        if (bitmapTracker == null) return;
+        bitmapTracker.releaseBitmap(b);
+    }
     }
 
     public void cancelTask(Object token) {
