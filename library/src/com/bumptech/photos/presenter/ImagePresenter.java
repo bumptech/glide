@@ -379,6 +379,7 @@ public class ImagePresenter<T> {
         private int height = 0;
         private boolean valid = false;
         private SizeReadyCallback cb = null;
+        private Handler handler = new Handler();
         private final Runnable getDimens = new Runnable() {
             @Override
             public void run() {
@@ -399,10 +400,11 @@ public class ImagePresenter<T> {
 
         private static class SizeObserver implements ViewTreeObserver.OnGlobalLayoutListener {
             private final WeakReference<SizeDeterminer> sizeDeterminerRef;
-            private Handler handler = new Handler();
+            private final Handler handler;
 
-            public SizeObserver(SizeDeterminer sizeDeterminer) {
+            public SizeObserver(SizeDeterminer sizeDeterminer, Handler handler) {
                 this.sizeDeterminerRef = new WeakReference<SizeDeterminer>(sizeDeterminer);
+                this.handler = handler;
             }
 
             @Override
@@ -428,10 +430,11 @@ public class ImagePresenter<T> {
 
         public SizeDeterminer(View view) {
             this.view = view;
-            view.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(this));
+            view.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(this, handler));
         }
 
         public void getSize(SizeReadyCallback cb) {
+            handler.removeCallbacksAndMessages(PENDING_SIZE_CHANGE_TOKEN);
             this.cb = null;
             ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             if (layoutParams.width > 0 && layoutParams.height > 0) {
@@ -440,8 +443,7 @@ public class ImagePresenter<T> {
                 cb.onSizeReady(width, height);
             } else {
                 this.cb = cb;
-                view.removeCallbacks(getDimens);
-                view.post(getDimens);
+                handler.postAtTime(getDimens, PENDING_SIZE_CHANGE_TOKEN, SystemClock.uptimeMillis() + PENDING_SIZE_CHANGE_DELAY);
             }
         }
 
