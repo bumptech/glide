@@ -7,8 +7,8 @@ package com.bumptech.photos.resize.cache;
 import android.graphics.Bitmap;
 import com.bumptech.photos.util.Log;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
@@ -26,30 +26,27 @@ public class SizedBitmapCache {
 
     public synchronized void put(Bitmap bitmap) {
         final String sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
-        Queue<Bitmap> available;
-        available = availableBitmaps.get(sizeKey);
+        Queue<Bitmap> available = availableBitmaps.get(sizeKey);
         if (available == null) {
-            available = new LinkedList<Bitmap>();
+            available = new ArrayDeque<Bitmap>();
             availableBitmaps.put(sizeKey, available);
         }
 
         if (available.size() < maxPerSize) {
-            available.add(bitmap);
+            available.offer(bitmap);
         }
     }
 
     public synchronized Bitmap get(int width, int height) {
         final String sizeKey = getSizeKey(width, height);
-        final Queue<Bitmap> available;
+        final Queue<Bitmap> available = availableBitmaps.get(sizeKey);
 
-         available = availableBitmaps.get(sizeKey);
-
-        if (available == null || available.size() == 0) {
+        if (available == null) {
             Log.d("SBC: missing bitmap for key= " + sizeKey);
             return null;
         } else {
             //Log.d("SBC:  get key=" + sizeKey + " available=" + (available.size() - 1));
-            return available.remove();
+            return available.poll();
         }
     }
 
