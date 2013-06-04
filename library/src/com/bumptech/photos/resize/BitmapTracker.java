@@ -3,10 +3,9 @@ package com.bumptech.photos.resize;
 import android.graphics.Bitmap;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,79 +15,95 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class BitmapTracker {
+
+    private static class InnerTrackerPool {
+        private ConcurrentLinkedQueue<InnerTracker> pool = new ConcurrentLinkedQueue<InnerTracker>();
+
+        public InnerTracker get() {
+            InnerTracker result = pool.poll();
+            if (result == null) {
+                result = new InnerTracker();
+            }
+
+            return result;
+        }
+
+        public void release(InnerTracker innerTracker) {
+            pool.offer(innerTracker);
+        }
+    }
+
+    private static class InnerTracker {
+        private volatile int refs = 0;
+        private volatile boolean pending = false;
+
+        public void acquire() {
+            pending = false;
+            synchronized (this) {
+                refs++;
+            }
+        }
+
+        public boolean release() {
+            synchronized (this) {
+                refs--;
+            }
+
+            return refs == 0 && !pending;
+        }
+
+        public boolean reject() {
+            pending = false;
+            return refs == 0;
+        }
+
+        public void markPending() {
+            pending = true;
+        }
+    }
+
+    private final Map<Integer, InnerTracker> counter;
     private final SizedBitmapCache target;
-    private final BitmapReferenceCounter counter = new BitmapReferenceCounter();
-    private final Set<Integer> pending = new HashSet<Integer>();
+    private final InnerTrackerPool pool = new InnerTrackerPool();
 
-    public BitmapTracker(SizedBitmapCache target) {
+    public BitmapTracker(SizedBitmapCache target, int bitmapsPerSize) {
         this.target = target;
+        counter = new ConcurrentHashMap<Integer, InnerTracker>(bitmapsPerSize * 6, 0.75f, 4);
     }
 
-    public synchronized void acquireBitmap(Bitmap bitmap) {
-        final int hashCode = bitmap.hashCode();
-        pending.remove(hashCode);
-        counter.inc(hashCode);
+    public void initBitmap(Bitmap toInit) {
+        counter.put(toInit.hashCode(), pool.get());
     }
 
-    public synchronized void releaseBitmap(Bitmap bitmap) {
-        final int hashCode = bitmap.hashCode();
-        if (counter.dec(hashCode) == 0 && !pending.contains(hashCode)) {
-            counter.rem(hashCode);
-            target.put(bitmap);
-        }
+    public void acquireBitmap(Bitmap bitmap) {
+        get(bitmap).acquire();
     }
 
-    public synchronized void rejectBitmap(Bitmap bitmap) {
-        final int hashCode = bitmap.hashCode();
-        pending.remove(hashCode);
-        if (counter.get(hashCode) == 0) {
-            counter.rem(hashCode);
-            target.put(bitmap);
+    public void releaseBitmap(Bitmap bitmap) {
+        final InnerTracker tracker = get(bitmap);
+        if (tracker.release()) {
+            recycle(tracker, bitmap);
         }
     }
 
-    public synchronized void markPending(Bitmap bitmap) {
-        final int hashCode = bitmap.hashCode();
-        pending.add(hashCode);
+    public void rejectBitmap(Bitmap bitmap) {
+        final InnerTracker tracker = get(bitmap);
+        if (tracker.reject()) {
+            recycle(tracker, bitmap);
+        }
     }
 
-    private class BitmapReferenceCounter {
-        private final Map<Integer, Integer> counter = new HashMap<Integer, Integer>();
+    public void markPending(Bitmap bitmap) {
+        get(bitmap).markPending();
+    }
 
-        public void inc(int hashCode) {
-            Integer currentCount = counter.get(hashCode);
-            if (currentCount == null) {
-                currentCount = 0;
-            }
-            counter.put(hashCode, currentCount + 1);
-        }
+    private InnerTracker get(Bitmap bitmap) {
+        return counter.get(bitmap.hashCode());
+    }
 
-        public int dec(int hashCode) {
-            Integer currentCount = counter.get(hashCode);
-            if (currentCount == null) {
-                throw new IllegalArgumentException("Can't decrement null count bitmap=" + hashCode);
-            }
-
-            currentCount--;
-
-            counter.put(hashCode, currentCount);
-
-            return currentCount;
-        }
-
-        public int get(int hashCode) {
-            Integer currentCount = counter.get(hashCode);
-
-            if (currentCount == null) {
-                currentCount = 0;
-            }
-
-            return currentCount;
-        }
-
-        public void rem(int hashCode) {
-            counter.remove(hashCode);
-        }
-
+    private void recycle(InnerTracker tracker, Bitmap bitmap) {
+        counter.remove(bitmap.hashCode());
+        pool.release(tracker);
+        target.put(bitmap);
     }
 }

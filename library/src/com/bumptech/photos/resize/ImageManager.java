@@ -28,7 +28,7 @@ import java.util.concurrent.RejectedExecutionException;
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
  * sdk version, uses a  combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
- * load and resize  * operations performed and to maximize the number of times Bitmaps are recycled as opposed to
+ * load and resize * operations performed and to maximize the number of times Bitmaps are recycled as opposed to
  * allocated.
  *
  * If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if possible. Note
@@ -266,7 +266,7 @@ public class ImageManager {
                 });
             }
             bitmapCache = new SizedBitmapCache(options.maxPerSize);
-            bitmapTracker = new BitmapTracker(bitmapCache);
+            bitmapTracker = new BitmapTracker(bitmapCache, options.maxPerSize);
         } else {
             if (CAN_RECYCLE)
                 options.bitmapDecodeOptions.inMutable = false;
@@ -467,6 +467,12 @@ public class ImageManager {
         bitmapTracker.markPending(b);
     }
 
+    private void initBitmapTracker(final Bitmap b) {
+        if (bitmapTracker == null) return;
+
+        bitmapTracker.initBitmap(b);
+    }
+
     public void cancelTask(Object token) {
         if (token != null) {
             ImageManagerJob job = (ImageManagerJob) token;
@@ -580,6 +586,8 @@ public class ImageManager {
                 if (useDiskCache && !isInDiskCache) {
                     putInDiskCache(key, result);
                 }
+
+                initBitmapTracker(result);
 
                 putInMemoryCache(key, result);
                 mainHandler.post(new Runnable() {
