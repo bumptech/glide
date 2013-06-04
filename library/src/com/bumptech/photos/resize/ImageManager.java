@@ -575,20 +575,18 @@ public class ImageManager {
             }
         }
 
-        private void finishResize(Bitmap result, boolean isInDiskCache) {
+        private void finishResize(final Bitmap result, boolean isInDiskCache) {
             if (result != null) {
                 if (useDiskCache && !isInDiskCache) {
                     putInDiskCache(key, result);
                 }
 
-                final Bitmap finalResult = result;
-                putInMemoryCache(key, finalResult);
+                putInMemoryCache(key, result);
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        cb.onLoadCompleted(finalResult);
+                        cb.onLoadCompleted(result);
                     }
-
                 });
             }
 
