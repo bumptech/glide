@@ -10,7 +10,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.os.Build;
-import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapPool;
+import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.photos.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.photos.util.Log;
 
 import java.io.FileInputStream;
@@ -26,8 +27,7 @@ import java.util.Queue;
 public class ImageResizer {
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
-
-    private final ConcurrentBitmapPool bitmapPool;
+    private final BitmapPool bitmapPool;
 
     private final BitmapFactory.Options defaultOptions;
 
@@ -50,7 +50,7 @@ public class ImageResizer {
         this(null, null);
     }
 
-    public ImageResizer(ConcurrentBitmapPool bitmapPool) {
+    public ImageResizer(BitmapPool bitmapPool) {
         this(bitmapPool, null);
     }
 
@@ -63,8 +63,13 @@ public class ImageResizer {
      *
      * @param bitmapPool The cache to try to recycle {@link android.graphics.Bitmap}s from
      */
-    public ImageResizer(ConcurrentBitmapPool bitmapPool, BitmapFactory.Options defaultOptions){
-        this.bitmapPool = bitmapPool;
+    public ImageResizer(BitmapPool bitmapPool, BitmapFactory.Options defaultOptions){
+        if (bitmapPool == null) {
+            this.bitmapPool = new BitmapPoolAdapter();
+        } else {
+            this.bitmapPool = bitmapPool;
+        }
+
         if (defaultOptions == null) {
             this.defaultOptions = getDefaultOptions();
         } else {
@@ -390,11 +395,7 @@ public class ImageResizer {
     }
 
     private Bitmap getRecycled(int width, int height) {
-        Bitmap result = null;
-        if (bitmapPool != null) {
-            result = bitmapPool.get(width, height);
-        }
-        return result;
+        return bitmapPool.get(width, height);
     }
 
     private byte[][] getTempBytes() {

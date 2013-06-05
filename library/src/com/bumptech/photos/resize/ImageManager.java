@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapPool;
 import com.bumptech.photos.resize.cache.DiskCache;
 import com.bumptech.photos.resize.cache.DiskCacheAdapter;
@@ -120,7 +121,6 @@ public class ImageManager {
     private final ExecutorService executor;
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
-    private final ConcurrentBitmapPool bitmapCache;
     private final DiskCache diskCache;
     private final Bitmap.CompressFormat diskCacheFormat;
 
@@ -276,6 +276,7 @@ public class ImageManager {
 
         diskCacheFormat = options.diskCacheFormat;
 
+        final BitmapPool bitmapPool;
         if (options.recycleBitmaps && CAN_RECYCLE) {
             memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
                 @Override
@@ -283,18 +284,18 @@ public class ImageManager {
                     releaseBitmap(bitmap);
                 }
             });
-            bitmapCache = new ConcurrentBitmapPool(options.maxPerSize);
-            bitmapTracker = new BitmapTracker(bitmapCache, options.maxPerSize);
+            bitmapPool = new ConcurrentBitmapPool(options.maxPerSize);
+            bitmapTracker = new BitmapTracker(bitmapPool, options.maxPerSize);
         } else {
             if (CAN_RECYCLE)
                 options.bitmapDecodeOptions.inMutable = false;
-            bitmapCache = null;
+            bitmapPool = null;
             bitmapTracker = null;
         }
 
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
-        this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
+        this.resizer = new ImageResizer(bitmapPool, options.bitmapDecodeOptions);
     }
 
     /**

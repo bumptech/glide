@@ -15,7 +15,7 @@ import java.util.Queue;
 /**
  * A cache of Bitmaps made available by size used to manage recycled bitmaps
  */
-public class ConcurrentBitmapPool {
+public class ConcurrentBitmapPool implements BitmapPool {
     private static final int DEFAULT_MAX_PER_SIZE = 20;
     private Map<Integer, Queue<Bitmap>> availableBitmaps = new HashMap<Integer, Queue<Bitmap>>();
     private final int maxPerSize;
@@ -24,6 +24,7 @@ public class ConcurrentBitmapPool {
         this.maxPerSize = maxPerSize == 0 ? DEFAULT_MAX_PER_SIZE : maxPerSize;
     }
 
+    @Override
     public synchronized void put(Bitmap bitmap) {
         final int sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
         Queue<Bitmap> available = availableBitmaps.get(sizeKey);
@@ -36,6 +37,7 @@ public class ConcurrentBitmapPool {
         }
     }
 
+    @Override
     public synchronized Bitmap get(int width, int height) {
         final int sizeKey = getSizeKey(width, height);
         final Queue<Bitmap> available = availableBitmaps.get(sizeKey);
