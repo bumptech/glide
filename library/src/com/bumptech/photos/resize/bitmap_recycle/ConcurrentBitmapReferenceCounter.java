@@ -1,7 +1,6 @@
 package com.bumptech.photos.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Time: 9:54 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ConcurrentBitmapReferenceCounter {
+public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter {
 
     private static class InnerTrackerPool {
         private ConcurrentLinkedQueue<InnerTracker> pool = new ConcurrentLinkedQueue<InnerTracker>();
@@ -71,14 +70,17 @@ public class ConcurrentBitmapReferenceCounter {
         counter = new ConcurrentHashMap<Integer, InnerTracker>(bitmapsPerSize * 6, 0.75f, 4);
     }
 
+    @Override
     public void initBitmap(Bitmap toInit) {
         counter.put(toInit.hashCode(), pool.get());
     }
 
+    @Override
     public void acquireBitmap(Bitmap bitmap) {
         get(bitmap).acquire();
     }
 
+    @Override
     public void releaseBitmap(Bitmap bitmap) {
         final InnerTracker tracker = get(bitmap);
         if (tracker.release()) {
@@ -86,6 +88,7 @@ public class ConcurrentBitmapReferenceCounter {
         }
     }
 
+    @Override
     public void rejectBitmap(Bitmap bitmap) {
         final InnerTracker tracker = get(bitmap);
         if (tracker.reject()) {
@@ -93,6 +96,7 @@ public class ConcurrentBitmapReferenceCounter {
         }
     }
 
+    @Override
     public void markPending(Bitmap bitmap) {
         get(bitmap).markPending();
     }

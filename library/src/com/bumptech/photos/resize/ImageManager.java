@@ -12,6 +12,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounter;
+import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
 import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapPool;
 import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapReferenceCounter;
 import com.bumptech.photos.resize.cache.DiskCache;
@@ -43,7 +45,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class ImageManager {
     private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
-    private final ConcurrentBitmapReferenceCounter bitmapTracker;
+    private final BitmapReferenceCounter bitmapReferenceCounter;
 
     /**
      * A class for setting options for an ImageManager
@@ -286,12 +288,12 @@ public class ImageManager {
                 }
             });
             bitmapPool = new ConcurrentBitmapPool(options.maxPerSize);
-            bitmapTracker = new ConcurrentBitmapReferenceCounter(bitmapPool, options.maxPerSize);
+            bitmapReferenceCounter = new ConcurrentBitmapReferenceCounter(bitmapPool, options.maxPerSize);
         } else {
             if (CAN_RECYCLE)
                 options.bitmapDecodeOptions.inMutable = false;
             bitmapPool = null;
-            bitmapTracker = null;
+            bitmapReferenceCounter = new BitmapReferenceCounterAdapter();
         }
 
         this.memoryCache = memoryCache;
@@ -442,8 +444,7 @@ public class ImageManager {
      * @param b The rejected Bitmap
      */
     public void rejectBitmap(final Bitmap b) {
-        if (bitmapTracker == null) return;
-        bitmapTracker.rejectBitmap(b);
+        bitmapReferenceCounter.rejectBitmap(b);
     }
 
     /**
@@ -455,8 +456,7 @@ public class ImageManager {
      * @param b The acquired Bitmap
      */
     public void acquireBitmap(Bitmap b) {
-        if (bitmapTracker == null) return;
-        bitmapTracker.acquireBitmap(b);
+        bitmapReferenceCounter.acquireBitmap(b);
     }
 
     /**
@@ -468,31 +468,7 @@ public class ImageManager {
      * @param b The releasedBitmap
      */
     public void releaseBitmap(final Bitmap b) {
-        if (bitmapTracker == null) return;
-        bitmapTracker.releaseBitmap(b);
-    }
-
-    /**
-     * An internal method notifying the tracker that this bitmap is referenced but not necessarily used
-     * by an external object. These bitmaps will not be recycled if their references drop to 0 unless they are
-     * first accepted or are rejected before or after their references drop to 0. This is used because the memory cache
-     * can force a bitmap to be removed b/c of size constraints while a callback referencing that bitmap is still
-     * on the queue of the main thread waiting to be called. If the bitmap were not marked and the memory cache released
-     * the bitmap before the callback was called on the main thread, then the bitmap would be placed in the queue to be
-     * recycled once by the memory cache and then again by the object owning the callback.
-     *
-     * @param b The bitmap to mark
-     */
-    private void markBitmapPending(final Bitmap b) {
-        if (bitmapTracker == null) return;
-
-        bitmapTracker.markPending(b);
-    }
-
-    private void initBitmapTracker(final Bitmap b) {
-        if (bitmapTracker == null) return;
-
-        bitmapTracker.initBitmap(b);
+        bitmapReferenceCounter.releaseBitmap(b);
     }
 
     public void cancelTask(Object token) {
@@ -609,7 +585,7 @@ public class ImageManager {
                     diskCache.put(String.valueOf(key), result, diskCacheFormat);
                 }
 
-                initBitmapTracker(result);
+                bitmapReferenceCounter.initBitmap(result);
 
                 putInMemoryCache(key, result);
                 mainHandler.post(new Runnable() {
@@ -629,7 +605,7 @@ public class ImageManager {
     private void putInMemoryCache(int key, Bitmap bitmap) {
         if (memoryCache.put(key, bitmap) != bitmap) {
             acquireBitmap(bitmap);
-            markBitmapPending(bitmap);
+            bitmapReferenceCounter.markPending(bitmap);
         }
     }
 
