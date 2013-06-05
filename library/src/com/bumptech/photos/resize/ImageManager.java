@@ -14,6 +14,8 @@ import android.os.HandlerThread;
 import com.bumptech.photos.resize.cache.DiskCache;
 import com.bumptech.photos.resize.cache.DiskCacheAdapter;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
+import com.bumptech.photos.resize.cache.MemoryCache;
+import com.bumptech.photos.resize.cache.MemoryCacheAdapter;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
 import com.bumptech.photos.resize.cache.disk.AndroidDiskCache;
 import com.bumptech.photos.util.Log;
@@ -116,7 +118,7 @@ public class ImageManager {
     private final Handler mainHandler = new Handler();
     private final Handler bgHandler;
     private final ExecutorService executor;
-    private final LruPhotoCache memoryCache;
+    private final MemoryCache memoryCache;
     private final ImageResizer resizer;
     private final SizedBitmapCache bitmapCache;
     private final DiskCache diskCache;
@@ -189,6 +191,21 @@ public class ImageManager {
         }
 
         return result;
+
+    }
+
+    private static MemoryCache buildMemoryCache(Options options, Context context) {
+        if (options.useMemoryCache && options.maxMemorySize <= 0) {
+            options.maxMemorySize = LruPhotoCache.getMaxCacheSize(context);
+        }
+
+        final MemoryCache result;
+        if (!options.useMemoryCache) {
+            result = new MemoryCacheAdapter();
+        } else {
+            result = new LruPhotoCache(options.maxMemorySize);
+        }
+        return result;
     }
 
     /**
@@ -248,6 +265,10 @@ public class ImageManager {
     }
 
     public ImageManager(Context context, DiskCache diskCache, ExecutorService resizeService, Options options) {
+        this(buildMemoryCache(options, context), diskCache, resizeService, options);
+    }
+
+    public ImageManager(MemoryCache memoryCache, DiskCache diskCache, ExecutorService resizeService, Options options) {
         HandlerThread bgThread = new HandlerThread("bg_thread");
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
@@ -255,25 +276,13 @@ public class ImageManager {
 
         diskCacheFormat = options.diskCacheFormat;
 
-        if (options.useMemoryCache && options.maxMemorySize <= 0) {
-            options.maxMemorySize = LruPhotoCache.getMaxCacheSize(context);
-        }
-
-        if (!options.useMemoryCache) {
-            memoryCache = null;
-        } else {
-            memoryCache = new LruPhotoCache(options.maxMemorySize);
-        }
-
         if (options.recycleBitmaps && CAN_RECYCLE) {
-            if (memoryCache != null) {
-                memoryCache.setPhotoRemovedListener(new LruPhotoCache.PhotoRemovedListener() {
-                    @Override
-                    public void onPhotoRemoved(Integer key, Bitmap bitmap) {
-                        releaseBitmap(bitmap);
-                    }
-                });
-            }
+            memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
+                @Override
+                public void onImageRemoved(Bitmap bitmap) {
+                    releaseBitmap(bitmap);
+                }
+            });
             bitmapCache = new SizedBitmapCache(options.maxPerSize);
             bitmapTracker = new BitmapTracker(bitmapCache, options.maxPerSize);
         } else {
@@ -283,6 +292,7 @@ public class ImageManager {
             bitmapTracker = null;
         }
 
+        this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
     }
@@ -504,7 +514,7 @@ public class ImageManager {
     }
 
     private boolean returnFromCache(int key, LoadedCallback cb) {
-        Bitmap inCache = getFromMemoryCache(key);
+        Bitmap inCache = memoryCache.get(key);
         boolean found = inCache != null;
         if (found) {
             cb.onLoadCompleted(inCache);
@@ -614,23 +624,10 @@ public class ImageManager {
     }
 
 
-    private Bitmap getFromMemoryCache(int key) {
-        Bitmap result = null;
-        if (memoryCache != null) {
-            result = memoryCache.get(key);
-        }
-        return result;
-    }
-
     private void putInMemoryCache(int key, Bitmap bitmap) {
-        if (memoryCache != null) {
-            synchronized (memoryCache) {
-                if (!memoryCache.contains(key)) {
-                    acquireBitmap(bitmap);
-                    markBitmapPending(bitmap);
-                    memoryCache.put(key, bitmap);
-                }
-            }
+        if (memoryCache.put(key, bitmap) != bitmap) {
+            acquireBitmap(bitmap);
+            markBitmapPending(bitmap);
         }
     }
 
