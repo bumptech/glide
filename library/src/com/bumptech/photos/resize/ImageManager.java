@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapPool;
+import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapReferenceCounter;
 import com.bumptech.photos.resize.cache.DiskCache;
 import com.bumptech.photos.resize.cache.DiskCacheAdapter;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
@@ -42,7 +43,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class ImageManager {
     private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
-    private final BitmapTracker bitmapTracker;
+    private final ConcurrentBitmapReferenceCounter bitmapTracker;
 
     /**
      * A class for setting options for an ImageManager
@@ -285,7 +286,7 @@ public class ImageManager {
                 }
             });
             bitmapPool = new ConcurrentBitmapPool(options.maxPerSize);
-            bitmapTracker = new BitmapTracker(bitmapPool, options.maxPerSize);
+            bitmapTracker = new ConcurrentBitmapReferenceCounter(bitmapPool, options.maxPerSize);
         } else {
             if (CAN_RECYCLE)
                 options.bitmapDecodeOptions.inMutable = false;

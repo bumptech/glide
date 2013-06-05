@@ -1,4 +1,4 @@
-package com.bumptech.photos.resize;
+package com.bumptech.photos.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Time: 9:54 AM
  * To change this template use File | Settings | File Templates.
  */
-public class BitmapTracker {
+public class ConcurrentBitmapReferenceCounter {
 
     private static class InnerTrackerPool {
         private ConcurrentLinkedQueue<InnerTracker> pool = new ConcurrentLinkedQueue<InnerTracker>();
@@ -66,7 +66,7 @@ public class BitmapTracker {
     private final BitmapPool target;
     private final InnerTrackerPool pool = new InnerTrackerPool();
 
-    public BitmapTracker(BitmapPool target, int bitmapsPerSize) {
+    public ConcurrentBitmapReferenceCounter(BitmapPool target, int bitmapsPerSize) {
         this.target = target;
         counter = new ConcurrentHashMap<Integer, InnerTracker>(bitmapsPerSize * 6, 0.75f, 4);
     }
