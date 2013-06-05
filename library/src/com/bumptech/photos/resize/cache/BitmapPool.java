@@ -15,12 +15,12 @@ import java.util.Queue;
 /**
  * A cache of Bitmaps made available by size used to manage recycled bitmaps
  */
-public class SizedBitmapCache {
+public class BitmapPool {
     private static final int DEFAULT_MAX_PER_SIZE = 20;
     private Map<String, Queue<Bitmap>> availableBitmaps = new HashMap<String, Queue<Bitmap>>();
     private final int maxPerSize;
 
-    public SizedBitmapCache(int maxPerSize) {
+    public BitmapPool(int maxPerSize) {
         this.maxPerSize = maxPerSize == 0 ? DEFAULT_MAX_PER_SIZE : maxPerSize;
     }
 

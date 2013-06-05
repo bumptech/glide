@@ -10,7 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.os.Build;
-import com.bumptech.photos.resize.cache.SizedBitmapCache;
+import com.bumptech.photos.resize.cache.BitmapPool;
 import com.bumptech.photos.util.Log;
 
 import java.io.FileInputStream;
@@ -26,7 +26,7 @@ import java.util.Queue;
 public class ImageResizer {
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
-    private final SizedBitmapCache bitmapCache;
+    private final BitmapPool bitmapPool;
     private final BitmapFactory.Options defaultOptions;
 
     public static BitmapFactory.Options getDefaultOptions() {
@@ -48,8 +48,8 @@ public class ImageResizer {
         this(null, null);
     }
 
-    public ImageResizer(SizedBitmapCache bitmapCache) {
-        this(bitmapCache, null);
+    public ImageResizer(BitmapPool bitmapPool) {
+        this(bitmapPool, null);
     }
 
     public ImageResizer(BitmapFactory.Options options) {
@@ -59,10 +59,11 @@ public class ImageResizer {
     /**
      * Creates a new resizer that will attempt to recycle {@link android.graphics.Bitmap}s if any are available in the given dimensions
      *
-     * @param bitmapCache The cache to try to recycle {@link android.graphics.Bitmap}s from
+     * @param bitmapPool The cache to try to recycle {@link android.graphics.Bitmap}s from
      */
-    public ImageResizer(SizedBitmapCache bitmapCache, BitmapFactory.Options defaultOptions){
-        this.bitmapCache = bitmapCache;
+    public ImageResizer(BitmapPool bitmapPool, BitmapFactory.Options defaultOptions){
+        this.bitmapPool = bitmapPool;
+
         if (defaultOptions == null) {
             this.defaultOptions = getDefaultOptions();
         } else {
@@ -389,8 +390,8 @@ public class ImageResizer {
 
     private Bitmap getRecycled(int width, int height) {
         Bitmap result = null;
-        if (bitmapCache != null) {
-            result = bitmapCache.get(width, height);
+        if (bitmapPool != null) {
+            result = bitmapPool.get(width, height);
         }
         return result;
     }

@@ -1,7 +1,7 @@
 package com.bumptech.photos.resize;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.resize.cache.SizedBitmapCache;
+import com.bumptech.photos.resize.cache.BitmapPool;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,10 +63,10 @@ public class BitmapTracker {
     }
 
     private final Map<Integer, InnerTracker> counter;
-    private final SizedBitmapCache target;
+    private final BitmapPool target;
     private final InnerTrackerPool pool = new InnerTrackerPool();
 
-    public BitmapTracker(SizedBitmapCache target, int bitmapsPerSize) {
+    public BitmapTracker(BitmapPool target, int bitmapsPerSize) {
         this.target = target;
         counter = new ConcurrentHashMap<Integer, InnerTracker>(bitmapsPerSize * 6, 0.75f, 4);
     }
