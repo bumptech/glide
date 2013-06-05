@@ -11,9 +11,11 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import com.bumptech.photos.resize.cache.DiskCache;
+import com.bumptech.photos.resize.cache.DiskCacheAdapter;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
 import com.bumptech.photos.resize.cache.SizedBitmapCache;
-import com.bumptech.photos.resize.cache.disk.DiskCache;
+import com.bumptech.photos.resize.cache.disk.AndroidDiskCache;
 import com.bumptech.photos.util.Log;
 import com.bumptech.photos.util.Util;
 
@@ -175,6 +177,20 @@ public class ImageManager {
         }
     }
 
+    private static DiskCache buildDiskCacheFor(Options options, File diskCacheDir) {
+        if (options.useDiskCache && options.maxDiskCacheSize <= 0) {
+            options.maxDiskCacheSize = MAX_DISK_CACHE_SIZE;
+        }
+        final DiskCache result;
+        if (diskCacheDir == null || !options.useDiskCache) {
+            result = new DiskCacheAdapter();
+        } else {
+            result = AndroidDiskCache.get(diskCacheDir, options.maxDiskCacheSize);
+        }
+
+        return result;
+    }
+
     /**
      * Create an ImageManager using the default options. Note that this will create a single background thread to use
      * to resize and load images from disk. Must be created in the UI thread!
@@ -228,27 +244,20 @@ public class ImageManager {
      * @param options The specified options
      */
     public ImageManager(Context context, File diskCacheDir, ExecutorService resizeService, Options options) {
+        this(context, buildDiskCacheFor(options, diskCacheDir), resizeService, options);
+    }
+
+    public ImageManager(Context context, DiskCache diskCache, ExecutorService resizeService, Options options) {
         HandlerThread bgThread = new HandlerThread("bg_thread");
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = resizeService;
 
+        diskCacheFormat = options.diskCacheFormat;
 
         if (options.useMemoryCache && options.maxMemorySize <= 0) {
             options.maxMemorySize = LruPhotoCache.getMaxCacheSize(context);
         }
-
-        if (options.useDiskCache && options.maxDiskCacheSize <= 0) {
-            options.maxDiskCacheSize = MAX_DISK_CACHE_SIZE;
-        }
-
-        if (diskCacheDir == null || !options.useDiskCache) {
-            diskCache = null;
-        } else {
-            diskCache = DiskCache.get(diskCacheDir, options.maxDiskCacheSize);
-        }
-
-        diskCacheFormat = options.diskCacheFormat;
 
         if (!options.useMemoryCache) {
             memoryCache = null;
@@ -274,6 +283,7 @@ public class ImageManager {
             bitmapTracker = null;
         }
 
+        this.diskCache = diskCache;
         this.resizer = new ImageResizer(bitmapCache, options.bitmapDecodeOptions);
     }
 
@@ -542,7 +552,7 @@ public class ImageManager {
             final boolean isInDiskCache;
             String path = null;
             if (useDiskCache) {
-                path = getFromDiskCache(key);
+                path = diskCache.get(String.valueOf(key));
             }
 
             isInDiskCache = path != null;
@@ -584,7 +594,7 @@ public class ImageManager {
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
             if (result != null) {
                 if (useDiskCache && !isInDiskCache) {
-                    putInDiskCache(key, result);
+                    diskCache.put(String.valueOf(key), result, diskCacheFormat);
                 }
 
                 initBitmapTracker(result);
@@ -603,20 +613,6 @@ public class ImageManager {
         protected abstract Bitmap resizeIfNotFound() throws FileNotFoundException;
     }
 
-
-    private String getFromDiskCache(int key) {
-        String result = null;
-        if (diskCache != null) {
-            result = diskCache.get(String.valueOf(key));
-        }
-        return result;
-    }
-
-    private void putInDiskCache(int key, Bitmap value) {
-        if (diskCache != null) {
-            diskCache.put(String.valueOf(key), value, diskCacheFormat);
-        }
-    }
 
     private Bitmap getFromMemoryCache(int key) {
         Bitmap result = null;

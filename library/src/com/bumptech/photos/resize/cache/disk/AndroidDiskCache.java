@@ -5,6 +5,7 @@
 package com.bumptech.photos.resize.cache.disk;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.resize.cache.DiskCache;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -27,24 +28,24 @@ import java.util.concurrent.locks.ReentrantLock;
  * Time: 9:20 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DiskCache {
-    private static String JOURNAL_FILE_NAME = "JOURNAL";
-    private static DiskCache CACHE = null;
+public class AndroidDiskCache implements DiskCache {
+    private static final String JOURNAL_FILE_NAME = "JOURNAL";
+    private static AndroidDiskCache CACHE = null;
 
     private final File outputDir;
     private Journal journal;
     private boolean isOpen = false;
     private Map<String, ReentrantLock> lockMap = new HashMap<String, ReentrantLock>();
 
-    public static synchronized DiskCache get(File diskCacheDir, int maxCacheSize) {
+    public static synchronized AndroidDiskCache get(File diskCacheDir, int maxCacheSize) {
         if (CACHE == null) {
-            CACHE = new DiskCache(diskCacheDir, maxCacheSize);
+            CACHE = new AndroidDiskCache(diskCacheDir, maxCacheSize);
         }
 
         return CACHE;
     }
 
-    protected DiskCache(File outputDir, int maxCacheSize) {
+    protected AndroidDiskCache(File outputDir, int maxCacheSize) {
         this.outputDir = outputDir;
         this.journal = new Journal(getFile(JOURNAL_FILE_NAME), maxCacheSize, new Journal.EvictionListener() {
             @Override
@@ -64,6 +65,7 @@ public class DiskCache {
         }
     }
 
+    @Override
     public void put(String key, final Bitmap bitmap, Bitmap.CompressFormat format) {
         synchronized (this) {
             if (!isOpen) open();
@@ -114,6 +116,7 @@ public class DiskCache {
         return lock;
     }
 
+    @Override
     public String get(String key) {
         synchronized (this) {
             if (!isOpen) open();
