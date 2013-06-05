@@ -17,7 +17,7 @@ import java.util.Queue;
  */
 public class BitmapPool {
     private static final int DEFAULT_MAX_PER_SIZE = 20;
-    private Map<String, Queue<Bitmap>> availableBitmaps = new HashMap<String, Queue<Bitmap>>();
+    private Map<Integer, Queue<Bitmap>> availableBitmaps = new HashMap<Integer, Queue<Bitmap>>();
     private final int maxPerSize;
 
     public BitmapPool(int maxPerSize) {
@@ -25,20 +25,19 @@ public class BitmapPool {
     }
 
     public synchronized void put(Bitmap bitmap) {
-        final String sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
+        final int sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
         Queue<Bitmap> available = availableBitmaps.get(sizeKey);
         if (available == null) {
             available = new ArrayDeque<Bitmap>();
             availableBitmaps.put(sizeKey, available);
-        }
-
-        if (available.size() < maxPerSize) {
+            available.offer(bitmap);
+        } else if (available.size() < maxPerSize) {
             available.offer(bitmap);
         }
     }
 
     public synchronized Bitmap get(int width, int height) {
-        final String sizeKey = getSizeKey(width, height);
+        final int sizeKey = getSizeKey(width, height);
         final Queue<Bitmap> available = availableBitmaps.get(sizeKey);
 
         if (available == null) {
@@ -50,7 +49,9 @@ public class BitmapPool {
         }
     }
 
-    private static final String getSizeKey(int width, int height) {
-        return width + "_" + height;
+    //see http://szudzik.com/ElegantPairing.pdf
+    //assumes width <= Short.MAX_VALUE && height <= SHORT.MAX_VALUE && width >= 0 && height >= 0
+    private static int getSizeKey(int width, int height) {
+        return width >= height ? width * width + width + height : width + height * height;
     }
 }
