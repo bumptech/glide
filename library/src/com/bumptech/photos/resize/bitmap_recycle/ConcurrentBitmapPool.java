@@ -5,19 +5,17 @@
 package com.bumptech.photos.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import com.bumptech.photos.util.Log;
 
 import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A cache of Bitmaps made available by size used to manage recycled bitmaps
  */
 public class ConcurrentBitmapPool implements BitmapPool {
     private static final int DEFAULT_MAX_PER_SIZE = 20;
-    private Map<Integer, Queue<Bitmap>> availableBitmaps = new HashMap<Integer, Queue<Bitmap>>();
+    private ConcurrentHashMap<Integer, Queue<Bitmap>> availableBitmaps = new ConcurrentHashMap<Integer, Queue<Bitmap>>();
     private final int maxPerSize;
 
     public ConcurrentBitmapPool(int maxPerSize) {
@@ -25,30 +23,35 @@ public class ConcurrentBitmapPool implements BitmapPool {
     }
 
     @Override
-    public synchronized void put(Bitmap bitmap) {
+    public void put(Bitmap bitmap) {
         final int sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
         Queue<Bitmap> available = availableBitmaps.get(sizeKey);
         if (available == null) {
-            available = new ArrayDeque<Bitmap>();
-            availableBitmaps.put(sizeKey, available);
-            available.offer(bitmap);
-        } else if (available.size() < maxPerSize) {
+            synchronized (this) {
+                available = availableBitmaps.get(sizeKey);
+                if (available == null) {
+                    available = new ArrayDeque<Bitmap>(maxPerSize);
+                    availableBitmaps.put(sizeKey, available);
+                }
+            }
+        }
+
+        synchronized (available) {
             available.offer(bitmap);
         }
     }
 
     @Override
-    public synchronized Bitmap get(int width, int height) {
+    public Bitmap get(int width, int height) {
         final int sizeKey = getSizeKey(width, height);
         final Queue<Bitmap> available = availableBitmaps.get(sizeKey);
-
-        if (available == null) {
-            Log.d("SBC: missing bitmap for key= " + sizeKey);
-            return null;
-        } else {
-            //Log.d("SBC:  get key=" + sizeKey + " available=" + (available.size() - 1));
-            return available.poll();
+        Bitmap result = null;
+        if (available != null) {
+            synchronized (available) {
+                result = available.poll();
+            }
         }
+        return result;
     }
 
     //see http://szudzik.com/ElegantPairing.pdf
