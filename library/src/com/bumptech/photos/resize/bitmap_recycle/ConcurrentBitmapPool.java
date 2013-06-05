@@ -2,7 +2,7 @@
  * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
  */
 
-package com.bumptech.photos.resize.cache;
+package com.bumptech.photos.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
 import com.bumptech.photos.util.Log;
@@ -15,12 +15,12 @@ import java.util.Queue;
 /**
  * A cache of Bitmaps made available by size used to manage recycled bitmaps
  */
-public class BitmapPool {
+public class ConcurrentBitmapPool {
     private static final int DEFAULT_MAX_PER_SIZE = 20;
     private Map<Integer, Queue<Bitmap>> availableBitmaps = new HashMap<Integer, Queue<Bitmap>>();
     private final int maxPerSize;
 
-    public BitmapPool(int maxPerSize) {
+    public ConcurrentBitmapPool(int maxPerSize) {
         this.maxPerSize = maxPerSize == 0 ? DEFAULT_MAX_PER_SIZE : maxPerSize;
     }
 

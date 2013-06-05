@@ -11,7 +11,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import com.bumptech.photos.resize.cache.BitmapPool;
+import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapPool;
 import com.bumptech.photos.resize.cache.DiskCache;
 import com.bumptech.photos.resize.cache.DiskCacheAdapter;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
@@ -120,7 +120,7 @@ public class ImageManager {
     private final ExecutorService executor;
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
-    private final BitmapPool bitmapCache;
+    private final ConcurrentBitmapPool bitmapCache;
     private final DiskCache diskCache;
     private final Bitmap.CompressFormat diskCacheFormat;
 
@@ -283,7 +283,7 @@ public class ImageManager {
                     releaseBitmap(bitmap);
                 }
             });
-            bitmapCache = new BitmapPool(options.maxPerSize);
+            bitmapCache = new ConcurrentBitmapPool(options.maxPerSize);
             bitmapTracker = new BitmapTracker(bitmapCache, options.maxPerSize);
         } else {
             if (CAN_RECYCLE)
