@@ -33,12 +33,12 @@ public class AndroidDiskCache implements DiskCache {
 
     private final File outputDir;
     private Journal journal;
-    private boolean isOpen = false;
     private ConcurrentHashMap<String, ReentrantLock> lockMap = new ConcurrentHashMap<String, ReentrantLock>();
 
     public static synchronized AndroidDiskCache get(File diskCacheDir, int maxCacheSize) {
         if (CACHE == null) {
             CACHE = new AndroidDiskCache(diskCacheDir, maxCacheSize);
+            CACHE.open();
         }
 
         return CACHE;
@@ -55,8 +55,6 @@ public class AndroidDiskCache implements DiskCache {
     }
 
     private void open() {
-        if (isOpen) return;
-        isOpen = true;
         try {
             journal.open();
         } catch (IOException e) {
@@ -66,10 +64,6 @@ public class AndroidDiskCache implements DiskCache {
 
     @Override
     public void put(String key, final Bitmap bitmap, Bitmap.CompressFormat format) {
-        synchronized (this) {
-            if (!isOpen) open();
-        }
-
         final String safeKey = sha1Hash(key);
         final Lock lock = acquireLockFor(safeKey);
         lock.lock();
@@ -117,9 +111,6 @@ public class AndroidDiskCache implements DiskCache {
 
     @Override
     public String get(String key) {
-        synchronized (this) {
-            if (!isOpen) open();
-        }
 
         final String safeKey = sha1Hash(key);
         Lock lock = acquireLockFor(safeKey);
@@ -141,9 +132,6 @@ public class AndroidDiskCache implements DiskCache {
     }
 
     public void remove(String key) {
-        synchronized (this) {
-            if (!isOpen) open();
-        }
         delete(sha1Hash(key));
     }
 
