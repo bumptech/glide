@@ -7,7 +7,10 @@ package com.bumptech.photos.resize;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.*;
+import android.os.Build;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounter;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
@@ -321,7 +324,7 @@ public class ImageManager {
      */
     public Object getImage(final String path, final LoadedCallback cb){
         final int key = getKey(path, -1, -1, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+        return runJob(key, cb, false, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadAsIs(path);
@@ -331,7 +334,7 @@ public class ImageManager {
 
     public Object getImage(final InputStream is1, final InputStream is2, String id, LoadedCallback cb) {
         final int key = getKey(id, -1, -1, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+        return runJob(key, cb, false, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException {
                 return resizer.loadAsIs(is1, is2);
@@ -350,7 +353,7 @@ public class ImageManager {
      */
     public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(path, width, height, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob(key, cb) {
+        return runJob(key, cb, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadAsIs(path, width, height);
@@ -360,7 +363,7 @@ public class ImageManager {
 
     public Object getImageExact(final InputStream is, final int width, final int height, String id, LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob(key, cb) {
+        return runJob(key, cb, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException {
                 return resizer.loadAsIs(is, width, height);
@@ -379,7 +382,7 @@ public class ImageManager {
      */
     public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
         final int key = getKey(path, width, height, ResizeType.APPROXIMATE);
-        return runJob(key, cb, new ImageManagerJob(key, cb) {
+        return runJob(key, cb, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadAtLeast(path, width, height);
@@ -389,7 +392,7 @@ public class ImageManager {
 
     public Object getImageApproximate(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.APPROXIMATE);
-        return runJob(key, cb, new ImageManagerJob(key, cb) {
+        return runJob(key, cb, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException {
                 return resizer.loadAtLeast(is1, is2, width, height);
@@ -409,7 +412,7 @@ public class ImageManager {
      */
     public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
         final int key = getKey(path, width, height, ResizeType.CENTER_CROP);
-        return runJob(key, cb, new ImageManagerJob(key, cb) {
+        return runJob(key, cb, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.centerCrop(path, width, height);
@@ -419,7 +422,7 @@ public class ImageManager {
 
     public Object centerCrop(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.CENTER_CROP);
-        return runJob(key, cb, new ImageManagerJob(key, cb) {
+        return runJob(key, cb, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException {
                 return resizer.centerCrop(is1, is2, width, height);
@@ -439,7 +442,7 @@ public class ImageManager {
      */
     public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
         final int key = getKey(path, width, height, ResizeType.FIT_CENTER);
-        return runJob(key, cb, new ImageManagerJob(key, cb) {
+        return runJob(key, cb, new ImageManagerJob() {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.fitInSpace(path, width, height);
@@ -493,9 +496,13 @@ public class ImageManager {
         bgHandler.getLooper().quit();
     }
 
-    private Object runJob(int key, final LoadedCallback cb, final ImageManagerJob job) {
+    private Object runJob(int key, LoadedCallback cb, ImageManagerJob job) {
+        return runJob(key, cb, true, job);
+    }
+
+    private Object runJob(int key, LoadedCallback cb, boolean useDiskCache, ImageManagerJob job) {
         if (!returnFromCache(key, cb)) {
-            job.execute();
+            job.execute(key, cb, useDiskCache);
         }
         return job;
     }
@@ -510,23 +517,16 @@ public class ImageManager {
     }
 
     private abstract class ImageManagerJob implements Runnable {
-        private final int key;
-        private final LoadedCallback cb;
-        private final boolean useDiskCache;
+        private int key;
+        private LoadedCallback cb;
+        private boolean useDiskCache;
         private Future future = null;
         private volatile boolean cancelled = false;
 
-        public ImageManagerJob(int key, LoadedCallback cb) {
-            this(key, cb, true);
-        }
-
-        public ImageManagerJob(int key, LoadedCallback cb, boolean useDiskCache) {
+        public void execute(int key, LoadedCallback cb, boolean useDiskCache) {
             this.key = key;
             this.cb = cb;
             this.useDiskCache = useDiskCache;
-        }
-
-        public void execute() {
             bgHandler.post(this);
         }
 
