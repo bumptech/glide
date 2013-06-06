@@ -16,8 +16,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,7 +34,7 @@ public class AndroidDiskCache implements DiskCache {
     private final File outputDir;
     private Journal journal;
     private boolean isOpen = false;
-    private Map<String, ReentrantLock> lockMap = new HashMap<String, ReentrantLock>();
+    private ConcurrentHashMap<String, ReentrantLock> lockMap = new ConcurrentHashMap<String, ReentrantLock>();
 
     public static synchronized AndroidDiskCache get(File diskCacheDir, int maxCacheSize) {
         if (CACHE == null) {
@@ -105,12 +104,12 @@ public class AndroidDiskCache implements DiskCache {
     }
 
     private Lock acquireLockFor(String safeKey) {
-        ReentrantLock lock;
-        synchronized (lockMap) {
-            lock = lockMap.get(safeKey);
+        ReentrantLock lock = lockMap.get(safeKey);
+        if (lock == null) {
+            ReentrantLock newLock = new ReentrantLock();
+            lock = lockMap.putIfAbsent(safeKey, newLock);
             if (lock == null) {
-                lock = new ReentrantLock();
-                lockMap.put(safeKey, lock);
+                lock = newLock;
             }
         }
         return lock;
