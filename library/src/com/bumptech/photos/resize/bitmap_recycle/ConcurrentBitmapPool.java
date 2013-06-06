@@ -36,8 +36,12 @@ public class ConcurrentBitmapPool implements BitmapPool {
             }
         }
 
+        final boolean result;
         synchronized (available) {
-            available.offer(bitmap);
+            result = available.size() < maxPerSize;
+            if (result) {
+                available.offer(bitmap);
+            }
         }
     }
 
