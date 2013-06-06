@@ -6,7 +6,7 @@ package com.bumptech.photos.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
 
-import java.util.ArrayDeque;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,7 +30,7 @@ public class ConcurrentBitmapPool implements BitmapPool {
             synchronized (this) {
                 available = availableBitmaps.get(sizeKey);
                 if (available == null) {
-                    available = new ArrayDeque<Bitmap>(maxPerSize);
+                    available = new LinkedList<Bitmap>();
                     availableBitmaps.put(sizeKey, available);
                 }
             }
