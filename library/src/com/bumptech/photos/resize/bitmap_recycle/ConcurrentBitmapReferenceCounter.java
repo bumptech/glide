@@ -2,7 +2,6 @@ package com.bumptech.photos.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -61,18 +60,22 @@ public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter 
         }
     }
 
-    private final Map<Integer, InnerTracker> counter;
+    private final ConcurrentHashMap<Integer, InnerTracker> counter;
     private final BitmapPool target;
     private final InnerTrackerPool pool = new InnerTrackerPool();
 
     public ConcurrentBitmapReferenceCounter(BitmapPool target, int bitmapsPerSize) {
         this.target = target;
-        counter = new ConcurrentHashMap<Integer, InnerTracker>(bitmapsPerSize * 6, 0.75f, 4);
+        counter = new ConcurrentHashMap<Integer, InnerTracker>(bitmapsPerSize * 12);
     }
 
     @Override
     public void initBitmap(Bitmap toInit) {
-        counter.put(toInit.hashCode(), pool.get());
+        final InnerTracker ifAbsent = pool.get();
+        final InnerTracker old = counter.putIfAbsent(toInit.hashCode(), ifAbsent);
+        if (old != null) {
+            pool.release(ifAbsent);
+        }
     }
 
     @Override
@@ -106,8 +109,9 @@ public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter 
     }
 
     private void recycle(InnerTracker tracker, Bitmap bitmap) {
-        counter.remove(bitmap.hashCode());
-        pool.release(tracker);
-        target.put(bitmap);
+        if (!target.put(bitmap)) {
+            counter.remove(bitmap.hashCode());
+            pool.release(tracker);
+        }
     }
 }

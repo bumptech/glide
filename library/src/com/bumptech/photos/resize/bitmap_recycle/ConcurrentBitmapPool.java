@@ -23,7 +23,7 @@ public class ConcurrentBitmapPool implements BitmapPool {
     }
 
     @Override
-    public void put(Bitmap bitmap) {
+    public boolean put(Bitmap bitmap) {
         final int sizeKey = getSizeKey(bitmap.getWidth(), bitmap.getHeight());
         Queue<Bitmap> available = availableBitmaps.get(sizeKey);
         if (available == null) {
@@ -43,6 +43,8 @@ public class ConcurrentBitmapPool implements BitmapPool {
                 available.offer(bitmap);
             }
         }
+
+        return result;
     }
 
     @Override

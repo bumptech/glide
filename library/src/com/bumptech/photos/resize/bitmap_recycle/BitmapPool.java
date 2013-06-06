@@ -10,7 +10,7 @@ import android.graphics.Bitmap;
  * To change this template use File | Settings | File Templates.
  */
 public interface BitmapPool {
-    public void put(Bitmap bitmap);
+    public boolean put(Bitmap bitmap);
     public Bitmap get(int width, int height);
 
 }
