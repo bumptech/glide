@@ -7,10 +7,7 @@ package com.bumptech.photos.resize;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
+import android.os.*;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounter;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
@@ -32,6 +29,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadFactory;
+
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
@@ -211,6 +211,17 @@ public class ImageManager {
         return result;
     }
 
+    private static ExecutorService buildExecutor() {
+        return Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()), new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable runnable) {
+                final Thread result = new Thread(runnable);
+                result.setPriority(Thread.MIN_PRIORITY);
+                return result;
+            }
+        });
+    }
+
     /**
      * Create an ImageManager using the default options. Note that this will create a single background thread to use
      * to resize and load images from disk. Must be created in the UI thread!
@@ -234,7 +245,7 @@ public class ImageManager {
      * @param options The specified options
      */
     public ImageManager(Context context, Options options) {
-        this(context, Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors())), options);
+        this(context, buildExecutor(), options);
     }
 
     /**
@@ -272,7 +283,7 @@ public class ImageManager {
     }
 
     public ImageManager(MemoryCache memoryCache, DiskCache diskCache, ExecutorService resizeService, Options options) {
-        HandlerThread bgThread = new HandlerThread("bg_thread");
+        HandlerThread bgThread = new HandlerThread("bg_thread", THREAD_PRIORITY_BACKGROUND);
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = resizeService;
