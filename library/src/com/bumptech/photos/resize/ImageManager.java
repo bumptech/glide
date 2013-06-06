@@ -350,7 +350,7 @@ public class ImageManager {
      */
     public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(path, width, height, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+        return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException{
                 return resizer.loadAsIs(path, width, height);
@@ -360,7 +360,7 @@ public class ImageManager {
 
     public Object getImageExact(final InputStream is, final int width, final int height, String id, LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob(key, cb, false) {
+        return runJob(key, cb, new ImageManagerJob(key, cb) {
             @Override
             protected Bitmap resizeIfNotFound() throws FileNotFoundException {
                 return resizer.loadAsIs(is, width, height);
@@ -396,7 +396,6 @@ public class ImageManager {
             }
         });
     }
-
 
     /**
      * Loads the image for the given path , resizes it to be exactly width pixels wide keeping proportions,
@@ -494,12 +493,11 @@ public class ImageManager {
         bgHandler.getLooper().quit();
     }
 
-    private Object runJob(int key,final LoadedCallback cb, final ImageManagerJob job) {
-        final Object token = job;
+    private Object runJob(int key, final LoadedCallback cb, final ImageManagerJob job) {
         if (!returnFromCache(key, cb)) {
             job.execute();
         }
-        return token;
+        return job;
     }
 
     private boolean returnFromCache(int key, LoadedCallback cb) {
@@ -548,46 +546,39 @@ public class ImageManager {
         public void run() {
             if (cancelled) return;
 
-            final boolean isInDiskCache;
             String path = null;
             if (useDiskCache) {
                 path = diskCache.get(String.valueOf(key));
             }
 
-            isInDiskCache = path != null;
+            if (cancelled) return;
 
-            Bitmap result = null;
-            if (isInDiskCache) {
-                try {
-                    result = resizer.loadAsIs(path);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            try {
+                if (path != null) {
+                    finishResize(resizer.loadAsIs(path), true);
+                } else {
+                    resizeWithPool();
                 }
+            } catch (Exception e) {
+                cb.onLoadFailed(e);
             }
+        }
 
-            if (result == null) {
-                if (cancelled) return;
-                try {
-                    future = executor.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Bitmap result = resizeIfNotFound();
-                                finishResize(result, isInDiskCache);
-                            } catch (Exception e) {
-                                cb.onLoadFailed(e);
-                            }
-                        }
-                    });
-                //in almost every case will be because of race after calling shutdown. Not much we can do
-                //either way
-                } catch (RejectedExecutionException e) {
-                    e.printStackTrace();
-                    cb.onLoadFailed(e);
+        //in almost every case exception will be because of race after calling shutdown. Not much we can do
+        //either way
+        private void resizeWithPool() throws RejectedExecutionException {
+            future = executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    if (cancelled) return;
+
+                    try {
+                        finishResize(resizeIfNotFound(), false);
+                    } catch (Exception e) {
+                        cb.onLoadFailed(e);
+                    }
                 }
-            } else {
-                finishResize(result, isInDiskCache);
-            }
+            });
         }
 
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
