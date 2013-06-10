@@ -546,22 +546,37 @@ public class ImageManager {
         public void run() {
             if (cancelled) return;
 
-            String path = null;
+            Bitmap result = null;
             if (useDiskCache) {
-                path = diskCache.get(String.valueOf(key));
+                result = loadFromDiskCache();
             }
 
-            if (cancelled) return;
-
-            try {
-                if (path != null) {
-                    finishResize(resizer.loadAsIs(path), true);
-                } else {
+            if (result == null) {
+                try {
                     resizeWithPool();
+                } catch (Exception e) {
+                    cb.onLoadFailed(e);
                 }
-            } catch (Exception e) {
-                cb.onLoadFailed(e);
+            } else {
+                finishResize(result, true);
             }
+        }
+
+        private Bitmap loadFromDiskCache() {
+            final String path = diskCache.get(String.valueOf(key));
+
+            Bitmap result = null;
+            if (path != null) {
+                try {
+                    result = resizer.loadAsIs(path);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                if (result == null) {
+                    diskCache.delete(String.valueOf(key));
+                }
+            }
+            return result;
         }
 
         //in almost every case exception will be because of race after calling shutdown. Not much we can do

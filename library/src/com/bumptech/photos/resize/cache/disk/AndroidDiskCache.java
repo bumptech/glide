@@ -131,11 +131,12 @@ public class AndroidDiskCache implements DiskCache {
         }
     }
 
-    public void remove(String key) {
-        delete(sha1Hash(key));
+    @Override
+    public void delete(String key) {
+        remove(sha1Hash(key));
     }
 
-    private void delete(String safeKey) {
+    private void remove(String safeKey) {
         final Lock lock = acquireLockFor(safeKey);
         lock.lock();
         try {

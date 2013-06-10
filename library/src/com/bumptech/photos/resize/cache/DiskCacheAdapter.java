@@ -17,4 +17,7 @@ public class DiskCacheAdapter implements DiskCache {
 
     @Override
     public void put(String key, Bitmap value, Bitmap.CompressFormat format) { }
+
+    @Override
+    public void delete(String key) { }
 }
