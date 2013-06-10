@@ -47,6 +47,7 @@ public class ImageManager {
     private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
     private final BitmapReferenceCounter bitmapReferenceCounter;
+    private boolean shutdown = false;
 
     /**
      * A class for setting options for an ImageManager
@@ -490,6 +491,7 @@ public class ImageManager {
     }
 
     public void shutdown() {
+        shutdown = true;
         executor.shutdown();
         bgHandler.getLooper().quit();
     }
@@ -499,6 +501,8 @@ public class ImageManager {
     }
 
     private Object runJob(int key, LoadedCallback cb, boolean useDiskCache, ImageManagerJob job) {
+        if (shutdown) return null;
+
         if (!returnFromCache(key, cb)) {
             job.execute(key, cb, useDiskCache);
         }
