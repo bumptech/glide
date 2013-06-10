@@ -34,8 +34,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
  * sdk version, uses a  combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
@@ -286,7 +284,7 @@ public class ImageManager {
     }
 
     public ImageManager(MemoryCache memoryCache, DiskCache diskCache, ExecutorService resizeService, Options options) {
-        HandlerThread bgThread = new HandlerThread("bg_thread", THREAD_PRIORITY_BACKGROUND);
+        HandlerThread bgThread = new HandlerThread("bg_thread");
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = resizeService;
