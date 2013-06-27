@@ -18,16 +18,18 @@ import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapPool;
 import com.bumptech.photos.resize.bitmap_recycle.ConcurrentBitmapReferenceCounter;
 import com.bumptech.photos.resize.cache.DiskCache;
 import com.bumptech.photos.resize.cache.DiskCacheAdapter;
+import com.bumptech.photos.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.photos.resize.cache.LruPhotoCache;
 import com.bumptech.photos.resize.cache.MemoryCache;
 import com.bumptech.photos.resize.cache.MemoryCacheAdapter;
-import com.bumptech.photos.resize.cache.disk.AndroidDiskCache;
 import com.bumptech.photos.util.Log;
 import com.bumptech.photos.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -188,11 +190,16 @@ public class ImageManager {
         if (options.useDiskCache && options.maxDiskCacheSize <= 0) {
             options.maxDiskCacheSize = MAX_DISK_CACHE_SIZE;
         }
-        final DiskCache result;
+        DiskCache result;
         if (diskCacheDir == null || !options.useDiskCache) {
             result = new DiskCacheAdapter();
         } else {
-            result = AndroidDiskCache.get(diskCacheDir, options.maxDiskCacheSize);
+            try {
+                result = DiskLruCacheWrapper.get(diskCacheDir, options.maxDiskCacheSize);
+            } catch (IOException e) {
+                e.printStackTrace();
+                result = new DiskCacheAdapter();
+            }
         }
 
         return result;
@@ -548,9 +555,19 @@ public class ImageManager {
         public void run() {
             if (cancelled) return;
 
+            final String stringKey = String.valueOf(key);
             Bitmap result = null;
             if (useDiskCache) {
-                result = loadFromDiskCache();
+                result = diskCache.get(stringKey, new DiskCache.Reader() {
+                    @Override
+                    public Bitmap read(InputStream is1, InputStream is2) {
+                        Bitmap result = resizer.loadAsIs(is1, is2);
+                        if (result == null) {
+                            diskCache.delete(stringKey);
+                        }
+                        return result;
+                    }
+                });
             }
 
             if (result == null) {
@@ -562,23 +579,6 @@ public class ImageManager {
             } else {
                 finishResize(result, true);
             }
-        }
-
-        private Bitmap loadFromDiskCache() {
-            final String path = diskCache.get(String.valueOf(key));
-
-            Bitmap result = null;
-            if (path != null) {
-                try {
-                    result = resizer.loadAsIs(path);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if (result == null) {
-                    diskCache.delete(String.valueOf(key));
-                }
-            }
-            return result;
         }
 
         //in almost every case exception will be because of race after calling shutdown. Not much we can do
@@ -601,11 +601,15 @@ public class ImageManager {
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
             if (result != null) {
                 if (useDiskCache && !isInDiskCache) {
-                    diskCache.put(String.valueOf(key), result, diskCacheFormat);
+                    diskCache.put(String.valueOf(key), new DiskCache.Writer() {
+                        @Override
+                        public void write(OutputStream os) {
+                            result.compress(diskCacheFormat, 100, os);
+                        }
+                    });
                 }
 
                 bitmapReferenceCounter.initBitmap(result);
-
                 putInMemoryCache(key, result);
                 mainHandler.post(new Runnable() {
                     @Override
@@ -614,7 +618,6 @@ public class ImageManager {
                     }
                 });
             }
-
         }
 
         protected abstract Bitmap resizeIfNotFound() throws FileNotFoundException;

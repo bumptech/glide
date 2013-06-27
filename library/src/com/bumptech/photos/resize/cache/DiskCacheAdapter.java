@@ -11,12 +11,12 @@ import android.graphics.Bitmap;
  */
 public class DiskCacheAdapter implements DiskCache {
     @Override
-    public String get(String key) {
+    public Bitmap get(String key, Reader reader) {
         return null;
     }
 
     @Override
-    public void put(String key, Bitmap value, Bitmap.CompressFormat format) { }
+    public void put(String key, Writer writer) { }
 
     @Override
     public void delete(String key) { }
