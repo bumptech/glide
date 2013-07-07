@@ -46,82 +46,12 @@ import java.util.concurrent.ThreadFactory;
  * that Bitmap recycling is only available on Honeycomb and up.
  */
 public class ImageManager {
-    private static final String DISK_CACHE_DIR = "image_manager_disk_cache";
-    private static final int MAX_DISK_CACHE_SIZE = 30 * 1024 * 1024;
+    private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
+    private static final int DEFAULT_DISK_CACHE_SIZE = 30 * 1024 * 1024;
+    public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
+
     private final BitmapReferenceCounter bitmapReferenceCounter;
     private boolean shutdown = false;
-
-    /**
-     * A class for setting options for an ImageManager
-     *
-     * Boolean use options for the caches superseed sizes, and invalid * sizes (<= 0) are equivalent to setting the
-     * corresponding use option to false.
-     */
-    public static class Options {
-        /**
-         * If true caches bitmaps in memory.
-         *
-         * Defaults to true
-         */
-        public boolean useMemoryCache = true;
-
-        /**
-         * The maximum memory cache size. This should be decreased on devices where recycling Bitmaps is possible and
-         * enabled because the Bitmap cache used to recycle Bitmaps will take a substantial amount of memory.
-         *
-         * Defaults to 1/8th of the total application memory
-         */
-        public int maxMemorySize;
-
-        /**
-         * If true, caches resized bitmaps on disk.
-         */
-        public boolean useDiskCache = true;
-
-        /**
-         * The maximum disk cache size.
-         *
-         * Defaults to 30mb
-         */
-        public int maxDiskCacheSize;
-
-       /**
-        * The output format used to store bitmaps on disk in the disk cache
-        */
-        public Bitmap.CompressFormat diskCacheFormat = Bitmap.CompressFormat.JPEG;
-
-        /**
-         * If true, will attempt to recycle Bitmaps and all loaded Bitmaps will be mutable. If true and a memory cache
-         * is used, the memory cache size should be decreased since the Bitmap cache used to recycle Bitmaps will
-         * take a substantial amount of memory.
-         *
-         * Defaults to true if Android version is 3.0 or greater and will always be false, regardless of this attribute
-         * otherwise.
-         */
-        public boolean recycleBitmaps = true;
-
-        /**
-         * The maximum number of recycled bitmaps of any requested size to keep around. Only used if recycleBitmaps
-         * is true. A higher number means loads are more likely to be able to reuse a bitmap but also that this object
-         * will use more memory. Increase this if there are few varieties of bitmaps that will be scrolled rapidly (ie
-         * a GridView of images with lots of columns), and decrease it if there are a lot of different sizes of bitmaps
-         * and limited memory is available.
-         *
-         * Defaults to 20
-         */
-        public int maxPerSize = 0;
-
-        /**
-         * Options for loading bitmaps. Some of these fields will be overwritten, including inSampleSize, inBitmap,
-         * and maybe inMutable depending on how recycleBitmaps is set.
-         *
-         * Config and dither for example can be set
-         */
-        public BitmapFactory.Options bitmapDecodeOptions = ImageResizer.getDefaultOptions();
-
-    }
-
-    public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
     private final Handler mainHandler = new Handler();
     private final Handler bgHandler;
@@ -143,7 +73,7 @@ public class ImageManager {
      * cache directory if no name is provided
      */
     public static File getPhotoCacheDir(Context context) {
-        return getPhotoCacheDir(context, DISK_CACHE_DIR);
+        return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
     }
 
     public static File getPhotoCacheDir(Context context, String cacheName) {
@@ -186,139 +116,156 @@ public class ImageManager {
         }
     }
 
-    private static DiskCache buildDiskCacheFor(Options options, File diskCacheDir) {
-        if (options.useDiskCache && options.maxDiskCacheSize <= 0) {
-            options.maxDiskCacheSize = MAX_DISK_CACHE_SIZE;
+    public static class Builder {
+        private final Context context;
+
+        private ExecutorService resizeService = null;
+        private MemoryCache memoryCache = null;
+        private DiskCache diskCache = null;
+
+        private Bitmap.CompressFormat diskCacheFormat = Bitmap.CompressFormat.JPEG;
+        private boolean recycleBitmaps = CAN_RECYCLE;
+        private int maxBitmapsPerSize = 20;
+
+        public BitmapFactory.Options decodeBitmapOptions = ImageResizer.getDefaultOptions();
+
+        public Builder(Context context) {
+            this.context = context;
         }
-        DiskCache result;
-        if (diskCacheDir == null || !options.useDiskCache) {
-            result = new DiskCacheAdapter();
-        } else {
+
+        public ImageManager build() {
+            setDefaults();
+
+            return new ImageManager(this);
+        }
+
+        public Builder setResizeService(ExecutorService resizeService) {
+            this.resizeService = resizeService;
+            return this;
+        }
+
+        public Builder setDiskCacheFormat(Bitmap.CompressFormat diskCacheFormat) {
+            this.diskCacheFormat = diskCacheFormat;
+            return this;
+        }
+
+        public Builder setRecycleBitmaps(boolean recycleBitmaps) {
+            this.recycleBitmaps = recycleBitmaps && CAN_RECYCLE;
+            return this;
+        }
+
+        public Builder setMemoryCache(MemoryCache memoryCache) {
+            this.memoryCache = memoryCache;
+            return this;
+        }
+
+        public Builder disableMemoryCache() {
+            if (memoryCache != null) {
+                throw new IllegalArgumentException("Can't disable memory cache after setting it");
+            }
+            memoryCache = new MemoryCacheAdapter();
+            return this;
+        }
+
+        public Builder setDefaultMemoryCacheSize(int maxSize) {
+            if (memoryCache != null) {
+                throw new IllegalArgumentException("Can't set a default memory cache after setting a custom one");
+            }
+
+            memoryCache = new LruPhotoCache(maxSize);
+            return this;
+        }
+
+        public Builder setDiskCache(DiskCache diskCache) {
+            this.diskCache = diskCache;
+            return this;
+        }
+
+        public Builder disableDiskCache() {
+            diskCache = new DiskCacheAdapter();
+            return this;
+        }
+
+        public Builder setDefaultDiskCacheOptions(File dir) {
+            setDefaultDiskCacheOptions(dir, DEFAULT_DISK_CACHE_SIZE);
+            return this;
+        }
+
+        public Builder setDefaultDiskCacheOptions(int size) {
+            setDefaultDiskCacheOptions(getPhotoCacheDir(context), size);
+            return this;
+        }
+
+        public Builder setDefaultDiskCacheOptions(File dir, int size) {
+            if (size <= 0) {
+                throw new IllegalArgumentException("Size must be >= 0");
+            }
+
+            if (diskCache != null) {
+                throw new IllegalArgumentException("Can't set disk cache twice");
+            }
+
             try {
-                result = DiskLruCacheWrapper.get(diskCacheDir, options.maxDiskCacheSize);
+                diskCache = DiskLruCacheWrapper.get(dir, size);
             } catch (IOException e) {
                 e.printStackTrace();
-                result = new DiskCacheAdapter();
+                disableDiskCache();
+            }
+            return this;
+        }
+
+        public Builder setMaxBitmapsPerSize(int maxBitmapsPerSize) {
+            this.maxBitmapsPerSize = maxBitmapsPerSize;
+            return this;
+        }
+
+        private void setDefaults() {
+            if (resizeService == null) {
+                resizeService = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()), new ThreadFactory() {
+                    @Override
+                    public Thread newThread(Runnable runnable) {
+                        final Thread result = new Thread(runnable);
+                        result.setPriority(Thread.MIN_PRIORITY);
+                        return result;
+                    }
+                });
+            }
+
+            if (memoryCache == null) {
+                setDefaultMemoryCacheSize(LruPhotoCache.getMaxCacheSize(context));
+            }
+
+            if (diskCache == null) {
+                setDefaultDiskCacheOptions(getPhotoCacheDir(context), DEFAULT_DISK_CACHE_SIZE);
             }
         }
-
-        return result;
-
     }
 
-    private static MemoryCache buildMemoryCache(Options options, Context context) {
-        if (options.useMemoryCache && options.maxMemorySize <= 0) {
-            options.maxMemorySize = LruPhotoCache.getMaxCacheSize(context);
-        }
-
-        final MemoryCache result;
-        if (!options.useMemoryCache) {
-            result = new MemoryCacheAdapter();
-        } else {
-            result = new LruPhotoCache(options.maxMemorySize);
-        }
-        return result;
-    }
-
-    private static ExecutorService buildExecutor() {
-        return Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()), new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable runnable) {
-                final Thread result = new Thread(runnable);
-                result.setPriority(Thread.MIN_PRIORITY);
-                return result;
-            }
-        });
-    }
-
-    /**
-     * Create an ImageManager using the default options. Note that this will create a single background thread to use
-     * to resize and load images from disk. Must be created in the UI thread!
-     *
-     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
-     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
-     *                in Activities.
-     */
-    public ImageManager(Context context) {
-        this(context, new Options());
-    }
-
-
-    /**
-     * Create an ImageManager using the given options and that performs image loads and resize operations using the
-     * given Executor. Must be created in the UI thread!
-     *
-     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
-     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
-     *                in Activities.
-     * @param options The specified options
-     */
-    public ImageManager(Context context, Options options) {
-        this(context, buildExecutor(), options);
-    }
-
-    /**
-     * Create an ImageManager using the given options and that performs image loads and resize operations using the
-     * given Executor. Can be created in any thread, but the mainHandler must be a Handler for the UI thread.
-     *
-     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
-     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
-     *                in Activities.
-     * @param resizeService An executor service that will be used to resize photos
-     * @param options The specified option
-     */
-    public ImageManager(Context context, ExecutorService resizeService, Options options) {
-        this(context, getPhotoCacheDir(context), resizeService, options);
-    }
-
-    /**
-     * Create an ImageManager using the given options and that performs image loads and resize operations using the
-     * given Executor. Can be created in any thread, but the mainHandler must be a Handler for the UI thread.
-     *
-     * @param context A Context used once to find or create a directory for the disk cache. This reference will not
-     *                be retained by this ImageManager object and is only used in the constructor so it is safe to pass
-     *                in Activities.
-     * @param diskCacheDir The directory containing the disk cache or in which to create a disk cache if one does not
-     *                     already exist
-     * @param resizeService An executor service that will be used to resize photos
-     * @param options The specified options
-     */
-    public ImageManager(Context context, File diskCacheDir, ExecutorService resizeService, Options options) {
-        this(context, buildDiskCacheFor(options, diskCacheDir), resizeService, options);
-    }
-
-    public ImageManager(Context context, DiskCache diskCache, ExecutorService resizeService, Options options) {
-        this(buildMemoryCache(options, context), diskCache, resizeService, options);
-    }
-
-    public ImageManager(MemoryCache memoryCache, DiskCache diskCache, ExecutorService resizeService, Options options) {
+    public ImageManager(Builder builder) {
         HandlerThread bgThread = new HandlerThread("bg_thread");
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
-        executor = resizeService;
-
-        diskCacheFormat = options.diskCacheFormat;
+        executor = builder.resizeService;
+        diskCacheFormat = builder.diskCacheFormat;
+        memoryCache = builder.memoryCache;
+        diskCache = builder.diskCache;
 
         final BitmapPool bitmapPool;
-        if (options.recycleBitmaps && CAN_RECYCLE) {
+        if (builder.recycleBitmaps) {
             memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
                 @Override
-                public void onImageRemoved(Bitmap bitmap) {
-                    releaseBitmap(bitmap);
+                public void onImageRemoved(Bitmap removed) {
+                    releaseBitmap(removed);
                 }
             });
-            bitmapPool = new ConcurrentBitmapPool(options.maxPerSize);
-            bitmapReferenceCounter = new ConcurrentBitmapReferenceCounter(bitmapPool, options.maxPerSize);
+            bitmapPool = new ConcurrentBitmapPool(builder.maxBitmapsPerSize);
+            bitmapReferenceCounter = new ConcurrentBitmapReferenceCounter(bitmapPool, builder.maxBitmapsPerSize);
         } else {
-            if (CAN_RECYCLE)
-                options.bitmapDecodeOptions.inMutable = false;
             bitmapPool = null;
             bitmapReferenceCounter = new BitmapReferenceCounterAdapter();
         }
 
-        this.memoryCache = memoryCache;
-        this.diskCache = diskCache;
-        this.resizer = new ImageResizer(bitmapPool, options.bitmapDecodeOptions);
+        this.resizer = new ImageResizer(bitmapPool, builder.decodeBitmapOptions);
     }
 
     /**
