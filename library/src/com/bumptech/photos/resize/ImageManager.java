@@ -4,6 +4,7 @@
 
 package com.bumptech.photos.resize;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -47,6 +48,7 @@ import java.util.concurrent.ThreadFactory;
 public class ImageManager {
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int DEFAULT_DISK_CACHE_SIZE = 30 * 1024 * 1024;
+    private static final float MEMORY_SIZE_RATIO = 1f/10f;
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
     private final BitmapReferenceCounter bitmapReferenceCounter;
@@ -65,6 +67,13 @@ public class ImageManager {
         FIT_CENTER,
         APPROXIMATE,
         AS_IS
+    }
+    /*
+     *    Can only call after context is created (ie in onCreate or later...)
+     */
+    public static int getMaxCacheSize(Context context){
+        final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        return Math.round(MEMORY_SIZE_RATIO * activityManager.getMemoryClass() * 1024 * 1024);
     }
 
     /**
@@ -195,7 +204,7 @@ public class ImageManager {
             }
 
             if (memoryCache == null) {
-                memoryCache = new LruPhotoCache(LruPhotoCache.getMaxCacheSize(context));
+                memoryCache = new LruPhotoCache(getMaxCacheSize(context));
             }
 
             if (diskCache == null) {

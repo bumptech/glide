@@ -4,8 +4,6 @@
 
 package com.bumptech.photos.resize.cache;
 
-import android.app.ActivityManager;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
@@ -15,17 +13,8 @@ import android.support.v4.util.LruCache;
  * @see android.support.v4.util.LruCache
  */
 public class LruPhotoCache implements MemoryCache {
-    private static final float SIZE_RATIO = 1f/10f;
     private final LruCache<Integer, Bitmap> lruCache;
     private ImageRemovedListener imageRemovedListener;
-
-    /*
-    Can only call after context is created (ie in onCreate or later...)
-    */
-    public static int getMaxCacheSize(Context context){
-        final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        return Math.round(SIZE_RATIO * activityManager.getMemoryClass() * 1024 * 1024);
-    }
 
     public LruPhotoCache(int maxSize) {
         lruCache = new LruCache<Integer, Bitmap>(maxSize) {
