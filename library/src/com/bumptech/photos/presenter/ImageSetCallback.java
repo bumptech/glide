@@ -16,7 +16,7 @@ public interface ImageSetCallback {
      * The method called when a bitmap is set
      *
      * @param view The view that will display the bitmap
-     * @param fromCache True iff the bitmap was loaded synchronously.
+     * @param fromCache True iff the bitmap load completed without a placeholder being shown.
      */
     public void onImageSet(ImageView view, boolean fromCache);
 }
