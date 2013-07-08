@@ -27,7 +27,6 @@ import com.bumptech.photos.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
@@ -167,15 +166,6 @@ public class ImageManager {
             return this;
         }
 
-        public Builder setDefaultMemoryCacheSize(int maxSize) {
-            if (memoryCache != null) {
-                throw new IllegalArgumentException("Can't set a default memory cache after setting a custom one");
-            }
-
-            memoryCache = new LruPhotoCache(maxSize);
-            return this;
-        }
-
         public Builder setDiskCache(DiskCache diskCache) {
             this.diskCache = diskCache;
             return this;
@@ -186,33 +176,6 @@ public class ImageManager {
             return this;
         }
 
-        public Builder setDefaultDiskCacheOptions(File dir) {
-            setDefaultDiskCacheOptions(dir, DEFAULT_DISK_CACHE_SIZE);
-            return this;
-        }
-
-        public Builder setDefaultDiskCacheOptions(int size) {
-            setDefaultDiskCacheOptions(getPhotoCacheDir(context), size);
-            return this;
-        }
-
-        public Builder setDefaultDiskCacheOptions(File dir, int size) {
-            if (size <= 0) {
-                throw new IllegalArgumentException("Size must be >= 0");
-            }
-
-            if (diskCache != null) {
-                throw new IllegalArgumentException("Can't set disk cache twice");
-            }
-
-            try {
-                diskCache = DiskLruCacheWrapper.get(dir, size);
-            } catch (IOException e) {
-                e.printStackTrace();
-                disableDiskCache();
-            }
-            return this;
-        }
 
         public Builder setMaxBitmapsPerSize(int maxBitmapsPerSize) {
             this.maxBitmapsPerSize = maxBitmapsPerSize;
@@ -232,11 +195,11 @@ public class ImageManager {
             }
 
             if (memoryCache == null) {
-                setDefaultMemoryCacheSize(LruPhotoCache.getMaxCacheSize(context));
+                memoryCache = new LruPhotoCache(LruPhotoCache.getMaxCacheSize(context));
             }
 
             if (diskCache == null) {
-                setDefaultDiskCacheOptions(getPhotoCacheDir(context), DEFAULT_DISK_CACHE_SIZE);
+                diskCache = DiskLruCacheWrapper.get(getPhotoCacheDir(context), DEFAULT_DISK_CACHE_SIZE);
             }
         }
     }

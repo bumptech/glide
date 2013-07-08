@@ -18,6 +18,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.photos.resize.ImageManager;
+import com.bumptech.photos.resize.cache.DiskLruCacheWrapper;
+import com.bumptech.photos.resize.cache.LruPhotoCache;
 import com.bumptech.photos.util.Log;
 
 import java.io.File;
@@ -47,7 +49,8 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         }
 
         imageManager = new ImageManager.Builder(this)
-                .setDefaultDiskCacheOptions(50 * 1024 * 1024)
+                .setMemoryCache(new LruPhotoCache(1234))
+                .setDiskCache(DiskLruCacheWrapper.get(ImageManager.getPhotoCacheDir(this), 50 * 1024 * 1024))
                 .setMaxBitmapsPerSize(40)
                 .build();
 
