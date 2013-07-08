@@ -58,7 +58,7 @@ public class ImageManager {
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
     private final DiskCache diskCache;
-    private final Bitmap.CompressFormat diskCacheFormat;
+    private final Bitmap.CompressFormat bitmapCompressFormat;
 
     private enum ResizeType {
         CENTER_CROP,
@@ -122,7 +122,7 @@ public class ImageManager {
         private MemoryCache memoryCache = null;
         private DiskCache diskCache = null;
 
-        private Bitmap.CompressFormat diskCacheFormat = Bitmap.CompressFormat.JPEG;
+        private Bitmap.CompressFormat bitmapCompressFormat = Bitmap.CompressFormat.JPEG;
         private boolean recycleBitmaps = CAN_RECYCLE;
         private int maxBitmapsPerSize = 20;
 
@@ -143,8 +143,8 @@ public class ImageManager {
             return this;
         }
 
-        public Builder setDiskCacheFormat(Bitmap.CompressFormat diskCacheFormat) {
-            this.diskCacheFormat = diskCacheFormat;
+        public Builder setBitmapCompressFormat(Bitmap.CompressFormat bitmapCompressFormat) {
+            this.bitmapCompressFormat = bitmapCompressFormat;
             return this;
         }
 
@@ -209,12 +209,13 @@ public class ImageManager {
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
-        diskCacheFormat = builder.diskCacheFormat;
+        bitmapCompressFormat = builder.bitmapCompressFormat;
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
 
         final BitmapPool bitmapPool;
         if (builder.recycleBitmaps) {
+            Log.d("IM: recycle bitmaps total per size=" + builder.maxBitmapsPerSize);
             memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
                 @Override
                 public void onImageRemoved(Bitmap removed) {
@@ -514,7 +515,7 @@ public class ImageManager {
                     diskCache.put(String.valueOf(key), new DiskCache.Writer() {
                         @Override
                         public void write(OutputStream os) {
-                            result.compress(diskCacheFormat, 100, os);
+                            result.compress(bitmapCompressFormat, 100, os);
                         }
                     });
                 }
