@@ -21,6 +21,7 @@ import java.io.InputStream;
 public class DiskLruCacheWrapper implements DiskCache {
 
     private static DiskLruCache CACHE = null;
+    private static DiskLruCacheWrapper WRAPPER = null;
 
     private synchronized static DiskLruCache getDiskLruCache(File directory, int maxSize) throws IOException {
         if (CACHE == null) {
@@ -29,8 +30,15 @@ public class DiskLruCacheWrapper implements DiskCache {
         return CACHE;
     }
 
-    public static DiskLruCacheWrapper get(File directory, int maxSize) throws IOException {
-        return new DiskLruCacheWrapper(getDiskLruCache(directory, maxSize));
+    public static DiskLruCacheWrapper get(File directory, int maxSize) {
+        if (WRAPPER == null) {
+            try {
+                WRAPPER = new DiskLruCacheWrapper(getDiskLruCache(directory, maxSize));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return WRAPPER;
     }
 
     private final DiskLruCache diskLruCache;
