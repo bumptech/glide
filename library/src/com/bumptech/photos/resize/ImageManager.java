@@ -339,6 +339,13 @@ public class ImageManager {
         });
     }
 
+    /**
+     * @see #getImage(String, LoadedCallback)
+     *
+     * Same as getImage except with two input streams representing the image instead of a path. One
+     * InputStream will be used to determine the image's dimensions and the other will be used to read the image data
+     * from disk
+     */
     public Object getImage(final InputStream is1, final InputStream is2, String id, LoadedCallback cb) {
         final int key = getKey(id, -1, -1, ResizeType.AS_IS);
         return runJob(key, cb, false, new ImageManagerJob() {
@@ -368,6 +375,11 @@ public class ImageManager {
         });
     }
 
+    /**
+     * @see #getImageExact(String, int, int, LoadedCallback)
+     *
+     * Same as getImageExact except with an input stream instead of a path
+     */
     public Object getImageExact(final InputStream is, final int width, final int height, String id, LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob() {
@@ -397,6 +409,13 @@ public class ImageManager {
         });
     }
 
+    /**
+     * @see #getImageApproximate(String, int, int, LoadedCallback)
+     *
+     * Same as getImageApproximate except with two input streams representing the image instead of a path. One
+     * InputStream will be used to determine the image's dimensions and the other will be used to read the image data
+     * from disk
+     */
     public Object getImageApproximate(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.APPROXIMATE);
         return runJob(key, cb, new ImageManagerJob() {
@@ -427,7 +446,13 @@ public class ImageManager {
         });
     }
 
-    public Object centerCrop(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
+    /**
+     * @see #centerCrop(String, int, int, LoadedCallback)
+     *
+     * Same as centerCrop except with two input streams representing the image instead of a path. One
+     * InputStream will be used to determine the image's dimensions and the other will be used to read the image data
+     * from disk
+     */    public Object centerCrop(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.CENTER_CROP);
         return runJob(key, cb, new ImageManagerJob() {
             @Override
@@ -491,6 +516,11 @@ public class ImageManager {
         bitmapReferenceCounter.releaseBitmap(b);
     }
 
+    /**
+     * Cancel the task represented by the given token. If token is null this call will be ignored.
+     *
+     * @param token The token returned by the ImageManager in a get call
+     */
     public void cancelTask(Object token) {
         if (token != null) {
             ImageManagerJob job = (ImageManagerJob) token;
@@ -498,6 +528,9 @@ public class ImageManager {
         }
     }
 
+    /**
+     * Shuts down all of the background threads used by the ImageManager including the executor service
+     */
     public void shutdown() {
         shutdown = true;
         executor.shutdown();
