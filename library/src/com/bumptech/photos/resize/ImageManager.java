@@ -75,7 +75,7 @@ public class ImageManager {
      * for newer devices.
      *
      * @param context
-     * @return the maximum safe size for the memory cache for this devices in bytes
+     * @return The maximum safe size for the memory cache for this devices in bytes
      */
     public static int getSafeMemoryCacheSize(Context context){
         final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -85,11 +85,22 @@ public class ImageManager {
     /**
      * Try to get the external cache directory if available and default to the internal. Use a default name for the
      * cache directory if no name is provided
+     *
+     * @param context A context
+     * @return A File representing the default disk cache directory
      */
     public static File getPhotoCacheDir(Context context) {
         return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
     }
 
+    /**
+     * Try to get the external cache directory if available and default to the internal. Use a default name for the
+     * cache directory if no name is provided
+     *
+     * @param context A context
+     * @param cacheName The name of the subdirectory in which to store the cache
+     * @return A File representing the default disk cache directory
+     */
     public static File getPhotoCacheDir(Context context, String cacheName) {
         String cachePath = null;
 
@@ -143,55 +154,119 @@ public class ImageManager {
 
         public BitmapFactory.Options decodeBitmapOptions = ImageResizer.getDefaultOptions();
 
+        /**
+         * Create a new builder. No options are required. By default will create an lru memory cache, an lru disk
+         * cache, and will recycle bitmaps if the device sdk version allows it.
+         *
+         * @param context Any context (will not be retained after build)
+         */
         public Builder(Context context) {
             this.context = context;
         }
 
+        /**
+         * Builds an ImageManager. Any defaults that haven't been set will be set
+         *
+         * @return A new ImageManager
+         */
         public ImageManager build() {
             setDefaults();
 
             return new ImageManager(this);
         }
 
+        /**
+         * Sets the service that will be used to load and resize images not yet in the disk cache.
+         *
+         * Defaults to a fixed thread pool with the number of threads equal to the number of available processors
+         * where every thread is run at min priority.
+         *
+         * @param resizeService The executor service to use to resize images
+         * @return This Builder
+         */
         public Builder setResizeService(ExecutorService resizeService) {
             this.resizeService = resizeService;
             return this;
         }
 
+        /**
+         * Sets the format that will be used to write bitmaps to disk in the disk cache (if one is present). Defaults
+         * to JPEG. Set to PNG if you need transparency
+         *
+         * @param bitmapCompressFormat The format to pass to
+         *  {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)} when saving
+         *  to the disk cache
+         * @return This Builder
+         */
         public Builder setBitmapCompressFormat(Bitmap.CompressFormat bitmapCompressFormat) {
             this.bitmapCompressFormat = bitmapCompressFormat;
             return this;
         }
 
+        /**
+         * Set whether or not to recycle bitmaps. Defaults to enabled. If enabled, devices with SDK < 11 will not
+         * recycle bitmaps while those with SDK >= 11 will recycle bitmaps. See also
+         * {@link ImageManager.Builder#setMaxBitmapsPerSize(int)}
+         *
+         * @param recycleBitmaps True to enable recycling bitmaps, false otherwise.
+         * @return This Builder
+         */
         public Builder setRecycleBitmaps(boolean recycleBitmaps) {
             this.recycleBitmaps = recycleBitmaps && CAN_RECYCLE;
             return this;
         }
 
+        /**
+         * Set the memory cache implementation. See also
+         * {@link com.bumptech.photos.resize.ImageManager.Builder#disableMemoryCache()}
+         *
+         * @param memoryCache The memory cache implementation to use
+         * @return This Builder
+         */
         public Builder setMemoryCache(MemoryCache memoryCache) {
             this.memoryCache = memoryCache;
             return this;
         }
 
+        /**
+         * Call to prevent the ImageManager from using a memory cache.
+         *
+         * @return This Builder
+         */
         public Builder disableMemoryCache() {
-            if (memoryCache != null) {
-                throw new IllegalArgumentException("Can't disable memory cache after setting it");
-            }
-            memoryCache = new MemoryCacheAdapter();
-            return this;
+            return setMemoryCache(new MemoryCacheAdapter());
         }
 
+        /**
+         * Set the disk cache implementation. See also
+         *  {@link com.bumptech.photos.resize.ImageManager.Builder#disableDiskCache()}
+         *
+         * @param diskCache The disk cache implementation to use
+         * @return This Builder
+         */
         public Builder setDiskCache(DiskCache diskCache) {
             this.diskCache = diskCache;
             return this;
         }
 
+        /**
+         * Call to prevent the ImageManager from using a disk cache
+         * @return
+         */
         public Builder disableDiskCache() {
-            diskCache = new DiskCacheAdapter();
-            return this;
+            return setDiskCache(new DiskCacheAdapter());
         }
 
-
+        /**
+         * Set the maximum number of bitmaps for a given size to store in memory at one time. Defaults to 20. The larger
+         * the number, the more memory will be used to store recycled bitmaps but the smoother scrolling will be. Set
+         * this * number larger when loading lots of smaller photos and/or when you expect your users to scroll rapidly.
+         * Set this number smaller when loading larger images and/or a lot of different sizes of images and/or when you
+         * expect your users to scroll relatively slowly.
+         *
+         * @param maxBitmapsPerSize The maximum number of bitmaps of any given size to keep in the recycle pool
+         * @return This Builder
+         */
         public Builder setMaxBitmapsPerSize(int maxBitmapsPerSize) {
             this.maxBitmapsPerSize = maxBitmapsPerSize;
             return this;
@@ -219,7 +294,7 @@ public class ImageManager {
         }
     }
 
-    public ImageManager(Builder builder) {
+    private ImageManager(Builder builder) {
         HandlerThread bgThread = new HandlerThread("bg_thread");
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
