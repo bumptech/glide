@@ -46,10 +46,10 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             cacheDir.mkdir();
         }
 
-        ImageManager.Options options = new ImageManager.Options();
-        options.maxPerSize = 40;
-        options.maxDiskCacheSize = 50 * 1024 * 1024;
-        imageManager = new ImageManager(this, options);
+        imageManager = new ImageManager.Builder(this)
+                .setDefaultDiskCacheOptions(50 * 1024 * 1024)
+                .setMaxBitmapsPerSize(40)
+                .build();
 
         final Resources res = getResources();
         flickerApi = new Api(res.getDimensionPixelSize(R.dimen.large_photo_side));
