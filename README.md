@@ -1,18 +1,16 @@
 Glide
 =====
-Glide is an image loading library for Android that wraps image loading, resizing, memory and disk caching, and bitmap recycling into one simple and easy to use interace.
+Glide is an image loading library for Android that wraps image loading, resizing, memory and disk caching, and bitmap recycling into one simple and easy to use interface.
 
 Glide works best for long lists or grids where every item contains an image or images, but it's also effective for almost any case where you need to fetch, resize, and display a remote image.
 
-Who Shouldn't Use Glide?
+Who shouldn't use Glide?
 ------------------------
 If you only have local assets or very infrequently display remote assets and never display remote or resized assets in a list, then Glide is probably overkill for you.
 
-Glide is also focused primarily on loading images from the sdcard efficiently and does not currently include code to download images from a URL (though that code does exist in the sample project).
-
 Also you probably shouldn't bother if you're not writing an Android app...
 
-Who Should Use Glide?
+Who should use Glide?
 ---------------------
 Anyone who displays large numbers of images can benefit from Glide.
 
@@ -22,7 +20,7 @@ Glide is also unobtrusive. It doesn't require you to change any xml or create an
 
 Finally Glide is performant. Image loading is fast without using lots of cpu or causing jerk inducing garbage collections.
 
-How Do I Use Glide?
+How do I use Glide?
 -------------------
 The only thing you need to implement is a simple interface that fetches a path for a given model. You then need an ImageManager instance which manages loading images from paths in the background, and an ImagePresenter instance per image view. To use Glide in an adapter for a list, your code will look something like this:
 
@@ -66,13 +64,16 @@ Behind the scenes the ImageManager will load resize the image from disk using a 
 
 Fewer garbage collections, less memory per image, and less cpu time dedicated to resizing each image on the fly means dramatically smoother scrolling and faster image loading.
 
-For more examples see the sample flickr app.
 
 How do I add Glide to my project?
 --------------------------------
-Glide is an Androlid library project so its fairly straightforward to add it. Either add this repo as a submodule or otherwise check out this repository in your project and then follow the steps in the Android docs to add it as a library project: http://developer.android.com/tools/projects/projects-cmdline.html#ReferencingLibraryProject
+Glide is an Android library project so its fairly straightforward to add it. Either add this repo as a submodule or otherwise check out this repository in your project and then follow the steps in the Android docs to add it as a library project: http://developer.android.com/tools/projects/projects-cmdline.html#ReferencingLibraryProject
 
 Intellij and Eclipse instructions coming soon.
+
+Great, but how do I actually use Glide in my code?
+-----------------------------------------------------
+For more concrete examples see the wiki for tutorials and/or the sample flickr app.
 
 Status
 ------
