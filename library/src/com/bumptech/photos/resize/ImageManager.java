@@ -659,7 +659,15 @@ public class ImageManager {
 
 
     private void putInMemoryCache(int key, Bitmap bitmap) {
-        if (memoryCache.put(key, bitmap) != bitmap) {
+        final boolean inCache;
+        synchronized (memoryCache) {
+            inCache = memoryCache.contains(key);
+            if (!inCache) {
+                memoryCache.put(key, bitmap);
+            }
+        }
+
+        if (!inCache) {
             acquireBitmap(bitmap);
             bitmapReferenceCounter.markPending(bitmap);
         }
