@@ -5,6 +5,7 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.loader.opener.StreamOpener;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.LoadedCallback;
 
@@ -12,17 +13,17 @@ import com.bumptech.photos.resize.LoadedCallback;
  * An ImageLoader implementation that loads an image into within the given dimensions maintaining the original
  * proportions
  *
- * @see ImageManager#fitCenter(String, int, int, com.bumptech.photos.resize.LoadedCallback)
+ * @see ImageManager#fitCenter(String, com.bumptech.photos.loader.opener.StreamOpener, int, int, com.bumptech.photos.resize.LoadedCallback)
  */
-public class FitCenter<T> extends ImageManagerLoader<T> {
+public class FitCenter extends ImageManagerLoader {
 
     public FitCenter(ImageManager imageManager) {
         super(imageManager);
     }
 
     @Override
-    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.fitCenter(path, width, height, new LoadedCallback() {
+    protected Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.fitCenter(id, streamOpener, width, height, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);

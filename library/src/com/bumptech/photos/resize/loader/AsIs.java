@@ -1,6 +1,7 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.loader.opener.StreamOpener;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.LoadedCallback;
 
@@ -10,17 +11,17 @@ import com.bumptech.photos.resize.LoadedCallback;
  * (like the view) to do the resizing for you. Not memory efficient and more expensive to use recycled Bitmaps for than
  * other implementations
  *
- * @see ImageManager#getImage(String, com.bumptech.photos.resize.LoadedCallback)
+ * @see ImageManager#getImage(String, com.bumptech.photos.loader.opener.StreamOpener, com.bumptech.photos.resize.LoadedCallback)
  */
-public class AsIs<T> extends ImageManagerLoader<T> {
+public class AsIs extends ImageManagerLoader {
 
     public AsIs(ImageManager imageManager) {
         super(imageManager);
     }
 
     @Override
-    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.getImage(path, new LoadedCallback() {
+    protected Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.getImage(id, streamOpener, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);

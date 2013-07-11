@@ -13,17 +13,18 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import com.bumptech.photos.loader.image.ImageLoader;
-import com.bumptech.photos.loader.path.PathLoader;
+import com.bumptech.photos.loader.model.ModelStreamLoader;
+import com.bumptech.photos.loader.opener.StreamOpener;
 
 import java.lang.ref.WeakReference;
 
 /**
  * Wraps an {@link android.widget.ImageView} to display arbitrary Bitmaps and provides a framework for fetching and loading bitmaps correctly
- * when views are being recycled. Uses {@link PathLoader} to download
- * an image or retrieve a path for a given model and {@link ImageLoader} to load
+ * when views are being recycled. Uses {@link ModelStreamLoader} to download
+ * an image or otherwise retrieve InputStreams for a given model and {@link ImageLoader} to load
  * a bitmap from a given path and/or model. Also determines the actual width and height of the wrapped
  * {@link android.widget.ImageView} and passes that information to the provided
- * {@link PathLoader} and {@link ImageLoader}.
+ * {@link ModelStreamLoader} and {@link ImageLoader}.
  *
  * @param <T> The type of the model that contains information necessary to display an image. Can be as simple
  *            as a String containing a path or a complex data type.
@@ -44,9 +45,9 @@ public class ImagePresenter<T> {
         private Drawable placeholderDrawable;
         private ImageSetCallback imageSetCallback;
         private ImagePresenterCoordinator coordinator;
-        private ImageLoader<T> imageLoader;
-        private PathLoader<T> pathLoader;
+        private ImageLoader imageLoader;
         private ExceptionHandler<T> exceptionHandler;
+        private ModelStreamLoader<T> modelStreamLoader;
 
         /**
          * Builds an ImagePresenter
@@ -60,9 +61,8 @@ public class ImagePresenter<T> {
             if (imageLoader == null) {
                 throw new IllegalArgumentException("cannot create presenter without an image loader");
             }
-            if (pathLoader == null) {
-                throw new IllegalArgumentException("cannot create presenter without a path loader");
-
+            if (modelStreamLoader == null) {
+                throw new IllegalArgumentException("cannot create presenter without a model stream loader");
             }
 
             return new ImagePresenter<T>(this);
@@ -80,14 +80,14 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Required sets the {@link com.bumptech.photos.loader.path.PathLoader} the presenter will use to download an
-         * image or otherwise retrieve a path for a given T model
+         * Required. Sets the {@link ModelStreamLoader} the presenter will use to obtain an Id and InputStreams to the
+         * image represented by a given model
          *
-         * @param pathLoader The {@link com.bumptech.photos.loader.path.PathLoader} to use to retrieve a path
-         * @return This Builder
+         * @param modelStreamLoader The {@link ModelStreamLoader} to use to obtain the id and InputStreams
+         * @return This Builder object
          */
-        public Builder<T> setPathLoader(PathLoader<T> pathLoader) {
-            this.pathLoader = pathLoader;
+        public Builder<T> setModelStreamLoader(ModelStreamLoader<T> modelStreamLoader) {
+            this.modelStreamLoader = modelStreamLoader;
             return this;
         }
 
@@ -98,7 +98,7 @@ public class ImagePresenter<T> {
          * @param imageLoader The {@link com.bumptech.photos.loader.image.ImageLoader} to use to load an image
          * @return This Builder object
          */
-        public Builder<T> setImageLoader(ImageLoader<T> imageLoader) {
+        public Builder<T> setImageLoader(ImageLoader imageLoader) {
             this.imageLoader = imageLoader;
             return this;
         }
@@ -175,11 +175,11 @@ public class ImagePresenter<T> {
         }
     }
 
-    private Object pathToken;
     private Object imageToken;
+    private Object modelStreamToken;
 
-    private final PathLoader<T> pathLoader;
-    private final ImageLoader<T> imageLoader;
+    private final ModelStreamLoader<T> modelStreamLoader;
+    private final ImageLoader imageLoader;
     private final Drawable placeholderDrawable;
     private final ImageSetCallback imageSetCallback;
     private final ImagePresenterCoordinator coordinator;
@@ -218,14 +218,14 @@ public class ImagePresenter<T> {
     }
 
     public interface ExceptionHandler<T> {
-        public void onPathLoadException(Exception e, T model, boolean isCurrent);
-        public void onImageLoadException(Exception e, T model, String path, boolean isCurrent);
+        public void onImageLoadException(Exception e, String id, boolean isCurrent);
+        public void onModelStreamLoadException(Exception e, T model, boolean isCurrent);
     }
 
-    private ImagePresenter(Builder<T> builder) {
+    protected ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
-        this.pathLoader = builder.pathLoader;
+        this.modelStreamLoader = builder.modelStreamLoader;
         if (builder.placeholderResourceId != 0) {
             this.placeholderDrawable = imageView.getResources().getDrawable(builder.placeholderResourceId);
         } else {
@@ -271,7 +271,7 @@ public class ImagePresenter<T> {
             sizeDeterminer.getSize(new SizeDeterminer.SizeReadyCallback() {
                 @Override
                 public void onSizeReady(int width, int height) {
-                    fetchPath(model, width, height, loadCount);
+                    fetchModelStreams(model, width, height, loadCount);
                 }
             });
 
@@ -297,8 +297,8 @@ public class ImagePresenter<T> {
 
     /**
      * Prevents any bitmaps being loaded from previous calls to {@link ImagePresenter#setModel(Object)} from
-     * being displayed and clears this presenter's {@link com.bumptech.photos.loader.image.ImageLoader} and
-     * this presenter's {@link com.bumptech.photos.loader.path.PathLoader}. Also displays the current placeholder if
+     * being displayed and clears this presenter's {@link ImageLoader} and
+     * this presenter's {@link ModelStreamLoader}. Also displays the current placeholder if
      * one is set
      */
     public void clear() {
@@ -306,16 +306,16 @@ public class ImagePresenter<T> {
         resetPlaceHolder();
         currentModel = null;
         isImageSet = false;
-        pathLoader.clear();
+        modelStreamLoader.clear();
         imageLoader.clear();
     }
 
-    private void fetchPath(final T model, final int width, final int height, final int loadCount) {
-        pathToken = pathLoader.fetchPath(model, width, height, new PathLoader.PathReadyCallback() {
+    private void fetchModelStreams(final T model, final int width, final int height, final int loadCount) {
+        modelStreamToken = modelStreamLoader.fetchModelStreams(model, width, height, new ModelStreamLoader.ModelStreamsReadyCallback() {
             @Override
-            public boolean onPathReady(final String path) {
+            public boolean onStreamsReady(String id, StreamOpener streamOpener) {
                 if (loadCount != currentCount) return false;
-                fetchImage(path, model, width, height, loadCount);
+                fetchImage(id, streamOpener, width, height, loadCount);
 
                 return true;
             }
@@ -323,14 +323,14 @@ public class ImagePresenter<T> {
             @Override
             public void onException(Exception e) {
                 if (exceptionHandler != null) {
-                    exceptionHandler.onPathLoadException(e, model, loadCount == currentCount);
+                    exceptionHandler.onModelStreamLoadException(e, model, loadCount == currentCount);
                 }
             }
         });
     }
 
-    private void fetchImage(final String path, final T model, int width, int height, final int loadCount) {
-        imageToken = imageLoader.fetchImage(path, model, width, height, new ImageLoader.ImageReadyCallback() {
+    private void fetchImage(final String id, StreamOpener streamOpener, int width, int height, final int loadCount) {
+        imageToken = imageLoader.fetchImage(id, streamOpener, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
@@ -345,7 +345,7 @@ public class ImagePresenter<T> {
             @Override
             public void onException(Exception e) {
                 if (exceptionHandler != null) {
-                    exceptionHandler.onImageLoadException(e, model, path, loadCount == currentCount);
+                    exceptionHandler.onImageLoadException(e, id, loadCount == currentCount);
                 }
             }
         });

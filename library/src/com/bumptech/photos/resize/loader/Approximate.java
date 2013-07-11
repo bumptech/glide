@@ -5,6 +5,7 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.loader.opener.StreamOpener;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.LoadedCallback;
 
@@ -13,17 +14,17 @@ import com.bumptech.photos.resize.LoadedCallback;
  * Should be used when the image is larger than the view that will display it but the expense of cropping or resizing
  * the image more precisely is not worth it. Can save a substantial amount of memory depending on the size discrepancy
  *
- * @see ImageManager#getImageApproximate(String, int, int, com.bumptech.photos.resize.LoadedCallback)
+ * @see ImageManager#getImageApproximate(String, com.bumptech.photos.loader.opener.StreamOpener, int, int, com.bumptech.photos.resize.LoadedCallback)
  */
-public class Approximate<T> extends ImageManagerLoader<T> {
+public class Approximate extends ImageManagerLoader {
 
     public Approximate(ImageManager imageManager) {
         super(imageManager);
     }
 
     @Override
-    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.getImageApproximate(path, width, height, new LoadedCallback() {
+    protected Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.getImageApproximate(id, streamOpener, width, height, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);

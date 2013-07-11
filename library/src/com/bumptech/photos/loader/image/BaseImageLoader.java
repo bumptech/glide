@@ -1,20 +1,19 @@
 package com.bumptech.photos.loader.image;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.loader.opener.StreamOpener;
 
 import java.lang.ref.WeakReference;
 
 
 /**
  * A base class for {@link ImageLoader} that provides some lifecycle methods and prevents memory leaks by only providing
- * subclasses with a weak reference to the calling object.
- *
- * @param <T> The type of the model this loader must be able to load a {@link android.graphics.Bitmap} for
+ * subclasses with a weak reference to the calling {@link com.bumptech.photos.presenter.ImagePresenter}.
  */
-public abstract class BaseImageLoader<T> implements ImageLoader<T> {
+public abstract class BaseImageLoader implements ImageLoader {
     @Override
-    public final Object fetchImage(String path, T model, int width, int height, ImageReadyCallback cb) {
-        doFetchImage(path, model, width, height, new InternalImageReadyCallback(cb, path, model));
+    public final Object fetchImage(String id, StreamOpener streamOpener, int width, int height, ImageReadyCallback cb) {
+        doFetchImage(id, streamOpener, width, height, new InternalImageReadyCallback(cb, id));
         return cb;
     }
 
@@ -27,15 +26,15 @@ public abstract class BaseImageLoader<T> implements ImageLoader<T> {
      * it. Once a load completes or fails the given callback should be called to signal to the calling object that the
      * image is ready.
      *
-     * @see ImageLoader#fetchImage(String, Object, int, int, com.bumptech.photos.loader.image.ImageLoader.ImageReadyCallback)
+     * @see ImageLoader#fetchImage(String, com.bumptech.photos.loader.opener.StreamOpener, int, int, com.bumptech.photos.loader.image.ImageLoader.ImageReadyCallback)
      *
-     * @param path The path to the image or null if the required information is contained in the model
-     * @param model The object that represents or contains an image that can be displayed
+     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
+     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
      * @param width The width of the view where the image will be displayed
      * @param height The height of the view where the image will be displayed
      * @param cb The callback to call when the bitmap is loaded into memory, or when a load fails
      */
-    protected abstract void doFetchImage(String path, T model, int width, int height, ImageReadyCallback cb);
+    protected abstract void doFetchImage(String id, StreamOpener streamOpener, int width, int height, ImageReadyCallback cb);
 
     /**
      * A lifecycle method called after the requesting object is notified that this loader has loaded a bitmap. Should be
@@ -43,45 +42,40 @@ public abstract class BaseImageLoader<T> implements ImageLoader<T> {
      * an image is displayed. See {@link com.bumptech.photos.presenter.ImageSetCallback} instead to make a visual change
      * when a load completes.
      *
-     * @param path The path to the loaded image
-     * @param model The model representing the loaded image
+     * @param id The unique id of the image
      * @param image The loaded image
      * @param isUsed True iff the requesting object is going to display the image
      */
-    protected void onImageReady(String path, T model, Bitmap image, boolean isUsed) { }
+    protected void onImageReady(String id, Bitmap image, boolean isUsed) { }
 
     /**
-     * A lifecycle method called after the requesting object is notified that this loader failed to loada Bitmap. Should
-     * be used to cleanup or update any data related to the failed load.
+     * A lifecycle method called after the requesting object is notified that this loader failed to load a Bitmap.
+     * Should be used to cleanup or update any data related to the failed load.
      *
      * @param e The exception that caused the failure, or null
-     * @param model The model representing the image this loader failed to load
-     * @param path The path to the image this loader failed to load
+     * @param id The unique id of the image
      * @return True iff this image loader has handled the exception and the cb should not be notified.
      */
-    protected boolean onImageLoadFailed(Exception e, T model, String path) {
+    protected boolean onImageLoadFailed(Exception e, String id) {
         return false;
     }
 
     protected class InternalImageReadyCallback implements ImageReadyCallback {
         private final WeakReference<ImageReadyCallback> cbRef;
-        private final String path;
-        private final WeakReference<T> modelRef;
+        private final String id;
 
-        public InternalImageReadyCallback(ImageReadyCallback cb, String path, T model) {
+        public InternalImageReadyCallback(ImageReadyCallback cb, String id) {
             this.cbRef = new WeakReference<ImageReadyCallback>(cb);
-            this.modelRef = new WeakReference<T>(model);
-            this.path = path;
+            this.id = id;
         }
 
         @Override
         public final boolean onImageReady(Bitmap image) {
             final ImageReadyCallback cb = cbRef.get();
-            final T model = modelRef.get();
             boolean result = false;
-            if (cb != null && modelRef != null) {
+            if (cb != null) {
                 result = cb.onImageReady(image);
-                BaseImageLoader.this.onImageReady(path, model, image, result);
+                BaseImageLoader.this.onImageReady(id, image, result);
             }
             return result;
         }
@@ -89,9 +83,8 @@ public abstract class BaseImageLoader<T> implements ImageLoader<T> {
         @Override
         public void onException(Exception e) {
             final ImageReadyCallback cb = cbRef.get();
-            final T model = modelRef.get();
-            if (cb != null && model != null) {
-                if (!BaseImageLoader.this.onImageLoadFailed(e, model, path)) {
+            if (cb != null) {
+                if (!BaseImageLoader.this.onImageLoadFailed(e, id)) {
                     cb.onException(e);
                 }
             }

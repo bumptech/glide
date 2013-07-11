@@ -5,6 +5,7 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.loader.opener.StreamOpener;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.LoadedCallback;
 
@@ -14,17 +15,17 @@ import com.bumptech.photos.resize.LoadedCallback;
  * but requires some other process to make sure the image on disk matches the given dimension (for example a server side
  * resize).
  *
- * @see ImageManager#getImageExact(String, int, int, com.bumptech.photos.resize.LoadedCallback)
+ * @see ImageManager#getImageExact(String, com.bumptech.photos.loader.opener.StreamOpener, int, int, com.bumptech.photos.resize.LoadedCallback)
  */
-public class Exact<T> extends ImageManagerLoader<T> {
+public class Exact extends ImageManagerLoader {
 
     public Exact(ImageManager imageManager) {
         super(imageManager);
     }
 
     @Override
-    protected Object doFetchImage(String path, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.getImageExact(path, width, height, new LoadedCallback() {
+    protected Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.getImageExact(id, streamOpener, width, height, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);

@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import com.bumptech.photos.loader.opener.StreamOpener;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounter;
 import com.bumptech.photos.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
@@ -28,6 +29,7 @@ import com.bumptech.photos.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
@@ -251,7 +253,7 @@ public class ImageManager {
 
         /**
          * Call to prevent the ImageManager from using a disk cache
-         * @return
+         * @return This Builder
          */
         public Builder disableDiskCache() {
             return setDiskCache(new DiskCacheAdapter());
@@ -305,7 +307,6 @@ public class ImageManager {
 
         final BitmapPool bitmapPool;
         if (builder.recycleBitmaps) {
-            Log.d("IM: recycle bitmaps total per size=" + builder.maxBitmapsPerSize);
             memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
                 @Override
                 public void onImageRemoved(Bitmap removed) {
@@ -323,140 +324,79 @@ public class ImageManager {
     }
 
     /**
-     * Loads the image at the given path at its original dimensions.
+     * Loads the image at its original dimensions.
      *
-     * @param path The path id to the image
+     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
+     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
      * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
-    public Object getImage(final String path, final LoadedCallback cb){
-        final int key = getKey(path, -1, -1, ResizeType.AS_IS);
-        return runJob(key, cb, false, new ImageManagerJob() {
-            @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
-                return resizer.loadAsIs(path);
-            }
-        });
-    }
-
-    /**
-     * @see #getImage(String, LoadedCallback)
-     *
-     * Same as getImage except with two input streams representing the image instead of a path. One
-     * InputStream will be used to determine the image's dimensions and the other will be used to read the image data
-     * from disk
-     */
-    public Object getImage(final InputStream is1, final InputStream is2, String id, LoadedCallback cb) {
+    public Object getImage(String id, final StreamOpener streamOpener, final LoadedCallback cb){
         final int key = getKey(id, -1, -1, ResizeType.AS_IS);
-        return runJob(key, cb, false, new ImageManagerJob() {
+        return runJob(key, cb, false, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
+            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws IOException {
                 return resizer.loadAsIs(is1, is2);
             }
         });
     }
 
     /**
-     * Loads the image for the given path assuming its width and height are exactly those given.
+     * Loads the image assuming its width and height are exactly those given.
      *
-     * @param path The path to the image
+     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
+     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
      * @param width The width of the image on disk
      * @param height The height of the image on disk
      * @param cb The callback called when the load completes
      * @return A token tracking this request
      */
-    public Object getImageExact(final String path, final int width, final int height, final LoadedCallback cb) {
-        final int key = getKey(path, width, height, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob() {
-            @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
-                return resizer.loadAsIs(path, width, height);
-            }
-        });
-    }
-
-    /**
-     * @see #getImageExact(String, int, int, LoadedCallback)
-     *
-     * Same as getImageExact except with an input stream instead of a path
-     */
-    public Object getImageExact(final InputStream is, final int width, final int height, String id, LoadedCallback cb) {
+    public Object getImageExact(final String id, StreamOpener streamOpener, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob() {
+        return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
-                return resizer.loadAsIs(is, width, height);
+            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException{
+                return resizer.loadAsIs(is1, width, height);
             }
         });
     }
 
     /**
-     * Loads the image for the given path to nearly the given width and height maintaining the original proportions.
+     * Loads the image to nearly the given width and height maintaining the original proportions.
      *
-     * @param path The id of the image
+     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
+     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
      * @param width The desired width in pixels
      * @param height The desired height of the slice
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object getImageApproximate(final String path, final int width, final int height, final LoadedCallback cb){
-        final int key = getKey(path, width, height, ResizeType.APPROXIMATE);
-        return runJob(key, cb, new ImageManagerJob() {
-            @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
-                return resizer.loadAtLeast(path, width, height);
-            }
-        });
-    }
-
-    /**
-     * @see #getImageApproximate(String, int, int, LoadedCallback)
-     *
-     * Same as getImageApproximate except with two input streams representing the image instead of a path. One
-     * InputStream will be used to determine the image's dimensions and the other will be used to read the image data
-     * from disk
-     */
-    public Object getImageApproximate(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
+    public Object getImageApproximate(final String id, StreamOpener streamOpener, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.APPROXIMATE);
-        return runJob(key, cb, new ImageManagerJob() {
+        return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
+            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException {
                 return resizer.loadAtLeast(is1, is2, width, height);
             }
         });
     }
 
     /**
-     * Loads the image for the given path , resizes it to be exactly width pixels wide keeping proportions,
+     * Loads the image, resizes it to be exactly width pixels wide keeping proportions,
      * and then returns a section from the center of image exactly height pixels tall.
      *
-     * @param path The id of the image
+     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
+     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
      * @param width The desired width in pixels
      * @param height The desired height of the slice
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object centerCrop(final String path, final int width, final int height, final LoadedCallback cb){
-        final int key = getKey(path, width, height, ResizeType.CENTER_CROP);
-        return runJob(key, cb, new ImageManagerJob() {
-            @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
-                return resizer.centerCrop(path, width, height);
-            }
-        });
-    }
-
-    /**
-     * @see #centerCrop(String, int, int, LoadedCallback)
-     *
-     * Same as centerCrop except with two input streams representing the image instead of a path. One
-     * InputStream will be used to determine the image's dimensions and the other will be used to read the image data
-     * from disk
-     */    public Object centerCrop(final InputStream is1, final InputStream is2, final String id, final int width, final int height, final LoadedCallback cb) {
+    public Object centerCrop(final String id, StreamOpener streamOpener, final int width, final int height, final LoadedCallback cb) {
         final int key = getKey(id, width, height, ResizeType.CENTER_CROP);
-        return runJob(key, cb, new ImageManagerJob() {
+        return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException {
+            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException {
                 return resizer.centerCrop(is1, is2, width, height);
             }
         });
@@ -466,18 +406,19 @@ public class ImageManager {
      * Loads the image for the given id and resizes it, maintaining the original proportions, so that the image fills
      * an area of width*height.
      *
-     * @param path The id of the image
+     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
+     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
      * @param width The width of the space
      * @param height The height of the space
      * @param cb The callback called when the task finishes
      * @return A token tracking this request
      */
-    public Object fitCenter(final String path, final int width, final int height, final LoadedCallback cb){
-        final int key = getKey(path, width, height, ResizeType.FIT_CENTER);
-        return runJob(key, cb, new ImageManagerJob() {
+    public Object fitCenter(final String id, StreamOpener streamOpener, final int width, final int height, final LoadedCallback cb){
+        final int key = getKey(id, width, height, ResizeType.FIT_CENTER);
+        return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound() throws FileNotFoundException{
-                return resizer.fitInSpace(path, width, height);
+            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException{
+                return resizer.fitInSpace(is1, is2, width, height);
             }
         });
     }
@@ -560,11 +501,16 @@ public class ImageManager {
     }
 
     private abstract class ImageManagerJob implements Runnable {
+        private final StreamOpener streamOpener;
         private int key;
         private LoadedCallback cb;
         private boolean useDiskCache;
         private Future future = null;
         private volatile boolean cancelled = false;
+
+        public ImageManagerJob(StreamOpener streamOpener) {
+            this.streamOpener = streamOpener;
+        }
 
         public void execute(int key, LoadedCallback cb, boolean useDiskCache) {
             this.key = key;
@@ -624,9 +570,12 @@ public class ImageManager {
                     if (cancelled) return;
 
                     try {
-                        finishResize(resizeIfNotFound(), false);
+                        StreamOpener.Streams streams = streamOpener.openStreams();
+                        finishResize(resizeIfNotFound(streams.is1, streams.is2), false);
                     } catch (Exception e) {
                         cb.onLoadFailed(e);
+                    } finally {
+                        streamOpener.cleanup();
                     }
                 }
             });
@@ -654,7 +603,7 @@ public class ImageManager {
             }
         }
 
-        protected abstract Bitmap resizeIfNotFound() throws FileNotFoundException;
+        protected abstract Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws IOException;
     }
 
 
@@ -673,7 +622,7 @@ public class ImageManager {
         }
     }
 
-    private static int getKey(String path, int width, int height, ResizeType type){
-        return Util.hash(path.hashCode(), width, height, type.hashCode());
+    private static int getKey(String id, int width, int height, ResizeType type){
+        return Util.hash(id.hashCode(), width, height, type.hashCode());
     }
 }

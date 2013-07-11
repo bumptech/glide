@@ -1,6 +1,7 @@
 package com.bumptech.photos.resize.loader;
 
 import android.graphics.Bitmap;
+import com.bumptech.photos.loader.opener.StreamOpener;
 import com.bumptech.photos.loader.image.BaseImageLoader;
 import com.bumptech.photos.resize.ImageManager;
 
@@ -8,7 +9,7 @@ import com.bumptech.photos.resize.ImageManager;
  * A base class for loaders that user ImageManager. Primarily responsible for keeping track of bitmaps for recycling
  * purposes.
  */
-public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
+public abstract class ImageManagerLoader extends BaseImageLoader {
 
     protected final ImageManager imageManager;
     private Bitmap acquired;
@@ -18,17 +19,17 @@ public abstract class ImageManagerLoader<T> extends BaseImageLoader<T> {
         this.imageManager = imageManager;
     }
     @Override
-    protected final void doFetchImage(String path, T model, int width, int height, ImageReadyCallback cb) {
+    protected final void doFetchImage(String id, StreamOpener streamOpener, int width, int height, ImageReadyCallback cb) {
         clear();
-        if (path != null) {
-            loadToken = doFetchImage(path, width, height, cb);
+        if (streamOpener != null) {
+            loadToken = loadFromImageManager(id, streamOpener, width, height, cb);
         }
     }
 
-    protected abstract Object doFetchImage(String path, int width, int height, ImageReadyCallback cb);
+    protected abstract Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, ImageReadyCallback cb);
 
     @Override
-    protected void onImageReady(String path, T model, Bitmap image, boolean isUsed) {
+    protected void onImageReady(String id, Bitmap image, boolean isUsed) {
         if (isUsed) {
             releaseAcquired();
             imageManager.acquireBitmap(image);
