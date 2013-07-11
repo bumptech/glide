@@ -18,7 +18,6 @@ import com.bumptech.photos.presenter.ImageSetCallback;
 import com.bumptech.photos.resize.ImageManager;
 import com.bumptech.photos.resize.loader.CenterCrop;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,14 +32,13 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
     private Api api;
     private ImageManager imageManager;
-    private File cacheDir;
     private List<Photo> currentPhotos;
 
-    public void setup(Api api, ImageManager imageManager, File cacheDir) {
+    public void setup(Api api, ImageManager imageManager) {
         this.api = api;
         this.imageManager = imageManager;
-        this.cacheDir = cacheDir;
     }
+
     @Override
     public void onPhotosUpdated(List<Photo> photos) {
         currentPhotos = photos;
@@ -107,7 +105,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                 final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
                 ImagePresenter<Photo> presenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
-                        .setModelStreamLoader(new FlickrStreamLoader(api, cacheDir))
+                        .setModelStreamLoader(new DirectFlickrStreamLoader(api))
                         .setImageLoader(new CenterCrop(imageManager))
                         .setImageSetCallback(new ImageSetCallback() {
                             @Override

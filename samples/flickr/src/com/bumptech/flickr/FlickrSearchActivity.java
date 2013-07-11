@@ -108,7 +108,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         photoViewers.add(medium);
 
         FlickrPhotoList list =  new FlickrPhotoList();
-        list.setup(flickerApi, imageManager, cacheDir);
+        list.setup(flickerApi, imageManager);
         fragments.add(list);
         photoViewers.add(list);
 
