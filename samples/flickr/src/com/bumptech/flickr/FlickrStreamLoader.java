@@ -2,8 +2,8 @@ package com.bumptech.flickr;
 
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
-import com.bumptech.photos.loader.model.BaseModelStreamLoader;
-import com.bumptech.photos.loader.opener.FileInputStreamsOpener;
+import com.bumptech.glide.loader.model.BaseModelStreamLoader;
+import com.bumptech.glide.loader.opener.FileInputStreamsOpener;
 
 import java.io.File;
 import java.util.concurrent.Future;

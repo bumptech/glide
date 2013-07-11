@@ -13,10 +13,10 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
-import com.bumptech.photos.presenter.ImagePresenter;
-import com.bumptech.photos.presenter.ImageSetCallback;
-import com.bumptech.photos.resize.ImageManager;
-import com.bumptech.photos.resize.loader.CenterCrop;
+import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.presenter.ImageSetCallback;
+import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.loader.CenterCrop;
 
 import java.util.ArrayList;
 import java.util.List;

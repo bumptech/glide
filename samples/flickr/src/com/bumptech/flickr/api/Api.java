@@ -1,6 +1,6 @@
 package com.bumptech.flickr.api;
 
-import com.bumptech.photos.util.Log;
+import com.bumptech.glide.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -17,9 +17,9 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
-import com.bumptech.photos.resize.ImageManager;
-import com.bumptech.photos.resize.cache.DiskLruCacheWrapper;
-import com.bumptech.photos.util.Log;
+import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
+import com.bumptech.glide.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
