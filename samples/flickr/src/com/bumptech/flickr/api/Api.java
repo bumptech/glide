@@ -7,6 +7,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +67,15 @@ public class Api {
     public Api(int maxPhotoSize) {
         this.downloader = Downloader.get();
         this.sizeKey = getSizeKey(maxPhotoSize, maxPhotoSize);
+    }
+
+    public URL getPhotoURL(int width, int height, Photo photo) {
+        try {
+            return new URL(getPhotoUrl(photo, getSizeKey(width, height)));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private static String getUrlForMethod(String method) {

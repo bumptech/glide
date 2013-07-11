@@ -104,8 +104,8 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
                 final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
                 presenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
-                        .setPathLoader(new FlickrPathLoader(api, cacheDir))
-                        .setImageLoader(new CenterCrop<Photo>(imageManager))
+                        .setModelStreamLoader(new FlickrStreamLoader(api, cacheDir))
+                        .setImageLoader(new CenterCrop(imageManager))
                         .setImageSetCallback(new ImageSetCallback() {
                             @Override
                             public void onImageSet(ImageView view, boolean fromCache) {
