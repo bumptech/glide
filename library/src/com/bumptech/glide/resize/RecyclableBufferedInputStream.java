@@ -198,7 +198,11 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      */
     @Override
     public synchronized void mark(int readlimit) {
-        marklimit = readlimit;
+        //This is stupid, but BitmapFactory.decodeStream calls mark(1024)
+        //which is too small for a substantial portion of images. This
+        //change (using Math.max) ensures that we don't overwrite readlimit
+        //with a smaller value
+        marklimit = Math.max(marklimit, readlimit);
         markpos = pos;
     }
 

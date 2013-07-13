@@ -25,8 +25,8 @@ import java.util.Queue;
  * A class for synchronously resizing bitmaps with or without Bitmaps to recycle
  */
 public class ImageResizer {
-    private static final int TEMP_BYTES_SIZE = 32 * 1024; //32kb
-    private static final int MARK_POSITION = 5 * 1024 * 1024; //5mb
+    private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
+    private static final int MARK_POSITION = 1024 * 1024; //1mb
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private final BitmapPool bitmapPool;
@@ -372,13 +372,13 @@ public class ImageResizer {
         decodeBitmapOptions.inTempStorage = getTempBytes();
 
         if (decodeBitmapOptions.inJustDecodeBounds) {
-            bis.mark(MARK_POSITION); //this is absurdly large, but jpeg headers are not size bounded so we need
+            bis.mark(MARK_POSITION); //this is large, but jpeg headers are not size bounded so we need
                                      //something large enough to minimize the possibility of not being able to fit
                                      //enough of the header in the buffer to get the image size so that we don't fail
                                      //to load images. The BufferedInputStream will create a new buffer of 2x the
                                      //original size each time we use up the buffer space without passing the mark so
                                      //this is a maximum bound on the buffer size, not a default. Most of the time we
-                                     //won't go past our pre-allocated 32kb
+                                     //won't go past our pre-allocated 16kb
         }
         final Bitmap result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
         try {
