@@ -38,6 +38,13 @@ import java.io.InputStream;
  *
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
+
+    public static class InvalidMarkException extends RuntimeException {
+        public InvalidMarkException(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
     /**
      * The buffer containing the current bytes read from the target InputStream.
      */
@@ -353,7 +360,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             throw new IOException("Stream is closed");
         }
         if (-1 == markpos) {
-            throw new IOException("Mark has been invalidated.");
+            throw new InvalidMarkException("Mark has been invalidated");
         }
         pos = markpos;
     }
