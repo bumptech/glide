@@ -11,16 +11,16 @@ import java.lang.ref.WeakReference;
  */
 public abstract class BaseModelStreamLoader<T> implements ModelStreamLoader<T> {
     /**
-     * @see ModelStreamLoader#fetchModelStreams(Object, int, int, com.bumptech.glide.loader.model.ModelStreamLoader.ModelStreamsReadyCallback)
+     * @see ModelStreamLoader#fetchModelStream(Object, int, int, com.bumptech.glide.loader.model.ModelStreamLoader.ModelStreamReadyCallback)
      */
     @Override
-    public final Object fetchModelStreams(T model, int width, int height, ModelStreamsReadyCallback cb) {
-        doFetchModelStreams(model, width, height, new InternalModelStreamsReadyCallback(cb, model));
+    public final Object fetchModelStream(T model, int width, int height, ModelStreamReadyCallback cb) {
+        doFetchModelStreams(model, width, height, new InternalModelStreamReadyCallback(cb, model));
         return cb;
     }
 
     /**
-     * @see ModelStreamLoader#fetchModelStreams(Object, int, int, com.bumptech.glide.loader.model.ModelStreamLoader.ModelStreamsReadyCallback)
+     * @see ModelStreamLoader#fetchModelStream(Object, int, int, com.bumptech.glide.loader.model.ModelStreamLoader.ModelStreamReadyCallback)
      */
     @Override
     public void clear() { }
@@ -35,7 +35,7 @@ public abstract class BaseModelStreamLoader<T> implements ModelStreamLoader<T> {
      * @param height The height of the view the image will be displayed in
      * @param cb The callback to call when the id and stream opener are ready, or when the load fails
      */
-    protected abstract void doFetchModelStreams(T model, int width, int height, ModelStreamsReadyCallback cb);
+    protected abstract void doFetchModelStreams(T model, int width, int height, ModelStreamReadyCallback cb);
 
     /**
      * A lifecycle method called after the requesting object is notifie that this loader failed to load the id and/or
@@ -49,29 +49,29 @@ public abstract class BaseModelStreamLoader<T> implements ModelStreamLoader<T> {
         return false;
     }
 
-    protected class InternalModelStreamsReadyCallback implements ModelStreamsReadyCallback {
+    protected class InternalModelStreamReadyCallback implements ModelStreamReadyCallback {
 
-        private final WeakReference<ModelStreamsReadyCallback> cbRef;
+        private final WeakReference<ModelStreamReadyCallback> cbRef;
         private final WeakReference<T> modelRef;
 
-        public InternalModelStreamsReadyCallback(ModelStreamsReadyCallback cb, T model) {
-            this.cbRef = new WeakReference<ModelStreamsReadyCallback>(cb);
+        public InternalModelStreamReadyCallback(ModelStreamReadyCallback cb, T model) {
+            this.cbRef = new WeakReference<ModelStreamReadyCallback>(cb);
             this.modelRef = new WeakReference<T>(model);
         }
 
         @Override
-        public boolean onStreamsReady(String id, StreamOpener streamOpener) {
-            ModelStreamsReadyCallback cb = cbRef.get();
+        public boolean onStreamReady(String id, StreamOpener streamOpener) {
+            ModelStreamReadyCallback cb = cbRef.get();
             boolean result = false;
             if (cb != null) {
-                result = cb.onStreamsReady(id, streamOpener);
+                result = cb.onStreamReady(id, streamOpener);
             }
             return result;
         }
 
         @Override
         public void onException(Exception e) {
-            ModelStreamsReadyCallback cb = cbRef.get();
+            ModelStreamReadyCallback cb = cbRef.get();
             T model = modelRef.get();
             if (cb != null && model != null) {
                 if (!BaseModelStreamLoader.this.onModelStreamFetchFailed(e, model)) {

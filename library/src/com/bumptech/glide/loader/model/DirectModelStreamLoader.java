@@ -11,8 +11,8 @@ import com.bumptech.glide.loader.opener.StreamOpener;
  */
 public abstract class DirectModelStreamLoader<T> extends BaseModelStreamLoader<T> {
     @Override
-    protected void doFetchModelStreams(T model, int width, int height, ModelStreamsReadyCallback cb) {
-        cb.onStreamsReady(getId(model), getStreamOpener(model, width, height));
+    protected void doFetchModelStreams(T model, int width, int height, ModelStreamReadyCallback cb) {
+        cb.onStreamReady(getId(model), getStreamOpener(model, width, height));
     }
 
     @Override

@@ -271,7 +271,7 @@ public class ImagePresenter<T> {
             sizeDeterminer.getSize(new SizeDeterminer.SizeReadyCallback() {
                 @Override
                 public void onSizeReady(int width, int height) {
-                    fetchModelStreams(model, width, height, loadCount);
+                    fetchModelStream(model, width, height, loadCount);
                 }
             });
 
@@ -310,10 +310,10 @@ public class ImagePresenter<T> {
         imageLoader.clear();
     }
 
-    private void fetchModelStreams(final T model, final int width, final int height, final int loadCount) {
-        modelStreamToken = modelStreamLoader.fetchModelStreams(model, width, height, new ModelStreamLoader.ModelStreamsReadyCallback() {
+    private void fetchModelStream(final T model, final int width, final int height, final int loadCount) {
+        modelStreamToken = modelStreamLoader.fetchModelStream(model, width, height, new ModelStreamLoader.ModelStreamReadyCallback() {
             @Override
-            public boolean onStreamsReady(String id, StreamOpener streamOpener) {
+            public boolean onStreamReady(String id, StreamOpener streamOpener) {
                 if (loadCount != currentCount) return false;
                 fetchImage(id, streamOpener, width, height, loadCount);
 

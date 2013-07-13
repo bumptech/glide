@@ -335,8 +335,8 @@ public class ImageManager {
         final int key = getKey(id, -1, -1, ResizeType.AS_IS);
         return runJob(key, cb, false, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws IOException {
-                return resizer.loadAsIs(is1);
+            protected Bitmap resizeIfNotFound(InputStream is) throws IOException {
+                return resizer.loadAsIs(is);
             }
         });
     }
@@ -355,8 +355,8 @@ public class ImageManager {
         final int key = getKey(id, width, height, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException{
-                return resizer.loadAsIs(is1, width, height);
+            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException{
+                return resizer.loadAsIs(is, width, height);
             }
         });
     }
@@ -375,8 +375,8 @@ public class ImageManager {
         final int key = getKey(id, width, height, ResizeType.APPROXIMATE);
         return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException {
-                return resizer.loadAtLeast(is1, width, height);
+            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
+                return resizer.loadAtLeast(is, width, height);
             }
         });
     }
@@ -396,8 +396,8 @@ public class ImageManager {
         final int key = getKey(id, width, height, ResizeType.CENTER_CROP);
         return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException {
-                return resizer.centerCrop(is1, width, height);
+            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
+                return resizer.centerCrop(is, width, height);
             }
         });
     }
@@ -417,8 +417,8 @@ public class ImageManager {
         final int key = getKey(id, width, height, ResizeType.FIT_CENTER);
         return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
-            protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException{
-                return resizer.fitInSpace(is1, width, height);
+            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException{
+                return resizer.fitInSpace(is, width, height);
             }
         });
     }
@@ -568,8 +568,7 @@ public class ImageManager {
                     if (cancelled) return;
 
                     try {
-                        StreamOpener.Streams streams = streamOpener.openStreams();
-                        finishResize(resizeIfNotFound(streams.is1, streams.is2), false);
+                        finishResize(resizeIfNotFound(streamOpener.openStream()), false);
                     } catch (Exception e) {
                         cb.onLoadFailed(e);
                     } finally {
@@ -608,7 +607,7 @@ public class ImageManager {
             }
         }
 
-        protected abstract Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws IOException;
+        protected abstract Bitmap resizeIfNotFound(InputStream is) throws IOException;
     }
 
 

@@ -3,7 +3,7 @@ package com.bumptech.flickr;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.loader.model.DirectModelStreamLoader;
-import com.bumptech.glide.loader.opener.HttpInputStreamsOpener;
+import com.bumptech.glide.loader.opener.HttpInputStreamOpener;
 import com.bumptech.glide.loader.opener.StreamOpener;
 
 /**
@@ -20,7 +20,7 @@ public class DirectFlickrStreamLoader extends DirectModelStreamLoader<Photo>{
 
     @Override
     protected StreamOpener getStreamOpener(Photo model, int width, int height) {
-        return new HttpInputStreamsOpener(flickrApi.getPhotoURL(width, height, model));
+        return new HttpInputStreamOpener(flickrApi.getPhotoURL(width, height, model));
     }
 
     @Override

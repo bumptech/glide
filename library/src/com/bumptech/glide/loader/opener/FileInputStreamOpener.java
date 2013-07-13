@@ -3,6 +3,7 @@ package com.bumptech.glide.loader.opener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,20 +12,20 @@ import java.io.IOException;
  * Time: 11:11 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileInputStreamsOpener implements StreamOpener {
+public class FileInputStreamOpener implements StreamOpener {
     private final File file;
 
-    public FileInputStreamsOpener(String path) {
+    public FileInputStreamOpener(String path) {
         this(new File(path));
     }
 
-    public FileInputStreamsOpener(File file) {
+    public FileInputStreamOpener(File file) {
         this.file = file;
     }
 
     @Override
-    public Streams openStreams() throws IOException {
-        return new Streams(new FileInputStream(file), new FileInputStream(file));
+    public InputStream openStream() throws IOException {
+        return new FileInputStream(file);
     }
 
     @Override

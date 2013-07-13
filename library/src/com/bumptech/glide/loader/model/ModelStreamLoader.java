@@ -14,7 +14,7 @@ public interface ModelStreamLoader<T> {
      * and that should be called by the {@link ModelStreamLoader} when a load completes either successfully or
      * because of an exception
      */
-    public interface ModelStreamsReadyCallback {
+    public interface ModelStreamReadyCallback {
         /**
          * The method a loader should call when a load completes successfully
          *
@@ -22,7 +22,7 @@ public interface ModelStreamLoader<T> {
          * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
          * @return True iff the loaded streamOpener and id was used by the class that requested
          */
-        public boolean onStreamsReady(String id, StreamOpener streamOpener);
+        public boolean onStreamReady(String id, StreamOpener streamOpener);
 
         /**
          * The method a loader should call when a load fails
@@ -42,7 +42,7 @@ public interface ModelStreamLoader<T> {
      *
      * @return A reference to the fetch that must be retained by the calling object as long as the fetch is relavent
      */
-    public Object fetchModelStreams(T model, int width, int height, ModelStreamsReadyCallback cb);
+    public Object fetchModelStream(T model, int width, int height, ModelStreamReadyCallback cb);
 
     /**
      * Called when the current load does not need to continue and any corresponding cleanup to save cpu or memory can be

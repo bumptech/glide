@@ -3,7 +3,7 @@ package com.bumptech.flickr;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.loader.model.BaseModelStreamLoader;
-import com.bumptech.glide.loader.opener.FileInputStreamsOpener;
+import com.bumptech.glide.loader.opener.FileInputStreamOpener;
 
 import java.io.File;
 import java.util.concurrent.Future;
@@ -25,12 +25,12 @@ public class FlickrStreamLoader extends BaseModelStreamLoader<Photo>{
     }
 
     @Override
-    protected void doFetchModelStreams(final Photo model, int width, int height, final ModelStreamsReadyCallback cb) {
+    protected void doFetchModelStreams(final Photo model, int width, int height, final ModelStreamReadyCallback cb) {
         clear();
         current = flickrApi.downloadPhoto(model, cacheDir, new Api.PhotoCallback() {
             @Override
             public void onDownloadComplete(String path) {
-                cb.onStreamsReady(model.id, new FileInputStreamsOpener(path));
+                cb.onStreamReady(model.id, new FileInputStreamOpener(path));
             }
         });
     }
