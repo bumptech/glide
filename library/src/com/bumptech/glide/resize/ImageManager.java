@@ -336,7 +336,7 @@ public class ImageManager {
         return runJob(key, cb, false, new ImageManagerJob(streamOpener) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws IOException {
-                return resizer.loadAsIs(is1, is2);
+                return resizer.loadAsIs(is1);
             }
         });
     }
@@ -376,7 +376,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException {
-                return resizer.loadAtLeast(is1, is2, width, height);
+                return resizer.loadAtLeast(is1, width, height);
             }
         });
     }
@@ -397,7 +397,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException {
-                return resizer.centerCrop(is1, is2, width, height);
+                return resizer.centerCrop(is1, width, height);
             }
         });
     }
@@ -418,7 +418,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(streamOpener) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is1, InputStream is2) throws FileNotFoundException{
-                return resizer.fitInSpace(is1, is2, width, height);
+                return resizer.fitInSpace(is1, width, height);
             }
         });
     }
@@ -541,7 +541,7 @@ public class ImageManager {
                 result = diskCache.get(stringKey, new DiskCache.Reader() {
                     @Override
                     public Bitmap read(InputStream is1, InputStream is2) {
-                        Bitmap result = resizer.loadAsIs(is1, is2);
+                        Bitmap result = resizer.loadAsIs(is1);
                         if (result == null) {
                             diskCache.delete(stringKey);
                         }

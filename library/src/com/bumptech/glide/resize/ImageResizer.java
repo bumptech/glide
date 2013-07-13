@@ -25,6 +25,8 @@ import java.util.Queue;
  * A class for synchronously resizing bitmaps with or without Bitmaps to recycle
  */
 public class ImageResizer {
+    private static final int TEMP_BYTES_SIZE = 32 * 1024; //32kb
+    private static final int MARK_POSITION = 5 * 1024 * 1024; //5mb
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private final BitmapPool bitmapPool;
@@ -91,8 +93,8 @@ public class ImageResizer {
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
-    public Bitmap centerCrop(InputStream is1, InputStream is2, int width, int height) {
-        final Bitmap streamed = loadAtLeast(is1, is2, width, height);
+    public Bitmap centerCrop(InputStream is1, int width, int height) {
+        final Bitmap streamed = loadAtLeast(is1, width, height);
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
@@ -111,8 +113,8 @@ public class ImageResizer {
         return fitInSpace(streamed, width, height);
     }
 
-    public Bitmap fitInSpace(InputStream is1, InputStream is2, int width, int height) {
-        final Bitmap streamed = loadAtLeast(is1, is2, width > height ? 1 : width, height > width ? 1 : height);
+    public Bitmap fitInSpace(InputStream is1, int width, int height) {
+        final Bitmap streamed = loadAtLeast(is1, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
 
@@ -139,7 +141,7 @@ public class ImageResizer {
             height = w;
         }
 
-        Bitmap result = loadAtLeast(new FileInputStream(path), new FileInputStream(path), width, height);
+        Bitmap result = loadAtLeast(new FileInputStream(path), width, height);
 
         if (orientation != 0) {
             result = rotateImage(result, orientation);
@@ -154,14 +156,15 @@ public class ImageResizer {
      * Note - if the image at the path has dimens less than or equal to the given dimens, the image will not
      * be enlarged and will instead be loaded at its original dimens.
      *
-     * @param is1 An inputStream for the image. Can't be is2
-     * @param is2 An inputStream for the image. Can't be is1
+     * @param is1 An inputStream for the image
      * @param width The minimum width of the returned Bitmap
      * @param height The minimum height of the returned Bitmap
      * @return A Bitmap containing the image
      */
-    public Bitmap loadAtLeast(InputStream is1, InputStream is2, int width, int height) {
-        final int[] dimens = getDimensions(is1);
+    public Bitmap loadAtLeast(InputStream is1, int width, int height) {
+        byte[] bytes = getTempBytes();
+        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is1, bytes);
+        final int[] dimens = getDimensions(bis);
         final int originalWidth = dimens[0];
         final int originalHeight = dimens[1];
 
@@ -171,7 +174,9 @@ public class ImageResizer {
         final BitmapFactory.Options decodeBitmapOptions = getOptions();
         decodeBitmapOptions.inSampleSize = sampleSize;
 
-        return decodeStream(is2, decodeBitmapOptions);
+        Bitmap result = decodeStream(bis, decodeBitmapOptions);
+        releaseTempBytes(bytes);
+        return result;
     }
 
     /**
@@ -211,8 +216,10 @@ public class ImageResizer {
      * @param height The maximum height
      * @return A bitmap containing the image
      */
-    public Bitmap loadAtMost(InputStream is1, InputStream is2, int width, int height) {
-        final int[] dimens = getDimensions(is1);
+    public Bitmap loadAtMost(InputStream is, int width, int height) {
+        byte[] bytes = getTempBytes();
+        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
+        final int[] dimens = getDimensions(bis);
         final int originalWidth = dimens[0];
         final int originalHeight = dimens[1];
 
@@ -220,7 +227,9 @@ public class ImageResizer {
         final BitmapFactory.Options decodeBitmapOptions = getOptions();
         decodeBitmapOptions.inSampleSize = sampleSize;
 
-        return decodeStream(is2, decodeBitmapOptions);
+        Bitmap result = decodeStream(bis, decodeBitmapOptions);
+        releaseTempBytes(bytes);
+        return result;
     }
 
     /**
@@ -229,26 +238,23 @@ public class ImageResizer {
      * size. Use the second InputStream to actually load the image into a Bitmap. Note both InputStreams must represent
      * the same image and this method will close both InputStreams.
      *
-     * @param is1 The InputStream used to get the dimensions of the image
-     * @param is2 The InputStream used to load the image into memory
+     * @param is The InputStream used to get the dimensions of the image
      * @return The loaded image
      */
-    public Bitmap loadAsIs(final InputStream is1, final InputStream is2) {
-        int[] dimens = new int[] {-1, -1};
-        try {
-            dimens = getDimensions(is1);
-        } finally {
-            try {
-                is1.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return load(is2, getRecycled(dimens));
+    public Bitmap loadAsIs(final InputStream is) {
+        byte[] bytes = getTempBytes();
+        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
+        int[] dimens = getDimensions(bis);
+        Bitmap result = load(bis, getRecycled(dimens));
+        releaseTempBytes(bytes);
+        return result;
     }
 
     public Bitmap loadAsIs(InputStream is, int width, int height) {
-        return load(is, getRecycled(width, height));
+        byte[] bytes = getTempBytes();
+        Bitmap result = load(new RecyclableBufferedInputStream(is, bytes), getRecycled(width, height));
+        releaseTempBytes(bytes);
+        return result;
     }
 
     /**
@@ -311,7 +317,7 @@ public class ImageResizer {
      * @param recycle A Bitmap we can load the image into, or null
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
      */
-    private Bitmap load(InputStream is, Bitmap recycle){
+    private Bitmap load(RecyclableBufferedInputStream is, Bitmap recycle){
         final BitmapFactory.Options decodeBitmapOptions = getOptions(recycle);
         return decodeStream(is, decodeBitmapOptions);
     }
@@ -335,7 +341,7 @@ public class ImageResizer {
      * @param is The InputStream representing the image
      * @return an array containing the dimensions of the image in the form {width, height}
      */
-    private int[] getDimensions(InputStream is) {
+    private int[] getDimensions(RecyclableBufferedInputStream is) {
         final BitmapFactory.Options decodeBoundsOptions = getOptions();
         decodeBoundsOptions.inJustDecodeBounds = true;
         decodeStream(is, decodeBoundsOptions);
@@ -343,11 +349,13 @@ public class ImageResizer {
     }
 
     private Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions) throws FileNotFoundException {
-        InputStream is = null;
+        RecyclableBufferedInputStream is = null;
         Bitmap result = null;
         try {
-            is = new FileInputStream(path);
+            byte[] bytes = getTempBytes();
+            is = new RecyclableBufferedInputStream(new FileInputStream(path), bytes);
             result = decodeStream(is, decodeBitmapOptions);
+            releaseTempBytes(bytes);
         } finally {
             if (is != null) {
                 try {
@@ -360,21 +368,31 @@ public class ImageResizer {
         return result;
     }
 
-    private Bitmap decodeStream(InputStream is, BitmapFactory.Options decodeBitmapOptions) {
-        final byte[][] tempBytes = getTempBytes();
-        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, tempBytes[0]);
-        decodeBitmapOptions.inTempStorage = tempBytes[1];
-        Bitmap result = null;
-        try {
-            result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
-        } finally {
-            try {
-                bis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            releaseTempBytes(tempBytes);
+    private Bitmap decodeStream(RecyclableBufferedInputStream bis, BitmapFactory.Options decodeBitmapOptions) {
+        decodeBitmapOptions.inTempStorage = getTempBytes();
+
+        if (decodeBitmapOptions.inJustDecodeBounds) {
+            bis.mark(MARK_POSITION); //this is absurdly large, but jpeg headers are not size bounded so we need
+                                     //something large enough to minimize the possibility of not being able to fit
+                                     //enough of the header in the buffer to get the image size so that we don't fail
+                                     //to load images. The BufferedInputStream will create a new buffer of 2x the
+                                     //original size each time we use up the buffer space without passing the mark so
+                                     //this is a maximum bound on the buffer size, not a default. Most of the time we
+                                     //won't go past our pre-allocated 32kb
         }
+        final Bitmap result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
+        try {
+            if (decodeBitmapOptions.inJustDecodeBounds) {
+                bis.reset();
+            } else {
+                bis.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        releaseTempBytes(decodeBitmapOptions.inTempStorage);
+
         return result;
     }
 
@@ -398,26 +416,21 @@ public class ImageResizer {
         return bitmapPool.get(width, height);
     }
 
-    private byte[][] getTempBytes() {
-        byte[][] result = new byte[2][];
+    private byte[] getTempBytes() {
+        byte[] result;
         synchronized (tempQueue) {
-            for (int i = 0; i < result.length; i++) {
-                if (tempQueue.size() > 0) {
-                    result[i] = tempQueue.remove();
-                } else {
-                    Log.d("IR: created temp bytes");
-                    result[i] = new byte[16 * 1024];
-                }
-            }
+            result = tempQueue.poll();
+        }
+        if (result == null) {
+            result = new byte[TEMP_BYTES_SIZE];
+            Log.d("IR: created temp bytes");
         }
         return result;
     }
 
-    private void releaseTempBytes(byte[][] byteArrays) {
+    private void releaseTempBytes(byte[] bytes) {
         synchronized (tempQueue) {
-            for (byte[] bytes : byteArrays) {
-                tempQueue.add(bytes);
-            }
+            tempQueue.offer(bytes);
         }
     }
 
@@ -490,7 +503,7 @@ public class ImageResizer {
         } else {
             result = Bitmap.createBitmap(width, height, toCrop.getConfig() == null ?
                                                             Bitmap.Config.ARGB_8888 : toCrop.getConfig());
-        };
+        }
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
         //only if scaling up
