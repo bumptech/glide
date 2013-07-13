@@ -1,6 +1,6 @@
 package com.bumptech.glide.resize.cache;
 
-import android.graphics.Bitmap;
+import java.io.InputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,7 +11,7 @@ import android.graphics.Bitmap;
  */
 public class DiskCacheAdapter implements DiskCache {
     @Override
-    public Bitmap get(String key, Reader reader) {
+    public InputStream get(String key) {
         return null;
     }
 

@@ -4,7 +4,6 @@
 
 package com.bumptech.glide.resize.cache;
 
-import android.graphics.Bitmap;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.File;
@@ -48,20 +47,15 @@ public class DiskLruCacheWrapper implements DiskCache {
     }
 
     @Override
-    public Bitmap get(String key, Reader reader) {
-        Bitmap result = null;
+    public InputStream get(String key) {
+        InputStream result = null;
         try {
             //It is possible that the there will be a put in between these two gets. If so that shouldn't be a problem
             //because we will always put the same value at the same key so our input streams will still represent
             //the same data
-            final DiskLruCache.Snapshot snapshot1 = diskLruCache.get(key);
-            if (snapshot1 != null) {
-                final DiskLruCache.Snapshot snapshot2 = diskLruCache.get(key);
-                if (snapshot2 != null) {
-                    final InputStream is1 = snapshot1.getInputStream(0);
-                    final InputStream is2 = snapshot2.getInputStream(0);
-                    result = reader.read(is1, is2);
-                }
+            final DiskLruCache.Snapshot snapshot = diskLruCache.get(key);
+            if (snapshot != null) {
+                result = snapshot.getInputStream(0);
             }
         } catch (IOException e) {
             e.printStackTrace();

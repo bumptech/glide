@@ -536,16 +536,13 @@ public class ImageManager {
             final String stringKey = String.valueOf(key);
             Bitmap result = null;
             if (useDiskCache) {
-                result = diskCache.get(stringKey, new DiskCache.Reader() {
-                    @Override
-                    public Bitmap read(InputStream is1, InputStream is2) {
-                        Bitmap result = resizer.loadAsIs(is1);
-                        if (result == null) {
-                            diskCache.delete(stringKey);
-                        }
-                        return result;
+                final InputStream is = diskCache.get(stringKey);
+                if (is != null) {
+                    result = resizer.loadAsIs(is);
+                    if (result == null) {
+                        diskCache.delete(stringKey); //the image must have been corrupted
                     }
-                });
+                }
             }
 
             if (result == null) {

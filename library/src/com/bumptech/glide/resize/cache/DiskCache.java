@@ -1,7 +1,5 @@
 package com.bumptech.glide.resize.cache;
 
-import android.graphics.Bitmap;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -17,11 +15,7 @@ public interface DiskCache {
         public void write(OutputStream os);
     }
 
-    public interface Reader {
-        public Bitmap read(InputStream is1, InputStream is2);
-    }
-
-    public Bitmap get(String key, Reader reader);
+    public InputStream get(String key);
     public void put(String key, Writer writer);
     public void delete(String key);
 }
