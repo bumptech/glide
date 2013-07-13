@@ -389,9 +389,9 @@ public class ImageResizer {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            releaseTempBytes(decodeBitmapOptions.inTempStorage);
         }
-
-        releaseTempBytes(decodeBitmapOptions.inTempStorage);
 
         return result;
     }

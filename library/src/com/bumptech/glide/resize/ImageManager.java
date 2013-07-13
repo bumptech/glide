@@ -523,9 +523,7 @@ public class ImageManager {
             if (cancelled) return;
             cancelled = true;
 
-            if (bgHandler != null) {
-                bgHandler.removeCallbacks(this);
-            }
+            bgHandler.removeCallbacks(this);
             if (future != null) {
                 future.cancel(false);
             }
@@ -598,6 +596,13 @@ public class ImageManager {
                     @Override
                     public void run() {
                         cb.onLoadCompleted(result);
+                    }
+                });
+            } else {
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        cb.onLoadFailed(null);
                     }
                 });
             }
