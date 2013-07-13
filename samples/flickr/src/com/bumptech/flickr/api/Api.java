@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,20 +38,25 @@ public class Api {
         put(150, "q");
         put(240, "m");
         put(320, "n");
-        put(500, "-");
         put(640, "z");
         put(1024, "b");
-        put(Integer.MAX_VALUE, "o");
     }};
+
+    private static final List<Integer> SORTED_SIZE_KEYS = new ArrayList<Integer>(EDGE_TO_SIZE_KEY.size());
+    static {
+        SORTED_SIZE_KEYS.addAll(EDGE_TO_SIZE_KEY.keySet());
+        Collections.sort(SORTED_SIZE_KEYS);
+    }
     private final String sizeKey;
 
     private static String getSizeKey(int width, int height) {
-        final int largestEdge = width > height ? width : height;
+        final int largestEdge = Math.max(width, height);
 
-        final String result = EDGE_TO_SIZE_KEY.get(Integer.MAX_VALUE);
-        for (int edge : EDGE_TO_SIZE_KEY.keySet()) {
+        String result = EDGE_TO_SIZE_KEY.get(SORTED_SIZE_KEYS.get(SORTED_SIZE_KEYS.size() - 1));
+        for (int edge : SORTED_SIZE_KEYS) {
             if (largestEdge <= edge) {
-                return EDGE_TO_SIZE_KEY.get(edge);
+                result = EDGE_TO_SIZE_KEY.get(edge);
+                break;
             }
         }
         return result;
