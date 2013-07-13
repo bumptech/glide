@@ -218,7 +218,7 @@ public class ImagePresenter<T> {
     }
 
     public interface ExceptionHandler<T> {
-        public void onImageLoadException(Exception e, String id, boolean isCurrent);
+        public void onImageLoadException(Exception e, T model, boolean isCurrent);
         public void onModelStreamLoadException(Exception e, T model, boolean isCurrent);
     }
 
@@ -315,7 +315,7 @@ public class ImagePresenter<T> {
             @Override
             public boolean onStreamReady(String id, StreamOpener streamOpener) {
                 if (loadCount != currentCount) return false;
-                fetchImage(id, streamOpener, width, height, loadCount);
+                fetchImage(model, id, streamOpener, width, height, loadCount);
 
                 return true;
             }
@@ -329,7 +329,7 @@ public class ImagePresenter<T> {
         });
     }
 
-    private void fetchImage(final String id, StreamOpener streamOpener, int width, int height, final int loadCount) {
+    private void fetchImage(final T model, final String id, StreamOpener streamOpener, int width, int height, final int loadCount) {
         imageToken = imageLoader.fetchImage(id, streamOpener, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
@@ -345,7 +345,7 @@ public class ImagePresenter<T> {
             @Override
             public void onException(Exception e) {
                 if (exceptionHandler != null) {
-                    exceptionHandler.onImageLoadException(e, id, loadCount == currentCount);
+                    exceptionHandler.onImageLoadException(e, model, loadCount == currentCount);
                 }
             }
         });
