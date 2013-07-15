@@ -14,8 +14,6 @@ import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.util.Log;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -80,90 +78,47 @@ public class ImageResizer {
     }
 
     /**
-     * Load the image at the given path at approximately the given dimensions, maintaining the original proportions,
-     * and then crop the image down so that it fills the given dimensions
+     * Scale the image so that either the width of the image matches the given width and the height of the image is
+     * greater than the given height or vice versa, and then crop the larger dimension to match the given dimension.
      *
-     * @param path The path where the image is located
-     * @param width The width the final image will fill
-     * @param height The height the final image will fill
+     * Does not maintain the image's aspect ratio
+     *
+     * @param is The InputStream for the image
+     * @param width The minimum width of the image
+     * @param height The minimum height of the image
      * @return The resized image
      */
-    public Bitmap centerCrop(final String path, final int width, final int height) throws FileNotFoundException {
-        final Bitmap streamed = loadAtLeast(path, width, height);
-        return centerCrop(getRecycled(width, height), streamed, width, height);
-    }
-
-    public Bitmap centerCrop(InputStream is1, int width, int height) {
-        final Bitmap streamed = loadAtLeast(is1, width, height);
+    public Bitmap centerCrop(InputStream is, int width, int height) {
+        final Bitmap streamed = loadAtLeast(is, width, height);
         return centerCrop(getRecycled(width, height), streamed, width, height);
     }
 
     /**
-     * Load the image at the given path at approximately the given dimensions, maintaining the original proportions,
-     * and then shrink the image down, again maintaining the original proportions, so that it fits entirely within the
-     * given dimensions.
+     * Scale the image uniformly (maintaining the image's aspect ratio) so that one of the dimensions of the image
+     * will be equal to the given dimension and the other will be less than the given dimension
      *
-     * @param path The path where the image is located
-     * @param width The width the final image will fit within
-     * @param height The height the final image will fit within
+     * @param is The InputStream for the image
+     * @param width The maximum width of the image
+     * @param height The maximum height of the image
      * @return The resized image
      */
-    public Bitmap fitInSpace(final String path, final int width, final int height) throws FileNotFoundException {
-        final Bitmap streamed = loadAtLeast(path, width > height ? 1 : width, height > width ? 1 : height);
-        return fitInSpace(streamed, width, height);
-    }
-
-    public Bitmap fitInSpace(InputStream is1, int width, int height) {
-        final Bitmap streamed = loadAtLeast(is1, width > height ? 1 : width, height > width ? 1 : height);
+    public Bitmap fitInSpace(InputStream is, int width, int height) {
+        final Bitmap streamed = loadAtLeast(is, width > height ? 1 : width, height > width ? 1 : height);
         return fitInSpace(streamed, width, height);
     }
 
     /**
-     * Load the image at the given path with dimens greater than or equal to the given dimens. If the image has a
-     * rotation specified in EXIF data, rotates the image accordingly. Maintains the original proportions.
+     * Scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image will be
+     * greater than or equal to the given width and height.
      *
-     * Note - if the image at the path has dimens less than or equal to the given dimens, the image will not
-     * be enlarged and will instead be loaded at its original dimens.
-     *
-     * @param path The path to the image
-     * @param width The minimum width of the returned Bitmap
-     * @param height The minimum heght of the returned Bitmap
-     * @return
-     * @throws FileNotFoundException
-     */
-    public Bitmap loadAtLeast(String path, int width, int height) throws FileNotFoundException {
-        int orientation = getOrientation(path);
-        if(orientation == 90 || orientation == 270) {
-            //Swap width and height for initial downsample calculation if its oriented so.
-            //The image will then be rotated back to normal.
-            int w = width;
-            width = height;
-            height = w;
-        }
-
-        Bitmap result = loadAtLeast(new FileInputStream(path), width, height);
-
-        if (orientation != 0) {
-            result = rotateImage(result, orientation);
-        }
-        return result;
-    }
-
-    /**
-     * Load the image represented by the given input streams with dimens greater than or equal to the given dimens.
-     * Maintains the original proportions.
-     *
-     * Note - if the image at the path has dimens less than or equal to the given dimens, the image will not
-     * be enlarged and will instead be loaded at its original dimens.
-     *
-     * @param is1 An inputStream for the image
+     * @param is An inputStream for the image
      * @param width The minimum width of the returned Bitmap
      * @param height The minimum height of the returned Bitmap
      * @return A Bitmap containing the image
      */
-    public Bitmap loadAtLeast(InputStream is1, int width, int height) {
+    public Bitmap loadAtLeast(InputStream is, int width, int height) {
         byte[] bytes = getTempBytes();
-        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is1, bytes);
+        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
         final int[] dimens = getDimensions(bis);
         final int originalWidth = dimens[0];
         final int originalHeight = dimens[1];
@@ -180,38 +135,11 @@ public class ImageResizer {
     }
 
     /**
-     * Load the image at the given path with dimens less than or equal to the given dimens. If the image has a
-     * rotation specified in EXIF data, rotates the image accordingly. Maintains the original proportions.
+     * Scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image will be
+     * less than or equal to the given width and height. Unlike {@link #fitInSpace(android.graphics.Bitmap, int, int)},
+     * one or both dimensions may be less than the given dimensions.
      *
-     * @param path The path to the image
-     * @param width The maximum width of the returned Bitmap
-     * @param height The maximum height of the returned Bitmap
-     * @return A Bitmap containing the image
-     * @throws FileNotFoundException
-     */
-    public Bitmap loadAtMost(String path, int width, int height) throws FileNotFoundException {
-        int orientation = getOrientation(path);
-        if (orientation == 90 || orientation == 270) {
-            int w = width;
-            width = height;
-            height = w;
-        }
-
-        Bitmap result = loadAtMost(new FileInputStream(path), new FileInputStream(path), width, height);
-
-        if (orientation != 0) {
-            result = rotateImage(result, orientation);
-        }
-
-        return result;
-    }
-
-    /**
-     * Load the image represented by the given input streams with dimens less than or equal to the given dimens.
-     * Maintains the original proportions.
-     *
-     * @param is1 An InputStream for the image. Can't be is2
-     * @param is2 An InputStream for the image. Can't be ss1
+     * @param is An InputStream for the image.
      * @param width The maximum width
      * @param height The maximum height
      * @return A bitmap containing the image
@@ -233,12 +161,9 @@ public class ImageResizer {
     }
 
     /**
-     * Load the image represented by the given InputStreams at its original size. Use the first InputStream to
-     * try to determine the proportions of the image so that we can try to retrieve a recycled Bitmap of the correct
-     * size. Use the second InputStream to actually load the image into a Bitmap. Note both InputStreams must represent
-     * the same image and this method will close both InputStreams.
+     * Load the image at its original size
      *
-     * @param is The InputStream used to get the dimensions of the image
+     * @param is The InputStream for the image
      * @return The loaded image
      */
     public Bitmap loadAsIs(final InputStream is) {
@@ -250,6 +175,17 @@ public class ImageResizer {
         return result;
     }
 
+    /**
+     * Load the image at its original size
+     *
+     * This is somewhat more efficient than {@link #loadAsIs(java.io.InputStream)} because it does not need to read
+     * the image header to determine the image's width and height. Instead, it assumes the given width and height
+     *
+     * @param is The InputStream for the image
+     * @param width The width of the image represented by the InputStream
+     * @param height The height of the image represented by the InputStream
+     * @return The loaded image
+     */
     public Bitmap loadAsIs(InputStream is, int width, int height) {
         byte[] bytes = getTempBytes();
         Bitmap result = load(new RecyclableBufferedInputStream(is, bytes), getRecycled(width, height));
@@ -258,60 +194,12 @@ public class ImageResizer {
     }
 
     /**
-     * Load the image at the given path at its original size. Assume that the dimensions of the image at the given path
-     * will match the given dimensions and use the given dimensions to retrieve a recycled Bitmap of the correct size.
-     * Note this method will throw an exception if the dimensions of the image at the given path do not exactly match
-     * the given dimensions and there is a bitmap of the given dimensions available to be recycled.
+     * A potentially expensive operation to load the image for the given InputStream. If a recycled Bitmap whose
+     * dimensions exactly match those of the image for the given InputStream is available, the operation is much less
+     * expensive in terms of memory.
      *
-     * The dimensions are given to avoid opening an InputStream specifically to determine the size of the image at the
-     * given path and should be used when the dimensions of the image are known.
-     *
-     * @param path The path where the image is stored
-     * @param width The width of the image at the given path
-     * @param height The height of the image at the given path
-     * @return The loaded image
-     */
-    public Bitmap loadAsIs(final String path, final int width, final int height) throws FileNotFoundException {
-        return load(path, getRecycled(width, height));
-    }
-
-    /**
-     * Load the image at the given path at its original size. Will create a second InputStream to first try to determine
-     * the size of the image to attempt to retrieve a recycled Bitmap.
-     *
-     * @param path The path where the image is stored
-     * @return The loaded image
-     */
-    public Bitmap loadAsIs(final String path) throws FileNotFoundException {
-        final int[] dimens = getDimensions(path);
-        return load(path, getRecycled(dimens));
-    }
-
-    /**
-     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
-     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
-     * of memory.
-     *
-     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
-     * is provided.
-     *
-     * @param path The path where the image is stored
-     * @param recycle A Bitmap we can load the image into, or null
-     * @return A new bitmap containing the image at the given path, or recycle if recycle is not null
-     */
-    private Bitmap load(String path, Bitmap recycle) throws FileNotFoundException {
-        final BitmapFactory.Options decodeBitmapOptions = getOptions(recycle);
-        final Bitmap result = decodeStream(path, decodeBitmapOptions);
-        return result == null ? null : orientImage(path, result);
-    }
-
-    /**
-     * A potentially expensive operation to load the image at the given path. If a recycled Bitmap whose dimensions
-     * exactly match those of the image at the given path is provided, the operation is much less expensive in terms
-     * of memory.
-     *
-     * Note this method will throw an exception of a Bitmap with dimensions not matching those of the image at path
-     * is provided.
+     * Note - this method will throw an exception of a Bitmap with dimensions not matching those of the image for the
+     * given InputStream is provided.
      *
      * @param is The InputStream representing the image data
      * @param recycle A Bitmap we can load the image into, or null
@@ -323,19 +211,6 @@ public class ImageResizer {
     }
 
     /**
-     * A method for getting the dimensions of an image at the given path
-     *
-     * @param path The path where the image is stored
-     * @return an array containing the dimensions of the image in the form {width, height}
-     */
-    private int[] getDimensions(String path) throws FileNotFoundException {
-        final BitmapFactory.Options decodeBoundsOptions = getOptions();
-        decodeBoundsOptions.inJustDecodeBounds = true;
-        decodeStream(path, decodeBoundsOptions);
-        return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
-    }
-
-     /**
      * A method for getting the dimensions of an image from the given InputStream
      *
      * @param is The InputStream representing the image
@@ -346,26 +221,6 @@ public class ImageResizer {
         decodeBoundsOptions.inJustDecodeBounds = true;
         decodeStream(is, decodeBoundsOptions);
         return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
-    }
-
-    private Bitmap decodeStream(String path, BitmapFactory.Options decodeBitmapOptions) throws FileNotFoundException {
-        RecyclableBufferedInputStream is = null;
-        Bitmap result = null;
-        try {
-            byte[] bytes = getTempBytes();
-            is = new RecyclableBufferedInputStream(new FileInputStream(path), bytes);
-            result = decodeStream(is, decodeBitmapOptions);
-            releaseTempBytes(bytes);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return result;
     }
 
     private Bitmap decodeStream(RecyclableBufferedInputStream bis, BitmapFactory.Options decodeBitmapOptions) {
