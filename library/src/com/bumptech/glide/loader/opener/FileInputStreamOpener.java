@@ -14,18 +14,21 @@ import java.io.InputStream;
  */
 public class FileInputStreamOpener implements StreamOpener {
     private final File file;
+    private final String path;
 
     public FileInputStreamOpener(String path) {
-        this(new File(path));
+        this.path = path;
+        this.file = null;
     }
 
     public FileInputStreamOpener(File file) {
         this.file = file;
+        this.path = null;
     }
 
     @Override
     public InputStream openStream() throws IOException {
-        return new FileInputStream(file);
+        return new FileInputStream(file != null ? file : new File(path));
     }
 
     @Override
