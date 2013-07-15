@@ -23,8 +23,8 @@ import java.util.Queue;
  * A class for synchronously resizing bitmaps with or without Bitmaps to recycle
  */
 public class ImageResizer {
-    private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
-    private static final int MARK_POSITION = 1024 * 1024; //1mb
+    private static final int TEMP_BYTES_SIZE = 32 * 1024; //32kb
+    private static final int MARK_POSITION = TEMP_BYTES_SIZE;//1024 * 1024; //1mb
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private final BitmapPool bitmapPool;
