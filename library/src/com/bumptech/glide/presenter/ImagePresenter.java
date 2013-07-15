@@ -314,7 +314,7 @@ public class ImagePresenter<T> {
         modelStreamToken = modelStreamLoader.fetchModelStream(model, width, height, new ModelStreamLoader.ModelStreamReadyCallback() {
             @Override
             public boolean onStreamReady(String id, StreamOpener streamOpener) {
-                if (loadCount != currentCount) return false;
+                if (loadCount != currentCount || id == null || streamOpener == null) return false;
                 fetchImage(model, id, streamOpener, width, height, loadCount);
 
                 return true;
