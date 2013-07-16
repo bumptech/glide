@@ -17,6 +17,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
@@ -30,7 +31,6 @@ import java.util.List;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
     private Api flickerApi;
-    private ImageManager imageManager;
     private int searchCount = 0;
 
     private List<PhotoViewer> photoViewers = new ArrayList<PhotoViewer>();
@@ -54,9 +54,11 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             diskCache = new DiskCacheAdapter();
         }
 
-        imageManager = new ImageManager.Builder(this)
-                .setDiskCache(diskCache)
-                .build();
+        final Glide glide = Glide.get();
+        if (!glide.isImageManagerSet()) {
+            glide.setImageManager(new ImageManager.Builder(this)
+                    .setDiskCache(diskCache));
+        }
 
         final Resources res = getResources();
         flickerApi = new Api(res.getDimensionPixelSize(R.dimen.large_photo_side));
@@ -104,17 +106,17 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         FlickrPhotoGrid small = new FlickrPhotoGrid();
-        small.setup(flickerApi, imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.small_photo_side));
+        small.setup(flickerApi, cacheDir, res.getDimensionPixelSize(R.dimen.small_photo_side));
         fragments.add(small);
         photoViewers.add(small);
 
         final FlickrPhotoGrid medium = new FlickrPhotoGrid();
-        medium.setup(flickerApi,  imageManager, cacheDir, res.getDimensionPixelSize(R.dimen.medium_photo_side));
+        medium.setup(flickerApi,  cacheDir, res.getDimensionPixelSize(R.dimen.medium_photo_side));
         fragments.add(medium);
         photoViewers.add(medium);
 
         FlickrPhotoList list =  new FlickrPhotoList();
-        list.setup(flickerApi, imageManager);
+        list.setup(flickerApi);
         fragments.add(list);
         photoViewers.add(list);
 

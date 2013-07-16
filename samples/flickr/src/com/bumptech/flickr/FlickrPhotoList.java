@@ -13,9 +13,9 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageSetCallback;
-import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.loader.CenterCrop;
 
 import java.util.ArrayList;
@@ -31,12 +31,10 @@ import java.util.List;
 public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
     private Api api;
-    private ImageManager imageManager;
     private List<Photo> currentPhotos;
 
-    public void setup(Api api, ImageManager imageManager) {
+    public void setup(Api api) {
         this.api = api;
-        this.imageManager = imageManager;
     }
 
     @Override
@@ -106,7 +104,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                 ImagePresenter<Photo> presenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
                         .setModelStreamLoader(new DirectFlickrStreamLoader(api))
-                        .setImageLoader(new CenterCrop(imageManager))
+                        .setImageLoader(new CenterCrop(Glide.get().getImageManager(getActivity())))
                         .setImageSetCallback(new ImageSetCallback() {
                             @Override
                             public void onImageSet(ImageView view, boolean fromCache) {
