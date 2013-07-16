@@ -433,7 +433,12 @@ public class ImageManager {
      * @param b The rejected Bitmap
      */
     public void rejectBitmap(final Bitmap b) {
-        bitmapReferenceCounter.rejectBitmap(b);
+        bgHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                bitmapReferenceCounter.rejectBitmap(b);
+            }
+        });
     }
 
     /**
@@ -444,8 +449,13 @@ public class ImageManager {
      *
      * @param b The acquired Bitmap
      */
-    public void acquireBitmap(Bitmap b) {
-        bitmapReferenceCounter.acquireBitmap(b);
+    public void acquireBitmap(final Bitmap b) {
+        bgHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                bitmapReferenceCounter.acquireBitmap(b);
+            }
+        });
     }
 
     /**
@@ -457,7 +467,12 @@ public class ImageManager {
      * @param b The releasedBitmap
      */
     public void releaseBitmap(final Bitmap b) {
-        bitmapReferenceCounter.releaseBitmap(b);
+        bgHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                bitmapReferenceCounter.releaseBitmap(b);
+            }
+        });
     }
 
     /**
