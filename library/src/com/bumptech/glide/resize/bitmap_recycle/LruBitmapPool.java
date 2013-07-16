@@ -16,7 +16,7 @@ import java.util.Map;
  * Time: 1:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SizedBitmapPool implements BitmapPool {
+public class LruBitmapPool implements BitmapPool {
     private final Map<Integer, ArrayList<Bitmap>> pool = new HashMap<Integer, ArrayList<Bitmap>>();
     //Typically there should only be a handful of keys (often 1 or 2) so
     //iterating over this list should be fast
@@ -25,7 +25,7 @@ public class SizedBitmapPool implements BitmapPool {
     private final int maxSize;
     private int currentSize = 0;
 
-    public SizedBitmapPool(int maxSize) {
+    public LruBitmapPool(int maxSize) {
         this.maxSize = maxSize;
     }
 
@@ -78,7 +78,7 @@ public class SizedBitmapPool implements BitmapPool {
                 keys.addFirst(key);
             }
         } else {
-            Log.d("SBP: missing bitmap for width=" + width + " height=" + height);
+            Log.d("LBP: missing bitmap for width=" + width + " height=" + height);
             result = null;
         }
         return result;

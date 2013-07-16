@@ -18,7 +18,7 @@ import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.ConcurrentBitmapReferenceCounter;
-import com.bumptech.glide.resize.bitmap_recycle.SizedBitmapPool;
+import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
@@ -300,7 +300,7 @@ public class ImageManager {
                 bitmapReferenceCounter = new BitmapReferenceCounterAdapter();
             } else {
                 if (bitmapPool == null) {
-                    bitmapPool = new SizedBitmapPool(getSafeMemoryCacheSize(context));
+                    bitmapPool = new LruBitmapPool(getSafeMemoryCacheSize(context));
                 }
                 bitmapReferenceCounter = new ConcurrentBitmapReferenceCounter(bitmapPool);
             }
