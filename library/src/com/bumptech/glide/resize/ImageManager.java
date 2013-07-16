@@ -14,10 +14,11 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import com.bumptech.glide.loader.opener.StreamOpener;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
-import com.bumptech.glide.resize.bitmap_recycle.ConcurrentBitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.ConcurrentBitmapReferenceCounter;
+import com.bumptech.glide.resize.bitmap_recycle.SizedBitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
@@ -152,9 +153,10 @@ public class ImageManager {
 
         private Bitmap.CompressFormat bitmapCompressFormat = Bitmap.CompressFormat.JPEG;
         private boolean recycleBitmaps = CAN_RECYCLE;
-        private int maxBitmapsPerSize = 20;
 
         public BitmapFactory.Options decodeBitmapOptions = ImageResizer.getDefaultOptions();
+        private BitmapPool bitmapPool;
+        private BitmapReferenceCounter bitmapReferenceCounter;
 
         /**
          * Create a new builder. No options are required. By default will create an lru memory cache, an lru disk
@@ -164,6 +166,9 @@ public class ImageManager {
          */
         public Builder(Context context) {
             this.context = context;
+            if (!CAN_RECYCLE) {
+                bitmapPool = new BitmapPoolAdapter();
+            }
         }
 
         /**
@@ -206,15 +211,26 @@ public class ImageManager {
         }
 
         /**
-         * Set whether or not to recycle bitmaps. Defaults to enabled. If enabled, devices with SDK < 11 will not
-         * recycle bitmaps while those with SDK >= 11 will recycle bitmaps. See also
-         * {@link ImageManager.Builder#setMaxBitmapsPerSize(int)}
+         * Set the implementation of a {@link BitmapPool} to use to store and retrieve recycled bitmaps based on their
+         * width and height. Should be thread safe and size limited in some way to avoid OOM exceptions.
          *
-         * @param recycleBitmaps True to enable recycling bitmaps, false otherwise.
+         * @param bitmapPool The BitmapPool implementation to use
          * @return This Builder
          */
-        public Builder setRecycleBitmaps(boolean recycleBitmaps) {
-            this.recycleBitmaps = recycleBitmaps && CAN_RECYCLE;
+        public Builder setBitmapPool(BitmapPool bitmapPool) {
+            if (CAN_RECYCLE) {
+                this.bitmapPool = bitmapPool;
+            }
+            return this;
+        }
+
+        /**
+         * Call to prevent the ImageManager from recycling bitmaps.
+         *
+         * @return This Builder
+         */
+        public Builder disableBitmapRecycling() {
+            recycleBitmaps = false;
             return this;
         }
 
@@ -259,21 +275,6 @@ public class ImageManager {
             return setDiskCache(new DiskCacheAdapter());
         }
 
-        /**
-         * Set the maximum number of bitmaps for a given size to store in memory at one time. Defaults to 20. The larger
-         * the number, the more memory will be used to store recycled bitmaps but the smoother scrolling will be. Set
-         * this * number larger when loading lots of smaller photos and/or when you expect your users to scroll rapidly.
-         * Set this number smaller when loading larger images and/or a lot of different sizes of images and/or when you
-         * expect your users to scroll relatively slowly.
-         *
-         * @param maxBitmapsPerSize The maximum number of bitmaps of any given size to keep in the recycle pool
-         * @return This Builder
-         */
-        public Builder setMaxBitmapsPerSize(int maxBitmapsPerSize) {
-            this.maxBitmapsPerSize = maxBitmapsPerSize;
-            return this;
-        }
-
         private void setDefaults() {
             if (resizeService == null) {
                 resizeService = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()), new ThreadFactory() {
@@ -293,6 +294,16 @@ public class ImageManager {
             if (diskCache == null) {
                 diskCache = DiskLruCacheWrapper.get(getPhotoCacheDir(context), DEFAULT_DISK_CACHE_SIZE);
             }
+
+            if (!recycleBitmaps) {
+                bitmapPool = new BitmapPoolAdapter();
+                bitmapReferenceCounter = new BitmapReferenceCounterAdapter();
+            } else {
+                if (bitmapPool == null) {
+                    bitmapPool = new SizedBitmapPool(getSafeMemoryCacheSize(context));
+                }
+                bitmapReferenceCounter = new ConcurrentBitmapReferenceCounter(bitmapPool);
+            }
         }
     }
 
@@ -304,23 +315,15 @@ public class ImageManager {
         bitmapCompressFormat = builder.bitmapCompressFormat;
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
+        bitmapReferenceCounter = builder.bitmapReferenceCounter;
+        resizer = new ImageResizer(builder.bitmapPool, builder.decodeBitmapOptions);
 
-        final BitmapPool bitmapPool;
-        if (builder.recycleBitmaps) {
-            memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-                @Override
-                public void onImageRemoved(Bitmap removed) {
-                    releaseBitmap(removed);
-                }
-            });
-            bitmapPool = new ConcurrentBitmapPool(builder.maxBitmapsPerSize);
-            bitmapReferenceCounter = new ConcurrentBitmapReferenceCounter(bitmapPool, builder.maxBitmapsPerSize);
-        } else {
-            bitmapPool = null;
-            bitmapReferenceCounter = new BitmapReferenceCounterAdapter();
-        }
-
-        this.resizer = new ImageResizer(bitmapPool, builder.decodeBitmapOptions);
+        memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
+            @Override
+            public void onImageRemoved(Bitmap removed) {
+                releaseBitmap(removed);
+            }
+        });
     }
 
     /**

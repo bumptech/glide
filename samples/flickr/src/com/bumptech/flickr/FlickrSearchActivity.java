@@ -49,7 +49,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
         imageManager = new ImageManager.Builder(this)
                 .setDiskCache(DiskLruCacheWrapper.get(ImageManager.getPhotoCacheDir(this), 50 * 1024 * 1024))
-                .setMaxBitmapsPerSize(40)
                 .build();
 
         final Resources res = getResources();

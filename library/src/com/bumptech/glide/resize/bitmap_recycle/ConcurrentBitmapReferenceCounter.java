@@ -64,9 +64,9 @@ public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter 
     private final BitmapPool target;
     private final InnerTrackerPool pool = new InnerTrackerPool();
 
-    public ConcurrentBitmapReferenceCounter(BitmapPool target, int bitmapsPerSize) {
+    public ConcurrentBitmapReferenceCounter(BitmapPool target) {
         this.target = target;
-        counter = new ConcurrentHashMap<Integer, InnerTracker>(bitmapsPerSize * 12);
+        counter = new ConcurrentHashMap<Integer, InnerTracker>();
     }
 
     @Override
