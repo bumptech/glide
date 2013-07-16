@@ -158,7 +158,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        imageManager.shutdown();
+        Glide.getImageManager().shutdown();
     }
 
     private static class TabListener implements ActionBar.TabListener {

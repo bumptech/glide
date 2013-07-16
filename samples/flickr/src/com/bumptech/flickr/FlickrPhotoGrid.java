@@ -92,7 +92,8 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
 
         @Override
         public View getView(int position, View view, ViewGroup container) {
-            final ImagePresenter<Photo> presenter;
+            final Photo current = photos.get(position);
+            final ImagePresenter<Photo> imagePresenter;
             if (view == null) {
                 ImageView imageView = (ImageView) inflater.inflate(R.layout.flickr_photo_grid_item, container, false);
                 ViewGroup.LayoutParams params = imageView.getLayoutParams();
@@ -100,7 +101,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
                 params.height = photoSize;
 
                 final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
-                presenter = new ImagePresenter.Builder<Photo>()
+                imagePresenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
                         .setModelStreamLoader(new FlickrStreamLoader(api, cacheDir))
                         .setImageLoader(new CenterCrop(Glide.get().getImageManager(getActivity())))
@@ -108,18 +109,21 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
                             @Override
                             public void onImageSet(ImageView view, boolean fromCache) {
                                 view.clearAnimation();
-                                if (!fromCache)
+
+                                if (!fromCache) {
                                     view.startAnimation(fadeIn);
+                                }
                             }
                         })
                         .build();
-                imageView.setTag(presenter);
+
+                imageView.setTag(R.id.image_presenter_id, imagePresenter);
                 view = imageView;
             } else {
-                presenter = (ImagePresenter<Photo>) view.getTag();
+                imagePresenter = (ImagePresenter<Photo>) view.getTag(R.id.image_presenter_id);
             }
 
-            presenter.setModel(photos.get(position));
+            imagePresenter.setModel(current);
             return view;
         }
     }

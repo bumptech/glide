@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -14,9 +12,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.ImageSetCallback;
-import com.bumptech.glide.resize.loader.CenterCrop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,11 +51,11 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     }
 
     private static class ViewHolder {
-        private final ImagePresenter<Photo> presenter;
+        private final ImageView imageView;
         private final TextView titleText;
 
-        public ViewHolder(ImagePresenter<Photo> presenter, TextView titleText) {
-            this.presenter = presenter;
+        public ViewHolder(ImageView imageView, TextView titleText) {
+            this.imageView = imageView;
             this.titleText = titleText;
         }
     }
@@ -85,44 +80,34 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
         @Override
         public Object getItem(int i) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;
         }
 
         @Override
         public long getItemId(int i) {
-            return 0;  //To change body of implemented methods use File | Settings | File Templates.
+            return 0;
         }
 
         @Override
         public View getView(int position, View view, ViewGroup container) {
+            final Photo current = photos.get(position);
             final ViewHolder viewHolder;
             if (view == null) {
                 view = inflater.inflate(R.layout.flickr_photo_list_item, container, false);
                 ImageView imageView = (ImageView) view.findViewById(R.id.photo_view);
-
-                final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
-                ImagePresenter<Photo> presenter = new ImagePresenter.Builder<Photo>()
-                        .setImageView(imageView)
-                        .setModelStreamLoader(new DirectFlickrStreamLoader(api))
-                        .setImageLoader(new CenterCrop(Glide.get().getImageManager(getActivity())))
-                        .setImageSetCallback(new ImageSetCallback() {
-                            @Override
-                            public void onImageSet(ImageView view, boolean fromCache) {
-                                view.clearAnimation();
-                                if (!fromCache)
-                                    view.startAnimation(fadeIn);
-                            }
-                        })
-                        .build();
                 TextView titleView = (TextView) view.findViewById(R.id.title_view);
-                viewHolder = new ViewHolder(presenter, titleView);
+                viewHolder = new ViewHolder(imageView, titleView);
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
+            Glide.load(current)
+                    .into(viewHolder.imageView)
+                    .with(new DirectFlickrStreamLoader(api))
+                    .centerCrop()
+                    .animate(R.anim.fade_in)
+                    .begin();
 
-            final Photo current = photos.get(position);
-            viewHolder.presenter.setModel(current);
             viewHolder.titleText.setText(current.title);
             return view;
         }
