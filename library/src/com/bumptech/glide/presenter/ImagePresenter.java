@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.model.ModelStreamLoader;
 import com.bumptech.glide.loader.opener.StreamOpener;
+import com.bumptech.glide.util.Log;
 
 import java.lang.ref.WeakReference;
 
@@ -46,7 +47,26 @@ public class ImagePresenter<T> {
         private ImageSetCallback imageSetCallback;
         private ImagePresenterCoordinator coordinator;
         private ImageLoader imageLoader;
-        private ExceptionHandler<T> exceptionHandler;
+        private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
+            @Override
+            public void onImageLoadException(Exception e, T model, boolean isCurrent) {
+                if (e != null) {
+                    e.printStackTrace();
+                } else {
+                    Log.e("IP: onImageLoadException model= " + model);
+                }
+            }
+
+            @Override
+            public void onModelStreamLoadException(Exception e, T model, boolean isCurrent) {
+                if (e != null) {
+                    e.printStackTrace();
+                } else {
+                    Log.e("IP: onModelStreamLoadException model= " + model);
+                }
+            }
+        };
+
         private ModelStreamLoader<T> modelStreamLoader;
 
         /**
