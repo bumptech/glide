@@ -127,6 +127,7 @@ public class Glide {
 
         private ImagePresenter<T> presenter;
         private ImagePresenter.Builder<T> builder;
+        private ModelStreamLoader<T> modelStreamLoader = null;
 
         public Request(T model, ImageView imageView) {
             this.model = model;
@@ -152,6 +153,7 @@ public class Glide {
          * @return This Request
          */
         public Request<T> with(ModelStreamLoader<T> modelStreamLoader) {
+            this.modelStreamLoader = modelStreamLoader;
             builder.setModelStreamLoader(modelStreamLoader);
 
             return this;
@@ -257,6 +259,10 @@ public class Glide {
          */
         private void build() {
             if (presenter == null) {
+                if (modelStreamLoader == null) {
+                    throw new IllegalArgumentException("You must set a ModelStreamLoader for model class=" +
+                            model.getClass());
+                }
                 presenter = builder.build();
                 imageView.setTag(R.id.image_presenter_id, presenter);
             }
@@ -268,7 +274,7 @@ public class Glide {
     /**
      * Begins constructing a load for a given model.
      *
-     * @param model The model to loa, must not be null
+     * @param model The model to load, must not be null
      * @param <T> The type of the model to load
      * @return A an unfinished Request that will be used to construct the components to load the model
      */
