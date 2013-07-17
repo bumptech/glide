@@ -29,13 +29,9 @@ public class DiskLruCacheWrapper implements DiskCache {
         return CACHE;
     }
 
-    public static DiskLruCacheWrapper get(File directory, int maxSize) {
+    public synchronized static DiskCache get(File directory, int maxSize) throws IOException {
         if (WRAPPER == null) {
-            try {
-                WRAPPER = new DiskLruCacheWrapper(getDiskLruCache(directory, maxSize));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            WRAPPER = new DiskLruCacheWrapper(getDiskLruCache(directory, maxSize));
         }
         return WRAPPER;
     }

@@ -18,17 +18,19 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.util.Log;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
     private Api flickerApi;
     private ImageManager imageManager;
-    private File cacheDir;
     private int searchCount = 0;
 
     private List<PhotoViewer> photoViewers = new ArrayList<PhotoViewer>();
@@ -42,13 +44,18 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flickr_search_activity);
         String cacheName = "flickr_cache";
-        cacheDir = ImageManager.getPhotoCacheDir(this, cacheName);
-        if (!cacheDir.exists()) {
-            cacheDir.mkdir();
+        File cacheDir = ImageManager.getPhotoCacheDir(this, cacheName);
+
+        DiskCache diskCache;
+        try {
+            diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
+        } catch (IOException e) {
+            e.printStackTrace();
+            diskCache = new DiskCacheAdapter();
         }
 
         imageManager = new ImageManager.Builder(this)
-                .setDiskCache(DiskLruCacheWrapper.get(ImageManager.getPhotoCacheDir(this), 50 * 1024 * 1024))
+                .setDiskCache(diskCache)
                 .build();
 
         final Resources res = getResources();
