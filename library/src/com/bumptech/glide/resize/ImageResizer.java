@@ -239,6 +239,7 @@ public class ImageResizer {
         try {
             if (decodeBitmapOptions.inJustDecodeBounds) {
                 bis.reset();
+                bis.clearMark();
             } else {
                 bis.close();
             }
