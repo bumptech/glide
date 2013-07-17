@@ -105,7 +105,7 @@ public class ImageManager {
      * @return A File representing the default disk cache directory
      */
     public static File getPhotoCacheDir(Context context, String cacheName) {
-        String cachePath = null;
+        File cacheDir = null;
 
         Boolean isExternalStorageRemoveable = null;
         if (Build.VERSION.SDK_INT >= 9) {
@@ -115,28 +115,16 @@ public class ImageManager {
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
                 (isExternalStorageRemoveable != null && !isExternalStorageRemoveable)) {
             //seems like this can still be null even if the above are true
-            final File externalCacheDir = context.getExternalCacheDir();
-            if (externalCacheDir != null) {
-                cachePath = externalCacheDir.getPath();
-            } else {
-                Log.e("IM: external cache dir is null");
-            }
+            cacheDir = context.getExternalCacheDir();
         }
 
-        if (cachePath == null) {
-            final File internalCacheDir = context.getCacheDir();
-            if (internalCacheDir != null) {
-                cachePath = internalCacheDir.getPath();
-            } else {
-                Log.e("IM: internal cache dir is null");
-            }
+        if (cacheDir == null) {
+            cacheDir = context.getCacheDir();
         }
 
-        if (cachePath != null) {
-            File result = new File(cachePath + File.separatorChar + cacheName);
-            if (!result.exists()) {
-                result.mkdir();
-            }
+        if (cacheDir != null) {
+            File result = new File(cacheDir, cacheName);
+            result.mkdirs();
             return result;
         } else {
             Log.d("IM: default disk cache dir is null");
