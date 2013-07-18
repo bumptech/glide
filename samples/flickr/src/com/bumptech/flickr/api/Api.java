@@ -1,5 +1,7 @@
 package com.bumptech.flickr.api;
 
+import android.content.Context;
+import com.bumptech.flickr.R;
 import com.bumptech.glide.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,11 +28,12 @@ import java.util.concurrent.Future;
  * To change this template use File | Settings | File Templates.
  */
 public class Api {
+    private static Api API;
+    public static final String SEARCH_COMPLETED_ACTION = "search_completed";
+
     private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
     private static final String SIGNED_API_URL = "http://api.flickr.com/services/rest/?method=%s&format=json&api_key=" + API_KEY;
     private static final String PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_%s.jpg";
-    private final Downloader downloader;
-    private Set<String> downloadedFilesNames = new HashSet<String>();
 
     private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() {{
         put(75, "s");
@@ -41,13 +44,11 @@ public class Api {
         put(640, "z");
         put(1024, "b");
     }};
-
     private static final List<Integer> SORTED_SIZE_KEYS = new ArrayList<Integer>(EDGE_TO_SIZE_KEY.size());
     static {
         SORTED_SIZE_KEYS.addAll(EDGE_TO_SIZE_KEY.keySet());
         Collections.sort(SORTED_SIZE_KEYS);
     }
-    private final String sizeKey;
 
     private static String getSizeKey(int width, int height) {
         final int largestEdge = Math.max(width, height);
@@ -70,7 +71,18 @@ public class Api {
         public void onDownloadComplete(String path);
     }
 
-    public Api(int maxPhotoSize) {
+    private final Downloader downloader;
+    private Set<String> downloadedFilesNames = new HashSet<String>();
+    private final String sizeKey;
+
+    public static Api get(Context context) {
+        if (API == null) {
+            API = new Api(context.getResources().getDimensionPixelSize(R.dimen.large_photo_side));
+        }
+        return API;
+    }
+
+    protected Api(int maxPhotoSize) {
         this.downloader = Downloader.get();
         this.sizeKey = getSizeKey(maxPhotoSize, maxPhotoSize);
     }
@@ -112,9 +124,9 @@ public class Api {
                     }
                     cb.onSearchCompleted(results);
                 } catch (JSONException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    e.printStackTrace();
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    e.printStackTrace();
                 }
             }
         });

@@ -28,21 +28,30 @@ import java.util.List;
  * Time: 9:48 AM
  * To change this template use File | Settings | File Templates.
  */
-public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
+public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
+    private static final String CACHE_PATH_KEY = "cache_path";
+    private static final String IMAGE_SIZE_KEY = "image_size";
+
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
-    private Api api;
     private File cacheDir;
     private int photoSize;
 
-    public void setup(Api api, File cacheDir, int photoSize) {
-        this.api = api;
-        this.cacheDir = cacheDir;
-        this.photoSize = photoSize;
+    public static FlickrPhotoGrid newInstance(File cacheDir, int size) {
+        FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
+        Bundle args = new Bundle();
+        args.putString(CACHE_PATH_KEY, cacheDir.getAbsolutePath());
+        args.putInt(IMAGE_SIZE_KEY, size);
+        photoGrid.setArguments(args);
+        return photoGrid;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle args = getArguments();
+        cacheDir = new File(args.getString(CACHE_PATH_KEY));
+        photoSize = args.getInt(IMAGE_SIZE_KEY);
+
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
         GridView grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
@@ -103,7 +112,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer{
                 final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
-                        .setModelStreamLoader(new FlickrStreamLoader(api, cacheDir))
+                        .setModelStreamLoader(new FlickrStreamLoader(Api.get(getActivity()), cacheDir))
                         .setImageLoader(new CenterCrop(Glide.get().getImageManager(getActivity())))
                         .setImageSetCallback(new ImageSetCallback() {
                             @Override

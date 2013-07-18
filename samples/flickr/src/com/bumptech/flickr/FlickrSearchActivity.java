@@ -1,6 +1,5 @@
 package com.bumptech.flickr;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -27,16 +26,44 @@ import com.bumptech.glide.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
-    private Api flickerApi;
     private int searchCount = 0;
-
-    private List<PhotoViewer> photoViewers = new ArrayList<PhotoViewer>();
     private EditText searchText;
     private View searching;
     private TextView searchTerm;
+    private Set<PhotoViewer> photoViewers = new HashSet<PhotoViewer>();
+    private File cacheDir;
+    private List<Photo> currentPhotos = new ArrayList<Photo>();
+
+    private enum Page {
+        SMALL,
+        MEDIUM,
+        LIST
+    }
+
+    private static final Map<Page, Integer> PAGE_TO_TITLE = new HashMap<Page, Integer>() {{
+        put(Page.SMALL, R.string.small);
+        put(Page.MEDIUM, R.string.medium);
+        put(Page.LIST, R.string.list);
+    }};
+
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        super.onAttachFragment(fragment);
+        if (!(fragment instanceof PhotoViewer)) {
+            throw new IllegalStateException("Fragment class " + fragment.getClass() + " does not implement PhotoViewer");
+        } else {
+            PhotoViewer photoViewer = (PhotoViewer) fragment;
+            photoViewer.onPhotosUpdated(currentPhotos);
+            photoViewers.add(photoViewer);
+        }
+    }
 
     /** Called when the activity is first created. */
     @Override
@@ -44,7 +71,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flickr_search_activity);
         String cacheName = "flickr_cache";
-        File cacheDir = ImageManager.getPhotoCacheDir(this, cacheName);
+        cacheDir = ImageManager.getPhotoCacheDir(this, cacheName);
 
         DiskCache diskCache;
         try {
@@ -59,9 +86,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             glide.setImageManager(new ImageManager.Builder(this)
                     .setDiskCache(diskCache));
         }
-
-        final Resources res = getResources();
-        flickerApi = new Api(res.getDimensionPixelSize(R.dimen.large_photo_side));
 
         searching = findViewById(R.id.searching);
         searchTerm = (TextView) findViewById(R.id.search_term);
@@ -101,29 +125,16 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             public void onPageScrollStateChanged(int i) { }
         });
 
-        final List<Fragment> fragments = new ArrayList<Fragment>();
+
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        FlickrPhotoGrid small = new FlickrPhotoGrid();
-        small.setup(flickerApi, cacheDir, res.getDimensionPixelSize(R.dimen.small_photo_side));
-        fragments.add(small);
-        photoViewers.add(small);
+        for (Page page : Page.values()) {
+            final int textId = PAGE_TO_TITLE.get(page);
+            actionBar.addTab(actionBar.newTab().setText(textId).setTabListener(new TabListener(pager)));
+        }
 
-        final FlickrPhotoGrid medium = new FlickrPhotoGrid();
-        medium.setup(flickerApi,  cacheDir, res.getDimensionPixelSize(R.dimen.medium_photo_side));
-        fragments.add(medium);
-        photoViewers.add(medium);
-
-        FlickrPhotoList list =  new FlickrPhotoList();
-        fragments.add(list);
-        photoViewers.add(list);
-
-        actionBar.addTab(actionBar.newTab().setText(R.string.small).setTabListener(new TabListener(pager)));
-        actionBar.addTab(actionBar.newTab().setText(R.string.medium).setTabListener(new TabListener(pager)));
-        actionBar.addTab(actionBar.newTab().setText(R.string.list).setTabListener(new TabListener(pager)));
-
-        pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager(), fragments));
+        pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager()));
     }
 
     private void executeSearch() {
@@ -137,7 +148,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         searching.setVisibility(View.VISIBLE);
         searchTerm.setText(getString(R.string.searching_for, searchString));
 
-        flickerApi.search(searchString, new Api.SearchCallback() {
+        Api.get(this).search(searchString, new Api.SearchCallback() {
             @Override
             public void onSearchCompleted(List<Photo> photos) {
                 if (currentSearch != searchCount) return;
@@ -148,9 +159,10 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 for (PhotoViewer viewer : photoViewers) {
                     viewer.onPhotosUpdated(photos);
                 }
+
+                currentPhotos = photos;
             }
         });
-
     }
 
     private static class TabListener implements ActionBar.TabListener {
@@ -172,22 +184,40 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) { }
     }
 
-    private static class FlickrPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> fragments;
+    private class FlickrPagerAdapter extends FragmentPagerAdapter {
 
-        public FlickrPagerAdapter(FragmentManager fm, List<Fragment> fragments){
+        public FlickrPagerAdapter(FragmentManager fm) {
             super(fm);
-            this.fragments = fragments;
         }
 
         @Override
-        public Fragment getItem(int i) {
-            return fragments.get(i);
+        public Fragment getItem(int position) {
+            return pageToFragment(position);
         }
 
         @Override
         public int getCount() {
-            return fragments.size();
+            return Page.values().length;
+        }
+
+        private Fragment pageToFragment(int position) {
+            Page page = Page.values()[position];
+            if (page == Page.SMALL) {
+                int pageSize = getPageSize(R.dimen.small_photo_side);
+                return FlickrPhotoGrid.newInstance(cacheDir, pageSize);
+
+            } else if (page == Page.MEDIUM) {
+                int pageSize = getPageSize(R.dimen.medium_photo_side);
+                return FlickrPhotoGrid.newInstance(cacheDir, pageSize);
+            } else if (page == Page.LIST) {
+                return FlickrPhotoList.newInstance();
+            } else {
+                throw new IllegalArgumentException("No fragment class for page=" + page);
+            }
+        }
+
+        private int getPageSize(int id) {
+            return getResources().getDimensionPixelSize(id);
         }
     }
 }

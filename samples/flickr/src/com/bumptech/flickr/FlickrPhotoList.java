@@ -26,6 +26,10 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
 
+    public static FlickrPhotoList newInstance() {
+        return new FlickrPhotoList();
+    }
+
     @Override
     public void onPhotosUpdated(List<Photo> photos) {
         currentPhotos = photos;
