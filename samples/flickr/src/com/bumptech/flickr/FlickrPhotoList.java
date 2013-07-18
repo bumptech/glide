@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
-import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.Glide;
 
@@ -25,12 +24,7 @@ import java.util.List;
  */
 public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
-    private Api api;
     private List<Photo> currentPhotos;
-
-    public void setup(Api api) {
-        this.api = api;
-    }
 
     @Override
     public void onPhotosUpdated(List<Photo> photos) {
@@ -101,9 +95,10 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
+
             Glide.load(current)
                     .into(viewHolder.imageView)
-                    .with(new DirectFlickrStreamLoader(api))
+                    .with(new DirectFlickrStreamLoader())
                     .centerCrop()
                     .animate(R.anim.fade_in)
                     .begin();

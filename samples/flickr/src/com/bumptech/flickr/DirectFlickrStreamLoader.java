@@ -12,15 +12,10 @@ import com.bumptech.glide.loader.opener.StreamOpener;
  * directly to the disk cache.
  */
 public class DirectFlickrStreamLoader extends DirectModelStreamLoader<Photo>{
-    private final Api flickrApi;
-
-    public DirectFlickrStreamLoader(Api flickApi) {
-        this.flickrApi = flickApi;
-    }
 
     @Override
     protected StreamOpener getStreamOpener(Photo model, int width, int height) {
-        return new HttpInputStreamOpener(flickrApi.getPhotoURL(width, height, model));
+        return new HttpInputStreamOpener(Api.getPhotoURL(model, width, height));
     }
 
     @Override

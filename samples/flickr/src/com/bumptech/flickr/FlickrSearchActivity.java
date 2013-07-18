@@ -116,7 +116,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         photoViewers.add(medium);
 
         FlickrPhotoList list =  new FlickrPhotoList();
-        list.setup(flickerApi);
         fragments.add(list);
         photoViewers.add(list);
 
@@ -125,7 +124,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         actionBar.addTab(actionBar.newTab().setText(R.string.list).setTabListener(new TabListener(pager)));
 
         pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager(), fragments));
-
     }
 
     private void executeSearch() {
@@ -153,12 +151,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             }
         });
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Glide.getImageManager().shutdown();
     }
 
     private static class TabListener implements ActionBar.TabListener {
@@ -190,12 +182,12 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
         @Override
         public Fragment getItem(int i) {
-            return fragments.get(i);  //To change body of implemented methods use File | Settings | File Templates.
+            return fragments.get(i);
         }
 
         @Override
         public int getCount() {
-            return fragments.size();  //To change body of implemented methods use File | Settings | File Templates.
+            return fragments.size();
         }
     }
 }

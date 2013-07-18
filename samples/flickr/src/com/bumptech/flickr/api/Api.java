@@ -75,7 +75,7 @@ public class Api {
         this.sizeKey = getSizeKey(maxPhotoSize, maxPhotoSize);
     }
 
-    public URL getPhotoURL(int width, int height, Photo photo) {
+    public static URL getPhotoURL(Photo photo, int width, int height) {
         try {
             return new URL(getPhotoUrl(photo, getSizeKey(width, height)));
         } catch (MalformedURLException e) {
