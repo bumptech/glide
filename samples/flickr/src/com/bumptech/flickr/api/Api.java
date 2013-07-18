@@ -1,6 +1,7 @@
 package com.bumptech.flickr.api;
 
 import android.content.Context;
+import com.android.volley.Request;
 import com.bumptech.flickr.R;
 import com.bumptech.glide.util.Log;
 import org.json.JSONArray;
@@ -8,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 /**
  * Created with IntelliJ IDEA.
@@ -75,15 +74,15 @@ public class Api {
     private Set<String> downloadedFilesNames = new HashSet<String>();
     private final String sizeKey;
 
-    public static Api get(Context context) {
+    public static Api get(Context applicationContext) {
         if (API == null) {
-            API = new Api(context.getResources().getDimensionPixelSize(R.dimen.large_photo_side));
+            API = new Api(applicationContext, applicationContext.getResources().getDimensionPixelSize(R.dimen.large_photo_side));
         }
         return API;
     }
 
-    protected Api(int maxPhotoSize) {
-        this.downloader = Downloader.get();
+    protected Api(Context applicationContext, int maxPhotoSize) {
+        this.downloader = Downloader.get(applicationContext);
         this.sizeKey = getSizeKey(maxPhotoSize, maxPhotoSize);
     }
 
@@ -110,13 +109,12 @@ public class Api {
 
     public void search(String text, final SearchCallback cb) {
         Log.d("API: searching");
-        downloader.download(getSearchUrl(text), new Downloader.MemoryCallback() {
+        downloader.download(getSearchUrl(text), new Downloader.StringCallback() {
             @Override
-            public void onDownloadReady(byte[] data) {
+            public void onDownloadReady(String result) {
                 try {
-                    String stringResults = new String(data, "UTF-8");
                     //cut out initial flickJsonApi(
-                    JSONObject searchResults = new JSONObject(stringResults.substring(14, stringResults.length()-1));
+                    JSONObject searchResults = new JSONObject(result.substring(14, result.length()-1));
                     JSONArray photos = searchResults.getJSONObject("photos").getJSONArray("photo");
                     List<Photo> results = new ArrayList<Photo>(photos.length());
                     for (int i = 0; i < photos.length(); i++) {
@@ -125,17 +123,15 @@ public class Api {
                     cb.onSearchCompleted(results);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
                 }
             }
         });
     }
 
-    public Future downloadPhoto(Photo photo, File cacheDir, final PhotoCallback cb) {
+    public Request downloadPhoto(Photo photo, File cacheDir, final PhotoCallback cb) {
         File out = new File(cacheDir.getPath() + File.separator + photo.id + photo.secret + sizeKey);
         final String path = out.getPath();
-        Future result = null;
+        Request result = null;
         if (downloadedFilesNames.contains(path)) {
             cb.onDownloadComplete(path);
         } else {

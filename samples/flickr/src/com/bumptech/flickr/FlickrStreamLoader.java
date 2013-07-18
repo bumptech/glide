@@ -1,12 +1,12 @@
 package com.bumptech.flickr;
 
+import com.android.volley.Request;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.loader.model.BaseModelStreamLoader;
 import com.bumptech.glide.loader.opener.FileInputStreamOpener;
 
 import java.io.File;
-import java.util.concurrent.Future;
 
 /**
  * An implementation of a ModelStreamLoader that uses a separate class to download images to disk and then uses
@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
 public class FlickrStreamLoader extends BaseModelStreamLoader<Photo>{
     private final Api flickrApi;
     private final File cacheDir;
-    private Future current = null;
+    private Request current = null;
 
     public FlickrStreamLoader(Api flickrApi, File cacheDir) {
         this.flickrApi = flickrApi;
@@ -38,7 +38,7 @@ public class FlickrStreamLoader extends BaseModelStreamLoader<Photo>{
     @Override
     public void clear() {
         if (current != null) {
-            current.cancel(false);
+            current.cancel();
             current = null;
         }
     }
