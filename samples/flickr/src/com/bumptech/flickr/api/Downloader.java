@@ -27,7 +27,7 @@ public class Downloader {
     private static Downloader DOWNLOADER;
     private final RequestQueue queue;
 
-    static Downloader get(Context context) {
+    public static Downloader get(Context context) {
         if (DOWNLOADER == null) {
             DOWNLOADER = new Downloader(context);
         }
@@ -36,6 +36,10 @@ public class Downloader {
 
     public Downloader(Context context) {
         queue = Volley.newRequestQueue(context);
+    }
+
+    public RequestQueue getQueue() {
+        return queue;
     }
 
     public interface StringCallback {
