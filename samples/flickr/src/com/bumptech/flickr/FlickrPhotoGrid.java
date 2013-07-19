@@ -10,7 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
-import com.bumptech.flickr.api.Api;
+import com.bumptech.flickr.api.Downloader;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.presenter.ImagePresenter;
@@ -112,7 +112,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
-                        .setModelStreamLoader(new FlickrStreamLoader(Api.get(getActivity()), cacheDir))
+                        .setModelLoader(new FlickrModelLoader(Downloader.get(getActivity()).getQueue()))
                         .setImageLoader(new CenterCrop(Glide.get().getImageManager(getActivity())))
                         .setImageSetCallback(new ImageSetCallback() {
                             @Override
