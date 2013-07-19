@@ -1,7 +1,7 @@
 package com.bumptech.glide.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.loader.opener.StreamOpener;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
 
@@ -11,7 +11,7 @@ import com.bumptech.glide.resize.LoadedCallback;
  * (like the view) to do the resizing for you. Not memory efficient and more expensive to use recycled Bitmaps for than
  * other implementations
  *
- * @see ImageManager#getImage(String, com.bumptech.glide.loader.opener.StreamOpener, com.bumptech.glide.resize.LoadedCallback)
+ * @see ImageManager#getImage(String, com.bumptech.glide.loader.stream.StreamLoader, com.bumptech.glide.resize.LoadedCallback)
  */
 public class AsIs extends ImageManagerLoader {
 
@@ -20,8 +20,8 @@ public class AsIs extends ImageManagerLoader {
     }
 
     @Override
-    protected Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.getImage(id, streamOpener, new LoadedCallback() {
+    protected Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.getImage(id, streamLoader, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);

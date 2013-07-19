@@ -5,7 +5,7 @@
 package com.bumptech.glide.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.loader.opener.StreamOpener;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
 
@@ -13,7 +13,7 @@ import com.bumptech.glide.resize.LoadedCallback;
  * An ImageLoader implementation that loads an image into within the given dimensions maintaining the original
  * proportions
  *
- * @see ImageManager#fitCenter(String, com.bumptech.glide.loader.opener.StreamOpener, int, int, com.bumptech.glide.resize.LoadedCallback)
+ * @see ImageManager#fitCenter(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)
  */
 public class FitCenter extends ImageManagerLoader {
 
@@ -22,8 +22,8 @@ public class FitCenter extends ImageManagerLoader {
     }
 
     @Override
-    protected Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.fitCenter(id, streamOpener, width, height, new LoadedCallback() {
+    protected Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.fitCenter(id, streamLoader, width, height, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);

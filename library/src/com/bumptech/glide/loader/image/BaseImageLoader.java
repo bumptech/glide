@@ -1,7 +1,7 @@
 package com.bumptech.glide.loader.image;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.loader.opener.StreamOpener;
+import com.bumptech.glide.loader.stream.StreamLoader;
 
 import java.lang.ref.WeakReference;
 
@@ -12,8 +12,8 @@ import java.lang.ref.WeakReference;
  */
 public abstract class BaseImageLoader implements ImageLoader {
     @Override
-    public final Object fetchImage(String id, StreamOpener streamOpener, int width, int height, ImageReadyCallback cb) {
-        doFetchImage(id, streamOpener, width, height, new InternalImageReadyCallback(cb, id));
+    public final Object fetchImage(String id, StreamLoader streamLoader, int width, int height, ImageReadyCallback cb) {
+        doFetchImage(id, streamLoader, width, height, new InternalImageReadyCallback(cb, id));
         return cb;
     }
 
@@ -26,15 +26,16 @@ public abstract class BaseImageLoader implements ImageLoader {
      * it. Once a load completes or fails the given callback should be called to signal to the calling object that the
      * image is ready.
      *
-     * @see ImageLoader#fetchImage(String, com.bumptech.glide.loader.opener.StreamOpener, int, int, com.bumptech.glide.loader.image.ImageLoader.ImageReadyCallback)
+     * @see ImageLoader#fetchImage(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.loader.image.ImageLoader.ImageReadyCallback)
      *
-     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
-     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
+     * @param id A string id that uniquely identifies the image to be loaded. It may include the width and height, but
+     *           is not required to do so
+     * @param streamLoader The {@link StreamLoader} that will be used to load the image if it is not cached
      * @param width The width of the view where the image will be displayed
      * @param height The height of the view where the image will be displayed
      * @param cb The callback to call when the bitmap is loaded into memory, or when a load fails
      */
-    protected abstract void doFetchImage(String id, StreamOpener streamOpener, int width, int height, ImageReadyCallback cb);
+    protected abstract void doFetchImage(String id, StreamLoader streamLoader, int width, int height, ImageReadyCallback cb);
 
     /**
      * A lifecycle method called after the requesting object is notified that this loader has loaded a bitmap. Should be

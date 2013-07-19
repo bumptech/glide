@@ -12,20 +12,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.loader.image.ImageLoader;
-import com.bumptech.glide.loader.model.ModelStreamLoader;
-import com.bumptech.glide.loader.opener.StreamOpener;
+import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.util.Log;
 
 import java.lang.ref.WeakReference;
 
 /**
- * Wraps an {@link android.widget.ImageView} to display arbitrary Bitmaps and provides a framework for fetching and loading bitmaps correctly
- * when views are being recycled. Uses {@link ModelStreamLoader} to download
- * an image or otherwise retrieve InputStreams for a given model and {@link ImageLoader} to load
- * a bitmap from a given path and/or model. Also determines the actual width and height of the wrapped
- * {@link android.widget.ImageView} and passes that information to the provided
- * {@link ModelStreamLoader} and {@link ImageLoader}.
+ * Wraps an {@link android.widget.ImageView} to display arbitrary Bitmaps and provides a framework for fetching and
+ * loading bitmaps correctly when views are being recycled. Uses {@link ModelLoader} to download convert between a
+ * model and an {@link java.io.InputStream} for a given model and {@link ImageLoader} to load * a bitmap from a given
+ * {@link java.io.InputStream}. This class also determines the width and height of the wrapped
+ * {@link android.widget.ImageView} at runtime and passes that information to the provided {@link ModelLoader} and
+ * {@link ImageLoader}.
  *
  * @param <T> The type of the model that contains information necessary to display an image. Can be as simple
  *            as a String containing a path or a complex data type.
@@ -33,8 +33,9 @@ import java.lang.ref.WeakReference;
 public class ImagePresenter<T> {
 
     /**
-     * A builder for an {@link ImagePresenter}. {@link Builder ImagePresenter.Builder#setImageView(android.widget.ImageView)},
-     * {@link Builder ImagePresenter.Builder#setPathLoader}, and {@link Builder ImagePresenter.Builder#setImageLoader}
+     * A builder for an {@link ImagePresenter}.
+     * {@see Builder ImagePresenter.Builder#setImageView(android.widget.ImageView)},
+     * {@see Builder ImagePresenter.Builder#setPathLoader}, and {@link Builder ImagePresenter.Builder#setImageLoader}
      * are required.
      *
      * @param <T> The type of the model that the presenter this builder will produce requires to load a path and an
@@ -67,7 +68,7 @@ public class ImagePresenter<T> {
             }
         };
 
-        private ModelStreamLoader<T> modelStreamLoader;
+        private ModelLoader<T> modelLoader;
 
         /**
          * Builds an ImagePresenter
@@ -81,15 +82,15 @@ public class ImagePresenter<T> {
             if (imageLoader == null) {
                 throw new IllegalArgumentException("cannot create presenter without an image loader");
             }
-            if (modelStreamLoader == null) {
-                throw new IllegalArgumentException("cannot create presenter without a model stream loader");
+            if (modelLoader == null) {
+                throw new IllegalArgumentException("cannot create presenter without a model loader");
             }
 
             return new ImagePresenter<T>(this);
         }
 
         /**
-         * Required sets the {@link android.widget.ImageView} the presenter will use to display any loaded bitmaps
+         * Required - Sets the {@link android.widget.ImageView} the presenter will use to display any loaded bitmaps
          *
          * @param imageView The {@link android.widget.ImageView} to wrap
          * @return This Builder object
@@ -100,19 +101,19 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Required. Sets the {@link ModelStreamLoader} the presenter will use to obtain an Id and InputStreams to the
+         * Required - Sets the {@link ModelLoader} the presenter will use to obtain an id for and an InputStream to the
          * image represented by a given model
          *
-         * @param modelStreamLoader The {@link ModelStreamLoader} to use to obtain the id and InputStreams
+         * @param modelLoader The {@link ModelLoader} to use to obtain the id and InputStreams
          * @return This Builder object
          */
-        public Builder<T> setModelStreamLoader(ModelStreamLoader<T> modelStreamLoader) {
-            this.modelStreamLoader = modelStreamLoader;
+        public Builder<T> setModelLoader(ModelLoader<T> modelLoader) {
+            this.modelLoader = modelLoader;
             return this;
         }
 
         /**
-         * Required Sets the {@link com.bumptech.glide.loader.image.ImageLoader} the presenter will use to load a
+         * Required - Sets the {@link com.bumptech.glide.loader.image.ImageLoader} the presenter will use to load a
          * Bitmap from the given path and/or model
          *
          * @param imageLoader The {@link com.bumptech.glide.loader.image.ImageLoader} to use to load an image
@@ -124,7 +125,7 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Optional Sets a resource that will be displayed during loads and whenever
+         * Optional - Sets a resource that will be displayed during loads and whenever
          * {@link ImagePresenter#resetPlaceHolder()} is called. Only call either this method or
          * {@link Builder ImagePresenter.Builder#setPlaceholderDrawable(android.graphics.drawable.Drawable)}, not both.
          *
@@ -141,7 +142,7 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Optional Sets a drawable that will be displayed during loads and whenever
+         * Optional - Sets a drawable that will be displayed during loads and whenever
          * {@link ImagePresenter#resetPlaceHolder()} is called. Only call either this method or
          * {@link Builder ImagePresenter.Builder#setPlaceholderResource(int)}, not both.
          *
@@ -158,7 +159,7 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Optional Sets a callback that will be called after an image is loaded by
+         * Optional - Sets a callback that will be called after an image is loaded by
          * {@link com.bumptech.glide.loader.image.ImageLoader} and immediately before
          * {@link android.widget.ImageView#setImageBitmap(android.graphics.Bitmap)} is called by the presenter
          *
@@ -171,7 +172,7 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Optional Sets a coordinator that can allow or prevent placeholders or bitmaps from being set in otherwise
+         * Optional - Sets a coordinator that can allow or prevent placeholders or bitmaps from being set in otherwise
          * valid loads. See {@link com.bumptech.glide.presenter.ThumbImagePresenter}.
          *
          * @param coordinator The coordinator to set
@@ -183,7 +184,7 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Optional Sets a handler that will be notified if any path or image load causes an exception.
+         * Optional - Sets a handler that will be notified if any path or image load causes an exception.
          * See {@link com.bumptech.glide.presenter.ImagePresenter.ExceptionHandler}.
          *
          * @param exceptionHandler The exception handler to set
@@ -196,9 +197,8 @@ public class ImagePresenter<T> {
     }
 
     private Object imageToken;
-    private Object modelStreamToken;
 
-    private final ModelStreamLoader<T> modelStreamLoader;
+    private final ModelLoader<T> modelLoader;
     private final ImageLoader imageLoader;
     private final Drawable placeholderDrawable;
     private final ImageSetCallback imageSetCallback;
@@ -245,7 +245,6 @@ public class ImagePresenter<T> {
     protected ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
-        this.modelStreamLoader = builder.modelStreamLoader;
         if (builder.placeholderResourceId != 0) {
             this.placeholderDrawable = imageView.getResources().getDrawable(builder.placeholderResourceId);
         } else {
@@ -254,6 +253,7 @@ public class ImagePresenter<T> {
         this.coordinator = builder.coordinator;
         this.imageSetCallback = builder.imageSetCallback;
         this.exceptionHandler = builder.exceptionHandler;
+        this.modelLoader = builder.modelLoader;
         sizeDeterminer = new SizeDeterminer(imageView);
     }
 
@@ -291,7 +291,7 @@ public class ImagePresenter<T> {
             sizeDeterminer.getSize(new SizeDeterminer.SizeReadyCallback() {
                 @Override
                 public void onSizeReady(int width, int height) {
-                    fetchModelStream(model, width, height, loadCount);
+                    fetchImage(model, width, height, loadCount);
                 }
             });
 
@@ -318,7 +318,7 @@ public class ImagePresenter<T> {
     /**
      * Prevents any bitmaps being loaded from previous calls to {@link ImagePresenter#setModel(Object)} from
      * being displayed and clears this presenter's {@link ImageLoader} and
-     * this presenter's {@link ModelStreamLoader}. Also displays the current placeholder if
+     * this presenter's {@link ModelLoader}. Also displays the current placeholder if
      * one is set
      */
     public void clear() {
@@ -326,31 +326,15 @@ public class ImagePresenter<T> {
         resetPlaceHolder();
         currentModel = null;
         isImageSet = false;
-        modelStreamLoader.clear();
+        modelLoader.clear();
         imageLoader.clear();
     }
 
-    private void fetchModelStream(final T model, final int width, final int height, final int loadCount) {
-        modelStreamToken = modelStreamLoader.fetchModelStream(model, width, height, new ModelStreamLoader.ModelStreamReadyCallback() {
-            @Override
-            public boolean onStreamReady(String id, StreamOpener streamOpener) {
-                if (loadCount != currentCount || id == null || streamOpener == null) return false;
-                fetchImage(model, id, streamOpener, width, height, loadCount);
+    private void fetchImage(final T model, int width, int height, final int loadCount) {
+        final StreamLoader streamLoader = modelLoader.getStreamOpener(model, width, height);
+        final String id = modelLoader.getId(model);
 
-                return true;
-            }
-
-            @Override
-            public void onException(Exception e) {
-                if (exceptionHandler != null) {
-                    exceptionHandler.onModelStreamLoadException(e, model, loadCount == currentCount);
-                }
-            }
-        });
-    }
-
-    private void fetchImage(final T model, final String id, StreamOpener streamOpener, int width, int height, final int loadCount) {
-        imageToken = imageLoader.fetchImage(id, streamOpener, width, height, new ImageLoader.ImageReadyCallback() {
+        imageToken = imageLoader.fetchImage(id, streamLoader, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
@@ -463,7 +447,8 @@ public class ImagePresenter<T> {
                 cb.onSizeReady(width, height);
             } else {
                 this.cb = cb;
-                handler.postAtTime(getDimens, PENDING_SIZE_CHANGE_TOKEN, SystemClock.uptimeMillis() + PENDING_SIZE_CHANGE_DELAY);
+                handler.postAtTime(getDimens, PENDING_SIZE_CHANGE_TOKEN, SystemClock.uptimeMillis()
+                        + PENDING_SIZE_CHANGE_DELAY);
             }
         }
 

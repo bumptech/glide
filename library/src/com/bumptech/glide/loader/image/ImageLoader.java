@@ -1,7 +1,7 @@
 package com.bumptech.glide.loader.image;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.loader.opener.StreamOpener;
+import com.bumptech.glide.loader.stream.StreamLoader;
 
 /**
  * An interface used by {@link com.bumptech.glide.presenter.ImagePresenter} to fetch a bitmap for a given id and
@@ -35,15 +35,16 @@ public interface ImageLoader {
     /**
      * Load the image at the given path represented by the given model
      *
-     * @param id A unique id identifying this particular image that will be combined with the provided size info to use as a cache key.
-     * @param streamOpener The {@link StreamOpener} that will be used to load the image if it is not cached
+     * @param id A string id that uniquely identifies the image to be loaded. It may include the width and height, but
+     *           is not required to do so
+     * @param streamLoader The {@link StreamLoader} that will be used to load the image if it is not cached
      * @param width The width of the view where the image will be displayed
      * @param height The height of the view where the image will be displayed
      * @param cb The callback to call when the bitmap is loaded into memory, or when a load fails
      *
      * @return A reference to the fetch that must be retained by the calling object as long as the fetch is relevant
      */
-    public Object fetchImage(String id, StreamOpener streamOpener, int width, int height, ImageReadyCallback cb);
+    public Object fetchImage(String id, StreamLoader streamLoader, int width, int height, ImageReadyCallback cb);
 
     /**
      * Called when the current image load does not need to continue and any corresponding cleanup to save cpu

@@ -5,14 +5,14 @@
 package com.bumptech.glide.resize.loader;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.loader.opener.StreamOpener;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
 
 /**
  * An ImageLoader implementation that loads and crops in image down to the given width and height.
  *
- * @see ImageManager#centerCrop(String, com.bumptech.glide.loader.opener.StreamOpener, int, int, com.bumptech.glide.resize.LoadedCallback)
+ * @see ImageManager#centerCrop(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)
  */
 public class CenterCrop extends ImageManagerLoader {
 
@@ -21,8 +21,8 @@ public class CenterCrop extends ImageManagerLoader {
     }
 
     @Override
-    protected Object loadFromImageManager(String id, StreamOpener streamOpener, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.centerCrop(id, streamOpener, width, height, new LoadedCallback() {
+    protected Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.centerCrop(id, streamLoader, width, height, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 cb.onImageReady(loaded);

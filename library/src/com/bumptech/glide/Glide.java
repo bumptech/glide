@@ -5,9 +5,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import com.bumptech.glide.loader.image.ImageLoader;
-import com.bumptech.glide.loader.model.FileStreamLoader;
-import com.bumptech.glide.loader.model.ModelStreamLoader;
-import com.bumptech.glide.loader.model.UrlStreamLoader;
+import com.bumptech.glide.loader.model.FileLoader;
+import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.model.UrlLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageSetCallback;
 import com.bumptech.glide.resize.ImageManager;
@@ -17,8 +17,6 @@ import com.bumptech.glide.resize.loader.FitCenter;
 
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Static helper methods/classes to present a simple unified interface for using glide. Allows 90%
@@ -28,15 +26,23 @@ import java.util.Map;
  */
 public class Glide {
     private static final Glide GLIDE = new Glide();
-    private static final Map<Class, ModelStreamLoader> classToModelStream = new HashMap<Class, ModelStreamLoader>() {{
-        put(File.class, new FileStreamLoader());
-        put(URL.class, new UrlStreamLoader());
-    }};
 
     private ImageManager imageManager;
 
     public static Glide get() {
         return GLIDE;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> ModelLoader<T> getModelFor(T model) {
+        if (model == URL.class) {
+            return (ModelLoader<T>) new UrlLoader();
+        } else if (model == File.class) {
+            return (ModelLoader<T>) new FileLoader();
+        } else {
+            throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
+                    ", you need to provide one by calling with()");
+        }
     }
 
     protected Glide() { }
@@ -127,8 +133,9 @@ public class Glide {
 
         private ImagePresenter<T> presenter;
         private ImagePresenter.Builder<T> builder;
-        private ModelStreamLoader<T> modelStreamLoader = null;
+        private ModelLoader<T> modelLoader = null;
 
+        @SuppressWarnings("unchecked")
         public Request(T model, ImageView imageView) {
             this.model = model;
             this.imageView = imageView;
@@ -138,29 +145,24 @@ public class Glide {
             builder = new ImagePresenter.Builder<T>()
                     .setImageView(imageView)
                     .setImageLoader(new Approximate(getImageManager()));
-
-            ModelStreamLoader<T> loader = classToModelStream.get(model.getClass());
-            if (loader != null) {
-                builder.setModelStreamLoader(loader);
-            }
         }
 
         /**
-         * Set the {@link ModelStreamLoader} for the model. For URL models, defaults to {@link UrlStreamLoader},
-         * for File models, defaults to {@link FileStreamLoader}.
+         * Set the {@link ModelLoader} for the model. For URL models, defaults to {@link UrlLoader},
+         * for File models, defaults to {@link FileLoader}.
          *
-         * @param modelStreamLoader The {@link ModelStreamLoader} to use. Replaces any existing loader
+         * @param modelLoader The {@link ModelLoader} to use. Replaces any existing loader
          * @return This Request
          */
-        public Request<T> with(ModelStreamLoader<T> modelStreamLoader) {
-            this.modelStreamLoader = modelStreamLoader;
-            builder.setModelStreamLoader(modelStreamLoader);
+        public Request<T> with(ModelLoader<T> modelLoader) {
+            this.modelLoader = modelLoader;
+            builder.setModelLoader(modelLoader);
 
             return this;
         }
 
         /**
-         * Resizes models using {@link ImageManager#centerCrop(String, com.bumptech.glide.loader.opener.StreamOpener, int, int, com.bumptech.glide.resize.LoadedCallback)}
+         * Resizes models using {@link ImageManager#centerCrop(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
          * Replaces any existing resize style
          *
          * @return This Request
@@ -170,7 +172,7 @@ public class Glide {
         }
 
         /**
-         * Resizes models using {@link ImageManager#fitCenter(String, com.bumptech.glide.loader.opener.StreamOpener, int, int, com.bumptech.glide.resize.LoadedCallback)}
+         * Resizes models using {@link ImageManager#fitCenter(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
          * Replaces any existing resize style
          *
          * @return This Request
@@ -180,7 +182,7 @@ public class Glide {
         }
 
         /**
-         * Resizes models using {@link ImageManager#getImageApproximate(String, com.bumptech.glide.loader.opener.StreamOpener, int, int, com.bumptech.glide.resize.LoadedCallback)}
+         * Resizes models using {@link ImageManager#getImageApproximate(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
          * Replaces any existing resize style
          *
          * @return This Request
@@ -259,9 +261,8 @@ public class Glide {
          */
         private void build() {
             if (presenter == null) {
-                if (modelStreamLoader == null) {
-                    throw new IllegalArgumentException("You must set a ModelStreamLoader for model class=" +
-                            model.getClass());
+                if (modelLoader == null) {
+                    modelLoader = getModelFor(model);
                 }
                 presenter = builder.build();
                 imageView.setTag(R.id.image_presenter_id, presenter);
