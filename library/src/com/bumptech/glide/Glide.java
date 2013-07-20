@@ -4,10 +4,13 @@ import android.content.Context;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.model.FileLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.model.UrlLoader;
+import com.bumptech.glide.loader.model.VolleyModelLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageSetCallback;
 import com.bumptech.glide.resize.ImageManager;
@@ -27,25 +30,52 @@ import java.net.URL;
 public class Glide {
     private static final Glide GLIDE = new Glide();
 
-    private ImageManager imageManager;
+    private ImageManager imageManager = null;
+    private RequestQueue requestQueue = null;
 
     public static Glide get() {
         return GLIDE;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> ModelLoader<T> getModelFor(T model) {
-        if (model == URL.class) {
-            return (ModelLoader<T>) new UrlLoader();
-        } else if (model == File.class) {
-            return (ModelLoader<T>) new FileLoader();
-        } else {
-            throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
-                    ", you need to provide one by calling with()");
+    protected Glide() { }
+
+    /**
+     * Return the current {@link RequestQueue} or create and return a new one if one is not currently set
+     *
+     * @see #setRequestQueue(com.android.volley.RequestQueue)
+     * @see #isRequestQueueSet()
+     *
+     * @param context
+     * @return The {@link RequestQueue}
+     */
+    public RequestQueue getRequestQueue(Context context) {
+        if (!isRequestQueueSet()) {
+            setRequestQueue(Volley.newRequestQueue(context));
         }
+        return requestQueue;
     }
 
-    protected Glide() { }
+    /**
+     * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
+     * {@link android.app.Activity#onCreate(android.os.Bundle)} along with
+     * {@link #setRequestQueue(com.android.volley.RequestQueue)} to set a {@link RequestQueue} with custom options
+     * for use with {@link Glide#load(Object)}} and/or as an easily accessible singleton
+     *
+     * @return true iff a {@link RequestQueue} has already been set
+     */
+    public boolean isRequestQueueSet() {
+        return requestQueue != null;
+    }
+
+    /**
+     * Set the {@link RequestQueue} to use with {@link Glide#load(Object)}}. Replaces the current {@link RequestQueue}
+     * if one has already been set
+     *
+     * @param requestQueue
+     */
+    public void setRequestQueue(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
+    }
 
     /**
      * Return the current {@link ImageManager} or create and return a new one if one is not currently set.
@@ -97,6 +127,43 @@ public class Glide {
     }
 
     /**
+     * Begins constructing a load for a given model.
+     *
+     * @param model The model to load, must not be null
+     * @param <T> The type of the model to load
+     * @return A an unfinished Request that will be used to construct the components to load the model
+     */
+    public static <T> HalfRequest<T> load(T model) {
+        if (model == null) {
+            throw new IllegalArgumentException("Model can't be null");
+        }
+
+        return new HalfRequest<T>(model);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> ModelLoader<T> getModelFor(T model, Context context) {
+        if (model == URL.class) {
+            return (ModelLoader<T>) new VolleyModelLoader<URL>(GLIDE.getRequestQueue(context)) {
+                @Override
+                protected String getUrl(URL model, int width, int height) {
+                    return model.toString();
+                }
+
+                @Override
+                public String getId(URL model) {
+                    return model.toString();
+                }
+            };
+        } else if (model == File.class) {
+            return (ModelLoader<T>) new FileLoader();
+        } else {
+            throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
+                    ", you need to provide one by calling with()");
+        }
+    }
+
+     /**
      * A builder for a request
      *
      * @param <T> The type of the model the request will be built for
@@ -262,28 +329,11 @@ public class Glide {
         private void build() {
             if (presenter == null) {
                 if (modelLoader == null) {
-                    modelLoader = getModelFor(model);
+                    modelLoader = getModelFor(model, context);
                 }
                 presenter = builder.build();
                 imageView.setTag(R.id.image_presenter_id, presenter);
             }
         }
-
-
-    }
-
-    /**
-     * Begins constructing a load for a given model.
-     *
-     * @param model The model to load, must not be null
-     * @param <T> The type of the model to load
-     * @return A an unfinished Request that will be used to construct the components to load the model
-     */
-    public static <T> HalfRequest<T> load(T model) {
-        if (model == null) {
-            throw new IllegalArgumentException("Model can't be null");
-        }
-
-        return new HalfRequest<T>(model);
     }
 }
