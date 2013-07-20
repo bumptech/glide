@@ -50,20 +50,11 @@ public class ImagePresenter<T> {
         private ImageLoader imageLoader;
         private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
             @Override
-            public void onImageLoadException(Exception e, T model, boolean isCurrent) {
+            public void onException(Exception e, T model, boolean isCurrent) {
                 if (e != null) {
                     e.printStackTrace();
                 } else {
                     Log.e("IP: onImageLoadException model= " + model);
-                }
-            }
-
-            @Override
-            public void onModelStreamLoadException(Exception e, T model, boolean isCurrent) {
-                if (e != null) {
-                    e.printStackTrace();
-                } else {
-                    Log.e("IP: onModelStreamLoadException model= " + model);
                 }
             }
         };
@@ -238,8 +229,7 @@ public class ImagePresenter<T> {
     }
 
     public interface ExceptionHandler<T> {
-        public void onImageLoadException(Exception e, T model, boolean isCurrent);
-        public void onModelStreamLoadException(Exception e, T model, boolean isCurrent);
+        public void onException(Exception e, T model, boolean isCurrent);
     }
 
     protected ImagePresenter(Builder<T> builder) {
@@ -351,7 +341,7 @@ public class ImagePresenter<T> {
             @Override
             public void onException(Exception e) {
                 if (exceptionHandler != null) {
-                    exceptionHandler.onImageLoadException(e, model, loadCount == currentCount);
+                    exceptionHandler.onException(e, model, loadCount == currentCount);
                 }
             }
         });
