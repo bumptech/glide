@@ -583,13 +583,18 @@ public class ImageManager {
 
                     streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
                         @Override
-                        public void onStreamReady(InputStream is) {
-                            try {
-                                final Bitmap result = resizeIfNotFound(is);
-                                finishResize(result, false);
-                            } catch (Exception e) {
-                                cb.onLoadFailed(e);
-                            }
+                        public void onStreamReady(final InputStream is) {
+                            future = executor.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        final Bitmap result = resizeIfNotFound(is);
+                                        finishResize(result, false);
+                                    } catch (Exception e) {
+                                        cb.onLoadFailed(e);
+                                    }
+                                }
+                            });
                         }
 
                         @Override
