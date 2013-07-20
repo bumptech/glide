@@ -2,22 +2,21 @@ package com.bumptech.flickr.api;
 
 import android.content.Context;
 import com.android.volley.Request;
-import com.bumptech.flickr.R;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,8 +27,6 @@ import java.util.Set;
  */
 public class Api {
     private static Api API;
-    public static final String SEARCH_COMPLETED_ACTION = "search_completed";
-
     private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
     private static final String SIGNED_API_URL = "http://api.flickr.com/services/rest/?method=%s&format=json&api_key=" + API_KEY;
     private static final String PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_%s.jpg";
@@ -49,6 +46,8 @@ public class Api {
         Collections.sort(SORTED_SIZE_KEYS);
     }
 
+    private final RequestQueue requestQueue;
+
     private static String getSizeKey(int width, int height) {
         final int largestEdge = Math.max(width, height);
 
@@ -66,33 +65,19 @@ public class Api {
         public void onSearchCompleted(List<Photo> photos);
     }
 
-    public interface PhotoCallback {
-        public void onDownloadComplete(String path);
-    }
-
-    private final Downloader downloader;
-    private Set<String> downloadedFilesNames = new HashSet<String>();
-    private final String sizeKey;
-
     public static Api get(Context applicationContext) {
         if (API == null) {
-            API = new Api(applicationContext, applicationContext.getResources().getDimensionPixelSize(R.dimen.large_photo_side));
+            API = new Api(applicationContext);
         }
         return API;
     }
 
-    protected Api(Context applicationContext, int maxPhotoSize) {
-        this.downloader = Downloader.get(applicationContext);
-        this.sizeKey = getSizeKey(maxPhotoSize, maxPhotoSize);
+    protected Api(Context applicationContext) {
+        this.requestQueue = Glide.get().getRequestQueue(applicationContext);
     }
 
-    public static URL getPhotoURL(Photo photo, int width, int height) {
-        try {
-            return new URL(getPhotoUrl(photo, getSizeKey(width, height)));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static String getPhotoURL(Photo photo, int width, int height) {
+        return getPhotoUrl(photo, getSizeKey(width, height));
     }
 
     private static String getUrlForMethod(String method) {
@@ -109,12 +94,12 @@ public class Api {
 
     public void search(String text, final SearchCallback cb) {
         Log.d("API: searching");
-        downloader.download(getSearchUrl(text), new Downloader.StringCallback() {
+        requestQueue.add(new StringRequest(Request.Method.GET, getSearchUrl(text), new Response.Listener<String>() {
             @Override
-            public void onDownloadReady(String result) {
+            public void onResponse(String response) {
                 try {
                     //cut out initial flickJsonApi(
-                    JSONObject searchResults = new JSONObject(result.substring(14, result.length()-1));
+                    JSONObject searchResults = new JSONObject(response.substring(14, response.length()-1));
                     JSONArray photos = searchResults.getJSONObject("photos").getJSONArray("photo");
                     List<Photo> results = new ArrayList<Photo>(photos.length());
                     for (int i = 0; i < photos.length(); i++) {
@@ -125,25 +110,11 @@ public class Api {
                     e.printStackTrace();
                 }
             }
-        });
-    }
-
-    public Request downloadPhoto(Photo photo, File cacheDir, final PhotoCallback cb) {
-        File out = new File(cacheDir.getPath() + File.separator + photo.id + photo.secret + sizeKey);
-        final String path = out.getPath();
-        Request result = null;
-        if (downloadedFilesNames.contains(path)) {
-            cb.onDownloadComplete(path);
-        } else {
-            Log.d("API: missing photo, downloading");
-            result = downloader.download(getPhotoUrl(photo, sizeKey), out, new Downloader.DiskCallback() {
-                @Override
-                public void onDownloadReady(String path) {
-                    downloadedFilesNames.add(path);
-                    cb.onDownloadComplete(path);
-                }
-            });
-       }
-        return result;
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        }));
     }
 }

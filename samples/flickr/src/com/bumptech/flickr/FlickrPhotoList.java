@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
-import com.bumptech.flickr.api.Downloader;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.Glide;
 
@@ -103,7 +102,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
             Glide.load(current)
                     .into(viewHolder.imageView)
-                    .with(new FlickrModelLoader(Downloader.get(getActivity()).getQueue()))
+                    .with(new FlickrModelLoader(Glide.get().getRequestQueue(getActivity())))
                     .centerCrop()
                     .animate(R.anim.fade_in)
                     .begin();
