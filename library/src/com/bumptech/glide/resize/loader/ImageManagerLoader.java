@@ -20,7 +20,6 @@ public abstract class ImageManagerLoader extends BaseImageLoader {
     }
     @Override
     protected final void doFetchImage(String id, StreamLoader streamLoader, int width, int height, ImageReadyCallback cb) {
-        clear();
         loadToken = loadFromImageManager(id, streamLoader, width, height, cb);
     }
 
