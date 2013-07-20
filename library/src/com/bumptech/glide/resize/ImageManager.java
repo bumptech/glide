@@ -41,20 +41,23 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
- * sdk version, uses a  combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
- * load and resize * operations performed and to maximize the number of times Bitmaps are recycled as opposed to
- * allocated.
+ * sdk version, uses a combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
+ * load and resize operations performed and to maximize the number of times Bitmaps are recycled as opposed to
+ * allocated. If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if possible.
  *
- * If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if possible. Note
- * that Bitmap recycling is only available on Honeycomb and up.
+ * <p>
+ * Note that Bitmap recycling is only available on Honeycomb and up.
+ * </p>
  */
 public class ImageManager {
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int DEFAULT_DISK_CACHE_SIZE = 30 * 1024 * 1024;
+    private static final int DEFAULT_BITMAP_COMPRESS_QUALITY = 90;
     private static final float MEMORY_SIZE_RATIO = 1f/10f;
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
     private final BitmapReferenceCounter bitmapReferenceCounter;
+    private final int bitmapCompressQuality;
     private boolean shutdown = false;
 
     private final Handler mainHandler = new Handler();
@@ -74,7 +77,7 @@ public class ImageManager {
 
     /**
      * Get the maximum safe memory cache size for this particular device based on the # of mb allocated to each app.
-     * This is a conservative estimate that has been safe for 2.2+ devices consistnetly. It is probably rather small
+     * This is a conservative estimate that has been safe for 2.2+ devices consistently. It is probably rather small
      * for newer devices.
      *
      * @param context A context
@@ -145,6 +148,7 @@ public class ImageManager {
         public BitmapFactory.Options decodeBitmapOptions = ImageResizer.getDefaultOptions();
         private BitmapPool bitmapPool;
         private BitmapReferenceCounter bitmapReferenceCounter;
+        private int bitmapCompressQuality = DEFAULT_BITMAP_COMPRESS_QUALITY;
 
         /**
          * Create a new builder. No options are required. By default will create an lru memory cache, an lru disk
@@ -188,6 +192,8 @@ public class ImageManager {
          * Sets the format that will be used to write bitmaps to disk in the disk cache (if one is present). Defaults
          * to JPEG. Set to PNG if you need transparency
          *
+         * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
+         *
          * @param bitmapCompressFormat The format to pass to
          *  {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)} when saving
          *  to the disk cache
@@ -195,6 +201,24 @@ public class ImageManager {
          */
         public Builder setBitmapCompressFormat(Bitmap.CompressFormat bitmapCompressFormat) {
             this.bitmapCompressFormat = bitmapCompressFormat;
+            return this;
+        }
+
+        /**
+         * Set the compression quality for Bitmaps when writing them out to the disk cache.
+         *
+         * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
+         * @see #setBitmapCompressFormat(android.graphics.Bitmap.CompressFormat)
+         *
+         * @param quality Hint for compression in range 0-100 with 0 being lowest and 100 being highest quality. Will
+         *                only be applied for certain lossy compression formats
+         * @return This Builder
+         */
+        public Builder setBitmapCompressQuality(int quality) {
+            if (quality < 0) {
+                throw new IllegalArgumentException("Bitmap compression quality must be >= 0");
+            }
+            this.bitmapCompressQuality = quality;
             return this;
         }
 
@@ -307,6 +331,7 @@ public class ImageManager {
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
         bitmapCompressFormat = builder.bitmapCompressFormat;
+        bitmapCompressQuality = builder.bitmapCompressQuality;
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
         bitmapReferenceCounter = builder.bitmapReferenceCounter;
@@ -612,7 +637,7 @@ public class ImageManager {
                     diskCache.put(String.valueOf(key), new DiskCache.Writer() {
                         @Override
                         public void write(OutputStream os) {
-                            result.compress(bitmapCompressFormat, 100, os);
+                            result.compress(bitmapCompressFormat, bitmapCompressQuality, os);
                         }
                     });
                 }

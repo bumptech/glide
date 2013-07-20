@@ -107,7 +107,8 @@ public class Api {
                     }
                     cb.onSearchCompleted(results);
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    cb.onSearchFailed(e);
+                    Log.d("ERROR: response=" + response);
                 }
             }
         }, new Response.ErrorListener() {

@@ -27,7 +27,9 @@ import java.net.URL;
  * methods. For many users this should be enough to make effective use of the library. For others it can serve as a
  * starting point and example.
  *
+ * <p>
  * Note - This class is not thread safe.
+ * </p>
  */
 public class Glide {
     private static final Glide GLIDE = new Glide();
@@ -49,7 +51,7 @@ public class Glide {
     /**
      * Return the current {@link RequestQueue} or create and return a new one if one is not currently set
      *
-     * @see #setRequestQueue(com.android.volley.RequestQueue)
+     * @see #setRequestQueue(RequestQueue)
      * @see #isRequestQueueSet()
      *
      * @param context
@@ -63,10 +65,10 @@ public class Glide {
     }
 
     /**
-     * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
-     * {@link android.app.Activity#onCreate(android.os.Bundle)} along with
-     * {@link #setRequestQueue(com.android.volley.RequestQueue)} to set a {@link RequestQueue} with custom options
-     * for use with {@link Glide#load(Object)}} and/or as an easily accessible singleton
+     * Use to check whether or not an {@link RequestQueue} has been set yet. Can be used in
+     * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
+     * {@link #setRequestQueue(RequestQueue) setRequestQueue} to set a {@link RequestQueue} with custom options
+     * for use with {@link Glide#load(Object) load} and/or as an easily accessible singleton
      *
      * @return true iff a {@link RequestQueue} has already been set
      */
@@ -75,8 +77,8 @@ public class Glide {
     }
 
     /**
-     * Set the {@link RequestQueue} to use with {@link Glide#load(Object)}}. Replaces the current {@link RequestQueue}
-     * if one has already been set
+     * Set the {@link RequestQueue} to use with {@link Glide#load(Object)} load}. Replaces the current
+     * {@link RequestQueue} if one has already been set
      *
      * @param requestQueue The {@link RequestQueue} to set
      */
@@ -102,9 +104,10 @@ public class Glide {
 
     /**
      * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
-     * {@link android.app.Activity#onCreate(android.os.Bundle)} along with
-     * {@link #setImageManager(com.bumptech.glide.resize.ImageManager.Builder)} to set an {@link ImageManager} with
-     * custom options for use with {@link Glide#load(Object)} and/or as an easily accessible singleton.
+     * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
+     * {@link #setImageManager(com.bumptech.glide.resize.ImageManager.Builder) setImageManager} to set an
+     * {@link ImageManager} with custom options for use with {@link Glide#load(Object) load} and/or as an easily
+     * accessible singleton.
      *
      * @return true iff an {@link ImageManager} is currently set
      */
@@ -122,8 +125,8 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ImageManager} to use with {@link Glide#load(Object)}. Replaces the current {@link ImageManager}
-     * if one has already been set.
+     * Set the {@link ImageManager} to use with {@link Glide#load(Object) load}. Replaces the current
+     * {@link ImageManager} if one has already been set.
      *
      * @see #isImageManagerSet()
      *
@@ -136,14 +139,18 @@ public class Glide {
     /**
      * Begins constructing a load for a given model.
      *
+     * <p>
      * Note - If an {@link ImageManager} has not yet been set via
-     * {@link #setImageManager(com.bumptech.glide.resize.ImageManager)}, one will be created during this call unless
-     * you specify a {@link ImageLoader} that does not use {@link #getRequestQueue(android.content.Context)} via
-     * {@link Request#resizeWith(com.bumptech.glide.loader.image.ImageLoader)}
+     * {@link #setImageManager(ImageManager) setImageManager}, one will be created during this call unless
+     * you specify a {@link ImageLoader} that does not use {@link #getRequestQueue(android.content.Context)
+     * getRequestQueue} via {@link Glide.Request#resizeWith(ImageLoader) resizeWith}
+     * </p>
      *
-     * Note - If the model is a {@link URL} and an {@link RequestQueue} has not yet been set via
-     * {@link #setRequestQueue(com.android.volley.RequestQueue)}}, one will be created during this call unless you
-     * specify a {@link ModelLoader} via {@link Request#with(com.bumptech.glide.loader.model.ModelLoader)}.
+     * <p>
+     * Note - If the model is a {@link URL} and an {@link com.android.volley.RequestQueue} has not yet been set via
+     * {@link #setRequestQueue(com.android.volley.RequestQueue) setRequestQueue}, one will be created during this call
+     * unless you specify a {@link ModelLoader} via {@link Glide.Request#with(ModelLoader) with}.
+     * </p>
      *
      * @see #setImageManager(com.bumptech.glide.resize.ImageManager)
      * @see #setRequestQueue(com.android.volley.RequestQueue)

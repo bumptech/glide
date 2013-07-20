@@ -22,7 +22,7 @@ import java.lang.ref.WeakReference;
 /**
  * Wraps an {@link android.widget.ImageView} to display arbitrary Bitmaps and provides a framework for fetching and
  * loading bitmaps correctly when views are being recycled. Uses {@link ModelLoader} to download convert between a
- * model and an {@link java.io.InputStream} for a given model and {@link ImageLoader} to load * a bitmap from a given
+ * model and an {@link java.io.InputStream} for a given model and {@link ImageLoader} to load a bitmap from a given
  * {@link java.io.InputStream}. This class also determines the width and height of the wrapped
  * {@link android.widget.ImageView} at runtime and passes that information to the provided {@link ModelLoader} and
  * {@link ImageLoader}.
@@ -34,9 +34,11 @@ public class ImagePresenter<T> {
 
     /**
      * A builder for an {@link ImagePresenter}.
-     * {@see Builder ImagePresenter.Builder#setImageView(android.widget.ImageView)},
-     * {@see Builder ImagePresenter.Builder#setPathLoader}, and {@link Builder ImagePresenter.Builder#setImageLoader}
-     * are required.
+     *
+     * <p> {@link Builder ImagePresenter.Builder#setImageView(android.widget.ImageView) setImageView},
+     * {@link Builder ImagePresenter.Builder#setPathLoader setPathLoader}, and
+     * {@link Builder ImagePresenter.Builder#setImageLoader setIamgeLoader}
+     * are required. </p>
      *
      * @param <T> The type of the model that the presenter this builder will produce requires to load a path and an
      *           image from that path.
@@ -50,20 +52,11 @@ public class ImagePresenter<T> {
         private ImageLoader imageLoader;
         private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
             @Override
-            public void onImageLoadException(Exception e, T model, boolean isCurrent) {
+            public void onException(Exception e, T model, boolean isCurrent) {
                 if (e != null) {
                     e.printStackTrace();
                 } else {
                     Log.e("IP: onImageLoadException model= " + model);
-                }
-            }
-
-            @Override
-            public void onModelStreamLoadException(Exception e, T model, boolean isCurrent) {
-                if (e != null) {
-                    e.printStackTrace();
-                } else {
-                    Log.e("IP: onModelStreamLoadException model= " + model);
                 }
             }
         };
@@ -204,7 +197,7 @@ public class ImagePresenter<T> {
     private final ImageSetCallback imageSetCallback;
     private final ImagePresenterCoordinator coordinator;
     private final ExceptionHandler<T> exceptionHandler;
-    protected final ImageView imageView;
+    private final ImageView imageView;
 
     private T currentModel;
     private int currentCount;
@@ -237,9 +230,20 @@ public class ImagePresenter<T> {
         public boolean canSetPlaceholder(ImagePresenter<T> presenter);
     }
 
+    /**
+     * An interface for logging or otherwise handling exceptions that may occur during an image load
+     *
+     * @param <T> The type of the model
+     */
     public interface ExceptionHandler<T> {
-        public void onImageLoadException(Exception e, T model, boolean isCurrent);
-        public void onModelStreamLoadException(Exception e, T model, boolean isCurrent);
+        /**
+         * Called whenever a load causes an exception
+         *
+         * @param e The exception
+         * @param model The model that was being loaded
+         * @param isCurrent true iff the presenter currently wants to display the image from the load that failed
+         */
+        public void onException(Exception e, T model, boolean isCurrent);
     }
 
     protected ImagePresenter(Builder<T> builder) {
@@ -258,8 +262,12 @@ public class ImagePresenter<T> {
     }
 
     /**
-     * A method to get the wrapped {@link android.widget.ImageView}. Note that setting any image or drawable on the view
-     * directly may or may not be overridden at any point by the wrapper presenter.
+     * A method to get the wrapped {@link android.widget.ImageView}.
+     *
+     * <p>
+     *     Note - Setting any image or drawable on the view
+     * directly may be overridden at any point by the wrapping presenter.
+     * </p>
      *
      * @return The {@link android.widget.ImageView} this {@link ImagePresenter} object wraps
      */
@@ -273,9 +281,11 @@ public class ImagePresenter<T> {
      * image being displayed at the time of this call will be replaced either by the placeholder or by the new image
      * if the load completes synchronously (ie it was in an in memory cache)
      *
-     * <p>Note that a load will not begin before the ImagePresenter has determined the width and height of the wrapped
+     * <p>
+     *     Note - A load will not begin before the ImagePresenter has determined the width and height of the wrapped
      * view, which can't happen until that view has been made visible and undergone layout out for the first time. Until
-     * then the current load is stored. Subsequent calls will replace the stored load</p>
+     * then the current load is stored. Subsequent calls will replace the stored load
+     * </p>
      *
      * @param model The model containing the information required to load a path and/or bitmap
      */
@@ -307,7 +317,7 @@ public class ImagePresenter<T> {
     /**
      * Sets the placeholder as the current image for the {@link android.widget.ImageView}. Does not cancel any previous
      * loads, so the placeholder could be replaced with a loaded bitmap at any time. To cancel a load and display a
-     * placeholder call {@link com.bumptech.glide.presenter.ImagePresenter#clear()}.
+     * placeholder call {@link #clear()}.
      */
     public void resetPlaceHolder() {
         if (!canSetPlaceholder()) return;
@@ -316,7 +326,7 @@ public class ImagePresenter<T> {
     }
 
     /**
-     * Prevents any bitmaps being loaded from previous calls to {@link ImagePresenter#setModel(Object)} from
+     * Prevents any bitmaps being loaded from previous calls to {@link ImagePresenter#setModel(Object) setModel} from
      * being displayed and clears this presenter's {@link ImageLoader} and
      * this presenter's {@link ModelLoader}. Also displays the current placeholder if
      * one is set
@@ -331,6 +341,8 @@ public class ImagePresenter<T> {
     }
 
     private void fetchImage(final T model, int width, int height, final int loadCount) {
+        modelLoader.clear();
+        imageLoader.clear();
         final StreamLoader streamLoader = modelLoader.getStreamOpener(model, width, height);
         final String id = modelLoader.getId(model);
 
@@ -349,7 +361,7 @@ public class ImagePresenter<T> {
             @Override
             public void onException(Exception e) {
                 if (exceptionHandler != null) {
-                    exceptionHandler.onImageLoadException(e, model, loadCount == currentCount);
+                    exceptionHandler.onException(e, model, loadCount == currentCount);
                 }
             }
         });

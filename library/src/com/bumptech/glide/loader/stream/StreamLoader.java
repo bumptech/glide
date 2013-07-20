@@ -21,7 +21,6 @@ public interface StreamLoader {
          * The method that should be called when a load completes successfully
          *
          * @param is The {@link InputStream} that will be used to load the image
-         * @return True iff the loaded streamOpener and id was used by the class that requested
          */
         public void onStreamReady(InputStream is);
 
