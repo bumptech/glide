@@ -40,6 +40,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     private Set<PhotoViewer> photoViewers = new HashSet<PhotoViewer>();
     private File cacheDir;
     private List<Photo> currentPhotos = new ArrayList<Photo>();
+    private View searchLoading;
 
     private enum Page {
         SMALL,
@@ -88,6 +89,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         }
 
         searching = findViewById(R.id.searching);
+        searchLoading = findViewById(R.id.search_loading);
         searchTerm = (TextView) findViewById(R.id.search_term);
 
         searchText = (EditText) findViewById(R.id.search_text);
@@ -146,6 +148,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         final int currentSearch = ++searchCount;
 
         searching.setVisibility(View.VISIBLE);
+        searchLoading.setVisibility(View.VISIBLE);
         searchTerm.setText(getString(R.string.searching_for, searchString));
 
         Api.get(this).search(searchString, new Api.SearchCallback() {
@@ -161,6 +164,17 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 }
 
                 currentPhotos = photos;
+            }
+
+            @Override
+            public void onSearchFailed(Exception e) {
+                if (currentSearch != searchCount) return;
+                e.printStackTrace();
+
+                Log.d("SEARCH: failed :(");
+                searching.setVisibility(View.VISIBLE);
+                searchLoading.setVisibility(View.INVISIBLE);
+                searchTerm.setText(getString(R.string.search_failed, searchString));
             }
         });
     }
