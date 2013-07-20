@@ -63,6 +63,7 @@ public class Api {
 
     public interface SearchCallback {
         public void onSearchCompleted(List<Photo> photos);
+        public void onSearchFailed(Exception e);
     }
 
     public static Api get(Context applicationContext) {
@@ -93,7 +94,6 @@ public class Api {
     }
 
     public void search(String text, final SearchCallback cb) {
-        Log.d("API: searching");
         requestQueue.add(new StringRequest(Request.Method.GET, getSearchUrl(text), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -107,13 +107,14 @@ public class Api {
                     }
                     cb.onSearchCompleted(results);
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    cb.onSearchFailed(e);
+                    Log.d("ERROR: response=" + response);
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
+                cb.onSearchFailed(error);
             }
         }));
     }
