@@ -41,12 +41,13 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
- * sdk version, uses a  combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
- * load and resize * operations performed and to maximize the number of times Bitmaps are recycled as opposed to
- * allocated.
+ * sdk version, uses a combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
+ * load and resize operations performed and to maximize the number of times Bitmaps are recycled as opposed to
+ * allocated. If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if possible.
  *
- * If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if possible. Note
- * that Bitmap recycling is only available on Honeycomb and up.
+ * <p>
+ * Note that Bitmap recycling is only available on Honeycomb and up.
+ * </p>
  */
 public class ImageManager {
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
@@ -76,7 +77,7 @@ public class ImageManager {
 
     /**
      * Get the maximum safe memory cache size for this particular device based on the # of mb allocated to each app.
-     * This is a conservative estimate that has been safe for 2.2+ devices consistnetly. It is probably rather small
+     * This is a conservative estimate that has been safe for 2.2+ devices consistently. It is probably rather small
      * for newer devices.
      *
      * @param context A context
@@ -191,7 +192,7 @@ public class ImageManager {
          * Sets the format that will be used to write bitmaps to disk in the disk cache (if one is present). Defaults
          * to JPEG. Set to PNG if you need transparency
          *
-         * @see {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)}
+         * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
          *
          * @param bitmapCompressFormat The format to pass to
          *  {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)} when saving
@@ -206,8 +207,8 @@ public class ImageManager {
         /**
          * Set the compression quality for Bitmaps when writing them out to the disk cache.
          *
-         * @see {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)}
-         * @see {@link #setBitmapCompressFormat(android.graphics.Bitmap.CompressFormat)}
+         * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
+         * @see #setBitmapCompressFormat(android.graphics.Bitmap.CompressFormat)
          *
          * @param quality Hint for compression in range 0-100 with 0 being lowest and 100 being highest quality. Will
          *                only be applied for certain lossy compression formats

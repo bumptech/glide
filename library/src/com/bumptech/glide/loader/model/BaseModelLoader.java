@@ -5,6 +5,8 @@ import com.bumptech.glide.loader.stream.StreamLoader;
 /**
  * A base class that handles canceling any existing {@link StreamLoader} when
  * cleared
+ *
+ * @param <T> The type of model for this loader
  */
 public abstract class BaseModelLoader<T> implements ModelLoader<T> {
     private StreamLoader current;
