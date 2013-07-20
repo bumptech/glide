@@ -25,7 +25,9 @@ import java.net.URL;
  * Static helper methods/classes to present a simple unified interface for using glide. Allows 90%
  * of the functionality of the library. The trade off is some extra unused object allocation, and a few unavailable
  * methods. For many users this should be enough to make effective use of the library. For others it can serve as a
- * starting point and example. This class is not thread safe.
+ * starting point and example.
+ *
+ * Note - This class is not thread safe.
  */
 public class Glide {
     private static final Glide GLIDE = new Glide();
@@ -33,6 +35,11 @@ public class Glide {
     private ImageManager imageManager = null;
     private RequestQueue requestQueue = null;
 
+    /**
+     * Get the singleton.
+     *
+     * @return the singleton
+     */
     public static Glide get() {
         return GLIDE;
     }
@@ -71,7 +78,7 @@ public class Glide {
      * Set the {@link RequestQueue} to use with {@link Glide#load(Object)}}. Replaces the current {@link RequestQueue}
      * if one has already been set
      *
-     * @param requestQueue
+     * @param requestQueue The {@link RequestQueue} to set
      */
     public void setRequestQueue(RequestQueue requestQueue) {
         this.requestQueue = requestQueue;
@@ -128,6 +135,20 @@ public class Glide {
 
     /**
      * Begins constructing a load for a given model.
+     *
+     * Note - If an {@link ImageManager} has not yet been set via
+     * {@link #setImageManager(com.bumptech.glide.resize.ImageManager)}, one will be created during this call unless
+     * you specify a {@link ImageLoader} that does not use {@link #getRequestQueue(android.content.Context)} via
+     * {@link Request#resizeWith(com.bumptech.glide.loader.image.ImageLoader)}
+     *
+     * Note - If the model is a {@link URL} and an {@link RequestQueue} has not yet been set via
+     * {@link #setRequestQueue(com.android.volley.RequestQueue)}}, one will be created during this call unless you
+     * specify a {@link ModelLoader} via {@link Request#with(com.bumptech.glide.loader.model.ModelLoader)}.
+     *
+     * @see #setImageManager(com.bumptech.glide.resize.ImageManager)
+     * @see #setRequestQueue(com.android.volley.RequestQueue)
+     * @see #isImageManagerSet()
+     * @see #isRequestQueueSet()
      *
      * @param model The model to load, must not be null
      * @param <T> The type of the model to load
@@ -191,6 +212,7 @@ public class Glide {
 
     /**
      * Manages building, tagging, retrieving and/or replacing an ImagePresenter for the given ImageView and model
+     *
      * @param <T> The type of model that will be loaded into the view
      */
     public static class Request<T> {
@@ -215,8 +237,12 @@ public class Glide {
         }
 
         /**
-         * Set the {@link ModelLoader} for the model. For URL models, defaults to {@link UrlLoader},
-         * for File models, defaults to {@link FileLoader}.
+         * Set the {@link ModelLoader} for the model.
+         *
+         * Note - This method is required only if you are using a model other than a {@link File} or an {@link URL} or
+         * if you wish to specify a different {@link ModelLoader} for either of those models. For {@link URL} models,
+         * the {@link ModelLoader} defaults to {@link UrlLoader} and for {@link File} models, the {@link ModelLoader}
+         * defaults to {@link FileLoader}.
          *
          * @param modelLoader The {@link ModelLoader} to use. Replaces any existing loader
          * @return This Request
@@ -306,7 +332,7 @@ public class Glide {
 
         /**
          * Creates an {@link ImagePresenter} or retrieves the existing one and starts loading the image represented by
-         * the given model
+         * the given model. This must be called on the main thread.
          *
          * @see ImagePresenter#setModel(Object)
          */
