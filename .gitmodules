@@ -1,3 +1,6 @@
 [submodule "samples/flickr/ActionBarSherlock"]
 	path = samples/flickr/ActionBarSherlock
 	url = https://github.com/JakeWharton/ActionBarSherlock.git
+[submodule "library/volley"]
+	path = library/volley
+	url = https://android.googlesource.com/platform/frameworks/volley
