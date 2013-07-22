@@ -36,4 +36,4 @@ Glide has been in use at Bump for about six months in two of our Android apps. T
 Thanks
 ------
 Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) included with Glide.
-Thanks also to Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/)
+Thanks also to the Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/)
