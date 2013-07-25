@@ -171,7 +171,7 @@ public class Glide {
 
     @SuppressWarnings("unchecked")
     private static <T> ModelLoader<T> getModelFor(T model, Context context) {
-        if (model == URL.class) {
+        if (model instanceof URL) {
             return (ModelLoader<T>) new VolleyModelLoader<URL>(GLIDE.getRequestQueue(context)) {
                 @Override
                 protected String getUrl(URL model, int width, int height) {
@@ -183,7 +183,7 @@ public class Glide {
                     return model.toString();
                 }
             };
-        } else if (model == File.class) {
+        } else if (model instanceof File) {
             return (ModelLoader<T>) new FileLoader();
         } else {
             throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
