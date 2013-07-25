@@ -256,7 +256,6 @@ public class Glide {
          */
         public Request<T> with(ModelLoader<T> modelLoader) {
             this.modelLoader = modelLoader;
-            builder.setModelLoader(modelLoader);
 
             return this;
         }
@@ -364,7 +363,7 @@ public class Glide {
                 if (modelLoader == null) {
                     modelLoader = getModelFor(model, context);
                 }
-                presenter = builder.build();
+                presenter = builder.setModelLoader(modelLoader).build();
                 imageView.setTag(R.id.image_presenter_id, presenter);
             }
         }
