@@ -1,0 +1,4 @@
+tests/ant.properties
+tests/local.properties
+tests/gen/**/*
+

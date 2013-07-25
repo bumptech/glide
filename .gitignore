@@ -10,3 +10,4 @@ samples/flickr/.idea/*
 samples/flickr/gen/**/*
 samples/flickr/out/**/*
 samples/flickr/local.properties
+**/.idea/*
