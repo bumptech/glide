@@ -293,9 +293,7 @@ public class Glide {
          * @return This Request
          */
         public Request<T> resizeWith(ImageLoader imageLoader) {
-            if (presenter == null) {
-                builder.setImageLoader(imageLoader);
-            }
+            builder.setImageLoader(imageLoader);
 
             return this;
         }
