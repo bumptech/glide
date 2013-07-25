@@ -1,7 +1,8 @@
 package com.bumptech.glide.loader.model;
 
-import com.bumptech.glide.loader.stream.HttpStreamLoader;
+import com.android.volley.RequestQueue;
 import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.loader.stream.VolleyStreamLoader;
 
 import java.net.URL;
 
@@ -9,12 +10,18 @@ import java.net.URL;
  * A simple model loader for urls
  */
 public class UrlLoader implements ModelLoader<URL> {
-    @Override
-    public StreamLoader getStreamOpener(URL model, int width, int height) {
-        return new HttpStreamLoader(model);
+    private final RequestQueue requestQueue;
+
+    public UrlLoader(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
     }
 
-    //this may need to be overridden if multiple urls can be used to retrieve the same imgae
+    @Override
+    public StreamLoader getStreamOpener(URL model, int width, int height) {
+        return new VolleyStreamLoader(requestQueue, model.toString());
+    }
+
+    //this may need to be overridden if multiple urls can be used to retrieve the same image
     @Override
     public String getId(URL model) {
         return model.toString();

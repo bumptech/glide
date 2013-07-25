@@ -13,7 +13,6 @@ import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.model.StringLoader;
 import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.model.UrlLoader;
-import com.bumptech.glide.loader.model.VolleyModelLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageSetCallback;
 import com.bumptech.glide.resize.ImageManager;
@@ -175,17 +174,7 @@ public class Glide {
     @SuppressWarnings("unchecked")
     private static <T> ModelLoader<T> getModelFor(T model, Context context) {
         if (model instanceof URL) {
-            return (ModelLoader<T>) new VolleyModelLoader<URL>(GLIDE.getRequestQueue(context)) {
-                @Override
-                protected String getUrl(URL model, int width, int height) {
-                    return model.toString();
-                }
-
-                @Override
-                public String getId(URL model) {
-                    return model.toString();
-                }
-            };
+            return (ModelLoader<T>) new UrlLoader(GLIDE.getRequestQueue(context));
         } else if (model instanceof File) {
             return (ModelLoader<T>) new FileLoader();
         } else if (model instanceof Uri) {
