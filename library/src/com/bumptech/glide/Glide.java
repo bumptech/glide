@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -9,6 +10,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.model.FileLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.model.UrlLoader;
 import com.bumptech.glide.loader.model.VolleyModelLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
@@ -185,6 +187,8 @@ public class Glide {
             };
         } else if (model instanceof File) {
             return (ModelLoader<T>) new FileLoader();
+        } else if (model instanceof Uri) {
+            return (ModelLoader<T>) new UriLoader(context, GLIDE.getRequestQueue(context));
         } else {
             throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
                     ", you need to provide one by calling with()");
