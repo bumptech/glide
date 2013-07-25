@@ -5,7 +5,6 @@ import android.net.Uri;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.loader.stream.FileStreamLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.util.Log;
 
 import java.io.File;
 
@@ -22,16 +21,29 @@ public class StringLoader extends BaseModelLoader<String> {
     }
 
     @Override
-    protected StreamLoader buildStreamOpener(String model, int width, int height) {
-        final File file = new File(model);
-        if (file.exists() && !file.isDirectory()) {
-            Log.d("TEST: string loader have file exists and not dir");
-            return new FileStreamLoader(model);
-        } else {
-            final Uri uri = Uri.parse(model);
-            Log.d("TEST: string loader parsed uri to: " + uri);
-            return uriLoader.buildStreamOpener(uri, width, height);
-        }
+    protected StreamLoader buildStreamOpener(final String model, final int width, final int height) {
+        return new StreamLoader() {
+            StreamLoader subStreamLoader = null;
+            @Override
+            public void loadStream(StreamReadyCallback cb) {
+                final File file = new File(model);
+                if (file.exists() && !file.isDirectory()) {
+                    subStreamLoader = new FileStreamLoader(model);
+                } else {
+                    final Uri uri = Uri.parse(model);
+                    subStreamLoader = uriLoader.buildStreamOpener(uri, width, height);
+                }
+
+                subStreamLoader.loadStream(cb);
+            }
+
+            @Override
+            public void cancel() {
+                if (subStreamLoader != null) {
+                    subStreamLoader.cancel();
+                }
+            }
+        };
     }
 
     @Override
