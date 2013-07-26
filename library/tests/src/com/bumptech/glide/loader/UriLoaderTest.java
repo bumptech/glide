@@ -38,7 +38,7 @@ public class UriLoaderTest extends AndroidTestCase {
         };
         loader = new UriLoader(getContext(), new ModelLoader<URL>() {
             @Override
-            public StreamLoader getStreamOpener(URL model, int width, int height) {
+            public StreamLoader getStreamLoader(URL model, int width, int height) {
                 return urlLoader;
             }
 
@@ -55,31 +55,31 @@ public class UriLoaderTest extends AndroidTestCase {
 
     public void testHandlesFileUris() throws IOException {
         Uri fileUri = Uri.fromFile(new File("f"));
-        StreamLoader streamLoader = loader.getStreamOpener(fileUri, 0, 0);
+        StreamLoader streamLoader = loader.getStreamLoader(fileUri, 0, 0);
         assertTrue(streamLoader instanceof LocalUriLoader);
     }
 
     public void testHandlesResourceUris() throws IOException {
         Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");// + R.raw.ic_launcher);
-        StreamLoader streamLoader = loader.getStreamOpener(resourceUri, 0, 0);
+        StreamLoader streamLoader = loader.getStreamLoader(resourceUri, 0, 0);
         assertTrue(streamLoader instanceof LocalUriLoader);
     }
 
     public void testHandlesContentUris() {
         Uri contentUri = Uri.parse("content://com.bumptech.glide");
-        StreamLoader streamLoader = loader.getStreamOpener(contentUri, 0, 0);
+        StreamLoader streamLoader = loader.getStreamLoader(contentUri, 0, 0);
         assertTrue(streamLoader instanceof LocalUriLoader);
     }
 
     public void testHandlesHttpUris() {
         Uri httpUri = Uri.parse("http://www.google.com");
-        StreamLoader streamLoader = loader.getStreamOpener(httpUri, 0, 0);
+        StreamLoader streamLoader = loader.getStreamLoader(httpUri, 0, 0);
         assertEquals(urlLoader, streamLoader);
     }
 
     public void testHandlesHttpsUris() {
         Uri httpsUri = Uri.parse("https://www.google.com");
-        StreamLoader streamLoader = loader.getStreamOpener(httpsUri, 0, 0);
+        StreamLoader streamLoader = loader.getStreamLoader(httpsUri, 0, 0);
         assertEquals(urlLoader, streamLoader);
     }
 }

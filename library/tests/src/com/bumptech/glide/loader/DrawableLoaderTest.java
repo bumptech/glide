@@ -27,7 +27,7 @@ public class DrawableLoaderTest extends ActivityTestCase {
 
     public void testCanHandleId() {
         DrawableLoader drawableLoader = new DrawableLoader(getInstrumentation().getContext());
-        StreamLoader streamLoader = drawableLoader.getStreamOpener(R.raw.ic_launcher, 0, 0);
+        StreamLoader streamLoader = drawableLoader.getStreamLoader(R.raw.ic_launcher, 0, 0);
         streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
             @Override
             public void onStreamReady(InputStream is) {

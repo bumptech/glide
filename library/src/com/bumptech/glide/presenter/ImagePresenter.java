@@ -343,7 +343,7 @@ public class ImagePresenter<T> {
     private void fetchImage(final T model, int width, int height, final int loadCount) {
         modelLoader.clear();
         imageLoader.clear();
-        final StreamLoader streamLoader = modelLoader.getStreamOpener(model, width, height);
+        final StreamLoader streamLoader = modelLoader.getStreamLoader(model, width, height);
         final String id = modelLoader.getId(model);
 
         imageToken = imageLoader.fetchImage(id, streamLoader, width, height, new ImageLoader.ImageReadyCallback() {

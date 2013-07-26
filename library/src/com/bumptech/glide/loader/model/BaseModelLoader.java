@@ -12,7 +12,7 @@ public abstract class BaseModelLoader<T> implements ModelLoader<T> {
     private StreamLoader current;
 
     @Override
-    public final StreamLoader getStreamOpener(T model, int width, int height) {
+    public final StreamLoader getStreamLoader(T model, int width, int height) {
         current = buildStreamOpener(model, width, height);
         return current;
     }

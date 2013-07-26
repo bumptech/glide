@@ -17,7 +17,7 @@ public class UrlLoader implements ModelLoader<URL> {
     }
 
     @Override
-    public StreamLoader getStreamOpener(URL model, int width, int height) {
+    public StreamLoader getStreamLoader(URL model, int width, int height) {
         return new VolleyStreamLoader(requestQueue, model.toString());
     }
 

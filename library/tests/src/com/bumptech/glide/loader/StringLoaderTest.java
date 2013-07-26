@@ -29,7 +29,7 @@ public class StringLoaderTest extends AndroidTestCase {
         uriLoader = new ModelLoader<Uri>() {
 
             @Override
-            public StreamLoader getStreamOpener(Uri model, int width, int height) {
+            public StreamLoader getStreamLoader(Uri model, int width, int height) {
                 uri = model;
                 return null;
             }
@@ -49,37 +49,37 @@ public class StringLoaderTest extends AndroidTestCase {
 
     public void testHandlesPaths() throws IOException {
         File f = getContext().getCacheDir();
-        stringLoader.getStreamOpener(f.getAbsolutePath(), 100, 100);
+        stringLoader.getStreamLoader(f.getAbsolutePath(), 100, 100);
         assertEquals("file", uri.getScheme());
     }
 
     public void testHandlesFileUris() throws IOException {
         File f = getContext().getCacheDir();
-        stringLoader.getStreamOpener(Uri.fromFile(f).toString(), 100, 100);
+        stringLoader.getStreamLoader(Uri.fromFile(f).toString(), 100, 100);
         assertEquals("file", uri.getScheme());
     }
 
     public void testHandlesResourceUris() throws IOException {
         Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
-        stringLoader.getStreamOpener(resourceUri.toString(), 100, 100);
+        stringLoader.getStreamLoader(resourceUri.toString(), 100, 100);
         assertEquals("android.resource", uri.getScheme());
     }
 
     public void testHandlesHttp() {
         String url = "http://www.google.com";
-        stringLoader.getStreamOpener(url, 100, 100);
+        stringLoader.getStreamLoader(url, 100, 100);
         assertEquals("http", uri.getScheme());
     }
 
     public void testHandlesHttps() {
         String url = "https://www.google.com";
-        stringLoader.getStreamOpener(url, 100, 100);
+        stringLoader.getStreamLoader(url, 100, 100);
         assertEquals("https", uri.getScheme());
     }
 
     public void testHandlesContent() {
         String content = "content://com.bumptech.glide";
-        stringLoader.getStreamOpener(content, 100, 100);
+        stringLoader.getStreamLoader(content, 100, 100);
         assertEquals("content", uri.getScheme());
     }
 }

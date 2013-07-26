@@ -32,7 +32,7 @@ public interface ModelLoader<T> {
      * @param height The height of the view the image will be loaded into
      * @return A {@link StreamLoader} that can obtain an InputStream for the image if it is not cached
      */
-    public StreamLoader getStreamOpener(T model, int width, int height);
+    public StreamLoader getStreamLoader(T model, int width, int height);
 
 
     /**

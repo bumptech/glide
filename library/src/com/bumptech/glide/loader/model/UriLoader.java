@@ -31,7 +31,7 @@ public class UriLoader extends BaseModelLoader<Uri> {
             result = new LocalUriLoader(context, model);
         } else if ("http".equals(scheme) || "https".equals(scheme)) {
             try {
-                result = urlLoader.getStreamOpener(new URL(model.toString()), width, height);
+                result = urlLoader.getStreamLoader(new URL(model.toString()), width, height);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }

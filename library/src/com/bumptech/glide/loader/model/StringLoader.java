@@ -26,7 +26,7 @@ public class StringLoader extends BaseModelLoader<String> {
             uri = Uri.fromFile(new File(model));
         }
 
-        return uriLoader.getStreamOpener(uri, width, height);
+        return uriLoader.getStreamLoader(uri, width, height);
     }
 
     @Override

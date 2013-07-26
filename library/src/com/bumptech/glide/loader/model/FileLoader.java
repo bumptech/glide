@@ -18,7 +18,7 @@ public class FileLoader implements ModelLoader<File> {
     }
 
     @Override
-    public StreamLoader getStreamOpener(File model, int width, int height) {
+    public StreamLoader getStreamLoader(File model, int width, int height) {
         return new LocalUriLoader(context, Uri.fromFile(model));
     }
 

@@ -20,7 +20,7 @@ public class DrawableLoader implements ModelLoader<Integer> {
     }
 
     @Override
-    public StreamLoader getStreamOpener(Integer model, int width, int height) {
+    public StreamLoader getStreamLoader(Integer model, int width, int height) {
         Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/" + model.toString());
         return new LocalUriLoader(context, uri);
     }
