@@ -71,36 +71,6 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      */
     protected int pos;
 
-    /**
-     * Constructs a new {@code BufferedInputStream}, providing {@code in} with a buffer
-     * of 8192 bytes.
-     *
-     * &lt;p&gt;&lt;strong&gt;Warning:&lt;/strong&gt; passing a null source creates a closed
-     * {@code BufferedInputStream}. All read operations on such a stream will
-     * fail with an IOException.
-     *
-     * @param in the {@code InputStream} the buffer reads from.
-     */
-    public RecyclableBufferedInputStream(InputStream in) {
-        this(in, 8192);
-    }
-
-    /**
-     * Constructs a new {@code BufferedInputStream}, providing {@code in} with {@code size} bytes
-     * of buffer.
-     *
-     * &lt;p&gt;&lt;strong&gt;Warning:&lt;/strong&gt; passing a null source creates a closed
-     * {@code BufferedInputStream}. All read operations on such a stream will
-     * fail with an IOException.
-     *
-     * @param in the {@code InputStream} the buffer reads from.
-     * @param size the size of buffer in bytes.
-     * @throws IllegalArgumentException if {@code size &lt;= 0}.
-     */
-    public RecyclableBufferedInputStream(InputStream in, int size) {
-        this(in, new byte[size]);
-    }
-
     public RecyclableBufferedInputStream(InputStream in, byte[] buffer) {
         super(in);
         if (buffer == null || buffer.length == 0) {
