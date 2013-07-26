@@ -23,30 +23,30 @@ public class VolleyStreamLoader implements StreamLoader {
 
     @Override
     public void loadStream(final StreamReadyCallback cb) {
-        current = requestQueue.add(new Request<ByteArrayInputStream>(Request.Method.GET, url, new Response.ErrorListener() {
+        current = requestQueue.add(new Request<Void>(Request.Method.GET, url, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 cb.onException(error);
             }
         }) {
             @Override
-            protected Response<ByteArrayInputStream> parseNetworkResponse(NetworkResponse response) {
-                //this may be less than ideal, since we can't downsample the image as it is read,
-                //but we don't have a choice if we want to use Volley
-                return Response.success(new ByteArrayInputStream(response.data), getCacheEntry());
+            protected Response<Void> parseNetworkResponse(NetworkResponse response) {
+                //We actually are going to do the parsing in the callback, so we we're going to call it here where it
+                // will be executed on a background thread.
+                cb.onStreamReady(new ByteArrayInputStream(response.data));
+                return Response.success(null, getCacheEntry());
             }
 
             @Override
-            protected void deliverResponse(ByteArrayInputStream response) {
-                cb.onStreamReady(response);
-            }
+            protected void deliverResponse(Void response) { }
         });
     }
 
     @Override
     public void cancel() {
-        if (current != null) {
-            current.cancel();
+        final Request local = current;
+        if (local != null) {
+            local.cancel();
             current = null;
         }
     }
