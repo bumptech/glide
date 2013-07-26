@@ -3,10 +3,11 @@ package com.bumptech.glide.loader.model;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import com.android.volley.RequestQueue;
 import com.bumptech.glide.loader.stream.LocalUriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.loader.stream.VolleyStreamLoader;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * A model loader for trying to load Uris. Capable of handling 'http', 'android.resource', 'content', and 'file'
@@ -14,11 +15,11 @@ import com.bumptech.glide.loader.stream.VolleyStreamLoader;
  */
 public class UriLoader extends BaseModelLoader<Uri> {
     private final Context context;
-    private final RequestQueue requestQueue;
+    private final ModelLoader<URL> urlLoader;
 
-    public UriLoader(Context context, RequestQueue requestQueue) {
+    public UriLoader(Context context, ModelLoader<URL> urlLoader) {
         this.context = context;
-        this.requestQueue = requestQueue;
+        this.urlLoader = urlLoader;
     }
 
     @Override
@@ -29,7 +30,11 @@ public class UriLoader extends BaseModelLoader<Uri> {
         if (isLocalUri(scheme)) {
             result = new LocalUriLoader(context, model);
         } else if ("http".equals(scheme)) {
-            result = new VolleyStreamLoader(requestQueue, model.toString());
+            try {
+                result = urlLoader.getStreamOpener(new URL(model.toString()), width, height);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
 
         if (result == null) {
@@ -42,6 +47,12 @@ public class UriLoader extends BaseModelLoader<Uri> {
     @Override
     public String getId(Uri model) {
         return model.toString();
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        urlLoader.clear();
     }
 
     private boolean isLocalUri(String scheme) {

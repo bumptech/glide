@@ -2,11 +2,11 @@ package com.bumptech.glide.loader.model;
 
 import android.content.Context;
 import android.net.Uri;
-import com.android.volley.RequestQueue;
-import com.bumptech.glide.loader.stream.FileStreamLoader;
+import android.webkit.URLUtil;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
 import java.io.File;
+import java.net.URL;
 
 /**
  * A model loader for handling certain string models. Handles paths, urls, and any uri string with a scheme handled by
@@ -16,34 +16,20 @@ public class StringLoader extends BaseModelLoader<String> {
 
     private final UriLoader uriLoader;
 
-    public StringLoader(Context context, RequestQueue requestQueue) {
-        uriLoader = new UriLoader(context, requestQueue);
+    public StringLoader(Context context, ModelLoader<URL> urlLoader) {
+        uriLoader = new UriLoader(context, urlLoader);
     }
 
     @Override
     protected StreamLoader buildStreamOpener(final String model, final int width, final int height) {
-        return new StreamLoader() {
-            StreamLoader subStreamLoader = null;
-            @Override
-            public void loadStream(StreamReadyCallback cb) {
-                final File file = new File(model);
-                if (file.exists() && !file.isDirectory()) {
-                    subStreamLoader = new FileStreamLoader(model);
-                } else {
-                    final Uri uri = Uri.parse(model);
-                    subStreamLoader = uriLoader.buildStreamOpener(uri, width, height);
-                }
+        final Uri uri;
+        if (!URLUtil.isValidUrl(model)) {
+            uri = Uri.fromFile(new File(model));
+        } else {
+            uri = Uri.parse(model);
+        }
 
-                subStreamLoader.loadStream(cb);
-            }
-
-            @Override
-            public void cancel() {
-                if (subStreamLoader != null) {
-                    subStreamLoader.cancel();
-                }
-            }
-        };
+        return uriLoader.buildStreamOpener(uri, width, height);
     }
 
     @Override
