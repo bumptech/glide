@@ -13,9 +13,9 @@ import android.widget.ImageView;
  * cached), then the thumbnail load is started. If the thumbnail load does not return synchronously, the placeholder
  * image is shown. If the thumbnail load completes before the image load (expected in most cases), the thumbnail is
  * shown until the image load completes. If the image load completes first, the thumbnail will never be shown.
- *
  */
-public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoordinator<T> {
+@SuppressWarnings("unused")
+public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterCoordinator {
 
     /**
      * A builder for a {@link ThumbImagePresenter}. Has a few convenience methods to avoid identical calls on both
@@ -23,17 +23,17 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
      * {@link Builder ThumbImagePresenter.Builder#setThumbPresenterBuilder}, and
      * {@link Builder ThumbImagePresenter.Builder#setImageView} are required.
      *
-     * @param <T> The type of the model that the full and thumb presenters require to load a path and an image for that
-     *           path
+     * @param <A> The type of the model that the full {@link ImagePresenter} requires
+     * @param <B> The type of the model that the thumb {@link ImagePresenter} requires
      */
-    public static class Builder<T> {
-        private ImagePresenter.Builder<T> fullPresenterBuilder;
-        private ImagePresenter.Builder<T> thumbPresenterBuilder;
+    public static class Builder<A, B> {
+        private ImagePresenter.Builder<A> fullPresenterBuilder;
+        private ImagePresenter.Builder<B> thumbPresenterBuilder;
         private ImageView imageView;
         private Drawable placeholderDrawable;
         private int placeholderResourceId;
 
-        public ThumbImagePresenter<T> build(){
+        public ThumbImagePresenter<A, B> build(){
             if (fullPresenterBuilder == null) {
                 throw new IllegalArgumentException("you must include a builder for the full image presenter");
             }
@@ -44,7 +44,7 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
                 throw new IllegalArgumentException("cannot create presenter without an image view");
             }
 
-            return new ThumbImagePresenter<T>(this);
+            return new ThumbImagePresenter<A, B>(this);
         }
 
         /**
@@ -54,7 +54,7 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
          *                and {@link ImagePresenter.Builder ImagePresenter.Builder#setImageLoader} must have been called
          * @return This builder object
          */
-        public Builder<T> setFullPresenterBuilder(ImagePresenter.Builder<T> builder) {
+        public Builder<A, B> setFullPresenterBuilder(ImagePresenter.Builder<A> builder) {
             this.fullPresenterBuilder = builder;
             return this;
         }
@@ -66,7 +66,7 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
          *                and {@link ImagePresenter.Builder ImagePresenter.Builder#setImageLoader} must have been called
          * @return This builder object
          */
-        public Builder<T> setThumbPresenterBuilder(ImagePresenter.Builder<T> builder) {
+        public Builder<A, B> setThumbPresenterBuilder(ImagePresenter.Builder<B> builder) {
             this.thumbPresenterBuilder = builder;
             return this;
         }
@@ -74,7 +74,7 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
         /**
          * @see ImagePresenter.Builder ImagePresenter.Builder#setImageView
          */
-        public Builder<T> setImageView(ImageView imageView) {
+        public Builder<A, B> setImageView(ImageView imageView) {
             this.imageView = imageView;
             return this;
         }
@@ -82,7 +82,7 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
         /**
          * @see ImagePresenter.Builder ImagePresenter.Builder#setPlaceholderDrawable
          */
-        public Builder<T> setPlaceholderDrawable(Drawable drawable) {
+        public Builder<A, B> setPlaceholderDrawable(Drawable drawable) {
             if (drawable != null && this.placeholderResourceId != 0) {
                 throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
             }
@@ -94,7 +94,7 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
         /**
          * @see ImagePresenter.Builder ImagePresenter.Builder#setPlaceholderResource
          */
-        public Builder<T> setPlaceholderResource(int resourceId) {
+        public Builder<A, B> setPlaceholderResource(int resourceId) {
             if (resourceId != 0 && placeholderDrawable != null) {
                 throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
             }
@@ -104,10 +104,10 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
         }
     }
 
-    private final ImagePresenter<T> fullPresenter;
-    private final ImagePresenter<T> thumbPresenter;
+    private final ImagePresenter<A> fullPresenter;
+    private final ImagePresenter<B> thumbPresenter;
 
-    private ThumbImagePresenter(Builder<T> builder) {
+    private ThumbImagePresenter(Builder<A, B> builder) {
         fullPresenter = builder.fullPresenterBuilder
                 .setImagePresenterCoordinator(this)
                 .setImageView(builder.imageView)
@@ -129,7 +129,7 @@ public class ThumbImagePresenter<T> implements ImagePresenter.ImagePresenterCoor
      *
      * @see ImagePresenter#setModel(Object)
      */
-    public void setModels(T fullModel, T thumbModel) {
+    public void setModels(A fullModel, B thumbModel) {
         fullPresenter.setModel(fullModel);
         if (!fullPresenter.isImageSet()) {
             thumbPresenter.setModel(thumbModel);

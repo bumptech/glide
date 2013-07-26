@@ -182,7 +182,7 @@ public class ImagePresenter<T> {
          * @param coordinator The coordinator to set
          * @return This Builder object
          */
-        public Builder<T> setImagePresenterCoordinator(ImagePresenterCoordinator<T> coordinator) {
+        public Builder<T> setImagePresenterCoordinator(ImagePresenterCoordinator coordinator) {
             this.coordinator = coordinator;
             return this;
         }
@@ -220,10 +220,8 @@ public class ImagePresenter<T> {
 
     /**
      * An interface used to coordinate multiple {@link ImagePresenter} objects acting on the same view
-     *
-     * @param <T> The type of the {@link ImagePresenter} objects the implementation will be acting on
      */
-    public interface ImagePresenterCoordinator<T> {
+    public interface ImagePresenterCoordinator {
 
         /**
          * Determines if a presenter can display a loaded bitmap
@@ -231,7 +229,7 @@ public class ImagePresenter<T> {
          * @param presenter The presenter requesting permission to display a bitmap
          * @return True iff the presenter can display a bitmap
          */
-        public boolean canSetImage(ImagePresenter<T> presenter);
+        public boolean canSetImage(ImagePresenter presenter);
 
         /**
          * Determines if a presenter can display a placeholder
@@ -239,7 +237,7 @@ public class ImagePresenter<T> {
          * @param presenter The presenter requesting permission to display a placeholder
          * @return True iff the presenter can display a placeholder
          */
-        public boolean canSetPlaceholder(ImagePresenter<T> presenter);
+        public boolean canSetPlaceholder(ImagePresenter presenter);
     }
 
     /**
