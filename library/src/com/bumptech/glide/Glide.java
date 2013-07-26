@@ -174,20 +174,22 @@ public class Glide {
 
     @SuppressWarnings("unchecked")
     private static <T> ModelLoader<T> getModelFor(T model, Context context) {
+        final ModelLoader result;
         if (model instanceof URL) {
-            return (ModelLoader<T>) new UrlLoader(GLIDE.getRequestQueue(context));
+            result = new UrlLoader(GLIDE.getRequestQueue(context));
         } else if (model instanceof File) {
-            return (ModelLoader<T>) new FileLoader(context);
+            result = new FileLoader(context);
         } else if (model instanceof Uri) {
-            return (ModelLoader<T>) new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context)));
+            result = new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context)));
         } else if (model instanceof String) {
-            return (ModelLoader<T>) new StringLoader(new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context))));
+            result = new StringLoader(new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context))));
         } else if (model instanceof Integer) {
-            return (ModelLoader<T>) new DrawableLoader(context);
+            result = new DrawableLoader(context);
         } else {
             throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
                     ", you need to provide one by calling with()");
         }
+        return result;
     }
 
      /**
