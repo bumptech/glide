@@ -10,8 +10,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * A model loader for trying to load Uris. Capable of handling 'http', 'android.resource', 'content', and 'file'
- * schemes. Unsupported schemes will throw an exception in {@link #buildStreamOpener(android.net.Uri, int, int)}.
+ * A model loader for trying to load Uris. Capable of handling 'http', 'https', 'android.resource', 'content', and
+ * 'file' schemes. Unsupported schemes will throw an exception in {@link #buildStreamOpener(android.net.Uri, int, int)}.
  */
 public class UriLoader extends BaseModelLoader<Uri> {
     private final Context context;
@@ -29,7 +29,7 @@ public class UriLoader extends BaseModelLoader<Uri> {
         StreamLoader result = null;
         if (isLocalUri(scheme)) {
             result = new LocalUriLoader(context, model);
-        } else if ("http".equals(scheme)) {
+        } else if ("http".equals(scheme) || "https".equals(scheme)) {
             try {
                 result = urlLoader.getStreamOpener(new URL(model.toString()), width, height);
             } catch (MalformedURLException e) {
