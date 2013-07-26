@@ -239,7 +239,7 @@ public class Glide {
             this.imageView = imageView;
             this.context = imageView.getContext();
 
-            presenter = (ImagePresenter<T>) imageView.getTag(R.id.image_presenter_id);
+            presenter = ImagePresenter.getCurrent(imageView);
             builder = new ImagePresenter.Builder<T>()
                     .setImageView(imageView)
                     .setImageLoader(new Approximate(getImageManager()));
@@ -393,7 +393,6 @@ public class Glide {
                     modelLoader = getModelFor(model, context);
                 }
                 presenter = builder.setModelLoader(modelLoader).build();
-                imageView.setTag(R.id.image_presenter_id, presenter);
             }
         }
     }

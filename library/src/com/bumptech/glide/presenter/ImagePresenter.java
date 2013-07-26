@@ -12,9 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.R;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -64,7 +65,15 @@ public class ImagePresenter<T> {
         private ModelLoader<T> modelLoader;
 
         /**
-         * Builds an ImagePresenter
+         * Builds an ImagePresenter.
+         *
+         * <p>
+         *     Note - If an ImagePresenter has already been set for this view, it will be silently replaced and will not
+         *     be cleared which could lead to undefined behavior. It is most efficient to set an ImagePresenter once and
+         *     then retrieve it for each subsequent load. If you need to replace an ImagePresenter you can do so by
+         *     setting the tag at <code>R.id.image_presenter_id</code> to null with
+         *     {@link View#setTag(int, Object)}
+         * </p>
          *
          * @return A new ImagePresenter
          */
@@ -246,6 +255,19 @@ public class ImagePresenter<T> {
         public void onException(Exception e, T model, boolean isCurrent);
     }
 
+    /**
+     * Retrieves the current ImagePresenter for the given view using {@link android.widget.ImageView#getTag()} and
+     * <code>R.id.image_presenter_id</code>
+     *
+     * @param imageView The view to get the ImagePresenter for
+     * @param <T> The type of model being displayed in the ImageView
+     * @return The current ImagePresenter, or null if one does not exist
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ImagePresenter<T> getCurrent(View imageView) {
+        return (ImagePresenter<T>) imageView.getTag(R.id.image_presenter_id);
+    }
+
     protected ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
@@ -259,6 +281,8 @@ public class ImagePresenter<T> {
         this.exceptionHandler = builder.exceptionHandler;
         this.modelLoader = builder.modelLoader;
         sizeDeterminer = new SizeDeterminer(imageView);
+
+        imageView.setTag(R.id.image_presenter_id, this);
     }
 
     /**

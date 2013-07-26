@@ -124,11 +124,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                             }
                         })
                         .build();
-
-                imageView.setTag(R.id.image_presenter_id, imagePresenter);
                 view = imageView;
             } else {
-                imagePresenter = (ImagePresenter<Photo>) view.getTag(R.id.image_presenter_id);
+                imagePresenter = ImagePresenter.getCurrent(view);
             }
 
             imagePresenter.setModel(current);
