@@ -35,7 +35,7 @@ public class GlideTest extends AndroidTestCase {
 
         boolean caughtException = false;
         try {
-            imagePresenter.setModel(new Integer(4));
+            imagePresenter.setModel(new Float(4.4f));
         } catch (ClassCastException e) {
             caughtException = true;
         }
@@ -61,6 +61,10 @@ public class GlideTest extends AndroidTestCase {
 
     public void testStringDefaultLoader() {
         checkImagePresenter("http://www.google.com");
+    }
+
+    public void testIntegerDefaultLoader() {
+        checkImagePresenter(1234);
     }
 
     public void testGlideDoesNotReplacePresenters() {

@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.image.ImageLoader;
+import com.bumptech.glide.loader.model.DrawableLoader;
 import com.bumptech.glide.loader.model.FileLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.model.StringLoader;
@@ -181,6 +182,8 @@ public class Glide {
             return (ModelLoader<T>) new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context)));
         } else if (model instanceof String) {
             return (ModelLoader<T>) new StringLoader(new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context))));
+        } else if (model instanceof Integer) {
+            return (ModelLoader<T>) new DrawableLoader(context);
         } else {
             throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
                     ", you need to provide one by calling with()");
