@@ -263,7 +263,7 @@ public class Glide {
         }
 
         /**
-         * Resizes models using {@link ImageManager#centerCrop(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
+         * Resize models using {@link ImageManager#centerCrop(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
          * Replaces any existing resize style
          *
          * @return This Request
@@ -273,7 +273,7 @@ public class Glide {
         }
 
         /**
-         * Resizes models using {@link ImageManager#fitCenter(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
+         * Resize models using {@link ImageManager#fitCenter(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
          * Replaces any existing resize style
          *
          * @return This Request
@@ -283,7 +283,7 @@ public class Glide {
         }
 
         /**
-         * Resizes models using {@link ImageManager#getImageApproximate(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
+         * Resize models using {@link ImageManager#getImageApproximate(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
          * Replaces any existing resize style
          *
          * @return This Request
@@ -362,6 +362,16 @@ public class Glide {
          * Creates an {@link ImagePresenter} or retrieves the existing one and starts loading the image represented by
          * the given model. This must be called on the main thread.
          *
+         * <p>
+         *     Note - If an existing ImagePresenter already exists for this view it will not be replaced. This means you
+         *     can set options once and only once the first time load and begin is called for any given view. For
+         *     example, if you call load and begin for a view with centerCrop the first time and then load a second time
+         *     for the same view but with fitCenter, the image will still be resized with centerCrop. If you need
+         *     to change options you can call <code> imageView.setTag(R.id.image_presenter_id, null) </code> prior to
+         *     calling this method, but it is inefficient to do so, particularly in lists.
+         * </p>
+         *
+         *
          * @see ImagePresenter#setModel(Object)
          */
         public void begin() {
@@ -376,9 +386,6 @@ public class Glide {
         /**
          * Creates the new {@link ImagePresenter} if one does not currently exist for the current view and sets it as
          * the view's tag for the id {@code R.id.image_presenter_id}.
-         *
-         * If a Request is completed with replaceAndBuild(), then an ImagePresenter will be created  but the image
-         * load will not actually be started until some subsequent Request is completed with {@link #begin()}
          */
         private void build() {
             if (presenter == null) {
