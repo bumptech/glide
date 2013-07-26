@@ -15,7 +15,7 @@ public class LocalUriLoader implements StreamLoader {
     private final Uri uri;
 
     /**
-     * Opens an input stream for a uri pointing to a local asset
+     * Opens an input stream for a uri pointing to a local asset. Only certain uris are supported
      *
      * @see ContentResolver#openInputStream(android.net.Uri)
      *

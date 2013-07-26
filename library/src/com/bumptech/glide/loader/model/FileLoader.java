@@ -1,6 +1,8 @@
 package com.bumptech.glide.loader.model;
 
-import com.bumptech.glide.loader.stream.FileStreamLoader;
+import android.content.Context;
+import android.net.Uri;
+import com.bumptech.glide.loader.stream.LocalUriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
 import java.io.File;
@@ -9,10 +11,15 @@ import java.io.File;
  * A simple model loader for {@link File}
  */
 public class FileLoader implements ModelLoader<File> {
+    private final Context context;
+
+    public FileLoader(Context context) {
+        this.context = context;
+    }
 
     @Override
     public StreamLoader getStreamOpener(File model, int width, int height) {
-        return new FileStreamLoader(model);
+        return new LocalUriLoader(context, Uri.fromFile(model));
     }
 
     @Override

@@ -176,7 +176,7 @@ public class Glide {
         if (model instanceof URL) {
             return (ModelLoader<T>) new UrlLoader(GLIDE.getRequestQueue(context));
         } else if (model instanceof File) {
-            return (ModelLoader<T>) new FileLoader();
+            return (ModelLoader<T>) new FileLoader(context);
         } else if (model instanceof Uri) {
             return (ModelLoader<T>) new UriLoader(context, GLIDE.getRequestQueue(context));
         } else if (model instanceof String) {
