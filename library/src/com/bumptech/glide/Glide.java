@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -333,6 +334,28 @@ public class Glide {
          */
         public Request<T> animate(int animationId) {
             return animate(AnimationUtils.loadAnimation(context, animationId));
+        }
+
+        /**
+         * Sets a drawable to display while an image is loading
+         *
+         * @param drawable The drawable to use as a placeholder
+         * @return This Request
+         */
+        public Request<T> setPlaceholderDrawable(Drawable drawable) {
+            builder.setPlaceholderDrawable(drawable);
+            return this;
+        }
+
+        /**
+         * @see #setPlaceholderDrawable(android.graphics.drawable.Drawable)
+         *
+         * @param resourceId The id of the resource to use as a placeholder
+         * @return This Request
+         */
+        public Request<T> setPlaceholderResource(int resourceId) {
+            builder.setPlaceholderResource(resourceId);
+            return this;
         }
 
         /**
