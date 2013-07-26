@@ -1,12 +1,9 @@
 package com.bumptech.glide.loader.model;
 
-import android.content.Context;
 import android.net.Uri;
-import android.webkit.URLUtil;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
 import java.io.File;
-import java.net.URL;
 
 /**
  * A model loader for handling certain string models. Handles paths, urls, and any uri string with a scheme handled by
@@ -14,22 +11,22 @@ import java.net.URL;
  */
 public class StringLoader extends BaseModelLoader<String> {
 
-    private final UriLoader uriLoader;
+    private final ModelLoader<Uri> uriLoader;
 
-    public StringLoader(Context context, ModelLoader<URL> urlLoader) {
-        uriLoader = new UriLoader(context, urlLoader);
+    public StringLoader(ModelLoader<Uri> uriLoader) {
+        this.uriLoader = uriLoader;
     }
 
     @Override
     protected StreamLoader buildStreamOpener(final String model, final int width, final int height) {
-        final Uri uri;
-        if (!URLUtil.isValidUrl(model)) {
+        Uri uri = Uri.parse(model);
+
+        final String scheme = uri.getScheme();
+        if (scheme == null) {
             uri = Uri.fromFile(new File(model));
-        } else {
-            uri = Uri.parse(model);
         }
 
-        return uriLoader.buildStreamOpener(uri, width, height);
+        return uriLoader.getStreamOpener(uri, width, height);
     }
 
     @Override

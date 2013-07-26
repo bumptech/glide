@@ -180,7 +180,7 @@ public class Glide {
         } else if (model instanceof Uri) {
             return (ModelLoader<T>) new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context)));
         } else if (model instanceof String) {
-            return (ModelLoader<T>) new StringLoader(context, new UrlLoader(GLIDE.getRequestQueue(context)));
+            return (ModelLoader<T>) new StringLoader(new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context))));
         } else {
             throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
                     ", you need to provide one by calling with()");
