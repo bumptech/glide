@@ -1,23 +1,15 @@
 package com.bumptech.glide.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.util.SparseArray;
 import com.bumptech.glide.util.Log;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 7/10/13
- * Time: 1:47 PM
- * To change this template use File | Settings | File Templates.
- */
 public class LruBitmapPool implements BitmapPool {
-    private final Map<Integer, ArrayList<Bitmap>> pool = new HashMap<Integer, ArrayList<Bitmap>>();
+    private final SparseArray<ArrayList<Bitmap>> pool = new SparseArray<ArrayList<Bitmap>>();
     //Typically there should only be a handful of keys (often 1 or 2) so
     //iterating over this list should be fast
     private final LinkedList<Integer> keys = new LinkedList<Integer>();
@@ -85,8 +77,8 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     //keys.remove(int) -> remove index int, not object int :(
-    private void removeKey(int key) {
-        keys.remove(new Integer(key));
+    private void removeKey(Integer key) {
+        keys.remove(key);
     }
 
     private int getKey(Bitmap bitmap) {

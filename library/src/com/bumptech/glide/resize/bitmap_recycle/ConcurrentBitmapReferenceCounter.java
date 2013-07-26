@@ -5,13 +5,6 @@ import android.graphics.Bitmap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 6/4/13
- * Time: 9:54 AM
- * To change this template use File | Settings | File Templates.
- */
 public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter {
 
     private static class InnerTrackerPool {

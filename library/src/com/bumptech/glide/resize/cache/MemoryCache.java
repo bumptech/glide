@@ -3,18 +3,28 @@ package com.bumptech.glide.resize.cache;
 import android.graphics.Bitmap;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 6/5/13
- * Time: 11:29 AM
- * To change this template use File | Settings | File Templates.
+ * An interface for adding and removing from an in memory cache
  */
 public interface MemoryCache {
+    /**
+     * An interface that will be called whenever a bitmap is removed from the cache.
+     */
     public interface ImageRemovedListener {
         public void onImageRemoved(Bitmap removed);
     }
 
+    /**
+     * Tell if cache contains key
+     * @param key The key
+     * @return true iff the key has a non null value in the cache
+     */
     public boolean contains(Integer key);
+
+    /**
+     * Get a value from the cache
+     * @param key The key
+     * @return The bitmap at key or null if the key is not present
+     */
     public Bitmap get(Integer key);
 
     /**
@@ -24,5 +34,10 @@ public interface MemoryCache {
      * @return The old value of key (null if key is not in map)
      */
     public Bitmap put(Integer key, Bitmap bitmap);
+
+    /**
+     * Set the listener to be called when a bitmap is removed from the cache
+     * @param listener The listener
+     */
     public void setImageRemovedListener(ImageRemovedListener listener);
 }

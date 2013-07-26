@@ -4,6 +4,7 @@
 
 package com.bumptech.glide.resize;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -107,16 +108,13 @@ public class ImageManager {
      * @param cacheName The name of the subdirectory in which to store the cache
      * @return A File representing the default disk cache directory
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static File getPhotoCacheDir(Context context, String cacheName) {
         File cacheDir = null;
 
-        Boolean isExternalStorageRemoveable = null;
-        if (Build.VERSION.SDK_INT >= 9) {
-            isExternalStorageRemoveable = Environment.isExternalStorageRemovable();
-        }
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                (isExternalStorageRemoveable != null && !isExternalStorageRemoveable)) {
+                !isExternalStorageRemovable()) {
             //seems like this can still be null even if the above are true
             cacheDir = context.getExternalCacheDir();
         }
@@ -129,12 +127,17 @@ public class ImageManager {
             File result = new File(cacheDir, cacheName);
             result.mkdirs();
             return result;
-        } else {
-            Log.d("IM: default disk cache dir is null");
-            return null;
         }
+        Log.d("IM: default disk cache dir is null");
+        return null;
     }
 
+    @TargetApi(9)
+    private static boolean isExternalStorageRemovable() {
+        return Build.VERSION.SDK_INT < 9 || Environment.isExternalStorageRemovable();
+    }
+
+    @SuppressWarnings("unused")
     public static class Builder {
         private final Context context;
 
@@ -514,6 +517,7 @@ public class ImageManager {
     /**
      * Shuts down all of the background threads used by the ImageManager including the executor service
      */
+    @SuppressWarnings("unused")
     public void shutdown() {
         shutdown = true;
         executor.shutdown();
@@ -609,9 +613,11 @@ public class ImageManager {
                     streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
                         @Override
                         public void onStreamReady(final InputStream is) {
+                            if (cancelled) return;
                             future = executor.submit(new Runnable() {
                                 @Override
                                 public void run() {
+                                    if (cancelled) return;
                                     try {
                                         final Bitmap result = resizeIfNotFound(is);
                                         finishResize(result, false);

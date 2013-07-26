@@ -10,10 +10,11 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
 
 /**
- * An ImageLoader implementation that loads and crops in image down to the given width and height.
+ * Load image to exactly match the view in one dimension and then crop the image to fit the other dimension.
  *
  * @see ImageManager#centerCrop(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)
  */
+@SuppressWarnings("unused")
 public class CenterCrop extends ImageManagerLoader {
 
     public CenterCrop(ImageManager imageManager) {

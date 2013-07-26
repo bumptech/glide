@@ -6,11 +6,8 @@ import com.bumptech.glide.loader.stream.LocalUriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 7/25/13
- * Time: 11:07 PM
- * To change this template use File | Settings | File Templates.
+ * A model loader for handling resources. Model must be a resource id in the package of
+ * the given context.
  */
 public class DrawableLoader implements ModelLoader<Integer> {
     private final Context context;

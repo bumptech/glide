@@ -39,11 +39,13 @@ public class ImagePresenter<T> {
      * <p> {@link Builder ImagePresenter.Builder#setImageView(android.widget.ImageView) setImageView},
      * {@link Builder ImagePresenter.Builder#setPathLoader setPathLoader}, and
      * {@link Builder ImagePresenter.Builder#setImageLoader setIamgeLoader}
-     * are required. </p>
+     * are required.
+     * </p>
      *
      * @param <T> The type of the model that the presenter this builder will produce requires to load a path and an
      *           image from that path.
      */
+    @SuppressWarnings("unused")
     public static class Builder<T> {
         private ImageView imageView;
         private int placeholderResourceId;
@@ -198,7 +200,8 @@ public class ImagePresenter<T> {
         }
     }
 
-    private Object imageToken;
+    @SuppressWarnings("all")
+    private Object imageToken; //this is just a reference we may need to keep, otherwise unused
 
     private final ModelLoader<T> modelLoader;
     private final ImageLoader imageLoader;
@@ -331,12 +334,11 @@ public class ImagePresenter<T> {
 
             loadedFromCache = false;
 
-            if (!isImageSet()) {
+            if (!isImageSet) {
                 resetPlaceHolder();
             }
         }
     }
-
 
     /**
      * Sets the placeholder as the current image for the {@link android.widget.ImageView}. Does not cancel any previous

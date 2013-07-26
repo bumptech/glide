@@ -2,13 +2,6 @@ package com.bumptech.glide.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 6/5/13
- * Time: 12:39 PM
- * To change this template use File | Settings | File Templates.
- */
 public interface BitmapReferenceCounter {
 
     public void initBitmap(Bitmap bitmap);

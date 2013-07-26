@@ -57,6 +57,7 @@ public abstract class BaseImageLoader implements ImageLoader {
      * @param id The unique id of the image
      * @return True iff this image loader has handled the exception and the cb should not be notified.
      */
+    @SuppressWarnings("unused")
     protected boolean onImageLoadFailed(Exception e, String id) {
         return false;
     }

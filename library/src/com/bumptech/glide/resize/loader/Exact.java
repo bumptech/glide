@@ -10,13 +10,16 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
 
 /**
- * An ImageLoader implementation that loads an image at the given path and expects that the image at that path
- * will exactly match the width and height of the view that will display it. Less expensive than other implementations,
- * but requires some other process to make sure the image on disk matches the given dimension (for example a server side
- * resize).
+ * Load an image at its original dimensions.
+ *
+ * <p>
+ *     This class is almost identical to {@link AsIs} except that it assumes the image size is identical to the given
+ *     dimensions. This assumption means we don't first need to read the image header to obtain the dimensions.
+ * </p>
  *
  * @see ImageManager#getImageExact(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)
  */
+@SuppressWarnings("unused")
 public class Exact extends ImageManagerLoader {
 
     public Exact(ImageManager imageManager) {

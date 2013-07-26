@@ -11,11 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 7/5/13
- * Time: 10:57 AM
- * To change this template use File | Settings | File Templates.
+ * The default DiskCache implementation. There must be no more than one active instance for a given
+ * directory at a time.
+ *
+ * @see #get(java.io.File, int)
  */
 public class DiskLruCacheWrapper implements DiskCache {
 
@@ -29,6 +28,16 @@ public class DiskLruCacheWrapper implements DiskCache {
         return CACHE;
     }
 
+    /**
+     * Get a DiskCache in the given directory and size. If a disk cache has alread been created with
+     * a different directory and/or size, it will be returned instead and the new arguments
+     * will be ignored.
+     *
+     * @param directory The directory for the disk cache
+     * @param maxSize The max size for the disk cache
+     * @return The new disk cache with the given arguments, or the current cache if one already exists
+     * @throws IOException
+     */
     public synchronized static DiskCache get(File directory, int maxSize) throws IOException {
         if (WRAPPER == null) {
             WRAPPER = new DiskLruCacheWrapper(getDiskLruCache(directory, maxSize));

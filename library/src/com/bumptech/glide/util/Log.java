@@ -1,18 +1,15 @@
 package com.bumptech.glide.util;
 
+import android.annotation.SuppressLint;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sam
- * Date: 10/11/12
- * Time: 10:11 AM
- * To change this template use File | Settings | File Templates.
- */
 public class Log {
     private static final String TAG = "BUMP_PHOTOS";
+
+    @SuppressLint("SimpleDateFormat")
     private static final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     public static void e(String message, Object... args) {

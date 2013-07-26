@@ -2,13 +2,6 @@ package com.bumptech.glide.resize.cache;
 
 import android.graphics.Bitmap;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 6/5/13
- * Time: 11:31 AM
- * To change this template use File | Settings | File Templates.
- */
 public class MemoryCacheAdapter implements MemoryCache {
     @Override
     public boolean contains(Integer key) {

@@ -6,13 +6,16 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
 
 /**
- * An ImageLoader implementation that loads an image at the given path at its original dimensions. Should be used
- * when an image is roughly the same size as the view that will display it and you want to use some external process
- * (like the view) to do the resizing for you. Not memory efficient and more expensive to use recycled Bitmaps for than
- * other implementations
+ * Load an image at its original dimensions.
+ *
+ * <p> Should be used when an image is exactly the same size as the view that will display it
+ * or you want to use some external process (like the view) to do the resizing for you. This class is usually less
+ * efficient than other implementations if the image is not exactly the size of the view
+ * </p>
  *
  * @see ImageManager#getImage(String, com.bumptech.glide.loader.stream.StreamLoader, com.bumptech.glide.resize.LoadedCallback)
  */
+@SuppressWarnings("unused")
 public class AsIs extends ImageManagerLoader {
 
     public AsIs(ImageManager imageManager) {

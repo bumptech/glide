@@ -26,10 +26,10 @@ import java.io.File;
 import java.net.URL;
 
 /**
- * Static helper methods/classes to present a simple unified interface for using glide. Allows 90%
- * of the functionality of the library. The trade off is some extra unused object allocation, and a few unavailable
- * methods. For many users this should be enough to make effective use of the library. For others it can serve as a
- * starting point and example.
+ * A singleton to present a simple static interface for Glide {@link Glide.Request} and to create and manage an
+ * {@link ImageLoader} and {@link com.android.volley.RequestQueue}. This class provides most of the functionality of
+ * {@link ImagePresenter} with a simpler but less efficient interface. For more complicated cases it may be worth
+ * considering using {@link ImagePresenter} and {@link com.bumptech.glide.presenter.ImagePresenter.Builder} directly.
  *
  * <p>
  * Note - This class is not thread safe.
@@ -58,7 +58,7 @@ public class Glide {
      * @see #setRequestQueue(RequestQueue)
      * @see #isRequestQueueSet()
      *
-     * @param context
+     * @param context A context to use for Volley
      * @return The {@link RequestQueue}
      */
     public RequestQueue getRequestQueue(Context context) {
@@ -144,6 +144,12 @@ public class Glide {
      * Begins constructing a load for a given model.
      *
      * <p>
+     * Only certain models are supported by default. See
+     * {@link Glide.Request#with(com.bumptech.glide.loader.model.ModelLoader)} for models with default a
+     * {@link ModelLoader}.
+     * </p>
+     *
+     * <p>
      * Note - If an {@link ImageManager} has not yet been set via
      * {@link #setImageManager(ImageManager) setImageManager}, one will be created during this call unless
      * you specify a {@link ImageLoader} that does not use {@link #getRequestQueue(android.content.Context)
@@ -224,9 +230,9 @@ public class Glide {
      *
      * @param <T> The type of model that will be loaded into the view
      */
+    @SuppressWarnings("unused") //public api
     public static class Request<T> {
         private final T model;
-        private final ImageView imageView;
         private final Context context;
 
         private ImagePresenter<T> presenter;
@@ -236,7 +242,6 @@ public class Glide {
         @SuppressWarnings("unchecked")
         public Request(T model, ImageView imageView) {
             this.model = model;
-            this.imageView = imageView;
             this.context = imageView.getContext();
 
             presenter = ImagePresenter.getCurrent(imageView);
@@ -248,10 +253,28 @@ public class Glide {
         /**
          * Set the {@link ModelLoader} for the model.
          *
-         * Note - This method is required only if you are using a model other than a {@link File} or an {@link URL} or
-         * if you wish to specify a different {@link ModelLoader} for either of those models. For {@link URL} models,
-         * the {@link ModelLoader} defaults to {@link UrlLoader} and for {@link File} models, the {@link ModelLoader}
-         * defaults to {@link FileLoader}.
+         * <p>
+         *     Note - This method is required only if you are using a model for which there is no default
+         *     {@link ModelLoader}. You can also optionally use this method to override the default {@link ModelLoader} for
+         *     a model for which there is a default. The defaults are as follows:
+         * <ul>
+         *     <li>{@link String} - {@link StringLoader}. String must be a file path
+         *          (<code>/data/data/com.bumptech/glide/...</code>), a url (<code>http://www.google.com</code>), or a
+         *          uri. </li>
+         *     <li>{@link File} - {@link FileLoader}</li>
+         *     <li>{@link Integer} - {@link DrawableLoader}. Integer must be a resource id in your package</li>
+         *     <li>{@link Uri} - {@link UriLoader}. Uri must be a scheme handled by
+         *     {@link android.content.ContentResolver#openInputStream(android.net.Uri)}, http, or https</li>
+         * </ul>
+         * </p>
+         *
+         * <p>
+         *     Note - If you have the ability to fetch different sized images for a given model, you should supply a
+         *     {@link ModelLoader} here to do so. Fetching a smaller image means less bandwidth, battery, and memory
+         *     usage as well as faster image loads. To simply build a url to download an image using the width and
+         *     the height of the view, consider passing in a subclass of
+         *     {@link com.bumptech.glide.loader.model.VolleyModelLoader}.
+         * </p>
          *
          * @param modelLoader The {@link ModelLoader} to use. Replaces any existing loader
          * @return This Request

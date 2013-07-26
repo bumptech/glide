@@ -7,11 +7,7 @@ package com.bumptech.glide.resize;
 import android.graphics.Bitmap;
 
 /**
- * Created by IntelliJ IDEA.
- * User: sam
- * Date: 2/9/12
- * Time: 7:04 PM
- * To change this template use File | Settings | File Templates.
+ * An interface to handle loads completing successfully or failing
  */
 public interface LoadedCallback {
     public void onLoadCompleted(Bitmap loaded);

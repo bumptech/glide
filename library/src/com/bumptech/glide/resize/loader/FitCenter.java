@@ -10,11 +10,12 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
 
 /**
- * An ImageLoader implementation that loads an image into within the given dimensions maintaining the original
- * proportions
+ * Load the image so that one dimension of the image exactly matches one of the given dimensions and the other dimension
+ * of the image is smaller than or equal to the other given dimension.
  *
  * @see ImageManager#fitCenter(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)
  */
+@SuppressWarnings("Unused")
 public class FitCenter extends ImageManagerLoader {
 
     public FitCenter(ImageManager imageManager) {

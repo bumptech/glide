@@ -3,6 +3,7 @@
  */
 package com.bumptech.glide.resize;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -20,7 +21,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * A class for synchronously resizing bitmaps with or without Bitmaps to recycle
+ * A class for synchronously resizing bitmaps with or without Bitmaps to reuse
  */
 public class ImageResizer {
     private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
@@ -31,6 +32,7 @@ public class ImageResizer {
 
     private final BitmapFactory.Options defaultOptions;
 
+    @TargetApi(11)
     public static BitmapFactory.Options getDefaultOptions() {
        BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
        decodeBitmapOptions.inDither = false;
@@ -46,14 +48,17 @@ public class ImageResizer {
     /**
      * Creates a new resizer that will not recycle Bitmaps
      */
+    @SuppressWarnings("unused")
     public ImageResizer() {
         this(null, null);
     }
 
+    @SuppressWarnings("unused")
     public ImageResizer(BitmapPool bitmapPool) {
         this(bitmapPool, null);
     }
 
+    @SuppressWarnings("unused")
     public ImageResizer(BitmapFactory.Options options) {
         this(null, options);
     }
@@ -144,6 +149,7 @@ public class ImageResizer {
      * @param height The maximum height
      * @return A bitmap containing the image
      */
+    @SuppressWarnings("unused")
     public Bitmap loadAtMost(InputStream is, int width, int height) {
         byte[] bytes = getTempBytes();
         RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
@@ -258,9 +264,7 @@ public class ImageResizer {
 
     private BitmapFactory.Options getOptions(Bitmap recycle) {
         BitmapFactory.Options result = new BitmapFactory.Options();
-        copyOptions(defaultOptions, result);
-        if (CAN_RECYCLE)
-            result.inBitmap = recycle;
+        copyOptions(defaultOptions, result, recycle);
         return result;
     }
 
@@ -290,33 +294,39 @@ public class ImageResizer {
         }
     }
 
-    private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to) {
+    private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to, Bitmap recycled) {
+        if (Build.VERSION.SDK_INT >= 11) {
+            copyOptionsHoneycomb(from, to, recycled);
+        } else if (Build.VERSION.SDK_INT >= 10) {
+            copyOptionsGingerbreadMr1(from, to);
+        } else {
+            copyOptionsFroyo(from, to);
+        }
+    }
+
+    @TargetApi(11)
+    private static void copyOptionsHoneycomb(BitmapFactory.Options from, BitmapFactory.Options to, Bitmap recycled) {
+        copyOptionsGingerbreadMr1(from, to);
+        to.inMutable = from.inMutable;
+        to.inBitmap = recycled;
+    }
+
+    @TargetApi(10)
+    private static void copyOptionsGingerbreadMr1(BitmapFactory.Options from, BitmapFactory.Options to) {
+        copyOptionsFroyo(from, to);
+        to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
+    }
+
+    private static void copyOptionsFroyo(BitmapFactory.Options from, BitmapFactory.Options to) {
         to.inDensity = from.inDensity;
         to.inDither = from.inDither;
         to.inInputShareable = from.inInputShareable;
-        if (CAN_RECYCLE)
-            to.inMutable = from.inMutable;
-        if (Build.VERSION.SDK_INT >= 10)
-            to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
         to.inPreferredConfig = from.inPreferredConfig;
         to.inPurgeable = from.inPurgeable;
         to.inSampleSize = from.inSampleSize;
         to.inScaled = from.inScaled;
         to.inScreenDensity = from.inScreenDensity;
         to.inTargetDensity = from.inTargetDensity;
-    }
-
-    /**
-     * An expensive operation to crop the given Bitmap so that it fills the given dimensions. This will not maintain
-     * the original proportions of the image
-     *
-     * @param toCrop The Bitmap to crop
-     * @param width The width of the final Bitmap
-     * @param height The height of the final Bitmap
-     * @return The resized image
-     */
-    public static Bitmap centerCrop(Bitmap toCrop, int width, int height) {
-        return centerCrop(null, toCrop, width, height);
     }
 
     /**
@@ -367,40 +377,6 @@ public class ImageResizer {
         paint.setAntiAlias(true);
         canvas.drawBitmap(toCrop, m, paint);
         return result;
-    }
-
-    /**
-     * An expensive operation to crop the given Bitmap to the given width by removing equal amounts from either side
-     * so that the center of image remains
-     *
-     * @param toCrop The Bitmap to crop
-     * @param width The width to crop the Bitmap to
-     * @return A new Bitmap cropped to the given width, or toCrop if toCrop's width is equivalent to the given width
-     */
-    public static Bitmap cropToWidth(Bitmap toCrop, int width) {
-        Bitmap cropped = toCrop;
-        if (toCrop.getWidth() > width) {
-            int extraWidth = toCrop.getWidth() - width;
-            cropped = Bitmap.createBitmap(toCrop, extraWidth / 2, 0, width, toCrop.getHeight());
-        }
-        return cropped;
-    }
-
-    /**
-     * An expensive operation to crop the given Bitmap to the given height by removing equal amounts from the top and
-     * bottom so that the center of the image remains
-     *
-     * @param toCrop The Bitmap to crop
-     * @param height The height to crop the Bitmap to
-     * @return A new Bitmap cropped to the given height, or toCrop if toCrop's height is equivalent to the given height
-     */
-    public static Bitmap cropToHeight(Bitmap toCrop, int height){
-        Bitmap cropped = toCrop;
-        if (toCrop.getHeight() > height){
-            int extraHeight = toCrop.getHeight() - height;
-            cropped = Bitmap.createBitmap(toCrop, 0, extraHeight / 2, toCrop.getWidth(), height);
-        }
-        return cropped;
     }
 
     /**
@@ -496,6 +472,7 @@ public class ImageResizer {
      * @param imageToOrient Image Bitmap to orient.
      * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
      */
+    @SuppressWarnings("unused")
     public static Bitmap orientImage(String pathToOriginal, Bitmap imageToOrient){
         int degreesToRotate = getOrientation(pathToOriginal);
         return rotateImage(imageToOrient, degreesToRotate);
