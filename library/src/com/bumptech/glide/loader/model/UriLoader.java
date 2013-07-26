@@ -11,7 +11,7 @@ import java.net.URL;
 
 /**
  * A model loader for trying to load Uris. Capable of handling 'http', 'https', 'android.resource', 'content', and
- * 'file' schemes. Unsupported schemes will throw an exception in {@link #buildStreamOpener(android.net.Uri, int, int)}.
+ * 'file' schemes. Unsupported schemes will throw an exception in {@link #buildStreamLoader(android.net.Uri, int, int)}.
  */
 public class UriLoader extends BaseModelLoader<Uri> {
     private final Context context;
@@ -23,7 +23,7 @@ public class UriLoader extends BaseModelLoader<Uri> {
     }
 
     @Override
-    protected StreamLoader buildStreamOpener(Uri model, int width, int height) {
+    protected StreamLoader buildStreamLoader(Uri model, int width, int height) {
         final String scheme = model.getScheme();
 
         StreamLoader result = null;

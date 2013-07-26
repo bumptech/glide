@@ -18,7 +18,7 @@ public class StringLoader extends BaseModelLoader<String> {
     }
 
     @Override
-    protected StreamLoader buildStreamOpener(final String model, final int width, final int height) {
+    protected StreamLoader buildStreamLoader(final String model, final int width, final int height) {
         Uri uri = Uri.parse(model);
 
         final String scheme = uri.getScheme();

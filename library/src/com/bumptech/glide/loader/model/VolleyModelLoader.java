@@ -16,7 +16,7 @@ public abstract class VolleyModelLoader<T> extends BaseModelLoader<T> {
     }
 
     @Override
-    protected StreamLoader buildStreamOpener(T model, int width, int height) {
+    protected StreamLoader buildStreamLoader(T model, int width, int height) {
         return new VolleyStreamLoader(requestQueue, getUrl(model, width, height));
     }
 
