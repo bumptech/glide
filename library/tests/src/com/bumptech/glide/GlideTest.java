@@ -1,9 +1,11 @@
 package com.bumptech.glide;
 
 import android.net.Uri;
-import android.test.AndroidTestCase;
+import android.test.ActivityTestCase;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 
 import java.io.File;
@@ -17,19 +19,18 @@ import java.net.URL;
  * Time: 12:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GlideTest extends AndroidTestCase {
+public class GlideTest extends ActivityTestCase {
     private ImageView imageView;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        imageView = new ImageView(getContext());
+        imageView = new ImageView(getInstrumentation().getContext());
+        //this is a quick hack to get the SizeDeterminer in ImagePresenter to think the view has been measured
         imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
     }
 
-    private <T> void checkImagePresenter(T model) {
-        Glide.load(model).into(imageView).begin();
-
+    private void checkImagePresenter(Object model) {
         ImagePresenter imagePresenter = getImagePresenterFromView();
         imagePresenter.setModel(model);
 
@@ -48,47 +49,150 @@ public class GlideTest extends AndroidTestCase {
     }
 
     public void testFileDefaultLoader() {
-        checkImagePresenter(new File("fake"));
+        File file = new File("fake");
+        Glide.load(file).into(imageView);
+        checkImagePresenter(file);
     }
 
     public void testUrlDefaultLoader() throws MalformedURLException {
-        checkImagePresenter(new URL("http://www.google.com"));
+        URL url = new URL("http://www.google.com");
+        Glide.load(url).into(imageView);
+        checkImagePresenter(url);
     }
 
     public void testUriDefaultLoader() {
-        checkImagePresenter(Uri.fromFile(new File("Fake")));
+        Uri uri = Uri.fromFile(new File("Fake"));
+        Glide.load(uri).into(imageView);
+        checkImagePresenter(uri);
     }
 
     public void testStringDefaultLoader() {
-        checkImagePresenter("http://www.google.com");
+        String string = "http://www.google.com";
+        Glide.load(string).into(imageView);
+        checkImagePresenter(string);
     }
 
     public void testIntegerDefaultLoader() {
-        checkImagePresenter(1234);
+        int integer = 1234;
+        Glide.load(integer).into(imageView);
+        checkImagePresenter(integer);
     }
 
-    public void testGlideDoesNotReplacePresenters() {
-        Glide.load(new File("fake")).into(imageView).begin();
-
+    public void testGlideDoesNotReplaceIdenticalPresenters() {
+        Glide.load("fake")
+                .centerCrop()
+                .animate(android.R.anim.fade_in)
+                .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
+                .into(imageView);
         ImagePresenter first = getImagePresenterFromView();
 
-        Glide.load(new File("fake2")).into(imageView).begin();
-
+        Glide.load("fake2")
+                .centerCrop()
+                .animate(android.R.anim.fade_in)
+                .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
+                .into(imageView);
         ImagePresenter second = getImagePresenterFromView();
 
-        assertEquals(first, second);
+        assertSame(first, second);
     }
 
-    public void testLoadingTwoDifferentTypesOfModelsThrows() {
-        Glide.load(new File("fake")).into(imageView).begin();
+    public void testDifferentModlsReplacesPresenters() {
+        Glide.load("fake").into(imageView);
 
-        boolean thrown = false;
-        try {
-            Glide.load(new Integer(4)).into(imageView).begin();
-        } catch (ClassCastException e) {
-            thrown = true;
-        }
+        ImagePresenter first = ImagePresenter.getCurrent(imageView);
+        Glide.load(4).into(imageView);
+        ImagePresenter second = ImagePresenter.getCurrent(imageView);
 
-        assertTrue(thrown);
+        assertNotSame(first, second);
     }
+
+    public void testDifferentModelLoadersReplacesPresenter() {
+        Glide.using(new ModelLoader<Object>() {
+            @Override
+            public StreamLoader getStreamLoader(Object model, int width, int height) {
+                return new StreamLoader() {
+                    @Override
+                    public void loadStream(StreamReadyCallback cb) {
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                };
+            }
+
+            @Override
+            public String getId(Object model) {
+                return String.valueOf(model.hashCode());
+            }
+
+            @Override
+            public void clear() {
+            }
+        }).load(new Object()).into(imageView);
+
+        ImagePresenter first = ImagePresenter.getCurrent(imageView);
+
+        Glide.using(new ModelLoader<Object>() {
+            @Override
+            public StreamLoader getStreamLoader(Object model, int width, int height) {
+                return new StreamLoader() {
+                    @Override
+                    public void loadStream(StreamReadyCallback cb) {
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                };
+            }
+
+            @Override
+            public String getId(Object model) {
+                return String.valueOf(model.hashCode());
+            }
+
+            @Override
+            public void clear() {
+            }
+        }).load(new Object()).into(imageView);
+
+        ImagePresenter second = ImagePresenter.getCurrent(imageView);
+
+        assertNotSame(first, second);
+    }
+
+    public void testDifferentImageLoadersReplacesPresenter() {
+        final File file = new File("fake");
+        Glide.load(file).centerCrop().into(imageView);
+        ImagePresenter first = ImagePresenter.getCurrent(imageView);
+
+        Glide.load(file).into(imageView);
+        ImagePresenter second = ImagePresenter.getCurrent(imageView);
+
+        assertNotSame(first, second);
+    }
+
+    public void testDifferentPlaceholdersReplacesPresenter() {
+        final File file = new File("fake");
+        Glide.load(file).placeholder(com.bumptech.glide.tests.R.raw.ic_launcher).into(imageView);
+        ImagePresenter first = ImagePresenter.getCurrent(imageView);
+
+        Glide.load(file).into(imageView);
+        ImagePresenter second = ImagePresenter.getCurrent(imageView);
+
+        assertNotSame(first, second);
+    }
+
+    public void testDifferentAnimationsReplacesPresenter() {
+        final File file = new File("fake");
+        Glide.load(file).animate(android.R.anim.fade_in).into(imageView);
+        ImagePresenter first = ImagePresenter.getCurrent(imageView);
+
+        Glide.load(file).into(imageView);
+        ImagePresenter second = ImagePresenter.getCurrent(imageView);
+
+        assertNotSame(first, second);
+    }
+
 }

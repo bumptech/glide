@@ -100,12 +100,11 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            Glide.load(current)
-                    .into(viewHolder.imageView)
-                    .with(new FlickrModelLoader(getActivity()))
+            Glide.using(new FlickrModelLoader(getActivity()))
+                    .load(current)
                     .centerCrop()
                     .animate(R.anim.fade_in)
-                    .begin();
+                    .into(viewHolder.imageView);
 
             viewHolder.titleText.setText(current.title);
             return view;

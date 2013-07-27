@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -37,7 +36,6 @@ import java.net.URL;
  */
 public class Glide {
     private static final Glide GLIDE = new Glide();
-
     private ImageManager imageManager = null;
     private RequestQueue requestQueue = null;
 
@@ -72,7 +70,7 @@ public class Glide {
      * Use to check whether or not an {@link RequestQueue} has been set yet. Can be used in
      * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
      * {@link #setRequestQueue(RequestQueue) setRequestQueue} to set a {@link RequestQueue} with custom options
-     * for use with {@link Glide#load(Object) load} and/or as an easily accessible singleton
+     * for use with {@link Glide.Request} and/or as an easily accessible singleton
      *
      * @return true iff a {@link RequestQueue} has already been set
      */
@@ -81,7 +79,7 @@ public class Glide {
     }
 
     /**
-     * Set the {@link RequestQueue} to use with {@link Glide#load(Object)} load}. Replaces the current
+     * Set the {@link RequestQueue} to use with {@link Glide.Request}. Replaces the current
      * {@link RequestQueue} if one has already been set
      *
      * @param requestQueue The {@link RequestQueue} to set
@@ -110,8 +108,8 @@ public class Glide {
      * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
      * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
      * {@link #setImageManager(com.bumptech.glide.resize.ImageManager.Builder) setImageManager} to set an
-     * {@link ImageManager} with custom options for use with {@link Glide#load(Object) load} and/or as an easily
-     * accessible singleton.
+     * {@link ImageManager} with custom options for use with {@link com.bumptech.glide.Glide.Request} and/or as an
+     * easily accessible singleton.
      *
      * @return true iff an {@link ImageManager} is currently set
      */
@@ -129,7 +127,7 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ImageManager} to use with {@link Glide#load(Object) load}. Replaces the current
+     * Set the {@link ImageManager} to use with {@link Glide.Request} Replaces the current
      * {@link ImageManager} if one has already been set.
      *
      * @see #isImageManagerSet()
@@ -141,148 +139,226 @@ public class Glide {
     }
 
     /**
-     * Begins constructing a load for a given model.
+     * Set the {@link ModelLoader} for this view.
      *
      * <p>
-     * Only certain models are supported by default. See
-     * {@link Glide.Request#with(com.bumptech.glide.loader.model.ModelLoader)} for models with default a
-     * {@link ModelLoader}.
+     *     Note - You can use this method to set a {@link ModelLoader} for models that don't have a default
+     *     {@link ModelLoader}. You can also optionally use this method to override the default {@link ModelLoader}
+     *     for a model for which there is a default.
      * </p>
      *
      * <p>
-     * Note - If an {@link ImageManager} has not yet been set via
-     * {@link #setImageManager(ImageManager) setImageManager}, one will be created during this call unless
-     * you specify a {@link ImageLoader} that does not use {@link #getRequestQueue(android.content.Context)
-     * getRequestQueue} via {@link Glide.Request#resizeWith(ImageLoader) resizeWith}
+     *     Note - If you have the ability to fetch different sized images for a given model, it is most efficient to
+     *     supply a custom {@link ModelLoader} here to do so, even if a default exists. Fetching a smaller image
+     *     means less bandwidth, battery, and memory usage as well as faster image loads. To simply build a url to
+     *     download an image using the width and the height of the view, consider passing in a subclass of
+     *     {@link com.bumptech.glide.loader.model.VolleyModelLoader}.
      * </p>
      *
-     * <p>
-     * Note - If the model is a {@link URL} and an {@link com.android.volley.RequestQueue} has not yet been set via
-     * {@link #setRequestQueue(com.android.volley.RequestQueue) setRequestQueue}, one will be created during this call
-     * unless you specify a {@link ModelLoader} via {@link Glide.Request#with(ModelLoader) with}.
-     * </p>
-     *
-     * @see #setImageManager(com.bumptech.glide.resize.ImageManager)
-     * @see #setRequestQueue(com.android.volley.RequestQueue)
-     * @see #isImageManagerSet()
-     * @see #isRequestQueueSet()
-     *
-     * @param model The model to load, must not be null
-     * @param <T> The type of the model to load
-     * @return A an unfinished Request that will be used to construct the components to load the model
+     * @param modelLoader The {@link ModelRequest} to use to load an image from a given model
+     * @return A {@link ModelRequest} to set the specific model to load
      */
-    public static <T> HalfRequest<T> load(T model) {
-        if (model == null) {
-            throw new IllegalArgumentException("Model can't be null");
-        }
-
-        return new HalfRequest<T>(model);
+    public static <T> ModelRequest<T> using(ModelLoader<T> modelLoader) {
+        return new ModelRequest<T>(modelLoader);
     }
 
+    /**
+     * Use {@link StringLoader} to load the given model
+     *
+     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     *
+     * @param string The string representing the image. Must be either a path, or a uri handled by {@link UriLoader}
+     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     */
+    public static Request<String> load(String string) {
+        return new Request<String>(string);
+    }
+
+    /**
+     * Use {@link UriLoader} to load the given model
+     *
+     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     *
+     * @param uri The uri representing the image. Must be a uri handled by {@link UriLoader}
+     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     */
+    public static Request<Uri> load(Uri uri) {
+        return new Request<Uri>(uri);
+    }
+
+    /**
+     * Use {@link UrlLoader} to load the given model
+     *
+     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     *
+     * @param url The URL representing the image.
+     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     */
+    public static Request<URL> load(URL url) {
+        return new Request<URL>(url);
+    }
+
+    /**
+     * Use {@link FileLoader} to load the given model
+     *
+     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     *
+     * @param file The File containing the image
+     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     */
+    public static Request<File> load(File file) {
+        return new Request<File>(file);
+    }
+
+    /**
+     * Use {@link DrawableLoader} to load the given model
+     *
+     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     *
+     * @param resourceId the id of the resource containing the image
+     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     */
+    public static Request<Integer> load(Integer resourceId) {
+        return new Request<Integer>(resourceId);
+    }
+
+    private interface ModelLoaderFactory<T> {
+        public ModelLoader<T> build(Context context);
+        public Class<? extends ModelLoader<T>> loaderClass();
+    }
+
+    private static final ModelLoaderFactory<String> stringLoaderFactory = new ModelLoaderFactory<String>() {
+
+        @Override
+        public ModelLoader<String> build(Context context) {
+            return new StringLoader(context);
+        }
+
+        @Override
+        public Class<? extends ModelLoader<String>> loaderClass() {
+            return StringLoader.class;
+        }
+    };
+
+    private static final ModelLoaderFactory<Uri> uriLoaderFactory = new ModelLoaderFactory<Uri>() {
+        @Override
+        public ModelLoader<Uri> build(Context context) {
+            return new UriLoader(context);
+        }
+
+        @Override
+        public Class<? extends ModelLoader<Uri>> loaderClass() {
+            return UriLoader.class;
+        }
+    };
+
+    private static final ModelLoaderFactory<File> fileLoaderFactory = new ModelLoaderFactory<File>() {
+        @Override
+        public ModelLoader<File> build(Context context) {
+            return new FileLoader(context);
+        }
+
+        @Override
+        public Class<? extends ModelLoader<File>> loaderClass() {
+            return FileLoader.class;
+        }
+    };
+
+    private static final ModelLoaderFactory<URL> urlLoaderFactory = new ModelLoaderFactory<URL>() {
+        @Override
+        public ModelLoader<URL> build(Context context) {
+            return new UrlLoader(context);
+        }
+
+        @Override
+        public Class<? extends ModelLoader<URL>> loaderClass() {
+            return UrlLoader.class;
+        }
+    };
+
+    private static final ModelLoaderFactory<Integer> resourceLoaderFactory = new ModelLoaderFactory<Integer>() {
+        @Override
+        public ModelLoader<Integer> build(Context context) {
+            return new DrawableLoader(context);
+        }
+
+        @Override
+        public Class<? extends ModelLoader<Integer>> loaderClass() {
+            return DrawableLoader.class;
+        }
+    };
+
     @SuppressWarnings("unchecked")
-    private static <T> ModelLoader<T> getModelFor(T model, Context context) {
-        final ModelLoader result;
-        if (model instanceof URL) {
-            result = new UrlLoader(GLIDE.getRequestQueue(context));
-        } else if (model instanceof File) {
-            result = new FileLoader(context);
+    private static <T> ModelLoaderFactory<T> getFactory(T model) {
+        final ModelLoaderFactory result;
+        if (model instanceof String) {
+            result = stringLoaderFactory;
         } else if (model instanceof Uri) {
-            result = new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context)));
-        } else if (model instanceof String) {
-            result = new StringLoader(new UriLoader(context, new UrlLoader(GLIDE.getRequestQueue(context))));
+            result = uriLoaderFactory;
+        } else if (model instanceof URL) {
+            result = urlLoaderFactory;
+        } else if (model instanceof File) {
+            result = fileLoaderFactory;
         } else if (model instanceof Integer) {
-            result = new DrawableLoader(context);
+            result = resourceLoaderFactory;
         } else {
-            throw new IllegalArgumentException("No default ModelLoader for class=" + model.getClass() +
-                    ", you need to provide one by calling with()");
+            throw new IllegalArgumentException("No model factory for model class=" + model.getClass());
         }
         return result;
     }
 
-     /**
-     * A builder for a request
+    /**
+     * A helper class for building requests with custom {@link ModelLoader}s
      *
-     * @param <T> The type of the model the request will be built for
+     * @param <T> The type of the model (and {@link ModelLoader}
      */
-    public static class HalfRequest<T> {
-        private final T model;
+    public static class ModelRequest<T> {
+        private final ModelLoader<T> modelLoader;
 
-        public HalfRequest(T model) {
-            this.model = model;
+        public ModelRequest(ModelLoader<T> modelLoader) {
+            this.modelLoader = modelLoader;
         }
 
-        /**
-         * Build a request object for the given ImageView and model
-         *
-         * @param imageView The ImageView the request will be wrapping
-         * @return A new {@link Request}
-         */
-        public Request<T> into(ImageView imageView) {
-            if (imageView == null) {
-                throw new IllegalArgumentException("ImageView can't be null");
-            }
-            return new Request<T>(model, imageView);
+        public Request<T> load(T model) {
+            return new Request<T>(model, modelLoader);
         }
     }
 
     /**
-     * Manages building, tagging, retrieving and/or replacing an ImagePresenter for the given ImageView and model
+     * Sets a variety of type independent options including resizing, animations, and placeholders. Responsible
+     * for building or retrieving an ImagePresenter for the given view and passing the ImagePresenter the given model.
      *
      * @param <T> The type of model that will be loaded into the view
      */
     @SuppressWarnings("unused") //public api
     public static class Request<T> {
-        private final T model;
-        private final Context context;
 
-        private ImagePresenter<T> presenter;
-        private ImagePresenter.Builder<T> builder;
-        private ModelLoader<T> modelLoader = null;
-
-        @SuppressWarnings("unchecked")
-        public Request(T model, ImageView imageView) {
-            this.model = model;
-            this.context = imageView.getContext();
-
-            presenter = ImagePresenter.getCurrent(imageView);
-            builder = new ImagePresenter.Builder<T>()
-                    .setImageView(imageView)
-                    .setImageLoader(new Approximate(getImageManager()));
+        private enum ResizeOption {
+            APPROXIMATE,
+            CENTER_CROP,
+            FIT_CENTER,
         }
 
-        /**
-         * Set the {@link ModelLoader} for the model.
-         *
-         * <p>
-         *     Note - This method is required only if you are using a model for which there is no default
-         *     {@link ModelLoader}. You can also optionally use this method to override the default {@link ModelLoader} for
-         *     a model for which there is a default. The defaults are as follows:
-         * <ul>
-         *     <li>{@link String} - {@link StringLoader}. String must be a file path
-         *          (<code>/data/data/com.bumptech/glide/...</code>), a url (<code>http://www.google.com</code>), or a
-         *          uri. </li>
-         *     <li>{@link File} - {@link FileLoader}</li>
-         *     <li>{@link Integer} - {@link DrawableLoader}. Integer must be a resource id in your package</li>
-         *     <li>{@link Uri} - {@link UriLoader}. Uri must be a scheme handled by
-         *     {@link android.content.ContentResolver#openInputStream(android.net.Uri)}, http, or https</li>
-         * </ul>
-         * </p>
-         *
-         * <p>
-         *     Note - If you have the ability to fetch different sized images for a given model, you should supply a
-         *     {@link ModelLoader} here to do so. Fetching a smaller image means less bandwidth, battery, and memory
-         *     usage as well as faster image loads. To simply build a url to download an image using the width and
-         *     the height of the view, consider passing in a subclass of
-         *     {@link com.bumptech.glide.loader.model.VolleyModelLoader}.
-         * </p>
-         *
-         * @param modelLoader The {@link ModelLoader} to use. Replaces any existing loader
-         * @return This Request
-         */
-        public Request<T> with(ModelLoader<T> modelLoader) {
-            this.modelLoader = modelLoader;
+        private ModelLoaderFactory<T> modelLoaderFactory;
+        private final T model;
+        private final Class<? extends ModelLoader> modelLoaderClass;
+        private ModelLoader<T> modelLoader;
 
-            return this;
+        private int animationId = -1;
+        private int placeholderId = -1;
+        private ResizeOption resizeOption = ResizeOption.APPROXIMATE;
+        private ImageLoader imageLoader = null;
+
+        public Request(T model) {
+            this.model = model;
+            this.modelLoaderFactory = getFactory(model);
+            this.modelLoaderClass = modelLoaderFactory.loaderClass();
+        }
+
+        public Request(T model, ModelLoader<T> modelLoader) {
+            this.model = model;
+            this.modelLoader = modelLoader;
+            this.modelLoaderClass = modelLoader.getClass();
         }
 
         /**
@@ -292,7 +368,10 @@ public class Glide {
          * @return This Request
          */
         public Request<T> centerCrop() {
-            return resizeWith(new CenterCrop(getImageManager()));
+            resizeOption = ResizeOption.CENTER_CROP;
+            imageLoader = null;
+
+            return this;
         }
 
         /**
@@ -302,7 +381,10 @@ public class Glide {
          * @return This Request
          */
         public Request<T> fitCenter() {
-            return resizeWith(new FitCenter(getImageManager()));
+            resizeOption = ResizeOption.FIT_CENTER;
+            imageLoader = null;
+
+            return this;
         }
 
         /**
@@ -312,7 +394,10 @@ public class Glide {
          * @return This Request
          */
         public Request<T> approximate() {
-            return resizeWith(new Approximate(getImageManager()));
+            resizeOption = ResizeOption.APPROXIMATE;
+            imageLoader = null;
+
+            return this;
         }
 
         /**
@@ -322,7 +407,8 @@ public class Glide {
          * @return This Request
          */
         public Request<T> resizeWith(ImageLoader imageLoader) {
-            builder.setImageLoader(imageLoader);
+            this.imageLoader = imageLoader;
+            resizeOption = null;
 
             return this;
         }
@@ -331,53 +417,24 @@ public class Glide {
          * Sets an animation to run on the wrapped view when an image load finishes. Will only be run if the image
          * was loaded asynchronously (ie was not in the memory cache)
          *
-         * @param animation The Animation to run
-         * @return This Request
-         */
-        public Request<T> animate(final Animation animation) {
-            builder.setImageSetCallback(new ImageSetCallback() {
-                @Override
-                public void onImageSet(ImageView view, boolean fromCache) {
-                    view.clearAnimation();
-
-                    if (!fromCache) {
-                        view.startAnimation(animation);
-                    }
-                }
-            });
-
-            return this;
-        }
-
-        /**
-         * @see #animate(android.view.animation.Animation)
-         *
          * @param animationId The resource id of the animation to run
          * @return This Request
          */
         public Request<T> animate(int animationId) {
-            return animate(AnimationUtils.loadAnimation(context, animationId));
+            this.animationId = animationId;
+
+            return this;
         }
 
         /**
          * Sets a drawable to display while an image is loading
          *
-         * @param drawable The drawable to use as a placeholder
-         * @return This Request
-         */
-        public Request<T> setPlaceholderDrawable(Drawable drawable) {
-            builder.setPlaceholderDrawable(drawable);
-            return this;
-        }
-
-        /**
-         * @see #setPlaceholderDrawable(android.graphics.drawable.Drawable)
-         *
          * @param resourceId The id of the resource to use as a placeholder
          * @return This Request
          */
-        public Request<T> setPlaceholderResource(int resourceId) {
-            builder.setPlaceholderResource(resourceId);
+        public Request<T> placeholder(int resourceId) {
+            this.placeholderId = resourceId;
+
             return this;
         }
 
@@ -385,38 +442,158 @@ public class Glide {
          * Creates an {@link ImagePresenter} or retrieves the existing one and starts loading the image represented by
          * the given model. This must be called on the main thread.
          *
-         * <p>
-         *     Note - If an existing ImagePresenter already exists for this view it will not be replaced. This means you
-         *     can set options once and only once the first time load and begin is called for any given view. For
-         *     example, if you call load and begin for a view with centerCrop the first time and then load a second time
-         *     for the same view but with fitCenter, the image will still be resized with centerCrop. If you need
-         *     to change options you can call <code> imageView.setTag(R.id.image_presenter_id, null) </code> prior to
-         *     calling this method, but it is inefficient to do so, particularly in lists.
-         * </p>
-         *
-         *
          * @see ImagePresenter#setModel(Object)
          */
-        public void begin() {
-            build();
-            presenter.setModel(model);
-        }
-
-        private ImageManager getImageManager() {
-            return GLIDE.getImageManager(context);
+        public void into(ImageView imageView) {
+            ImagePresenter<T> imagePresenter = getImagePresenter(imageView);
+            imagePresenter.setModel(model);
         }
 
         /**
          * Creates the new {@link ImagePresenter} if one does not currently exist for the current view and sets it as
          * the view's tag for the id {@code R.id.image_presenter_id}.
          */
-        private void build() {
-            if (presenter == null) {
-                if (modelLoader == null) {
-                    modelLoader = getModelFor(model, context);
+        private ImagePresenter<T> getImagePresenter(ImageView imageView) {
+            Metadata previous = getMetadataFrom(imageView);
+            Metadata current = new Metadata(this);
+
+            ImagePresenter<T> result = ImagePresenter.getCurrent(imageView);
+
+            if (!current.equals(previous)) {
+                if (result != null) {
+                    result.clear();
                 }
-                presenter = builder.setModelLoader(modelLoader).build();
+
+                result = buildImagePresenter(imageView);
+
+                setMetadata(imageView, current);
+            }
+
+            return result;
+        }
+
+        private ImagePresenter<T> buildImagePresenter(ImageView imageView) {
+            final Context context = imageView.getContext();
+
+            imageLoader = getFinalImageLoader(context);
+            modelLoader = getFinalModelLoader(context);
+
+            ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
+                    .setImageView(imageView)
+                    .setModelLoader(modelLoader)
+                    .setImageLoader(imageLoader);
+
+            if (animationId != -1) {
+                final Animation animation = AnimationUtils.loadAnimation(imageView.getContext(), animationId);
+                builder.setImageSetCallback(new ImageSetCallback() {
+                    @Override
+                    public void onImageSet(ImageView view, boolean fromCache) {
+                        view.clearAnimation();
+
+                        if (!fromCache) {
+                            view.startAnimation(animation);
+                        }
+
+                    }
+                });
+            }
+
+            if (placeholderId != -1) {
+                builder.setPlaceholderResource(placeholderId);
+            }
+
+            return builder.build();
+        }
+
+        private ModelLoader<T> getFinalModelLoader(Context context) {
+            if (modelLoader == null) {
+                return modelLoaderFactory.build(context);
+            } else {
+                return modelLoader;
             }
         }
+
+        private ImageLoader getFinalImageLoader(Context context) {
+            if (imageLoader == null) {
+                return getImageLoaderFromOptions(context);
+            } else {
+                return imageLoader;
+            }
+        }
+
+        private ImageLoader getImageLoaderFromOptions(Context context) {
+            final ImageLoader result;
+            switch (resizeOption) {
+                case APPROXIMATE:
+                    result = new Approximate(context);
+                    break;
+                case CENTER_CROP:
+                    result = new CenterCrop(context);
+                    break;
+                case FIT_CENTER:
+                    result = new FitCenter(context);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown resize option " + resizeOption);
+            }
+            return result;
+        }
+
+        private static Metadata getMetadataFrom(ImageView imageView) {
+            return (Metadata) imageView.getTag(R.id.glide_metadata);
+        }
+
+        private static void setMetadata(ImageView imageView, Metadata metadata) {
+            imageView.setTag(R.id.glide_metadata, metadata);
+        }
+
+        private static class Metadata {
+            public final Class modelClass;
+            public final Class modelLoaderClass;
+            public final Class imageLoaderClass;
+            public final int animationId;
+            public final int placeholderId;
+
+            public Metadata(Request request) {
+                modelClass = request.model.getClass();
+                modelLoaderClass = request.modelLoaderClass;
+                if (request.imageLoader != null) {
+                    imageLoaderClass = request.imageLoader.getClass();
+                } else {
+                    switch (request.resizeOption) {
+                        case APPROXIMATE:
+                            imageLoaderClass = Approximate.class;
+                            break;
+                        case CENTER_CROP:
+                            imageLoaderClass = CenterCrop.class;
+                            break;
+                        case FIT_CENTER:
+                            imageLoaderClass = FitCenter.class;
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unknown resize option " + request.resizeOption);
+                    }
+                }
+                animationId = request.animationId;
+                placeholderId = request.placeholderId;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (o == null || !(o instanceof Metadata)) {
+                    return false;
+                }
+
+                Metadata other = (Metadata) o;
+
+                return modelClass.equals(other.modelClass) &&
+                        modelLoaderClass.equals(other.modelLoaderClass) &&
+                        imageLoaderClass.equals(other.imageLoaderClass) &&
+                        animationId == other.animationId &&
+                        placeholderId == other.placeholderId;
+
+            }
+        }
+
     }
 }
