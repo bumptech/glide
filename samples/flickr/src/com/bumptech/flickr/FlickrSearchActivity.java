@@ -85,7 +85,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         final Glide glide = Glide.get();
         if (!glide.isImageManagerSet()) {
             glide.setImageManager(new ImageManager.Builder(this)
+                    .setBitmapCompressQuality(70)
                     .setDiskCache(diskCache));
+
         }
 
         searching = findViewById(R.id.searching);
