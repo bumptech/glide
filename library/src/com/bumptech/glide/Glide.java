@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.image.ImageLoader;
-import com.bumptech.glide.loader.model.DrawableLoader;
+import com.bumptech.glide.loader.model.ResourceLoader;
 import com.bumptech.glide.loader.model.FileLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.model.StringLoader;
@@ -211,7 +211,7 @@ public class Glide {
     }
 
     /**
-     * Use {@link DrawableLoader} to load the given model
+     * Use {@link com.bumptech.glide.loader.model.ResourceLoader} to load the given model
      *
      * @see #using(com.bumptech.glide.loader.model.ModelLoader)
      *
@@ -279,12 +279,12 @@ public class Glide {
     private static final ModelLoaderFactory<Integer> resourceLoaderFactory = new ModelLoaderFactory<Integer>() {
         @Override
         public ModelLoader<Integer> build(Context context) {
-            return new DrawableLoader(context);
+            return new ResourceLoader(context);
         }
 
         @Override
         public Class<? extends ModelLoader<Integer>> loaderClass() {
-            return DrawableLoader.class;
+            return ResourceLoader.class;
         }
     };
 

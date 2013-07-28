@@ -9,10 +9,10 @@ import com.bumptech.glide.loader.stream.StreamLoader;
  * A model loader for handling resources. Model must be a resource id in the package of
  * the given context.
  */
-public class DrawableLoader implements ModelLoader<Integer> {
+public class ResourceLoader implements ModelLoader<Integer> {
     private final Context context;
 
-    public DrawableLoader(Context context) {
+    public ResourceLoader(Context context) {
         this.context = context;
     }
 
