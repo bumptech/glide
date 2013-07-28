@@ -102,7 +102,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
             Glide.load(current)
                     .into(viewHolder.imageView)
-                    .with(new FlickrModelLoader(Glide.get().getRequestQueue(getActivity())))
+                    .with(new FlickrModelLoader(getActivity()))
                     .centerCrop()
                     .animate(R.anim.fade_in)
                     .begin();

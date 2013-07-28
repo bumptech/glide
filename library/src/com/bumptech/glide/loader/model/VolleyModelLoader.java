@@ -1,6 +1,8 @@
 package com.bumptech.glide.loader.model;
 
+import android.content.Context;
 import com.android.volley.RequestQueue;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.loader.stream.VolleyStreamLoader;
 
@@ -10,6 +12,16 @@ import com.bumptech.glide.loader.stream.VolleyStreamLoader;
  */
 public abstract class VolleyModelLoader<T> extends BaseModelLoader<T> {
     private final RequestQueue requestQueue;
+
+    /**
+     * A convenience constructor relying on the {@link Glide} singleton and it's {@link RequestQueue} via
+     * {@link Glide#getRequestQueue(android.content.Context)}}
+     *
+     * @param context A context
+     */
+    public VolleyModelLoader(Context context) {
+        this(Glide.get().getRequestQueue(context));
+    }
 
     public VolleyModelLoader(RequestQueue requestQueue) {
         this.requestQueue = requestQueue;

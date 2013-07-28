@@ -4,6 +4,7 @@
 
 package com.bumptech.glide.resize.loader;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
@@ -21,6 +22,10 @@ import com.bumptech.glide.resize.LoadedCallback;
  */
 @SuppressWarnings("unused")
 public class Exact extends ImageManagerLoader {
+
+    public Exact(Context context) {
+        super(context);
+    }
 
     public Exact(ImageManager imageManager) {
         super(imageManager);

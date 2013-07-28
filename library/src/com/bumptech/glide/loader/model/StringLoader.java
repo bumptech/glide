@@ -1,5 +1,6 @@
 package com.bumptech.glide.loader.model;
 
+import android.content.Context;
 import android.net.Uri;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
@@ -12,6 +13,15 @@ import java.io.File;
 public class StringLoader extends BaseModelLoader<String> {
 
     private final ModelLoader<Uri> uriLoader;
+
+    /**
+     * A convenience constructor that defaults to {@link UriLoader} for loading uri strings
+     *
+     * @param context A context
+     */
+    public StringLoader(Context context) {
+        this(new UriLoader(context));
+    }
 
     public StringLoader(ModelLoader<Uri> uriLoader) {
         this.uriLoader = uriLoader;

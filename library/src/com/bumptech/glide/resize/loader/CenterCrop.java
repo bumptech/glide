@@ -4,6 +4,7 @@
 
 package com.bumptech.glide.resize.loader;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
@@ -16,6 +17,10 @@ import com.bumptech.glide.resize.LoadedCallback;
  */
 @SuppressWarnings("unused")
 public class CenterCrop extends ImageManagerLoader {
+
+    public CenterCrop(Context context) {
+        super(context);
+    }
 
     public CenterCrop(ImageManager imageManager) {
         super(imageManager);

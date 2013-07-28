@@ -1,24 +1,27 @@
 package com.bumptech.glide.loader.model;
 
+import android.content.Context;
 import com.android.volley.RequestQueue;
-import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.loader.stream.VolleyStreamLoader;
 
 import java.net.URL;
 
 /**
  * A simple model loader for urls
  */
-public class UrlLoader implements ModelLoader<URL> {
-    private final RequestQueue requestQueue;
+public class UrlLoader extends VolleyModelLoader<URL> {
 
+    public UrlLoader(Context context) {
+        super(context);
+    }
+
+    @SuppressWarnings("unused")
     public UrlLoader(RequestQueue requestQueue) {
-        this.requestQueue = requestQueue;
+        super(requestQueue);
     }
 
     @Override
-    public StreamLoader getStreamLoader(URL model, int width, int height) {
-        return new VolleyStreamLoader(requestQueue, model.toString());
+    protected String getUrl(URL model, int width, int height) {
+        return model.toString();
     }
 
     //this may need to be overridden if multiple urls can be used to retrieve the same image
@@ -26,7 +29,4 @@ public class UrlLoader implements ModelLoader<URL> {
     public String getId(URL model) {
         return model.toString();
     }
-
-    @Override
-    public void clear() { }
 }

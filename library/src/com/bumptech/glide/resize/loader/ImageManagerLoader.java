@@ -1,8 +1,10 @@
 package com.bumptech.glide.resize.loader;
 
+import android.content.Context;
 import android.graphics.Bitmap;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.image.BaseImageLoader;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
 
 /**
@@ -14,6 +16,10 @@ public abstract class ImageManagerLoader extends BaseImageLoader {
     protected final ImageManager imageManager;
     private Bitmap acquired;
     private Object loadToken;
+
+    public ImageManagerLoader(Context context) {
+        this(Glide.get().getImageManager(context));
+    }
 
     public ImageManagerLoader(ImageManager imageManager) {
         this.imageManager = imageManager;

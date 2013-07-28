@@ -1,6 +1,6 @@
 package com.bumptech.flickr;
 
-import com.android.volley.RequestQueue;
+import android.content.Context;
 import com.bumptech.flickr.api.Api;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.loader.model.VolleyModelLoader;
@@ -11,8 +11,9 @@ import com.bumptech.glide.loader.model.VolleyModelLoader;
  * directly to the disk cache.
  */
 public class FlickrModelLoader extends VolleyModelLoader<Photo> {
-    public FlickrModelLoader(RequestQueue requestQueue) {
-        super(requestQueue);
+
+    public FlickrModelLoader(Context context) {
+        super(context);
     }
 
     @Override

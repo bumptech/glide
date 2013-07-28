@@ -17,6 +17,15 @@ public class UriLoader extends BaseModelLoader<Uri> {
     private final Context context;
     private final ModelLoader<URL> urlLoader;
 
+    /**
+     * A convenience constructor that defaults to {@link UrlLoader} for loading URLs
+     *
+     * @param context A context
+     */
+    public UriLoader(Context context) {
+        this(context, new UrlLoader(context));
+    }
+
     public UriLoader(Context context, ModelLoader<URL> urlLoader) {
         this.context = context;
         this.urlLoader = urlLoader;

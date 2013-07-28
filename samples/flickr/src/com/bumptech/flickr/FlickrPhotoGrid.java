@@ -1,5 +1,6 @@
 package com.bumptech.flickr;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Photo;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageSetCallback;
 import com.bumptech.glide.resize.loader.CenterCrop;
@@ -108,11 +108,12 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 params.width = photoSize;
                 params.height = photoSize;
 
-                final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
+                final Context context = getActivity();
+                final Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
-                        .setModelLoader(new FlickrModelLoader(Glide.get().getRequestQueue(getActivity())))
-                        .setImageLoader(new CenterCrop(Glide.get().getImageManager(getActivity())))
+                        .setModelLoader(new FlickrModelLoader(context))
+                        .setImageLoader(new CenterCrop(context))
                         .setImageSetCallback(new ImageSetCallback() {
                             @Override
                             public void onImageSet(ImageView view, boolean fromCache) {

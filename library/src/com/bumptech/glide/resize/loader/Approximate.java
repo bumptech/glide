@@ -4,6 +4,7 @@
 
 package com.bumptech.glide.resize.loader;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
@@ -22,6 +23,10 @@ import com.bumptech.glide.resize.LoadedCallback;
  */
 @SuppressWarnings("unused")
 public class Approximate extends ImageManagerLoader {
+
+    public Approximate(Context context) {
+        super(context);
+    }
 
     public Approximate(ImageManager imageManager) {
         super(imageManager);
