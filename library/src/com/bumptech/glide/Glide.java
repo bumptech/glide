@@ -8,9 +8,9 @@ import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.image.ImageLoader;
-import com.bumptech.glide.loader.model.ResourceLoader;
 import com.bumptech.glide.loader.model.FileLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.model.ResourceLoader;
 import com.bumptech.glide.loader.model.StringLoader;
 import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.model.UrlLoader;
@@ -18,11 +18,15 @@ import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.loader.Approximate;
+import com.bumptech.glide.resize.loader.AsIs;
 import com.bumptech.glide.resize.loader.CenterCrop;
 import com.bumptech.glide.resize.loader.FitCenter;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+
+import static android.view.ViewGroup.LayoutParams;
 
 /**
  * A singleton to present a simple static interface for Glide {@link Glide.Request} and to create and manage an
@@ -337,6 +341,7 @@ public class Glide {
             APPROXIMATE,
             CENTER_CROP,
             FIT_CENTER,
+            AS_IS,
         }
 
         private ModelLoaderFactory<T> modelLoaderFactory;
@@ -347,7 +352,7 @@ public class Glide {
         private int animationId = -1;
         private int placeholderId = -1;
         private int errorId = -1;
-        private ResizeOption resizeOption = ResizeOption.APPROXIMATE;
+        private ResizeOption resizeOption = null;
         private ImageLoader imageLoader = null;
 
         public Request(T model) {
@@ -363,8 +368,7 @@ public class Glide {
         }
 
         /**
-         * Resize models using {@link ImageManager#centerCrop(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
-         * Replaces any existing resize style
+         * Resize models using {@link CenterCrop}. Replaces any existing resize style
          *
          * @return This Request
          */
@@ -376,8 +380,7 @@ public class Glide {
         }
 
         /**
-         * Resize models using {@link ImageManager#fitCenter(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
-         * Replaces any existing resize style
+         * Resize models using {@link FitCenter}. Replaces any existing resize style
          *
          * @return This Request
          */
@@ -389,13 +392,25 @@ public class Glide {
         }
 
         /**
-         * Resize models using {@link ImageManager#getImageApproximate(String, com.bumptech.glide.loader.stream.StreamLoader, int, int, com.bumptech.glide.resize.LoadedCallback)}
-         * Replaces any existing resize style
+         * Resize models using {@link Approximate}. Replaces any existing resize style
          *
          * @return This Request
          */
         public Request<T> approximate() {
             resizeOption = ResizeOption.APPROXIMATE;
+            imageLoader = null;
+
+            return this;
+        }
+
+        /**
+         * Load images at their original size using {@link com.bumptech.glide.resize.loader.AsIs}. Replaces any existing
+         * resize style
+         *
+         * @return This Request
+         */
+        public Request<T> asIs() {
+            resizeOption = ResizeOption.AS_IS;
             imageLoader = null;
 
             return this;
@@ -467,6 +482,8 @@ public class Glide {
          * the view's tag for the id {@code R.id.image_presenter_id}.
          */
         private ImagePresenter<T> getImagePresenter(ImageView imageView) {
+            resizeOption = getFinalResizeOption(imageView);
+
             Metadata previous = getMetadataFrom(imageView);
             Metadata current = new Metadata(this);
 
@@ -539,22 +556,57 @@ public class Glide {
             }
         }
 
+        private ResizeOption getFinalResizeOption(ImageView imageView) {
+            ResizeOption result = resizeOption;
+            if (result == null) {
+                //default to Approximate unless view's layout params are set to wrap content, in which case the only
+                //loader that makes sense is AsIs since all the others crop based on the view's size
+                final LayoutParams lp = imageView.getLayoutParams();
+                if (lp != null && (lp.width == LayoutParams.WRAP_CONTENT || lp.height == LayoutParams.WRAP_CONTENT)) {
+                    result = ResizeOption.AS_IS;
+                } else {
+                    result = ResizeOption.APPROXIMATE;
+                }
+            }
+            return result;
+        }
+
         private ImageLoader getImageLoaderFromOptions(Context context) {
-            final ImageLoader result;
+
+            Class<? extends ImageLoader> imageLoaderClass = getImageLoaderClassFor(resizeOption);
+            try {
+                return imageLoaderClass.getConstructor(Context.class).newInstance(context);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        private static Class<? extends ImageLoader> getImageLoaderClassFor(ResizeOption resizeOption) {
+            final Class<? extends ImageLoader> imageLoaderClass;
             switch (resizeOption) {
                 case APPROXIMATE:
-                    result = new Approximate(context);
+                    imageLoaderClass = Approximate.class;
                     break;
                 case CENTER_CROP:
-                    result = new CenterCrop(context);
+                    imageLoaderClass = CenterCrop.class;
                     break;
                 case FIT_CENTER:
-                    result = new FitCenter(context);
+                    imageLoaderClass = FitCenter.class;
+                    break;
+                case AS_IS:
+                    imageLoaderClass = AsIs.class;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown resize option " + resizeOption);
             }
-            return result;
+            return imageLoaderClass;
         }
 
         private static Metadata getMetadataFrom(ImageView imageView) {
@@ -579,19 +631,8 @@ public class Glide {
                 if (request.imageLoader != null) {
                     imageLoaderClass = request.imageLoader.getClass();
                 } else {
-                    switch (request.resizeOption) {
-                        case APPROXIMATE:
-                            imageLoaderClass = Approximate.class;
-                            break;
-                        case CENTER_CROP:
-                            imageLoaderClass = CenterCrop.class;
-                            break;
-                        case FIT_CENTER:
-                            imageLoaderClass = FitCenter.class;
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unknown resize option " + request.resizeOption);
-                    }
+                    imageLoaderClass = getImageLoaderClassFor(request.resizeOption);
+
                 }
                 animationId = request.animationId;
                 placeholderId = request.placeholderId;

@@ -24,8 +24,13 @@ public abstract class ImageManagerLoader extends BaseImageLoader {
     public ImageManagerLoader(ImageManager imageManager) {
         this.imageManager = imageManager;
     }
+
     @Override
     protected final void doFetchImage(String id, StreamLoader streamLoader, int width, int height, ImageReadyCallback cb) {
+        if (!isHandled(width, height)) {
+            throw new IllegalArgumentException(getClass() + " cannot handle width=" + width + " and/or height =" +
+                    height);
+        }
         loadToken = loadFromImageManager(id, streamLoader, width, height, cb);
     }
 
@@ -68,5 +73,9 @@ public abstract class ImageManagerLoader extends BaseImageLoader {
             imageManager.releaseBitmap(acquired);
             acquired = null;
         }
+    }
+
+    protected boolean isHandled(int width, int height) {
+        return width >= 0 && height >= 0;
     }
 }

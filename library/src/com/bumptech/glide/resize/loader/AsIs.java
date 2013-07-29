@@ -2,6 +2,7 @@ package com.bumptech.glide.resize.loader;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.ViewGroup;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
@@ -40,5 +41,11 @@ public class AsIs extends ImageManagerLoader {
                 cb.onException(e);
             }
         });
+    }
+
+    @Override
+    protected boolean isHandled(int width, int height) {
+        return super.isHandled(width, height)
+                || (width == ViewGroup.LayoutParams.WRAP_CONTENT || height == ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 }

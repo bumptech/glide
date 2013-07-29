@@ -526,7 +526,11 @@ public class ImagePresenter<T> {
             handler.removeCallbacksAndMessages(PENDING_SIZE_CHANGE_TOKEN);
             this.cb = null;
             ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            if (layoutParams != null && layoutParams.width > 0 && layoutParams.height > 0) {
+            //non null layout params and either width and height have been set, or set to wrap content so they
+            //will not be set until we set some content
+            if (layoutParams != null && ((layoutParams.width > 0 && layoutParams.height > 0)
+                    || (layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
+                            layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT))) {
                 cb.onSizeReady(layoutParams.width, layoutParams.height);
             } else if (valid) {
                 cb.onSizeReady(width, height);
