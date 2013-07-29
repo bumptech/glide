@@ -1,7 +1,9 @@
 package com.bumptech.glide.loader.model;
 
 import android.content.Context;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
+import com.android.volley.RetryPolicy;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.loader.stream.VolleyStreamLoader;
@@ -29,7 +31,7 @@ public abstract class VolleyModelLoader<T> extends BaseModelLoader<T> {
 
     @Override
     protected StreamLoader buildStreamLoader(T model, int width, int height) {
-        return new VolleyStreamLoader(requestQueue, getUrl(model, width, height));
+        return new VolleyStreamLoader(requestQueue, getUrl(model, width, height), getRetryPolicy());
     }
 
     /**
@@ -41,4 +43,8 @@ public abstract class VolleyModelLoader<T> extends BaseModelLoader<T> {
      * @return A String url
      */
     protected abstract String getUrl(T model, int width, int height);
+
+    protected RetryPolicy getRetryPolicy() {
+        return new DefaultRetryPolicy();
+    }
 }
