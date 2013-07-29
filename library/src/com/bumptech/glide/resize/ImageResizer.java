@@ -63,6 +63,65 @@ public class ImageResizer {
         this(null, options);
     }
 
+    private abstract class ImageDownsampler {
+        public Bitmap load(InputStream is, int width, int height) {
+            byte[] bytes = getTempBytes();
+            RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
+            final int[] inDimens = getDimens(bis, width, height);
+
+            // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
+            final int sampleSize = getSampleSize(inDimens[0], inDimens[1], width, height);
+
+            final BitmapFactory.Options decodeBitmapOptions = getOptions();
+            decodeBitmapOptions.inSampleSize = sampleSize;
+
+            Bitmap result = decodeStream(bis, decodeBitmapOptions);
+            releaseTempBytes(bytes);
+            return result;
+        }
+
+        protected abstract int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight);
+
+        protected int[] getDimens(RecyclableBufferedInputStream bis, int inWidth, int inHeight) {
+            return getDimensions(bis);
+        }
+    }
+
+    private final ImageDownsampler atLeastDownsampler = new ImageDownsampler() {
+
+        @Override
+        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
+            // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
+            return Math.min(inHeight / outHeight, inWidth / outWidth);
+        }
+    };
+
+    private final ImageDownsampler atMostDownsampler = new ImageDownsampler() {
+        @Override
+        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
+            return Math.max(inHeight / outHeight, inWidth / outWidth);
+        }
+    };
+
+    private final ImageDownsampler asIsDownsampler = new ImageDownsampler() {
+        @Override
+        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
+            return 0;
+        }
+    };
+
+    private final ImageDownsampler fixedAsIsDownsampler = new ImageDownsampler() {
+        @Override
+        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
+            return 0;
+        }
+
+        @Override
+        protected int[] getDimens(RecyclableBufferedInputStream bis, int inWidth, int inHeight) {
+            return new int[] { inWidth, inHeight };
+
+        }
+    };
     /**
      * Creates a new resizer that will attempt to recycle {@link android.graphics.Bitmap}s if any are available in the given dimensions
      *
@@ -122,21 +181,7 @@ public class ImageResizer {
      * @return A Bitmap containing the image
      */
     public Bitmap loadAtLeast(InputStream is, int width, int height) {
-        byte[] bytes = getTempBytes();
-        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
-        final int[] dimens = getDimensions(bis);
-        final int originalWidth = dimens[0];
-        final int originalHeight = dimens[1];
-
-        // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
-        final int sampleSize = Math.min(originalHeight / height, originalWidth / width);
-
-        final BitmapFactory.Options decodeBitmapOptions = getOptions();
-        decodeBitmapOptions.inSampleSize = sampleSize;
-
-        Bitmap result = decodeStream(bis, decodeBitmapOptions);
-        releaseTempBytes(bytes);
-        return result;
+        return atLeastDownsampler.load(is, width, height);
     }
 
     /**
@@ -151,19 +196,7 @@ public class ImageResizer {
      */
     @SuppressWarnings("unused")
     public Bitmap loadAtMost(InputStream is, int width, int height) {
-        byte[] bytes = getTempBytes();
-        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
-        final int[] dimens = getDimensions(bis);
-        final int originalWidth = dimens[0];
-        final int originalHeight = dimens[1];
-
-        final int sampleSize = Math.max(originalHeight / height, originalWidth / width);
-        final BitmapFactory.Options decodeBitmapOptions = getOptions();
-        decodeBitmapOptions.inSampleSize = sampleSize;
-
-        Bitmap result = decodeStream(bis, decodeBitmapOptions);
-        releaseTempBytes(bytes);
-        return result;
+        return atMostDownsampler.load(is, width, height);
     }
 
     /**
@@ -173,12 +206,7 @@ public class ImageResizer {
      * @return The loaded image
      */
     public Bitmap loadAsIs(final InputStream is) {
-        byte[] bytes = getTempBytes();
-        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
-        int[] dimens = getDimensions(bis);
-        Bitmap result = load(bis, getRecycled(dimens));
-        releaseTempBytes(bytes);
-        return result;
+        return asIsDownsampler.load(is, 0, 0);
     }
 
     /**
@@ -193,10 +221,7 @@ public class ImageResizer {
      * @return The loaded image
      */
     public Bitmap loadAsIs(InputStream is, int width, int height) {
-        byte[] bytes = getTempBytes();
-        Bitmap result = load(new RecyclableBufferedInputStream(is, bytes), getRecycled(width, height));
-        releaseTempBytes(bytes);
-        return result;
+        return fixedAsIsDownsampler.load(is, width, height);
     }
 
     /**
