@@ -4,6 +4,7 @@
 
 package com.bumptech.glide.presenter;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -32,6 +33,8 @@ import java.lang.ref.WeakReference;
  *            as a String containing a path or a complex data type.
  */
 public class ImagePresenter<T> {
+
+    private final Drawable errorDrawable;
 
     /**
      * A builder for an {@link ImagePresenter}.
@@ -65,6 +68,8 @@ public class ImagePresenter<T> {
         };
 
         private ModelLoader<T> modelLoader;
+        private int errorResourceId;
+        private Drawable errorDrawable;
 
         /**
          * Builds an ImagePresenter.
@@ -159,6 +164,38 @@ public class ImagePresenter<T> {
             }
 
             this.placeholderDrawable = placeholderDrawable;
+            return this;
+        }
+
+        /**
+         * Optional - Sets a resource that will be displayed whenever a load fails. Only call either this method
+         * or {@link #setErrorDrawable(android.graphics.drawable.Drawable)}, not both.
+         *
+         * @param resourceId The id of the resource to show
+         * @return This Builder object
+         */
+        public Builder<T> setErrorResource(int resourceId) {
+            if (resourceId != 0 && errorDrawable != null) {
+                throw new IllegalArgumentException("Can't set both an error drawable and an error resource");
+            }
+
+            this.errorResourceId = resourceId;
+            return this;
+        }
+
+        /**
+         * Optional - Sets a drawable that will be displayed whenever a load fails. Only call either this or
+         * {@link #setErrorResource(int)}, not both.
+         *
+         * @param drawable The drawable to show
+         * @return This Builder object
+         */
+        public Builder<T> setErrorDrawable(Drawable drawable) {
+            if (errorResourceId != -1 && drawable != null) {
+                throw new IllegalArgumentException("Can't set both an error drawable and an error resource");
+            }
+
+            this.errorDrawable = drawable;
             return this;
         }
 
@@ -272,11 +309,19 @@ public class ImagePresenter<T> {
     protected ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
+
+        final Resources res = imageView.getResources();
         if (builder.placeholderResourceId != 0) {
-            this.placeholderDrawable = imageView.getResources().getDrawable(builder.placeholderResourceId);
+            this.placeholderDrawable = res.getDrawable(builder.placeholderResourceId);
         } else {
             this.placeholderDrawable = builder.placeholderDrawable;
         }
+        if (builder.errorResourceId != 0){
+            this.errorDrawable = res.getDrawable(builder.errorResourceId);
+        } else {
+            this.errorDrawable = builder.errorDrawable;
+        }
+
         this.coordinator = builder.coordinator;
         this.imageReadyCallback = builder.imageReadyCallback;
         this.exceptionHandler = builder.exceptionHandler;
@@ -384,8 +429,12 @@ public class ImagePresenter<T> {
 
             @Override
             public void onException(Exception e) {
+                final boolean relevant = loadCount == currentCount;
                 if (exceptionHandler != null) {
-                    exceptionHandler.onException(e, model, loadCount == currentCount);
+                    exceptionHandler.onException(e, model, relevant);
+                }
+                if (relevant && canSetPlaceholder()) {
+                    imageView.setImageDrawable(errorDrawable);
                 }
             }
         });

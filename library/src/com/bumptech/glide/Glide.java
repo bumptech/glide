@@ -346,6 +346,7 @@ public class Glide {
 
         private int animationId = -1;
         private int placeholderId = -1;
+        private int errorId = -1;
         private ResizeOption resizeOption = ResizeOption.APPROXIMATE;
         private ImageLoader imageLoader = null;
 
@@ -427,13 +428,25 @@ public class Glide {
         }
 
         /**
-         * Sets a drawable to display while an image is loading
+         * Sets a resource to display while an image is loading
          *
          * @param resourceId The id of the resource to use as a placeholder
          * @return This Request
          */
         public Request<T> placeholder(int resourceId) {
             this.placeholderId = resourceId;
+
+            return this;
+        }
+
+        /**
+         * Sets a resource to display if a load fails
+         *
+         * @param resourceId The id of the resource to use as a placeholder
+         * @return This request
+         */
+        public Request<T> error(int resourceId) {
+            this.errorId = resourceId;
 
             return this;
         }
@@ -502,6 +515,11 @@ public class Glide {
                 builder.setPlaceholderResource(placeholderId);
             }
 
+
+            if (errorId != -1) {
+                builder.setErrorResource(errorId);
+            }
+
             return builder.build();
         }
 
@@ -553,6 +571,7 @@ public class Glide {
             public final Class imageLoaderClass;
             public final int animationId;
             public final int placeholderId;
+            public final int errorId;
 
             public Metadata(Request request) {
                 modelClass = request.model.getClass();
@@ -576,6 +595,7 @@ public class Glide {
                 }
                 animationId = request.animationId;
                 placeholderId = request.placeholderId;
+                errorId = request.errorId;
             }
 
             @Override
@@ -590,7 +610,8 @@ public class Glide {
                         modelLoaderClass.equals(other.modelLoaderClass) &&
                         imageLoaderClass.equals(other.imageLoaderClass) &&
                         animationId == other.animationId &&
-                        placeholderId == other.placeholderId;
+                        placeholderId == other.placeholderId &&
+                        errorId == other.errorId;
 
             }
         }

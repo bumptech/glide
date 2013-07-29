@@ -83,6 +83,7 @@ public class GlideTest extends ActivityTestCase {
                 .centerCrop()
                 .animate(android.R.anim.fade_in)
                 .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
+                .error(com.bumptech.glide.tests.R.raw.ic_launcher)
                 .into(imageView);
         ImagePresenter first = getImagePresenterFromView();
 
@@ -90,6 +91,7 @@ public class GlideTest extends ActivityTestCase {
                 .centerCrop()
                 .animate(android.R.anim.fade_in)
                 .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
+                .error(com.bumptech.glide.tests.R.raw.ic_launcher)
                 .into(imageView);
         ImagePresenter second = getImagePresenterFromView();
 
@@ -189,7 +191,18 @@ public class GlideTest extends ActivityTestCase {
         Glide.load(file).animate(android.R.anim.fade_in).into(imageView);
         ImagePresenter first = ImagePresenter.getCurrent(imageView);
 
-        Glide.load(file).into(imageView);
+        Glide.load(file).animate(android.R.anim.fade_out).into(imageView);
+        ImagePresenter second = ImagePresenter.getCurrent(imageView);
+
+        assertNotSame(first, second);
+    }
+
+    public void testDifferentErrorIdsReplacesPresenter() {
+        final File file = new File("fake");
+        Glide.load(file).error(com.bumptech.glide.tests.R.raw.ic_launcher).into(imageView);
+        ImagePresenter first = ImagePresenter.getCurrent(imageView);
+
+        Glide.load(file).error(android.R.drawable.btn_star).into(imageView);
         ImagePresenter second = ImagePresenter.getCurrent(imageView);
 
         assertNotSame(first, second);
