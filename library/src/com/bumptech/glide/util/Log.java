@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Log {
-    private static final String TAG = "BUMP_PHOTOS";
+    private static final String TAG = "GLIDE";
 
     @SuppressLint("SimpleDateFormat")
     private static final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");

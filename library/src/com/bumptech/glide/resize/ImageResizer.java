@@ -72,8 +72,13 @@ public class ImageResizer {
             // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
             final int sampleSize = getSampleSize(inDimens[0], inDimens[1], width, height);
 
-            final BitmapFactory.Options decodeBitmapOptions = getOptions();
-            decodeBitmapOptions.inSampleSize = sampleSize;
+            final BitmapFactory.Options decodeBitmapOptions;
+            if (sampleSize > 1) {
+                decodeBitmapOptions = getOptions();
+                decodeBitmapOptions.inSampleSize = sampleSize;
+            } else {
+                decodeBitmapOptions = getOptions(getRecycled(inDimens));
+            }
 
             Bitmap result = decodeStream(bis, decodeBitmapOptions);
             releaseTempBytes(bytes);
