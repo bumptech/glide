@@ -40,7 +40,7 @@ public abstract class BaseImageLoader implements ImageLoader {
     /**
      * A lifecycle method called after the requesting object is notified that this loader has loaded a bitmap. Should be
      * used to cleanup or update any data related to the completed load. Should not be used as a callback to change how
-     * an image is displayed. See {@link com.bumptech.glide.presenter.ImageSetCallback} instead to make a visual change
+     * an image is displayed. See {@link com.bumptech.glide.presenter.ImageReadyCallback} instead to make a visual change
      * when a load completes.
      *
      * @param id The unique id of the image

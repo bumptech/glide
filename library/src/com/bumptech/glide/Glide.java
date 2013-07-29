@@ -15,7 +15,7 @@ import com.bumptech.glide.loader.model.StringLoader;
 import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.model.UrlLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.ImageSetCallback;
+import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.loader.Approximate;
 import com.bumptech.glide.resize.loader.CenterCrop;
@@ -485,9 +485,9 @@ public class Glide {
 
             if (animationId != -1) {
                 final Animation animation = AnimationUtils.loadAnimation(imageView.getContext(), animationId);
-                builder.setImageSetCallback(new ImageSetCallback() {
+                builder.setImageReadyCallback(new ImageReadyCallback() {
                     @Override
-                    public void onImageSet(ImageView view, boolean fromCache) {
+                    public void onImageReady(ImageView view, boolean fromCache) {
                         view.clearAnimation();
 
                         if (!fromCache) {

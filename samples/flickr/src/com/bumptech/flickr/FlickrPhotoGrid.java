@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.ImageSetCallback;
+import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.resize.loader.CenterCrop;
 
 import java.io.File;
@@ -114,9 +114,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                         .setImageView(imageView)
                         .setModelLoader(new FlickrModelLoader(context))
                         .setImageLoader(new CenterCrop(context))
-                        .setImageSetCallback(new ImageSetCallback() {
+                        .setImageReadyCallback(new ImageReadyCallback() {
                             @Override
-                            public void onImageSet(ImageView view, boolean fromCache) {
+                            public void onImageReady(ImageView view, boolean fromCache) {
                                 view.clearAnimation();
 
                                 if (!fromCache) {

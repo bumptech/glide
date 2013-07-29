@@ -50,7 +50,7 @@ public class ImagePresenter<T> {
         private ImageView imageView;
         private int placeholderResourceId;
         private Drawable placeholderDrawable;
-        private ImageSetCallback imageSetCallback;
+        private ImageReadyCallback imageReadyCallback;
         private ImagePresenterCoordinator coordinator;
         private ImageLoader imageLoader;
         private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
@@ -170,8 +170,8 @@ public class ImagePresenter<T> {
          * @param cb The callback to call
          * @return This Builder object
          */
-        public Builder<T> setImageSetCallback(ImageSetCallback cb) {
-            this.imageSetCallback = cb;
+        public Builder<T> setImageReadyCallback(ImageReadyCallback cb) {
+            this.imageReadyCallback = cb;
             return this;
         }
 
@@ -206,7 +206,7 @@ public class ImagePresenter<T> {
     private final ModelLoader<T> modelLoader;
     private final ImageLoader imageLoader;
     private final Drawable placeholderDrawable;
-    private final ImageSetCallback imageSetCallback;
+    private final ImageReadyCallback imageReadyCallback;
     private final ImagePresenterCoordinator coordinator;
     private final ExceptionHandler<T> exceptionHandler;
     private final ImageView imageView;
@@ -278,7 +278,7 @@ public class ImagePresenter<T> {
             this.placeholderDrawable = builder.placeholderDrawable;
         }
         this.coordinator = builder.coordinator;
-        this.imageSetCallback = builder.imageSetCallback;
+        this.imageReadyCallback = builder.imageReadyCallback;
         this.exceptionHandler = builder.exceptionHandler;
         this.modelLoader = builder.modelLoader;
         sizeDeterminer = new SizeDeterminer(imageView);
@@ -375,8 +375,8 @@ public class ImagePresenter<T> {
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
 
-                if (imageSetCallback != null)
-                    imageSetCallback.onImageSet(imageView, loadedFromCache);
+                if (imageReadyCallback != null)
+                    imageReadyCallback.onImageReady(imageView, loadedFromCache);
                 imageView.setImageBitmap(image);
                 isImageSet = true;
                 return true;
