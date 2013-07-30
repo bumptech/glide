@@ -648,8 +648,18 @@ public class ImageManager {
                     });
                 }
 
-                bitmapReferenceCounter.initBitmap(result);
-                putInMemoryCache(key, result);
+                final boolean addedToMemoryCache = putInMemoryCache(key, result);
+                bgHandler.postAtFrontOfQueue(new Runnable() {
+                    @Override
+                    public void run() {
+                        bitmapReferenceCounter.initBitmap(result);
+                        if (addedToMemoryCache) {
+                            bitmapReferenceCounter.acquireBitmap(result);
+                            bitmapReferenceCounter.markPending(result);
+                        }
+                    }
+                });
+
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -670,7 +680,7 @@ public class ImageManager {
     }
 
 
-    private void putInMemoryCache(int key, Bitmap bitmap) {
+    private boolean putInMemoryCache(int key, Bitmap bitmap) {
         final boolean inCache;
         synchronized (memoryCache) {
             inCache = memoryCache.contains(key);
@@ -679,10 +689,7 @@ public class ImageManager {
             }
         }
 
-        if (!inCache) {
-            acquireBitmap(bitmap);
-            bitmapReferenceCounter.markPending(bitmap);
-        }
+        return !inCache;
     }
 
     private static int getKey(String id, int width, int height, ResizeType type){
