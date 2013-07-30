@@ -1,6 +1,7 @@
 package com.bumptech.flickr.api;
 
 import android.content.Context;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -94,12 +95,12 @@ public class Api {
     }
 
     public void search(String text, final SearchCallback cb) {
-        requestQueue.add(new StringRequest(Request.Method.GET, getSearchUrl(text), new Response.Listener<String>() {
+        StringRequest request = new StringRequest(Request.Method.GET, getSearchUrl(text), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     //cut out initial flickJsonApi(
-                    JSONObject searchResults = new JSONObject(response.substring(14, response.length()-1));
+                    JSONObject searchResults = new JSONObject(response.substring(14, response.length() - 1));
                     JSONArray photos = searchResults.getJSONObject("photos").getJSONArray("photo");
                     List<Photo> results = new ArrayList<Photo>(photos.length());
                     for (int i = 0; i < photos.length(); i++) {
@@ -116,6 +117,8 @@ public class Api {
             public void onErrorResponse(VolleyError error) {
                 cb.onSearchFailed(error);
             }
-        }));
+        });
+        request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 3, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        requestQueue.add(request);
     }
 }
