@@ -17,6 +17,7 @@ public class Photo {
     public final String server;
     public final String farm;
     public final String secret;
+    private String partialUrl = null;
 
     public Photo(JSONObject jsonPhoto) throws JSONException {
         this.id = jsonPhoto.getString("id");
@@ -25,6 +26,13 @@ public class Photo {
         this.server = jsonPhoto.getString("server");
         this.farm = jsonPhoto.getString("farm");
         this.secret = jsonPhoto.getString("secret");
+    }
+
+    public String getPartialUrl() {
+        if (partialUrl == null ) {
+            partialUrl = Api.getCacheableUrl(this);
+        }
+        return partialUrl;
     }
 
 }

@@ -30,7 +30,8 @@ public class Api {
     private static Api API;
     private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
     private static final String SIGNED_API_URL = "http://api.flickr.com/services/rest/?method=%s&format=json&api_key=" + API_KEY;
-    private static final String PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_%s.jpg";
+    //incomplete size independent url for photos that can be cached per photo
+    private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
 
     private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() {{
         put(75, "s");
@@ -82,6 +83,10 @@ public class Api {
         return getPhotoUrl(photo, getSizeKey(width, height));
     }
 
+    public static String getCacheableUrl(Photo photo) {
+        return String.format(CACHEABLE_PHOTO_URL, photo.farm, photo.server, photo.id, photo.secret);
+    }
+
     private static String getUrlForMethod(String method) {
         return String.format(SIGNED_API_URL, method);
     }
@@ -91,7 +96,7 @@ public class Api {
     }
 
     private static String getPhotoUrl(Photo photo, String sizeKey) {
-        return String.format(PHOTO_URL, photo.farm, photo.server, photo.id, photo.secret, sizeKey);
+        return photo.getPartialUrl() + sizeKey + ".jpg";
     }
 
     public void search(String text, final SearchCallback cb) {
