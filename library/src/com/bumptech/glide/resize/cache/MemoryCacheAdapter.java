@@ -3,18 +3,19 @@ package com.bumptech.glide.resize.cache;
 import android.graphics.Bitmap;
 
 public class MemoryCacheAdapter implements MemoryCache {
+
     @Override
-    public boolean contains(Integer key) {
+    public boolean contains(String key) {
         return false;
     }
 
     @Override
-    public Bitmap get(Integer key) {
+    public Bitmap get(String key) {
         return null;
     }
 
     @Override
-    public Bitmap put(Integer key, Bitmap bitmap) {
+    public Bitmap put(String key, Bitmap bitmap) {
         return null;
     }
 

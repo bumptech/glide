@@ -13,13 +13,13 @@ import android.support.v4.util.LruCache;
  * @see android.support.v4.util.LruCache
  */
 public class LruPhotoCache implements MemoryCache {
-    private final LruCache<Integer, Bitmap> lruCache;
+    private final LruCache<String, Bitmap> lruCache;
     private ImageRemovedListener imageRemovedListener;
 
     public LruPhotoCache(int maxSize) {
-        lruCache = new LruCache<Integer, Bitmap>(maxSize) {
+        lruCache = new LruCache<String, Bitmap>(maxSize) {
             @Override
-            protected void entryRemoved(boolean evicted, Integer key, Bitmap oldValue, Bitmap newValue) {
+            protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
                 super.entryRemoved(evicted, key, oldValue, newValue);
                 if (imageRemovedListener != null) {
                     imageRemovedListener.onImageRemoved(oldValue);
@@ -27,24 +27,24 @@ public class LruPhotoCache implements MemoryCache {
             }
 
             @Override
-            protected int sizeOf(Integer key, Bitmap value) {
+            protected int sizeOf(String key, Bitmap value) {
                 //get the size, getByteCount() is API 12+...
                 return value.getHeight() * value.getRowBytes();
             }
         };
     }
 
-    public boolean contains(Integer key) {
-        return get(key) != null;
+    public boolean contains(String key) {
+        return lruCache.get(key) != null;
     }
 
     @Override
-    public Bitmap get(Integer key) {
+    public Bitmap get(String key) {
         return lruCache.get(key);
     }
 
     @Override
-    public Bitmap put(Integer key, Bitmap bitmap) {
+    public Bitmap put(String key, Bitmap bitmap) {
         return lruCache.put(key, bitmap);
     }
 

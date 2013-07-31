@@ -358,7 +358,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImage(String id, final StreamLoader streamLoader, final LoadedCallback cb){
-        final int key = getKey(id, -1, -1, ResizeType.AS_IS);
+        final String key = getKey(id, -1, -1, ResizeType.AS_IS);
         return runJob(key, cb, false, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws IOException {
@@ -379,7 +379,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImageExact(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb) {
-        final int key = getKey(id, width, height, ResizeType.AS_IS);
+        final String key = getKey(id, width, height, ResizeType.AS_IS);
         return runJob(key, cb, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException{
@@ -400,7 +400,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object getImageApproximate(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb) {
-        final int key = getKey(id, width, height, ResizeType.APPROXIMATE);
+        final String key = getKey(id, width, height, ResizeType.APPROXIMATE);
         return runJob(key, cb, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
@@ -422,7 +422,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object centerCrop(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb) {
-        final int key = getKey(id, width, height, ResizeType.CENTER_CROP);
+        final String key = getKey(id, width, height, ResizeType.CENTER_CROP);
         return runJob(key, cb, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
@@ -444,7 +444,7 @@ public class ImageManager {
      * @return A token tracking this request
      */
     public Object fitCenter(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb){
-        final int key = getKey(id, width, height, ResizeType.FIT_CENTER);
+        final String key = getKey(id, width, height, ResizeType.FIT_CENTER);
         return runJob(key, cb, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException{
@@ -524,11 +524,11 @@ public class ImageManager {
         bgHandler.getLooper().quit();
     }
 
-    private Object runJob(int key, LoadedCallback cb, ImageManagerJob job) {
+    private Object runJob(String key, LoadedCallback cb, ImageManagerJob job) {
         return runJob(key, cb, true, job);
     }
 
-    private Object runJob(int key, LoadedCallback cb, boolean useDiskCache, ImageManagerJob job) {
+    private Object runJob(String key, LoadedCallback cb, boolean useDiskCache, ImageManagerJob job) {
         if (shutdown) return null;
 
         if (!returnFromCache(key, cb)) {
@@ -537,7 +537,7 @@ public class ImageManager {
         return job;
     }
 
-    private boolean returnFromCache(int key, LoadedCallback cb) {
+    private boolean returnFromCache(String key, LoadedCallback cb) {
         Bitmap inCache = memoryCache.get(key);
         boolean found = inCache != null;
         if (found) {
@@ -548,7 +548,7 @@ public class ImageManager {
 
     private abstract class ImageManagerJob implements Runnable {
         private final StreamLoader streamLoader;
-        private int key;
+        private String key;
         private LoadedCallback cb;
         private boolean useDiskCache;
         private Future future = null;
@@ -558,7 +558,7 @@ public class ImageManager {
             this.streamLoader = streamLoader;
         }
 
-        public void execute(int key, LoadedCallback cb, boolean useDiskCache) {
+        public void execute(String key, LoadedCallback cb, boolean useDiskCache) {
             this.key = key;
             this.cb = cb;
             this.useDiskCache = useDiskCache;
@@ -576,10 +576,9 @@ public class ImageManager {
 
         @Override
         public void run() {
-            final String stringKey = String.valueOf(key);
             Bitmap result = null;
             if (useDiskCache) {
-                result = getFromDiskCache(stringKey);
+                result = getFromDiskCache(key);
             }
 
             if (result == null) {
@@ -634,7 +633,7 @@ public class ImageManager {
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
             if (result != null) {
                 if (useDiskCache && !isInDiskCache) {
-                    putInDiskCache(String.valueOf(key), result);
+                    putInDiskCache(key, result);
                 }
 
                 bitmapReferenceCounter.initBitmap(result);
@@ -680,7 +679,7 @@ public class ImageManager {
 
     }
 
-    private void putInMemoryCache(int key, final Bitmap bitmap) {
+    private void putInMemoryCache(String key, final Bitmap bitmap) {
         final boolean inCache;
         synchronized (memoryCache) {
             inCache = memoryCache.contains(key);
@@ -693,7 +692,7 @@ public class ImageManager {
         bitmapReferenceCounter.markPending(bitmap);
     }
 
-    private static int getKey(String id, int width, int height, ResizeType type){
-        return Util.hash(id.hashCode(), width, height, type.hashCode());
+    private static String getKey(String id, int width, int height, ResizeType type){
+        return String.valueOf(Util.hash(id.hashCode(), width, height, type.hashCode()));
     }
 }
