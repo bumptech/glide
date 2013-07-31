@@ -566,7 +566,6 @@ public class ImageManager {
         }
 
         public void cancel() {
-            if (cancelled) return;
             cancelled = true;
 
             bgHandler.removeCallbacks(this);
@@ -577,25 +576,17 @@ public class ImageManager {
 
         @Override
         public void run() {
-            if (cancelled) return;
-
             final String stringKey = String.valueOf(key);
             Bitmap result = null;
             if (useDiskCache) {
-                final InputStream is = diskCache.get(stringKey);
-                if (is != null) {
-                    result = resizer.loadAsIs(is);
-                    if (result == null) {
-                        diskCache.delete(stringKey); //the image must have been corrupted
-                    }
-                }
+                result = getFromDiskCache(stringKey);
             }
 
             if (result == null) {
                 try {
                     resizeWithPool();
                 } catch (Exception e) {
-                    cb.onLoadFailed(e);
+                    handleException(e);
                 }
             } else {
                 finishResize(result, true);
@@ -608,16 +599,19 @@ public class ImageManager {
             future = executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    if (cancelled) return;
-
                     streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
                         @Override
                         public void onStreamReady(final InputStream is) {
-                            if (cancelled) return;
+                            if (cancelled) {
+                                return;
+                            }
+
+                            //this call back might be called on some other thread,
+                            //we want to do resizing on our thread, especially if we're called
+                            //back on the main thread, so we will resubmit
                             future = executor.submit(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (cancelled) return;
                                     try {
                                         final Bitmap result = resizeIfNotFound(is);
                                         finishResize(result, false);
@@ -630,7 +624,7 @@ public class ImageManager {
 
                         @Override
                         public void onException(Exception e) {
-                            cb.onLoadFailed(e);
+                            handleException(e);
                         }
                     });
                 }
@@ -640,25 +634,11 @@ public class ImageManager {
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
             if (result != null) {
                 if (useDiskCache && !isInDiskCache) {
-                    diskCache.put(String.valueOf(key), new DiskCache.Writer() {
-                        @Override
-                        public void write(OutputStream os) {
-                            result.compress(bitmapCompressFormat, bitmapCompressQuality, os);
-                        }
-                    });
+                    putInDiskCache(String.valueOf(key), result);
                 }
 
-                final boolean addedToMemoryCache = putInMemoryCache(key, result);
-                bgHandler.postAtFrontOfQueue(new Runnable() {
-                    @Override
-                    public void run() {
-                        bitmapReferenceCounter.initBitmap(result);
-                        if (addedToMemoryCache) {
-                            bitmapReferenceCounter.acquireBitmap(result);
-                            bitmapReferenceCounter.markPending(result);
-                        }
-                    }
-                });
+                bitmapReferenceCounter.initBitmap(result);
+                putInMemoryCache(key, result);
 
                 mainHandler.post(new Runnable() {
                     @Override
@@ -667,20 +647,40 @@ public class ImageManager {
                     }
                 });
             } else {
-                mainHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        cb.onLoadFailed(null);
-                    }
-                });
+                handleException(null);
             }
+        }
+
+        private void handleException(Exception e) {
+            cb.onLoadFailed(e);
         }
 
         protected abstract Bitmap resizeIfNotFound(InputStream is) throws IOException;
     }
 
+    private Bitmap getFromDiskCache(String key) {
+        Bitmap result = null;
+        final InputStream is = diskCache.get(key);
+        if (is != null) {
+            result = resizer.loadAsIs(is);
+            if (result == null) {
+                diskCache.delete(key); //the image must have been corrupted
+            }
+        }
+        return result;
+    }
 
-    private boolean putInMemoryCache(int key, Bitmap bitmap) {
+    private void putInDiskCache(String key, final Bitmap bitmap) {
+        diskCache.put(key, new DiskCache.Writer() {
+            @Override
+            public void write(OutputStream os) {
+                bitmap.compress(bitmapCompressFormat, bitmapCompressQuality, os);
+            }
+        });
+
+    }
+
+    private void putInMemoryCache(int key, final Bitmap bitmap) {
         final boolean inCache;
         synchronized (memoryCache) {
             inCache = memoryCache.contains(key);
@@ -689,7 +689,8 @@ public class ImageManager {
             }
         }
 
-        return !inCache;
+        bitmapReferenceCounter.acquireBitmap(bitmap);
+        bitmapReferenceCounter.markPending(bitmap);
     }
 
     private static int getKey(String id, int width, int height, ResizeType type){
