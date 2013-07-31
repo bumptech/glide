@@ -19,6 +19,7 @@ public class VolleyStreamLoader implements StreamLoader {
     private final RetryPolicy retryPolicy;
     private Request current = null;
 
+    @SuppressWarnings("unused")
     public VolleyStreamLoader(RequestQueue requestQueue, String url) {
         this(requestQueue, url, new DefaultRetryPolicy());
     }
