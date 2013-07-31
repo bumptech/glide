@@ -16,9 +16,8 @@ repositories {
 dependencies {
     compile files('libs/disklrucache-2.0.2.jar')
     compile 'com.android.support:support-v4:13.0.+'
-    compile project('volley')
+    compile files('libs/volley.jar')
 }
-
 
 android {
     compileSdkVersion 17
