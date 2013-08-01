@@ -1,11 +1,8 @@
 package com.bumptech.glide.resize.loader;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.view.ViewGroup;
-import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.ImageManager;
-import com.bumptech.glide.resize.LoadedCallback;
+import com.bumptech.glide.resize.Transformation;
 
 /**
  * Load an image at its original dimensions.
@@ -21,31 +18,10 @@ import com.bumptech.glide.resize.LoadedCallback;
 public class AsIs extends ImageManagerLoader {
 
     public AsIs(Context context) {
-        super(context);
+        super(context, Transformation.CENTER_CROP);
     }
 
     public AsIs(ImageManager imageManager) {
-        super(imageManager);
-    }
-
-    @Override
-    protected Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.getImage(id, streamLoader, new LoadedCallback() {
-            @Override
-            public void onLoadCompleted(Bitmap loaded) {
-                cb.onImageReady(loaded);
-            }
-
-            @Override
-            public void onLoadFailed(Exception e) {
-                cb.onException(e);
-            }
-        });
-    }
-
-    @Override
-    protected boolean isHandled(int width, int height) {
-        return super.isHandled(width, height)
-                || (width == ViewGroup.LayoutParams.WRAP_CONTENT || height == ViewGroup.LayoutParams.WRAP_CONTENT);
+        super(imageManager, Transformation.CENTER_CROP);
     }
 }

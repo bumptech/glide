@@ -30,7 +30,6 @@ import com.bumptech.glide.util.Log;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,13 +67,6 @@ public class ImageManager {
     private final ImageResizer resizer;
     private final DiskCache diskCache;
     private final Bitmap.CompressFormat bitmapCompressFormat;
-
-    private enum ResizeType {
-        CENTER_CROP,
-        FIT_CENTER,
-        APPROXIMATE,
-        AS_IS
-    }
 
     /**
      * Get the maximum safe memory cache size for this particular device based on the # of mb allocated to each app.
@@ -348,88 +340,16 @@ public class ImageManager {
         });
     }
 
-    /**
-     * Loads the image at its original dimensions.
-     *
-     * @param id A string id that uniquely identifies the image to be loaded. It may include the width and height, but
-     *           is not required to do so
-     * @param streamLoader The {@link StreamLoader} that will be used to load the image if it is not cached
-     * @param cb The callback called when the load completes
-     * @return A token tracking this request
-     */
-    public Object getImage(String id, final StreamLoader streamLoader, final LoadedCallback cb){
-        final String key = getKey(id, -1, -1, ResizeType.AS_IS);
-        return runJob(key, cb, false, new ImageManagerJob(streamLoader) {
-            @Override
-            protected Bitmap resizeIfNotFound(InputStream is) throws IOException {
-                return resizer.load(is);
-            }
-        });
-    }
+    public Object getImage(String id, StreamLoader streamLoader, int width, int height, Downsampler downsampler, Transformation transformation, LoadedCallback cb) {
+        if (shutdown) return null;
+        final String key = getKey(id, downsampler, transformation, width, height);
 
-    /**
-     * Loads the image to nearly the given width and height maintaining the original proportions.
-     *
-     * @param id A string id that uniquely identifies the image to be loaded. It may include the width and height, but
-     *           is not required to do so
-     * @param streamLoader The {@link StreamLoader} that will be used to load the image if it is not cached
-     * @param width The desired width in pixels
-     * @param height The desired height of the slice
-     * @param cb The callback called when the task finishes
-     * @return A token tracking this request
-     */
-    public Object getImageApproximate(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb) {
-        final String key = getKey(id, width, height, ResizeType.APPROXIMATE);
-        return runJob(key, cb, new ImageManagerJob(streamLoader) {
-            @Override
-            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
-                return resizer.load(is, width, height);
-            }
-        });
-    }
-
-    /**
-     * Loads the image, resizes it to be exactly width pixels wide keeping proportions,
-     * and then returns a section from the center of image exactly height pixels tall.
-     *
-     * @param id A string id that uniquely identifies the image to be loaded. It may include the width and height, but
-     *           is not required to do so
-     * @param streamLoader The {@link StreamLoader} that will be used to load the image if it is not cached
-     * @param width The desired width in pixels
-     * @param height The desired height of the slice
-     * @param cb The callback called when the task finishes
-     * @return A token tracking this request
-     */
-    public Object centerCrop(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb) {
-        final String key = getKey(id, width, height, ResizeType.CENTER_CROP);
-        return runJob(key, cb, new ImageManagerJob(streamLoader) {
-            @Override
-            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
-                return resizer.load(is, width, height, Transformation.CENTER_CROP);
-            }
-        });
-    }
-
-    /**
-     * Loads the image for the given id and resizes it, maintaining the original proportions, so that the image fills
-     * an area of width*height.
-     *
-     * @param id A string id that uniquely identifies the image to be loaded. It may include the width and height, but
-     *           is not required to do so
-     * @param streamLoader The {@link StreamLoader} that will be used to load the image if it is not cached
-     * @param width The width of the space
-     * @param height The height of the space
-     * @param cb The callback called when the task finishes
-     * @return A token tracking this request
-     */
-    public Object fitCenter(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb){
-        final String key = getKey(id, width, height, ResizeType.FIT_CENTER);
-        return runJob(key, cb, new ImageManagerJob(streamLoader) {
-            @Override
-            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException{
-                return resizer.load(is, width, height, Transformation.FIT_CENTER);
-            }
-        });
+        ImageManagerJob job = null;
+        if (!returnFromCache(key, cb)) {
+            job = new ImageManagerJob();
+            job.execute(key, streamLoader, width, height, downsampler, transformation, cb);
+        }
+        return job;
     }
 
     /**
@@ -503,19 +423,6 @@ public class ImageManager {
         bgHandler.getLooper().quit();
     }
 
-    private Object runJob(String key, LoadedCallback cb, ImageManagerJob job) {
-        return runJob(key, cb, true, job);
-    }
-
-    private Object runJob(String key, LoadedCallback cb, boolean useDiskCache, ImageManagerJob job) {
-        if (shutdown) return null;
-
-        if (!returnFromCache(key, cb)) {
-            job.execute(key, cb, useDiskCache);
-        }
-        return job;
-    }
-
     private boolean returnFromCache(String key, LoadedCallback cb) {
         Bitmap inCache = memoryCache.get(key);
         boolean found = inCache != null;
@@ -525,28 +432,30 @@ public class ImageManager {
         return found;
     }
 
-    private abstract class ImageManagerJob implements Runnable {
-        private final StreamLoader streamLoader;
+    private class ImageManagerJob implements Runnable {
+        private StreamLoader streamLoader;
         private String key;
         private LoadedCallback cb;
-        private boolean useDiskCache;
         private Future future = null;
         private volatile boolean cancelled = false;
+        private Transformation transformation;
+        private Downsampler downsampler;
+        private int width;
+        private int height;
 
-        public ImageManagerJob(StreamLoader streamLoader) {
-            this.streamLoader = streamLoader;
-        }
-
-        public void execute(String key, LoadedCallback cb, boolean useDiskCache) {
+        public void execute(String key, StreamLoader streamLoader, int width, int height, Downsampler downsampler, Transformation transformation, LoadedCallback cb) {
             this.key = key;
             this.cb = cb;
-            this.useDiskCache = useDiskCache;
+            this.width = width;
+            this.height = height;
+            this.streamLoader = streamLoader;
+            this.downsampler = downsampler;
+            this.transformation = transformation;
             bgHandler.post(this);
         }
 
         public void cancel() {
             cancelled = true;
-
             bgHandler.removeCallbacks(this);
             if (future != null) {
                 future.cancel(false);
@@ -555,13 +464,12 @@ public class ImageManager {
 
         @Override
         public void run() {
-            Bitmap result = null;
-            if (useDiskCache) {
-                result = getFromDiskCache(key);
-            }
+            Bitmap result = getFromDiskCache(key);
 
             if (result == null) {
                 try {
+                    //in almost every case exception will be because of race after calling shutdown. Not much we can do
+                    //either way
                     resizeWithPool();
                 } catch (Exception e) {
                     handleException(e);
@@ -571,8 +479,6 @@ public class ImageManager {
             }
         }
 
-        //in almost every case exception will be because of race after calling shutdown. Not much we can do
-        //either way
         private void resizeWithPool() throws RejectedExecutionException {
             future = executor.submit(new Runnable() {
                 @Override
@@ -611,7 +517,7 @@ public class ImageManager {
 
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
             if (result != null) {
-                if (useDiskCache && !isInDiskCache) {
+                if (!isInDiskCache) {
                     putInDiskCache(key, result);
                 }
 
@@ -633,7 +539,9 @@ public class ImageManager {
             cb.onLoadFailed(e);
         }
 
-        protected abstract Bitmap resizeIfNotFound(InputStream is) throws IOException;
+        private Bitmap resizeIfNotFound(InputStream is) throws IOException {
+            return resizer.load(is, width, height, downsampler, transformation);
+        }
     }
 
     private Bitmap getFromDiskCache(String key) {
@@ -671,7 +579,8 @@ public class ImageManager {
         bitmapReferenceCounter.markPending(bitmap);
     }
 
-    private static String getKey(String id, int width, int height, ResizeType type){
-        return String.valueOf(Util.hash(id.hashCode(), width, height, type.hashCode()));
+    private static String getKey(String id, Downsampler downsampler, Transformation transformation, int width, int height) {
+        return String.valueOf(Util.hash(id.hashCode(), downsampler.getId().hashCode(),
+                transformation.getId().hashCode(), width, height));
     }
 }

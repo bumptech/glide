@@ -5,24 +5,41 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.image.BaseImageLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.resize.Downsampler;
 import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.LoadedCallback;
+import com.bumptech.glide.resize.Transformation;
+
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * A base class for loaders that user ImageManager. Primarily responsible for keeping track of bitmaps for recycling
  * purposes.
  */
-public abstract class ImageManagerLoader extends BaseImageLoader {
+public class ImageManagerLoader extends BaseImageLoader {
 
     protected final ImageManager imageManager;
+    private final Transformation transformation;
+    private final Downsampler downsampler;
     private Bitmap acquired;
     private Object loadToken;
 
-    public ImageManagerLoader(Context context) {
-        this(Glide.get().getImageManager(context));
+    public ImageManagerLoader(Context context, Transformation transformation) {
+        this(context, Downsampler.AT_LEAST, transformation);
     }
 
-    public ImageManagerLoader(ImageManager imageManager) {
+    public ImageManagerLoader(Context context, Downsampler downsampler, Transformation transformation) {
+        this(Glide.get().getImageManager(context), downsampler, transformation);
+    }
+
+    public ImageManagerLoader(ImageManager imageManager, Transformation transformation) {
+        this(imageManager, Downsampler.AT_LEAST, transformation);
+    }
+
+    public ImageManagerLoader(ImageManager imageManager, Downsampler downsampler, Transformation transformation) {
         this.imageManager = imageManager;
+        this.downsampler = downsampler;
+        this.transformation = transformation;
     }
 
     @Override
@@ -46,7 +63,19 @@ public abstract class ImageManagerLoader extends BaseImageLoader {
      *
      * @return A reference to the fetch that must be retained by the calling object as long as the fetch is relevant
      */
-    protected abstract Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, ImageReadyCallback cb);
+    protected Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, final ImageReadyCallback cb) {
+        return imageManager.getImage(id, streamLoader, width, height, downsampler, transformation, new LoadedCallback() {
+            @Override
+            public void onLoadCompleted(Bitmap loaded) {
+                cb.onImageReady(loaded);
+            }
+
+            @Override
+            public void onLoadFailed(Exception e) {
+                cb.onException(e);
+            }
+        });
+    }
 
     @Override
     protected void onImageReady(String id, Bitmap image, boolean isUsed) {
@@ -76,6 +105,7 @@ public abstract class ImageManagerLoader extends BaseImageLoader {
     }
 
     protected boolean isHandled(int width, int height) {
-        return width >= 0 && height >= 0;
+        return width >= 0 && height >= 0 ||
+                (downsampler == Downsampler.NONE && width == WRAP_CONTENT && height == WRAP_CONTENT);
     }
 }

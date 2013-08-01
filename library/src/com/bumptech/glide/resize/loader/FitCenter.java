@@ -7,8 +7,10 @@ package com.bumptech.glide.resize.loader;
 import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.resize.Downsampler;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
+import com.bumptech.glide.resize.Transformation;
 
 /**
  * Load the image so that one dimension of the image exactly matches one of the given dimensions and the other dimension
@@ -20,25 +22,10 @@ import com.bumptech.glide.resize.LoadedCallback;
 public class FitCenter extends ImageManagerLoader {
 
     public FitCenter(Context context) {
-        super(context);
+        super(context, Transformation.FIT_CENTER);
     }
 
     public FitCenter(ImageManager imageManager) {
-        super(imageManager);
-    }
-
-    @Override
-    protected Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.fitCenter(id, streamLoader, width, height, new LoadedCallback() {
-            @Override
-            public void onLoadCompleted(Bitmap loaded) {
-                cb.onImageReady(loaded);
-            }
-
-            @Override
-            public void onLoadFailed(Exception e) {
-                cb.onException(e);
-            }
-        });
+        super(imageManager, Transformation.FIT_CENTER);
     }
 }

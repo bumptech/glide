@@ -14,7 +14,13 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
+<<<<<<< HEAD
+import com.bumptech.glide.resize.Downsampler;
+import com.bumptech.glide.resize.Transformation;
 import com.bumptech.glide.resize.loader.CenterCrop;
+=======
+import com.bumptech.glide.resize.loader.ImageManagerLoader;
+>>>>>>> 765fdbe... Should have been in go to just image manager loader
 
 import java.io.File;
 import java.util.ArrayList;

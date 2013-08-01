@@ -7,8 +7,10 @@ package com.bumptech.glide.resize.loader;
 import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.resize.Downsampler;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
+import com.bumptech.glide.resize.Transformation;
 
 /**
  * Load an image at roughly the width and height of the view that will display it, maintaining its original aspect ratio
@@ -25,25 +27,10 @@ import com.bumptech.glide.resize.LoadedCallback;
 public class Approximate extends ImageManagerLoader {
 
     public Approximate(Context context) {
-        super(context);
+        super(context, Downsampler.AT_LEAST, Transformation.NONE);
     }
 
     public Approximate(ImageManager imageManager) {
-        super(imageManager);
-    }
-
-    @Override
-    protected Object loadFromImageManager(String id, StreamLoader streamLoader, int width, int height, final ImageReadyCallback cb) {
-        return imageManager.getImageApproximate(id, streamLoader, width, height, new LoadedCallback() {
-            @Override
-            public void onLoadCompleted(Bitmap loaded) {
-                cb.onImageReady(loaded);
-            }
-
-            @Override
-            public void onLoadFailed(Exception e) {
-                cb.onException(e);
-            }
-        });
+        super(imageManager, Downsampler.AT_LEAST, Transformation.NONE);
     }
 }
