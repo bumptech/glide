@@ -25,7 +25,6 @@ import java.util.Queue;
  */
 public class ImageResizer {
     private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
-    private static final int MARK_POSITION = 1024 * 1024; //1mb
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private final BitmapPool bitmapPool;
@@ -63,70 +62,6 @@ public class ImageResizer {
         this(null, options);
     }
 
-    private abstract class ImageDownsampler {
-        public Bitmap load(InputStream is, int width, int height) {
-            byte[] bytes = getTempBytes();
-            RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytes);
-            final int[] inDimens = getDimens(bis, width, height);
-
-            // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
-            final int sampleSize = getSampleSize(inDimens[0], inDimens[1], width, height);
-
-            final BitmapFactory.Options decodeBitmapOptions;
-            if (sampleSize > 1) {
-                decodeBitmapOptions = getOptions();
-                decodeBitmapOptions.inSampleSize = sampleSize;
-            } else {
-                decodeBitmapOptions = getOptions(getRecycled(inDimens));
-            }
-
-            Bitmap result = decodeStream(bis, decodeBitmapOptions);
-            releaseTempBytes(bytes);
-            return result;
-        }
-
-        protected abstract int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight);
-
-        protected int[] getDimens(RecyclableBufferedInputStream bis, int inWidth, int inHeight) {
-            return getDimensions(bis);
-        }
-    }
-
-    private final ImageDownsampler atLeastDownsampler = new ImageDownsampler() {
-
-        @Override
-        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-            // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
-            return Math.min(inHeight / outHeight, inWidth / outWidth);
-        }
-    };
-
-    private final ImageDownsampler atMostDownsampler = new ImageDownsampler() {
-        @Override
-        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-            return Math.max(inHeight / outHeight, inWidth / outWidth);
-        }
-    };
-
-    private final ImageDownsampler asIsDownsampler = new ImageDownsampler() {
-        @Override
-        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-            return 0;
-        }
-    };
-
-    private final ImageDownsampler fixedAsIsDownsampler = new ImageDownsampler() {
-        @Override
-        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-            return 0;
-        }
-
-        @Override
-        protected int[] getDimens(RecyclableBufferedInputStream bis, int inWidth, int inHeight) {
-            return new int[] { inWidth, inHeight };
-
-        }
-    };
     /**
      * Creates a new resizer that will attempt to recycle {@link android.graphics.Bitmap}s if any are available in the given dimensions
      *
@@ -146,164 +81,44 @@ public class ImageResizer {
         }
     }
 
-    /**
-     * Scale the image so that either the width of the image matches the given width and the height of the image is
-     * greater than the given height or vice versa, and then crop the larger dimension to match the given dimension.
-     *
-     * Does not maintain the image's aspect ratio
-     *
-     * @param is The InputStream for the image
-     * @param width The minimum width of the image
-     * @param height The minimum height of the image
-     * @return The resized image
-     */
-    public Bitmap centerCrop(InputStream is, int width, int height) {
-        final Bitmap streamed = loadAtLeast(is, width, height);
-        return centerCrop(getRecycled(width, height), streamed, width, height);
+    public Bitmap load(InputStream is) {
+        return load(is, -1, -1, Downsampler.NONE, Transformation.NONE);
     }
 
-    /**
-     * Scale the image uniformly (maintaining the image's aspect ratio) so that one of the dimensions of the image
-     * will be equal to the given dimension and the other will be less than the given dimension
-     *
-     * @param is The InputStream for the image
-     * @param width The maximum width of the image
-     * @param height The maximum height of the image
-     * @return The resized image
-     */
-    public Bitmap fitInSpace(InputStream is, int width, int height) {
-        final Bitmap streamed = loadAtLeast(is, width > height ? 1 : width, height > width ? 1 : height);
-        return fitInSpace(streamed, width, height);
+    public Bitmap load(InputStream is, int outWidth, int outHeight) {
+        return load(is, outWidth, outHeight, Transformation.NONE);
     }
 
-    /**
-     * Scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image will be
-     * greater than or equal to the given width and height.
-     *
-     * @param is An inputStream for the image
-     * @param width The minimum width of the returned Bitmap
-     * @param height The minimum height of the returned Bitmap
-     * @return A Bitmap containing the image
-     */
-    public Bitmap loadAtLeast(InputStream is, int width, int height) {
-        return atLeastDownsampler.load(is, width, height);
+    public Bitmap load(InputStream is, int outWidth, int outHeight, Transformation transformation) {
+        return load(is, outWidth, outHeight, Downsampler.AT_LEAST, transformation);
     }
 
-    /**
-     * Scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image will be
-     * less than or equal to the given width and height. Unlike {@link #fitInSpace(android.graphics.Bitmap, int, int)},
-     * one or both dimensions may be less than the given dimensions.
-     *
-     * @param is An InputStream for the image.
-     * @param width The maximum width
-     * @param height The maximum height
-     * @return A bitmap containing the image
-     */
-    @SuppressWarnings("unused")
-    public Bitmap loadAtMost(InputStream is, int width, int height) {
-        return atMostDownsampler.load(is, width, height);
-    }
+    public Bitmap load(InputStream is, int outWidth, int outHeight, Downsampler downsampler, Transformation transformation) {
+        byte[] tempBytesForBis = getTempBytes();
+        byte[] tempBytesForOptions = getTempBytes();
 
-    /**
-     * Load the image at its original size
-     *
-     * @param is The InputStream for the image
-     * @return The loaded image
-     */
-    public Bitmap loadAsIs(final InputStream is) {
-        return asIsDownsampler.load(is, 0, 0);
-    }
+        BitmapFactory.Options options = getOptions();
+        options.inTempStorage = tempBytesForOptions;
 
-    /**
-     * Load the image at its original size
-     *
-     * This is somewhat more efficient than {@link #loadAsIs(java.io.InputStream)} because it does not need to read
-     * the image header to determine the image's width and height. Instead, it assumes the given width and height
-     *
-     * @param is The InputStream for the image
-     * @param width The width of the image represented by the InputStream
-     * @param height The height of the image represented by the InputStream
-     * @return The loaded image
-     */
-    public Bitmap loadAsIs(InputStream is, int width, int height) {
-        return fixedAsIsDownsampler.load(is, width, height);
-    }
+        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, tempBytesForBis);
 
-    /**
-     * A potentially expensive operation to load the image for the given InputStream. If a recycled Bitmap whose
-     * dimensions exactly match those of the image for the given InputStream is available, the operation is much less
-     * expensive in terms of memory.
-     *
-     * Note - this method will throw an exception of a Bitmap with dimensions not matching those of the image for the
-     * given InputStream is provided.
-     *
-     * @param is The InputStream representing the image data
-     * @param recycle A Bitmap we can load the image into, or null
-     * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
-     */
-    private Bitmap load(RecyclableBufferedInputStream is, Bitmap recycle){
-        final BitmapFactory.Options decodeBitmapOptions = getOptions(recycle);
-        return decodeStream(is, decodeBitmapOptions);
-    }
+        final Bitmap initial = downsampler.downsample(bis, options, bitmapPool, outWidth, outHeight);
+        final Bitmap result = transformation.transform(initial, bitmapPool, outWidth, outHeight);
 
-    /**
-     * A method for getting the dimensions of an image from the given InputStream
-     *
-     * @param is The InputStream representing the image
-     * @return an array containing the dimensions of the image in the form {width, height}
-     */
-    private int[] getDimensions(RecyclableBufferedInputStream is) {
-        final BitmapFactory.Options decodeBoundsOptions = getOptions();
-        decodeBoundsOptions.inJustDecodeBounds = true;
-        decodeStream(is, decodeBoundsOptions);
-        return new int[] { decodeBoundsOptions.outWidth, decodeBoundsOptions.outHeight };
-    }
-
-    private Bitmap decodeStream(RecyclableBufferedInputStream bis, BitmapFactory.Options decodeBitmapOptions) {
-        decodeBitmapOptions.inTempStorage = getTempBytes();
-
-        if (decodeBitmapOptions.inJustDecodeBounds) {
-            bis.mark(MARK_POSITION); //this is large, but jpeg headers are not size bounded so we need
-                                     //something large enough to minimize the possibility of not being able to fit
-                                     //enough of the header in the buffer to get the image size so that we don't fail
-                                     //to load images. The BufferedInputStream will create a new buffer of 2x the
-                                     //original size each time we use up the buffer space without passing the mark so
-                                     //this is a maximum bound on the buffer size, not a default. Most of the time we
-                                     //won't go past our pre-allocated 16kb
+        if (initial != result) {
+            bitmapPool.put(initial);
         }
-        final Bitmap result = BitmapFactory.decodeStream(bis, null, decodeBitmapOptions);
-        try {
-            if (decodeBitmapOptions.inJustDecodeBounds) {
-                bis.reset();
-                bis.clearMark();
-            } else {
-                bis.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            releaseTempBytes(decodeBitmapOptions.inTempStorage);
-        }
+
+        releaseTempBytes(tempBytesForBis);
+        releaseTempBytes(tempBytesForOptions);
 
         return result;
     }
 
     private BitmapFactory.Options getOptions() {
-        return getOptions(null);
-    }
-
-    private BitmapFactory.Options getOptions(Bitmap recycle) {
         BitmapFactory.Options result = new BitmapFactory.Options();
-        copyOptions(defaultOptions, result, recycle);
+        copyOptions(defaultOptions, result);
         return result;
-    }
-
-    private Bitmap getRecycled(int[] dimens) {
-        return getRecycled(dimens[0], dimens[1]);
-    }
-
-    private Bitmap getRecycled(int width, int height) {
-        return bitmapPool.get(width, height);
     }
 
     private byte[] getTempBytes() {
@@ -324,9 +139,9 @@ public class ImageResizer {
         }
     }
 
-    private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to, Bitmap recycled) {
+    private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to) {
         if (Build.VERSION.SDK_INT >= 11) {
-            copyOptionsHoneycomb(from, to, recycled);
+            copyOptionsHoneycomb(from, to);
         } else if (Build.VERSION.SDK_INT >= 10) {
             copyOptionsGingerbreadMr1(from, to);
         } else {
@@ -335,10 +150,9 @@ public class ImageResizer {
     }
 
     @TargetApi(11)
-    private static void copyOptionsHoneycomb(BitmapFactory.Options from, BitmapFactory.Options to, Bitmap recycled) {
+    private static void copyOptionsHoneycomb(BitmapFactory.Options from, BitmapFactory.Options to) {
         copyOptionsGingerbreadMr1(from, to);
         to.inMutable = from.inMutable;
-        to.inBitmap = recycled;
     }
 
     @TargetApi(10)

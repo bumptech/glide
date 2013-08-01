@@ -362,28 +362,7 @@ public class ImageManager {
         return runJob(key, cb, false, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws IOException {
-                return resizer.loadAsIs(is);
-            }
-        });
-    }
-
-    /**
-     * Loads the image assuming its width and height are exactly those given.
-     *
-     * @param id A string id that uniquely identifies the image to be loaded. It may include the width and height, but
-     *           is not required to do so
-     * @param streamLoader The {@link StreamLoader} that will be used to load the image if it is not cached
-     * @param width The width of the image on disk
-     * @param height The height of the image on disk
-     * @param cb The callback called when the load completes
-     * @return A token tracking this request
-     */
-    public Object getImageExact(String id, StreamLoader streamLoader, final int width, final int height, final LoadedCallback cb) {
-        final String key = getKey(id, width, height, ResizeType.AS_IS);
-        return runJob(key, cb, new ImageManagerJob(streamLoader) {
-            @Override
-            protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException{
-                return resizer.loadAsIs(is, width, height);
+                return resizer.load(is);
             }
         });
     }
@@ -404,7 +383,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
-                return resizer.loadAtLeast(is, width, height);
+                return resizer.load(is, width, height);
             }
         });
     }
@@ -426,7 +405,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException {
-                return resizer.centerCrop(is, width, height);
+                return resizer.load(is, width, height, Transformation.CENTER_CROP);
             }
         });
     }
@@ -448,7 +427,7 @@ public class ImageManager {
         return runJob(key, cb, new ImageManagerJob(streamLoader) {
             @Override
             protected Bitmap resizeIfNotFound(InputStream is) throws FileNotFoundException{
-                return resizer.fitInSpace(is, width, height);
+                return resizer.load(is, width, height, Transformation.FIT_CENTER);
             }
         });
     }
@@ -661,7 +640,7 @@ public class ImageManager {
         Bitmap result = null;
         final InputStream is = diskCache.get(key);
         if (is != null) {
-            result = resizer.loadAsIs(is);
+            result = resizer.load(is);
             if (result == null) {
                 diskCache.delete(key); //the image must have been corrupted
             }
