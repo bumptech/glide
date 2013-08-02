@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.net.Uri;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -16,17 +17,18 @@ import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.model.UrlLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
+import com.bumptech.glide.resize.Downsampler;
 import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.Transformation;
 import com.bumptech.glide.resize.loader.Approximate;
-import com.bumptech.glide.resize.loader.AsIs;
 import com.bumptech.glide.resize.loader.CenterCrop;
 import com.bumptech.glide.resize.loader.FitCenter;
+import com.bumptech.glide.resize.loader.ImageManagerLoader;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
-import static android.view.ViewGroup.LayoutParams;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * A singleton to present a simple static interface for Glide {@link Glide.Request} and to create and manage an
@@ -336,7 +338,6 @@ public class Glide {
      */
     @SuppressWarnings("unused") //public api
     public static class Request<T> {
-
         private enum ResizeOption {
             APPROXIMATE,
             CENTER_CROP,
@@ -352,8 +353,8 @@ public class Glide {
         private int animationId = -1;
         private int placeholderId = -1;
         private int errorId = -1;
-        private ResizeOption resizeOption = null;
-        private ImageLoader imageLoader = null;
+        private Transformation transformation = Transformation.NONE;
+        private Downsampler downsampler = null;
 
         public Request(T model) {
             this.model = model;
@@ -373,8 +374,8 @@ public class Glide {
          * @return This Request
          */
         public Request<T> centerCrop() {
-            resizeOption = ResizeOption.CENTER_CROP;
-            imageLoader = null;
+            transformation = Transformation.CENTER_CROP;
+            downsampler = Downsampler.AT_LEAST;
 
             return this;
         }
@@ -385,46 +386,47 @@ public class Glide {
          * @return This Request
          */
         public Request<T> fitCenter() {
-            resizeOption = ResizeOption.FIT_CENTER;
-            imageLoader = null;
+            transformation = Transformation.FIT_CENTER;
+            downsampler = Downsampler.AT_LEAST;
 
             return this;
         }
 
         /**
-         * Resize models using {@link Approximate}. Replaces any existing resize style
+         * Load images at a size near the size of the target using {@link Downsampler#AT_LEAST}. Replaces any existing resize style
          *
          * @return This Request
          */
         public Request<T> approximate() {
-            resizeOption = ResizeOption.APPROXIMATE;
-            imageLoader = null;
+            transformation = Transformation.NONE;
+            downsampler = Downsampler.AT_LEAST;
 
             return this;
         }
 
         /**
-         * Load images at their original size using {@link com.bumptech.glide.resize.loader.AsIs}. Replaces any existing
+         * Load images at their original size using {@link Downsampler#NONE}. Replaces any existing
          * resize style
          *
          * @return This Request
          */
         public Request<T> asIs() {
-            resizeOption = ResizeOption.AS_IS;
-            imageLoader = null;
+            transformation = Transformation.NONE;
+            downsampler = Downsampler.NONE;
 
             return this;
         }
 
         /**
-         * Set the {@link ImageLoader} to use to load images into memory
+         * Set an arbitrary transformation to apply after an image has been loaded into memory.  Replaces any existing
+         * resize style
          *
-         * @param imageLoader The {@link ImageLoader} to use
+         * @param transformation The transformation to use
          * @return This Request
          */
-        public Request<T> resizeWith(ImageLoader imageLoader) {
-            this.imageLoader = imageLoader;
-            resizeOption = null;
+        public Request<T> transform(Transformation transformation) {
+            this.transformation = transformation;
+            downsampler = Downsampler.AT_LEAST;
 
             return this;
         }
@@ -482,7 +484,7 @@ public class Glide {
          * the view's tag for the id {@code R.id.image_presenter_id}.
          */
         private ImagePresenter<T> getImagePresenter(ImageView imageView) {
-            resizeOption = getFinalResizeOption(imageView);
+            downsampler = getFinalDownsampler(imageView);
 
             Metadata previous = getMetadataFrom(imageView);
             Metadata current = new Metadata(this);
@@ -505,13 +507,12 @@ public class Glide {
         private ImagePresenter<T> buildImagePresenter(ImageView imageView) {
             final Context context = imageView.getContext();
 
-            imageLoader = getFinalImageLoader(context);
             modelLoader = getFinalModelLoader(context);
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
                     .setImageView(imageView)
                     .setModelLoader(modelLoader)
-                    .setImageLoader(imageLoader);
+                    .setImageLoader(new ImageManagerLoader(context, downsampler, transformation));
 
             if (animationId != -1) {
                 final Animation animation = AnimationUtils.loadAnimation(imageView.getContext(), animationId);
@@ -548,65 +549,17 @@ public class Glide {
             }
         }
 
-        private ImageLoader getFinalImageLoader(Context context) {
-            if (imageLoader == null) {
-                return getImageLoaderFromOptions(context);
-            } else {
-                return imageLoader;
-            }
-        }
-
-        private ResizeOption getFinalResizeOption(ImageView imageView) {
-            ResizeOption result = resizeOption;
+        private Downsampler getFinalDownsampler(ImageView imageView) {
+            Downsampler result = downsampler;
             if (result == null) {
-                //default to Approximate unless view's layout params are set to wrap content, in which case the only
-                //loader that makes sense is AsIs since all the others crop based on the view's size
-                final LayoutParams lp = imageView.getLayoutParams();
-                if (lp != null && (lp.width == LayoutParams.WRAP_CONTENT || lp.height == LayoutParams.WRAP_CONTENT)) {
-                    result = ResizeOption.AS_IS;
+                ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+                if (layoutParams.width == WRAP_CONTENT && layoutParams.height == WRAP_CONTENT) {
+                    result = Downsampler.NONE;
                 } else {
-                    result = ResizeOption.APPROXIMATE;
+                    result = Downsampler.AT_LEAST;
                 }
             }
             return result;
-        }
-
-        private ImageLoader getImageLoaderFromOptions(Context context) {
-
-            Class<? extends ImageLoader> imageLoaderClass = getImageLoaderClassFor(resizeOption);
-            try {
-                return imageLoaderClass.getConstructor(Context.class).newInstance(context);
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        private static Class<? extends ImageLoader> getImageLoaderClassFor(ResizeOption resizeOption) {
-            final Class<? extends ImageLoader> imageLoaderClass;
-            switch (resizeOption) {
-                case APPROXIMATE:
-                    imageLoaderClass = Approximate.class;
-                    break;
-                case CENTER_CROP:
-                    imageLoaderClass = CenterCrop.class;
-                    break;
-                case FIT_CENTER:
-                    imageLoaderClass = FitCenter.class;
-                    break;
-                case AS_IS:
-                    imageLoaderClass = AsIs.class;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown resize option " + resizeOption);
-            }
-            return imageLoaderClass;
         }
 
         private static Metadata getMetadataFrom(ImageView imageView) {
@@ -620,20 +573,17 @@ public class Glide {
         private static class Metadata {
             public final Class modelClass;
             public final Class modelLoaderClass;
-            public final Class imageLoaderClass;
             public final int animationId;
             public final int placeholderId;
             public final int errorId;
+            private final String downsamplerId;
+            private final String transformationId;
 
             public Metadata(Request request) {
                 modelClass = request.model.getClass();
                 modelLoaderClass = request.modelLoaderClass;
-                if (request.imageLoader != null) {
-                    imageLoaderClass = request.imageLoader.getClass();
-                } else {
-                    imageLoaderClass = getImageLoaderClassFor(request.resizeOption);
-
-                }
+                downsamplerId = request.downsampler.getId();
+                transformationId = request.transformation.getId();
                 animationId = request.animationId;
                 placeholderId = request.placeholderId;
                 errorId = request.errorId;
@@ -649,7 +599,8 @@ public class Glide {
 
                 return modelClass.equals(other.modelClass) &&
                         modelLoaderClass.equals(other.modelLoaderClass) &&
-                        imageLoaderClass.equals(other.imageLoaderClass) &&
+                        downsamplerId.equals(other.downsamplerId) &&
+                        transformationId.equals(other.transformationId) &&
                         animationId == other.animationId &&
                         placeholderId == other.placeholderId &&
                         errorId == other.errorId;
