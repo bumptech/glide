@@ -493,7 +493,7 @@ public class ImageManager {
                                         final Bitmap result = resizeIfNotFound(is);
                                         finishResize(result, false);
                                     } catch (Exception e) {
-                                        cb.onLoadFailed(e);
+                                        handleException(e);
                                     }
                                 }
                             });
