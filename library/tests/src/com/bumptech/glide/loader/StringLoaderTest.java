@@ -39,9 +39,6 @@ public class StringLoaderTest extends AndroidTestCase {
                 return null;
             }
 
-            @Override
-            public void clear() {
-            }
         };
 
         stringLoader = new StringLoader(uriLoader);

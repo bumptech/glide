@@ -13,7 +13,7 @@ import java.net.URL;
  * A model loader for trying to load Uris. Capable of handling 'http', 'https', 'android.resource', 'content', and
  * 'file' schemes. Unsupported schemes will throw an exception in {@link #buildStreamLoader(android.net.Uri, int, int)}.
  */
-public class UriLoader extends BaseModelLoader<Uri> {
+public class UriLoader implements ModelLoader<Uri> {
     private final Context context;
     private final ModelLoader<URL> urlLoader;
 
@@ -32,7 +32,7 @@ public class UriLoader extends BaseModelLoader<Uri> {
     }
 
     @Override
-    protected StreamLoader buildStreamLoader(Uri model, int width, int height) {
+    public StreamLoader getStreamLoader(Uri model, int width, int height) {
         final String scheme = model.getScheme();
 
         StreamLoader result = null;
@@ -56,12 +56,6 @@ public class UriLoader extends BaseModelLoader<Uri> {
     @Override
     public String getId(Uri model) {
         return model.toString();
-    }
-
-    @Override
-    public void clear() {
-        super.clear();
-        urlLoader.clear();
     }
 
     private boolean isLocalUri(String scheme) {

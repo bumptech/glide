@@ -12,7 +12,7 @@ import com.bumptech.glide.loader.stream.VolleyStreamLoader;
  * A base ModelLoader for using Volley to fetch an image from a model that
  * can readily be converted into a url
  */
-public abstract class VolleyModelLoader<T> extends BaseModelLoader<T> {
+public abstract class VolleyModelLoader<T> implements ModelLoader<T> {
     private final RequestQueue requestQueue;
 
     /**
@@ -30,7 +30,7 @@ public abstract class VolleyModelLoader<T> extends BaseModelLoader<T> {
     }
 
     @Override
-    protected StreamLoader buildStreamLoader(T model, int width, int height) {
+    public StreamLoader getStreamLoader(T model, int width, int height) {
         return new VolleyStreamLoader(requestQueue, getUrl(model, width, height), getRetryPolicy());
     }
 

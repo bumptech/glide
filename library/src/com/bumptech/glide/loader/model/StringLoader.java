@@ -10,7 +10,7 @@ import java.io.File;
  * A model loader for handling certain string models. Handles paths, urls, and any uri string with a scheme handled by
  * {@link android.content.ContentResolver#openInputStream(android.net.Uri)}.
  */
-public class StringLoader extends BaseModelLoader<String> {
+public class StringLoader implements ModelLoader<String> {
 
     private final ModelLoader<Uri> uriLoader;
 
@@ -28,7 +28,7 @@ public class StringLoader extends BaseModelLoader<String> {
     }
 
     @Override
-    protected StreamLoader buildStreamLoader(final String model, final int width, final int height) {
+    public StreamLoader getStreamLoader(final String model, final int width, final int height) {
         Uri uri = Uri.parse(model);
 
         final String scheme = uri.getScheme();

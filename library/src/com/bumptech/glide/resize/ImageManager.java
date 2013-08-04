@@ -340,14 +340,15 @@ public class ImageManager {
         });
     }
 
-    public Object getImage(String id, StreamLoader streamLoader, int width, int height, Downsampler downsampler, Transformation transformation, LoadedCallback cb) {
+    public Object getImage(String id, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
         if (shutdown) return null;
-        final String key = getKey(id, downsampler, transformation, width, height);
+
+        final String key = getKey(id, transformation.getId(), downsampler, width, height);
 
         ImageManagerJob job = null;
         if (!returnFromCache(key, cb)) {
             job = new ImageManagerJob();
-            job.execute(key, streamLoader, width, height, downsampler, transformation, cb);
+            job.execute(key, streamLoader, transformation, downsampler, width, height, cb);
         }
         return job;
     }
@@ -432,25 +433,25 @@ public class ImageManager {
         return found;
     }
 
-    private class ImageManagerJob implements Runnable {
-        private StreamLoader streamLoader;
-        private String key;
+    private class ImageManagerJob<T> implements Runnable {
         private LoadedCallback cb;
         private Future future = null;
         private volatile boolean cancelled = false;
-        private Transformation transformation;
         private Downsampler downsampler;
         private int width;
         private int height;
+        private String key;
+        private StreamLoader streamLoader = null;
+        private Transformation transformation;
 
-        public void execute(String key, StreamLoader streamLoader, int width, int height, Downsampler downsampler, Transformation transformation, LoadedCallback cb) {
+        public void execute(String key, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
             this.key = key;
+            this.streamLoader = streamLoader;
+            this.transformation = transformation;
             this.cb = cb;
             this.width = width;
             this.height = height;
-            this.streamLoader = streamLoader;
             this.downsampler = downsampler;
-            this.transformation = transformation;
             bgHandler.post(this);
         }
 
@@ -459,6 +460,9 @@ public class ImageManager {
             bgHandler.removeCallbacks(this);
             if (future != null) {
                 future.cancel(false);
+            }
+            if (streamLoader != null) {
+                streamLoader.cancel();
             }
         }
 
@@ -579,8 +583,8 @@ public class ImageManager {
         bitmapReferenceCounter.markPending(bitmap);
     }
 
-    private static String getKey(String id, Downsampler downsampler, Transformation transformation, int width, int height) {
+    private static String getKey(String id, String transformationId, Downsampler downsampler, int width, int height) {
         return String.valueOf(Util.hash(id.hashCode(), downsampler.getId().hashCode(),
-                transformation.getId().hashCode(), width, height));
+                transformationId.hashCode(), width, height));
     }
 }

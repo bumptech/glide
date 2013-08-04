@@ -17,6 +17,9 @@ import com.bumptech.glide.R;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.loader.transformation.None;
+import com.bumptech.glide.loader.transformation.TransformationLoader;
+import com.bumptech.glide.resize.Transformation;
 import com.bumptech.glide.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -34,7 +37,6 @@ import java.lang.ref.WeakReference;
  */
 public class ImagePresenter<T> {
 
-    private final Drawable errorDrawable;
 
     /**
      * A builder for an {@link ImagePresenter}.
@@ -70,6 +72,7 @@ public class ImagePresenter<T> {
         private ModelLoader<T> modelLoader;
         private int errorResourceId;
         private Drawable errorDrawable;
+        private TransformationLoader<T> transformationLoader;
 
         /**
          * Builds an ImagePresenter.
@@ -93,6 +96,10 @@ public class ImagePresenter<T> {
             }
             if (modelLoader == null) {
                 throw new IllegalArgumentException("cannot create presenter without a model loader");
+            }
+
+            if (transformationLoader == null) {
+                transformationLoader = new None<T>();
             }
 
             return new ImagePresenter<T>(this);
@@ -235,6 +242,11 @@ public class ImagePresenter<T> {
             this.exceptionHandler = exceptionHandler;
             return this;
         }
+
+        public Builder<T> setTransformationLoader(TransformationLoader<T> transformationLoader) {
+            this.transformationLoader = transformationLoader;
+            return this;
+        }
     }
 
     @SuppressWarnings("all")
@@ -242,6 +254,8 @@ public class ImagePresenter<T> {
 
     private final ModelLoader<T> modelLoader;
     private final ImageLoader imageLoader;
+    private final TransformationLoader<T> transformationLoader;
+
     private final Drawable placeholderDrawable;
     private final ImageReadyCallback imageReadyCallback;
     private final ImagePresenterCoordinator coordinator;
@@ -254,6 +268,7 @@ public class ImagePresenter<T> {
     private boolean isImageSet = false;
     private boolean loadedFromCache = false;
     private final SizeDeterminer sizeDeterminer;
+    private final Drawable errorDrawable;
 
     /**
      * An interface used to coordinate multiple {@link ImagePresenter} objects acting on the same view
@@ -309,6 +324,7 @@ public class ImagePresenter<T> {
     protected ImagePresenter(Builder<T> builder) {
         this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
+        this.transformationLoader = builder.transformationLoader;
 
         final Resources res = imageView.getResources();
         if (builder.placeholderResourceId != 0) {
@@ -405,17 +421,16 @@ public class ImagePresenter<T> {
         resetPlaceHolder();
         currentModel = null;
         isImageSet = false;
-        modelLoader.clear();
         imageLoader.clear();
     }
 
     private void fetchImage(final T model, int width, int height, final int loadCount) {
-        modelLoader.clear();
         imageLoader.clear();
-        final StreamLoader streamLoader = modelLoader.getStreamLoader(model, width, height);
         final String id = modelLoader.getId(model);
+        final StreamLoader sl = modelLoader.getStreamLoader(model, width, height);
+        final Transformation t = transformationLoader.getTransformation(model);
 
-        imageToken = imageLoader.fetchImage(id, streamLoader, width, height, new ImageLoader.ImageReadyCallback() {
+        imageToken = imageLoader.fetchImage(id, sl, t, width, height, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;

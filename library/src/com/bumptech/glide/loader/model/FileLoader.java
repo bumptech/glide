@@ -27,7 +27,4 @@ public class FileLoader implements ModelLoader<File> {
         //canonical is better, but also slower
         return model.getAbsolutePath();
     }
-
-    @Override
-    public void clear() { }
 }

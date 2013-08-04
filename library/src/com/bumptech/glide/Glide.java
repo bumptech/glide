@@ -15,14 +15,14 @@ import com.bumptech.glide.loader.model.ResourceLoader;
 import com.bumptech.glide.loader.model.StringLoader;
 import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.model.UrlLoader;
+import com.bumptech.glide.loader.transformation.CenterCrop;
+import com.bumptech.glide.loader.transformation.FitCenter;
+import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.resize.Downsampler;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Transformation;
-import com.bumptech.glide.resize.loader.Approximate;
-import com.bumptech.glide.resize.loader.CenterCrop;
-import com.bumptech.glide.resize.loader.FitCenter;
 import com.bumptech.glide.resize.loader.ImageManagerLoader;
 
 import java.io.File;
@@ -338,6 +338,7 @@ public class Glide {
      */
     @SuppressWarnings("unused") //public api
     public static class Request<T> {
+
         private enum ResizeOption {
             APPROXIMATE,
             CENTER_CROP,
@@ -353,8 +354,9 @@ public class Glide {
         private int animationId = -1;
         private int placeholderId = -1;
         private int errorId = -1;
-        private Transformation transformation = Transformation.NONE;
+        private Transformation transformation = null;
         private Downsampler downsampler = null;
+        private TransformationLoader<T> transformationLoader = null;
 
         public Request(T model) {
             this.model = model;
@@ -376,6 +378,7 @@ public class Glide {
         public Request<T> centerCrop() {
             transformation = Transformation.CENTER_CROP;
             downsampler = Downsampler.AT_LEAST;
+            transformationLoader = null;
 
             return this;
         }
@@ -388,6 +391,7 @@ public class Glide {
         public Request<T> fitCenter() {
             transformation = Transformation.FIT_CENTER;
             downsampler = Downsampler.AT_LEAST;
+            transformationLoader = null;
 
             return this;
         }
@@ -400,6 +404,7 @@ public class Glide {
         public Request<T> approximate() {
             transformation = Transformation.NONE;
             downsampler = Downsampler.AT_LEAST;
+            transformationLoader = null;
 
             return this;
         }
@@ -413,6 +418,7 @@ public class Glide {
         public Request<T> asIs() {
             transformation = Transformation.NONE;
             downsampler = Downsampler.NONE;
+            transformationLoader = null;
 
             return this;
         }
@@ -424,8 +430,17 @@ public class Glide {
          * @param transformation The transformation to use
          * @return This Request
          */
-        public Request<T> transform(Transformation transformation) {
+        public Request<T> transform(final Transformation transformation) {
             this.transformation = transformation;
+            downsampler = Downsampler.AT_LEAST;
+            transformationLoader = null;
+
+            return this;
+        }
+
+        public Request<T> transform(TransformationLoader<T> transformationLoader) {
+            this.transformationLoader = transformationLoader;
+            transformation = null;
             downsampler = Downsampler.AT_LEAST;
 
             return this;
@@ -508,11 +523,13 @@ public class Glide {
             final Context context = imageView.getContext();
 
             modelLoader = getFinalModelLoader(context);
+            transformationLoader = getFinalTransformationLoader();
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
                     .setImageView(imageView)
                     .setModelLoader(modelLoader)
-                    .setImageLoader(new ImageManagerLoader(context, downsampler, transformation));
+                    .setImageLoader(new ImageManagerLoader(context, downsampler))
+                    .setTransformationLoader(transformationLoader);
 
             if (animationId != -1) {
                 final Animation animation = AnimationUtils.loadAnimation(imageView.getContext(), animationId);
@@ -533,7 +550,6 @@ public class Glide {
                 builder.setPlaceholderResource(placeholderId);
             }
 
-
             if (errorId != -1) {
                 builder.setErrorResource(errorId);
             }
@@ -549,6 +565,27 @@ public class Glide {
             }
         }
 
+        private TransformationLoader<T> getFinalTransformationLoader() {
+            if (transformationLoader != null) {
+                return transformationLoader;
+            } else {
+                return new TransformationLoader<T>() {
+                    @Override
+                    public Transformation getTransformation(T model) {
+                        return transformation;
+                    }
+                };
+            }
+        }
+
+        private String getFinalTransformationId() {
+            if (transformationLoader != null) {
+                return transformationLoader.getClass().toString();
+            } else {
+                return transformation.getId();
+            }
+        }
+
         private Downsampler getFinalDownsampler(ImageView imageView) {
             Downsampler result = downsampler;
             if (result == null) {
@@ -561,6 +598,7 @@ public class Glide {
             }
             return result;
         }
+
 
         private static Metadata getMetadataFrom(ImageView imageView) {
             return (Metadata) imageView.getTag(R.id.glide_metadata);
@@ -583,7 +621,7 @@ public class Glide {
                 modelClass = request.model.getClass();
                 modelLoaderClass = request.modelLoaderClass;
                 downsamplerId = request.downsampler.getId();
-                transformationId = request.transformation.getId();
+                transformationId = request.getFinalTransformationId();
                 animationId = request.animationId;
                 placeholderId = request.placeholderId;
                 errorId = request.errorId;

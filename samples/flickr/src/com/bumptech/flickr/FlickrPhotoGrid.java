@@ -12,15 +12,10 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Photo;
+import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
-<<<<<<< HEAD
-import com.bumptech.glide.resize.Downsampler;
-import com.bumptech.glide.resize.Transformation;
-import com.bumptech.glide.resize.loader.CenterCrop;
-=======
-import com.bumptech.glide.resize.loader.ImageManagerLoader;
->>>>>>> 765fdbe... Should have been in go to just image manager loader
+import com.bumptech.glide.resize.loader.Approximate;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -119,7 +114,8 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 imagePresenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
                         .setModelLoader(new FlickrModelLoader(context))
-                        .setImageLoader(new CenterCrop(context))
+                        .setImageLoader(new Approximate<Photo>(context))
+                        .setTransformationLoader(new CenterCrop<Photo>())
                         .setImageReadyCallback(new ImageReadyCallback() {
                             @Override
                             public void onImageReady(ImageView view, boolean fromCache) {

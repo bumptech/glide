@@ -26,7 +26,4 @@ public class ResourceLoader implements ModelLoader<Integer> {
     public String getId(Integer model) {
         return model.toString();
     }
-
-    @Override
-    public void clear() { }
 }

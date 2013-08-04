@@ -2,6 +2,7 @@ package com.bumptech.glide.loader.image;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.resize.Transformation;
 
 /**
  * An interface used by {@link com.bumptech.glide.presenter.ImagePresenter} to fetch a bitmap for a given id and
@@ -44,7 +45,7 @@ public interface ImageLoader {
      *
      * @return A reference to the fetch that must be retained by the calling object as long as the fetch is relevant
      */
-    public Object fetchImage(String id, StreamLoader streamLoader, int width, int height, ImageReadyCallback cb);
+    public Object fetchImage(String id, StreamLoader streamLoader, Transformation transformation, int width, int height, ImageReadyCallback cb);
 
     /**
      * Called when the current image load does not need to continue and any corresponding cleanup to save cpu

@@ -43,10 +43,4 @@ public interface ModelLoader<T> {
      * it does not have to.
      */
     public String getId(T model);
-
-    /**
-     * A method that allows the ModelLoader to cleanup any old or inprocess {@link StreamLoader}. Primarily oriented
-     * at allowing the model loader to call {@link com.bumptech.glide.loader.stream.StreamLoader#cancel()};
-     */
-    public void clear();
 }
