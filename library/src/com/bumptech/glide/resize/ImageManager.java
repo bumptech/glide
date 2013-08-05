@@ -104,7 +104,6 @@ public class ImageManager {
     public static File getPhotoCacheDir(Context context, String cacheName) {
         File cacheDir = null;
 
-
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
                 !isExternalStorageRemovable()) {
             //seems like this can still be null even if the above are true
@@ -325,7 +324,7 @@ public class ImageManager {
     }
 
     private ImageManager(Builder builder) {
-        HandlerThread bgThread = new HandlerThread("bg_thread");
+        HandlerThread bgThread = new HandlerThread("bg_thread", android.os.Process.THREAD_PRIORITY_BACKGROUND);
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
