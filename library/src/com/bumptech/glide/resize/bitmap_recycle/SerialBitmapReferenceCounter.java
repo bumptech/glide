@@ -2,13 +2,14 @@ package com.bumptech.glide.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
-public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter {
+public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
 
     private static class InnerTrackerPool {
-        private ConcurrentLinkedQueue<InnerTracker> pool = new ConcurrentLinkedQueue<InnerTracker>();
+        private LinkedList<InnerTracker> pool = new LinkedList<InnerTracker>();
 
         public InnerTracker get() {
             InnerTracker result = pool.poll();
@@ -25,20 +26,16 @@ public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter 
     }
 
     private static class InnerTracker {
-        private volatile int refs = 0;
-        private volatile boolean pending = false;
+        private int refs = 0;
+        private boolean pending = false;
 
         public void acquire() {
             pending = false;
-            synchronized (this) {
-                refs++;
-            }
+            refs++;
         }
 
         public boolean release() {
-            synchronized (this) {
-                refs--;
-            }
+            refs--;
 
             return refs == 0 && !pending;
         }
@@ -53,32 +50,30 @@ public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter 
         }
     }
 
-    private final ConcurrentHashMap<Integer, InnerTracker> counter;
+    private final Map<Bitmap, InnerTracker> counter = new HashMap<Bitmap, InnerTracker>();
     private final BitmapPool target;
     private final InnerTrackerPool pool = new InnerTrackerPool();
 
-    public ConcurrentBitmapReferenceCounter(BitmapPool target) {
+    public SerialBitmapReferenceCounter(BitmapPool target) {
         this.target = target;
-        counter = new ConcurrentHashMap<Integer, InnerTracker>();
     }
 
     @Override
     public void initBitmap(Bitmap toInit) {
-        final InnerTracker ifAbsent = pool.get();
-        final InnerTracker old = counter.putIfAbsent(toInit.hashCode(), ifAbsent);
-        if (old != null) {
-            pool.release(ifAbsent);
+        final InnerTracker tracker = counter.get(toInit);
+        if (tracker == null) {
+            counter.put(toInit, pool.get());
         }
     }
 
     @Override
     public void acquireBitmap(Bitmap bitmap) {
-        get(bitmap).acquire();
+        counter.get(bitmap).acquire();
     }
 
     @Override
     public void releaseBitmap(Bitmap bitmap) {
-        final InnerTracker tracker = get(bitmap);
+        final InnerTracker tracker = counter.get(bitmap);
         if (tracker.release()) {
             recycle(tracker, bitmap);
         }
@@ -86,7 +81,7 @@ public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter 
 
     @Override
     public void rejectBitmap(Bitmap bitmap) {
-        final InnerTracker tracker = get(bitmap);
+        final InnerTracker tracker = counter.get(bitmap);
         if (tracker.reject()) {
             recycle(tracker, bitmap);
         }
@@ -94,17 +89,12 @@ public class ConcurrentBitmapReferenceCounter implements BitmapReferenceCounter 
 
     @Override
     public void markPending(Bitmap bitmap) {
-        get(bitmap).markPending();
-    }
-
-    private InnerTracker get(Bitmap bitmap) {
-        return counter.get(bitmap.hashCode());
+        counter.get(bitmap).markPending();
     }
 
     private void recycle(InnerTracker tracker, Bitmap bitmap) {
-        if (!target.put(bitmap)) {
-            counter.remove(bitmap.hashCode());
-            pool.release(tracker);
-        }
+        target.put(bitmap);
+        counter.remove(bitmap);
+        pool.release(tracker);
     }
 }

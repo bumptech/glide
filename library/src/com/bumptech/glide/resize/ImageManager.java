@@ -18,7 +18,7 @@ import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
-import com.bumptech.glide.resize.bitmap_recycle.ConcurrentBitmapReferenceCounter;
+import com.bumptech.glide.resize.bitmap_recycle.SerialBitmapReferenceCounter;
 import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
@@ -315,7 +315,7 @@ public class ImageManager {
                 if (bitmapPool == null) {
                     bitmapPool = new LruBitmapPool(getSafeMemoryCacheSize(context));
                 }
-                bitmapReferenceCounter = new ConcurrentBitmapReferenceCounter(bitmapPool);
+                bitmapReferenceCounter = new SerialBitmapReferenceCounter(bitmapPool);
             }
         }
     }
@@ -360,12 +360,7 @@ public class ImageManager {
      * @param b The rejected Bitmap
      */
     public void rejectBitmap(final Bitmap b) {
-        bgHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                bitmapReferenceCounter.rejectBitmap(b);
-            }
-        });
+        bitmapReferenceCounter.rejectBitmap(b);
     }
 
     /**
@@ -377,12 +372,7 @@ public class ImageManager {
      * @param b The acquired Bitmap
      */
     public void acquireBitmap(final Bitmap b) {
-        bgHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                bitmapReferenceCounter.acquireBitmap(b);
-            }
-        });
+        bitmapReferenceCounter.acquireBitmap(b);
     }
 
     /**
@@ -394,12 +384,7 @@ public class ImageManager {
      * @param b The releasedBitmap
      */
     public void releaseBitmap(final Bitmap b) {
-        bgHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                bitmapReferenceCounter.releaseBitmap(b);
-            }
-        });
+        bitmapReferenceCounter.releaseBitmap(b);
     }
 
     /**
@@ -525,12 +510,11 @@ public class ImageManager {
                     putInDiskCache(key, result);
                 }
 
-                bitmapReferenceCounter.initBitmap(result);
-                putInMemoryCache(key, result);
-
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        bitmapReferenceCounter.initBitmap(result);
+                        putInMemoryCache(key, result);
                         cb.onLoadCompleted(result);
                     }
                 });
@@ -572,11 +556,9 @@ public class ImageManager {
 
     private void putInMemoryCache(String key, final Bitmap bitmap) {
         final boolean inCache;
-        synchronized (memoryCache) {
-            inCache = memoryCache.contains(key);
-            if (!inCache) {
-                memoryCache.put(key, bitmap);
-            }
+        inCache = memoryCache.contains(key);
+        if (!inCache) {
+            memoryCache.put(key, bitmap);
         }
 
         bitmapReferenceCounter.acquireBitmap(bitmap);
