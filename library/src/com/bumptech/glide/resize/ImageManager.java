@@ -23,7 +23,7 @@ import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
-import com.bumptech.glide.resize.cache.LruPhotoCache;
+import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCacheAdapter;
 import com.bumptech.glide.util.Log;
@@ -294,7 +294,7 @@ public class ImageManager {
             }
 
             if (memoryCache == null) {
-                memoryCache = new LruPhotoCache(getSafeMemoryCacheSize(context));
+                memoryCache = new LruMemoryCache(getSafeMemoryCacheSize(context));
             }
 
             if (diskCache == null) {
