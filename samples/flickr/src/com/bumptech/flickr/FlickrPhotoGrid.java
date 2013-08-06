@@ -15,7 +15,8 @@ import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
-import com.bumptech.glide.resize.loader.Approximate;
+import com.bumptech.glide.presenter.target.Target;
+import com.bumptech.glide.resize.loader.ImageManagerLoader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -114,22 +115,21 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 imagePresenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)
                         .setModelLoader(new FlickrModelLoader(context))
-                        .setImageLoader(new Approximate<Photo>(context))
+                        .setImageLoader(new ImageManagerLoader(context))
                         .setTransformationLoader(new CenterCrop<Photo>())
                         .setImageReadyCallback(new ImageReadyCallback() {
                             @Override
-                            public void onImageReady(ImageView view, boolean fromCache) {
-                                view.clearAnimation();
-
+                            public void onImageReady(Target target, boolean fromCache) {
                                 if (!fromCache) {
-                                    view.startAnimation(fadeIn);
+                                    target.startAnimation(fadeIn);
                                 }
                             }
                         })
                         .build();
                 view = imageView;
+                view.setTag(imagePresenter);
             } else {
-                imagePresenter = ImagePresenter.getCurrent(view);
+                imagePresenter = (ImagePresenter<Photo>) view.getTag();
             }
 
             imagePresenter.setModel(current);

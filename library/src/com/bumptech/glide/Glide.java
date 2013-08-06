@@ -20,6 +20,8 @@ import com.bumptech.glide.loader.transformation.FitCenter;
 import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
+import com.bumptech.glide.presenter.target.ImageViewTarget;
+import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.Downsampler;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Transformation;
@@ -27,8 +29,8 @@ import com.bumptech.glide.resize.loader.ImageManagerLoader;
 
 import java.io.File;
 import java.net.URL;
-
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A singleton to present a simple static interface for Glide {@link Glide.Request} and to create and manage an
@@ -44,6 +46,7 @@ public class Glide {
     private static final Glide GLIDE = new Glide();
     private ImageManager imageManager = null;
     private RequestQueue requestQueue = null;
+    private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
 
     /**
      * Get the singleton.
@@ -321,7 +324,7 @@ public class Glide {
     public static class ModelRequest<T> {
         private final ModelLoader<T> modelLoader;
 
-        public ModelRequest(ModelLoader<T> modelLoader) {
+        private ModelRequest(ModelLoader<T> modelLoader) {
             this.modelLoader = modelLoader;
         }
 
@@ -338,6 +341,9 @@ public class Glide {
      */
     @SuppressWarnings("unused") //public api
     public static class Request<T> {
+
+        private Context context;
+        private Target target;
 
         private enum ResizeOption {
             APPROXIMATE,
@@ -358,13 +364,13 @@ public class Glide {
         private Downsampler downsampler = null;
         private TransformationLoader<T> transformationLoader = null;
 
-        public Request(T model) {
+        private Request(T model) {
             this.model = model;
             this.modelLoaderFactory = getFactory(model);
             this.modelLoaderClass = modelLoaderFactory.loaderClass();
         }
 
-        public Request(T model, ModelLoader<T> modelLoader) {
+        private Request(T model, ModelLoader<T> modelLoader) {
             this.model = model;
             this.modelLoader = modelLoader;
             this.modelLoaderClass = modelLoader.getClass();
@@ -490,7 +496,27 @@ public class Glide {
          * @see ImagePresenter#setModel(Object)
          */
         public void into(ImageView imageView) {
-            ImagePresenter<T> imagePresenter = getImagePresenter(imageView);
+            //make an effort to support wrap content layout params. This will still blow
+            //up if transformation doesn't handle wrap content, but its a start
+            final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+            if (layoutParams != null &&
+                    (layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
+                    layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT)) {
+                downsampler = Downsampler.NONE;
+            }
+
+            finish(imageView.getContext(), new ImageViewTarget(imageView));
+        }
+
+        public ContextRequest into(Target target) {
+            return new ContextRequest(this, target);
+        }
+
+        private void finish(Context context, Target target) {
+            this.context = context;
+            this.target = target;
+
+            ImagePresenter<T> imagePresenter = getImagePresenter(target);
             imagePresenter.setModel(model);
         }
 
@@ -498,50 +524,45 @@ public class Glide {
          * Creates the new {@link ImagePresenter} if one does not currently exist for the current view and sets it as
          * the view's tag for the id {@code R.id.image_presenter_id}.
          */
-        private ImagePresenter<T> getImagePresenter(ImageView imageView) {
-            downsampler = getFinalDownsampler(imageView);
-
-            Metadata previous = getMetadataFrom(imageView);
+        @SuppressWarnings("unchecked")
+        private ImagePresenter<T> getImagePresenter(Target target) {
+            Metadata previous = GLIDE.metadataTracker.get(target);
             Metadata current = new Metadata(this);
 
-            ImagePresenter<T> result = ImagePresenter.getCurrent(imageView);
+            ImagePresenter<T> result = target.getImagePresenter();
 
             if (!current.equals(previous)) {
                 if (result != null) {
                     result.clear();
                 }
 
-                result = buildImagePresenter(imageView);
+                result = buildImagePresenter(target);
+                target.setImagePresenter(result);
 
-                setMetadata(imageView, current);
+                GLIDE.metadataTracker.put(target, current);
             }
 
             return result;
         }
 
-        private ImagePresenter<T> buildImagePresenter(ImageView imageView) {
-            final Context context = imageView.getContext();
-
+        private ImagePresenter<T> buildImagePresenter(Target target) {
             modelLoader = getFinalModelLoader(context);
             transformationLoader = getFinalTransformationLoader();
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
-                    .setImageView(imageView)
+                    .setTarget(target, context)
                     .setModelLoader(modelLoader)
                     .setImageLoader(new ImageManagerLoader(context, downsampler))
                     .setTransformationLoader(transformationLoader);
 
             if (animationId != -1) {
-                final Animation animation = AnimationUtils.loadAnimation(imageView.getContext(), animationId);
+                final Animation animation = AnimationUtils.loadAnimation(context, animationId);
                 builder.setImageReadyCallback(new ImageReadyCallback() {
                     @Override
-                    public void onImageReady(ImageView view, boolean fromCache) {
-                        view.clearAnimation();
-
+                    public void onImageReady(Target target, boolean fromCache) {
                         if (!fromCache) {
-                            view.startAnimation(animation);
+                            target.startAnimation(animation);
                         }
-
                     }
                 });
             }
@@ -585,66 +606,58 @@ public class Glide {
                 return transformation.getId();
             }
         }
+    }
 
-        private Downsampler getFinalDownsampler(ImageView imageView) {
-            Downsampler result = downsampler;
-            if (result == null) {
-                ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-                if (layoutParams.width == WRAP_CONTENT && layoutParams.height == WRAP_CONTENT) {
-                    result = Downsampler.NONE;
-                } else {
-                    result = Downsampler.AT_LEAST;
-                }
+    public static class ContextRequest {
+        private final Request request;
+        private final Target target;
+
+        private ContextRequest(Request request, Target target) {
+            this.request = request;
+            this.target = target;
+        }
+
+        public void with(Context context) {
+            request.finish(context, target);
+        }
+    }
+
+    private static class Metadata {
+        public final Class modelClass;
+        public final Class modelLoaderClass;
+        public final int animationId;
+        public final int placeholderId;
+        public final int errorId;
+
+        private final String downsamplerId;
+        private final String transformationId;
+
+        public Metadata(Request request) {
+            modelClass = request.model.getClass();
+            modelLoaderClass = request.modelLoaderClass;
+            downsamplerId = request.downsampler.getId();
+            transformationId = request.getFinalTransformationId();
+            animationId = request.animationId;
+            placeholderId = request.placeholderId;
+            errorId = request.errorId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || !(o instanceof Metadata)) {
+                return false;
             }
-            return result;
+
+            Metadata other = (Metadata) o;
+
+            return modelClass.equals(other.modelClass) &&
+                    modelLoaderClass.equals(other.modelLoaderClass) &&
+                    downsamplerId.equals(other.downsamplerId) &&
+                    transformationId.equals(other.transformationId) &&
+                    animationId == other.animationId &&
+                    placeholderId == other.placeholderId &&
+                    errorId == other.errorId;
+
         }
-
-
-        private static Metadata getMetadataFrom(ImageView imageView) {
-            return (Metadata) imageView.getTag(R.id.glide_metadata);
-        }
-
-        private static void setMetadata(ImageView imageView, Metadata metadata) {
-            imageView.setTag(R.id.glide_metadata, metadata);
-        }
-
-        private static class Metadata {
-            public final Class modelClass;
-            public final Class modelLoaderClass;
-            public final int animationId;
-            public final int placeholderId;
-            public final int errorId;
-            private final String downsamplerId;
-            private final String transformationId;
-
-            public Metadata(Request request) {
-                modelClass = request.model.getClass();
-                modelLoaderClass = request.modelLoaderClass;
-                downsamplerId = request.downsampler.getId();
-                transformationId = request.getFinalTransformationId();
-                animationId = request.animationId;
-                placeholderId = request.placeholderId;
-                errorId = request.errorId;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || !(o instanceof Metadata)) {
-                    return false;
-                }
-
-                Metadata other = (Metadata) o;
-
-                return modelClass.equals(other.modelClass) &&
-                        modelLoaderClass.equals(other.modelLoaderClass) &&
-                        downsamplerId.equals(other.downsamplerId) &&
-                        transformationId.equals(other.transformationId) &&
-                        animationId == other.animationId &&
-                        placeholderId == other.placeholderId &&
-                        errorId == other.errorId;
-
-            }
-        }
-
     }
 }

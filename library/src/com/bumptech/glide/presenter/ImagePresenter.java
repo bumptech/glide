@@ -4,25 +4,20 @@
 
 package com.bumptech.glide.presenter;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.SystemClock;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import com.bumptech.glide.R;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.loader.transformation.None;
 import com.bumptech.glide.loader.transformation.TransformationLoader;
+import com.bumptech.glide.presenter.target.ImageViewTarget;
+import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.Transformation;
 import com.bumptech.glide.util.Log;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Wraps an {@link android.widget.ImageView} to display arbitrary Bitmaps and provides a framework for fetching and
@@ -36,7 +31,6 @@ import java.lang.ref.WeakReference;
  *            as a String containing a path or a complex data type.
  */
 public class ImagePresenter<T> {
-
 
     /**
      * A builder for an {@link ImagePresenter}.
@@ -52,12 +46,12 @@ public class ImagePresenter<T> {
      */
     @SuppressWarnings("unused")
     public static class Builder<T> {
-        private ImageView imageView;
         private int placeholderResourceId;
         private Drawable placeholderDrawable;
         private ImageReadyCallback imageReadyCallback;
         private ImagePresenterCoordinator coordinator;
         private ImageLoader imageLoader;
+        private Context context;
         private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
             @Override
             public void onException(Exception e, T model, boolean isCurrent) {
@@ -73,6 +67,7 @@ public class ImagePresenter<T> {
         private int errorResourceId;
         private Drawable errorDrawable;
         private TransformationLoader<T> transformationLoader;
+        private Target target;
 
         /**
          * Builds an ImagePresenter.
@@ -80,16 +75,14 @@ public class ImagePresenter<T> {
          * <p>
          *     Note - If an ImagePresenter has already been set for this view, it will be silently replaced and will not
          *     be cleared which could lead to undefined behavior. It is most efficient to set an ImagePresenter once and
-         *     then retrieve it for each subsequent load. If you need to replace an ImagePresenter you can do so by
-         *     setting the tag at <code>R.id.image_presenter_id</code> to null with
-         *     {@link View#setTag(int, Object)}
+         *     then retrieve it for each subsequent load.
          * </p>
          *
          * @return A new ImagePresenter
          */
         public ImagePresenter<T> build(){
-            if (imageView == null) {
-                throw new IllegalArgumentException("cannot create presenter without an image view");
+            if (target == null) {
+                throw new IllegalArgumentException("cannot create presenter without a target");
             }
             if (imageLoader == null) {
                 throw new IllegalArgumentException("cannot create presenter without an image loader");
@@ -111,8 +104,17 @@ public class ImagePresenter<T> {
          * @param imageView The {@link android.widget.ImageView} to wrap
          * @return This Builder object
          */
-        public Builder<T> setImageView(ImageView imageView) {
-            this.imageView = imageView;
+        public Builder<T> setImageView(final ImageView imageView) {
+            this.target = new ImageViewTarget(imageView);
+            this.context = imageView.getContext();
+
+            return this;
+        }
+
+        public Builder<T> setTarget(Target target, Context context) {
+            this.target = target;
+            this.context = context;
+
             return this;
         }
 
@@ -252,6 +254,8 @@ public class ImagePresenter<T> {
     @SuppressWarnings("all")
     private Object imageToken; //this is just a reference we may need to keep, otherwise unused
 
+    private final Target target;
+
     private final ModelLoader<T> modelLoader;
     private final ImageLoader imageLoader;
     private final TransformationLoader<T> transformationLoader;
@@ -260,14 +264,12 @@ public class ImagePresenter<T> {
     private final ImageReadyCallback imageReadyCallback;
     private final ImagePresenterCoordinator coordinator;
     private final ExceptionHandler<T> exceptionHandler;
-    private final ImageView imageView;
 
     private T currentModel;
     private int currentCount;
 
     private boolean isImageSet = false;
     private boolean loadedFromCache = false;
-    private final SizeDeterminer sizeDeterminer;
     private final Drawable errorDrawable;
 
     /**
@@ -308,25 +310,11 @@ public class ImagePresenter<T> {
         public void onException(Exception e, T model, boolean isCurrent);
     }
 
-    /**
-     * Retrieves the current ImagePresenter for the given view using {@link android.widget.ImageView#getTag()} and
-     * <code>R.id.image_presenter_id</code>
-     *
-     * @param imageView The view to get the ImagePresenter for
-     * @param <T> The type of model being displayed in the ImageView
-     * @return The current ImagePresenter, or null if one does not exist
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> ImagePresenter<T> getCurrent(View imageView) {
-        return (ImagePresenter<T>) imageView.getTag(R.id.image_presenter_id);
-    }
-
     protected ImagePresenter(Builder<T> builder) {
-        this.imageView = builder.imageView;
         this.imageLoader = builder.imageLoader;
         this.transformationLoader = builder.transformationLoader;
 
-        final Resources res = imageView.getResources();
+        final Resources res = builder.context.getResources();
         if (builder.placeholderResourceId != 0) {
             this.placeholderDrawable = res.getDrawable(builder.placeholderResourceId);
         } else {
@@ -342,23 +330,7 @@ public class ImagePresenter<T> {
         this.imageReadyCallback = builder.imageReadyCallback;
         this.exceptionHandler = builder.exceptionHandler;
         this.modelLoader = builder.modelLoader;
-        sizeDeterminer = new SizeDeterminer(imageView);
-
-        imageView.setTag(R.id.image_presenter_id, this);
-    }
-
-    /**
-     * A method to get the wrapped {@link android.widget.ImageView}.
-     *
-     * <p>
-     *     Note - Setting any image or drawable on the view
-     * directly may be overridden at any point by the wrapping presenter.
-     * </p>
-     *
-     * @return The {@link android.widget.ImageView} this {@link ImagePresenter} object wraps
-     */
-    public ImageView getImageView() {
-        return imageView;
+        this.target = builder.target;
     }
 
     /**
@@ -384,7 +356,7 @@ public class ImagePresenter<T> {
             currentModel = model;
             isImageSet = false;
 
-            sizeDeterminer.getSize(new SizeDeterminer.SizeReadyCallback() {
+            target.getSize(new Target.SizeReadyCallback() {
                 @Override
                 public void onSizeReady(int width, int height) {
                     fetchImage(model, width, height, loadCount);
@@ -407,7 +379,7 @@ public class ImagePresenter<T> {
     public void resetPlaceHolder() {
         if (!canSetPlaceholder()) return;
 
-        imageView.setImageDrawable(placeholderDrawable);
+        target.setPlaceholder(placeholderDrawable);
     }
 
     /**
@@ -436,8 +408,8 @@ public class ImagePresenter<T> {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
 
                 if (imageReadyCallback != null)
-                    imageReadyCallback.onImageReady(imageView, loadedFromCache);
-                imageView.setImageBitmap(image);
+                    imageReadyCallback.onImageReady(target, loadedFromCache);
+                target.onImageReady(image);
                 isImageSet = true;
                 return true;
             }
@@ -449,7 +421,7 @@ public class ImagePresenter<T> {
                     exceptionHandler.onException(e, model, relevant);
                 }
                 if (relevant && canSetPlaceholder()) {
-                    imageView.setImageDrawable(errorDrawable);
+                    target.setPlaceholder(errorDrawable);
                 }
             }
         });
@@ -472,105 +444,5 @@ public class ImagePresenter<T> {
 
     private boolean canSetPlaceholder() {
         return coordinator == null || coordinator.canSetPlaceholder(this);
-    }
-
-    private static class SizeDeterminer {
-        private static final String PENDING_SIZE_CHANGE_TOKEN = "pending_load";
-        private static final int PENDING_SIZE_CHANGE_DELAY = 100; //60 fps = 1000/60 = 16.67 ms
-
-        private final View view;
-        private int width = 0;
-        private int height = 0;
-        private boolean valid = false;
-        private SizeReadyCallback cb = null;
-        private Handler handler = new Handler();
-        private final Runnable getDimens = new Runnable() {
-            @Override
-            public void run() {
-                if (cb == null) return;
-
-                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-                if (layoutParams.width > 0 && layoutParams.height > 0) {
-                    cb.onSizeReady(layoutParams.width, layoutParams.height);
-                } else if (view.getWidth() > 0 && view.getHeight() > 0) {
-                    valid = true;
-                    width = view.getWidth();
-                    height = view.getHeight();
-                    cb.onSizeReady(width, height);
-                }
-                cb = null;
-            }
-        };
-
-        private static class SizeObserver implements ViewTreeObserver.OnGlobalLayoutListener {
-            private final WeakReference<SizeDeterminer> sizeDeterminerRef;
-            private final Handler handler;
-
-            public SizeObserver(SizeDeterminer sizeDeterminer, Handler handler) {
-                this.sizeDeterminerRef = new WeakReference<SizeDeterminer>(sizeDeterminer);
-                this.handler = handler;
-            }
-
-            @Override
-            public void onGlobalLayout() {
-                if (sizeDeterminerRef.get() != null) {
-                    handler.removeCallbacksAndMessages(PENDING_SIZE_CHANGE_TOKEN);
-                    handler.postAtTime(new Runnable() {
-                        @Override
-                        public void run() {
-                            final SizeDeterminer sizeDeterminer = sizeDeterminerRef.get();
-                            if (sizeDeterminer != null) {
-                                sizeDeterminer.maybeInvalidate();
-                            }
-                        }
-                    }, PENDING_SIZE_CHANGE_TOKEN, SystemClock.uptimeMillis() + PENDING_SIZE_CHANGE_DELAY);
-                }
-            }
-        }
-
-        public interface SizeReadyCallback {
-            public void onSizeReady(int width, int height);
-        }
-
-        public SizeDeterminer(View view) {
-            this.view = view;
-            view.getViewTreeObserver().addOnGlobalLayoutListener(new SizeObserver(this, handler));
-        }
-
-        public void getSize(SizeReadyCallback cb) {
-            handler.removeCallbacksAndMessages(PENDING_SIZE_CHANGE_TOKEN);
-            this.cb = null;
-            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            //non null layout params and either width and height have been set, or set to wrap content so they
-            //will not be set until we set some content
-            if (layoutParams != null && ((layoutParams.width > 0 && layoutParams.height > 0)
-                    || (layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
-                            layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT))) {
-                cb.onSizeReady(layoutParams.width, layoutParams.height);
-            } else if (valid) {
-                cb.onSizeReady(width, height);
-            } else {
-                this.cb = cb;
-                handler.postAtTime(getDimens, PENDING_SIZE_CHANGE_TOKEN, SystemClock.uptimeMillis()
-                        + PENDING_SIZE_CHANGE_DELAY);
-            }
-        }
-
-        private void maybeInvalidate() {
-            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            if (layoutParams.width <= 0 || layoutParams.height <= 0) {
-                if (view.getWidth() >= 0 && view.getHeight() >= 0) {
-                    width = view.getWidth();
-                    height = view.getHeight();
-                    valid = true;
-                    if (cb != null) {
-                        cb.onSizeReady(width, height);
-                        cb = null;
-                    }
-                } else {
-                    valid = false;
-                }
-            }
-        }
     }
 }

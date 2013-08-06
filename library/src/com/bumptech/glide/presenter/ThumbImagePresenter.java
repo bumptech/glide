@@ -137,15 +137,6 @@ public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterC
     }
 
     /**
-     * Get the {@link android.widget.ImageView} this object is acting on
-     *
-     * @see ImagePresenter#getImageView()
-     */
-    public ImageView getImageView() {
-        return fullPresenter.getImageView();
-    }
-
-    /**
      * Calls the corresponding method on both image presenters
      *
      * @see ImagePresenter#clear()
