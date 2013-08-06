@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="glide-rules" default="help">
+    <target name="jar" depends="-compile">
+        <jar destfile="bin/glide.jar"
+            basedir="bin/classes" >
+            <zipgroupfileset dir="libs" includes="*.jar" />
+        </jar>
+    </target>
+    <target name="glide-minus-volley" depends="-compile">
+        <jar destfile="bin/glide-minus-volley.jar"
+            basedir="bin/classes" >
+            <zipgroupfileset dir="libs" includes="disklrucache*.jar" />
+        </jar>
+    </target>
+</project>

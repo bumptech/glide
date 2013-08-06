@@ -1,8 +1,10 @@
-setup:
+jar:
 	git submodule init
 	git submodule update
 	cd library/volley && ant jar
 	cp library/volley/bin/volley.jar library/libs
+	cd library && ant jar
 
-update-ant: setup
-	android update project --path .. --library glide/library
+glide-minus-volley:
+	cd library && ant glide-minus-volley
+
