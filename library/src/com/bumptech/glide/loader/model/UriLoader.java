@@ -11,7 +11,7 @@ import java.net.URL;
 
 /**
  * A model loader for trying to load Uris. Capable of handling 'http', 'https', 'android.resource', 'content', and
- * 'file' schemes. Unsupported schemes will throw an exception in {@link #buildStreamLoader(android.net.Uri, int, int)}.
+ * 'file' schemes. Unsupported schemes will throw an exception in {@link #getStreamLoader(android.net.Uri, int, int)}
  */
 public class UriLoader implements ModelLoader<Uri> {
     private final Context context;

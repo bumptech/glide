@@ -3,7 +3,7 @@ package com.bumptech.glide.loader.stream;
 import java.io.InputStream;
 
 /**
- * An interface for lazily and asynchronously opening an input stream that can be used to load an image.
+ * A base class for lazily and asynchronously opening an input stream that can be used to load an image.
  * A new instance is created per image load by {@link com.bumptech.glide.loader.model.ModelLoader}. loadStream
  * may or may not be called for any given load depending on whether or not the corresponding image is cached. Cancel
  * also may or may not be called.

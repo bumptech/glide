@@ -20,9 +20,10 @@ import com.bumptech.glide.resize.Transformation;
 import com.bumptech.glide.util.Log;
 
 /**
- * Wraps an {@link android.widget.ImageView} to display arbitrary Bitmaps and provides a framework for fetching and
- * loading bitmaps correctly when views are being recycled. Uses {@link ModelLoader} to download convert between a
- * model and an {@link java.io.InputStream} for a given model and {@link ImageLoader} to load a bitmap from a given
+ * Wraps an {@link Target} to display arbitrary Bitmaps and provides a framework for fetching and
+ * loading bitmaps correctly when targest are being recycled. Uses {@link ModelLoader} to between a
+ * model {@link StreamLoader} for a given model, a {@link StreamLoader} to download or otherwise obtain an
+ * {@link java.io.InputStream} for a given model, and  an {@link ImageLoader} to load a bitmap from a given
  * {@link java.io.InputStream}. This class also determines the width and height of the wrapped
  * {@link android.widget.ImageView} at runtime and passes that information to the provided {@link ModelLoader} and
  * {@link ImageLoader}.
@@ -73,9 +74,8 @@ public class ImagePresenter<T> {
          * Builds an ImagePresenter.
          *
          * <p>
-         *     Note - If an ImagePresenter has already been set for this view, it will be silently replaced and will not
-         *     be cleared which could lead to undefined behavior. It is most efficient to set an ImagePresenter once and
-         *     then retrieve it for each subsequent load.
+         *     Note - this ImagePresenter will not be retained by default. Consider
+         *     {@link android.view.View#setTag(Object)}, or the view holder pattern.
          * </p>
          *
          * @return A new ImagePresenter
@@ -99,18 +99,27 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Required - Sets the {@link android.widget.ImageView} the presenter will use to display any loaded bitmaps
+         * Required - Sets the {@link android.widget.ImageView} the presenter will use to display any loaded bitmaps.
+         * Alternatively you can instead set a more general target for an object other than an ImageView using
+         * {@link #setTarget(com.bumptech.glide.presenter.target.Target, android.content.Context)}.
          *
          * @param imageView The {@link android.widget.ImageView} to wrap
          * @return This Builder object
          */
         public Builder<T> setImageView(final ImageView imageView) {
-            this.target = new ImageViewTarget(imageView);
-            this.context = imageView.getContext();
+            setTarget(new ImageViewTarget(imageView), imageView.getContext());
 
             return this;
         }
 
+        /**
+         * Required - Sets the {@link Target} the presenter will use to display any loaded bitmaps. If you are loading
+         * bitmaps into an {@link ImageView}, you can instead use {@link #setImageView(android.widget.ImageView)}.
+         *
+         * @param target The {@link Target} to wrap
+         * @param context A context that can be held for the duration of the load
+         * @return This builder object
+         */
         public Builder<T> setTarget(Target target, Context context) {
             this.target = target;
             this.context = context;
@@ -223,7 +232,9 @@ public class ImagePresenter<T> {
 
         /**
          * Optional - Sets a coordinator that can allow or prevent placeholders or bitmaps from being set in otherwise
-         * valid loads. See {@link com.bumptech.glide.presenter.ThumbImagePresenter}.
+         * valid loads.
+         *
+         * @see com.bumptech.glide.presenter.ThumbImagePresenter
          *
          * @param coordinator The coordinator to set
          * @return This Builder object
@@ -235,7 +246,8 @@ public class ImagePresenter<T> {
 
         /**
          * Optional - Sets a handler that will be notified if any path or image load causes an exception.
-         * See {@link com.bumptech.glide.presenter.ImagePresenter.ExceptionHandler}.
+         *
+         * @see com.bumptech.glide.presenter.ImagePresenter.ExceptionHandler
          *
          * @param exceptionHandler The exception handler to set
          * @return This builder object
@@ -245,6 +257,15 @@ public class ImagePresenter<T> {
             return this;
         }
 
+        /**
+         * Optional - Sets a transformation loader to use to obtain a transformation to apply to images on a per
+         * model basis.
+         *
+         * @see Transformation
+         *
+         * @param transformationLoader A {@link TransformationLoader} for this model type
+         * @return This builder object
+         */
         public Builder<T> setTransformationLoader(TransformationLoader<T> transformationLoader) {
             this.transformationLoader = transformationLoader;
             return this;
@@ -341,8 +362,8 @@ public class ImagePresenter<T> {
      *
      * <p>
      *     Note - A load will not begin before the ImagePresenter has determined the width and height of the wrapped
-     * view, which can't happen until that view has been made visible and undergone layout out for the first time. Until
-     * then the current load is stored. Subsequent calls will replace the stored load
+     * view, which can't happen until that view has been made visible and undergone layout for the first time. Until
+     * then the current load is stored. Subsequent calls will replace the stored load.
      * </p>
      *
      * @param model The model containing the information required to load a path and/or bitmap
