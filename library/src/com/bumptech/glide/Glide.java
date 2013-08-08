@@ -231,6 +231,30 @@ public class Glide {
         return new Request<Integer>(resourceId);
     }
 
+    /**
+     * @see #cancel(com.bumptech.glide.presenter.target.Target)
+     */
+    public static boolean cancel(ImageView imageView) {
+        return cancel(new ImageViewTarget(imageView));
+    }
+
+    /**
+     * Cancel any pending loads Glide may have for the target. After the load is cancelled Glide will not load
+     * a placeholder or bitmap into the target so it is safe to do so yourself until you start another load.
+     *
+     * @param target The Target to cancel loads for
+     * @return True iff Glide had ever been asked to load an image for this view
+     */
+    public static boolean cancel(Target target) {
+        ImagePresenter current = target.getImagePresenter();
+        final boolean cancelled = current != null;
+        if (cancelled) {
+            current.clear();
+        }
+
+        return cancelled;
+    }
+
     private interface ModelLoaderFactory<T> {
         public ModelLoader<T> build(Context context);
         public Class<? extends ModelLoader<T>> loaderClass();
