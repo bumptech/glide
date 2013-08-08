@@ -1,0 +1,8 @@
+*.idea
+library/
+samples/
+*.iml
+*.DS_Store
+local.properties
+
+*.swp
