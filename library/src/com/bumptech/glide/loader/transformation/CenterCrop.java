@@ -1,6 +1,6 @@
 package com.bumptech.glide.loader.transformation;
 
-import com.bumptech.glide.resize.Transformation;
+import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * Load image to exactly match the view in one dimension and then crop the image to fit the other dimension.

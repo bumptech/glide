@@ -2,7 +2,7 @@ package com.bumptech.glide.loader.image;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.resize.Transformation;
+import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * An interface used by {@link com.bumptech.glide.presenter.ImagePresenter} to fetch a bitmap for a given id and

@@ -1,4 +1,4 @@
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.load;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;

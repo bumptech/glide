@@ -1,6 +1,6 @@
 package com.bumptech.glide.loader.transformation;
 
-import com.bumptech.glide.resize.Transformation;
+import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * Load the image so that one dimension of the image exactly matches one of the given dimensions and the other dimension

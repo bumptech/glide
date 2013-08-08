@@ -26,6 +26,9 @@ import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCacheAdapter;
+import com.bumptech.glide.resize.load.Downsampler;
+import com.bumptech.glide.resize.load.ImageResizer;
+import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.util.Log;
 import com.bumptech.glide.util.Util;
 

@@ -1,6 +1,6 @@
 package com.bumptech.glide.loader.transformation;
 
-import com.bumptech.glide.resize.Transformation;
+import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * A loader that will always return a noop {@link Transformation} that does not change a bitmap.

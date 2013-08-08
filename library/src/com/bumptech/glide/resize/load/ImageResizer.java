@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2012 Bump Technologies Inc. All rights reserved.
  */
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.load;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
@@ -11,6 +11,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.os.Build;
+import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.util.Log;

@@ -1,6 +1,6 @@
 package com.bumptech.glide.loader.transformation;
 
-import com.bumptech.glide.resize.Transformation;
+import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * A class for loading a {@link Transformation} for a particular model. This allows things like rotating the image based

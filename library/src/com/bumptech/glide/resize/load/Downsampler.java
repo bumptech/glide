@@ -1,9 +1,10 @@
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.load;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 
 import java.io.IOException;
