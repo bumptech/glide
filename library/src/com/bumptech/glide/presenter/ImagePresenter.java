@@ -441,7 +441,7 @@ public class ImagePresenter<T> {
                 if (exceptionHandler != null) {
                     exceptionHandler.onException(e, model, relevant);
                 }
-                if (relevant && canSetPlaceholder()) {
+                if (relevant && canSetPlaceholder() && errorDrawable != null) {
                     target.setPlaceholder(errorDrawable);
                 }
             }
