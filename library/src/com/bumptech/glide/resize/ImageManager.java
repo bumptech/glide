@@ -526,8 +526,13 @@ public class ImageManager {
             }
         }
 
-        private void handleException(Exception e) {
-            cb.onLoadFailed(e);
+        private void handleException(final Exception e) {
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    cb.onLoadFailed(e);
+                }
+            });
         }
 
         private Bitmap resizeIfNotFound(InputStream is) throws IOException {
