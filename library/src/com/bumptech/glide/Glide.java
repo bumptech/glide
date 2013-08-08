@@ -148,7 +148,7 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ModelLoader} for this view.
+     * Set the {@link ModelLoader} and therefore the model type to use for a new load.
      *
      * <p>
      *     Note - You can use this method to set a {@link ModelLoader} for models that don't have a default
@@ -160,7 +160,7 @@ public class Glide {
      *     Note - If you have the ability to fetch different sized images for a given model, it is most efficient to
      *     supply a custom {@link ModelLoader} here to do so, even if a default exists. Fetching a smaller image
      *     means less bandwidth, battery, and memory usage as well as faster image loads. To simply build a url to
-     *     download an image using the width and the height of the view, consider passing in a subclass of
+     *     download an image using the width and the height of the target, consider passing in a subclass of
      *     {@link com.bumptech.glide.loader.model.VolleyModelLoader}.
      * </p>
      *
@@ -177,7 +177,7 @@ public class Glide {
      * @see #using(com.bumptech.glide.loader.model.ModelLoader)
      *
      * @param string The string representing the image. Must be either a path, or a uri handled by {@link UriLoader}
-     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static Request<String> load(String string) {
         return new Request<String>(string);
@@ -189,7 +189,7 @@ public class Glide {
      * @see #using(com.bumptech.glide.loader.model.ModelLoader)
      *
      * @param uri The uri representing the image. Must be a uri handled by {@link UriLoader}
-     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static Request<Uri> load(Uri uri) {
         return new Request<Uri>(uri);
@@ -201,7 +201,7 @@ public class Glide {
      * @see #using(com.bumptech.glide.loader.model.ModelLoader)
      *
      * @param url The URL representing the image.
-     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static Request<URL> load(URL url) {
         return new Request<URL>(url);
@@ -213,7 +213,7 @@ public class Glide {
      * @see #using(com.bumptech.glide.loader.model.ModelLoader)
      *
      * @param file The File containing the image
-     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static Request<File> load(File file) {
         return new Request<File>(file);
@@ -225,7 +225,7 @@ public class Glide {
      * @see #using(com.bumptech.glide.loader.model.ModelLoader)
      *
      * @param resourceId the id of the resource containing the image
-     * @return A {@link Request} to set options for the load and ultimately the view to load the model into
+     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static Request<Integer> load(Integer resourceId) {
         return new Request<Integer>(resourceId);
@@ -243,7 +243,7 @@ public class Glide {
      * a placeholder or bitmap into the target so it is safe to do so yourself until you start another load.
      *
      * @param target The Target to cancel loads for
-     * @return True iff Glide had ever been asked to load an image for this view
+     * @return True iff Glide had ever been asked to load an image for this target
      */
     public static boolean cancel(Target target) {
         ImagePresenter current = target.getImagePresenter();
@@ -359,9 +359,9 @@ public class Glide {
 
     /**
      * Sets a variety of type independent options including resizing, animations, and placeholders. Responsible
-     * for building or retrieving an ImagePresenter for the given view and passing the ImagePresenter the given model.
+     * for building or retrieving an ImagePresenter for the given target and passing the ImagePresenter the given model.
      *
-     * @param <T> The type of model that will be loaded into the view
+     * @param <T> The type of model that will be loaded into the target
      */
     @SuppressWarnings("unused") //public api
     public static class Request<T> {
@@ -489,7 +489,7 @@ public class Glide {
         }
 
         /**
-         * Sets an animation to run on the wrapped view when an image load finishes. Will only be run if the image
+         * Sets an animation to run on the wrapped target when an image load finishes. Will only be run if the image
          * was loaded asynchronously (ie was not in the memory cache)
          *
          * @param animationId The resource id of the animation to run
@@ -557,8 +557,8 @@ public class Glide {
         }
 
         /**
-         * Creates the new {@link ImagePresenter} if one does not currently exist for the current view and sets it as
-         * the view's tag for the id {@code R.id.image_presenter_id}.
+         * Creates the new {@link ImagePresenter} if one does not currently exist for the current target and sets it as
+         * the target's ImagePresenter via {@link Target#setImagePresenter(com.bumptech.glide.presenter.ImagePresenter)}
          */
         @SuppressWarnings("unchecked")
         private ImagePresenter<T> getImagePresenter(Target target) {

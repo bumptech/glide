@@ -27,8 +27,8 @@ public abstract class SimpleTarget implements Target {
     }
 
     /**
-     * A default implementation that calls {@link SizeReadyCallback#onSizeReady(int, int)} synchronously with
-     * {@link #getSize(com.bumptech.glide.presenter.target.Target.SizeReadyCallback)}.
+     * A default implementation that calls {@link com.bumptech.glide.presenter.target.Target.SizeReadyCallback}
+     * synchronously with {@link #getSize()}
      *
      * @param cb The callback that must be called when the size of the target has been determined
      */
