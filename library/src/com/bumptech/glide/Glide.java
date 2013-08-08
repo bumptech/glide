@@ -360,8 +360,8 @@ public class Glide {
         private int animationId = -1;
         private int placeholderId = -1;
         private int errorId = -1;
-        private Transformation transformation = null;
-        private Downsampler downsampler = null;
+        private Transformation transformation = Transformation.NONE;
+        private Downsampler downsampler = Downsampler.AT_LEAST;
         private TransformationLoader<T> transformationLoader = null;
 
         private Request(T model) {
