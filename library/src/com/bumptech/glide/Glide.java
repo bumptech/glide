@@ -25,7 +25,7 @@ import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.Downsampler;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Transformation;
-import com.bumptech.glide.resize.loader.ImageManagerLoader;
+import com.bumptech.glide.loader.image.ImageManagerLoader;
 
 import java.io.File;
 import java.net.URL;

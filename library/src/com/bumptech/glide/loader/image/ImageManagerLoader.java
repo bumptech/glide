@@ -1,14 +1,13 @@
-package com.bumptech.glide.resize.loader;
+package com.bumptech.glide.loader.image;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.Downsampler;
+import com.bumptech.glide.resize.Transformation;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
-import com.bumptech.glide.resize.Transformation;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 

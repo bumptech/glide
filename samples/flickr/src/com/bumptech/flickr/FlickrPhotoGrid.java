@@ -16,7 +16,7 @@ import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.presenter.target.Target;
-import com.bumptech.glide.resize.loader.ImageManagerLoader;
+import com.bumptech.glide.loader.image.ImageManagerLoader;
 
 import java.io.File;
 import java.util.ArrayList;
