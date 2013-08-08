@@ -389,12 +389,24 @@ public class Glide {
         private TransformationLoader<T> transformationLoader = null;
 
         private Request(T model) {
+            if (model == null ) {
+                throw new IllegalArgumentException("Model can't be null");
+            }
             this.model = model;
             this.modelLoaderFactory = getFactory(model);
+            if (modelLoaderFactory == null ) {
+                throw new IllegalArgumentException("Missing ModelLoader factory for model = " + model);
+            }
             this.modelLoaderClass = modelLoaderFactory.loaderClass();
         }
 
         private Request(T model, ModelLoader<T> modelLoader) {
+            if (model == null ) {
+                throw new IllegalArgumentException("Model can't be null");
+            }
+            if (modelLoader == null) {
+                throw new IllegalArgumentException("ModelLoader can't be null");
+            }
             this.model = model;
             this.modelLoader = modelLoader;
             this.modelLoaderClass = modelLoader.getClass();
