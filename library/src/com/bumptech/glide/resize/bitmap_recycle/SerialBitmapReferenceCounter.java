@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
 
@@ -50,7 +51,7 @@ public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
         }
     }
 
-    private final Map<Bitmap, InnerTracker> counter = new HashMap<Bitmap, InnerTracker>();
+    private final Map<Bitmap, InnerTracker> counter = new WeakHashMap<Bitmap, InnerTracker>();
     private final BitmapPool target;
     private final InnerTrackerPool pool = new InnerTrackerPool();
 
