@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.bumptech.flickr"
+  package="com.bumptech.glide.samples.flickr"
   android:versionCode="1"
   android:versionName="1.0">
 
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-  <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="16" />
+  <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="18" />
 
   <application android:label="@string/app_name" android:icon="@drawable/ic_launcher"
     android:hardwareAccelerated="true"

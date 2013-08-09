@@ -1,4 +1,4 @@
-package com.bumptech.flickr;
+package com.bumptech.glide.samples.flickr;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,8 +9,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
-import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.util.ArrayList;
 import java.util.List;

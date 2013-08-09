@@ -1,4 +1,4 @@
-package com.bumptech.flickr.api;
+package com.bumptech.glide.samples.flickr.api;
 
 import android.content.Context;
 import com.android.volley.DefaultRetryPolicy;

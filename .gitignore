@@ -8,7 +8,10 @@ library/local.properties
 *.swp
 proguard-project.txt
 samples/flickr/.idea/*
-samples/flickr/gen/**/*
-samples/flickr/out/**/*
+samples/flickr/gen
+samples/flickr/out
+samples/flickr/bin
 samples/flickr/local.properties
+*.keystore
 **/.idea/*
+

@@ -1,6 +1,6 @@
-package com.bumptech.flickr;
+package com.bumptech.glide.samples.flickr;
 
-import com.bumptech.flickr.api.Photo;
+import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.util.List;
 

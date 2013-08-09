@@ -1,8 +1,8 @@
-package com.bumptech.flickr;
+package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import com.bumptech.flickr.api.Api;
-import com.bumptech.flickr.api.Photo;
+import com.bumptech.glide.samples.flickr.api.Api;
+import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.loader.model.VolleyModelLoader;
 
 /**

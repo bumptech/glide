@@ -1,4 +1,4 @@
-package com.bumptech.flickr;
+package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,7 +11,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
-import com.bumptech.flickr.api.Photo;
+import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;

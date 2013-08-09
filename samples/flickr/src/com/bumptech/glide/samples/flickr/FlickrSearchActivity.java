@@ -1,4 +1,4 @@
-package com.bumptech.flickr;
+package com.bumptech.glide.samples.flickr;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,13 +14,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.bumptech.flickr.api.Api;
-import com.bumptech.flickr.api.Photo;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
+import com.bumptech.glide.samples.flickr.api.Api;
+import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.Log;
 
 import java.io.File;
