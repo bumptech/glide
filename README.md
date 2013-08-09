@@ -1,12 +1,12 @@
 Glide
 =====
-Glide is a view centric image loading library for Android that wraps image downloading, resizing, memory and disk caching, and bitmap reuse into one simple and easy to use interface. Glide includes an implementation for fetching images over http based on Google's Volley project for fast, parallelized network operations on Android.
+Glide is fast and efficient image loading library for Android that wraps image downloading, resizing, memory and disk caching, and bitmap recycling into one simple and easy to use interface. By default, Glide includes an implementation for fetching images over http based on Google's Volley project for fast, parallelized network operations on Android.
 
-Glide works best for long lists or grids where every item contains an image or images, but it's also effective for almost any case where you need to fetch, resize, and display a remote image in a view.
+Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is also effective for almost any case where you need to fetch, resize, and display a remote image.
 
 How do I use Glide?
 -------------------
-The GitHub project wiki has tutorials on a variety of topics, including basic usage and adding Glide to a project. The javadocs for version 2.0+ will also be available via a link on the wiki.
+You can download a .jar from GitHub's release page for the Glide project. The wiki also has tutorials on a variety of topics and the javadocs for version 2.0+ will also be available via a link there as well.
 
 Simple use cases will look something like this:
 
@@ -46,9 +46,13 @@ public View getView(int position, View recycled, ViewGroup container) {
 
 Status
 ------
-Glide has been in use at Bump for about six months in two of our Android apps at version 1.0. Version 2.0 is in progress and will include a more general and easier to use interface. After version 2.0 the api will be stable and any outdated apis will first be deprecated before being removed. That being said, the 2.0+ api is definitely a work in progress and new functionality will probably be added in intermediate versions. Comments/bugs/questions/pull requests welcome!
+Glide has been in use at Bump for about six months in two of our Android apps at version 1.0. Version 2.0 is the first public release with a stable api. Comments/bugs/questions/pull requests welcome!
 
 Thanks
 ------
-Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) included with Glide.
-Thanks also to the Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/)
+Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) included with Glide, and also to Square and [Picasso](https://github.com/square/picasso) for Glide's high level api.
+Thanks also to the Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/).
+
+Author
+------
+Sam Judd - <sam.a.judd@gmail.com> @samajudd
