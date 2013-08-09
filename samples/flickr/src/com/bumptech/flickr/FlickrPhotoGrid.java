@@ -12,13 +12,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.flickr.api.Photo;
+import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.presenter.target.Target;
-import com.bumptech.glide.loader.image.ImageManagerLoader;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,18 +29,15 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
-    private static final String CACHE_PATH_KEY = "cache_path";
     private static final String IMAGE_SIZE_KEY = "image_size";
 
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
-    private File cacheDir;
     private int photoSize;
 
-    public static FlickrPhotoGrid newInstance(File cacheDir, int size) {
+    public static FlickrPhotoGrid newInstance(int size) {
         FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
         Bundle args = new Bundle();
-        args.putString(CACHE_PATH_KEY, cacheDir.getAbsolutePath());
         args.putInt(IMAGE_SIZE_KEY, size);
         photoGrid.setArguments(args);
         return photoGrid;
@@ -50,7 +46,6 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
-        cacheDir = new File(args.getString(CACHE_PATH_KEY));
         photoSize = args.getInt(IMAGE_SIZE_KEY);
 
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
@@ -111,6 +106,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 params.height = photoSize;
 
                 final Context context = getActivity();
+
+                //this is an example of how one might use ImagePresenter directly, there is no particular reason
+                //why ImagePresenter is used here and not in FlickrPhotoList otherwise.
                 final Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo>()
                         .setImageView(imageView)

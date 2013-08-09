@@ -33,12 +33,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
+    private static final String CACHE_NAME = "flickr_cache";
+
     private int searchCount = 0;
     private EditText searchText;
     private View searching;
     private TextView searchTerm;
     private Set<PhotoViewer> photoViewers = new HashSet<PhotoViewer>();
-    private File cacheDir;
     private List<Photo> currentPhotos = new ArrayList<Photo>();
     private View searchLoading;
 
@@ -62,7 +63,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         } else {
             PhotoViewer photoViewer = (PhotoViewer) fragment;
             photoViewer.onPhotosUpdated(currentPhotos);
-            photoViewers.add(photoViewer);
+            if (!photoViewers.contains(photoViewer)) {
+                photoViewers.add(photoViewer);
+            }
         }
     }
 
@@ -71,23 +74,23 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flickr_search_activity);
-        String cacheName = "flickr_cache";
-        cacheDir = ImageManager.getPhotoCacheDir(this, cacheName);
 
-        DiskCache diskCache;
-        try {
-            diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
-        } catch (IOException e) {
-            e.printStackTrace();
-            diskCache = new DiskCacheAdapter();
-        }
 
         final Glide glide = Glide.get();
         if (!glide.isImageManagerSet()) {
+            File cacheDir = ImageManager.getPhotoCacheDir(this, CACHE_NAME);
+
+            DiskCache diskCache;
+            try {
+                diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
+            } catch (IOException e) {
+                e.printStackTrace();
+                diskCache = new DiskCacheAdapter();
+            }
+
             glide.setImageManager(new ImageManager.Builder(this)
                     .setBitmapCompressQuality(70)
                     .setDiskCache(diskCache));
-
         }
 
         searching = findViewById(R.id.searching);
@@ -220,11 +223,11 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             Page page = Page.values()[position];
             if (page == Page.SMALL) {
                 int pageSize = getPageSize(R.dimen.small_photo_side);
-                return FlickrPhotoGrid.newInstance(cacheDir, pageSize);
+                return FlickrPhotoGrid.newInstance(pageSize);
 
             } else if (page == Page.MEDIUM) {
                 int pageSize = getPageSize(R.dimen.medium_photo_side);
-                return FlickrPhotoGrid.newInstance(cacheDir, pageSize);
+                return FlickrPhotoGrid.newInstance(pageSize);
             } else if (page == Page.LIST) {
                 return FlickrPhotoList.newInstance();
             } else {
