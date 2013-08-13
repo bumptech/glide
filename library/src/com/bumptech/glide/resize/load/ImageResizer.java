@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.os.Build;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
@@ -350,5 +351,101 @@ public class ImageResizer {
             e.printStackTrace();
         }
         return imageToOrient;
+    }
+
+    /**
+     * Get the # of degrees an image must be rotated to match the given exif orientation.
+     *
+     * @param exifOrientation The exif orientation [1-8]
+     * @return the number of degrees to rotate
+     */
+    public static int getExifOrientationDegrees(int exifOrientation) {
+        final int degreesToRotate;
+        switch (exifOrientation) {
+            case ExifInterface.ORIENTATION_TRANSPOSE:
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                degreesToRotate = 90;
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                degreesToRotate = 180;
+                break;
+            case ExifInterface.ORIENTATION_TRANSVERSE:
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                degreesToRotate = 270;
+                break;
+            default:
+                degreesToRotate = 0;
+
+        }
+        return degreesToRotate;
+    }
+
+    /**
+     * Rotate and/or flip the image to match the given exif orientation
+     *
+     * @param toOrient The bitmap to rotate/flip
+     * @param pool A pool that may or may not contain an image of the necessary dimensions
+     * @param exifOrientation the exif orientation [1-8]
+     * @return The rotated and/or flipped image or toOrient if no rotation or flip was necessary
+     */
+    public static Bitmap rotateImageExif(Bitmap toOrient, BitmapPool pool, int exifOrientation) {
+        final Matrix matrix = new Matrix();
+        boolean swapWidthHeight = false;
+        switch (exifOrientation) {
+            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                matrix.setScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.setRotate(180);
+                break;
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                matrix.setRotate(180);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_TRANSPOSE:
+                swapWidthHeight = true;
+                matrix.setRotate(90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                swapWidthHeight = true;
+                matrix.setRotate(90);
+                //matrix.postTranslate(toOrient.getHeight(), 0);
+                break;
+            case ExifInterface.ORIENTATION_TRANSVERSE:
+                swapWidthHeight = true;
+                matrix.setRotate(-90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                swapWidthHeight = true;
+                matrix.setRotate(-90);
+                break;
+            default: //case ExifInterface.ORIENTATION_NORMAL
+                return toOrient;
+        }
+
+        //from Bitmap.createBitmap
+        final RectF newRect = new RectF(0, 0, toOrient.getWidth(), toOrient.getHeight());
+        matrix.mapRect(newRect);
+
+        final int newWidth = Math.round(newRect.width());
+        final int newHeight = Math.round(newRect.height());
+
+        Bitmap result = pool.get(newWidth, newHeight);
+        if (result == null) {
+            result = Bitmap.createBitmap(newWidth, newHeight, toOrient.getConfig());
+        }
+
+        matrix.postTranslate(-newRect.left, -newRect.top);
+
+        final Canvas canvas = new Canvas(result);
+        final Paint paint = new Paint();
+        paint.setFilterBitmap(true);
+        paint.setAntiAlias(true);
+        canvas.drawBitmap(toOrient, matrix, null);
+
+        return result;
     }
 }

@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Log;
 
 import java.io.IOException;
 
@@ -68,11 +69,39 @@ public abstract class Downsampler {
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
      */
     public Bitmap downsample(RecyclableBufferedInputStream bis, BitmapFactory.Options options, BitmapPool pool, int outWidth, int outHeight) {
-        final int[] inDimens = getDimensions(bis, options);
-        final int inWidth = inDimens[0];
-        final int inHeight = inDimens[1];
+        bis.mark(MARK_POSITION);
+        int orientation = 0;
+        try {
+            orientation = new ExifOrientationParser(bis).getOrientation();//ImageResizer.getOrientation(bis);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            bis.reset();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        Log.d("EXIF: got orientation=" + orientation);
 
-        final int sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
+
+        final int[] inDimens = getDimensions(bis, options);
+        int inWidth = inDimens[0];
+        int inHeight = inDimens[1];
+
+        final int degreesToRotate = ImageResizer.getExifOrientationDegrees(orientation);
+        final int sampleSize;
+        if (degreesToRotate == 90 || degreesToRotate == 270) {
+            final int temp = inWidth;
+            inWidth = inHeight;
+            inHeight = temp;
+
+            sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
+
+            inHeight = inWidth;
+            inWidth = temp;
+        } else {
+            sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
+        }
 
         //sample sizes <= 1 do nothing
         if (sampleSize > 1) {
@@ -81,7 +110,14 @@ public abstract class Downsampler {
             setInBitmap(options, pool.get(inWidth, inHeight));
         }
 
-        return decodeStream(bis, options);
+        final Bitmap downsampled = decodeStream(bis, options);
+        final Bitmap rotated = ImageResizer.rotateImageExif(downsampled, pool, orientation);
+
+        if (downsampled != rotated) {
+            pool.put(downsampled);
+        }
+
+        return rotated;
     }
 
     /**
