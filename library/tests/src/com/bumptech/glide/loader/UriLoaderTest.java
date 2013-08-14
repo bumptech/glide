@@ -29,7 +29,7 @@ public class UriLoaderTest extends AndroidTestCase {
         urlLoader = new StreamLoader() {
 
             @Override
-            public void loadStream(Object t, StreamReadyCallback cb) {
+            public void loadStream(StreamReadyCallback cb) {
             }
 
             @Override

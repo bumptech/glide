@@ -106,7 +106,7 @@ public class GlideTest extends ActivityTestCase {
         assertNotNull(getImagePresenterFromView());
     }
 
-    public void testDifferentModlsReplacesPresenters() {
+    public void testDifferentModelsReplacesPresenters() {
         Glide.load("fake").into(imageView);
 
         ImagePresenter first = getImagePresenterFromView();
@@ -122,7 +122,7 @@ public class GlideTest extends ActivityTestCase {
             public StreamLoader getStreamLoader(Object model, int width, int height) {
                 return new StreamLoader() {
                     @Override
-                    public void loadStream(Object t, StreamReadyCallback cb) {
+                    public void loadStream(StreamReadyCallback cb) {
                     }
 
                     @Override
@@ -145,7 +145,7 @@ public class GlideTest extends ActivityTestCase {
             public StreamLoader getStreamLoader(Object model, int width, int height) {
                 return new StreamLoader() {
                     @Override
-                    public void loadStream(Object object, StreamReadyCallback cb) {
+                    public void loadStream(StreamReadyCallback cb) {
                     }
 
                     @Override
