@@ -95,6 +95,10 @@ public class ImageResizer {
         return load(is, outWidth, outHeight, Downsampler.AT_LEAST, transformation);
     }
 
+    public Bitmap load(InputStream is, int outWidth, int outHeight, Downsampler downsampler) {
+        return load(is, outWidth, outHeight, downsampler, Transformation.NONE);
+    }
+
     public Bitmap load(InputStream is, int outWidth, int outHeight, Downsampler downsampler, Transformation transformation) {
         byte[] tempBytesForBis = getTempBytes();
         byte[] tempBytesForOptions = getTempBytes();

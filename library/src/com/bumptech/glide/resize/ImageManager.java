@@ -71,6 +71,22 @@ public class ImageManager {
     private final DiskCache diskCache;
     private final Bitmap.CompressFormat bitmapCompressFormat;
 
+    //special downsampler that doesn't check exif, and assumes inWidth and inHeight == outWidth and outHeight so it
+    //doesn't need to read the image header for size information
+    private static Downsampler DISK_CACHE_DOWNSAMPLER = new Downsampler() {
+
+        @Override
+        public Bitmap downsample(RecyclableBufferedInputStream bis, BitmapFactory.Options options, BitmapPool pool, int outWidth, int outHeight) {
+            return downsampleWithSize(bis, options, pool, outWidth, outHeight, 1);
+        }
+
+        @Override
+        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
+            return 0;
+        }
+    };
+
+
     /**
      * Get the maximum safe memory cache size for this particular device based on the # of mb allocated to each app.
      * This is a conservative estimate that has been safe for 2.2+ devices consistently. It is probably rather small
@@ -541,18 +557,18 @@ public class ImageManager {
         private Bitmap resizeIfNotFound(InputStream is) throws IOException {
             return resizer.load(is, width, height, downsampler, transformation);
         }
-    }
 
-    private Bitmap getFromDiskCache(String key) {
-        Bitmap result = null;
-        final InputStream is = diskCache.get(key);
-        if (is != null) {
-            result = resizer.load(is);
-            if (result == null) {
-                diskCache.delete(key); //the image must have been corrupted
+        private Bitmap getFromDiskCache(String key) {
+            Bitmap result = null;
+            final InputStream is = diskCache.get(key);
+            if (is != null) {
+                result = resizer.load(is, width, height, DISK_CACHE_DOWNSAMPLER);
+                if (result == null) {
+                    diskCache.delete(key); //the image must have been corrupted
+                }
             }
+            return result;
         }
-        return result;
     }
 
     private void putInDiskCache(String key, final Bitmap bitmap) {
