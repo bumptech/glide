@@ -13,23 +13,40 @@ import java.net.URL;
  */
 public abstract class UrlModelLoader<T> implements ModelLoader<T> {
     private final ModelLoader<URL> concreteLoader;
+    private final Cache<URL> modelCache;
 
     @SuppressWarnings("unused")
     public UrlModelLoader(ModelLoader<URL> concreteLoader) {
+        this(concreteLoader, null);
+    }
+
+    public UrlModelLoader(ModelLoader<URL> concreteLoader, Cache<URL> modelCache) {
         this.concreteLoader = concreteLoader;
+        this.modelCache = modelCache;
     }
 
     @Override
     public StreamLoader getStreamLoader(T model, int width, int height) {
+        final String id = getId(model);
         URL result = null;
-        String stringURL = getUrl(model, width, height);
-        try {
-            result = new URL(stringURL);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        if (modelCache != null) {
+            result = modelCache.get(id, width, height);
         }
+
         if (result == null) {
-            throw new IllegalArgumentException("Invalid URL for model=" + model + " url=" + stringURL);
+            String stringURL = getUrl(model, width, height);
+            try {
+                result = new URL(stringURL);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            if (result == null) {
+                throw new IllegalArgumentException("Invalid URL for model=" + model + " url=" + stringURL);
+            }
+
+            if (modelCache != null) {
+                modelCache.put(id, width, height, result);
+            }
         }
 
         return concreteLoader.getStreamLoader(result, width, height);

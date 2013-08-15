@@ -80,7 +80,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flickr_search_activity);
 
-
         final Glide glide = Glide.get();
         if (!glide.isImageManagerSet()) {
             File cacheDir = ImageManager.getPhotoCacheDir(this, CACHE_NAME);
