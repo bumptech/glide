@@ -2,7 +2,6 @@ package com.bumptech.glide.loader.model;
 
 import android.content.Context;
 import android.net.Uri;
-import com.bumptech.glide.loader.stream.LocalUriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
 /**
@@ -15,7 +14,7 @@ public class ResourceLoader implements ModelLoader<Integer> {
 
         @Override
         public ModelLoader<Integer> build(Context context, GenericLoaderFactory factories) {
-            return new ResourceLoader(context);
+            return new ResourceLoader(context, factories.buildModelLoader(Uri.class, context));
         }
 
         @Override
@@ -27,16 +26,18 @@ public class ResourceLoader implements ModelLoader<Integer> {
         public void teardown() { }
     }
 
+    private final ModelLoader<Uri> uriLoader;
     private final Context context;
 
-    public ResourceLoader(Context context) {
+    public ResourceLoader(Context context, ModelLoader<Uri> uriLoader) {
         this.context = context;
+        this.uriLoader = uriLoader;
     }
 
     @Override
     public StreamLoader getStreamLoader(Integer model, int width, int height) {
         Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/" + model.toString());
-        return new LocalUriLoader(context, uri);
+        return uriLoader.getStreamLoader(uri, width, height);
     }
 
     @Override

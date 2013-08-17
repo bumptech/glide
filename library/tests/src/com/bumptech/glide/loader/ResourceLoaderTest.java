@@ -1,13 +1,17 @@
 package com.bumptech.glide.loader;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.test.ActivityTestCase;
+import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.model.ResourceLoader;
+import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.tests.R;
 
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +30,18 @@ public class ResourceLoaderTest extends ActivityTestCase {
     }
 
     public void testCanHandleId() {
-        ResourceLoader resourceLoader = new ResourceLoader(getInstrumentation().getContext());
+        final Context context = getInstrumentation().getContext();
+        ResourceLoader resourceLoader = new ResourceLoader(context, new UriLoader(context, new ModelLoader<URL>() {
+            @Override
+            public StreamLoader getStreamLoader(URL model, int width, int height) {
+                return null;
+            }
+
+            @Override
+            public String getId(URL model) {
+                return null;
+            }
+        }));
         StreamLoader streamLoader = resourceLoader.getStreamLoader(R.raw.ic_launcher, 0, 0);
         streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
             @Override
