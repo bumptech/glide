@@ -1,4 +1,4 @@
-package com.bumptech.glide.loader.model;
+package com.bumptech.glide.volley;
 
 import android.content.Context;
 import com.android.volley.DefaultRetryPolicy;
@@ -6,8 +6,10 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.loader.model.GenericLoaderFactory;
+import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.loader.stream.VolleyStreamLoader;
 
 import java.net.URL;
 

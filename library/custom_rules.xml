@@ -8,7 +8,8 @@
     </target>
     <target name="glide-minus-volley" depends="-compile">
         <jar destfile="bin/glide-minus-volley.jar"
-            basedir="bin/classes" >
+            basedir="bin/classes"
+            excludes="com/bumptech/glide/volley/">
             <zipgroupfileset dir="libs" includes="disklrucache*.jar" />
         </jar>
     </target>

@@ -24,7 +24,7 @@ import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.Log;
-import com.bumptech.glide.loader.model.VolleyUrlLoader;
+import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
 import java.io.IOException;

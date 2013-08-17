@@ -1,4 +1,4 @@
-package com.bumptech.glide.loader.stream;
+package com.bumptech.glide.volley;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
@@ -7,6 +7,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
+import com.bumptech.glide.loader.stream.StreamLoader;
 
 import java.io.ByteArrayInputStream;
 

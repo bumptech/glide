@@ -6,8 +6,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.model.FileLoader;
@@ -29,7 +27,7 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.util.Log;
-import com.bumptech.glide.loader.model.VolleyUrlLoader;
+import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
 import java.net.URL;
@@ -49,7 +47,6 @@ import java.util.WeakHashMap;
 public class Glide {
     private static final Glide GLIDE = new Glide();
     private ImageManager imageManager = null;
-    private RequestQueue requestQueue = null;
     private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
     private GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
 
@@ -62,44 +59,46 @@ public class Glide {
         return GLIDE;
     }
 
+    protected Glide() {
+        loaderFactory.register(File.class, new FileLoader.Factory());
+        loaderFactory.register(Integer.class, new ResourceLoader.Factory());
+        loaderFactory.register(String.class, new StringLoader.Factory());
+        loaderFactory.register(Uri.class, new UriLoader.Factory());
+        try {
+            Class.forName("com.bumptech.glide.volley.VolleyUrlLoader$Factory");
+            loaderFactory.register(URL.class, new VolleyUrlLoader.Factory());
+        } catch (ClassNotFoundException e) {
+            Log.d("Volley not found, missing url loader");
+            loaderFactory.register(URL.class, new ModelLoaderFactory<URL>() {
+                ModelLoader<URL> errorUrlLoader = new ModelLoader<URL>() {
+                    @Override
+                    public StreamLoader getStreamLoader(URL model, int width, int height) {
+                        throw new IllegalArgumentException("No ModelLoaderFactory for urls registered with Glide");
+                    }
 
-    /**
-     * Return the current {@link RequestQueue} or create and return a new one if one is not currently set
-     *
-     * @see #setRequestQueue(RequestQueue)
-     * @see #isRequestQueueSet()
-     *
-     * @param context A context to use for Volley
-     * @return The {@link RequestQueue}
-     */
-    public RequestQueue getRequestQueue(Context context) {
-        if (!isRequestQueueSet()) {
-            setRequestQueue(Volley.newRequestQueue(context));
+                    @Override
+                    public String getId(URL model) {
+                        throw new IllegalArgumentException("No ModelLoaderFactory for urls registered with Glide");
+                    }
+                };
+
+                @Override
+                public ModelLoader<URL> build(Context context, GenericLoaderFactory factories) {
+                    return errorUrlLoader;
+                }
+
+                @Override @SuppressWarnings("unchecked")
+                public Class<? extends ModelLoader<URL>> loaderClass() {
+                    return (Class<ModelLoader<URL>>) errorUrlLoader.getClass();
+                }
+
+                @Override
+                public void teardown() {
+                }
+            });
         }
-        return requestQueue;
     }
 
-    /**
-     * Use to check whether or not an {@link RequestQueue} has been set yet. Can be used in
-     * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
-     * {@link #setRequestQueue(RequestQueue) setRequestQueue} to set a {@link RequestQueue} with custom options
-     * for use with {@link Glide.Request} and/or as an easily accessible singleton
-     *
-     * @return true iff a {@link RequestQueue} has already been set
-     */
-    public boolean isRequestQueueSet() {
-        return requestQueue != null;
-    }
-
-    /**
-     * Set the {@link RequestQueue} to use with {@link Glide.Request}. Replaces the current
-     * {@link RequestQueue} if one has already been set
-     *
-     * @param requestQueue The {@link RequestQueue} to set
-     */
-    public void setRequestQueue(RequestQueue requestQueue) {
-        this.requestQueue = requestQueue;
-    }
 
     /**
      * Return the current {@link ImageManager} or create and return a new one if one is not currently set.
@@ -115,13 +114,6 @@ public class Glide {
             setImageManager(new ImageManager.Builder(context));
         }
         return imageManager;
-    }
-
-    protected Glide() {
-        loaderFactory.register(File.class, new FileLoader.Factory());
-        loaderFactory.register(Integer.class, new ResourceLoader.Factory());
-        loaderFactory.register(String.class, new StringLoader.Factory());
-        loaderFactory.register(Uri.class, new UriLoader.Factory());
     }
 
     /**
@@ -212,7 +204,7 @@ public class Glide {
      *     supply a custom {@link ModelLoaderFactory} here to do so, even if a default exists. Fetching a smaller image
      *     means less bandwidth, battery, and memory usage as well as faster image loads. To simply build a url to
      *     download an image using the width and the height of the target, consider passing in a factory for a subclass
-     *     of {@link com.bumptech.glide.loader.model.UriLoader}
+     *     of {@link com.bumptech.glide.loader.model.UrlModelLoader}
      * </p>
      *
      *
