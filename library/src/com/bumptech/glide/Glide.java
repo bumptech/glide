@@ -673,20 +673,32 @@ public class Glide {
 
         @Override
         public boolean equals(Object o) {
-            if (o == null || !(o instanceof Metadata)) {
-                return false;
-            }
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
 
-            Metadata other = (Metadata) o;
+            Metadata metadata = (Metadata) o;
 
-            return modelClass.equals(other.modelClass) &&
-                    modelLoaderClass.equals(other.modelLoaderClass) &&
-                    downsamplerId.equals(other.downsamplerId) &&
-                    transformationId.equals(other.transformationId) &&
-                    animationId == other.animationId &&
-                    placeholderId == other.placeholderId &&
-                    errorId == other.errorId;
+            if (animationId != metadata.animationId) return false;
+            if (errorId != metadata.errorId) return false;
+            if (placeholderId != metadata.placeholderId) return false;
+            if (!downsamplerId.equals(metadata.downsamplerId)) return false;
+            if (!modelClass.equals(metadata.modelClass)) return false;
+            if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
+            if (!transformationId.equals(metadata.transformationId)) return false;
 
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = modelClass.hashCode();
+            result = 31 * result + modelLoaderClass.hashCode();
+            result = 31 * result + animationId;
+            result = 31 * result + placeholderId;
+            result = 31 * result + errorId;
+            result = 31 * result + downsamplerId.hashCode();
+            result = 31 * result + transformationId.hashCode();
+            return result;
         }
     }
 }
