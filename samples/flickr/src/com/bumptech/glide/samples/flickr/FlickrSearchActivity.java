@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.cache.DiskCache;
@@ -22,9 +24,11 @@ import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.Log;
+import com.bumptech.glide.loader.model.VolleyUrlLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +46,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     private Set<PhotoViewer> photoViewers = new HashSet<PhotoViewer>();
     private List<Photo> currentPhotos = new ArrayList<Photo>();
     private View searchLoading;
+    private RequestQueue requestQueue;
 
     private enum Page {
         SMALL,
@@ -92,6 +97,11 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                     .setBitmapCompressQuality(70)
                     .setDiskCache(diskCache));
         }
+
+        requestQueue = Volley.newRequestQueue(this);
+
+        glide.register(URL.class, new VolleyUrlLoader.Factory(requestQueue));
+        glide.register(Photo.class, new FlickrModelLoader.Factory());
 
         searching = findViewById(R.id.searching);
         searchLoading = findViewById(R.id.search_loading);
@@ -156,7 +166,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         searchLoading.setVisibility(View.VISIBLE);
         searchTerm.setText(getString(R.string.searching_for, searchString));
 
-        Api.get(this).search(searchString, new Api.SearchCallback() {
+        Api.get(requestQueue).search(searchString, new Api.SearchCallback() {
             @Override
             public void onSearchCompleted(List<Photo> photos) {
                 if (currentSearch != searchCount) return;

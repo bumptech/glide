@@ -12,16 +12,23 @@ import java.io.File;
  */
 public class StringLoader implements ModelLoader<String> {
 
-    private final ModelLoader<Uri> uriLoader;
+    public static class Factory implements ModelLoaderFactory<String> {
 
-    /**
-     * A convenience constructor that defaults to {@link UriLoader} for loading uri strings
-     *
-     * @param context A context
-     */
-    public StringLoader(Context context) {
-        this(new UriLoader(context));
+        @Override
+        public ModelLoader<String> build(Context context, GenericLoaderFactory factories) {
+            return new StringLoader(factories.buildModelLoader(Uri.class, context));
+        }
+
+        @Override
+        public Class<? extends ModelLoader<String>> loaderClass() {
+            return StringLoader.class;
+        }
+
+        @Override
+        public void teardown() { }
     }
+
+    private final ModelLoader<Uri> uriLoader;
 
     public StringLoader(ModelLoader<Uri> uriLoader) {
         this.uriLoader = uriLoader;

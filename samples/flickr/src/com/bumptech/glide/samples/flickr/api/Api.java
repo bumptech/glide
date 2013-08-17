@@ -1,13 +1,11 @@
 package com.bumptech.glide.samples.flickr.api;
 
-import android.content.Context;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,15 +66,15 @@ public class Api {
         public void onSearchFailed(Exception e);
     }
 
-    public static Api get(Context applicationContext) {
+    public static Api get(RequestQueue requestQueue) {
         if (API == null) {
-            API = new Api(applicationContext);
+            API = new Api(requestQueue);
         }
         return API;
     }
 
-    protected Api(Context applicationContext) {
-        this.requestQueue = Glide.get().getRequestQueue(applicationContext);
+    protected Api(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
     }
 
     public static String getPhotoURL(Photo photo, int width, int height) {

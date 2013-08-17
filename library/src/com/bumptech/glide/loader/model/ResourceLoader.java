@@ -10,6 +10,23 @@ import com.bumptech.glide.loader.stream.StreamLoader;
  * the given context.
  */
 public class ResourceLoader implements ModelLoader<Integer> {
+
+    public static class Factory implements ModelLoaderFactory<Integer> {
+
+        @Override
+        public ModelLoader<Integer> build(Context context, GenericLoaderFactory factories) {
+            return new ResourceLoader(context);
+        }
+
+        @Override
+        public Class<? extends ModelLoader<Integer>> loaderClass() {
+            return ResourceLoader.class;
+        }
+
+        @Override
+        public void teardown() { }
+    }
+
     private final Context context;
 
     public ResourceLoader(Context context) {

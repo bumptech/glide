@@ -14,17 +14,24 @@ import java.net.URL;
  * 'file' schemes. Unsupported schemes will throw an exception in {@link #getStreamLoader(android.net.Uri, int, int)}
  */
 public class UriLoader implements ModelLoader<Uri> {
+    public static class Factory implements ModelLoaderFactory<Uri> {
+
+        @Override
+        public ModelLoader<Uri> build(Context context, GenericLoaderFactory factories) {
+            return new UriLoader(context, factories.buildModelLoader(URL.class, context));
+        }
+
+        @Override
+        public Class<? extends ModelLoader<Uri>> loaderClass() {
+            return UriLoader.class;
+        }
+
+        @Override
+        public void teardown() { }
+    }
+
     private final Context context;
     private final ModelLoader<URL> urlLoader;
-
-    /**
-     * A convenience constructor that defaults to {@link UrlLoader} for loading URLs
-     *
-     * @param context A context
-     */
-    public UriLoader(Context context) {
-        this(context, new UrlLoader(context));
-    }
 
     public UriLoader(Context context, ModelLoader<URL> urlLoader) {
         this.context = context;

@@ -11,11 +11,13 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.model.FileLoader;
+import com.bumptech.glide.loader.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.model.ResourceLoader;
 import com.bumptech.glide.loader.model.StringLoader;
 import com.bumptech.glide.loader.model.UriLoader;
-import com.bumptech.glide.loader.model.UrlLoader;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.loader.transformation.FitCenter;
 import com.bumptech.glide.loader.transformation.TransformationLoader;
@@ -26,6 +28,8 @@ import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
+import com.bumptech.glide.util.Log;
+import com.bumptech.glide.loader.model.VolleyUrlLoader;
 
 import java.io.File;
 import java.net.URL;
@@ -47,6 +51,7 @@ public class Glide {
     private ImageManager imageManager = null;
     private RequestQueue requestQueue = null;
     private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
+    private GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
 
     /**
      * Get the singleton.
@@ -57,7 +62,6 @@ public class Glide {
         return GLIDE;
     }
 
-    protected Glide() { }
 
     /**
      * Return the current {@link RequestQueue} or create and return a new one if one is not currently set
@@ -113,6 +117,13 @@ public class Glide {
         return imageManager;
     }
 
+    protected Glide() {
+        loaderFactory.register(File.class, new FileLoader.Factory());
+        loaderFactory.register(Integer.class, new ResourceLoader.Factory());
+        loaderFactory.register(String.class, new StringLoader.Factory());
+        loaderFactory.register(Uri.class, new UriLoader.Factory());
+    }
+
     /**
      * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
      * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
@@ -148,33 +159,104 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ModelLoader} and therefore the model type to use for a new load.
+     * Use the given factory to build a {@link ModelLoader} for models of the given class.
      *
      * <p>
-     *     Note - You can use this method to set a {@link ModelLoader} for models that don't have a default
-     *     {@link ModelLoader}. You can also optionally use this method to override the default {@link ModelLoader}
-     *     for a model for which there is a default.
+     *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
+     *     used for any other model class, {@link com.bumptech.glide.loader.model.ModelLoaderFactory#teardown()}
+     *     will be called.
+     * </p>
+     *
+     * @param clazz The class
+     * @param factory The factory to use
+     * @param <T> The type of the model
+     */
+    public <T> void register(Class<T> clazz, ModelLoaderFactory<T> factory) {
+        ModelLoaderFactory<T> removed = loaderFactory.register(clazz, factory);
+        if (removed != null) {
+            removed.teardown();
+        }
+    }
+
+    /**
+     * Build a {@link ModelLoader} for the given model class using a registered factory.
+     *
+     * @param clazz The class to get a {@link ModelLoader} for
+     * @param context Any context
+     * @param <T> The type of the model
+     * @return A new {@link ModelLoader} for the given model class
+     * @throws IllegalArgumentException if no factory exists for the given class
+     */
+    public <T> ModelLoader<T> buildModelLoader(Class<T> clazz, Context context) {
+        return loaderFactory.buildModelLoader(clazz, context);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> ModelLoaderFactory<T> getFactory(T model) {
+        return loaderFactory.getFactory((Class<T>) model.getClass());
+    }
+
+    /**
+     * Set the {@link ModelLoaderFactory} and therefore the model type to use for a new load.
+     *
+     * <p>
+     *     Note - You can use this method to set a {@link ModelLoaderFactory} for models that don't have a default
+     *     {@link ModelLoader}/{@link ModelLoaderFactory}. You can also optionally use this method to override the
+     *     default {@link ModelLoader} for a model for which there is a default. If you would like to permanently
+     *     use this factory for all model loads of the this factory's type, see
+     *     {@link #register(Class, com.bumptech.glide.loader.model.ModelLoaderFactory)}.
      * </p>
      *
      * <p>
      *     Note - If you have the ability to fetch different sized images for a given model, it is most efficient to
-     *     supply a custom {@link ModelLoader} here to do so, even if a default exists. Fetching a smaller image
+     *     supply a custom {@link ModelLoaderFactory} here to do so, even if a default exists. Fetching a smaller image
      *     means less bandwidth, battery, and memory usage as well as faster image loads. To simply build a url to
-     *     download an image using the width and the height of the target, consider passing in a subclass of
-     *     {@link com.bumptech.glide.loader.model.VolleyModelLoader}.
+     *     download an image using the width and the height of the target, consider passing in a factory for a subclass
+     *     of {@link com.bumptech.glide.loader.model.UriLoader}
      * </p>
      *
-     * @param modelLoader The {@link ModelRequest} to use to load an image from a given model
+     *
+     * @param factory The {@link ModelLoaderFactory} to use to load an image from a given model
+     * @param <T> The type of the model to load using this factory
      * @return A {@link ModelRequest} to set the specific model to load
      */
-    public static <T> ModelRequest<T> using(ModelLoader<T> modelLoader) {
-        return new ModelRequest<T>(modelLoader);
+    public static <T> ModelRequest<T> using(ModelLoaderFactory<T> factory) {
+        return new ModelRequest<T>(factory);
     }
 
     /**
-     * Use {@link StringLoader} to load the given model
+     * Set the {@link ModelLoader} and therefore the model type to use for a new load.
      *
-     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     * @see #using(com.bumptech.glide.loader.model.ModelLoaderFactory)
+     *
+     * @param modelLoader The model loader to use
+     * @param <T> The type of the model to load using this loader
+     * @return A {@link ModelRequest} to set the specific model to load
+     */
+    public static <T> ModelRequest<T> using(final ModelLoader<T> modelLoader) {
+        return new ModelRequest<T>(new ModelLoaderFactory<T>() {
+            @Override
+            public ModelLoader<T> build(Context context, GenericLoaderFactory factories) {
+                return modelLoader;
+            }
+
+
+            @Override @SuppressWarnings("unchecked")
+            public Class<? extends ModelLoader<T>> loaderClass() {
+                return (Class<ModelLoader<T>>) modelLoader.getClass();
+            }
+
+            @Override
+            public void teardown() { }
+        });
+    }
+
+    /**
+     * Use the {@link ModelLoaderFactory} currently registered for {@link String} to load the image represented by the
+     * given {@link String}. Defaults to {@link StringLoader.Factory} and {@link StringLoader} to load the given model.
+     *
+     * @see #using(ModelLoaderFactory)
+     * @see ModelRequest#load(String)
      *
      * @param string The string representing the image. Must be either a path, or a uri handled by {@link UriLoader}
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
@@ -184,9 +266,11 @@ public class Glide {
     }
 
     /**
-     * Use {@link UriLoader} to load the given model
+     * Use the {@link ModelLoaderFactory} currently registered for {@link Uri} to load the image at the given uri.
+     * Defaults to {@link UriLoader.Factory} and {@link UriLoader}.
      *
-     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     * @see #using(ModelLoaderFactory)
+     * @see ModelRequest#load(android.net.Uri)
      *
      * @param uri The uri representing the image. Must be a uri handled by {@link UriLoader}
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
@@ -196,9 +280,12 @@ public class Glide {
     }
 
     /**
-     * Use {@link UrlLoader} to load the given model
+     * Use the {@link ModelLoaderFactory} currently registered for {@link URL} to load the image represented by the
+     * given {@link URL}. Defaults to {@link VolleyUrlLoader.Factory} and {@link VolleyUrlLoader} to load the given
+     * model.
      *
-     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     * @see #using(ModelLoaderFactory)
+     * @see ModelRequest#load(java.net.URL)
      *
      * @param url The URL representing the image.
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
@@ -208,9 +295,11 @@ public class Glide {
     }
 
     /**
-     * Use {@link FileLoader} to load the given model
+     * Use the {@link ModelLoaderFactory} currently registered for {@link File} to load the image represented by the
+     * given {@link File}. Defaults to {@link FileLoader.Factory} and {@link FileLoader} to load the given model.
      *
-     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     * @see #using(ModelLoaderFactory)
+     * @see ModelRequest#load(java.io.File)
      *
      * @param file The File containing the image
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
@@ -220,15 +309,31 @@ public class Glide {
     }
 
     /**
-     * Use {@link com.bumptech.glide.loader.model.ResourceLoader} to load the given model
+     * Use the {@link ModelLoaderFactory} currently registered for {@link Integer} to load the image represented by the
+     * given {@link Integer} resource id. Defaults to {@link ResourceLoader.Factory} and {@link ResourceLoader} to load
+     * the given model.
      *
-     * @see #using(com.bumptech.glide.loader.model.ModelLoader)
+     * @see #using(ModelLoaderFactory)
+     * @see ModelRequest#load(Integer)
      *
      * @param resourceId the id of the resource containing the image
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static Request<Integer> load(Integer resourceId) {
         return new Request<Integer>(resourceId);
+    }
+
+    /**
+     * Use the {@link ModelLoaderFactory} currently registered for the given model type to load the image represented by
+     * the given model.
+     *
+     * @param model The model to load
+     * @param <T> The type of the model to load
+     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+     * @throws IllegalArgumentException If no {@link ModelLoaderFactory} is registered for the given model type
+     */
+    public static <T> Request<T> load(T model) {
+        return new Request<T>(model);
     }
 
     /**
@@ -255,105 +360,20 @@ public class Glide {
         return cancelled;
     }
 
-    private interface ModelLoaderFactory<T> {
-        public ModelLoader<T> build(Context context);
-        public Class<? extends ModelLoader<T>> loaderClass();
-    }
-
-    private static final ModelLoaderFactory<String> stringLoaderFactory = new ModelLoaderFactory<String>() {
-
-        @Override
-        public ModelLoader<String> build(Context context) {
-            return new StringLoader(context);
-        }
-
-        @Override
-        public Class<? extends ModelLoader<String>> loaderClass() {
-            return StringLoader.class;
-        }
-    };
-
-    private static final ModelLoaderFactory<Uri> uriLoaderFactory = new ModelLoaderFactory<Uri>() {
-        @Override
-        public ModelLoader<Uri> build(Context context) {
-            return new UriLoader(context);
-        }
-
-        @Override
-        public Class<? extends ModelLoader<Uri>> loaderClass() {
-            return UriLoader.class;
-        }
-    };
-
-    private static final ModelLoaderFactory<File> fileLoaderFactory = new ModelLoaderFactory<File>() {
-        @Override
-        public ModelLoader<File> build(Context context) {
-            return new FileLoader(context);
-        }
-
-        @Override
-        public Class<? extends ModelLoader<File>> loaderClass() {
-            return FileLoader.class;
-        }
-    };
-
-    private static final ModelLoaderFactory<URL> urlLoaderFactory = new ModelLoaderFactory<URL>() {
-        @Override
-        public ModelLoader<URL> build(Context context) {
-            return new UrlLoader(context);
-        }
-
-        @Override
-        public Class<? extends ModelLoader<URL>> loaderClass() {
-            return UrlLoader.class;
-        }
-    };
-
-    private static final ModelLoaderFactory<Integer> resourceLoaderFactory = new ModelLoaderFactory<Integer>() {
-        @Override
-        public ModelLoader<Integer> build(Context context) {
-            return new ResourceLoader(context);
-        }
-
-        @Override
-        public Class<? extends ModelLoader<Integer>> loaderClass() {
-            return ResourceLoader.class;
-        }
-    };
-
-    @SuppressWarnings("unchecked")
-    private static <T> ModelLoaderFactory<T> getFactory(T model) {
-        final ModelLoaderFactory result;
-        if (model instanceof String) {
-            result = stringLoaderFactory;
-        } else if (model instanceof Uri) {
-            result = uriLoaderFactory;
-        } else if (model instanceof URL) {
-            result = urlLoaderFactory;
-        } else if (model instanceof File) {
-            result = fileLoaderFactory;
-        } else if (model instanceof Integer) {
-            result = resourceLoaderFactory;
-        } else {
-            throw new IllegalArgumentException("No model factory for model class=" + model.getClass());
-        }
-        return result;
-    }
-
     /**
      * A helper class for building requests with custom {@link ModelLoader}s
      *
      * @param <T> The type of the model (and {@link ModelLoader}
      */
     public static class ModelRequest<T> {
-        private final ModelLoader<T> modelLoader;
+        private final ModelLoaderFactory<T> factory;
 
-        private ModelRequest(ModelLoader<T> modelLoader) {
-            this.modelLoader = modelLoader;
+        private ModelRequest(ModelLoaderFactory<T> factory) {
+            this.factory = factory;
         }
 
         public Request<T> load(T model) {
-            return new Request<T>(model, modelLoader);
+            return new Request<T>(model, factory);
         }
     }
 
@@ -378,8 +398,6 @@ public class Glide {
 
         private ModelLoaderFactory<T> modelLoaderFactory;
         private final T model;
-        private final Class<? extends ModelLoader> modelLoaderClass;
-        private ModelLoader<T> modelLoader;
 
         private int animationId = -1;
         private int placeholderId = -1;
@@ -389,27 +407,19 @@ public class Glide {
         private TransformationLoader<T> transformationLoader = null;
 
         private Request(T model) {
-            if (model == null ) {
-                throw new IllegalArgumentException("Model can't be null");
-            }
-            this.model = model;
-            this.modelLoaderFactory = getFactory(model);
-            if (modelLoaderFactory == null ) {
-                throw new IllegalArgumentException("Missing ModelLoader factory for model = " + model);
-            }
-            this.modelLoaderClass = modelLoaderFactory.loaderClass();
+            this(model, GLIDE.getFactory(model));
         }
 
-        private Request(T model, ModelLoader<T> modelLoader) {
-            if (model == null ) {
+        private Request(T model, ModelLoaderFactory<T> factory) {
+             if (model == null ) {
                 throw new IllegalArgumentException("Model can't be null");
             }
-            if (modelLoader == null) {
-                throw new IllegalArgumentException("ModelLoader can't be null");
-            }
             this.model = model;
-            this.modelLoader = modelLoader;
-            this.modelLoaderClass = modelLoader.getClass();
+
+            if (factory == null) {
+                throw new IllegalArgumentException("No ModelLoaderFactory registered for class=" + model.getClass());
+            }
+            this.modelLoaderFactory = factory;
         }
 
         /**
@@ -582,12 +592,11 @@ public class Glide {
         }
 
         private ImagePresenter<T> buildImagePresenter(Target target) {
-            modelLoader = getFinalModelLoader(context);
             transformationLoader = getFinalTransformationLoader();
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
                     .setTarget(target, context)
-                    .setModelLoader(modelLoader)
+                    .setModelLoader(modelLoaderFactory.build(context, GLIDE.loaderFactory))
                     .setImageLoader(new ImageManagerLoader(context, downsampler))
                     .setTransformationLoader(transformationLoader);
 
@@ -612,14 +621,6 @@ public class Glide {
             }
 
             return builder.build();
-        }
-
-        private ModelLoader<T> getFinalModelLoader(Context context) {
-            if (modelLoader == null) {
-                return modelLoaderFactory.build(context);
-            } else {
-                return modelLoader;
-            }
         }
 
         private TransformationLoader<T> getFinalTransformationLoader() {
@@ -670,7 +671,7 @@ public class Glide {
 
         public Metadata(Request request) {
             modelClass = request.model.getClass();
-            modelLoaderClass = request.modelLoaderClass;
+            modelLoaderClass = request.modelLoaderFactory.loaderClass();
             downsamplerId = request.downsampler.getId();
             transformationId = request.getFinalTransformationId();
             animationId = request.animationId;
