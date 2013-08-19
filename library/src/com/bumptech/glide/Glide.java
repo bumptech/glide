@@ -30,6 +30,7 @@ import com.bumptech.glide.util.Log;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -49,6 +50,7 @@ public class Glide {
     private ImageManager imageManager = null;
     private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
     private GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
+    private Map<ImageView, WeakReference<ImageViewTarget>> imageViewToTarget = new WeakHashMap<ImageView, WeakReference<ImageViewTarget>>();
 
     /**
      * Get the singleton.
@@ -148,6 +150,21 @@ public class Glide {
      */
     public void setImageManager(ImageManager imageManager) {
         this.imageManager = imageManager;
+    }
+
+
+    private ImageViewTarget getImageViewTarget(ImageView imageView) {
+        final WeakReference<ImageViewTarget> ref = imageViewToTarget.get(imageView);
+        return ref != null ? ref.get() : null;
+    }
+
+    private ImageViewTarget getImageViewTargetOrSet(ImageView imageView) {
+        ImageViewTarget result = getImageViewTarget(imageView);
+        if (result == null) {
+            result = new ImageViewTarget(imageView);
+            imageViewToTarget.put(imageView, new WeakReference<ImageViewTarget>(result));
+        }
+        return result;
     }
 
     /**
@@ -332,7 +349,7 @@ public class Glide {
      * @see #cancel(com.bumptech.glide.presenter.target.Target)
      */
     public static boolean cancel(ImageView imageView) {
-        return cancel(new ImageViewTarget(imageView));
+        return cancel(GLIDE.getImageViewTarget(imageView));
     }
 
     /**
@@ -543,7 +560,7 @@ public class Glide {
                 downsampler = Downsampler.NONE;
             }
 
-            finish(imageView.getContext(), new ImageViewTarget(imageView));
+            finish(imageView.getContext(), GLIDE.getImageViewTargetOrSet(imageView));
         }
 
         public ContextRequest into(Target target) {
