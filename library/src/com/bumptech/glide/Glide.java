@@ -569,7 +569,7 @@ public class Glide {
 
             ImagePresenter<T> result = target.getImagePresenter();
 
-            if (!current.equals(previous)) {
+            if (!current.isIdenticalTo(previous)) {
                 if (result != null) {
                     result.clear();
                 }
@@ -671,13 +671,9 @@ public class Glide {
             errorId = request.errorId;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Metadata metadata = (Metadata) o;
-
+        //we don't want to change behavior in sets/maps, just be able to compare properties
+        public boolean isIdenticalTo(Metadata metadata) {
+            if (metadata == null) return false;
             if (animationId != metadata.animationId) return false;
             if (errorId != metadata.errorId) return false;
             if (placeholderId != metadata.placeholderId) return false;
@@ -687,18 +683,6 @@ public class Glide {
             if (!transformationId.equals(metadata.transformationId)) return false;
 
             return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = modelClass.hashCode();
-            result = 31 * result + modelLoaderClass.hashCode();
-            result = 31 * result + animationId;
-            result = 31 * result + placeholderId;
-            result = 31 * result + errorId;
-            result = 31 * result + downsamplerId.hashCode();
-            result = 31 * result + transformationId.hashCode();
-            return result;
         }
     }
 }
