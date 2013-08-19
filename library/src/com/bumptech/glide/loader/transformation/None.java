@@ -12,4 +12,9 @@ public class None<T> implements TransformationLoader<T> {
     public Transformation getTransformation(T model) {
         return Transformation.NONE;
     }
+
+    @Override
+    public String getId() {
+        return Transformation.NONE.getId();
+    }
 }

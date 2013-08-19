@@ -13,4 +13,9 @@ public class FitCenter<T> implements TransformationLoader<T> {
     public Transformation getTransformation(T model) {
         return Transformation.FIT_CENTER;
     }
+
+    @Override
+    public String getId() {
+        return Transformation.FIT_CENTER.getId();
+    }
 }

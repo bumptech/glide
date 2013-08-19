@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.tests.R;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -80,6 +81,7 @@ public class GlideTest extends ActivityTestCase {
 
     public void testGlideDoesNotReplaceIdenticalPresenters() {
         Glide.load("fake")
+                .asIs()
                 .centerCrop()
                 .animate(android.R.anim.fade_in)
                 .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
@@ -88,6 +90,7 @@ public class GlideTest extends ActivityTestCase {
         ImagePresenter first = getImagePresenterFromView();
 
         Glide.load("fake2")
+                .asIs()
                 .centerCrop()
                 .animate(android.R.anim.fade_in)
                 .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
@@ -106,18 +109,15 @@ public class GlideTest extends ActivityTestCase {
         assertNotNull(getImagePresenterFromView());
     }
 
-    public void testDifferentModelsReplacesPresenters() {
-        Glide.load("fake").into(imageView);
-
-        ImagePresenter first = getImagePresenterFromView();
-        Glide.load(4).into(imageView);
-        ImagePresenter second = getImagePresenterFromView();
-
-        assertNotSame(first, second);
+    public void testDifferentModelTypesReplacesPresenters() {
+        assertDifferentPresenters(
+                Glide.load(4),
+                Glide.load("fake")
+        );
     }
 
     public void testDifferentModelLoadersReplacesPresenter() {
-        Glide.using(new ModelLoader<Object>() {
+        ModelLoader<Object> first = new ModelLoader<Object>() {
             @Override
             public StreamLoader getStreamLoader(Object model, int width, int height) {
                 return new StreamLoader() {
@@ -133,14 +133,12 @@ public class GlideTest extends ActivityTestCase {
 
             @Override
             public String getId(Object model) {
-                return String.valueOf(model.hashCode());
+                return model.toString();
             }
 
-        }).load(new Object()).into(imageView);
+        };
 
-        ImagePresenter first = getImagePresenterFromView();
-
-        Glide.using(new ModelLoader<Object>() {
+        ModelLoader<Object> second = new ModelLoader<Object>() {
             @Override
             public StreamLoader getStreamLoader(Object model, int width, int height) {
                 return new StreamLoader() {
@@ -156,58 +154,68 @@ public class GlideTest extends ActivityTestCase {
 
             @Override
             public String getId(Object model) {
-                return String.valueOf(model.hashCode());
+                return model.toString();
             }
+        };
 
-        }).load(new Object()).into(imageView);
-
-        ImagePresenter second = getImagePresenterFromView();
-
-        assertNotSame(first, second);
+        final Object object = new Object();
+        assertDifferentPresenters(
+                Glide.using(first).load(object),
+                Glide.using(second).load(object)
+        );
     }
 
-    public void testDifferentImageLoadersReplacesPresenter() {
+    public void testDifferentDownsamplersReplacesPresenter() {
+        assertDifferentPresenters(
+                Glide.load("a").approximate(),
+                Glide.load("a").asIs()
+        );
+    }
+
+    public void testDifferentTransformationsReplacesPresenter() {
         final File file = new File("fake");
-        Glide.load(file).centerCrop().into(imageView);
-        ImagePresenter first = getImagePresenterFromView();
-
-        Glide.load(file).into(imageView);
-        ImagePresenter second = getImagePresenterFromView();
-
-        assertNotSame(first, second);
+        assertDifferentPresenters(
+                Glide.load(file).centerCrop().fitCenter(),
+                Glide.load(file).centerCrop()
+        );
     }
 
     public void testDifferentPlaceholdersReplacesPresenter() {
         final File file = new File("fake");
-        Glide.load(file).placeholder(com.bumptech.glide.tests.R.raw.ic_launcher).into(imageView);
-        ImagePresenter first = getImagePresenterFromView();
+        assertDifferentPresenters(
+                Glide.load(file).placeholder(com.bumptech.glide.tests.R.raw.ic_launcher),
+                Glide.load(file)
 
-        Glide.load(file).into(imageView);
-        ImagePresenter second = getImagePresenterFromView();
-
-        assertNotSame(first, second);
+        );
     }
 
     public void testDifferentAnimationsReplacesPresenter() {
         final File file = new File("fake");
-        Glide.load(file).animate(android.R.anim.fade_in).into(imageView);
-        ImagePresenter first = getImagePresenterFromView();
-
-        Glide.load(file).animate(android.R.anim.fade_out).into(imageView);
-        ImagePresenter second = getImagePresenterFromView();
-
-        assertNotSame(first, second);
+        assertDifferentPresenters(
+                Glide.load(file).animate(android.R.anim.fade_in),
+                Glide.load(file).animate(android.R.anim.fade_out)
+        );
     }
 
     public void testDifferentErrorIdsReplacesPresenter() {
-        final File file = new File("fake");
-        Glide.load(file).error(com.bumptech.glide.tests.R.raw.ic_launcher).into(imageView);
+        assertDifferentPresenters(
+                Glide.load("b").error(R.raw.ic_launcher),
+                Glide.load("b").error(android.R.drawable.btn_star)
+        );
+    }
+
+    private void assertDifferentPresenters(Glide.Request a, Glide.Request b) {
+        a.into(imageView);
         ImagePresenter first = getImagePresenterFromView();
 
-        Glide.load(file).error(android.R.drawable.btn_star).into(imageView);
+        a.into(imageView);
         ImagePresenter second = getImagePresenterFromView();
 
-        assertNotSame(first, second);
+        b.into(imageView);
+        ImagePresenter third = getImagePresenterFromView();
+
+        assertSame(first, second);
+        assertNotSame(first, third);
     }
 
 }

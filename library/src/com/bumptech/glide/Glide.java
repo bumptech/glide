@@ -18,6 +18,8 @@ import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.loader.transformation.FitCenter;
+import com.bumptech.glide.loader.transformation.MultiTransformationLoader;
+import com.bumptech.glide.loader.transformation.None;
 import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
@@ -32,6 +34,7 @@ import com.bumptech.glide.volley.VolleyUrlLoader;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -398,22 +401,14 @@ public class Glide {
         private Context context;
         private Target target;
 
-        private enum ResizeOption {
-            APPROXIMATE,
-            CENTER_CROP,
-            FIT_CENTER,
-            AS_IS,
-        }
-
         private ModelLoaderFactory<T> modelLoaderFactory;
         private final T model;
 
         private int animationId = -1;
         private int placeholderId = -1;
         private int errorId = -1;
-        private Transformation transformation = Transformation.NONE;
         private Downsampler downsampler = Downsampler.AT_LEAST;
-        private TransformationLoader<T> transformationLoader = null;
+        private ArrayList<TransformationLoader<T>> transformationLoaders = new ArrayList<TransformationLoader<T>>();
 
         private Request(T model) {
             this(model, GLIDE.getFactory(model));
@@ -432,77 +427,93 @@ public class Glide {
         }
 
         /**
-         * Resize models using {@link CenterCrop}. Replaces any existing resize style
+         * Load images at a size near the size of the target using {@link Downsampler#AT_LEAST}.
          *
-         * @return This Request
-         */
-        public Request<T> centerCrop() {
-            transformation = Transformation.CENTER_CROP;
-            downsampler = Downsampler.AT_LEAST;
-            transformationLoader = null;
-
-            return this;
-        }
-
-        /**
-         * Resize models using {@link FitCenter}. Replaces any existing resize style
-         *
-         * @return This Request
-         */
-        public Request<T> fitCenter() {
-            transformation = Transformation.FIT_CENTER;
-            downsampler = Downsampler.AT_LEAST;
-            transformationLoader = null;
-
-            return this;
-        }
-
-        /**
-         * Load images at a size near the size of the target using {@link Downsampler#AT_LEAST}. Replaces any existing resize style
+         * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
          *
          * @return This Request
          */
         public Request<T> approximate() {
-            transformation = Transformation.NONE;
-            downsampler = Downsampler.AT_LEAST;
-            transformationLoader = null;
-
-            return this;
+            return downsample(Downsampler.AT_LEAST);
         }
 
         /**
-         * Load images at their original size using {@link Downsampler#NONE}. Replaces any existing
-         * resize style
+         * Load images at their original size using {@link Downsampler#NONE}.
+         *
+         * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
          *
          * @return This Request
          */
         public Request<T> asIs() {
-            transformation = Transformation.NONE;
-            downsampler = Downsampler.NONE;
-            transformationLoader = null;
+            return downsample(Downsampler.NONE);
+        }
+
+        /**
+         * Load images using the given {@link Downsampler}. Replaces any existing downsampler. Defaults to
+         * {@link Downsampler#AT_LEAST}
+         *
+         * @param downsampler The downsampler
+         * @return This Request
+         */
+        public Request<T> downsample(Downsampler downsampler) {
+            this.downsampler = downsampler;
 
             return this;
         }
 
         /**
-         * Set an arbitrary transformation to apply after an image has been loaded into memory.  Replaces any existing
-         * resize style
+         * Transform images using {@link com.bumptech.glide.loader.transformation.CenterCrop}.
+         *
+         * @see #transform(com.bumptech.glide.loader.transformation.TransformationLoader)
+         *
+         * @return This Request
+         */
+        public Request<T> centerCrop() {
+            return transform(new CenterCrop<T>());
+        }
+
+        /**
+         * Transform images using {@link com.bumptech.glide.loader.transformation.FitCenter}.
+         *
+         * @see #transform(com.bumptech.glide.loader.transformation.TransformationLoader)
+         *
+         * @return This Request
+         */
+        public Request<T> fitCenter() {
+            return transform(new FitCenter<T>());
+        }
+
+        /**
+         * Set an arbitrary transformation to apply after an image has been loaded into memory.
+         *
+         * @see #transform(com.bumptech.glide.loader.transformation.TransformationLoader)
          *
          * @param transformation The transformation to use
          * @return This Request
          */
         public Request<T> transform(final Transformation transformation) {
-            this.transformation = transformation;
-            downsampler = Downsampler.AT_LEAST;
-            transformationLoader = null;
+            return transform(new TransformationLoader<T>() {
+                @Override
+                public Transformation getTransformation(T model) {
+                    return transformation;
+                }
 
-            return this;
+                @Override
+                public String getId() {
+                    return transformation.getId();
+                }
+            });
         }
 
+        /**
+         * Transform images with the given {@link TransformationLoader}. Appends this transformation onto any existing
+         * transformations
+         *
+         * @param transformationLoader The loader to obtaian a transformation for a given model
+         * @return This Request
+         */
         public Request<T> transform(TransformationLoader<T> transformationLoader) {
-            this.transformationLoader = transformationLoader;
-            transformation = null;
-            downsampler = Downsampler.AT_LEAST;
+            transformationLoaders.add(transformationLoader);
 
             return this;
         }
@@ -601,7 +612,7 @@ public class Glide {
         }
 
         private ImagePresenter<T> buildImagePresenter(Target target) {
-            transformationLoader = getFinalTransformationLoader();
+            TransformationLoader<T> transformationLoader = getFinalTransformationLoader();
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
                     .setTarget(target, context)
@@ -633,23 +644,28 @@ public class Glide {
         }
 
         private TransformationLoader<T> getFinalTransformationLoader() {
-            if (transformationLoader != null) {
-                return transformationLoader;
-            } else {
-                return new TransformationLoader<T>() {
-                    @Override
-                    public Transformation getTransformation(T model) {
-                        return transformation;
-                    }
-                };
+            switch (transformationLoaders.size()) {
+                case 0:
+                    return new None<T>();
+                case 1:
+                    return transformationLoaders.get(0);
+                default:
+                    return new MultiTransformationLoader<T>(transformationLoaders);
             }
         }
 
         private String getFinalTransformationId() {
-            if (transformationLoader != null) {
-                return transformationLoader.getClass().toString();
-            } else {
-                return transformation.getId();
+            switch (transformationLoaders.size()) {
+                case 0:
+                    return Transformation.NONE.getId();
+                case 1:
+                    return transformationLoaders.get(0).getId();
+                default:
+                    StringBuilder sb = new StringBuilder();
+                    for (TransformationLoader transformationLoader : transformationLoaders) {
+                        sb.append(transformationLoader.getId());
+                    }
+                    return sb.toString();
             }
         }
     }

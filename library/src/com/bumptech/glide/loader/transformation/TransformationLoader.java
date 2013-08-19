@@ -16,4 +16,11 @@ public interface TransformationLoader<T> {
      * @return A new or static (if the transformation is type/model agnostic) {@link Transformation}
      */
     public Transformation getTransformation(T model);
+
+    /**
+     * Get a unique identifier for this TransformationLoader.
+     *
+     * @return A unique String identifier
+     */
+    public String getId();
 }

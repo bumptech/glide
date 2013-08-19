@@ -12,4 +12,9 @@ public class CenterCrop<T> implements TransformationLoader<T>{
     public Transformation getTransformation(T model) {
         return Transformation.CENTER_CROP;
     }
+
+    @Override
+    public String getId() {
+        return Transformation.CENTER_CROP.getId();
+    }
 }
