@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="glide-rules" default="help">
+    <xmlproperty file="AndroidManifest.xml" prefix="mymanifest" collapseAttributes="true"/>
+
     <target name="jar" depends="-compile">
-        <jar destfile="bin/glide.jar"
+        <jar destfile="bin/glide-${mymanifest.manifest.android:versionName}.jar"
             basedir="bin/classes" >
             <zipgroupfileset dir="libs" includes="*.jar" />
         </jar>
     </target>
     <target name="glide-minus-volley" depends="-compile">
-        <jar destfile="bin/glide-minus-volley.jar"
+        <jar destfile="bin/glide-minus-volley-${mymanifest.manifest.android:versionName}.jar"
             basedir="bin/classes"
             excludes="com/bumptech/glide/volley/">
             <zipgroupfileset dir="libs" includes="disklrucache*.jar" />
