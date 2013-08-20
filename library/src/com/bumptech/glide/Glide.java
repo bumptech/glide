@@ -193,8 +193,8 @@ public class Glide {
      * @return A new {@link ModelLoader} for the given model class
      * @throws IllegalArgumentException if no factory exists for the given class
      */
-    public <T> ModelLoader<T> buildModelLoader(Class<T> clazz, Context context) {
-        return loaderFactory.buildModelLoader(clazz, context);
+    public static <T> ModelLoader<T> buildModelLoader(Class<T> clazz, Context context) {
+        return GLIDE.loaderFactory.buildModelLoader(clazz, context);
     }
 
     @SuppressWarnings("unchecked")
