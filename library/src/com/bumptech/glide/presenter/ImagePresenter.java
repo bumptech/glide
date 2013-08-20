@@ -421,6 +421,13 @@ public class ImagePresenter<T> {
         imageLoader.clear();
         final String id = modelLoader.getId(model);
         final StreamLoader sl = modelLoader.getStreamLoader(model, width, height);
+
+        if (id == null || sl == null) {
+            Log.i("ImagePresenter got null model id or stream loader model=" + model + " id=" + id + " stream loader=" + sl);
+            clear();
+            return;
+        }
+
         final Transformation t = transformationLoader.getTransformation(model);
 
         imageToken = imageLoader.fetchImage(id, sl, t, width, height, new ImageLoader.ImageReadyCallback() {
