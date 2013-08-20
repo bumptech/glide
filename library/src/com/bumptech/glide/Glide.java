@@ -360,7 +360,8 @@ public class Glide {
      * @see #cancel(com.bumptech.glide.presenter.target.Target)
      */
     public static boolean cancel(ImageView imageView) {
-        return cancel(GLIDE.getImageViewTarget(imageView));
+        final Target target = GLIDE.getImageViewTarget(imageView);
+        return target != null && cancel(target);
     }
 
     /**
