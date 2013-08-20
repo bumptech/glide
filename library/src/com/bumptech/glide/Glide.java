@@ -40,7 +40,7 @@ import java.util.WeakHashMap;
 
 /**
  * A singleton to present a simple static interface for Glide {@link Glide.Request} and to create and manage an
- * {@link ImageLoader} and {@link com.android.volley.RequestQueue}. This class provides most of the functionality of
+ * {@link ImageLoader} and {@link ModelLoaderFactory}s. This class provides most of the functionality of
  * {@link ImagePresenter} with a simpler but less efficient interface. For more complicated cases it may be worth
  * considering using {@link ImagePresenter} and {@link com.bumptech.glide.presenter.ImagePresenter.Builder} directly.
  *
@@ -50,10 +50,12 @@ import java.util.WeakHashMap;
  */
 public class Glide {
     private static final Glide GLIDE = new Glide();
-    private ImageManager imageManager = null;
     private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
-    private GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
-    private Map<ImageView, WeakReference<ImageViewTarget>> imageViewToTarget = new WeakHashMap<ImageView, WeakReference<ImageViewTarget>>();
+    private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
+    private final WeakHashMap<ImageView, WeakReference<ImageViewTarget>> imageViewToTarget =
+            new WeakHashMap<ImageView, WeakReference<ImageViewTarget>>();
+
+    private ImageManager imageManager = null;
 
     /**
      * Get the singleton.
@@ -135,6 +137,8 @@ public class Glide {
     }
 
     /**
+     * Set the {@link ImageManager} to use with {@link Glide.Request}.
+     *
      * @see #setImageManager(com.bumptech.glide.resize.ImageManager)
      *
      * @param builder The builder that will be used to construct a new ImageManager
@@ -155,21 +159,6 @@ public class Glide {
         this.imageManager = imageManager;
     }
 
-
-    private ImageViewTarget getImageViewTarget(ImageView imageView) {
-        final WeakReference<ImageViewTarget> ref = imageViewToTarget.get(imageView);
-        return ref != null ? ref.get() : null;
-    }
-
-    private ImageViewTarget getImageViewTargetOrSet(ImageView imageView) {
-        ImageViewTarget result = getImageViewTarget(imageView);
-        if (result == null) {
-            result = new ImageViewTarget(imageView);
-            imageViewToTarget.put(imageView, new WeakReference<ImageViewTarget>(result));
-        }
-        return result;
-    }
-
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class.
      *
@@ -177,6 +166,11 @@ public class Glide {
      *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
      *     used for any other model class, {@link com.bumptech.glide.loader.model.ModelLoaderFactory#teardown()}
      *     will be called.
+     * </p>
+     *
+     * <p>
+     *     Note - The factory must not be an anonymous inner class of an Activity or another object that cannot be
+     *     retained statically.
      * </p>
      *
      * @param clazz The class
@@ -206,6 +200,20 @@ public class Glide {
     @SuppressWarnings("unchecked")
     private <T> ModelLoaderFactory<T> getFactory(T model) {
         return loaderFactory.getFactory((Class<T>) model.getClass());
+    }
+
+    private ImageViewTarget getImageViewTarget(ImageView imageView) {
+        final WeakReference<ImageViewTarget> ref = imageViewToTarget.get(imageView);
+        return ref != null ? ref.get() : null;
+    }
+
+    private ImageViewTarget getImageViewTargetOrSet(ImageView imageView) {
+        ImageViewTarget result = getImageViewTarget(imageView);
+        if (result == null) {
+            result = new ImageViewTarget(imageView);
+            imageViewToTarget.put(imageView, new WeakReference<ImageViewTarget>(result));
+        }
+        return result;
     }
 
     /**
@@ -556,10 +564,15 @@ public class Glide {
         }
 
         /**
-         * Creates an {@link ImagePresenter} or retrieves the existing one and starts loading the image represented by
-         * the given model. This must be called on the main thread.
+         * Start loading the image into the view.
+         *
+         * <p>
+         *     Note - This method will call {@link ImageView#setTag(Object)} and may silently overwrite any tag that
+         *     might already be set on the view.
+         * </p>
          *
          * @see ImagePresenter#setModel(Object)
+         * @param imageView The view that will display the image
          */
         public void into(ImageView imageView) {
             //make an effort to support wrap content layout params. This will still blow
@@ -574,6 +587,17 @@ public class Glide {
             finish(imageView.getContext(), GLIDE.getImageViewTargetOrSet(imageView));
         }
 
+        /**
+         * Set the target the image will be loaded into.
+         *
+         * <p>
+         *     Note - This method does not actually start loading the view. You must first pass in a {@link Context} to
+         *     returned Request via {@link ContextRequest#with(android.content.Context)}.
+         * </p>
+         *
+         * @param target The target to load te image for
+         * @return A {@link ContextRequest} that can start the load
+         */
         public ContextRequest into(Target target) {
             return new ContextRequest(this, target);
         }
@@ -670,6 +694,9 @@ public class Glide {
         }
     }
 
+    /**
+     * An request for the user to provide an {@link Context} to start an image load
+     */
     public static class ContextRequest {
         private final Request request;
         private final Target target;
@@ -679,6 +706,12 @@ public class Glide {
             this.target = target;
         }
 
+        /**
+         * Start loading the image using the given context. The context will not be referenced statically so any
+         * context is acceptable.
+         *
+         * @param context The context to use to help load the image
+         */
         public void with(Context context) {
             request.finish(context, target);
         }
