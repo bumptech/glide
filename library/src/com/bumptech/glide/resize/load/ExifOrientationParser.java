@@ -50,7 +50,6 @@ public class ExifOrientationParser {
                 new String(exifData, 0, JPEG_EXIF_SEGMENT_PREAMBLE.length()).equalsIgnoreCase(JPEG_EXIF_SEGMENT_PREAMBLE)) {
                 return parseExifSegment(new RandomAccessReader(exifData));
             } else {
-                Log.d("EXIF: segment data too short or missing jpeg exif segment preamble");
                 return -1;
             }
         }
@@ -70,7 +69,6 @@ public class ExifOrientationParser {
             segmentType = streamReader.getUInt8();
 
             if (segmentType == SEGMENT_SOS) {
-                Log.d("EXIF: found SEGMENT_SOS");
                 return null;
             } else if (segmentType == MARKER_EOI) {
                 Log.d("EXIF: found MARKER_EOI");
