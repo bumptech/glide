@@ -6,7 +6,7 @@ Glide's primary focus is on making scrolling any kind of a list of images as smo
 
 How do I use Glide?
 -------------------
-You can download a .jar from GitHub's release page for the Glide project. The wiki also has tutorials on a variety of topics and the javadocs for version 2.0+ will also be available via a link there as well.
+You can download a .jar from GitHub's release page for the Glide project. The wiki also has pages on a variety of topics and the javadocs for version 2.0+ will also be available via a link there as well.
 
 Simple use cases will look something like this:
 
@@ -50,8 +50,7 @@ Glide has been in use at Bump for about six months in two of our Android apps at
 
 Thanks
 ------
-Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) included with Glide, and also to Square and [Picasso](https://github.com/square/picasso) for Glide's high level api.
-Thanks also to the Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/).
+Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) included with Glide. Thanks also to the Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/).
 
 Author
 ------
