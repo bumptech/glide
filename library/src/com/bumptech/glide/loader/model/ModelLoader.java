@@ -27,6 +27,12 @@ public interface ModelLoader<T> {
      * Obtain an {@link StreamLoader} that can asynchronously load and open an InputStream for the image represented
      * by this model. The {@link StreamLoader} will not be used if the image is already cached.
      *
+     * <p>
+     *     Note - If the {@link StringLoader} in any way retains a reference a context, either directly or as an
+     *     anonymous inner class, that context may be leaked. The leak will only be an issue if this load can run for a
+     *     long time or indefinitely (because of a particularly slow or paused/failed download for example).
+     * </p>
+     *
      * @param model The model representing the image
      * @param width The width of the view the image will be loaded into
      * @param height The height of the view the image will be loaded into

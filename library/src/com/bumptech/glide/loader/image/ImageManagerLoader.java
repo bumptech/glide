@@ -20,7 +20,7 @@ public class ImageManagerLoader implements ImageLoader {
     protected final ImageManager imageManager;
     private final Downsampler downsampler;
     private Bitmap acquired;
-    private Object loadToken;
+    private ImageManager.ImageManagerJob loadToken;
 
     public ImageManagerLoader(Context context) {
         this(context, Downsampler.AT_LEAST);
@@ -74,7 +74,7 @@ public class ImageManagerLoader implements ImageLoader {
     public void clear() {
         releaseAcquired();
         if (loadToken != null) {
-            imageManager.cancelTask(loadToken);
+            loadToken.cancel();
             loadToken = null;
         }
     }

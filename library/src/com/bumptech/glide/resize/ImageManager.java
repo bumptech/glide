@@ -18,8 +18,8 @@ import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounterAdapter;
-import com.bumptech.glide.resize.bitmap_recycle.SerialBitmapReferenceCounter;
 import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
+import com.bumptech.glide.resize.bitmap_recycle.SerialBitmapReferenceCounter;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
@@ -36,10 +36,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -362,15 +362,29 @@ public class ImageManager {
         });
     }
 
-    public Object getImage(String id, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
+    /**
+     * Load an image
+     *
+     * @param id A unique id for this image (it may include the width and height but is not required to)
+     * @param streamLoader An object that can fetch the image for the given id, width, and height if it is not cached
+     * @param transformation A transformation to apply to the image
+     * @param downsampler A downsampler to load the image from disk
+     * @param width The desired width of the final image
+     * @param height The desired height of the final image
+     * @param cb A callback to call when the image is ready
+     * @return An {@link ImageManagerJob} that must be retained while the job is still relevant and that can be used
+     *          to cancel a job if the image is no longer needed
+     */
+    public ImageManagerJob getImage(String id, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
         if (shutdown) return null;
 
         final String key = getKey(id, transformation.getId(), downsampler, width, height);
 
         ImageManagerJob job = null;
         if (!returnFromCache(key, cb)) {
-            job = new ImageManagerJob();
-            job.execute(key, streamLoader, transformation, downsampler, width, height, cb);
+            ImageManagerRunner runner = new ImageManagerRunner(key, streamLoader, transformation, downsampler, width, height, cb);
+            runner.execute();
+            job = new ImageManagerJob(runner, streamLoader, transformation, downsampler, cb);
         }
         return job;
     }
@@ -410,18 +424,6 @@ public class ImageManager {
     }
 
     /**
-     * Cancel the task represented by the given token. If token is null this call will be ignored.
-     *
-     * @param token The token returned by the ImageManager in a get call
-     */
-    public void cancelTask(Object token) {
-        if (token != null) {
-            ImageManagerJob job = (ImageManagerJob) token;
-            job.cancel();
-        }
-    }
-
-    /**
      * Shuts down all of the background threads used by the ImageManager including the executor service
      */
     @SuppressWarnings("unused")
@@ -440,34 +442,75 @@ public class ImageManager {
         return found;
     }
 
-    private class ImageManagerJob<T> implements Runnable {
-        private LoadedCallback cb;
-        private Future future = null;
-        private volatile boolean cancelled = false;
-        private Downsampler downsampler;
-        private int width;
-        private int height;
-        private String key;
-        private StreamLoader streamLoader = null;
+    /**
+     * A class for tracking a particular job in the {@link ImageManager}. Cancel does not guarantee that the
+     * job will not finish, but rather is a best effort attempt.
+     */
+    public static class ImageManagerJob {
+        private final ImageManagerRunner runner;
+        private StreamLoader sl;
         private Transformation transformation;
+        private Downsampler downsampler;
+        private LoadedCallback cb;
 
-        public void execute(String key, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
-            this.key = key;
-            this.streamLoader = streamLoader;
-            this.transformation = transformation;
+        public ImageManagerJob(ImageManagerRunner runner, StreamLoader sl, Transformation t, Downsampler d, LoadedCallback cb) {
+            this.runner = runner;
+            this.sl = sl;
+            this.transformation = t;
+            this.downsampler = d;
             this.cb = cb;
-            this.width = width;
+        }
+
+        /**
+         * Try to cancel the job. Does not guarantee that the job will not finish.
+         */
+        public void cancel() {
+            runner.cancel();
+            sl = null;
+            transformation = null;
+            downsampler = null;
+            cb = null;
+        }
+    }
+
+    private class ImageManagerRunner implements Runnable {
+        public final String key;
+        public final int width;
+        public final int height;
+        private final WeakReference<StreamLoader> slRef;
+        private final WeakReference<Transformation> tRef;
+        private final WeakReference<Downsampler> dRef;
+        private final WeakReference<LoadedCallback> cbRef;
+
+        private volatile Future<?> future;
+        private volatile boolean cancelled = false;
+
+        public ImageManagerRunner(String key, StreamLoader sl, Transformation t, Downsampler d, int width, int height, LoadedCallback cb) {
+            this.key = key;
             this.height = height;
-            this.downsampler = downsampler;
+            this.width = width;
+
+            slRef = new WeakReference<StreamLoader>(sl);
+            tRef = new WeakReference<Transformation>(t);
+            dRef = new WeakReference<Downsampler>(d);
+            cbRef = new WeakReference<LoadedCallback>(cb);
+        }
+
+        private void execute() {
             bgHandler.post(this);
         }
 
         public void cancel() {
             cancelled = true;
+
             bgHandler.removeCallbacks(this);
-            if (future != null) {
-                future.cancel(false);
+
+            final Future current = future;
+            if (current != null) {
+                current.cancel(false);
             }
+
+            final StreamLoader streamLoader = slRef.get();
             if (streamLoader != null) {
                 streamLoader.cancel();
             }
@@ -476,11 +519,8 @@ public class ImageManager {
         @Override
         public void run() {
             Bitmap result = getFromDiskCache(key);
-
             if (result == null) {
                 try {
-                    //in almost every case exception will be because of race after calling shutdown. Not much we can do
-                    //either way
                     resizeWithPool();
                 } catch (Exception e) {
                     handleException(e);
@@ -490,10 +530,28 @@ public class ImageManager {
             }
         }
 
-        private void resizeWithPool() throws RejectedExecutionException {
+
+        private Bitmap getFromDiskCache(String key) {
+            Bitmap result = null;
+            final InputStream is = diskCache.get(key);
+            if (is != null) {
+                result = resizer.load(is, width, height, DISK_CACHE_DOWNSAMPLER);
+                if (result == null) {
+                    diskCache.delete(key); //the image must have been corrupted
+                }
+            }
+            return result;
+        }
+
+        private void resizeWithPool() {
             future = executor.submit(new Runnable() {
                 @Override
                 public void run() {
+                    final StreamLoader streamLoader = slRef.get();
+                    if (streamLoader == null) {
+                        return;
+                    }
+
                     streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
                         @Override
                         public void onStreamReady(final InputStream is) {
@@ -501,15 +559,19 @@ public class ImageManager {
                                 return;
                             }
 
-                            //this call back might be called on some other thread,
+                            //this callback might be called on some other thread,
                             //we want to do resizing on our thread, especially if we're called
                             //back on the main thread, so we will resubmit
                             future = executor.submit(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {
-                                        final Bitmap result = resizeIfNotFound(is);
-                                        finishResize(result, false);
+                                        final Downsampler downsampler = dRef.get();
+                                        final Transformation transformation = tRef.get();
+                                        if (downsampler != null && transformation != null) {
+                                            final Bitmap result = resizeIfNotFound(is, downsampler, transformation);
+                                            finishResize(result, false);
+                                        }
                                     } catch (Exception e) {
                                         handleException(e);
                                     }
@@ -526,6 +588,10 @@ public class ImageManager {
             });
         }
 
+        private Bitmap resizeIfNotFound(InputStream is, Downsampler downsampler, Transformation transformation) {
+            return resizer.load(is, width, height, downsampler, transformation);
+        }
+
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
             if (result != null) {
                 if (!isInDiskCache) {
@@ -535,9 +601,13 @@ public class ImageManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        final LoadedCallback cb = cbRef.get();
                         bitmapReferenceCounter.initBitmap(result);
                         putInMemoryCache(key, result);
-                        cb.onLoadCompleted(result);
+                        if (cb != null) {
+                            bitmapReferenceCounter.markPending(result);
+                            cb.onLoadCompleted(result);
+                        }
                     }
                 });
             } else {
@@ -549,25 +619,12 @@ public class ImageManager {
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    cb.onLoadFailed(e);
+                    final LoadedCallback cb = cbRef.get();
+                    if (cb != null) {
+                        cb.onLoadFailed(e);
+                    }
                 }
             });
-        }
-
-        private Bitmap resizeIfNotFound(InputStream is) throws IOException {
-            return resizer.load(is, width, height, downsampler, transformation);
-        }
-
-        private Bitmap getFromDiskCache(String key) {
-            Bitmap result = null;
-            final InputStream is = diskCache.get(key);
-            if (is != null) {
-                result = resizer.load(is, width, height, DISK_CACHE_DOWNSAMPLER);
-                if (result == null) {
-                    diskCache.delete(key); //the image must have been corrupted
-                }
-            }
-            return result;
         }
     }
 
@@ -589,7 +646,6 @@ public class ImageManager {
         }
 
         bitmapReferenceCounter.acquireBitmap(bitmap);
-        bitmapReferenceCounter.markPending(bitmap);
     }
 
     private static String getKey(String id, String transformationId, Downsampler downsampler, int width, int height) {
