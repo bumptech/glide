@@ -1,10 +1,10 @@
 jar:
 	git submodule init
 	git submodule update
-	cd library/volley && ant jar
+	cd library/volley && ant clean && ant jar
 	cp library/volley/bin/volley.jar library/libs
-	cd library && ant jar
+	cd library && ant clean && ant jar
 
 glide-minus-volley:
-	cd library && ant glide-minus-volley
+	cd library && ant clean && ant glide-minus-volley
 
