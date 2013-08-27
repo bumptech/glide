@@ -10,3 +10,4 @@ com.bumptech.glide.resize.bitmap_recycle
 com.bumptech.glide.resize.cache
 com.bumptech.glide.resize.load
 com.bumptech.glide.util
+com.bumptech.glide.volley
