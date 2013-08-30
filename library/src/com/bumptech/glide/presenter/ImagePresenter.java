@@ -209,7 +209,7 @@ public class ImagePresenter<T> {
          * @return This Builder object
          */
         public Builder<T> setErrorDrawable(Drawable drawable) {
-            if (errorResourceId != -1 && drawable != null) {
+            if (errorResourceId != 0 && drawable != null) {
                 throw new IllegalArgumentException("Can't set both an error drawable and an error resource");
             }
 
