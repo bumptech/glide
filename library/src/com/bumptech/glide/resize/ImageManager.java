@@ -327,7 +327,9 @@ public class ImageManager {
                     }
                 }
 
-                diskCache = new DiskCacheAdapter();
+                if (diskCache == null) {
+                    diskCache = new DiskCacheAdapter();
+                }
             }
 
             if (!recycleBitmaps) {
