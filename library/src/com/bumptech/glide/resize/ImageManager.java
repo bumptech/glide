@@ -324,8 +324,11 @@ public class ImageManager {
                     } catch (IOException e) {
                         //this is probably a corrupt or full sd card, so default to not using a disk cache
                         e.printStackTrace();
-                        diskCache = new DiskCacheAdapter();
                     }
+                }
+
+                if (diskCache == null) {
+                    diskCache = new DiskCacheAdapter();
                 }
             }
 
