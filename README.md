@@ -28,7 +28,7 @@ public View getView(int position, View recycled, ViewGroup container) {
     if (recycled == null) {
         myImageView = (ImageView) inflater.inflate(R.layout.my_image_view, container, false);
     } else {
-        myImageView = (ImageView) recycled);
+        myImageView = (ImageView) recycled;
     }
 
     String url = myUrls.get(position);
