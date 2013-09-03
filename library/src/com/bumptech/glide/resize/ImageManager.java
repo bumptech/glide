@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -479,10 +478,10 @@ public class ImageManager {
         public final String key;
         public final int width;
         public final int height;
-        private final WeakReference<StreamLoader> slRef;
-        private final WeakReference<Transformation> tRef;
-        private final WeakReference<Downsampler> dRef;
-        private final WeakReference<LoadedCallback> cbRef;
+        private final StreamLoader streamLoader;
+        private final Transformation transformation;
+        private final Downsampler downsampler;
+        private final LoadedCallback cb;
 
         private volatile Future<?> future;
         private volatile boolean cancelled = false;
@@ -492,10 +491,10 @@ public class ImageManager {
             this.height = height;
             this.width = width;
 
-            slRef = new WeakReference<StreamLoader>(sl);
-            tRef = new WeakReference<Transformation>(t);
-            dRef = new WeakReference<Downsampler>(d);
-            cbRef = new WeakReference<LoadedCallback>(cb);
+            this.streamLoader = sl;
+            this.transformation = t;
+            this.downsampler = d;
+            this.cb = cb;
         }
 
         private void execute() {
@@ -512,7 +511,6 @@ public class ImageManager {
                 current.cancel(false);
             }
 
-            final StreamLoader streamLoader = slRef.get();
             if (streamLoader != null) {
                 streamLoader.cancel();
             }
@@ -549,10 +547,6 @@ public class ImageManager {
             future = executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    final StreamLoader streamLoader = slRef.get();
-                    if (streamLoader == null) {
-                        return;
-                    }
 
                     streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
                         @Override
@@ -568,12 +562,8 @@ public class ImageManager {
                                 @Override
                                 public void run() {
                                     try {
-                                        final Downsampler downsampler = dRef.get();
-                                        final Transformation transformation = tRef.get();
-                                        if (downsampler != null && transformation != null) {
-                                            final Bitmap result = resizeIfNotFound(is, downsampler, transformation);
-                                            finishResize(result, false);
-                                        }
+                                        final Bitmap result = resizeIfNotFound(is, downsampler, transformation);
+                                        finishResize(result, false);
                                     } catch (Exception e) {
                                         handleException(e);
                                     }
@@ -603,13 +593,10 @@ public class ImageManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        final LoadedCallback cb = cbRef.get();
                         bitmapReferenceCounter.initBitmap(result);
                         putInMemoryCache(key, result);
-                        if (cb != null) {
-                            bitmapReferenceCounter.markPending(result);
-                            cb.onLoadCompleted(result);
-                        }
+                        bitmapReferenceCounter.markPending(result);
+                        cb.onLoadCompleted(result);
                     }
                 });
             } else {
@@ -621,10 +608,7 @@ public class ImageManager {
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    final LoadedCallback cb = cbRef.get();
-                    if (cb != null) {
-                        cb.onLoadFailed(e);
-                    }
+                    cb.onLoadFailed(e);
                 }
             });
         }
