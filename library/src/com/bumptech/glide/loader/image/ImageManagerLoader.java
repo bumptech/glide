@@ -88,6 +88,6 @@ public class ImageManagerLoader implements ImageLoader {
 
     protected boolean isHandled(int width, int height) {
         return width >= 0 && height >= 0 ||
-                (downsampler == Downsampler.NONE && width == WRAP_CONTENT && height == WRAP_CONTENT);
+                (downsampler == Downsampler.NONE && (width == WRAP_CONTENT || height == WRAP_CONTENT));
     }
 }

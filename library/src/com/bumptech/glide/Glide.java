@@ -106,7 +106,6 @@ public class Glide {
         }
     }
 
-
     /**
      * Return the current {@link ImageManager} or create and return a new one if one is not currently set.
      *
