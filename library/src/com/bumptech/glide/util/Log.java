@@ -8,6 +8,7 @@ import java.util.Date;
 
 public class Log {
     private static final String TAG = "GLIDE";
+    public static boolean DEBUG = false;
 
     @SuppressLint("SimpleDateFormat")
     private static final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -33,12 +34,18 @@ public class Log {
     }
 
     public static void d(String message, Object... args) {
+        if (!DEBUG)
+            return;
+
         String formatted = args.length > 0 ? String.format(message, args) : message;
         formatted = "[" + dateFormat.format(new Date()) + "] " + formatted;
         android.util.Log.d(TAG, formatted);
     }
 
     public static void v(String message, Object... args) {
+        if (!DEBUG)
+            return;
+
         String formatted = args.length > 0 ? String.format(message, args) : message;
         android.util.Log.v(TAG, formatted);
     }
