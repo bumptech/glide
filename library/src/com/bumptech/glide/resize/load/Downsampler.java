@@ -162,9 +162,11 @@ public abstract class Downsampler {
                          //won't go past our pre-allocated 16kb
          }
 
-        final Bitmap result = BitmapFactory.decodeStream(bis, null, options);
-
+        Bitmap result = null;
+        
         try {
+            result = BitmapFactory.decodeStream(bis, null, options);
+            
             if (options.inJustDecodeBounds) {
                 bis.reset();
                 bis.clearMark();
@@ -172,6 +174,8 @@ public abstract class Downsampler {
                 bis.close();
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
 
