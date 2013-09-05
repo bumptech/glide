@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 
 public class MemoryCacheAdapter implements MemoryCache {
 
+    private ImageRemovedListener listener;
+
     @Override
     public boolean contains(String key) {
         return false;
@@ -16,9 +18,12 @@ public class MemoryCacheAdapter implements MemoryCache {
 
     @Override
     public Bitmap put(String key, Bitmap bitmap) {
+        listener.onImageRemoved(bitmap);
         return null;
     }
 
     @Override
-    public void setImageRemovedListener(ImageRemovedListener listener) { }
+    public void setImageRemovedListener(ImageRemovedListener listener) {
+        this.listener = listener;
+    }
 }

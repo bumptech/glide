@@ -391,28 +391,6 @@ public class ImageManager {
     }
 
     /**
-     * Notify the ImageManager that a bitmap it loaded is not going to be displayed and can go into a queue to be
-     * reused. Does nothing if recycling is disabled or impossible.
-     *
-     * @param b The rejected Bitmap
-     */
-    public void rejectBitmap(final Bitmap b) {
-        bitmapReferenceCounter.rejectBitmap(b);
-    }
-
-    /**
-     * Notify the ImageManager that a Bitmap it loaded is going to be used and increment the reference counter for that
-     * Bitmap. Though it won't cause a memory leak, we expect releaseBitmap to be called for this Bitmap at some point.
-     * If release is not called, then we will never be able to recycle the Bitmap. Does nothing if recycling is disabled
-     * or impossible.
-     *
-     * @param b The acquired Bitmap
-     */
-    public void acquireBitmap(final Bitmap b) {
-        bitmapReferenceCounter.acquireBitmap(b);
-    }
-
-    /**
      * Notify the ImageManager that a Bitmap it loaded is no longer being used and decrement the reference counter for
      * that Bitmap. This will cause an exception if acquire was not called first, or if each call to release does not
      * come after a call to acquire. If the reference count drops to zero, places the Bitmap into a queue to be
@@ -438,6 +416,7 @@ public class ImageManager {
         Bitmap inCache = memoryCache.get(key);
         boolean found = inCache != null;
         if (found) {
+            bitmapReferenceCounter.acquireBitmap(inCache);
             cb.onLoadCompleted(inCache);
         }
         return found;
@@ -593,9 +572,11 @@ public class ImageManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        bitmapReferenceCounter.initBitmap(result);
+                        //acquire for the callback before putting in to memory cache so that the bitmap is not
+                        //released to the pool if the bitmap is synchronously released by the memory cache
+                        //we rely on the callback to call releaseBitmap if it doesn't want to use the bitmap
+                        bitmapReferenceCounter.acquireBitmap(result);
                         putInMemoryCache(key, result);
-                        bitmapReferenceCounter.markPending(result);
                         cb.onLoadCompleted(result);
                     }
                 });
@@ -628,10 +609,9 @@ public class ImageManager {
         final boolean inCache;
         inCache = memoryCache.contains(key);
         if (!inCache) {
+            bitmapReferenceCounter.acquireBitmap(bitmap);
             memoryCache.put(key, bitmap);
         }
-
-        bitmapReferenceCounter.acquireBitmap(bitmap);
     }
 
     private static String getKey(String id, String transformationId, Downsampler downsampler, int width, int height) {

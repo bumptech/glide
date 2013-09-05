@@ -63,10 +63,9 @@ public class ImageManagerLoader implements ImageLoader {
     protected void onImageReady(Bitmap image, boolean isUsed) {
         if (isUsed) {
             releaseAcquired();
-            imageManager.acquireBitmap(image);
             acquired = image;
         } else {
-            imageManager.rejectBitmap(image);
+            imageManager.releaseBitmap(image);
         }
     }
 

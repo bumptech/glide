@@ -2,7 +2,6 @@ package com.bumptech.glide.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -28,26 +27,15 @@ public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
 
     private static class InnerTracker {
         private int refs = 0;
-        private boolean pending = false;
 
         public void acquire() {
-            pending = false;
             refs++;
         }
 
         public boolean release() {
             refs--;
 
-            return refs == 0 && !pending;
-        }
-
-        public boolean reject() {
-            pending = false;
             return refs == 0;
-        }
-
-        public void markPending() {
-            pending = true;
         }
     }
 
@@ -59,8 +47,7 @@ public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
         this.target = target;
     }
 
-    @Override
-    public void initBitmap(Bitmap toInit) {
+    private void initBitmap(Bitmap toInit) {
         final InnerTracker tracker = counter.get(toInit);
         if (tracker == null) {
             counter.put(toInit, pool.get());
@@ -69,6 +56,7 @@ public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
 
     @Override
     public void acquireBitmap(Bitmap bitmap) {
+        initBitmap(bitmap);
         counter.get(bitmap).acquire();
     }
 
@@ -78,19 +66,6 @@ public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
         if (tracker.release()) {
             recycle(tracker, bitmap);
         }
-    }
-
-    @Override
-    public void rejectBitmap(Bitmap bitmap) {
-        final InnerTracker tracker = counter.get(bitmap);
-        if (tracker.reject()) {
-            recycle(tracker, bitmap);
-        }
-    }
-
-    @Override
-    public void markPending(Bitmap bitmap) {
-        counter.get(bitmap).markPending();
     }
 
     private void recycle(InnerTracker tracker, Bitmap bitmap) {
