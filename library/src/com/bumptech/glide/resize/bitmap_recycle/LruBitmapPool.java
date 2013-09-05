@@ -22,6 +22,12 @@ public class LruBitmapPool implements BitmapPool {
 
     @Override
     public synchronized boolean put(Bitmap bitmap) {
+        //BitmapFactory.decodeStream can sometimes return bitmaps with null configs, which can't generally be
+        //reused
+        if (bitmap.getConfig() == null) {
+            return false;
+        }
+
         final int size = getSize(bitmap);
 
         pool.put(bitmap);
