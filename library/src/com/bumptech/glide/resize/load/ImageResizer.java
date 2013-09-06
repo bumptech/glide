@@ -437,7 +437,7 @@ public class ImageResizer {
         final int newWidth = Math.round(newRect.width());
         final int newHeight = Math.round(newRect.height());
 
-        Bitmap result = pool.get(newWidth, newHeight);
+        Bitmap result = pool.get(newWidth, newHeight, toOrient.getConfig());
         if (result == null) {
             result = Bitmap.createBitmap(newWidth, newHeight, toOrient.getConfig());
         }

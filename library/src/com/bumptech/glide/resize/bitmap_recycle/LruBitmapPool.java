@@ -22,12 +22,6 @@ public class LruBitmapPool implements BitmapPool {
 
     @Override
     public synchronized boolean put(Bitmap bitmap) {
-        //BitmapFactory.decodeStream can sometimes return bitmaps with null configs, which can't generally be
-        //reused
-        if (bitmap.getConfig() == null) {
-            return false;
-        }
-
         final int size = getSize(bitmap);
 
         pool.put(bitmap);
@@ -45,10 +39,10 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     @Override
-    public synchronized Bitmap get(int width, int height) {
-        final Bitmap result = pool.get(width, height);
+    public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
+        final Bitmap result = pool.get(width, height, config);
         if (result == null) {
-            Log.d("LBP: missing bitmap for width=" + width + " height=" + height);
+            Log.d("LBP: missing bitmap for width=" + width + " height=" + height + " config=" + config);
         } else {
             currentSize -= getSize(result);
         }
@@ -77,14 +71,14 @@ public class LruBitmapPool implements BitmapPool {
         private static class KeyPool {
             private static final int MAX_SIZE = 20;
 
-            private Queue<Key> keyPool = new LinkedList<Key>();
+            private final Queue<Key> keyPool = new LinkedList<Key>();
 
-            public Key get(int width, int height) {
+            public Key get(int width, int height, Bitmap.Config config) {
                 Key result = keyPool.poll();
                 if (result == null) {
                     result = new Key();
                 }
-                result.init(width, height);
+                result.init(width, height, config);
                 return result;
             }
 
@@ -98,10 +92,12 @@ public class LruBitmapPool implements BitmapPool {
         private static class Key {
             private int width;
             private int height;
+            private Bitmap.Config config; //this can be null :(
 
-            public void init(int width, int height) {
+            public void init(int width, int height, Bitmap.Config config) {
                 this.width = width;
                 this.height = height;
+                this.config = config;
             }
 
             @Override
@@ -113,6 +109,7 @@ public class LruBitmapPool implements BitmapPool {
 
                 if (height != key.height) return false;
                 if (width != key.width) return false;
+                if (config != key.config) return false;
 
                 return true;
             }
@@ -121,12 +118,13 @@ public class LruBitmapPool implements BitmapPool {
             public int hashCode() {
                 int result = width;
                 result = 31 * result + height;
+                result = 31 * result + (config != null ? config.hashCode() : 0);
                 return result;
             }
         }
 
         public void put(Bitmap bitmap) {
-            final Key key = keyPool.get(bitmap.getWidth(), bitmap.getHeight());
+            final Key key = keyPool.get(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
 
             LinkedEntry entry = keyToEntry.get(key);
             if (entry == null) {
@@ -140,8 +138,8 @@ public class LruBitmapPool implements BitmapPool {
             entry.add(bitmap);
         }
 
-        public Bitmap get(int width, int height) {
-            final Key key = keyPool.get(width, height);
+        public Bitmap get(int width, int height, Bitmap.Config config) {
+            final Key key = keyPool.get(width, height, config);
 
             LinkedEntry entry = keyToEntry.get(key);
             if (entry == null) {

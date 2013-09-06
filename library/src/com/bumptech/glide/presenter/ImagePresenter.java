@@ -56,10 +56,9 @@ public class ImagePresenter<T> {
         private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
             @Override
             public void onException(Exception e, T model, boolean isCurrent) {
+                Log.e("IP: onImageLoadException model= " + model);
                 if (e != null) {
                     e.printStackTrace();
-                } else {
-                    Log.e("IP: onImageLoadException model= " + model);
                 }
             }
         };

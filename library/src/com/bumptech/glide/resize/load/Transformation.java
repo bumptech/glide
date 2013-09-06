@@ -20,7 +20,7 @@ public abstract class Transformation {
                 throw new IllegalArgumentException("Cannot center crop image to width=" + outWidth + " and height="
                         + outHeight);
             }
-            return ImageResizer.centerCrop(pool.get(outWidth, outHeight), bitmap, outWidth, outHeight);
+            return ImageResizer.centerCrop(pool.get(outWidth, outHeight, bitmap.getConfig()), bitmap, outWidth, outHeight);
         }
     };
 
