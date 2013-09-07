@@ -395,7 +395,6 @@ public class ImageResizer {
      */
     public static Bitmap rotateImageExif(Bitmap toOrient, BitmapPool pool, int exifOrientation) {
         final Matrix matrix = new Matrix();
-        boolean swapWidthHeight = false;
         switch (exifOrientation) {
             case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
                 matrix.setScale(-1, 1);
@@ -408,22 +407,17 @@ public class ImageResizer {
                 matrix.postScale(-1, 1);
                 break;
             case ExifInterface.ORIENTATION_TRANSPOSE:
-                swapWidthHeight = true;
                 matrix.setRotate(90);
                 matrix.postScale(-1, 1);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_90:
-                swapWidthHeight = true;
                 matrix.setRotate(90);
-                //matrix.postTranslate(toOrient.getHeight(), 0);
                 break;
             case ExifInterface.ORIENTATION_TRANSVERSE:
-                swapWidthHeight = true;
                 matrix.setRotate(-90);
                 matrix.postScale(-1, 1);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_270:
-                swapWidthHeight = true;
                 matrix.setRotate(-90);
                 break;
             default: //case ExifInterface.ORIENTATION_NORMAL
