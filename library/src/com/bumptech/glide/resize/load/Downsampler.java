@@ -71,7 +71,7 @@ public abstract class Downsampler {
         bis.mark(MARK_POSITION);
         int orientation = 0;
         try {
-            orientation = new ExifOrientationParser(bis).getOrientation();
+            orientation = new ImageHeaderParser(bis).getOrientation();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -118,7 +118,7 @@ public abstract class Downsampler {
         Bitmap.Config result = Bitmap.Config.RGB_565;
         bis.mark(1024); //we probably only need 25, but this is safer (particularly since the buffer size is > 1024)
         try {
-            result = new ExifOrientationParser(bis).hasAlpha() ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+            result = new ImageHeaderParser(bis).hasAlpha() ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

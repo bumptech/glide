@@ -10,7 +10,7 @@ import java.nio.ByteOrder;
 /**
  * A class for parsing the exif orientation from an InputStream for an image. Handles jpegs and tiffs.
  */
-public class ExifOrientationParser {
+public class ImageHeaderParser {
     private static final int GIF_HEADER = 0x474946;
     private static final int PNG_HEADER = 0x89504E47;
     private static final int EXIF_MAGIC_NUMBER = 0xFFD8;
@@ -30,7 +30,7 @@ public class ExifOrientationParser {
 
     private final StreamReader streamReader;
 
-    public ExifOrientationParser(InputStream is) {
+    public ImageHeaderParser(InputStream is) {
         streamReader = new StreamReader(is);
     }
 

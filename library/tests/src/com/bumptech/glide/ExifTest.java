@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import android.content.res.AssetManager;
 import android.test.InstrumentationTestCase;
-import com.bumptech.glide.resize.load.ExifOrientationParser;
+import com.bumptech.glide.resize.load.ImageHeaderParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ public class ExifTest extends InstrumentationTestCase {
         InputStream is = null;
         try {
             is = open(filePrefix + "_" + expectedOrientation + ".jpg");
-            assertEquals(new ExifOrientationParser(is).getOrientation(), expectedOrientation);
+            assertEquals(new ImageHeaderParser(is).getOrientation(), expectedOrientation);
         } catch (IOException e) {
             e.printStackTrace();
             assertNull(e);
