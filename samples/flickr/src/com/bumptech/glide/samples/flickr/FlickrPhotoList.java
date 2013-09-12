@@ -10,8 +10,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.loader.model.Cache;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +27,7 @@ import java.util.List;
 public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
+    private Cache<URL> urlCache = new Cache<URL>();
 
     public static FlickrPhotoList newInstance() {
         return new FlickrPhotoList();
@@ -100,7 +103,8 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            Glide.load(current)
+            Glide.using(new FlickrModelLoader(getActivity(), urlCache))
+                    .load(current)
                     .centerCrop()
                     .animate(R.anim.fade_in)
                     .into(viewHolder.imageView);

@@ -100,7 +100,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         requestQueue = Volley.newRequestQueue(this);
 
         glide.register(URL.class, new VolleyUrlLoader.Factory(requestQueue));
-        glide.register(Photo.class, new FlickrModelLoader.Factory());
 
         searching = findViewById(R.id.searching);
         searchLoading = findViewById(R.id.search_loading);

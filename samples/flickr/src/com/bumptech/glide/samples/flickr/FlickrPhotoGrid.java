@@ -11,14 +11,15 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
+import com.bumptech.glide.loader.model.Cache;
 import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
     private int photoSize;
+    private final Cache<URL> urlCache = new Cache<URL>();
 
     public static FlickrPhotoGrid newInstance(int size) {
         FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
@@ -112,7 +114,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 //reason why ImagePresenter is used here and not in FlickrPhotoList.
                 final Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo>()
-                        .setModelLoader(Glide.buildModelLoader(Photo.class, context))
+                        .setModelLoader(new FlickrModelLoader(context, urlCache))
                         .setImageView(imageView)
                         .setImageLoader(new ImageManagerLoader(context))
                         .setTransformationLoader(new CenterCrop<Photo>())
