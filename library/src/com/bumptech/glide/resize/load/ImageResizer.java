@@ -60,6 +60,7 @@ public class ImageResizer {
     }
 
     @SuppressWarnings("unused")
+    @Deprecated
     public ImageResizer(BitmapFactory.Options options) {
         this(null, options);
     }
@@ -69,6 +70,7 @@ public class ImageResizer {
      *
      * @param bitmapPool The cache to try to recycle {@link android.graphics.Bitmap}s from
      */
+    @Deprecated
     public ImageResizer(BitmapPool bitmapPool, BitmapFactory.Options defaultOptions){
         if (bitmapPool == null) {
             this.bitmapPool = new BitmapPoolAdapter();

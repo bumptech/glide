@@ -68,7 +68,6 @@ public class ImageManager {
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
     private final DiskCache diskCache;
-    private final Bitmap.CompressFormat bitmapCompressFormat;
 
     //special downsampler that doesn't check exif, and assumes inWidth and inHeight == outWidth and outHeight so it
     //doesn't need to read the image header for size information
@@ -157,7 +156,9 @@ public class ImageManager {
         private Bitmap.CompressFormat bitmapCompressFormat = Bitmap.CompressFormat.JPEG;
         private boolean recycleBitmaps = CAN_RECYCLE;
 
+        @Deprecated
         public BitmapFactory.Options decodeBitmapOptions = ImageResizer.getDefaultOptions();
+
         private BitmapPool bitmapPool;
         private BitmapReferenceCounter bitmapReferenceCounter;
         private int bitmapCompressQuality = DEFAULT_BITMAP_COMPRESS_QUALITY;
@@ -206,11 +207,17 @@ public class ImageManager {
          *
          * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
          *
+         * <p>
+         *     Note - this call will now be ignored, ARGB_8888 bitmaps will be saved as PNGs, and all other formats
+         *     will be saved as jpegs.
+         * </p>
+         *
          * @param bitmapCompressFormat The format to pass to
          *  {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)} when saving
          *  to the disk cache
          * @return This Builder
          */
+        @Deprecated
         public Builder setBitmapCompressFormat(Bitmap.CompressFormat bitmapCompressFormat) {
             this.bitmapCompressFormat = bitmapCompressFormat;
             return this;
@@ -221,6 +228,10 @@ public class ImageManager {
          *
          * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
          * @see #setBitmapCompressFormat(android.graphics.Bitmap.CompressFormat)
+         *
+         * <Note>
+         *     This will only apply to bitmaps saved to the disk cache as JPEGs (bitmaps with the RGB_565 config)
+         * </Note>
          *
          * @param quality Hint for compression in range 0-100 with 0 being lowest and 100 being highest quality. Will
          *                only be applied for certain lossy compression formats
@@ -348,7 +359,6 @@ public class ImageManager {
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
-        bitmapCompressFormat = builder.bitmapCompressFormat;
         bitmapCompressQuality = builder.bitmapCompressQuality;
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
