@@ -32,7 +32,6 @@ import com.bumptech.glide.util.Log;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
@@ -52,8 +51,6 @@ public class Glide {
     private static final Glide GLIDE = new Glide();
     private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
-    private final WeakHashMap<ImageView, WeakReference<ImageViewTarget>> imageViewToTarget =
-            new WeakHashMap<ImageView, WeakReference<ImageViewTarget>>();
 
     private ImageManager imageManager = null;
 
@@ -205,15 +202,21 @@ public class Glide {
     }
 
     private ImageViewTarget getImageViewTarget(ImageView imageView) {
-        final WeakReference<ImageViewTarget> ref = imageViewToTarget.get(imageView);
-        return ref != null ? ref.get() : null;
+        Object tag = imageView.getTag();
+        final ImageViewTarget result;
+        if (tag != null && tag instanceof ImageViewTarget) {
+            result = (ImageViewTarget) tag;
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private ImageViewTarget getImageViewTargetOrSet(ImageView imageView) {
         ImageViewTarget result = getImageViewTarget(imageView);
         if (result == null) {
             result = new ImageViewTarget(imageView);
-            imageViewToTarget.put(imageView, new WeakReference<ImageViewTarget>(result));
+            imageView.setTag(result);
         }
         return result;
     }

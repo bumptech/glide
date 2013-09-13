@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.tests.R;
 
 import java.io.File;
@@ -46,7 +47,7 @@ public class GlideTest extends ActivityTestCase {
     }
 
     private ImagePresenter getImagePresenterFromView() {
-        return (ImagePresenter) imageView.getTag();
+        return ((ImageViewTarget) imageView.getTag()).getImagePresenter();
     }
 
     public void testFileDefaultLoader() {

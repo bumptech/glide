@@ -17,6 +17,7 @@ import static android.view.ViewGroup.LayoutParams;
 public class ImageViewTarget implements Target {
     private final ImageView imageView;
     private final SizeDeterminer sizeDeterminer;
+    private ImagePresenter imagePresenter;
 
     public ImageViewTarget(ImageView imageView) {
         this.imageView = imageView;
@@ -51,17 +52,12 @@ public class ImageViewTarget implements Target {
      */
     @Override
     public void setImagePresenter(ImagePresenter imagePresenter) {
-        imageView.setTag(imagePresenter);
+        this.imagePresenter = imagePresenter;
     }
 
     @Override
     public ImagePresenter getImagePresenter() {
-        Object tag = imageView.getTag();
-        ImagePresenter result = null;
-        if (tag instanceof ImagePresenter) {
-            result = (ImagePresenter) tag;
-        }
-        return result;
+        return imagePresenter;
     }
 
     @Override
