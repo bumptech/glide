@@ -289,6 +289,8 @@ public class ImagePresenter<T> {
     private int currentCount;
 
     private boolean isImageSet = false;
+    private boolean isErrorSet = false;
+
     private boolean loadedFromCache = false;
     private final Drawable errorDrawable;
 
@@ -375,6 +377,7 @@ public class ImagePresenter<T> {
             final int loadCount = ++currentCount;
             currentModel = model;
             isImageSet = false;
+            isErrorSet = false;
 
             target.getSize(new Target.SizeReadyCallback() {
                 @Override
@@ -385,7 +388,7 @@ public class ImagePresenter<T> {
 
             loadedFromCache = false;
 
-            if (!isImageSet) {
+            if (!isImageSet && !isErrorSet) {
                 resetPlaceHolder();
             }
         }
@@ -413,6 +416,7 @@ public class ImagePresenter<T> {
         resetPlaceHolder();
         currentModel = null;
         isImageSet = false;
+        isErrorSet = false;
         imageLoader.clear();
     }
 
@@ -448,6 +452,7 @@ public class ImagePresenter<T> {
                     exceptionHandler.onException(e, model, relevant);
                 }
                 if (relevant && canSetPlaceholder() && errorDrawable != null) {
+                    isErrorSet = true;
                     target.setPlaceholder(errorDrawable);
                 }
             }

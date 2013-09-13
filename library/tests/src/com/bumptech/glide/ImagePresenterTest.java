@@ -3,10 +3,16 @@ package com.bumptech.glide;
 import android.R;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.test.AndroidTestCase;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import com.bumptech.glide.loader.image.ImageLoader;
+import com.bumptech.glide.loader.image.ImageManagerLoader;
+import com.bumptech.glide.loader.model.ModelLoader;
+import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * Created with IntelliJ IDEA.
@@ -57,5 +63,46 @@ public class ImagePresenterTest extends AndroidTestCase {
         }
 
         assertNotNull(exception);
+    }
+
+    public void testErrorPlaceholderIsSetOnException() {
+        Drawable errorDrawable = new ColorDrawable(Color.RED);
+        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+                .setImageView(imageView)
+                .setModelLoader(new ModelLoader<Object>() {
+                    @Override
+                    public StreamLoader getStreamLoader(Object model, int width, int height) {
+                        return new StreamLoader() {
+                            @Override
+                            public void loadStream(StreamReadyCallback cb) {
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        };
+                    }
+
+                    @Override
+                    public String getId(Object model) {
+                        return model.toString();
+                    }
+                })
+                .setImageLoader(new ImageLoader() {
+                    @Override
+                    public Object fetchImage(String id, StreamLoader streamLoader, Transformation transformation, int width, int height, ImageReadyCallback cb) {
+                        cb.onException(new Exception("Test"));
+                        return null;
+                    }
+
+                    @Override
+                    public void clear() { }
+                })
+                .setErrorDrawable(errorDrawable)
+                .build();
+
+        assertNull(imageView.getDrawable());
+        imagePresenter.setModel(new Object());
+        assertEquals(errorDrawable, imageView.getDrawable());
     }
 }
