@@ -609,7 +609,9 @@ public class ImageManager {
         diskCache.put(key, new DiskCache.Writer() {
             @Override
             public void write(OutputStream os) {
-                bitmap.compress(bitmap.getConfig() == Bitmap.Config.ARGB_8888 ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, bitmapCompressQuality, os);
+                Bitmap.Config config = bitmap.getConfig();
+                bitmap.compress(config == null || config == Bitmap.Config.ARGB_8888 || config == Bitmap.Config.ARGB_4444 
+                    ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, bitmapCompressQuality, os);
             }
         });
 
