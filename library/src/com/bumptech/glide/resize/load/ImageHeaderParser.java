@@ -50,7 +50,8 @@ public class ImageHeaderParser {
             //see: http://stackoverflow.com/questions/2057923/how-to-check-a-png-for-grayscale-alpha-color-type
             streamReader.skip(25 - 4);
             int alpha = streamReader.getByte();
-            return alpha > 3;
+            // A RGB indexed PNG can also have transparency. Better safe than sorry!
+            return alpha >= 3;
         }
 
         if (firstFourBytes >> 8 == GIF_HEADER) { //GIF from first 3 bytes

@@ -2,6 +2,8 @@ library/bin/*
 library/gen/*
 library/build/*
 library/local.properties
+library/.gradle
+library/.settings
 *.iml
 .idea/*
 *.DS_Store
@@ -14,4 +16,6 @@ samples/flickr/bin
 samples/flickr/local.properties
 *.keystore
 **/.idea/*
-
+.settings
+/library/.classpath
+/library/.project
