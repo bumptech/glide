@@ -109,6 +109,14 @@ public class GlideTest extends ActivityTestCase {
         assertNotNull(getImagePresenterFromView());
     }
 
+    public void testCanHandleWrapContentMatchParent() {
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        Glide.load("fake").into(imageView);
+
+        assertNotNull(getImagePresenterFromView());
+    }
+
     public void testDifferentModelTypesReplacesPresenters() {
         assertDifferentPresenters(
                 Glide.load(4),

@@ -60,6 +60,7 @@ public class ImageResizer {
     }
 
     @SuppressWarnings("unused")
+    @Deprecated
     public ImageResizer(BitmapFactory.Options options) {
         this(null, options);
     }
@@ -69,6 +70,7 @@ public class ImageResizer {
      *
      * @param bitmapPool The cache to try to recycle {@link android.graphics.Bitmap}s from
      */
+    @Deprecated
     public ImageResizer(BitmapPool bitmapPool, BitmapFactory.Options defaultOptions){
         if (bitmapPool == null) {
             this.bitmapPool = new BitmapPoolAdapter();
@@ -395,7 +397,6 @@ public class ImageResizer {
      */
     public static Bitmap rotateImageExif(Bitmap toOrient, BitmapPool pool, int exifOrientation) {
         final Matrix matrix = new Matrix();
-        boolean swapWidthHeight = false;
         switch (exifOrientation) {
             case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
                 matrix.setScale(-1, 1);
@@ -408,22 +409,17 @@ public class ImageResizer {
                 matrix.postScale(-1, 1);
                 break;
             case ExifInterface.ORIENTATION_TRANSPOSE:
-                swapWidthHeight = true;
                 matrix.setRotate(90);
                 matrix.postScale(-1, 1);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_90:
-                swapWidthHeight = true;
                 matrix.setRotate(90);
-                //matrix.postTranslate(toOrient.getHeight(), 0);
                 break;
             case ExifInterface.ORIENTATION_TRANSVERSE:
-                swapWidthHeight = true;
                 matrix.setRotate(-90);
                 matrix.postScale(-1, 1);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_270:
-                swapWidthHeight = true;
                 matrix.setRotate(-90);
                 break;
             default: //case ExifInterface.ORIENTATION_NORMAL
@@ -437,7 +433,7 @@ public class ImageResizer {
         final int newWidth = Math.round(newRect.width());
         final int newHeight = Math.round(newRect.height());
 
-        Bitmap result = pool.get(newWidth, newHeight);
+        Bitmap result = pool.get(newWidth, newHeight, toOrient.getConfig());
         if (result == null) {
             result = Bitmap.createBitmap(newWidth, newHeight, toOrient.getConfig());
         }

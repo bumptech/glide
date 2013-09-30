@@ -1,5 +1,7 @@
 package com.bumptech.glide.loader.model;
 
+import android.content.Context;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
 import java.net.MalformedURLException;
@@ -14,6 +16,14 @@ import java.net.URL;
 public abstract class UrlModelLoader<T> implements ModelLoader<T> {
     private final ModelLoader<URL> concreteLoader;
     private final Cache<URL> modelCache;
+
+    public UrlModelLoader(Context context) {
+        this(context, null);
+    }
+
+    public UrlModelLoader(Context context, Cache<URL> modelCache) {
+        this(Glide.buildModelLoader(URL.class, context), modelCache);
+    }
 
     @SuppressWarnings("unused")
     public UrlModelLoader(ModelLoader<URL> concreteLoader) {

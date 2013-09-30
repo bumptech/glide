@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -69,7 +68,6 @@ public class ImageManager {
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
     private final DiskCache diskCache;
-    private final Bitmap.CompressFormat bitmapCompressFormat;
 
     //special downsampler that doesn't check exif, and assumes inWidth and inHeight == outWidth and outHeight so it
     //doesn't need to read the image header for size information
@@ -158,7 +156,9 @@ public class ImageManager {
         private Bitmap.CompressFormat bitmapCompressFormat = Bitmap.CompressFormat.JPEG;
         private boolean recycleBitmaps = CAN_RECYCLE;
 
+        @Deprecated
         public BitmapFactory.Options decodeBitmapOptions = ImageResizer.getDefaultOptions();
+
         private BitmapPool bitmapPool;
         private BitmapReferenceCounter bitmapReferenceCounter;
         private int bitmapCompressQuality = DEFAULT_BITMAP_COMPRESS_QUALITY;
@@ -207,11 +207,17 @@ public class ImageManager {
          *
          * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
          *
+         * <p>
+         *     Note - this call will now be ignored, ARGB_8888 bitmaps will be saved as PNGs, and all other formats
+         *     will be saved as jpegs.
+         * </p>
+         *
          * @param bitmapCompressFormat The format to pass to
          *  {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)} when saving
          *  to the disk cache
          * @return This Builder
          */
+        @Deprecated
         public Builder setBitmapCompressFormat(Bitmap.CompressFormat bitmapCompressFormat) {
             this.bitmapCompressFormat = bitmapCompressFormat;
             return this;
@@ -222,6 +228,10 @@ public class ImageManager {
          *
          * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
          * @see #setBitmapCompressFormat(android.graphics.Bitmap.CompressFormat)
+         *
+         * <Note>
+         *     This will only apply to bitmaps saved to the disk cache as JPEGs (bitmaps with the RGB_565 config)
+         * </Note>
          *
          * @param quality Hint for compression in range 0-100 with 0 being lowest and 100 being highest quality. Will
          *                only be applied for certain lossy compression formats
@@ -349,7 +359,6 @@ public class ImageManager {
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
-        bitmapCompressFormat = builder.bitmapCompressFormat;
         bitmapCompressQuality = builder.bitmapCompressQuality;
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
@@ -392,28 +401,6 @@ public class ImageManager {
     }
 
     /**
-     * Notify the ImageManager that a bitmap it loaded is not going to be displayed and can go into a queue to be
-     * reused. Does nothing if recycling is disabled or impossible.
-     *
-     * @param b The rejected Bitmap
-     */
-    public void rejectBitmap(final Bitmap b) {
-        bitmapReferenceCounter.rejectBitmap(b);
-    }
-
-    /**
-     * Notify the ImageManager that a Bitmap it loaded is going to be used and increment the reference counter for that
-     * Bitmap. Though it won't cause a memory leak, we expect releaseBitmap to be called for this Bitmap at some point.
-     * If release is not called, then we will never be able to recycle the Bitmap. Does nothing if recycling is disabled
-     * or impossible.
-     *
-     * @param b The acquired Bitmap
-     */
-    public void acquireBitmap(final Bitmap b) {
-        bitmapReferenceCounter.acquireBitmap(b);
-    }
-
-    /**
      * Notify the ImageManager that a Bitmap it loaded is no longer being used and decrement the reference counter for
      * that Bitmap. This will cause an exception if acquire was not called first, or if each call to release does not
      * come after a call to acquire. If the reference count drops to zero, places the Bitmap into a queue to be
@@ -439,6 +426,7 @@ public class ImageManager {
         Bitmap inCache = memoryCache.get(key);
         boolean found = inCache != null;
         if (found) {
+            bitmapReferenceCounter.acquireBitmap(inCache);
             cb.onLoadCompleted(inCache);
         }
         return found;
@@ -479,10 +467,10 @@ public class ImageManager {
         public final String key;
         public final int width;
         public final int height;
-        private final WeakReference<StreamLoader> slRef;
-        private final WeakReference<Transformation> tRef;
-        private final WeakReference<Downsampler> dRef;
-        private final WeakReference<LoadedCallback> cbRef;
+        private final StreamLoader streamLoader;
+        private final Transformation transformation;
+        private final Downsampler downsampler;
+        private final LoadedCallback cb;
 
         private volatile Future<?> future;
         private volatile boolean cancelled = false;
@@ -492,10 +480,10 @@ public class ImageManager {
             this.height = height;
             this.width = width;
 
-            slRef = new WeakReference<StreamLoader>(sl);
-            tRef = new WeakReference<Transformation>(t);
-            dRef = new WeakReference<Downsampler>(d);
-            cbRef = new WeakReference<LoadedCallback>(cb);
+            this.streamLoader = sl;
+            this.transformation = t;
+            this.downsampler = d;
+            this.cb = cb;
         }
 
         private void execute() {
@@ -512,7 +500,6 @@ public class ImageManager {
                 current.cancel(false);
             }
 
-            final StreamLoader streamLoader = slRef.get();
             if (streamLoader != null) {
                 streamLoader.cancel();
             }
@@ -549,10 +536,6 @@ public class ImageManager {
             future = executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    final StreamLoader streamLoader = slRef.get();
-                    if (streamLoader == null) {
-                        return;
-                    }
 
                     streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
                         @Override
@@ -568,12 +551,8 @@ public class ImageManager {
                                 @Override
                                 public void run() {
                                     try {
-                                        final Downsampler downsampler = dRef.get();
-                                        final Transformation transformation = tRef.get();
-                                        if (downsampler != null && transformation != null) {
-                                            final Bitmap result = resizeIfNotFound(is, downsampler, transformation);
-                                            finishResize(result, false);
-                                        }
+                                        final Bitmap result = resizeIfNotFound(is, downsampler, transformation);
+                                        finishResize(result, false);
                                     } catch (Exception e) {
                                         handleException(e);
                                     }
@@ -603,13 +582,12 @@ public class ImageManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        final LoadedCallback cb = cbRef.get();
-                        bitmapReferenceCounter.initBitmap(result);
+                        //acquire for the callback before putting in to memory cache so that the bitmap is not
+                        //released to the pool if the bitmap is synchronously released by the memory cache
+                        //we rely on the callback to call releaseBitmap if it doesn't want to use the bitmap
+                        bitmapReferenceCounter.acquireBitmap(result);
                         putInMemoryCache(key, result);
-                        if (cb != null) {
-                            bitmapReferenceCounter.markPending(result);
-                            cb.onLoadCompleted(result);
-                        }
+                        cb.onLoadCompleted(result);
                     }
                 });
             } else {
@@ -621,10 +599,7 @@ public class ImageManager {
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    final LoadedCallback cb = cbRef.get();
-                    if (cb != null) {
-                        cb.onLoadFailed(e);
-                    }
+                    cb.onLoadFailed(e);
                 }
             });
         }
@@ -634,7 +609,7 @@ public class ImageManager {
         diskCache.put(key, new DiskCache.Writer() {
             @Override
             public void write(OutputStream os) {
-                bitmap.compress(bitmapCompressFormat, bitmapCompressQuality, os);
+                bitmap.compress(bitmap.getConfig() == Bitmap.Config.ARGB_8888 ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, bitmapCompressQuality, os);
             }
         });
 
@@ -644,10 +619,9 @@ public class ImageManager {
         final boolean inCache;
         inCache = memoryCache.contains(key);
         if (!inCache) {
+            bitmapReferenceCounter.acquireBitmap(bitmap);
             memoryCache.put(key, bitmap);
         }
-
-        bitmapReferenceCounter.acquireBitmap(bitmap);
     }
 
     private static String getKey(String id, String transformationId, Downsampler downsampler, int width, int height) {

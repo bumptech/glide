@@ -106,7 +106,6 @@ public class Glide {
         }
     }
 
-
     /**
      * Return the current {@link ImageManager} or create and return a new one if one is not currently set.
      *
@@ -160,7 +159,10 @@ public class Glide {
     }
 
     /**
-     * Use the given factory to build a {@link ModelLoader} for models of the given class.
+     * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
+     * this method is to replace one of the default factories or add an implementation for other similar low level
+     * models. Typically the {@link Glide#using(com.bumptech.glide.loader.model.ModelLoader)} syntax is preferred
+     * because it directly links the model with the ModelLoader being used to load it.
      *
      * <p>
      *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being

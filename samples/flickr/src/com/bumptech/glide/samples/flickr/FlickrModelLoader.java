@@ -1,10 +1,7 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import com.bumptech.glide.loader.model.GenericLoaderFactory;
-import com.bumptech.glide.loader.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.model.Cache;
-import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.model.UrlModelLoader;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
@@ -18,25 +15,8 @@ import java.net.URL;
  */
 public class FlickrModelLoader extends UrlModelLoader<Photo> {
 
-    public static class Factory implements ModelLoaderFactory<Photo> {
-        private final Cache<URL> cache = new Cache<URL>();
-
-        @Override
-        public ModelLoader<Photo> build(Context context, GenericLoaderFactory factories) {
-            return new FlickrModelLoader(factories.buildModelLoader(URL.class, context), cache);
-        }
-
-        @Override
-        public Class<? extends ModelLoader<Photo>> loaderClass() {
-            return FlickrModelLoader.class;
-        }
-
-        @Override
-        public void teardown() { }
-    }
-
-    public FlickrModelLoader(ModelLoader<URL> concreteLoader, Cache<URL> modelCache) {
-        super(concreteLoader, modelCache);
+    public FlickrModelLoader(Context context, Cache<URL> modelCache) {
+        super(context, modelCache);
     }
 
     @Override

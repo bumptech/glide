@@ -10,7 +10,9 @@ import java.nio.ByteOrder;
 /**
  * A class for parsing the exif orientation from an InputStream for an image. Handles jpegs and tiffs.
  */
-public class ExifOrientationParser {
+public class ImageHeaderParser {
+    private static final int GIF_HEADER = 0x474946;
+    private static final int PNG_HEADER = 0x89504E47;
     private static final int EXIF_MAGIC_NUMBER = 0xFFD8;
     private static final int MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D;  // "MM"
     private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;     // "II"
@@ -28,8 +30,34 @@ public class ExifOrientationParser {
 
     private final StreamReader streamReader;
 
-    public ExifOrientationParser(InputStream is) {
+    public ImageHeaderParser(InputStream is) {
         streamReader = new StreamReader(is);
+    }
+
+
+    // 0xD0A3C68 -> <htm
+    // 0xCAFEBABE -> <!DOCTYPE...
+    public boolean hasAlpha() throws IOException {
+        int firstByte = streamReader.getUInt8();
+
+        if (firstByte == EXIF_MAGIC_NUMBER >> 8) { //JPEG
+            return false;
+        }
+
+        final int firstTwoBytes = firstByte << 8 & 0xFF00 | streamReader.getUInt8() & 0xFF;
+        final int firstFourBytes = firstTwoBytes << 16 & 0xFFFF0000 | streamReader.getUInt16() & 0xFFFF;
+        if (firstFourBytes == PNG_HEADER) { //PNG
+            //see: http://stackoverflow.com/questions/2057923/how-to-check-a-png-for-grayscale-alpha-color-type
+            streamReader.skip(25 - 4);
+            int alpha = streamReader.getByte();
+            return alpha > 3;
+        }
+
+        if (firstFourBytes >> 8 == GIF_HEADER) { //GIF from first 3 bytes
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -224,6 +252,10 @@ public class ExifOrientationParser {
 
         public int read(byte[] buffer) throws IOException {
             return is.read(buffer);
+        }
+
+        public int getByte() throws IOException {
+            return is.read();
         }
     }
 }

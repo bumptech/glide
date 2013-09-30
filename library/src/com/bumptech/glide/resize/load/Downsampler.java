@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Log;
 
 import java.io.IOException;
 
@@ -39,7 +40,6 @@ public abstract class Downsampler {
         }
     };
 
-
     /**
      * Load the image at its original size
      *
@@ -71,7 +71,7 @@ public abstract class Downsampler {
         bis.mark(MARK_POSITION);
         int orientation = 0;
         try {
-            orientation = new ExifOrientationParser(bis).getOrientation();//ImageResizer.getOrientation(bis);
+            orientation = new ImageHeaderParser(bis).getOrientation();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -109,9 +109,26 @@ public abstract class Downsampler {
         if (sampleSize > 1) {
             options.inSampleSize = sampleSize;
         } else {
-            setInBitmap(options, pool.get(inWidth, inHeight));
+            setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
         }
         return decodeStream(bis, options);
+    }
+
+    private Bitmap.Config getConfig(RecyclableBufferedInputStream bis) {
+        Bitmap.Config result = Bitmap.Config.RGB_565;
+        bis.mark(1024); //we probably only need 25, but this is safer (particularly since the buffer size is > 1024)
+        try {
+            result = new ImageHeaderParser(bis).hasAlpha() ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bis.reset();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 
     /**
@@ -162,11 +179,12 @@ public abstract class Downsampler {
                          //won't go past our pre-allocated 16kb
          }
 
-        Bitmap result = null;
-        
+        final Bitmap result = BitmapFactory.decodeStream(bis, null, options);
+        if (result == null && !options.inJustDecodeBounds) {
+            throw new IllegalArgumentException("IP: null result, sampleSize=" + options.inSampleSize);
+        }
+
         try {
-            result = BitmapFactory.decodeStream(bis, null, options);
-            
             if (options.inJustDecodeBounds) {
                 bis.reset();
                 bis.clearMark();
@@ -174,8 +192,7 @@ public abstract class Downsampler {
                 bis.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
+            Log.d("Downsampler: exception loading inDecodeBounds=" + options.inJustDecodeBounds + " sample=" + options.inSampleSize);
             e.printStackTrace();
         }
 

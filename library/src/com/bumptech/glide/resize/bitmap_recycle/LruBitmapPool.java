@@ -1,11 +1,14 @@
 package com.bumptech.glide.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import android.util.SparseArray;
 import com.bumptech.glide.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 public class LruBitmapPool implements BitmapPool {
     private final GroupedBitmapLinkedMap pool = new GroupedBitmapLinkedMap();
@@ -19,10 +22,10 @@ public class LruBitmapPool implements BitmapPool {
 
     @Override
     public synchronized boolean put(Bitmap bitmap) {
-        final int key = getKey(bitmap);
         final int size = getSize(bitmap);
 
-        pool.put(key, bitmap);
+        pool.put(bitmap);
+
         currentSize += size;
         evict();
 
@@ -36,25 +39,16 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     @Override
-    public synchronized Bitmap get(int width, int height) {
-        final int sizeKey = getKey(width, height);
-        final Bitmap result = pool.get(sizeKey);
+    public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
+        final Bitmap result = pool.get(width, height, config);
         if (result == null) {
-            Log.d("LBP: missing bitmap for width=" + width + " height=" + height);
+            Log.d("LBP: missing bitmap for width=" + width + " height=" + height + " config=" + config);
         } else {
             currentSize -= getSize(result);
         }
 
         return result;
     }
-
-    private static int getKey(Bitmap bitmap) {
-        return getKey(bitmap.getWidth(), bitmap.getHeight());
-    }
-
-    private static int getKey(int width, int height) {
-        return width >= height ? width * width + width + height : width + height * height;
-   }
 
     private static int getSize(Bitmap bitmap) {
         return bitmap.getHeight() * bitmap.getWidth();
@@ -70,25 +64,91 @@ public class LruBitmapPool implements BitmapPool {
      * of that size are present. We do not count addition or removal of bitmaps as an access.
      */
     private static class GroupedBitmapLinkedMap {
-        private final SparseArray<LinkedEntry> keyToEntry = new SparseArray<LinkedEntry>();
+        private final Map<Key, LinkedEntry> keyToEntry = new HashMap<Key, LinkedEntry>();
         private final LinkedEntry head = new LinkedEntry();
+        private final KeyPool keyPool = new KeyPool();
 
-        public void put(int key, Bitmap bitmap) {
+        private static class KeyPool {
+            private static final int MAX_SIZE = 20;
+
+            private final Queue<Key> keyPool = new LinkedList<Key>();
+
+            public Key get(int width, int height, Bitmap.Config config) {
+                Key result = keyPool.poll();
+                if (result == null) {
+                    result = new Key();
+                }
+                result.init(width, height, config);
+                return result;
+            }
+
+            public void offer(Key key) {
+                if (keyPool.size() <= MAX_SIZE) {
+                    keyPool.offer(key);
+                }
+            }
+        }
+
+        private static class Key {
+            private int width;
+            private int height;
+            private Bitmap.Config config; //this can be null :(
+
+            public void init(int width, int height, Bitmap.Config config) {
+                this.width = width;
+                this.height = height;
+                this.config = config;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                Key key = (Key) o;
+
+                if (height != key.height) return false;
+                if (width != key.width) return false;
+                if (config != key.config) return false;
+
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = width;
+                result = 31 * result + height;
+                result = 31 * result + (config != null ? config.hashCode() : 0);
+                return result;
+            }
+        }
+
+        public void put(Bitmap bitmap) {
+            final Key key = keyPool.get(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+
             LinkedEntry entry = keyToEntry.get(key);
             if (entry == null) {
                 entry = new LinkedEntry(key);
                 makeTail(entry);
                 keyToEntry.put(key, entry);
+            } else {
+                keyPool.offer(key);
             }
+
             entry.add(bitmap);
         }
 
-        public Bitmap get(int key) {
+        public Bitmap get(int width, int height, Bitmap.Config config) {
+            final Key key = keyPool.get(width, height, config);
+
             LinkedEntry entry = keyToEntry.get(key);
             if (entry == null) {
                 entry = new LinkedEntry(key);
                 keyToEntry.put(key, entry);
+            } else {
+                keyPool.offer(key);
             }
+
             makeHead(entry);
 
             return entry.removeLast();
@@ -108,6 +168,7 @@ public class LruBitmapPool implements BitmapPool {
                     //large sizes
                     removeEntry(last);
                     keyToEntry.remove(last.key);
+                    keyPool.offer(last.key);
                 }
 
                 last = last.prev;
@@ -144,16 +205,16 @@ public class LruBitmapPool implements BitmapPool {
 
         private static class LinkedEntry {
             private List<Bitmap> value;
-            private final int key;
+            private final Key key;
             LinkedEntry next;
             LinkedEntry prev;
 
             //head only
             public LinkedEntry() {
-                this(-1);
+                this(null);
             }
 
-            public LinkedEntry(int key) {
+            public LinkedEntry(Key key) {
                 next = prev = this;
                 this.key = key;
             }

@@ -63,10 +63,9 @@ public class ImageManagerLoader implements ImageLoader {
     protected void onImageReady(Bitmap image, boolean isUsed) {
         if (isUsed) {
             releaseAcquired();
-            imageManager.acquireBitmap(image);
             acquired = image;
         } else {
-            imageManager.rejectBitmap(image);
+            imageManager.releaseBitmap(image);
         }
     }
 
@@ -88,6 +87,6 @@ public class ImageManagerLoader implements ImageLoader {
 
     protected boolean isHandled(int width, int height) {
         return width >= 0 && height >= 0 ||
-                (downsampler == Downsampler.NONE && width == WRAP_CONTENT && height == WRAP_CONTENT);
+                (downsampler == Downsampler.NONE && (width == WRAP_CONTENT || height == WRAP_CONTENT));
     }
 }
