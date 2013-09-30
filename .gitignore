@@ -16,4 +16,6 @@ samples/flickr/bin
 samples/flickr/local.properties
 *.keystore
 **/.idea/*
-
+.settings
+/library/.classpath
+/library/.project
