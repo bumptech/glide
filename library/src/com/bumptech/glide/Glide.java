@@ -55,6 +55,67 @@ public class Glide {
     private ImageManager imageManager = null;
 
     /**
+     * A class for handling exceptions that occur while loading images
+     *
+     * @param <T> The type of the model being loaded
+     */
+    public static abstract class ExceptionHandler<T> {
+
+        /**
+         * Called when an exception occurs during a load. Will only be called if we currently want to display an image
+         * for the given model in the given target. It is recommended to create a single instance per activity/fragment
+         * rather than instantiate a new object for each call to {@code Glide.load()} to avoid object churn.
+         *
+         * <p>
+         *     It is safe to reload this or a different model or change what is displayed in the target at this point.
+         *     For example:
+         * <pre>
+         * <code>
+         *     public void onException(Exception e, T model, Target target) {
+         *         target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
+         *         Glide.load(model).into(target);
+         *     }
+         * </code>
+         * </pre>
+         * </p>
+         *
+         * <p>
+         *     Note - if you want to reload this or any other model after an exception, you will need to include all
+         *     relevant builder calls (like centerCrop, placeholder etc).
+         * </p>
+         *
+         * @param e The exception, or null
+         * @param model The model we were trying to load when the exception occured
+         * @param target The {@link Target} we were trying to load the image into
+         */
+        public abstract void onException(Exception e, T model, Target target);
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         *     By default we only check the both objects are not null and that their classes are identical. This assumes
+         *     that two instances of the same anonymous inner class will behave identically.
+         * </p>
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            return true;
+        }
+
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
      * Get the singleton.
      *
      * @return the singleton
@@ -423,6 +484,7 @@ public class Glide {
         private int errorId = -1;
         private Downsampler downsampler = Downsampler.AT_LEAST;
         private ArrayList<TransformationLoader<T>> transformationLoaders = new ArrayList<TransformationLoader<T>>();
+        private ExceptionHandler<T> exceptionHandler;
 
         private Request(T model) {
             this(model, GLIDE.getFactory(model));
@@ -570,6 +632,19 @@ public class Glide {
         }
 
         /**
+         * Sets an exception handler to use if a load fails. Note it's best to create a single instance of an exception
+         * handler per activity/fragment rather than pass one in per request.
+         *
+         * @param exceptionHandler The exception handler to use
+         * @return This request
+         */
+        public Request<T> exception(ExceptionHandler<T> exceptionHandler) {
+            this.exceptionHandler = exceptionHandler;
+
+            return this;
+        }
+
+        /**
          * Start loading the image into the view.
          *
          * <p>
@@ -641,7 +716,7 @@ public class Glide {
             return result;
         }
 
-        private ImagePresenter<T> buildImagePresenter(Target target) {
+        private ImagePresenter<T> buildImagePresenter(final Target target) {
             TransformationLoader<T> transformationLoader = getFinalTransformationLoader();
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
@@ -668,6 +743,17 @@ public class Glide {
 
             if (errorId != -1) {
                 builder.setErrorResource(errorId);
+            }
+
+            if (exceptionHandler != null) {
+                builder.setExceptionHandler(new ImagePresenter.ExceptionHandler<T>() {
+                    @Override
+                    public void onException(Exception e, T model, boolean isCurrent) {
+                        if (isCurrent) {
+                            exceptionHandler.onException(e, model, target);
+                        }
+                    }
+                });
             }
 
             return builder.build();
@@ -732,6 +818,7 @@ public class Glide {
 
         private final String downsamplerId;
         private final String transformationId;
+        private final ExceptionHandler exceptionHandler;
 
         public Metadata(Request request) {
             modelClass = request.model.getClass();
@@ -741,6 +828,7 @@ public class Glide {
             animationId = request.animationId;
             placeholderId = request.placeholderId;
             errorId = request.errorId;
+            exceptionHandler = request.exceptionHandler;
         }
 
         //we don't want to change behavior in sets/maps, just be able to compare properties
@@ -753,6 +841,8 @@ public class Glide {
             if (!modelClass.equals(metadata.modelClass)) return false;
             if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
             if (!transformationId.equals(metadata.transformationId)) return false;
+            if (exceptionHandler == null ? metadata.exceptionHandler != null :
+                    !exceptionHandler.equals(metadata.exceptionHandler)) return false;
 
             return true;
         }
