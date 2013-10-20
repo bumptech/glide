@@ -54,4 +54,4 @@ Thanks to the Android project and Jake Wharton for the [disk cache implementatio
 
 Author
 ------
-Sam Judd - <sam.a.judd@gmail.com> @samajudd
+Sam Judd - @samajudd
