@@ -8,6 +8,7 @@ import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
+import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.tests.R;
 
 import java.io.File;
@@ -210,6 +211,23 @@ public class GlideTest extends ActivityTestCase {
         assertDifferentPresenters(
                 Glide.load("b").error(R.raw.ic_launcher),
                 Glide.load("b").error(android.R.drawable.btn_star)
+        );
+    }
+
+    public void testDifferentExceptionHandlersReplacesPresenter() {
+        assertDifferentPresenters(
+                Glide.load("a").exception(new Glide.ExceptionHandler<String>() {
+
+                    @Override
+                    public void onException(Exception e, String model, Target target) {
+
+                    }
+                }),
+                Glide.load("a").exception(new Glide.ExceptionHandler<String>() {
+                    @Override
+                    public void onException(Exception e, String model, Target target) {
+                    }
+                })
         );
     }
 
