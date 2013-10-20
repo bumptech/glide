@@ -36,6 +36,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -68,6 +74,7 @@ public class ImageManager {
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
     private final DiskCache diskCache;
+    private final SafeKeyGenerator safeKeyGenerator = new SafeKeyGenerator();
 
     //special downsampler that doesn't check exif, and assumes inWidth and inHeight == outWidth and outHeight so it
     //doesn't need to read the image header for size information
@@ -389,7 +396,7 @@ public class ImageManager {
     public ImageManagerJob getImage(String id, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
         if (shutdown) return null;
 
-        final String key = getKey(id, transformation.getId(), downsampler, width, height);
+        final String key = safeKeyGenerator.getSafeKey(id, transformation, downsampler, width, height);
 
         ImageManagerJob job = null;
         if (!returnFromCache(key, cb)) {
@@ -631,8 +638,84 @@ public class ImageManager {
         }
     }
 
-    private static String getKey(String id, String transformationId, Downsampler downsampler, int width, int height) {
-        return String.valueOf(Util.hash(id.hashCode(), downsampler.getId().hashCode(),
-                transformationId.hashCode(), width, height));
+    private static class SafeKeyGenerator {
+        private final Map<LoadId, String> loadIdToSafeHash = new HashMap<LoadId, String>();
+        private final ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+        private MessageDigest messageDigest;
+
+        public SafeKeyGenerator() {
+            try {
+                messageDigest = MessageDigest.getInstance("SHA-256");
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public String getSafeKey(String id, Transformation transformation, Downsampler downsampler, int width, int height) {
+            LoadId loadId = new LoadId(id, transformation.getId(), downsampler.getId(), width, height);
+            String safeKey = loadIdToSafeHash.get(loadId);
+            if (safeKey == null) {
+                try {
+                    safeKey = loadId.generateSafeKey();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                loadIdToSafeHash.put(loadId, safeKey);
+            }
+            return safeKey;
+        }
+
+        private class LoadId {
+            private final String id;
+            private final String transformationId;
+            private final String downsamplerId;
+            private final int width;
+            private final int height;
+
+            public LoadId(String id, String transformationId, String downsamplerId, int width, int height) {
+                this.id = id;
+                this.transformationId = transformationId;
+                this.downsamplerId = downsamplerId;
+                this.width = width;
+                this.height = height;
+            }
+
+            public String generateSafeKey() throws UnsupportedEncodingException {
+                messageDigest.update(id.getBytes("UTF-8"));
+                messageDigest.update(transformationId.getBytes("UTF-8"));
+                messageDigest.update(downsamplerId.getBytes("UTF-8"));
+                byteBuffer.position(0);
+                byteBuffer.putInt(width);
+                byteBuffer.putInt(height);
+                messageDigest.update(byteBuffer.array());
+                return Util.sha256BytesToHex(messageDigest.digest());
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                LoadId loadId = (LoadId) o;
+
+                if (height != loadId.height) return false;
+                if (width != loadId.width) return false;
+                if (!downsamplerId.equals(loadId.downsamplerId)) return false;
+                if (!id.equals(loadId.id)) return false;
+                if (!transformationId.equals(loadId.transformationId)) return false;
+
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = id.hashCode();
+                result = 31 * result + transformationId.hashCode();
+                result = 31 * result + downsamplerId.hashCode();
+                result = 31 * result + width;
+                result = 31 * result + height;
+                return result;
+            }
+        }
     }
 }
