@@ -51,7 +51,7 @@ public abstract class Downsampler {
         }
     };
 
-    private static final int MARK_POSITION = 1024 * 1024; //1mb
+    private static final int MARK_POSITION = 5 * 1024 * 1024; //5mb, max possible, not preallocated
 
     /**
      * Load the image for the given InputStream. If a recycled Bitmap whose dimensions exactly match those of the image
