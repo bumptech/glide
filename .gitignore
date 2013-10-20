@@ -19,3 +19,4 @@ samples/flickr/local.properties
 .settings
 /library/.classpath
 /library/.project
+docs/**/*
