@@ -204,10 +204,13 @@ public class Glide {
     private ImageViewTarget getImageViewTarget(ImageView imageView) {
         Object tag = imageView.getTag();
         final ImageViewTarget result;
-        if (tag != null && tag instanceof ImageViewTarget) {
+        if (tag instanceof ImageViewTarget) {
             result = (ImageViewTarget) tag;
         } else {
             result = null;
+            if (tag != null) {
+                Log.d("Replacing existing tag=" + tag + " on view=" + imageView + " with an ImageViewTarge");
+            }
         }
         return result;
     }
@@ -622,10 +625,14 @@ public class Glide {
          */
         @SuppressWarnings("unchecked")
         private ImagePresenter<T> getImagePresenter(Target target) {
+            ImagePresenter<T> result = target.getImagePresenter();
+
             Metadata previous = GLIDE.metadataTracker.get(target);
             Metadata current = new Metadata(this);
 
-            ImagePresenter<T> result = target.getImagePresenter();
+            if (previous != null && result == null) {
+                previous = null;
+            }
 
             if (!current.isIdenticalTo(previous)) {
                 if (result != null) {

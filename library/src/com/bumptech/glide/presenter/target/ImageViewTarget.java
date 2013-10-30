@@ -11,8 +11,7 @@ import com.bumptech.glide.presenter.ImagePresenter;
 import static android.view.ViewGroup.LayoutParams;
 
 /**
- * A target wrapping an ImageView that makes use of {@link ImageView#setTag(Object)} to store and retrieve
- * ImagePresenters. Also obtains the runtime dimensions of the ImageView.
+ * A target wrapping an ImageView. Obtains the runtime dimensions of the ImageView.
  */
 public class ImageViewTarget implements Target {
     private final ImageView imageView;
@@ -46,10 +45,6 @@ public class ImageViewTarget implements Target {
         imageView.startAnimation(animation);
     }
 
-    /**
-     * TODO: use {@link View#setTag(int, Object)} when we can do so and still create
-     * a jar
-     */
     @Override
     public void setImagePresenter(ImagePresenter imagePresenter) {
         this.imagePresenter = imagePresenter;

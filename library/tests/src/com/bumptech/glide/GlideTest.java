@@ -213,6 +213,13 @@ public class GlideTest extends ActivityTestCase {
         );
     }
 
+    public void testClearingTagReplacesPresenter() {
+        Glide.load("a").into(imageView);
+        assertNotNull(imageView.getTag());
+        imageView.setTag(null);
+        Glide.load("b").into(imageView);
+    }
+
     private void assertDifferentPresenters(Glide.Request a, Glide.Request b) {
         a.into(imageView);
         ImagePresenter first = getImagePresenterFromView();
