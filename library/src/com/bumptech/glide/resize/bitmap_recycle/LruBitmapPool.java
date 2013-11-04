@@ -22,6 +22,10 @@ public class LruBitmapPool implements BitmapPool {
 
     @Override
     public synchronized boolean put(Bitmap bitmap) {
+        // BitmapFactory.decodeStream can sometimes return bitmaps with null configs, which can't generally be reused
+        if (bitmap.getConfig() == null)
+            return false;
+        
         final int size = getSize(bitmap);
 
         pool.put(bitmap);
@@ -124,6 +128,10 @@ public class LruBitmapPool implements BitmapPool {
         }
 
         public void put(Bitmap bitmap) {
+            // BitmapFactory.decodeStream can sometimes return bitmaps with null configs, which can't generally be reused
+            if (bitmap.getConfig() == null)
+                return;
+            
             final Key key = keyPool.get(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
 
             LinkedEntry entry = keyToEntry.get(key);
