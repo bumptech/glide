@@ -59,6 +59,7 @@ public class ImageManager {
 
     private final BitmapReferenceCounter bitmapReferenceCounter;
     private final int bitmapCompressQuality;
+    private final BitmapPool bitmapPool;
     private boolean shutdown = false;
 
     private final Handler mainHandler = new Handler();
@@ -363,6 +364,7 @@ public class ImageManager {
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
         bitmapReferenceCounter = builder.bitmapReferenceCounter;
+        bitmapPool = builder.bitmapPool;
         resizer = new ImageResizer(builder.bitmapPool, builder.decodeBitmapOptions);
 
         memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
@@ -371,6 +373,22 @@ public class ImageManager {
                 releaseBitmap(removed);
             }
         });
+    }
+
+    /**
+     * Get the {@link BitmapPool} this ImageManager is using. If Bitmap recycling is not supported, an
+     * {@link BitmapPoolAdapter} will be returned. For the pool to be useful you must return a bitmap to the pool for
+     * every bitmap you obtain from the pool.
+     *
+     * <p>
+     *     Note the BitmapPool api is likely to change in the near future to support some new features released in
+     *     KitKat.
+     * </p>
+     *
+     * @return The bitmap pool.
+     */
+    public BitmapPool getBitmapPool() {
+        return bitmapPool;
     }
 
     /**
