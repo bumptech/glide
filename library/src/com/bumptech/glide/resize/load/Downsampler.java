@@ -180,9 +180,6 @@ public abstract class Downsampler {
          }
 
         final Bitmap result = BitmapFactory.decodeStream(bis, null, options);
-        if (result == null && !options.inJustDecodeBounds) {
-            throw new IllegalArgumentException("IP: null result, sampleSize=" + options.inSampleSize);
-        }
 
         try {
             if (options.inJustDecodeBounds) {
