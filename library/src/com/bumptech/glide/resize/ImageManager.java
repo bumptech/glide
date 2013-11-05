@@ -30,7 +30,6 @@ import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.ImageResizer;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.util.Log;
-import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +67,7 @@ public class ImageManager {
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
     private final DiskCache diskCache;
+    private final SafeKeyGenerator safeKeyGenerator = new SafeKeyGenerator();
 
     //special downsampler that doesn't check exif, and assumes inWidth and inHeight == outWidth and outHeight so it
     //doesn't need to read the image header for size information
@@ -389,7 +389,7 @@ public class ImageManager {
     public ImageManagerJob getImage(String id, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
         if (shutdown) return null;
 
-        final String key = getKey(id, transformation.getId(), downsampler, width, height);
+        final String key = safeKeyGenerator.getSafeKey(id, transformation, downsampler, width, height);
 
         ImageManagerJob job = null;
         if (!returnFromCache(key, cb)) {
@@ -629,10 +629,5 @@ public class ImageManager {
             bitmapReferenceCounter.acquireBitmap(bitmap);
             memoryCache.put(key, bitmap);
         }
-    }
-
-    private static String getKey(String id, String transformationId, Downsampler downsampler, int width, int height) {
-        return String.valueOf(Util.hash(id.hashCode(), downsampler.getId().hashCode(),
-                transformationId.hashCode(), width, height));
     }
 }

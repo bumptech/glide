@@ -18,12 +18,14 @@ import java.io.InputStream;
  */
 public class DiskLruCacheWrapper implements DiskCache {
 
+    private static final int APP_VERSION = 1;
+    private static final int VALUE_COUNT = 1;
     private static DiskLruCache CACHE = null;
     private static DiskLruCacheWrapper WRAPPER = null;
 
     private synchronized static DiskLruCache getDiskLruCache(File directory, int maxSize) throws IOException {
         if (CACHE == null) {
-            CACHE = DiskLruCache.open(directory, 0, 1, maxSize);
+            CACHE = DiskLruCache.open(directory, APP_VERSION, VALUE_COUNT, maxSize);
         }
         return CACHE;
     }
