@@ -30,18 +30,11 @@ import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.ImageResizer;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.util.Log;
-import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
