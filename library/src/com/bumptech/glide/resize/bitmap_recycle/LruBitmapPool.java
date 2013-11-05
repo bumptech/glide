@@ -51,7 +51,7 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     private static int getSize(Bitmap bitmap) {
-        return bitmap.getHeight() * bitmap.getWidth();
+        return bitmap.getHeight() * bitmap.getRowBytes();
     }
 
     /**
