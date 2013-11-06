@@ -74,8 +74,7 @@ public class LruMemoryCache implements MemoryCache {
         }
     }
 
-    @Override
-    public void trimToSize(int size) {
+    private void trimToSize(int size) {
         Map.Entry<String, Bitmap> last;
         while (currentSize > size) {
             last = cache.entrySet().iterator().next();

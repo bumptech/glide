@@ -32,7 +32,4 @@ public class MemoryCacheAdapter implements MemoryCache {
 
     @Override
     public void trimMemory(int level) {}
-
-    @Override
-    public void trimToSize(int size) {}
 }
