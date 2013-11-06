@@ -34,7 +34,9 @@ public class LruBitmapPool implements BitmapPool {
 
     private void evict() {
         while (currentSize > maxSize) {
-            currentSize -= getSize(pool.removeLast());
+            final Bitmap removed = pool.removeLast();
+            currentSize -= getSize(removed);
+            removed.recycle();
         }
     }
 

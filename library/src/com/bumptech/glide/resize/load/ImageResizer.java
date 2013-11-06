@@ -113,8 +113,8 @@ public class ImageResizer {
         final Bitmap initial = downsampler.downsample(bis, options, bitmapPool, outWidth, outHeight);
         final Bitmap result = transformation.transform(initial, bitmapPool, outWidth, outHeight);
 
-        if (initial != result) {
-            bitmapPool.put(initial);
+        if (initial != result && !bitmapPool.put(initial)) {
+            initial.recycle();
         }
 
         releaseTempBytes(tempBytesForBis);

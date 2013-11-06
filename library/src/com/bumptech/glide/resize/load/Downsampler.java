@@ -98,8 +98,8 @@ public abstract class Downsampler {
         final Bitmap downsampled = downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize);
         final Bitmap rotated = ImageResizer.rotateImageExif(downsampled, pool, orientation);
 
-        if (downsampled != rotated) {
-            pool.put(downsampled);
+        if (downsampled != rotated && !pool.put(downsampled)) {
+            downsampled.recycle();
         }
 
         return rotated;
