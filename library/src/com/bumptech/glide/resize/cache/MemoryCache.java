@@ -1,5 +1,6 @@
 package com.bumptech.glide.resize.cache;
 
+import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 
 /**
@@ -40,4 +41,21 @@ public interface MemoryCache {
      * @param listener The listener
      */
     public void setImageRemovedListener(ImageRemovedListener listener);
+
+    /**
+     * Evict all items from the memory cache.
+     */
+    public void clearMemory();
+
+    /**
+     * Trim the memory cache to the appropriate level. Typically called on the callback onTrimMemory.
+     * @param level This integer represents a trim level as specified in {@link ComponentCallbacks2}
+     */
+    public void trimMemory(int level);
+
+    /**
+     * Trim the memory cache to specified size.
+     * @param size The size, in bytes, to trim the memory cache to.
+     */
+    public void trimToSize(int size);
 }
