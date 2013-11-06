@@ -22,7 +22,6 @@ import com.bumptech.glide.loader.transformation.MultiTransformationLoader;
 import com.bumptech.glide.loader.transformation.None;
 import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.ImageManager;
@@ -55,11 +54,11 @@ public class Glide {
     private ImageManager imageManager = null;
 
     /**
-     * A class for handling exceptions that occur while loading images
+     * A class for monitoring the status of a request while images load.
      *
      * @param <T> The type of the model being loaded
      */
-    public static abstract class ExceptionHandler<T> {
+    public static abstract class RequestListener<T> {
 
         /**
          * Called when an exception occurs during a load. Will only be called if we currently want to display an image
@@ -89,6 +88,15 @@ public class Glide {
          * @param target The {@link Target} we were trying to load the image into
          */
         public abstract void onException(Exception e, T model, Target target);
+
+        /**
+         * Called when a load completes successfully, immediately before
+         * {@link Target#onImageReady(android.graphics.Bitmap)}.
+         *
+         * @param model The specific model that was used to load the image.
+         * @param target The target the model was loaded into.
+         */
+        public abstract void onImageReady(T model, Target target);
 
         /**
          * {@inheritDoc}
@@ -484,7 +492,7 @@ public class Glide {
         private int errorId = -1;
         private Downsampler downsampler = Downsampler.AT_LEAST;
         private ArrayList<TransformationLoader<T>> transformationLoaders = new ArrayList<TransformationLoader<T>>();
-        private ExceptionHandler<T> exceptionHandler;
+        private RequestListener<T> requestListener;
 
         private Request(T model) {
             this(model, GLIDE.getFactory(model));
@@ -632,14 +640,15 @@ public class Glide {
         }
 
         /**
-         * Sets an exception handler to use if a load fails. Note it's best to create a single instance of an exception
-         * handler per activity/fragment rather than pass one in per request.
+         * Sets a Request listener to monitor the image load. It's best to create a single instance of an exception
+         * handler per type of request (usually activity/fragment) rather than pass one in per request to avoid some
+         * redundant object allocation.
          *
-         * @param exceptionHandler The exception handler to use
+         * @param requestListener The request listener to use
          * @return This request
          */
-        public Request<T> exception(ExceptionHandler<T> exceptionHandler) {
-            this.exceptionHandler = exceptionHandler;
+        public Request<T> listener(RequestListener<T> requestListener) {
+            this.requestListener = requestListener;
 
             return this;
         }
@@ -725,13 +734,21 @@ public class Glide {
                     .setImageLoader(new ImageManagerLoader(context, downsampler))
                     .setTransformationLoader(transformationLoader);
 
-            if (animationId != -1) {
-                final Animation animation = AnimationUtils.loadAnimation(context, animationId);
-                builder.setImageReadyCallback(new ImageReadyCallback() {
+            if (animationId != -1 || requestListener != null) {
+                final Animation animation;
+                if (animationId != -1) {
+                    animation = AnimationUtils.loadAnimation(context, animationId);
+                } else {
+                    animation = null;
+                }
+                builder.setImageReadyCallback(new ImagePresenter.ImageReadyCallback<T>() {
                     @Override
-                    public void onImageReady(Target target, boolean fromCache) {
-                        if (!fromCache) {
+                    public void onImageReady(T model, Target target, boolean fromCache) {
+                        if (animation != null && !fromCache) {
                             target.startAnimation(animation);
+                        }
+                        if (requestListener != null) {
+                            requestListener.onImageReady(null, target);
                         }
                     }
                 });
@@ -745,12 +762,12 @@ public class Glide {
                 builder.setErrorResource(errorId);
             }
 
-            if (exceptionHandler != null) {
+            if (requestListener != null) {
                 builder.setExceptionHandler(new ImagePresenter.ExceptionHandler<T>() {
                     @Override
                     public void onException(Exception e, T model, boolean isCurrent) {
                         if (isCurrent) {
-                            exceptionHandler.onException(e, model, target);
+                            requestListener.onException(e, model, target);
                         }
                     }
                 });
@@ -818,7 +835,7 @@ public class Glide {
 
         private final String downsamplerId;
         private final String transformationId;
-        private final ExceptionHandler exceptionHandler;
+        private final RequestListener requestListener;
 
         public Metadata(Request request) {
             modelClass = request.model.getClass();
@@ -828,7 +845,7 @@ public class Glide {
             animationId = request.animationId;
             placeholderId = request.placeholderId;
             errorId = request.errorId;
-            exceptionHandler = request.exceptionHandler;
+            requestListener = request.requestListener;
         }
 
         //we don't want to change behavior in sets/maps, just be able to compare properties
@@ -841,8 +858,8 @@ public class Glide {
             if (!modelClass.equals(metadata.modelClass)) return false;
             if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
             if (!transformationId.equals(metadata.transformationId)) return false;
-            if (exceptionHandler == null ? metadata.exceptionHandler != null :
-                    !exceptionHandler.equals(metadata.exceptionHandler)) return false;
+            if (requestListener == null ? metadata.requestListener != null :
+                    !requestListener.equals(metadata.requestListener)) return false;
 
             return true;
         }

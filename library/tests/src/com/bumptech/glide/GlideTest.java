@@ -214,18 +214,26 @@ public class GlideTest extends ActivityTestCase {
         );
     }
 
-    public void testDifferentExceptionHandlersReplacesPresenter() {
+    public void testDifferentRequestListenersReplacesPresenter() {
         assertDifferentPresenters(
-                Glide.load("a").exception(new Glide.ExceptionHandler<String>() {
+                Glide.load("a").listener(new Glide.RequestListener<String>() {
 
                     @Override
                     public void onException(Exception e, String model, Target target) {
 
                     }
+
+                    @Override
+                    public void onImageReady(String model, Target target) {
+                    }
                 }),
-                Glide.load("a").exception(new Glide.ExceptionHandler<String>() {
+                Glide.load("a").listener(new Glide.RequestListener<String>() {
                     @Override
                     public void onException(Exception e, String model, Target target) {
+                    }
+
+                    @Override
+                    public void onImageReady(String model, Target target) {
                     }
                 })
         );
@@ -244,5 +252,4 @@ public class GlideTest extends ActivityTestCase {
         assertSame(first, second);
         assertNotSame(first, third);
     }
-
 }
