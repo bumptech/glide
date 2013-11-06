@@ -26,4 +26,10 @@ public class MemoryCacheAdapter implements MemoryCache {
     public void setImageRemovedListener(ImageRemovedListener listener) {
         this.listener = listener;
     }
+
+    @Override
+    public void clearMemory() {}
+
+    @Override
+    public void trimMemory(int level) {}
 }
