@@ -55,7 +55,8 @@ public class LruMemoryCache implements MemoryCache {
     public void clearMemory() {
         final Iterator<Map.Entry<String,Bitmap>> iterator = cache.entrySet().iterator();
         while (iterator.hasNext()) {
-            iterator.next();
+            final Bitmap bitmap = iterator.next().getValue();
+            bitmap.recycle();
             iterator.remove();
         }
         currentSize = 0;
