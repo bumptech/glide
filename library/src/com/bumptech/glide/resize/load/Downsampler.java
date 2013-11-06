@@ -109,9 +109,29 @@ public abstract class Downsampler {
         if (sampleSize > 1) {
             options.inSampleSize = sampleSize;
         } else {
-            setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
+            // cannot reuse bitmaps when decoding GIFs.
+            // look at : https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
+            if (!isGif(bis)) {
+                setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
+            }
         }
         return decodeStream(bis, options);
+    }
+
+    private boolean isGif(RecyclableBufferedInputStream bis) {
+        bis.mark(1024);
+        try {
+            return new ImageHeaderParser(bis).getType() == ImageHeaderParser.ImageType.GIF;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bis.reset();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     private Bitmap.Config getConfig(RecyclableBufferedInputStream bis) {

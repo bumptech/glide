@@ -11,6 +11,20 @@ import java.nio.ByteOrder;
  * A class for parsing the exif orientation from an InputStream for an image. Handles jpegs and tiffs.
  */
 public class ImageHeaderParser {
+
+    public static enum ImageType {
+        GIF(true), JPEG(false), APNG(true), PNG(false), UNKNOWN(false);
+        private final boolean hasAlpha;
+
+        ImageType(boolean hasAlpha) {
+            this.hasAlpha = hasAlpha;
+        }
+
+        public boolean hasAlpha() {
+            return hasAlpha;
+        }
+    }
+
     private static final int GIF_HEADER = 0x474946;
     private static final int PNG_HEADER = 0x89504E47;
     private static final int EXIF_MAGIC_NUMBER = 0xFFD8;
@@ -38,10 +52,14 @@ public class ImageHeaderParser {
     // 0xD0A3C68 -> <htm
     // 0xCAFEBABE -> <!DOCTYPE...
     public boolean hasAlpha() throws IOException {
+        return getType().hasAlpha();
+    }
+
+    public ImageType getType() throws IOException {
         int firstByte = streamReader.getUInt8();
 
         if (firstByte == EXIF_MAGIC_NUMBER >> 8) { //JPEG
-            return false;
+            return ImageType.JPEG;
         }
 
         final int firstTwoBytes = firstByte << 8 & 0xFF00 | streamReader.getUInt8() & 0xFF;
@@ -51,14 +69,14 @@ public class ImageHeaderParser {
             streamReader.skip(25 - 4);
             int alpha = streamReader.getByte();
             // A RGB indexed PNG can also have transparency. Better safe than sorry!
-            return alpha >= 3;
+            return alpha >= 3 ? ImageType.APNG : ImageType.PNG;
         }
 
         if (firstFourBytes >> 8 == GIF_HEADER) { //GIF from first 3 bytes
-            return true;
+            return ImageType.GIF;
         }
 
-        return false;
+        return ImageType.UNKNOWN;
     }
 
     /**
