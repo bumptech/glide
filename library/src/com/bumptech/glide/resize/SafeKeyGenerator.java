@@ -1,5 +1,6 @@
 package com.bumptech.glide.resize;
 
+import android.annotation.TargetApi;
 import android.os.Build;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
@@ -49,6 +50,7 @@ public class SafeKeyGenerator {
         private static final int MAX_SIZE = 20;
         private Queue<LoadId> loadIdQueue;
 
+        @TargetApi(9)
         public LoadIdPool() {
             if (Build.VERSION.SDK_INT >= 9) {
                 loadIdQueue = new ArrayDeque<LoadId>(MAX_SIZE);
