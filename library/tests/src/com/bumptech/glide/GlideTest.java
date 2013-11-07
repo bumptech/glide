@@ -10,6 +10,7 @@ import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.tests.R;
 
 import java.io.File;
@@ -231,6 +232,31 @@ public class GlideTest extends ActivityTestCase {
 
         assertEquals(small, bitmapPool.get(small.getWidth(), small.getHeight(), small.getConfig()));
         assertEquals(large, bitmapPool.get(large.getWidth(), large.getHeight(), large.getConfig()));
+    }
+
+    public void testDifferentRequestListenersReplacesPresenter() {
+        assertDifferentPresenters(
+                Glide.load("a").listener(new Glide.RequestListener<String>() {
+
+                    @Override
+                    public void onException(Exception e, String model, Target target) {
+
+                    }
+
+                    @Override
+                    public void onImageReady(String model, Target target) {
+                    }
+                }),
+                Glide.load("a").listener(new Glide.RequestListener<String>() {
+                    @Override
+                    public void onException(Exception e, String model, Target target) {
+                    }
+
+                    @Override
+                    public void onImageReady(String model, Target target) {
+                    }
+                })
+        );
     }
 
     private void assertDifferentPresenters(Glide.Request a, Glide.Request b) {
