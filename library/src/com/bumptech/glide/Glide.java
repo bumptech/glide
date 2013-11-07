@@ -84,13 +84,13 @@ public class Glide {
          * </p>
          *
          * @param e The exception, or null
-         * @param model The model we were trying to load when the exception occured
+         * @param model The model we were trying to load when the exception occurred
          * @param target The {@link Target} we were trying to load the image into
          */
         public abstract void onException(Exception e, T model, Target target);
 
         /**
-         * Called when a load completes successfully, immediately before
+         * Called when a load completes successfully, immediately after
          * {@link Target#onImageReady(android.graphics.Bitmap)}.
          *
          * @param model The specific model that was used to load the image.
