@@ -453,9 +453,9 @@ public class ImagePresenter<T> {
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
 
+                target.onImageReady(image);
                 if (imageReadyCallback != null)
                     imageReadyCallback.onImageReady(model, target, loadedFromCache);
-                target.onImageReady(image);
                 isImageSet = true;
                 return true;
             }
@@ -463,12 +463,12 @@ public class ImagePresenter<T> {
             @Override
             public void onException(Exception e) {
                 final boolean relevant = loadCount == currentCount;
-                if (exceptionHandler != null) {
-                    exceptionHandler.onException(e, model, relevant);
-                }
                 if (relevant && canSetPlaceholder() && errorDrawable != null) {
                     isErrorSet = true;
                     target.setPlaceholder(errorDrawable);
+                }
+                if (exceptionHandler != null) {
+                    exceptionHandler.onException(e, model, relevant);
                 }
             }
         });
