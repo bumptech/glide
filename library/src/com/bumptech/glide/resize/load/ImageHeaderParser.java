@@ -1,5 +1,7 @@
 package com.bumptech.glide.resize.load;
 
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.*;
+
 import com.bumptech.glide.util.Log;
 
 import java.io.IOException;
@@ -13,7 +15,16 @@ import java.nio.ByteOrder;
 public class ImageHeaderParser {
 
     public static enum ImageType {
-        GIF(true), JPEG(false), APNG(true), PNG(false), UNKNOWN(false);
+        /** GIF type */
+        GIF(true),
+        /** JPG type */
+        JPEG(false),
+        /** PNG type with alpha */
+        PNG_A(true),
+        /** PNG type without alpha */
+        PNG(false),
+        /** Unrecognized type */
+        UNKNOWN(false);
         private final boolean hasAlpha;
 
         ImageType(boolean hasAlpha) {
@@ -59,7 +70,7 @@ public class ImageHeaderParser {
         int firstByte = streamReader.getUInt8();
 
         if (firstByte == EXIF_MAGIC_NUMBER >> 8) { //JPEG
-            return ImageType.JPEG;
+            return JPEG;
         }
 
         final int firstTwoBytes = firstByte << 8 & 0xFF00 | streamReader.getUInt8() & 0xFF;
@@ -69,14 +80,14 @@ public class ImageHeaderParser {
             streamReader.skip(25 - 4);
             int alpha = streamReader.getByte();
             // A RGB indexed PNG can also have transparency. Better safe than sorry!
-            return alpha >= 3 ? ImageType.APNG : ImageType.PNG;
+            return alpha >= 3 ? PNG_A : PNG;
         }
 
         if (firstFourBytes >> 8 == GIF_HEADER) { //GIF from first 3 bytes
-            return ImageType.GIF;
+            return GIF;
         }
 
-        return ImageType.UNKNOWN;
+        return UNKNOWN;
     }
 
     /**
