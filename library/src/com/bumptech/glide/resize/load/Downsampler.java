@@ -119,7 +119,7 @@ public abstract class Downsampler {
         } else {
             // cannot reuse bitmaps when decoding images that are not PNG or JPG.
             // look at : https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
-            if (!shouldUsePool(bis)) {
+            if (shouldUsePool(bis)) {
                 setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
             }
         }
