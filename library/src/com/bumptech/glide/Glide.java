@@ -496,6 +496,7 @@ public class Glide {
         private Downsampler downsampler = Downsampler.AT_LEAST;
         private ArrayList<TransformationLoader<T>> transformationLoaders = new ArrayList<TransformationLoader<T>>();
         private RequestListener<T> requestListener;
+        private boolean force;
 
         private Request(T model) {
             this(model, GLIDE.getFactory(model));
@@ -657,6 +658,16 @@ public class Glide {
         }
 
         /**
+         * Calling this will force the image to be loaded regardless of weather it has been loaded before in the same
+         * target.
+         * @return This request.
+         */
+        public Request<T> force() {
+            this.force = true;
+            return this;
+        }
+
+        /**
          * Start loading the image into the view.
          *
          * <p>
@@ -700,6 +711,9 @@ public class Glide {
             this.target = target;
 
             ImagePresenter<T> imagePresenter = getImagePresenter(target);
+            if (force) {
+                imagePresenter.clear();
+            }
             imagePresenter.setModel(model);
         }
 
