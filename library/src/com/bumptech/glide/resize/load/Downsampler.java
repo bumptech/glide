@@ -1,5 +1,10 @@
 package com.bumptech.glide.resize.load;
 
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG_A;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.JPEG;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG;
+
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,13 +12,16 @@ import android.os.Build;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Log;
-
 import java.io.IOException;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * A base class with methods for loading and decoding images from InputStreams.
  */
 public abstract class Downsampler {
+
+    private static final Set<ImageType> TYPES_THAT_USE_POOL = EnumSet.of(JPEG, PNG_A, PNG);
     private final String id = getClass().toString();
 
     /**
@@ -109,9 +117,30 @@ public abstract class Downsampler {
         if (sampleSize > 1) {
             options.inSampleSize = sampleSize;
         } else {
-            setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
+            // cannot reuse bitmaps when decoding images that are not PNG or JPG.
+            // look at : https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
+            if (shouldUsePool(bis)) {
+                setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
+            }
         }
         return decodeStream(bis, options);
+    }
+
+    private boolean shouldUsePool(RecyclableBufferedInputStream bis) {
+        bis.mark(1024);
+        try {
+            final ImageType type = new ImageHeaderParser(bis).getType();
+            return TYPES_THAT_USE_POOL.contains(type);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bis.reset();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     private Bitmap.Config getConfig(RecyclableBufferedInputStream bis) {
