@@ -1,5 +1,7 @@
 package com.bumptech.glide.presenter.target;
 
+import static android.view.ViewGroup.LayoutParams;
+
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -7,8 +9,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import com.bumptech.glide.presenter.ImagePresenter;
-
-import static android.view.ViewGroup.LayoutParams;
 
 /**
  * A target wrapping an ImageView. Obtains the runtime dimensions of the ImageView.
@@ -43,6 +43,10 @@ public class ImageViewTarget implements Target {
         imageView.clearAnimation();
 
         imageView.startAnimation(animation);
+    }
+
+    public ImageView getImageView() {
+        return imageView;
     }
 
     @Override
