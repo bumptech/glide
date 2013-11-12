@@ -30,7 +30,6 @@ import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.ImageResizer;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.util.Log;
-import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +59,7 @@ public class ImageManager {
 
     private final BitmapReferenceCounter bitmapReferenceCounter;
     private final int bitmapCompressQuality;
+    private final BitmapPool bitmapPool;
     private boolean shutdown = false;
 
     private final Handler mainHandler = new Handler();
@@ -68,6 +68,7 @@ public class ImageManager {
     private final MemoryCache memoryCache;
     private final ImageResizer resizer;
     private final DiskCache diskCache;
+    private final SafeKeyGenerator safeKeyGenerator = new SafeKeyGenerator();
 
     //special downsampler that doesn't check exif, and assumes inWidth and inHeight == outWidth and outHeight so it
     //doesn't need to read the image header for size information
@@ -363,6 +364,7 @@ public class ImageManager {
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
         bitmapReferenceCounter = builder.bitmapReferenceCounter;
+        bitmapPool = builder.bitmapPool;
         resizer = new ImageResizer(builder.bitmapPool, builder.decodeBitmapOptions);
 
         memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
@@ -371,6 +373,22 @@ public class ImageManager {
                 releaseBitmap(removed);
             }
         });
+    }
+
+    /**
+     * Get the {@link BitmapPool} this ImageManager is using. If Bitmap recycling is not supported, an
+     * {@link BitmapPoolAdapter} will be returned. For the pool to be useful you must return a bitmap to the pool for
+     * every bitmap you obtain from the pool.
+     *
+     * <p>
+     *     Note the BitmapPool api is likely to change in the near future to support some new features released in
+     *     KitKat.
+     * </p>
+     *
+     * @return The bitmap pool.
+     */
+    public BitmapPool getBitmapPool() {
+        return bitmapPool;
     }
 
     /**
@@ -389,7 +407,7 @@ public class ImageManager {
     public ImageManagerJob getImage(String id, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
         if (shutdown) return null;
 
-        final String key = getKey(id, transformation.getId(), downsampler, width, height);
+        final String key = safeKeyGenerator.getSafeKey(id, transformation, downsampler, width, height);
 
         ImageManagerJob job = null;
         if (!returnFromCache(key, cb)) {
@@ -629,10 +647,5 @@ public class ImageManager {
             bitmapReferenceCounter.acquireBitmap(bitmap);
             memoryCache.put(key, bitmap);
         }
-    }
-
-    private static String getKey(String id, String transformationId, Downsampler downsampler, int width, int height) {
-        return String.valueOf(Util.hash(id.hashCode(), downsampler.getId().hashCode(),
-                transformationId.hashCode(), width, height));
     }
 }

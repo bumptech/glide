@@ -2,4 +2,7 @@
 <lint>
     <issue id="MissingApplicationIcon" severity="ignore" />
     <issue id="AllowBackup" severity="ignore" />
+    <issue id="InlinedApi">
+        <ignore path="src/com/bumptech/glide/resize/cache/LruMemoryCache.java" />
+    </issue>
 </lint>

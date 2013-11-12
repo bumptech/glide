@@ -49,7 +49,7 @@ public class ImagePresenter<T> {
     public static class Builder<T> {
         private int placeholderResourceId;
         private Drawable placeholderDrawable;
-        private ImageReadyCallback imageReadyCallback;
+        private ImageReadyCallback<T> imageReadyCallback;
         private ImagePresenterCoordinator coordinator;
         private ImageLoader imageLoader;
         private Context context;
@@ -224,7 +224,7 @@ public class ImagePresenter<T> {
          * @param cb The callback to call
          * @return This Builder object
          */
-        public Builder<T> setImageReadyCallback(ImageReadyCallback cb) {
+        public Builder<T> setImageReadyCallback(ImageReadyCallback<T> cb) {
             this.imageReadyCallback = cb;
             return this;
         }
@@ -281,7 +281,7 @@ public class ImagePresenter<T> {
     private final TransformationLoader<T> transformationLoader;
 
     private final Drawable placeholderDrawable;
-    private final ImageReadyCallback imageReadyCallback;
+    private final ImageReadyCallback<T> imageReadyCallback;
     private final ImagePresenterCoordinator coordinator;
     private final ExceptionHandler<T> exceptionHandler;
 
@@ -330,6 +330,21 @@ public class ImagePresenter<T> {
          * @param isCurrent true iff the presenter currently wants to display the image from the load that failed
          */
         public void onException(Exception e, T model, boolean isCurrent);
+    }
+
+    /**
+     * A callback interface used to perform some action when an {@link ImagePresenter} sets a new bitmap in an
+     * {@link android.widget.ImageView}
+     */
+    public interface ImageReadyCallback<T> {
+
+        /**
+         * The method called when a bitmap is set
+         *
+         * @param target The target that will display the bitmap
+         * @param fromCache True iff the load completed without a placeholder being shown.
+         */
+        public void onImageReady(T model, Target target, boolean fromCache);
     }
 
     protected ImagePresenter(Builder<T> builder) {
@@ -438,9 +453,9 @@ public class ImagePresenter<T> {
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
 
-                if (imageReadyCallback != null)
-                    imageReadyCallback.onImageReady(target, loadedFromCache);
                 target.onImageReady(image);
+                if (imageReadyCallback != null)
+                    imageReadyCallback.onImageReady(model, target, loadedFromCache);
                 isImageSet = true;
                 return true;
             }
@@ -448,12 +463,12 @@ public class ImagePresenter<T> {
             @Override
             public void onException(Exception e) {
                 final boolean relevant = loadCount == currentCount;
-                if (exceptionHandler != null) {
-                    exceptionHandler.onException(e, model, relevant);
-                }
                 if (relevant && canSetPlaceholder() && errorDrawable != null) {
                     isErrorSet = true;
                     target.setPlaceholder(errorDrawable);
+                }
+                if (exceptionHandler != null) {
+                    exceptionHandler.onException(e, model, relevant);
                 }
             }
         });

@@ -12,7 +12,6 @@ import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.load.Transformation;
 
@@ -330,9 +329,9 @@ public class ImagePresenterTest extends AndroidTestCase {
                         cb.onImageReady(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444));
                     }
                 }))
-                .setImageReadyCallback(new ImageReadyCallback() {
+                .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Object>() {
                     @Override
-                    public void onImageReady(Target target, boolean fromCache) {
+                    public void onImageReady(Object model, Target target, boolean fromCache) {
                         wasImageSetCallbackCalled.set(true);
                     }
                 })

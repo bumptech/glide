@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.test.ActivityTestCase;
 import android.view.ViewGroup;
@@ -8,6 +9,8 @@ import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
+import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.tests.R;
 
 import java.io.File;
@@ -220,6 +223,42 @@ public class GlideTest extends ActivityTestCase {
         Glide.load("b").into(imageView);
     }
 
+    public void testObtainAndOfferToBitmapPool() {
+        Bitmap small = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        Bitmap large = Bitmap.createBitmap(512, 512, Bitmap.Config.RGB_565);
+        BitmapPool bitmapPool = Glide.get().getImageManager(getInstrumentation().getContext()).getBitmapPool();
+        bitmapPool.put(small);
+        bitmapPool.put(large);
+
+        assertEquals(small, bitmapPool.get(small.getWidth(), small.getHeight(), small.getConfig()));
+        assertEquals(large, bitmapPool.get(large.getWidth(), large.getHeight(), large.getConfig()));
+    }
+
+    public void testDifferentRequestListenersReplacesPresenter() {
+        assertDifferentPresenters(
+                Glide.load("a").listener(new Glide.RequestListener<String>() {
+
+                    @Override
+                    public void onException(Exception e, String model, Target target) {
+
+                    }
+
+                    @Override
+                    public void onImageReady(String model, Target target) {
+                    }
+                }),
+                Glide.load("a").listener(new Glide.RequestListener<String>() {
+                    @Override
+                    public void onException(Exception e, String model, Target target) {
+                    }
+
+                    @Override
+                    public void onImageReady(String model, Target target) {
+                    }
+                })
+        );
+    }
+
     private void assertDifferentPresenters(Glide.Request a, Glide.Request b) {
         a.into(imageView);
         ImagePresenter first = getImagePresenterFromView();
@@ -233,5 +272,4 @@ public class GlideTest extends ActivityTestCase {
         assertSame(first, second);
         assertNotSame(first, third);
     }
-
 }

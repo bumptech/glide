@@ -24,8 +24,8 @@ public class MultiTransformation extends Transformation {
         Bitmap transformed;
         for (Transformation transformation : transformations) {
             transformed = transformation.transform(bitmap, pool, outWidth, outHeight);
-            if (current != null && current != transformed) {
-                pool.put(current);
+            if (current != null && current != transformed && !pool.put(current)) {
+                current.recycle();
             }
 
             current = transformed;

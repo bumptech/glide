@@ -69,7 +69,9 @@ public class SerialBitmapReferenceCounter implements BitmapReferenceCounter {
     }
 
     private void recycle(InnerTracker tracker, Bitmap bitmap) {
-        target.put(bitmap);
+        if (!target.put(bitmap)) {
+            bitmap.recycle();
+        }
         counter.remove(bitmap);
         pool.release(tracker);
     }

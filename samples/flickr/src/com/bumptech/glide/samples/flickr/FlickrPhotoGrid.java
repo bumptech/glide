@@ -15,7 +15,6 @@ import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.model.Cache;
 import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -118,9 +117,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                         .setImageView(imageView)
                         .setImageLoader(new ImageManagerLoader(context))
                         .setTransformationLoader(new CenterCrop<Photo>())
-                        .setImageReadyCallback(new ImageReadyCallback() {
+                        .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Photo>() {
                             @Override
-                            public void onImageReady(Target target, boolean fromCache) {
+                            public void onImageReady(Photo photo, Target target, boolean fromCache) {
                                 if (!fromCache) {
                                     target.startAnimation(fadeIn);
                                 }

@@ -22,7 +22,6 @@ import com.bumptech.glide.loader.transformation.MultiTransformationLoader;
 import com.bumptech.glide.loader.transformation.None;
 import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.ImageReadyCallback;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.ImageManager;
@@ -53,6 +52,76 @@ public class Glide {
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
 
     private ImageManager imageManager = null;
+
+    /**
+     * A class for monitoring the status of a request while images load.
+     *
+     * @param <T> The type of the model being loaded
+     */
+    public static abstract class RequestListener<T> {
+
+        /**
+         * Called when an exception occurs during a load. Will only be called if we currently want to display an image
+         * for the given model in the given target. It is recommended to create a single instance per activity/fragment
+         * rather than instantiate a new object for each call to {@code Glide.load()} to avoid object churn.
+         *
+         * <p>
+         *     It is safe to reload this or a different model or change what is displayed in the target at this point.
+         *     For example:
+         * <pre>
+         * <code>
+         *     public void onException(Exception e, T model, Target target) {
+         *         target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
+         *         Glide.load(model).into(target);
+         *     }
+         * </code>
+         * </pre>
+         * </p>
+         *
+         * <p>
+         *     Note - if you want to reload this or any other model after an exception, you will need to include all
+         *     relevant builder calls (like centerCrop, placeholder etc).
+         * </p>
+         *
+         * @param e The exception, or null
+         * @param model The model we were trying to load when the exception occurred
+         * @param target The {@link Target} we were trying to load the image into
+         */
+        public abstract void onException(Exception e, T model, Target target);
+
+        /**
+         * Called when a load completes successfully, immediately after
+         * {@link Target#onImageReady(android.graphics.Bitmap)}.
+         *
+         * @param model The specific model that was used to load the image.
+         * @param target The target the model was loaded into.
+         */
+        public abstract void onImageReady(T model, Target target);
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         *     By default we only check the both objects are not null and that their classes are identical. This assumes
+         *     that two instances of the same anonymous inner class will behave identically.
+         * </p>
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            return true;
+        }
+
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
+        }
+    }
 
     /**
      * Get the singleton.
@@ -426,6 +495,7 @@ public class Glide {
         private int errorId = -1;
         private Downsampler downsampler = Downsampler.AT_LEAST;
         private ArrayList<TransformationLoader<T>> transformationLoaders = new ArrayList<TransformationLoader<T>>();
+        private RequestListener<T> requestListener;
 
         private Request(T model) {
             this(model, GLIDE.getFactory(model));
@@ -573,6 +643,20 @@ public class Glide {
         }
 
         /**
+         * Sets a Request listener to monitor the image load. It's best to create a single instance of an exception
+         * handler per type of request (usually activity/fragment) rather than pass one in per request to avoid some
+         * redundant object allocation.
+         *
+         * @param requestListener The request listener to use
+         * @return This request
+         */
+        public Request<T> listener(RequestListener<T> requestListener) {
+            this.requestListener = requestListener;
+
+            return this;
+        }
+
+        /**
          * Start loading the image into the view.
          *
          * <p>
@@ -648,7 +732,7 @@ public class Glide {
             return result;
         }
 
-        private ImagePresenter<T> buildImagePresenter(Target target) {
+        private ImagePresenter<T> buildImagePresenter(final Target target) {
             TransformationLoader<T> transformationLoader = getFinalTransformationLoader();
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
@@ -657,13 +741,21 @@ public class Glide {
                     .setImageLoader(new ImageManagerLoader(context, downsampler))
                     .setTransformationLoader(transformationLoader);
 
-            if (animationId != -1) {
-                final Animation animation = AnimationUtils.loadAnimation(context, animationId);
-                builder.setImageReadyCallback(new ImageReadyCallback() {
+            if (animationId != -1 || requestListener != null) {
+                final Animation animation;
+                if (animationId != -1) {
+                    animation = AnimationUtils.loadAnimation(context, animationId);
+                } else {
+                    animation = null;
+                }
+                builder.setImageReadyCallback(new ImagePresenter.ImageReadyCallback<T>() {
                     @Override
-                    public void onImageReady(Target target, boolean fromCache) {
-                        if (!fromCache) {
+                    public void onImageReady(T model, Target target, boolean fromCache) {
+                        if (animation != null && !fromCache) {
                             target.startAnimation(animation);
+                        }
+                        if (requestListener != null) {
+                            requestListener.onImageReady(null, target);
                         }
                     }
                 });
@@ -675,6 +767,17 @@ public class Glide {
 
             if (errorId != -1) {
                 builder.setErrorResource(errorId);
+            }
+
+            if (requestListener != null) {
+                builder.setExceptionHandler(new ImagePresenter.ExceptionHandler<T>() {
+                    @Override
+                    public void onException(Exception e, T model, boolean isCurrent) {
+                        if (isCurrent) {
+                            requestListener.onException(e, model, target);
+                        }
+                    }
+                });
             }
 
             return builder.build();
@@ -739,6 +842,7 @@ public class Glide {
 
         private final String downsamplerId;
         private final String transformationId;
+        private final RequestListener requestListener;
 
         public Metadata(Request request) {
             modelClass = request.model.getClass();
@@ -748,6 +852,7 @@ public class Glide {
             animationId = request.animationId;
             placeholderId = request.placeholderId;
             errorId = request.errorId;
+            requestListener = request.requestListener;
         }
 
         //we don't want to change behavior in sets/maps, just be able to compare properties
@@ -760,6 +865,8 @@ public class Glide {
             if (!modelClass.equals(metadata.modelClass)) return false;
             if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
             if (!transformationId.equals(metadata.transformationId)) return false;
+            if (requestListener == null ? metadata.requestListener != null :
+                    !requestListener.equals(metadata.requestListener)) return false;
 
             return true;
         }
