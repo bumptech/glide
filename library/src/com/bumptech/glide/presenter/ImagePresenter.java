@@ -453,7 +453,7 @@ public class ImagePresenter<T> {
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;
 
-                target.onImageReady(image);
+                target.onImageReady(image, loadedFromCache);
                 if (imageReadyCallback != null)
                     imageReadyCallback.onImageReady(model, target, loadedFromCache);
                 isImageSet = true;
