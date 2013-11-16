@@ -3,6 +3,6 @@
           package="com.bumptech.glide"
           android:versionCode="3"
           android:versionName="2.0.1" >
-  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="18" />
+  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19" />
   <application />
 </manifest>
