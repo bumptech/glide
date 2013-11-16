@@ -267,73 +267,73 @@ public class GlideTest extends ActivityTestCase {
         );
     }
 
-    public void testMemoryLeak() throws InterruptedException {
-        final int numRequests = 200;
-        final HandlerThread handlerThread = new HandlerThread("memory_leak");
-        handlerThread.start();
-        final Handler handler = new Handler(handlerThread.getLooper());
-        final AtomicInteger totalRun = new AtomicInteger();
-        Runnable doLoad = new Runnable() {
-                @Override
-                public void run() {
-                    final ImageView temp = new ImageView(getInstrumentation().getContext());
-                    temp.setBackgroundDrawable(new BitmapDrawable(
-                            Bitmap.createBitmap(1000, 1000, Bitmap.Config.ARGB_8888)));
-                    temp.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
-                    Glide.using(new ModelLoader<Object>() {
-                        @Override
-                        public StreamLoader getStreamLoader(Object model, int width, int height) {
-                            return new StreamLoader() {
-                                @Override
-                                public void loadStream(StreamReadyCallback cb) {
-                                    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-                                    ByteArrayOutputStream os = new ByteArrayOutputStream();
-                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
-                                    cb.onStreamReady(new ByteArrayInputStream(os.toByteArray()));
-                                }
-
-                                @Override
-                                public void cancel() { }
-                            };
-                        }
-
-                        @Override
-                        public String getId(Object model) {
-                            return model.toString();
-                        }
-                    })
-                            .load(new Object())
-                            .animate(android.R.anim.fade_in)
-                            .centerCrop()
-                            .error(android.R.drawable.ic_delete)
-                            .placeholder(android.R.drawable.ic_dialog_email)
-                            .listener(new Glide.RequestListener<Object>() {
-                                @Override
-                                public void onException(Exception e, Object model, Target target) {
-                                    temp.invalidate();
-                                }
-
-                                @Override
-                                public void onImageReady(Object model, Target target) {
-                                    temp.jumpDrawablesToCurrentState();
-                                }
-                            })
-                            .into(temp);
-                    if (totalRun.getAndIncrement() < numRequests) {
-                        handler.postDelayed(this, 10);
-                    } else {
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                handlerThread.getLooper().quit();
-                            }
-                        }, 100);
-                    }
-                }
-        };
-        handler.post(doLoad);
-        handlerThread.join();
-    }
+//    public void testMemoryLeak() throws InterruptedException {
+//        final int numRequests = 200;
+//        final HandlerThread handlerThread = new HandlerThread("memory_leak");
+//        handlerThread.start();
+//        final Handler handler = new Handler(handlerThread.getLooper());
+//        final AtomicInteger totalRun = new AtomicInteger();
+//        Runnable doLoad = new Runnable() {
+//                @Override
+//                public void run() {
+//                    final ImageView temp = new ImageView(getInstrumentation().getContext());
+//                    temp.setBackgroundDrawable(new BitmapDrawable(
+//                            Bitmap.createBitmap(1000, 1000, Bitmap.Config.ARGB_8888)));
+//                    temp.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
+//                    Glide.using(new ModelLoader<Object>() {
+//                        @Override
+//                        public StreamLoader getStreamLoader(Object model, int width, int height) {
+//                            return new StreamLoader() {
+//                                @Override
+//                                public void loadStream(StreamReadyCallback cb) {
+//                                    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+//                                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+//                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+//                                    cb.onStreamReady(new ByteArrayInputStream(os.toByteArray()));
+//                                }
+//
+//                                @Override
+//                                public void cancel() { }
+//                            };
+//                        }
+//
+//                        @Override
+//                        public String getId(Object model) {
+//                            return model.toString();
+//                        }
+//                    })
+//                            .load(new Object())
+//                            .animate(android.R.anim.fade_in)
+//                            .centerCrop()
+//                            .error(android.R.drawable.ic_delete)
+//                            .placeholder(android.R.drawable.ic_dialog_email)
+//                            .listener(new Glide.RequestListener<Object>() {
+//                                @Override
+//                                public void onException(Exception e, Object model, Target target) {
+//                                    temp.invalidate();
+//                                }
+//
+//                                @Override
+//                                public void onImageReady(Object model, Target target) {
+//                                    temp.jumpDrawablesToCurrentState();
+//                                }
+//                            })
+//                            .into(temp);
+//                    if (totalRun.getAndIncrement() < numRequests) {
+//                        handler.postDelayed(this, 10);
+//                    } else {
+//                        handler.postDelayed(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                handlerThread.getLooper().quit();
+//                            }
+//                        }, 100);
+//                    }
+//                }
+//        };
+//        handler.post(doLoad);
+//        handlerThread.join();
+//    }
 
     private void assertDifferentPresenters(Glide.Request a, Glide.Request b) {
         a.into(imageView);
