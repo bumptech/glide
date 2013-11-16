@@ -24,6 +24,7 @@ import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
+
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
@@ -58,7 +59,7 @@ public class Glide {
      *
      * @param <T> The type of the model being loaded
      */
-    public static abstract class RequestListener<T> {
+    public interface RequestListener<T> {
 
         /**
          * Called when an exception occurs during a load. Will only be called if we currently want to display an image
@@ -97,30 +98,6 @@ public class Glide {
          * @param target The target the model was loaded into.
          */
         public abstract void onImageReady(T model, Target target);
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>
-         *     By default we only check the both objects are not null and that their classes are identical. This assumes
-         *     that two instances of the same anonymous inner class will behave identically.
-         * </p>
-         */
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            return true;
-        }
-
-        /**
-         * {@inheritDoc }
-         */
-        @Override
-        public int hashCode() {
-            throw new UnsupportedOperationException();
-        }
     }
 
     /**
@@ -842,7 +819,7 @@ public class Glide {
 
         private final String downsamplerId;
         private final String transformationId;
-        private final RequestListener requestListener;
+        private final Class requestListenerClass;
 
         public Metadata(Request request) {
             modelClass = request.model.getClass();
@@ -852,7 +829,8 @@ public class Glide {
             animationId = request.animationId;
             placeholderId = request.placeholderId;
             errorId = request.errorId;
-            requestListener = request.requestListener;
+            requestListenerClass = (request.requestListener != null ?
+                    request.requestListener.getClass() : null);
         }
 
         //we don't want to change behavior in sets/maps, just be able to compare properties
@@ -865,8 +843,8 @@ public class Glide {
             if (!modelClass.equals(metadata.modelClass)) return false;
             if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
             if (!transformationId.equals(metadata.transformationId)) return false;
-            if (requestListener == null ? metadata.requestListener != null :
-                    !requestListener.equals(metadata.requestListener)) return false;
+            if (requestListenerClass == null ? metadata.requestListenerClass != null :
+                    !requestListenerClass.equals(metadata.requestListenerClass)) return false;
 
             return true;
         }
