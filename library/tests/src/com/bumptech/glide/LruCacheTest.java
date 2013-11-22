@@ -118,6 +118,32 @@ public class LruCacheTest extends AndroidTestCase {
         assertEquals(1, totalRemoved.get());
     }
 
+    public void testClearMemoryCallsListener() {
+        List<String> keys = fillCache();
+        final AtomicInteger totalRemoved = new AtomicInteger();
+        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
+            @Override
+            public void onImageRemoved(Bitmap removed) {
+                totalRemoved.getAndIncrement();
+            }
+        });
+        cache.clearMemory();
+        assertEquals(keys.size(), totalRemoved.get());
+    }
+
+    public void testTrimMemoryCallsListener() {
+        List<String> keys = fillCache();
+        final AtomicInteger totalRemoved = new AtomicInteger();
+        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
+            @Override
+            public void onImageRemoved(Bitmap removed) {
+                totalRemoved.getAndIncrement();
+            }
+        });
+        cache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+        assertEquals(keys.size(), totalRemoved.get());
+    }
+
     public void testClearMemory() {
         List<String> keys = fillCache();
         cache.clearMemory();

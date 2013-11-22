@@ -53,13 +53,7 @@ public class LruMemoryCache implements MemoryCache {
 
     @Override
     public void clearMemory() {
-        final Iterator<Map.Entry<String,Bitmap>> iterator = cache.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Bitmap bitmap = iterator.next().getValue();
-            bitmap.recycle();
-            iterator.remove();
-        }
-        currentSize = 0;
+        trimToSize(0);
     }
 
     @Override
