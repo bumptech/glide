@@ -430,6 +430,11 @@ public class ImageManager {
         bitmapReferenceCounter.releaseBitmap(b);
     }
 
+    public void clearMemory() {
+        memoryCache.clearMemory();
+        bitmapPool.clearMemory();
+    }
+
     /**
      * Shuts down all of the background threads used by the ImageManager including the executor service
      */

@@ -33,11 +33,7 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     private void evict() {
-        while (currentSize > maxSize) {
-            final Bitmap removed = pool.removeLast();
-            currentSize -= getSize(removed);
-            removed.recycle();
-        }
+        trimToSize(maxSize);
     }
 
     @Override
@@ -50,6 +46,19 @@ public class LruBitmapPool implements BitmapPool {
         }
 
         return result;
+    }
+
+    @Override
+    public void clearMemory() {
+        trimToSize(0);
+    }
+
+    private void trimToSize(int size) {
+        while (currentSize > size) {
+            final Bitmap removed = pool.removeLast();
+            currentSize -= getSize(removed);
+            removed.recycle();
+        }
     }
 
     private static int getSize(Bitmap bitmap) {

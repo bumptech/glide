@@ -14,4 +14,6 @@ public class BitmapPoolAdapter implements BitmapPool {
         return null;
     }
 
+    @Override
+    public void clearMemory() { }
 }
