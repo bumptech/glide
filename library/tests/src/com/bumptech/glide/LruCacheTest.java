@@ -78,7 +78,7 @@ public class LruCacheTest extends AndroidTestCase {
         assertEquals(1, totalRemoved.get());
     }
 
-    public void testBitmapLargerThanPoolIsImmediatelyEvicted() {
+    public void testBitmapLargerThanCacheIsImmediatelyEvicted() {
         final Bitmap tooLarge = Bitmap.createBitmap(1000, 1000, Bitmap.Config.ARGB_8888);
         assertTrue(getSize(tooLarge) > SIZE);
         final AtomicInteger totalRemoved = new AtomicInteger();

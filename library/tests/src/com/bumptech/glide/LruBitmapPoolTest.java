@@ -17,14 +17,75 @@ public class LruBitmapPoolTest extends AndroidTestCase {
         pool = new LruBitmapPool(SIZE);
     }
 
+    public void testCanAddAndRemoveBitmap() {
+        Bitmap bitmap = getBitmap();
+        pool.put(bitmap);
+        assertEquals(bitmap, getEquivalentFromPool(bitmap));
+    }
+
+    public void testCanAddAndRemoveBitmapsOfDifferentSizes() {
+        Bitmap first = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        Bitmap second = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
+        pool.put(first);
+        pool.put(second);
+        assertEquals(first, getEquivalentFromPool(first));
+        assertEquals(second, getEquivalentFromPool(second));
+    }
+
+    public void testCanAddAndRemoveBitmapsOfDifferentConfigs() {
+        Bitmap first = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        Bitmap second = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+        pool.put(first);
+        pool.put(second);
+        assertEquals(first, getEquivalentFromPool(first));
+        assertEquals(second, getEquivalentFromPool(second));
+    }
+
+    public void testPoolIsSizeLimited() {
+        List<Bitmap> bitmaps = fillPool();
+        Bitmap first = bitmaps.get(0);
+        pool.put(Bitmap.createBitmap(first));
+
+        int totalInPool = 0;
+        for (int i = 0; i < bitmaps.size(); i++) {
+            if (getEquivalentFromPool(first) == null) {
+                break;
+            }
+            totalInPool++;
+        }
+
+        assertEquals(bitmaps.size(), totalInPool);
+    }
+
+    public void testLeastRecentlyAcquiredBitmapRemovedFirst() {
+        Bitmap special = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+        pool.put(Bitmap.createBitmap(special));
+        pool.put(Bitmap.createBitmap(special));
+        getEquivalentFromPool(special);
+        List<Bitmap> bitmaps = fillPool();
+
+        assertNotNull(getEquivalentFromPool(special));
+
+        Bitmap first = bitmaps.get(0);
+        int totalAcquired = 0;
+        for (int i = 0; i < bitmaps.size(); i++) {
+            if (getEquivalentFromPool(first) == null) {
+                break;
+            }
+            totalAcquired++;
+        }
+
+        assertEquals(totalAcquired, bitmaps.size() - 1);
+    }
+
     public void testClearMemoryRemovesAllBitmaps() {
         List<Bitmap> bitmaps = fillPool();
         assertTrue(bitmaps.size() >= 2);
 
         Bitmap first = bitmaps.get(0);
-        assertNotNull(pool.get(first.getWidth(), first.getHeight(), first.getConfig()));
+        assertNotNull(getEquivalentFromPool(first));
         pool.clearMemory();
-        assertNull(pool.get(first.getWidth(), first.getHeight(), first.getConfig()));
+        assertNull(getEquivalentFromPool(first));
     }
 
     public void testClearMemoryCallsRecycleOnRemovedBitmaps() {
@@ -47,6 +108,10 @@ public class LruBitmapPoolTest extends AndroidTestCase {
         }
         assertTrue(bitmaps.size() > 0);
         return bitmaps;
+    }
+
+    private Bitmap getEquivalentFromPool(Bitmap bitmap) {
+        return pool.get(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
     }
 
     private static int getSize(Bitmap bitmap) {
