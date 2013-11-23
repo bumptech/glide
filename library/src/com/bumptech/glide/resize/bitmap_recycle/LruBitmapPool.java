@@ -1,5 +1,8 @@
 package com.bumptech.glide.resize.bitmap_recycle;
 
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+
 import android.graphics.Bitmap;
 import com.bumptech.glide.util.Log;
 
@@ -51,6 +54,15 @@ public class LruBitmapPool implements BitmapPool {
     @Override
     public void clearMemory() {
         trimToSize(0);
+    }
+
+    @Override
+    public void trimMemory(int level) {
+        if (level >= TRIM_MEMORY_MODERATE) {
+            clearMemory();
+        } else if (level >= TRIM_MEMORY_BACKGROUND) {
+            trimToSize(currentSize / 2);
+        }
     }
 
     private void trimToSize(int size) {

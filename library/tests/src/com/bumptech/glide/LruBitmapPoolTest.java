@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
@@ -78,6 +79,35 @@ public class LruBitmapPoolTest extends AndroidTestCase {
         assertEquals(totalAcquired, bitmaps.size() - 1);
     }
 
+    public void testTrimMemoryCompleteClearsPool() {
+        doTestTrimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE, false);
+    }
+
+    public void testTrimMemoryModerateClearsPool() {
+        doTestTrimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE, false);
+    }
+
+    public void testTrimMemoryBackgroundRemovesHalf() {
+        doTestTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND, true);
+    }
+
+    private void doTestTrimMemory(int level, boolean half) {
+        List<Bitmap> bitmaps = fillPool();
+        Bitmap first = bitmaps.get(0);
+        assertTrue(bitmaps.size() >= 2);
+
+        Bitmap fromPool = getEquivalentFromPool(first);
+        assertNotNull(fromPool);
+        pool.put(fromPool);
+        pool.trimMemory(level);
+        if (half) {
+            for (int i = 0; i < bitmaps.size() / 2; i++) {
+                assertNotNull(getEquivalentFromPool(first));
+            }
+        }
+        assertNull(getEquivalentFromPool(first));
+    }
+
     public void testClearMemoryRemovesAllBitmaps() {
         List<Bitmap> bitmaps = fillPool();
         assertTrue(bitmaps.size() >= 2);
@@ -86,6 +116,14 @@ public class LruBitmapPoolTest extends AndroidTestCase {
         assertNotNull(getEquivalentFromPool(first));
         pool.clearMemory();
         assertNull(getEquivalentFromPool(first));
+    }
+
+    public void testTrimMemoryCallsRecycleOnRemovedBitmaps() {
+        List<Bitmap> bitmaps = fillPool();
+        pool.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+        for (Bitmap bitmap : bitmaps) {
+            assertTrue(bitmap.isRecycled());
+        }
     }
 
     public void testClearMemoryCallsRecycleOnRemovedBitmaps() {
