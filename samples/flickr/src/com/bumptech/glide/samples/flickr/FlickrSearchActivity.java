@@ -152,6 +152,18 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager()));
     }
 
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Glide.get().getImageManager(this).trimMemory(level);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        Glide.get().getImageManager(this).clearMemory();
+    }
+
     private void executeSearch() {
         final String searchString = searchText.getText().toString();
         searchText.getText().clear();

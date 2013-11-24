@@ -435,6 +435,11 @@ public class ImageManager {
         bitmapPool.clearMemory();
     }
 
+    public void trimMemory(int level) {
+        memoryCache.trimMemory(level);
+        bitmapPool.trimMemory(level);
+    }
+
     /**
      * Shuts down all of the background threads used by the ImageManager including the executor service
      */

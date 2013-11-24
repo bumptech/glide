@@ -1,6 +1,6 @@
 package com.bumptech.glide;
 
-import android.graphics.Bitmap;
+import android.content.ComponentCallbacks2;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
@@ -38,6 +38,34 @@ public class ImageManagerTest extends AndroidTestCase {
         im.clearMemory();
 
         assertEquals(2, clearsCalled.get());
+    }
+
+    public void testTrimMemory() {
+        final AtomicInteger trimsCalled = new AtomicInteger();
+        BitmapPool pool = new BitmapPoolAdapter() {
+            @Override
+            public void trimMemory(int level) {
+                super.trimMemory(level);
+                assertEquals(2, trimsCalled.incrementAndGet());
+            }
+        };
+
+        MemoryCache cache = new MemoryCacheAdapter() {
+            @Override
+            public void trimMemory(int level) {
+                super.trimMemory(level);
+                assertEquals(1, trimsCalled.incrementAndGet());
+            }
+        };
+
+        ImageManager im = new ImageManager.Builder(getContext())
+                .setBitmapPool(pool)
+                .setMemoryCache(cache)
+                .build();
+
+
+        im.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+        assertEquals(2, trimsCalled.get());
     }
 }
 
