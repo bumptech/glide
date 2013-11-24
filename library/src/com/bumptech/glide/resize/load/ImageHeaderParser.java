@@ -2,7 +2,7 @@ package com.bumptech.glide.resize.load;
 
 import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.*;
 
-import com.bumptech.glide.util.Log;
+import com.bumptech.glide.Log;
 
 import java.io.IOException;
 import java.io.InputStream;

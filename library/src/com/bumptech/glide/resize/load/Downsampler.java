@@ -11,7 +11,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.util.Log;
+import com.bumptech.glide.Log;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Set;

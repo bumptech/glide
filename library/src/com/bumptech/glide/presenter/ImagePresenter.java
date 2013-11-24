@@ -17,7 +17,7 @@ import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.load.Transformation;
-import com.bumptech.glide.util.Log;
+import com.bumptech.glide.Log;
 
 /**
  * Wraps an {@link Target} to display arbitrary Bitmaps and provides a framework for fetching and

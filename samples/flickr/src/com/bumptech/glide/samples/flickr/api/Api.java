@@ -6,7 +6,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.bumptech.glide.util.Log;
+import com.bumptech.glide.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

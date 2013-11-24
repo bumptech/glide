@@ -29,7 +29,7 @@ import com.bumptech.glide.resize.cache.MemoryCacheAdapter;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.ImageResizer;
 import com.bumptech.glide.resize.load.Transformation;
-import com.bumptech.glide.util.Log;
+import com.bumptech.glide.Log;
 
 import java.io.File;
 import java.io.IOException;

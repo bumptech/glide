@@ -4,7 +4,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.util.Log;
+import com.bumptech.glide.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
