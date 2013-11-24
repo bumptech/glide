@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,9 +20,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
+import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.volley.VolleyUrlLoader;
@@ -96,8 +99,15 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 diskCache = new DiskCacheAdapter();
             }
 
+            // When we can recycle bitmaps, the smaller our cache is, the more quickly our scrolling will become smooth
+            // so prefer large bitmap pool and a small cache.
+            final int safeMemCacheSize = ImageManager.getSafeMemoryCacheSize(this);
             glide.setImageManager(new ImageManager.Builder(this)
                     .setBitmapCompressQuality(70)
+                    .setMemoryCache(new LruMemoryCache(
+                            Build.VERSION.SDK_INT >= 11 ? safeMemCacheSize / 2 : safeMemCacheSize))
+                    .setBitmapPool(new LruBitmapPool(
+                            Build.VERSION.SDK_INT >= 11 ? Math.round(safeMemCacheSize * 1.5f) : safeMemCacheSize))
                     .setDiskCache(diskCache));
         }
 

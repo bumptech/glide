@@ -4,5 +4,6 @@
     <issue id="AllowBackup" severity="ignore" />
     <issue id="InlinedApi">
         <ignore path="src/com/bumptech/glide/resize/cache/LruMemoryCache.java" />
+        <ignore path="src/com/bumptech/glide/resize/bitmap_recycle/LruBitmapPool.java" />
     </issue>
 </lint>
