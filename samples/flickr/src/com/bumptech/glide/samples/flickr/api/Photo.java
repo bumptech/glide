@@ -35,4 +35,8 @@ public class Photo {
         return partialUrl;
     }
 
+    @Override
+    public String toString() {
+        return getPartialUrl();
+    }
 }
