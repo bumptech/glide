@@ -15,13 +15,12 @@ repositories {
 
 dependencies {
     compile files('libs/disklrucache-2.0.2.jar')
-    compile 'com.android.support:support-v4:13.0.+'
     compile files('libs/volley.jar')
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion = 17
+    compileSdkVersion 19
+    buildToolsVersion = "19.0.0"
 
     sourceSets {
         main {
