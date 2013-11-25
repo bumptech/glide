@@ -535,7 +535,13 @@ public class ImageManager {
 
         @Override
         public void run() {
-            Bitmap result = getFromDiskCache(key);
+            Bitmap result = null;
+            try {
+                result = getFromDiskCache(key);
+            } catch (Exception e) {
+                handleException(e);
+            }
+
             if (result == null) {
                 try {
                     resizeWithPool();
@@ -546,7 +552,6 @@ public class ImageManager {
                 finishResize(result, true);
             }
         }
-
 
         private Bitmap getFromDiskCache(String key) {
             Bitmap result = null;
@@ -647,7 +652,6 @@ public class ImageManager {
                 bitmap.compress(format, bitmapCompressQuality, os);
             }
         });
-
     }
 
     private void putInMemoryCache(String key, final Bitmap bitmap) {
