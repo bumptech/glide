@@ -12,6 +12,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+/**
+ * Loads a few images ahead in the direction of scrolling in any {@link AbsListView} so that images are in the memory
+ * cache just before the corresponding view in created in the list. Gives the appearance of an infinitely large image
+ * cache, depending on scrolling speed, cpu speed, and cache size.
+ *
+ * <p>
+ *  Must be set using {@link AbsListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener)}, or have its
+ *  corresponding methods called from another {@link android.widget.AbsListView.OnScrollListener} to function.
+ * </p>
+ *
+ * @param <T> The type of the model being displayed in the list.
+ */
 public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     private final int maxPreload;
     private final Context context;
@@ -24,6 +36,12 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
 
     private boolean isIncreasing = true;
 
+    /**
+     * Create the preloader.
+     *
+     * @param context A context
+     * @param maxPreload The maximum number of items in the list to load ahead (corresponds to adapter positions).
+     */
     public ListPreloader(Context context, int maxPreload) {
         this.context = context;
         this.maxPreload = maxPreload;
@@ -44,13 +62,36 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         lastFirstVisible = firstVisible;
     }
 
+    /**
+     * Get the dimensions of the view in the list where the images will be displayed.
+     * <p>
+     *     Note - The dimensions returned here must precisely match those of the view in the list.
+     * </p>
+     * @param item A model
+     * @return The dimensions of the view where the item will be displayed
+     */
     protected abstract int[] getDimens(T item);
 
+    /**
+     * Get a list of all models that need to be loaded for the list to display adapter items start - end. A list of any
+     * size can be returned so there can be multiple models per adapter position.
+     *
+     * @param start The smallest adapter position. Will be >= 0 && < adapter.getCount() && <= end
+     * @param end The largest adapter position. Will be >= 0 && < adapter.getCount && >= start
+     * @return A non null list of all models for adapter positions between start and end.
+     */
     protected abstract List<T> getItems(int start, int end);
 
+    /**
+     * Get a glide request for a given item. Must exactly match the request used to load the image in the list. The
+     * target and context will be provided by the preloader.
+     *
+     * @param item The model to load.
+     * @return A non null {@link Glide.Request}.
+     */
     protected abstract Glide.Request<T> getRequest(T item);
 
-    public void preload(int start, boolean increasing) {
+    private void preload(int start, boolean increasing) {
         if (isIncreasing != increasing) {
             isIncreasing = increasing;
             cancelAll();
