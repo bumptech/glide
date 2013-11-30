@@ -90,7 +90,7 @@ public class Api {
     }
 
     private static String getSearchUrl(String text) {
-        return getUrlForMethod("flickr.photos.search") + "&text=" + text + "&per_page=500";
+        return getUrlForMethod("flickr.photos.search") + "&text=" + text + "&per_page=300";
     }
 
     private static String getPhotoUrl(Photo photo, String sizeKey) {

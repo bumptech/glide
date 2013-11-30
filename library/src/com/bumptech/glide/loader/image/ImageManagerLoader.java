@@ -16,11 +16,10 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * purposes.
  */
 public class ImageManagerLoader implements ImageLoader {
-
-    protected final ImageManager imageManager;
+    private final ImageManager imageManager;
     private final Downsampler downsampler;
     private Bitmap acquired;
-    private ImageManager.ImageManagerJob loadToken;
+    private ImageManager.LoadToken loadToken;
 
     public ImageManagerLoader(Context context) {
         this(context, Downsampler.AT_LEAST);
@@ -40,13 +39,14 @@ public class ImageManagerLoader implements ImageLoader {
     }
 
     @Override
-    public Object fetchImage(String id, StreamLoader streamLoader, Transformation transformation, int width, int height, final ImageReadyCallback cb) {
+    public Object fetchImage(String id, StreamLoader streamLoader, Transformation transformation, int width, int height,
+                             final ImageReadyCallback cb) {
         if (!isHandled(width, height)) {
             throw new IllegalArgumentException(getClass() + " cannot handle width=" + width + " and/or height =" +
                     height);
         }
-        loadToken = imageManager.getImage(id, streamLoader, transformation, downsampler, width, height, new LoadedCallback() {
-
+        loadToken = imageManager.getImage(id, streamLoader, transformation, downsampler, width, height,
+                new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {
                 onImageReady(loaded, cb.onImageReady(loaded));

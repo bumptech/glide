@@ -9,10 +9,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
+import android.os.*;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
@@ -35,16 +32,23 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
  * sdk version, uses a combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
  * load and resize operations performed and to maximize the number of times Bitmaps are recycled as opposed to
- * allocated. If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if possible.
+ * allocated. If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if
+ * possible.
  *
  * <p>
  * Note that Bitmap recycling is only available on Honeycomb and up.
@@ -60,6 +64,7 @@ public class ImageManager {
     private final BitmapReferenceCounter bitmapReferenceCounter;
     private final int bitmapCompressQuality;
     private final BitmapPool bitmapPool;
+    private final Map<String, ImageManagerJob> jobs = new HashMap<String, ImageManagerJob>();
     private boolean shutdown = false;
 
     private final Handler mainHandler = new Handler();
@@ -75,7 +80,8 @@ public class ImageManager {
     private static Downsampler DISK_CACHE_DOWNSAMPLER = new Downsampler() {
 
         @Override
-        public Bitmap downsample(RecyclableBufferedInputStream bis, BitmapFactory.Options options, BitmapPool pool, int outWidth, int outHeight) {
+        public Bitmap downsample(RecyclableBufferedInputStream bis, BitmapFactory.Options options, BitmapPool pool,
+                int outWidth, int outHeight) {
             return downsampleWithSize(bis, options, pool, outWidth, outHeight, 1);
         }
 
@@ -313,11 +319,12 @@ public class ImageManager {
 
         private void setDefaults() {
             if (resizeService == null) {
-                resizeService = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()), new ThreadFactory() {
+                final int numThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
+                resizeService = Executors.newFixedThreadPool(numThreads, new ThreadFactory() {
                     @Override
                     public Thread newThread(Runnable runnable) {
                         final Thread result = new Thread(runnable);
-                        result.setPriority(Thread.MIN_PRIORITY);
+                        result.setPriority(THREAD_PRIORITY_BACKGROUND);
                         return result;
                     }
                 });
@@ -356,7 +363,7 @@ public class ImageManager {
     }
 
     private ImageManager(Builder builder) {
-        HandlerThread bgThread = new HandlerThread("bg_thread", android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        HandlerThread bgThread = new HandlerThread("bg_thread", THREAD_PRIORITY_BACKGROUND);
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
@@ -366,7 +373,6 @@ public class ImageManager {
         bitmapReferenceCounter = builder.bitmapReferenceCounter;
         bitmapPool = builder.bitmapPool;
         resizer = new ImageResizer(builder.bitmapPool, builder.decodeBitmapOptions);
-
         memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
             @Override
             public void onImageRemoved(Bitmap removed) {
@@ -404,18 +410,25 @@ public class ImageManager {
      * @return An {@link ImageManagerJob} that must be retained while the job is still relevant and that can be used
      *          to cancel a job if the image is no longer needed
      */
-    public ImageManagerJob getImage(String id, StreamLoader streamLoader, Transformation transformation, Downsampler downsampler, int width, int height, LoadedCallback cb) {
+    public LoadToken getImage(String id, StreamLoader streamLoader, Transformation transformation,
+                              Downsampler downsampler, int width, int height, LoadedCallback cb) {
         if (shutdown) return null;
 
         final String key = safeKeyGenerator.getSafeKey(id, transformation, downsampler, width, height);
-
-        ImageManagerJob job = null;
+        LoadToken result = null;
         if (!returnFromCache(key, cb)) {
-            ImageManagerRunner runner = new ImageManagerRunner(key, streamLoader, transformation, downsampler, width, height, cb);
-            runner.execute();
-            job = new ImageManagerJob(runner, streamLoader, transformation, downsampler, cb);
+            ImageManagerJob job = jobs.get(key);
+            if (job == null) {
+                ImageManagerRunner runner = new ImageManagerRunner(key, streamLoader, transformation, downsampler,
+                        width, height);
+                job = new ImageManagerJob(runner, key);
+                jobs.put(key, job);
+                runner.execute();
+            }
+            job.addCallback(cb);
+            result = new LoadToken(cb, job);
         }
-        return job;
+        return result;
     }
 
     /**
@@ -464,30 +477,69 @@ public class ImageManager {
      * A class for tracking a particular job in the {@link ImageManager}. Cancel does not guarantee that the
      * job will not finish, but rather is a best effort attempt.
      */
-    public static class ImageManagerJob {
+    private class ImageManagerJob {
         private final ImageManagerRunner runner;
-        private StreamLoader sl;
-        private Transformation transformation;
-        private Downsampler downsampler;
-        private LoadedCallback cb;
+        private final String key;
+        private final List<LoadedCallback> cbs = new ArrayList<LoadedCallback>();
 
-        public ImageManagerJob(ImageManagerRunner runner, StreamLoader sl, Transformation t, Downsampler d, LoadedCallback cb) {
+        public ImageManagerJob(ImageManagerRunner runner, String key) {
             this.runner = runner;
-            this.sl = sl;
-            this.transformation = t;
-            this.downsampler = d;
-            this.cb = cb;
+            this.key = key;
+        }
+
+        public void addCallback(LoadedCallback cb) {
+            cbs.add(cb);
         }
 
         /**
          * Try to cancel the job. Does not guarantee that the job will not finish.
          */
-        public void cancel() {
-            runner.cancel();
-            sl = null;
-            transformation = null;
-            downsampler = null;
-            cb = null;
+        public void cancel(LoadedCallback cb) {
+            cbs.remove(cb);
+            if (cbs.size() == 0) {
+                runner.cancel();
+                jobs.remove(key);
+            }
+        }
+
+        public void onLoadComplete(Bitmap result) {
+            for (LoadedCallback cb : cbs) {
+                bitmapReferenceCounter.acquireBitmap(result);
+                cb.onLoadCompleted(result);
+            }
+            jobs.remove(key);
+        }
+
+        public void onLoadFailed(Exception e) {
+            for (LoadedCallback cb : cbs) {
+                cb.onLoadFailed(e);
+            }
+            jobs.remove(key);
+        }
+    }
+
+    private void putInDiskCache(String key, final Bitmap bitmap) {
+        diskCache.put(key, new DiskCache.Writer() {
+            @Override
+            public void write(OutputStream os) {
+                final Bitmap.Config config = bitmap.getConfig();
+                final Bitmap.CompressFormat format;
+                if (config == null || config == Bitmap.Config.ARGB_4444 || config == Bitmap.Config.ARGB_8888) {
+                    format = Bitmap.CompressFormat.PNG;
+                } else {
+                    format = Bitmap.CompressFormat.JPEG;
+                }
+                bitmap.compress(format, bitmapCompressQuality, os);
+            }
+        });
+    }
+
+    private void putInMemoryCache(String key, final Bitmap bitmap) {
+        final boolean inCache;
+        inCache = memoryCache.contains(key);
+        if (!inCache) {
+            bitmapReferenceCounter.acquireBitmap(bitmap);
+            memoryCache.put(key, bitmap);
         }
     }
 
@@ -498,12 +550,11 @@ public class ImageManager {
         private final StreamLoader streamLoader;
         private final Transformation transformation;
         private final Downsampler downsampler;
-        private final LoadedCallback cb;
 
         private volatile Future<?> future;
         private volatile boolean cancelled = false;
 
-        public ImageManagerRunner(String key, StreamLoader sl, Transformation t, Downsampler d, int width, int height, LoadedCallback cb) {
+        public ImageManagerRunner(String key, StreamLoader sl, Transformation t, Downsampler d, int width, int height) {
             this.key = key;
             this.height = height;
             this.width = width;
@@ -511,7 +562,6 @@ public class ImageManager {
             this.streamLoader = sl;
             this.transformation = t;
             this.downsampler = d;
-            this.cb = cb;
         }
 
         private void execute() {
@@ -618,9 +668,11 @@ public class ImageManager {
                         //acquire for the callback before putting in to memory cache so that the bitmap is not
                         //released to the pool if the bitmap is synchronously released by the memory cache
                         //we rely on the callback to call releaseBitmap if it doesn't want to use the bitmap
-                        bitmapReferenceCounter.acquireBitmap(result);
                         putInMemoryCache(key, result);
-                        cb.onLoadCompleted(result);
+                        final ImageManagerJob job = jobs.get(key);
+                        if (job != null) {
+                            job.onLoadComplete(result);
+                        }
                     }
                 });
             } else {
@@ -632,34 +684,26 @@ public class ImageManager {
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    cb.onLoadFailed(e);
+                    final ImageManagerJob job = jobs.get(key);
+                    if (job != null) {
+                        job.onLoadFailed(e);
+                    }
                 }
             });
         }
     }
 
-    private void putInDiskCache(String key, final Bitmap bitmap) {
-        diskCache.put(key, new DiskCache.Writer() {
-            @Override
-            public void write(OutputStream os) {
-                final Bitmap.Config config = bitmap.getConfig();
-                final Bitmap.CompressFormat format;
-                if (config == null || config == Bitmap.Config.ARGB_4444 || config == Bitmap.Config.ARGB_8888) {
-                    format = Bitmap.CompressFormat.PNG;
-                } else {
-                    format = Bitmap.CompressFormat.JPEG;
-                }
-                bitmap.compress(format, bitmapCompressQuality, os);
-            }
-        });
-    }
+    public static class LoadToken {
+        private final ImageManagerJob job;
+        private final LoadedCallback cb;
 
-    private void putInMemoryCache(String key, final Bitmap bitmap) {
-        final boolean inCache;
-        inCache = memoryCache.contains(key);
-        if (!inCache) {
-            bitmapReferenceCounter.acquireBitmap(bitmap);
-            memoryCache.put(key, bitmap);
+        public LoadToken(LoadedCallback cb, ImageManagerJob job) {
+            this.cb = cb;
+            this.job = job;
+        }
+
+        public void cancel() {
+            job.cancel(cb);
         }
     }
 }

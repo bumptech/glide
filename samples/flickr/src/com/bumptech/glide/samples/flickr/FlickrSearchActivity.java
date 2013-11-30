@@ -21,6 +21,7 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
+import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.Log;
@@ -94,6 +95,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
             glide.setImageManager(new ImageManager.Builder(this)
                     .setBitmapCompressQuality(70)
+                    .setMemoryCache(new LruMemoryCache(ImageManager.getSafeMemoryCacheSize(this)/4))
                     .setDiskCache(diskCache));
         }
 

@@ -11,6 +11,8 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.model.Cache;
 import com.bumptech.glide.loader.transformation.CenterCrop;
@@ -22,15 +24,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 1/10/13
- * Time: 9:48 AM
- * To change this template use File | Settings | File Templates.
- */
 public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
     private static final String IMAGE_SIZE_KEY = "image_size";
+    private static final int PRELOAD_COUNT = 10;
 
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
@@ -51,8 +47,10 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         photoSize = args.getInt(IMAGE_SIZE_KEY);
 
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
-        GridView grid = (GridView) result.findViewById(R.id.images);
+        final GridView grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
+        final FlickrPreloader preloader = new FlickrPreloader(getActivity(), PRELOAD_COUNT);
+        grid.setOnScrollListener(preloader);
         adapter = new PhotoAdapter();
         grid.setAdapter(adapter);
         if (currentPhotos != null)
@@ -68,8 +66,30 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
             adapter.setPhotos(currentPhotos);
     }
 
-    private class PhotoAdapter extends BaseAdapter {
+    private class FlickrPreloader extends ListPreloader<Photo> {
+        public FlickrPreloader(Context context, int toPreload) {
+            super(context, toPreload);
+        }
 
+        @Override
+        protected int[] getDimens(Photo item) {
+            return new int[] { photoSize, photoSize };
+        }
+
+        @Override
+        protected List<Photo> getItems(int start, int end) {
+            return currentPhotos.subList(start, end);
+        }
+
+        @Override
+        protected Glide.Request<Photo> getRequest(Photo item) {
+            return Glide.using(new FlickrModelLoader(getActivity(), urlCache))
+                    .load(item)
+                    .centerCrop();
+        }
+    }
+
+    private class PhotoAdapter extends BaseAdapter {
         private List<Photo> photos = new ArrayList<Photo>(0);
         private final LayoutInflater inflater;
 
@@ -135,6 +155,6 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
             imagePresenter.setModel(current);
             return view;
         }
-    }
 
+    }
 }
