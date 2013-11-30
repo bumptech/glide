@@ -90,8 +90,10 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
 
     private void preload(List<T> items, int position) {
         final T item = items.get(position);
-        int[] dimens = getDimens(item);
-        getRequest(item).into(preloadTargetQueue.next(dimens[0], dimens[1])).with(context);
+        final int[] dimens = getDimens(item);
+        if (dimens != null) {
+            getRequest(item).into(preloadTargetQueue.next(dimens[0], dimens[1])).with(context);
+        }
     }
 
     private void cancelAll() {
