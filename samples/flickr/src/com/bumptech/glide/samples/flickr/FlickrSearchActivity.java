@@ -95,7 +95,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
             glide.setImageManager(new ImageManager.Builder(this)
                     .setBitmapCompressQuality(70)
-                    .setMemoryCache(new LruMemoryCache(ImageManager.getSafeMemoryCacheSize(this)/4))
                     .setDiskCache(diskCache));
         }
 
@@ -245,11 +244,11 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             Page page = Page.values()[position];
             if (page == Page.SMALL) {
                 int pageSize = getPageSize(R.dimen.small_photo_side);
-                return FlickrPhotoGrid.newInstance(pageSize);
+                return FlickrPhotoGrid.newInstance(pageSize, 30);
 
             } else if (page == Page.MEDIUM) {
                 int pageSize = getPageSize(R.dimen.medium_photo_side);
-                return FlickrPhotoGrid.newInstance(pageSize);
+                return FlickrPhotoGrid.newInstance(pageSize, 10);
             } else if (page == Page.LIST) {
                 return FlickrPhotoList.newInstance();
             } else {

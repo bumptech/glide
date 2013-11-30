@@ -26,17 +26,18 @@ import java.util.List;
 
 public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
     private static final String IMAGE_SIZE_KEY = "image_size";
-    private static final int PRELOAD_COUNT = 10;
+    private static final String PRELOAD_KEY = "preload";
 
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
     private int photoSize;
     private final Cache<URL> urlCache = new Cache<URL>();
 
-    public static FlickrPhotoGrid newInstance(int size) {
+    public static FlickrPhotoGrid newInstance(int size, int preloadCount) {
         FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
         Bundle args = new Bundle();
         args.putInt(IMAGE_SIZE_KEY, size);
+        args.putInt(PRELOAD_KEY, preloadCount);
         photoGrid.setArguments(args);
         return photoGrid;
     }
@@ -49,7 +50,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
         final GridView grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
-        final FlickrPreloader preloader = new FlickrPreloader(getActivity(), PRELOAD_COUNT);
+        final FlickrPreloader preloader = new FlickrPreloader(getActivity(), args.getInt(PRELOAD_KEY));
         grid.setOnScrollListener(preloader);
         adapter = new PhotoAdapter();
         grid.setAdapter(adapter);
@@ -67,13 +68,15 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
     }
 
     private class FlickrPreloader extends ListPreloader<Photo> {
+        private final int[] dimens = new int[] { photoSize, photoSize };
+
         public FlickrPreloader(Context context, int toPreload) {
             super(context, toPreload);
         }
 
         @Override
         protected int[] getDimens(Photo item) {
-            return new int[] { photoSize, photoSize };
+            return dimens;
         }
 
         @Override
