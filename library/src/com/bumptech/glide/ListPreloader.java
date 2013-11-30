@@ -22,6 +22,8 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     private int lastFirstVisible;
     private int totalItemCount;
 
+    private boolean isIncreasing = true;
+
     public ListPreloader(Context context, int maxPreload) {
         this.context = context;
         this.maxPreload = maxPreload;
@@ -49,6 +51,10 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     protected abstract Glide.Request<T> getRequest(T item);
 
     public void preload(int start, boolean increasing) {
+        if (isIncreasing != increasing) {
+            isIncreasing = increasing;
+            cancelAll();
+        }
         preload(start, start + (increasing ? maxPreload : -maxPreload));
     }
 
@@ -86,6 +92,12 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         final T item = items.get(position);
         int[] dimens = getDimens(item);
         getRequest(item).into(preloadTargetQueue.next(dimens[0], dimens[1])).with(context);
+    }
+
+    private void cancelAll() {
+        for (int i = 0; i < maxPreload; i++) {
+            Glide.cancel(preloadTargetQueue.next(0, 0));
+        }
     }
 
     private static class PreloadTargetQueue {
