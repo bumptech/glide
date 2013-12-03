@@ -75,7 +75,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         }
 
         @Override
-        protected int[] getDimens(Photo item) {
+        protected int[] getDimensions(Photo item) {
             return dimens;
         }
 

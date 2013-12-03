@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.widget.AbsListView;
 import com.bumptech.glide.presenter.target.SimpleTarget;
+import com.bumptech.glide.util.Log;
 
 import java.util.ArrayDeque;
 import java.util.LinkedList;
@@ -37,7 +38,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     private boolean isIncreasing = true;
 
     /**
-     * Create the preloader.
+     * Constructor for the preloader.
      *
      * @param context A context
      * @param maxPreload The maximum number of items in the list to load ahead (corresponds to adapter positions).
@@ -63,18 +64,18 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     /**
-     * Get the dimensions of the view in the list where the images will be displayed.
+     * Returns the dimensions of the view in the list where the images will be displayed.
      * <p>
      *     Note - The dimensions returned here must precisely match those of the view in the list.
      * </p>
      * @param item A model
      * @return The dimensions of the view where the item will be displayed
      */
-    protected abstract int[] getDimens(T item);
+    protected abstract int[] getDimensions(T item);
 
     /**
-     * Get a list of all models that need to be loaded for the list to display adapter items start - end. A list of any
-     * size can be returned so there can be multiple models per adapter position.
+     * Returns a list of all models that need to be loaded for the list to display adapter items start - end. A list of
+     * any size can be returned so there can be multiple models per adapter position.
      *
      * @param start The smallest adapter position. Will be >= 0 && < adapter.getCount() && <= end
      * @param end The largest adapter position. Will be >= 0 && < adapter.getCount && >= start
@@ -83,7 +84,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     protected abstract List<T> getItems(int start, int end);
 
     /**
-     * Get a glide request for a given item. Must exactly match the request used to load the image in the list. The
+     * Returns a glide request for a given item. Must exactly match the request used to load the image in the list. The
      * target and context will be provided by the preloader.
      *
      * @param item The model to load.
@@ -113,15 +114,16 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         start = Math.min(totalItemCount, Math.max(0, start));
         List<T> items = getItems(start, end);
 
-        // Increasing
         if (from < to) {
+            // Increasing
             final int numItems = items.size();
             for (int i = 0; i < numItems; i++) {
-                preload(items, i);
+                preloadItem(items, i);
             }
         } else {
+            // Decreasing
             for (int i = items.size() - 1; i >= 0; i--) {
-                preload(items, i);
+                preloadItem(items, i);
             }
         }
 
@@ -129,11 +131,11 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         lastEnd = end;
     }
 
-    private void preload(List<T> items, int position) {
+    private void preloadItem(List<T> items, int position) {
         final T item = items.get(position);
-        final int[] dimens = getDimens(item);
-        if (dimens != null) {
-            getRequest(item).into(preloadTargetQueue.next(dimens[0], dimens[1])).with(context);
+        final int[] dimensions = getDimensions(item);
+        if (dimensions != null) {
+            getRequest(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1])).with(context);
         }
     }
 
