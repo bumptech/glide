@@ -24,7 +24,7 @@ public class ImageViewTarget implements Target {
     }
 
     @Override
-    public void onImageReady(Bitmap bitmap) {
+    public void onImageReady(Bitmap bitmap, boolean fromCache) {
         imageView.setImageBitmap(bitmap);
     }
 

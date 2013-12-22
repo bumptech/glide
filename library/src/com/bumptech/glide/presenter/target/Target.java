@@ -20,9 +20,10 @@ public interface Target {
 
     /**
      * The method that will be called when the image load has finished
+     * @param fromCache True if the bitmap comes from a local cache (memory or disk).
      * @param bitmap The loaded image
      */
-    public void onImageReady(Bitmap bitmap);
+    public void onImageReady(Bitmap bitmap, boolean fromCache);
 
     /**
      * A method that can optionally be implemented to set any placeholder that might have been passed to Glide to
