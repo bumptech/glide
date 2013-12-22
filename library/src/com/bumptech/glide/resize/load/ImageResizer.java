@@ -12,10 +12,10 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.os.Build;
+import android.util.Log;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
-import com.bumptech.glide.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +26,7 @@ import java.util.Queue;
  * A class for synchronously resizing bitmaps with or without Bitmaps to reuse
  */
 public class ImageResizer {
+    private static final String TAG = "ImageResizer";
     private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
@@ -136,7 +137,9 @@ public class ImageResizer {
         }
         if (result == null) {
             result = new byte[TEMP_BYTES_SIZE];
-            Log.d("IR: created temp bytes");
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Created temp bytes");
+            }
         }
         return result;
     }
@@ -307,11 +310,10 @@ public class ImageResizer {
             } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270){
                 degreesToRotate = 270;
             }
-        } catch (IOException e){
-            Log.w("IOException for image with filePath=" + pathToOriginal);
-        } catch (Exception e) {
-            Log.w("Exception when trying to get image orientation matrix");
-            e.printStackTrace();
+        } catch (Exception e){
+            if (Log.isLoggable(TAG, Log.ERROR)) {
+                Log.e(TAG, "Unable to get orientation for image with path=" + pathToOriginal, e);
+            }
         }
         return degreesToRotate;
     }
@@ -353,7 +355,9 @@ public class ImageResizer {
                         true);
             }
         } catch (Exception e) {
-            Log.w("Exception when trying to orient image");
+            if (Log.isLoggable(TAG, Log.ERROR)) {
+                Log.e(TAG, "Exception when trying to orient image", e);
+            }
             e.printStackTrace();
         }
         return imageToOrient;

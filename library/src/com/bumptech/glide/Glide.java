@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -28,7 +29,6 @@ import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
-import com.bumptech.glide.util.Log;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
@@ -48,6 +48,7 @@ import java.util.WeakHashMap;
  * </p>
  */
 public class Glide {
+    private static final String TAG = "Glide";
     private static final Glide GLIDE = new Glide();
     private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
@@ -118,7 +119,9 @@ public class Glide {
             Class.forName("com.bumptech.glide.volley.VolleyUrlLoader$Factory");
             loaderFactory.register(URL.class, new VolleyUrlLoader.Factory());
         } catch (ClassNotFoundException e) {
-            Log.d("Volley not found, missing url loader");
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Volley not found, missing url loader");
+            }
             loaderFactory.register(URL.class, new ModelLoaderFactory<URL>() {
                 ModelLoader<URL> errorUrlLoader = new ModelLoader<URL>() {
                     @Override
@@ -255,7 +258,9 @@ public class Glide {
         } else {
             result = null;
             if (tag != null) {
-                Log.d("Replacing existing tag=" + tag + " on view=" + imageView + " with an ImageViewTarge");
+                if (Log.isLoggable(TAG, Log.INFO)) {
+                    Log.i(TAG, "Replacing existing tag=" + tag + " on view=" + imageView + " with an ImageViewTarget");
+                }
             }
         }
         return result;

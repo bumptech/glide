@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.widget.ImageView;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.model.ModelLoader;
@@ -17,7 +18,6 @@ import com.bumptech.glide.loader.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.load.Transformation;
-import com.bumptech.glide.util.Log;
 
 /**
  * Wraps an {@link Target} to display arbitrary Bitmaps and provides a framework for fetching and
@@ -32,6 +32,7 @@ import com.bumptech.glide.util.Log;
  *            as a String containing a path or a complex data type.
  */
 public class ImagePresenter<T> {
+    private static final String TAG = "ImagePresenter";
 
     /**
      * A builder for an {@link ImagePresenter}.
@@ -56,9 +57,8 @@ public class ImagePresenter<T> {
         private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
             @Override
             public void onException(Exception e, T model, boolean isCurrent) {
-                Log.e("IP: onImageLoadException model= " + model);
-                if (e != null) {
-                    e.printStackTrace();
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, "onImageLoadException model= " + model, e);
                 }
             }
         };
@@ -441,7 +441,9 @@ public class ImagePresenter<T> {
         final StreamLoader sl = modelLoader.getStreamLoader(model, width, height);
 
         if (id == null || sl == null) {
-            Log.i("ImagePresenter got null model id or stream loader model=" + model + " id=" + id + " stream loader=" + sl);
+            if (Log.isLoggable(TAG, Log.INFO)) {
+                Log.i(TAG, "got null model id or stream loader model=" + model + " id=" + id + " stream loader=" + sl);
+            }
             clear();
             return;
         }

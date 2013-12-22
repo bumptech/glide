@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.widget.AbsListView;
 import com.bumptech.glide.presenter.target.SimpleTarget;
-import com.bumptech.glide.util.Log;
 
 import java.util.ArrayDeque;
 import java.util.LinkedList;

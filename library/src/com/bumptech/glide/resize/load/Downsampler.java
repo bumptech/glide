@@ -9,9 +9,9 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.util.Log;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.util.Log;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Set;
@@ -20,6 +20,7 @@ import java.util.Set;
  * A base class with methods for loading and decoding images from InputStreams.
  */
 public abstract class Downsampler {
+    private static final String TAG = "Downsampler";
 
     private static final Set<ImageType> TYPES_THAT_USE_POOL = EnumSet.of(JPEG, PNG_A, PNG);
     private final String id = getClass().toString();
@@ -218,8 +219,10 @@ public abstract class Downsampler {
                 bis.close();
             }
         } catch (IOException e) {
-            Log.d("Downsampler: exception loading inDecodeBounds=" + options.inJustDecodeBounds + " sample=" + options.inSampleSize);
-            e.printStackTrace();
+            if (Log.isLoggable(TAG, Log.ERROR)) {
+                Log.e(TAG, "Exception loading inDecodeBounds=" + options.inJustDecodeBounds
+                        + " sample=" + options.inSampleSize, e);
+            }
         }
 
         return result;

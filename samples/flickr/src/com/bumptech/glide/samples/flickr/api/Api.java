@@ -1,12 +1,12 @@
 package com.bumptech.glide.samples.flickr.api;
 
+import android.util.Log;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.bumptech.glide.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,17 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 1/6/13
- * Time: 10:18 AM
- * To change this template use File | Settings | File Templates.
- */
 public class Api {
     private static Api API;
+    private static final String TAG = "FlickrApi";
     private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
-    private static final String SIGNED_API_URL = "http://api.flickr.com/services/rest/?method=%s&format=json&api_key=" + API_KEY;
+    private static final String SIGNED_API_URL = "http://api.flickr.com/services/rest/?method=%s&format=json&api_key="
+            + API_KEY;
     //incomplete size independent url for photos that can be cached per photo
     private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
 
@@ -98,7 +93,8 @@ public class Api {
     }
 
     public void search(String text, final SearchCallback cb) {
-        StringRequest request = new StringRequest(Request.Method.GET, getSearchUrl(text), new Response.Listener<String>() {
+        StringRequest request = new StringRequest(Request.Method.GET, getSearchUrl(text),
+                new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -112,7 +108,9 @@ public class Api {
                     cb.onSearchCompleted(results);
                 } catch (JSONException e) {
                     cb.onSearchFailed(e);
-                    Log.d("ERROR: response=" + response);
+                    if (Log.isLoggable(TAG, Log.ERROR)) {
+                        Log.e(TAG, "Search failed response=" + response, e);
+                    }
                 }
             }
         }, new Response.ErrorListener() {
@@ -121,7 +119,8 @@ public class Api {
                 cb.onSearchFailed(error);
             }
         });
-        request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 3, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 3,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(request);
     }
 }

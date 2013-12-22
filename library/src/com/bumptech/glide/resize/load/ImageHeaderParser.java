@@ -2,7 +2,7 @@ package com.bumptech.glide.resize.load;
 
 import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.*;
 
-import com.bumptech.glide.util.Log;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +13,7 @@ import java.nio.ByteOrder;
  * A class for parsing the exif orientation from an InputStream for an image. Handles jpegs and tiffs.
  */
 public class ImageHeaderParser {
+    private static final String TAG = "ImageHeaderParser";
 
     public static enum ImageType {
         /** GIF type */
@@ -104,8 +105,9 @@ public class ImageHeaderParser {
             return -1;
         } else {
             byte[] exifData = getExifSegment();
-            if (exifData != null && exifData.length >= JPEG_EXIF_SEGMENT_PREAMBLE.length() &&
-                new String(exifData, 0, JPEG_EXIF_SEGMENT_PREAMBLE.length()).equalsIgnoreCase(JPEG_EXIF_SEGMENT_PREAMBLE)) {
+            if (exifData != null && exifData.length >= JPEG_EXIF_SEGMENT_PREAMBLE.length()
+                    && new String(exifData, 0, JPEG_EXIF_SEGMENT_PREAMBLE.length())
+                        .equalsIgnoreCase(JPEG_EXIF_SEGMENT_PREAMBLE)) {
                 return parseExifSegment(new RandomAccessReader(exifData));
             } else {
                 return -1;
@@ -120,7 +122,9 @@ public class ImageHeaderParser {
             segmentId = streamReader.getUInt8();
 
             if (segmentId != SEGMENT_START_ID) {
-                Log.d("EXIF: unknown segmentId=" + segmentId);
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Unknown segmentId=" + segmentId);
+                }
                 return null;
             }
 
@@ -129,7 +133,9 @@ public class ImageHeaderParser {
             if (segmentType == SEGMENT_SOS) {
                 return null;
             } else if (segmentType == MARKER_EOI) {
-                Log.d("EXIF: found MARKER_EOI");
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Found MARKER_EOI in exif segment");
+                }
                 return null;
             }
 
@@ -137,14 +143,18 @@ public class ImageHeaderParser {
 
             if (segmentType != EXIF_SEGMENT_TYPE) {
                 if (segmentLength != streamReader.skip(segmentLength)) {
-                    Log.d("EXIF: unable to skip enough data for type=" + segmentType);
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Unable to skip enough data for type=" + segmentType);
+                    }
                     return null;
                 }
             } else {
                 byte[] segmentData = new byte[segmentLength];
 
                 if (segmentLength != streamReader.read(segmentData)) {
-                    Log.d("EXIF: unable to read segment data for type=" + segmentType + " length=" + segmentLength);
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Unable to read segment data for type=" + segmentType + " length=" + segmentLength);
+                    }
                     return null;
                 } else {
                     return segmentData;
@@ -164,7 +174,9 @@ public class ImageHeaderParser {
         } else if (byteOrderIdentifier == INTEL_TIFF_MAGIC_NUMBER) {
             byteOrder = ByteOrder.LITTLE_ENDIAN;
         } else {
-            Log.d("EXIF: unknown endianness = " +  byteOrderIdentifier);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unknown endianness = " + byteOrderIdentifier);
+            }
             byteOrder = ByteOrder.BIG_ENDIAN;
         }
 
@@ -186,35 +198,48 @@ public class ImageHeaderParser {
             formatCode = segmentData.getInt16(tagOffset + 2);
 
             if (formatCode < 1 || formatCode > 12) { //12 is max format code
-                Log.d("EXIF: got invalid format code = " + formatCode);
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Got invalid format code = " + formatCode);
+                }
                 continue;
             }
 
             componentCount = segmentData.getInt32(tagOffset + 4);
 
             if (componentCount < 0) {
-                Log.d("EXIF: negative tiff component count");
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Negative tiff component count");
+                }
                 continue;
             }
 
-            Log.d("EXIF: got tagIndex=" + i + " tagType=" + tagType + " formatCode =" + formatCode + " componentCount=" + componentCount);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Got tagIndex=" + i + " tagType=" + tagType + " formatCode =" + formatCode
+                        + " componentCount=" + componentCount);
+            }
 
             final int byteCount = componentCount + BYTES_PER_FORMAT[formatCode];
 
             if (byteCount > 4) {
-                Log.d("EXIF: got byte count > 4, not orientation, continuing, formatCode=" + formatCode);
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=" + formatCode);
+                }
                 continue;
             }
 
             final int tagValueOffset = tagOffset + 8;
 
             if (tagValueOffset < 0 || tagValueOffset > segmentData.length()) {
-                Log.d("EXIF: illegal tagValueOffset=" + tagValueOffset + " tagType=" + tagType);
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Illegal tagValueOffset=" + tagValueOffset + " tagType=" + tagType);
+                }
                 continue;
             }
 
             if (byteCount < 0 || tagValueOffset + byteCount > segmentData.length()) {
-                Log.d("EXIF: illegal number of bytes for TI tag data tagType=" + tagType);
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Illegal number of bytes for TI tag data tagType=" + tagType);
+                }
                 continue;
             }
 

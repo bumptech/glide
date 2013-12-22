@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -21,10 +22,8 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
-import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
-import com.bumptech.glide.util.Log;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
@@ -39,6 +38,7 @@ import java.util.Set;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
     private static final String CACHE_NAME = "flickr_cache";
+    private static final String TAG = "FlickrSearchActivity";
 
     private int searchCount = 0;
     private EditText searchText;
@@ -65,7 +65,8 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
         if (!(fragment instanceof PhotoViewer)) {
-            throw new IllegalStateException("Fragment class " + fragment.getClass() + " does not implement PhotoViewer");
+            throw new IllegalStateException("Fragment class " + fragment.getClass() +
+                    " does not implement PhotoViewer");
         } else {
             PhotoViewer photoViewer = (PhotoViewer) fragment;
             photoViewer.onPhotosUpdated(currentPhotos);
@@ -89,7 +90,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             try {
                 diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
             } catch (IOException e) {
-                e.printStackTrace();
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, "Exception creating disk cache", e);
+                }
                 diskCache = new DiskCacheAdapter();
             }
 
@@ -182,7 +185,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             public void onSearchCompleted(List<Photo> photos) {
                 if (currentSearch != searchCount) return;
 
-                Log.d("SEARCH: completed, got " + photos.size() + " results");
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Search completed, got " + photos.size() + " results");
+                }
                 searching.setVisibility(View.INVISIBLE);
 
                 for (PhotoViewer viewer : photoViewers) {
@@ -195,9 +200,10 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             @Override
             public void onSearchFailed(Exception e) {
                 if (currentSearch != searchCount) return;
-                e.printStackTrace();
 
-                Log.d("SEARCH: failed :(");
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, "Search failed", e);
+                }
                 searching.setVisibility(View.VISIBLE);
                 searchLoading.setVisibility(View.INVISIBLE);
                 searchTerm.setText(getString(R.string.search_failed, searchString));
@@ -245,7 +251,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             if (page == Page.SMALL) {
                 int pageSize = getPageSize(R.dimen.small_photo_side);
                 return FlickrPhotoGrid.newInstance(pageSize, 30);
-
             } else if (page == Page.MEDIUM) {
                 int pageSize = getPageSize(R.dimen.medium_photo_side);
                 return FlickrPhotoGrid.newInstance(pageSize, 10);

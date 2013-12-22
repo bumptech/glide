@@ -4,7 +4,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.util.Log;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Queue;
 
 public class LruBitmapPool implements BitmapPool {
+    private static final String TAG = "LruBitmapPool";
     private final GroupedBitmapLinkedMap pool = new GroupedBitmapLinkedMap();
 
     private final int maxSize;
@@ -43,7 +44,9 @@ public class LruBitmapPool implements BitmapPool {
     public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
         final Bitmap result = pool.get(width, height, config);
         if (result == null) {
-            Log.d("LBP: missing bitmap for width=" + width + " height=" + height + " config=" + config);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Missing bitmap with dimens=[" + width + "x" + height + "] and config config=" + config);
+            }
         } else {
             currentSize -= getSize(result);
         }

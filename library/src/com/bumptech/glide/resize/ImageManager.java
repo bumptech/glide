@@ -10,6 +10,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.*;
+import android.util.Log;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
@@ -26,7 +27,6 @@ import com.bumptech.glide.resize.cache.MemoryCacheAdapter;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.ImageResizer;
 import com.bumptech.glide.resize.load.Transformation;
-import com.bumptech.glide.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +55,7 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
  * </p>
  */
 public class ImageManager {
+    private static final String TAG = "ImageManager";
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final int DEFAULT_DISK_CACHE_SIZE = 30 * 1024 * 1024;
     private static final int DEFAULT_BITMAP_COMPRESS_QUALITY = 90;
@@ -143,7 +144,9 @@ public class ImageManager {
             result.mkdirs();
             return result;
         }
-        Log.d("IM: default disk cache dir is null");
+        if (Log.isLoggable(TAG, Log.ERROR)) {
+            Log.e(TAG, "default disk cache dir is null");
+        }
         return null;
     }
 

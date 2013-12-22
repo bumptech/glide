@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.loader.model.ModelLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,10 +16,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ListPreloaderTest extends AndroidTestCase {
-
-    static {
-        Log.DEBUG = true;
-    }
 
     @Override
     protected void setUp() throws Exception {
