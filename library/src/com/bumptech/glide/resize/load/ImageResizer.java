@@ -9,7 +9,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Bitmap.Config;
+import android.graphics.PorterDuff.Mode;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.util.Log;
@@ -233,6 +237,46 @@ public class ImageResizer {
         canvas.drawBitmap(toCrop, m, paint);
         return result;
     }
+    
+    
+    /**
+     * Clip the given Bitmap with transparent circle
+     *
+     * @param recycled A mutable Bitmap with dimensions width and height that we can load the cropped portion of toCrop
+     *                 into
+     * @param toCrop The Bitmap to resize
+     * @param width The width of the final Bitmap
+     * @param height The height of the final Bitmap
+     * @return The resized Bitmap (will be recycled if recycled is not null)
+     */
+    public static Bitmap circleCrop(Bitmap recycled, Bitmap toCrop, int width, int height) {
+        if (toCrop == null) {
+            return null;
+        }
+        final Bitmap result;
+        if (recycled != null) {
+            result = recycled;
+        } else {
+        	result = Bitmap.createBitmap(toCrop.getWidth(), toCrop.getHeight(), Config.ARGB_8888);
+        }
+	    Canvas canvas = new Canvas(result);
+	
+	    final int color = 0xff424242;
+	    final Paint paint = new Paint();
+	    final Rect rect = new Rect(0, 0, toCrop.getWidth(), toCrop.getHeight());
+	    final RectF rectF = new RectF(rect);
+	
+	    paint.setAntiAlias(true);
+	    canvas.drawARGB(0, 0, 0, 0);
+	    paint.setColor(color);
+	    canvas.drawRoundRect(rectF, toCrop.getWidth(), toCrop.getHeight(), paint);
+	
+	    paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+	    canvas.drawBitmap(toCrop, rect, rect, paint);
+	
+	    return result;
+    
+        }
 
     /**
      * An expensive operation to resize the given image, maintaining the original proportions, so that its width
