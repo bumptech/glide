@@ -9,6 +9,7 @@ import com.jakewharton.disklrucache.DiskLruCache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * The default DiskCache implementation. There must be no more than one active instance for a given
@@ -77,8 +78,10 @@ public class DiskLruCacheWrapper implements DiskCache {
             //editor will be null if there are two concurrent puts
             //worst case just silently fail
             if (editor != null) {
-                writer.write(editor.newOutputStream(0));
+                OutputStream os = editor.newOutputStream(0);
+                writer.write(os);
                 editor.commit();
+                os.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
