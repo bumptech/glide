@@ -252,17 +252,13 @@ public class Glide {
 
     private ImageViewTarget getImageViewTarget(ImageView imageView) {
         Object tag = imageView.getTag();
-        final ImageViewTarget result;
+        ImageViewTarget result = null;
         if (tag instanceof ImageViewTarget) {
             result = (ImageViewTarget) tag;
-        } else {
-            result = null;
-            if (tag != null) {
-                if (Log.isLoggable(TAG, Log.INFO)) {
-                    Log.i(TAG, "Replacing existing tag=" + tag + " on view=" + imageView + " with an ImageViewTarget");
-                }
-            }
+        } else if (tag != null) {
+            throw new IllegalArgumentException("You cannot set a tag on an image view Glide is loading an image into");
         }
+
         return result;
     }
 

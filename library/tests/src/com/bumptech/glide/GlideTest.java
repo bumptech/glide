@@ -242,6 +242,18 @@ public class GlideTest extends ActivityTestCase {
         assertEquals(large, bitmapPool.get(large.getWidth(), large.getHeight(), large.getConfig()));
     }
 
+    public void testThrowExceptionIfTagReplaced() {
+        imageView.setTag(1234);
+        Exception exception = null;
+        try {
+            Glide.load("a").into(imageView);
+        } catch (Exception e) {
+            exception = e;
+        }
+
+        assertNotNull(exception);
+    }
+
     public void testDifferentRequestListenersReplacesPresenter() {
         assertDifferentPresenters(
                 Glide.load("a").listener(new Glide.RequestListener<String>() {
