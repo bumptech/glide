@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.test.ActivityTestCase;
@@ -23,17 +24,23 @@ import java.net.URL;
  */
 public class GlideTest extends ActivityTestCase {
     private ImageView imageView;
+    private ImageViewTarget imageViewTarget;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        imageView = new ImageView(getInstrumentation().getContext());
+        imageView = new ImageView(getContext());
         //this is a quick hack to get the SizeDeterminer in ImagePresenter to think the view has been measured
         imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
+        imageViewTarget = new ImageViewTarget(imageView);
     }
 
-    private void checkImagePresenter(Object model) {
-        ImagePresenter imagePresenter = getImagePresenterFromView();
+    private Context getContext() {
+        return getInstrumentation().getContext();
+    }
+
+    private void checkImagePresenter(Target target, Object model) {
+        ImagePresenter imagePresenter = target.getImagePresenter();
         imagePresenter.setModel(model);
 
         boolean caughtException = false;
@@ -46,58 +53,56 @@ public class GlideTest extends ActivityTestCase {
         assertTrue(caughtException);
     }
 
-    private ImagePresenter getImagePresenterFromView() {
-        return ((ImageViewTarget) imageView.getTag()).getImagePresenter();
-    }
-
     public void testFileDefaultLoader() {
         File file = new File("fake");
-        Glide.load(file).into(imageView);
-        checkImagePresenter(file);
+        Target target = Glide.with(getContext()).load(file).into(imageViewTarget);
+        checkImagePresenter(target, file);
     }
 
     public void testUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
-        Glide.load(url).into(imageView);
-        checkImagePresenter(url);
+        Target target = Glide.with(getContext()).load(url).into(imageViewTarget);
+        checkImagePresenter(target, url);
     }
 
     public void testUriDefaultLoader() {
         Uri uri = Uri.fromFile(new File("Fake"));
-        Glide.load(uri).into(imageView);
-        checkImagePresenter(uri);
+        Target target = Glide.with(getContext()).load(uri).into(imageViewTarget);
+        checkImagePresenter(target, uri);
     }
 
     public void testStringDefaultLoader() {
         String string = "http://www.google.com";
-        Glide.load(string).into(imageView);
-        checkImagePresenter(string);
+        Target target = Glide.with(getContext()).load(string).into(imageViewTarget);
+        checkImagePresenter(target, string);
     }
 
     public void testIntegerDefaultLoader() {
         int integer = 1234;
-        Glide.load(integer).into(imageView);
-        checkImagePresenter(integer);
+        Target target = Glide.with(getContext()).load(integer).into(imageViewTarget);
+        checkImagePresenter(target, integer);
     }
 
     public void testGlideDoesNotReplaceIdenticalPresenters() {
-        Glide.load("fake")
+        Target target = Glide.with(getContext())
+                .load("fake")
                 .asIs()
                 .centerCrop()
                 .animate(android.R.anim.fade_in)
                 .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
                 .error(com.bumptech.glide.tests.R.raw.ic_launcher)
-                .into(imageView);
-        ImagePresenter first = getImagePresenterFromView();
+                .into(imageViewTarget);
+        ImagePresenter first = target.getImagePresenter();
 
-        Glide.load("fake2")
+        Target target2 = Glide.with(getContext())
+                .load("fake2")
                 .asIs()
                 .centerCrop()
                 .animate(android.R.anim.fade_in)
                 .placeholder(com.bumptech.glide.tests.R.raw.ic_launcher)
                 .error(com.bumptech.glide.tests.R.raw.ic_launcher)
-                .into(imageView);
-        ImagePresenter second = getImagePresenterFromView();
+                .into(imageViewTarget);
+        ImagePresenter second = target2.getImagePresenter();
 
         assertSame(first, second);
     }
@@ -105,23 +110,23 @@ public class GlideTest extends ActivityTestCase {
     public void testCanHandleWrapContent() {
         imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        Glide.load("fake").into(imageView);
+        Target target = Glide.with(getContext()).load("fake").into(imageViewTarget);
 
-        assertNotNull(getImagePresenterFromView());
+        assertNotNull(target.getImagePresenter());
     }
 
     public void testCanHandleWrapContentMatchParent() {
         imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        Glide.load("fake").into(imageView);
+        Target target = Glide.with(getContext()).load("fake").into(imageViewTarget);
 
-        assertNotNull(getImagePresenterFromView());
+        assertNotNull(target.getImagePresenter());
     }
 
     public void testDifferentModelTypesReplacesPresenters() {
         assertDifferentPresenters(
-                Glide.load(4),
-                Glide.load("fake")
+                Glide.with(getContext()).load(4),
+                Glide.with(getContext()).load("fake")
         );
     }
 
@@ -182,31 +187,31 @@ public class GlideTest extends ActivityTestCase {
 
         final Object object = new Object();
         assertDifferentPresenters(
-                Glide.using(first).load(object),
-                Glide.using(second).load(object)
+                Glide.with(getContext()).using(first).load(object),
+                Glide.with(getContext()).using(second).load(object)
         );
     }
 
     public void testDifferentDownsamplersReplacesPresenter() {
         assertDifferentPresenters(
-                Glide.load("a").approximate(),
-                Glide.load("a").asIs()
+                Glide.with(getContext()).load("a").approximate(),
+                Glide.with(getContext()).load("a").asIs()
         );
     }
 
     public void testDifferentTransformationsReplacesPresenter() {
         final File file = new File("fake");
         assertDifferentPresenters(
-                Glide.load(file).centerCrop().fitCenter(),
-                Glide.load(file).centerCrop()
+                Glide.with(getContext()).load(file).centerCrop().fitCenter(),
+                Glide.with(getContext()).load(file).centerCrop()
         );
     }
 
     public void testDifferentPlaceholdersReplacesPresenter() {
         final File file = new File("fake");
         assertDifferentPresenters(
-                Glide.load(file).placeholder(com.bumptech.glide.tests.R.raw.ic_launcher),
-                Glide.load(file)
+                Glide.with(getContext()).load(file).placeholder(com.bumptech.glide.tests.R.raw.ic_launcher),
+                Glide.with(getContext()).load(file)
 
         );
     }
@@ -214,23 +219,16 @@ public class GlideTest extends ActivityTestCase {
     public void testDifferentAnimationsReplacesPresenter() {
         final File file = new File("fake");
         assertDifferentPresenters(
-                Glide.load(file).animate(android.R.anim.fade_in),
-                Glide.load(file).animate(android.R.anim.fade_out)
+                Glide.with(getContext()).load(file).animate(android.R.anim.fade_in),
+                Glide.with(getContext()).load(file).animate(android.R.anim.fade_out)
         );
     }
 
     public void testDifferentErrorIdsReplacesPresenter() {
         assertDifferentPresenters(
-                Glide.load("b").error(R.raw.ic_launcher),
-                Glide.load("b").error(android.R.drawable.btn_star)
+                Glide.with(getContext()).load("b").error(R.raw.ic_launcher),
+                Glide.with(getContext()).load("b").error(android.R.drawable.btn_star)
         );
-    }
-
-    public void testClearingTagReplacesPresenter() {
-        Glide.load("a").into(imageView);
-        assertNotNull(imageView.getTag());
-        imageView.setTag(null);
-        Glide.load("b").into(imageView);
     }
 
     public void testObtainAndOfferToBitmapPool() {
@@ -244,21 +242,9 @@ public class GlideTest extends ActivityTestCase {
         assertEquals(large, bitmapPool.get(large.getWidth(), large.getHeight(), large.getConfig()));
     }
 
-    public void testThrowExceptionIfTagReplaced() {
-        imageView.setTag(1234);
-        Exception exception = null;
-        try {
-            Glide.load("a").into(imageView);
-        } catch (Exception e) {
-            exception = e;
-        }
-
-        assertNotNull(exception);
-    }
-
     public void testDifferentRequestListenersReplacesPresenter() {
         assertDifferentPresenters(
-                Glide.load("a").listener(new Glide.RequestListener<String>() {
+                Glide.with(getContext()).load("a").listener(new Glide.RequestListener<String>() {
 
                     @Override
                     public void onException(Exception e, String model, Target target) {
@@ -269,7 +255,7 @@ public class GlideTest extends ActivityTestCase {
                     public void onImageReady(String model, Target target) {
                     }
                 }),
-                Glide.load("a").listener(new Glide.RequestListener<String>() {
+                Glide.with(getContext()).load("a").listener(new Glide.RequestListener<String>() {
                     @Override
                     public void onException(Exception e, String model, Target target) {
                     }
@@ -350,14 +336,9 @@ public class GlideTest extends ActivityTestCase {
 //    }
 
     private void assertDifferentPresenters(Glide.Request a, Glide.Request b) {
-        a.into(imageView);
-        ImagePresenter first = getImagePresenterFromView();
-
-        a.into(imageView);
-        ImagePresenter second = getImagePresenterFromView();
-
-        b.into(imageView);
-        ImagePresenter third = getImagePresenterFromView();
+        ImagePresenter first = a.into(imageViewTarget).getImagePresenter();
+        ImagePresenter second = a.into(imageViewTarget).getImagePresenter();
+        ImagePresenter third = b.into(imageViewTarget).getImagePresenter();
 
         assertSame(first, second);
         assertNotSame(first, third);

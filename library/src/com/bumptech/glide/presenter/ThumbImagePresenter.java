@@ -4,8 +4,9 @@
 
 package com.bumptech.glide.presenter;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.widget.ImageView;
+import com.bumptech.glide.presenter.target.Target;
 
 /**
  *Wraps a pair of {@link ImagePresenter} objects and uses them to load and display an image and a thumbnail for that
@@ -15,7 +16,7 @@ import android.widget.ImageView;
  * shown until the image load completes. If the image load completes first, the thumbnail will never be shown.
  */
 @SuppressWarnings("unused")
-public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterCoordinator {
+public class ThumbImagePresenter<A, B, C extends Target> implements ImagePresenter.ImagePresenterCoordinator {
 
     /**
      * A builder for a {@link ThumbImagePresenter}. Has a few convenience methods to avoid identical calls on both
@@ -26,25 +27,26 @@ public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterC
      * @param <A> The type of the model that the full {@link ImagePresenter} requires
      * @param <B> The type of the model that the thumb {@link ImagePresenter} requires
      */
-    public static class Builder<A, B> {
-        private ImagePresenter.Builder<A> fullPresenterBuilder;
-        private ImagePresenter.Builder<B> thumbPresenterBuilder;
-        private ImageView imageView;
+    public static class Builder<A, B, C extends Target> {
+        private ImagePresenter.Builder<A, C> fullPresenterBuilder;
+        private ImagePresenter.Builder<B, C> thumbPresenterBuilder;
         private Drawable placeholderDrawable;
         private int placeholderResourceId;
+        private Context context;
+        private C target;
 
-        public ThumbImagePresenter<A, B> build(){
+        public ThumbImagePresenter<A, B, C> build(){
             if (fullPresenterBuilder == null) {
                 throw new IllegalArgumentException("you must include a builder for the full image presenter");
             }
             if (thumbPresenterBuilder == null) {
                 throw new IllegalArgumentException("you must include a builder for the thumb image presenter");
             }
-            if (imageView == null){
+            if (target == null){
                 throw new IllegalArgumentException("cannot create presenter without an image view");
             }
 
-            return new ThumbImagePresenter<A, B>(this);
+            return new ThumbImagePresenter<A, B, C>(this);
         }
 
         /**
@@ -54,7 +56,7 @@ public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterC
          *                and {@link ImagePresenter.Builder ImagePresenter.Builder#setImageLoader} must have been called
          * @return This builder object
          */
-        public Builder<A, B> setFullPresenterBuilder(ImagePresenter.Builder<A> builder) {
+        public Builder<A, B, C> setFullPresenterBuilder(ImagePresenter.Builder<A, C> builder) {
             this.fullPresenterBuilder = builder;
             return this;
         }
@@ -66,7 +68,7 @@ public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterC
          *                and {@link ImagePresenter.Builder ImagePresenter.Builder#setImageLoader} must have been called
          * @return This builder object
          */
-        public Builder<A, B> setThumbPresenterBuilder(ImagePresenter.Builder<B> builder) {
+        public Builder<A, B, C> setThumbPresenterBuilder(ImagePresenter.Builder<B, C> builder) {
             this.thumbPresenterBuilder = builder;
             return this;
         }
@@ -74,15 +76,16 @@ public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterC
         /**
          * @see ImagePresenter.Builder ImagePresenter.Builder#setImageView
          */
-        public Builder<A, B> setImageView(ImageView imageView) {
-            this.imageView = imageView;
+        public Builder<A, B, C> setTarget(C target, Context context) {
+            this.target = target;
+            this.context = context;
             return this;
         }
 
         /**
          * @see ImagePresenter.Builder ImagePresenter.Builder#setPlaceholderDrawable
          */
-        public Builder<A, B> setPlaceholderDrawable(Drawable drawable) {
+        public Builder<A, B, C> setPlaceholderDrawable(Drawable drawable) {
             if (drawable != null && this.placeholderResourceId != 0) {
                 throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
             }
@@ -94,7 +97,7 @@ public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterC
         /**
          * @see ImagePresenter.Builder ImagePresenter.Builder#setPlaceholderResource
          */
-        public Builder<A, B> setPlaceholderResource(int resourceId) {
+        public Builder<A, B, C> setPlaceholderResource(int resourceId) {
             if (resourceId != 0 && placeholderDrawable != null) {
                 throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
             }
@@ -104,20 +107,21 @@ public class ThumbImagePresenter<A, B> implements ImagePresenter.ImagePresenterC
         }
     }
 
-    private final ImagePresenter<A> fullPresenter;
-    private final ImagePresenter<B> thumbPresenter;
+    private final ImagePresenter<A, C> fullPresenter;
+    private final ImagePresenter<B, C> thumbPresenter;
 
-    private ThumbImagePresenter(Builder<A, B> builder) {
+    private ThumbImagePresenter(Builder<A, B, C> builder) {
         fullPresenter = builder.fullPresenterBuilder
                 .setImagePresenterCoordinator(this)
-                .setImageView(builder.imageView)
+                .setTarget(builder.target, builder.context)
                 .setPlaceholderResource(0)
                 .setPlaceholderDrawable(builder.placeholderDrawable == null ?
-                        builder.imageView.getResources().getDrawable(builder.placeholderResourceId) : builder.placeholderDrawable)
+                        builder.context.getResources().getDrawable(builder.placeholderResourceId)
+                        : builder.placeholderDrawable)
                 .build();
         thumbPresenter = builder.thumbPresenterBuilder
                 .setImagePresenterCoordinator(this)
-                .setImageView(builder.imageView)
+                .setTarget(builder.target, builder.context)
                 .setPlaceholderDrawable(null)
                 .setPlaceholderResource(0)
                 .build();

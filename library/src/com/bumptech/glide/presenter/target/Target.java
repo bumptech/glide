@@ -46,19 +46,7 @@ public interface Target {
      */
     public void startAnimation(Animation animation);
 
-    /**
-     * A method that is used to keep a reference to the ImagePresenter. Increases the efficiency of loads if it is
-     * possible that this target object will be used more than once.
-     *
-     * @param imagePresenter The ImagePresenter to store
-     */
     public void setImagePresenter(ImagePresenter imagePresenter);
 
-    /**
-     * A method for retrieving any current ImagePresenter. Increases the efficiency of loads if it is possible that this
-     * target object will be used more than once.
-     *
-     * @return The current ImagePresenter or null
-     */
     public ImagePresenter getImagePresenter();
 }

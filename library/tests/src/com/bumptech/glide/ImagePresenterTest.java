@@ -11,6 +11,7 @@ import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.presenter.target.BaseTarget;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.BitmapLoadTask;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
@@ -69,10 +70,8 @@ public class ImagePresenterTest extends AndroidTestCase {
     public void testMustProvideATarget() {
         Exception exception = null;
         try {
-            new ImagePresenter.Builder<Object>()
+            new ImagePresenter.Builder<Object, Target>()
                     .setBitmapLoadFactory(new MockBitmapLoadFactory())
-                    .setBitmapLoadFactory(new MockBitmapLoadFactory())
-                    .setImageLoader(new MockImageLoader())
                     .build();
         } catch (Exception e) {
             exception = e;
@@ -83,7 +82,7 @@ public class ImagePresenterTest extends AndroidTestCase {
     public void testMustProvideAModelLoader() {
         Exception exception = null;
         try {
-            new ImagePresenter.Builder<Object>()
+            new ImagePresenter.Builder<Object, Target>()
                     .setTarget(target, getContext())
                     .setImageLoader(new MockImageLoader())
                     .build();
@@ -96,7 +95,7 @@ public class ImagePresenterTest extends AndroidTestCase {
     public void testMustProvideAnImageLoader() {
         Exception exception = null;
         try {
-            new ImagePresenter.Builder<Object>()
+            new ImagePresenter.Builder<Object, Target>()
                     .setTarget(target, getContext())
                     .setBitmapLoadFactory(new MockBitmapLoadFactory())
                     .build();
@@ -108,7 +107,7 @@ public class ImagePresenterTest extends AndroidTestCase {
 
     public void testPlaceholderIsSetWithNullModel() {
         Drawable placeholder = new ColorDrawable(Color.RED);
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new ImageManagerLoader(getContext()))
@@ -121,7 +120,7 @@ public class ImagePresenterTest extends AndroidTestCase {
     public void testPlaceholderIsSetWithNullBitmapLoadTask() {
         Drawable placeholder = new ColorDrawable(Color.RED);
         final Bitmap result = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory() {
                     @Override
@@ -144,7 +143,7 @@ public class ImagePresenterTest extends AndroidTestCase {
 
     public void testPlaceholderIsSetDuringAsynchronousLoad() {
         Drawable placeholder = new ColorDrawable(Color.RED);
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new MockImageLoader())
@@ -160,7 +159,7 @@ public class ImagePresenterTest extends AndroidTestCase {
         final Bitmap result = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444);
 
         final AtomicBoolean wasPlaceholderEverSet = new AtomicBoolean(false);
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(new MockTarget() {
                     @Override
                     public void setPlaceholder(Drawable placeholder) {
@@ -184,7 +183,7 @@ public class ImagePresenterTest extends AndroidTestCase {
 
     public void testErrorPlaceholderIsSetOnException() {
         Drawable errorDrawable = new ColorDrawable(Color.RED);
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new MockImageLoader().onCallback(new MockImageLoader.CallbackAction() {
@@ -202,7 +201,7 @@ public class ImagePresenterTest extends AndroidTestCase {
 
     public void testBitmapIsSetWhenLoaded() {
         final Bitmap result = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new MockImageLoader().onCallback(new MockImageLoader.CallbackAction() {
@@ -221,7 +220,7 @@ public class ImagePresenterTest extends AndroidTestCase {
         final Bitmap second = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444);
 
         final List<ImageLoader.ImageReadyCallback> cbs = new ArrayList<ImageLoader.ImageReadyCallback>();
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new MockImageLoader().onCallback(new MockImageLoader.CallbackAction() {
@@ -245,7 +244,7 @@ public class ImagePresenterTest extends AndroidTestCase {
         final Object actualModel = new Object();
 
         final AtomicBoolean wasOnExceptionCalled = new AtomicBoolean(false);
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new MockImageLoader().onCallback(new MockImageLoader.CallbackAction() {
@@ -273,7 +272,7 @@ public class ImagePresenterTest extends AndroidTestCase {
         final Object model = new Object();
         final AtomicInteger timesMockImageLoaderCalled = new AtomicInteger();
 
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new MockImageLoader().onCallback(new MockImageLoader.CallbackAction() {
@@ -293,7 +292,7 @@ public class ImagePresenterTest extends AndroidTestCase {
     public void testImageSetCallbackIsCalledWhenImageIsSet() {
         final AtomicBoolean wasImageSetCallbackCalled = new AtomicBoolean(false);
 
-        ImagePresenter<Object> imagePresenter = new ImagePresenter.Builder<Object>()
+        ImagePresenter<Object, Target> imagePresenter = new ImagePresenter.Builder<Object, Target>()
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory())
                 .setImageLoader(new MockImageLoader().onCallback(new MockImageLoader.CallbackAction() {
@@ -302,7 +301,7 @@ public class ImagePresenterTest extends AndroidTestCase {
                         cb.onImageReady(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444));
                     }
                 }))
-                .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Object>() {
+                .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Object, Target>() {
                     @Override
                     public void onImageReady(Object model, Target target, boolean fromCache) {
                         wasImageSetCallbackCalled.set(true);
@@ -314,7 +313,7 @@ public class ImagePresenterTest extends AndroidTestCase {
         assertTrue(wasImageSetCallbackCalled.get());
     }
 
-    private static class MockTarget implements Target {
+    private static class MockTarget extends BaseTarget {
 
         private Bitmap bitmap = null;
         private Drawable placeholder = null;
@@ -346,15 +345,6 @@ public class ImagePresenterTest extends AndroidTestCase {
 
         @Override
         public void startAnimation(Animation animation) {
-        }
-
-        @Override
-        public void setImagePresenter(ImagePresenter imagePresenter) {
-        }
-
-        @Override
-        public ImagePresenter getImagePresenter() {
-            return null;
         }
     }
 

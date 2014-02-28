@@ -9,13 +9,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.BitmapLoadTask;
+import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * Wraps an {@link Target} to display arbitrary Bitmaps and provides a framework for fetching and
@@ -28,9 +28,8 @@ import com.bumptech.glide.resize.BitmapLoadTask;
  * @param <T> The type of the model that contains information necessary to display an image. Can be as simple
  *            as a String containing a path or a complex data type.
  */
-public class ImagePresenter<T> {
+public class ImagePresenter<T, Y extends Target> {
     private static final String TAG = "ImagePresenter";
-    private final BitmapLoadFactory<T> loadFactory;
 
     /**
      * A builder for an {@link ImagePresenter}.
@@ -43,10 +42,10 @@ public class ImagePresenter<T> {
      * @param <T> The type of the model that the presenter this builder will produce requires to load an image.
      */
     @SuppressWarnings("unused")
-    public static class Builder<T> {
+    public static class Builder<T, Y extends Target> {
         private int placeholderResourceId;
         private Drawable placeholderDrawable;
-        private ImageReadyCallback<T> imageReadyCallback;
+        private ImageReadyCallback<T, Y> imageReadyCallback;
         private ImagePresenterCoordinator coordinator;
         private ImageLoader imageLoader;
         private Context context;
@@ -61,15 +60,16 @@ public class ImagePresenter<T> {
 
         private int errorResourceId;
         private Drawable errorDrawable;
-        private Target target;
-        BitmapLoadFactory<T> loadFactory;
+        private BitmapLoadFactory<T> loadFactory;
+        private TransformationLoader<T> transformationLoader;
+        private Y target;
 
         /**
          * Builds an ImagePresenter.
          *
          * @return A new ImagePresenter
          */
-        public ImagePresenter<T> build(){
+        public ImagePresenter<T, Y> build(){
             if (target == null) {
                 throw new IllegalArgumentException("cannot create presenter without a target");
             }
@@ -80,36 +80,17 @@ public class ImagePresenter<T> {
                 throw new IllegalArgumentException("cannot create presenter without a bitmap load factory");
             }
 
-            return new ImagePresenter<T>(this);
+            return new ImagePresenter<T, Y>(this);
         }
 
         /**
-         * Required - Sets the {@link android.widget.ImageView} the presenter will use to display any loaded bitmaps.
-         * Alternatively you can instead set a more general target for an object other than an ImageView using
-         * {@link #setTarget(com.bumptech.glide.presenter.target.Target, android.content.Context)}.
-         *
-         * @see #setTarget(Target, Context)
-         *
-         * @param imageView The {@link android.widget.ImageView} to wrap
-         * @return This Builder object
-         */
-        public Builder<T> setImageView(final ImageView imageView) {
-            setTarget(new ImageViewTarget(imageView), imageView.getContext());
-
-            return this;
-        }
-
-        /**
-         * Required - Sets the {@link Target} the presenter will use to display any loaded bitmaps. If you are loading
-         * bitmaps into an {@link ImageView}, you can instead use {@link #setImageView(android.widget.ImageView)}.
-         *
-         * @see #setImageView(ImageView)
+         * Required - Sets the {@link Target} the presenter will use to display any loaded bitmaps.
          *
          * @param target The {@link Target} to wrap
          * @param context A context that can be held for the duration of the load
          * @return This builder object
          */
-        public Builder<T> setTarget(Target target, Context context) {
+        public Builder<T, Y> setTarget(Y target, Context context) {
             this.target = target;
             this.context = context;
 
@@ -123,9 +104,8 @@ public class ImagePresenter<T> {
          * @param loadFactory The {@link BitmapLoadFactory} to use to obtain the id and InputStreams
          * @return This Builder object
          */
-        public Builder<T> setBitmapLoadFactory(BitmapLoadFactory<T> loadFactory) {
+        public Builder<T, Y> setBitmapLoadFactory(BitmapLoadFactory<T> loadFactory) {
             this.loadFactory = loadFactory;
-
             return this;
         }
 
@@ -136,7 +116,7 @@ public class ImagePresenter<T> {
          * @param imageLoader The {@link com.bumptech.glide.loader.image.ImageLoader} to use to load an image
          * @return This Builder object
          */
-        public Builder<T> setImageLoader(ImageLoader imageLoader) {
+        public Builder<T, Y> setImageLoader(ImageLoader imageLoader) {
             this.imageLoader = imageLoader;
             return this;
         }
@@ -149,7 +129,7 @@ public class ImagePresenter<T> {
          * @param resourceId The id of the resource to show
          * @return This Builder object
          */
-        public Builder<T> setPlaceholderResource(int resourceId) {
+        public Builder<T, Y> setPlaceholderResource(int resourceId) {
             if (resourceId != 0 && placeholderDrawable != null) {
                 throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
             }
@@ -166,7 +146,7 @@ public class ImagePresenter<T> {
          * @param placeholderDrawable The drawable to show
          * @return This Builder object
          */
-        public Builder<T> setPlaceholderDrawable(Drawable placeholderDrawable) {
+        public Builder<T, Y> setPlaceholderDrawable(Drawable placeholderDrawable) {
             if (placeholderDrawable != null && placeholderResourceId != 0) {
                 throw new IllegalArgumentException("Can't set both a placeholder drawable and a placeholder resource");
             }
@@ -182,7 +162,7 @@ public class ImagePresenter<T> {
          * @param resourceId The id of the resource to show
          * @return This Builder object
          */
-        public Builder<T> setErrorResource(int resourceId) {
+        public Builder<T, Y> setErrorResource(int resourceId) {
             if (resourceId != 0 && errorDrawable != null) {
                 throw new IllegalArgumentException("Can't set both an error drawable and an error resource");
             }
@@ -198,7 +178,7 @@ public class ImagePresenter<T> {
          * @param drawable The drawable to show
          * @return This Builder object
          */
-        public Builder<T> setErrorDrawable(Drawable drawable) {
+        public Builder<T, Y> setErrorDrawable(Drawable drawable) {
             if (errorResourceId != 0 && drawable != null) {
                 throw new IllegalArgumentException("Can't set both an error drawable and an error resource");
             }
@@ -215,7 +195,7 @@ public class ImagePresenter<T> {
          * @param cb The callback to call
          * @return This Builder object
          */
-        public Builder<T> setImageReadyCallback(ImageReadyCallback<T> cb) {
+        public Builder<T, Y> setImageReadyCallback(ImageReadyCallback<T, Y> cb) {
             this.imageReadyCallback = cb;
             return this;
         }
@@ -229,7 +209,7 @@ public class ImagePresenter<T> {
          * @param coordinator The coordinator to set
          * @return This Builder object
          */
-        public Builder<T> setImagePresenterCoordinator(ImagePresenterCoordinator coordinator) {
+        public Builder<T, Y> setImagePresenterCoordinator(ImagePresenterCoordinator coordinator) {
             this.coordinator = coordinator;
             return this;
         }
@@ -242,8 +222,22 @@ public class ImagePresenter<T> {
          * @param exceptionHandler The exception handler to set
          * @return This builder object
          */
-        public Builder<T> setExceptionHandler(ExceptionHandler<T> exceptionHandler) {
+        public Builder<T, Y> setExceptionHandler(ExceptionHandler<T> exceptionHandler) {
             this.exceptionHandler = exceptionHandler;
+            return this;
+        }
+
+        /**
+         * Optional - Sets a transformation loader to use to obtain a transformation to apply to images on a per
+         * model basis.
+         *
+         * @see Transformation
+         *
+         * @param transformationLoader A {@link TransformationLoader} for this model type
+         * @return This builder object
+         */
+        public Builder<T, Y> setTransformationLoader(TransformationLoader<T> transformationLoader) {
+            this.transformationLoader = transformationLoader;
             return this;
         }
     }
@@ -251,12 +245,12 @@ public class ImagePresenter<T> {
     @SuppressWarnings("all")
     private Object imageToken; //this is just a reference we may need to keep, otherwise unused
 
-    private final Target target;
+    private final Y target;
 
     private final ImageLoader imageLoader;
 
     private final Drawable placeholderDrawable;
-    private final ImageReadyCallback<T> imageReadyCallback;
+    private final ImageReadyCallback<T, Y> imageReadyCallback;
     private final ImagePresenterCoordinator coordinator;
     private final ExceptionHandler<T> exceptionHandler;
 
@@ -266,6 +260,7 @@ public class ImagePresenter<T> {
     private boolean isImageSet = false;
     private boolean isErrorSet = false;
 
+    private final BitmapLoadFactory<T> loadFactory;
     private boolean loadedFromCache = false;
     private final Drawable errorDrawable;
 
@@ -311,7 +306,7 @@ public class ImagePresenter<T> {
      * A callback interface used to perform some action when an {@link ImagePresenter} sets a new bitmap in an
      * {@link android.widget.ImageView}
      */
-    public interface ImageReadyCallback<T> {
+    public interface ImageReadyCallback<T, Y extends Target> {
 
         /**
          * The method called when a bitmap is set
@@ -319,10 +314,10 @@ public class ImagePresenter<T> {
          * @param target The target that will display the bitmap
          * @param fromCache True iff the load completed without a placeholder being shown.
          */
-        public void onImageReady(T model, Target target, boolean fromCache);
+        public void onImageReady(T model, Y target, boolean fromCache);
     }
 
-    protected ImagePresenter(Builder<T> builder) {
+    protected ImagePresenter(Builder<T, Y> builder) {
         this.imageLoader = builder.imageLoader;
 
         final Resources res = builder.context.getResources();
@@ -342,6 +337,11 @@ public class ImagePresenter<T> {
         this.exceptionHandler = builder.exceptionHandler;
         this.loadFactory = builder.loadFactory;
         this.target = builder.target;
+        final ImagePresenter previous = builder.target.getImagePresenter();
+        if (previous != null) {
+            previous.clear();
+        }
+        builder.target.setImagePresenter(this);
     }
 
     /**

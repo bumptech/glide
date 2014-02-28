@@ -168,10 +168,12 @@ public class ListPreloaderTest extends AndroidTestCase {
     }
 
     private static class ListPreloaderAdapter extends ListPreloader<Object> {
+        private final Context context;
         public Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
         public ListPreloaderAdapter(Context context, int maxPreload) {
-            super(context, maxPreload);
+            super(maxPreload);
+            this.context = context;
         }
 
         @Override
@@ -188,7 +190,7 @@ public class ListPreloaderTest extends AndroidTestCase {
 
         @Override
         protected Glide.Request getRequest(Object item) {
-            return Glide.using(new StreamModelLoader<Object>() {
+            return Glide.with(context).using(new StreamModelLoader<Object>() {
                 @Override
                 public ResourceFetcher<InputStream> getResourceFetcher(final Object model, int width, int height) {
                     return new ResourceFetcher<InputStream>() {

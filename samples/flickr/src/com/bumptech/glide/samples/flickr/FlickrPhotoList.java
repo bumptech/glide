@@ -13,6 +13,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.loader.bitmap.model.Cache;
+import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.net.URL;
@@ -50,20 +51,22 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     }
 
     private static class ViewHolder {
-        private final ImageView imageView;
         private final TextView titleText;
+        private final ImageViewTarget imageViewTarget;
 
         public ViewHolder(ImageView imageView, TextView titleText) {
-            this.imageView = imageView;
             this.titleText = titleText;
+            this.imageViewTarget = new ImageViewTarget(imageView);
         }
     }
 
     private class FlickrListPreloader extends ListPreloader<Photo> {
+        private final Context context;
         private int[] photoDimens = null;
 
         public FlickrListPreloader(Context context, int maxPreload) {
-            super(context, maxPreload);
+            super(maxPreload);
+            this.context = context;
         }
 
         public boolean isDimensSet() {
@@ -88,7 +91,8 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
         @Override
         protected Glide.Request getRequest(Photo item) {
-            return Glide.using(new FlickrModelLoader(getActivity(), urlCache))
+            return Glide.with(context)
+                    .using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(item)
                     .centerCrop();
         }
@@ -144,11 +148,12 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            Glide.using(new FlickrModelLoader(getActivity(), urlCache))
+            Glide.with(getActivity())
+                    .using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(current)
                     .centerCrop()
                     .animate(R.anim.fade_in)
-                    .into(viewHolder.imageView);
+                    .into(viewHolder.imageViewTarget);
 
             viewHolder.titleText.setText(current.title);
             return view;

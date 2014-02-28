@@ -26,7 +26,6 @@ import java.util.Queue;
  */
 public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     private final int maxPreload;
-    private final Context context;
     private final PreloadTargetQueue preloadTargetQueue;
 
     private int lastEnd;
@@ -39,11 +38,9 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     /**
      * Constructor for the preloader.
      *
-     * @param context A context
      * @param maxPreload The maximum number of items in the list to load ahead (corresponds to adapter positions).
      */
-    public ListPreloader(Context context, int maxPreload) {
-        this.context = context;
+    public ListPreloader(int maxPreload) {
         this.maxPreload = maxPreload;
         preloadTargetQueue = new PreloadTargetQueue(maxPreload);
     }
@@ -134,7 +131,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         final T item = items.get(position);
         final int[] dimensions = getDimensions(item);
         if (dimensions != null) {
-            getRequest(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1])).with(context);
+            getRequest(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
         }
     }
 

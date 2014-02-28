@@ -7,24 +7,13 @@ import com.bumptech.glide.presenter.ImagePresenter;
 /**
  * A simpler interface for targets with default (usually noop) implementations of non essential methods.
  */
-public abstract class SimpleTarget implements Target {
-    private ImagePresenter imagePresenter;
+public abstract class SimpleTarget extends BaseTarget {
 
     @Override
     public void setPlaceholder(Drawable placeholder) { }
 
     @Override
     public void startAnimation(Animation animation) { }
-
-    @Override
-    public void setImagePresenter(ImagePresenter imagePresenter) {
-        this.imagePresenter = imagePresenter;
-    }
-
-    @Override
-    public ImagePresenter getImagePresenter() {
-        return imagePresenter;
-    }
 
     /**
      * A default implementation that calls {@link com.bumptech.glide.presenter.target.Target.SizeReadyCallback}

@@ -10,7 +10,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-import com.bumptech.glide.presenter.ImagePresenter;
 
 import java.lang.ref.WeakReference;
 
@@ -19,15 +18,18 @@ import static android.view.ViewGroup.LayoutParams;
 /**
  * A target wrapping an ImageView. Obtains the runtime dimensions of the ImageView.
  */
-public class ImageViewTarget implements Target {
+public class ImageViewTarget extends BaseTarget {
     private static final String TAG = "ImageViewTarget";
     private final ImageView imageView;
     private final SizeDeterminer sizeDeterminer;
-    private ImagePresenter imagePresenter;
 
     public ImageViewTarget(ImageView imageView) {
         this.imageView = imageView;
         this.sizeDeterminer = new SizeDeterminer(imageView);
+    }
+
+    public ImageView getView() {
+        return imageView;
     }
 
     @Override
@@ -50,16 +52,6 @@ public class ImageViewTarget implements Target {
         imageView.clearAnimation();
 
         imageView.startAnimation(animation);
-    }
-
-    @Override
-    public void setImagePresenter(ImagePresenter imagePresenter) {
-        this.imagePresenter = imagePresenter;
-    }
-
-    @Override
-    public ImagePresenter getImagePresenter() {
-        return imagePresenter;
     }
 
     @Override
