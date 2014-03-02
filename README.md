@@ -25,8 +25,10 @@ public void onCreate(Bundle savedInstanceState) {
 //For a list:
 @Override
 public View getView(int position, View recycled, ViewGroup container) {
+    final ImageView myImageView;
     if (recycled == null) {
-        myImageView = (ImageView) inflater.inflate(R.layout.my_image_view, container, false);
+        myImageView = (ImageView) inflater.inflate(R.layout.my_image_view,
+                container, false);
     } else {
         myImageView = (ImageView) recycled;
     }
