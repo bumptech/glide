@@ -9,7 +9,10 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.*;
+import android.os.Build;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
@@ -366,7 +369,7 @@ public class ImageManager {
     }
 
     private ImageManager(Builder builder) {
-        HandlerThread bgThread = new HandlerThread("bg_thread", THREAD_PRIORITY_BACKGROUND);
+        HandlerThread bgThread = new HandlerThread("image_manager_thread", THREAD_PRIORITY_BACKGROUND);
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
