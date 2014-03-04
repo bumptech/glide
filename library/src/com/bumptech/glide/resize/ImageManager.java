@@ -527,21 +527,22 @@ public class ImageManager {
         diskCache.put(key, new DiskCache.Writer() {
             @Override
             public void write(OutputStream os) {
-                final Bitmap.Config config = bitmap.getConfig();
-                Bitmap.CompressFormat compressFormat = getCompressFormat(config);
+                Bitmap.CompressFormat compressFormat = getCompressFormat(bitmap);
                 bitmap.compress(compressFormat, bitmapCompressQuality, os);
             }
         });
     }
 
-    private Bitmap.CompressFormat getCompressFormat(Bitmap.Config config) {
+    private Bitmap.CompressFormat getCompressFormat(Bitmap bitmap) {
         final Bitmap.CompressFormat format;
         if (bitmapCompressFormat != null) {
             format = bitmapCompressFormat;
-        } else if (config == Bitmap.Config.RGB_565) {
-            format = Bitmap.CompressFormat.JPEG;
         } else {
-            format = Bitmap.CompressFormat.PNG;
+            if (bitmap.getConfig() == Bitmap.Config.RGB_565 || !bitmap.hasAlpha()) {
+                format = Bitmap.CompressFormat.JPEG;
+            } else {
+                format = Bitmap.CompressFormat.PNG;
+            }
         }
         return format;
     }
