@@ -69,6 +69,7 @@ public class ImageManager {
     private final int bitmapCompressQuality;
     private final BitmapPool bitmapPool;
     private final Map<String, ImageManagerJob> jobs = new HashMap<String, ImageManagerJob>();
+    private final Bitmap.CompressFormat bitmapCompressFormat;
     private boolean shutdown = false;
 
     private final Handler mainHandler = new Handler();
@@ -166,7 +167,7 @@ public class ImageManager {
         private MemoryCache memoryCache = null;
         private DiskCache diskCache = null;
 
-        private Bitmap.CompressFormat bitmapCompressFormat = Bitmap.CompressFormat.JPEG;
+        private Bitmap.CompressFormat bitmapCompressFormat = null;
         private boolean recycleBitmaps = CAN_RECYCLE;
 
         @Deprecated
@@ -215,22 +216,19 @@ public class ImageManager {
         }
 
         /**
-         * Sets the format that will be used to write bitmaps to disk in the disk cache (if one is present). Defaults
-         * to JPEG. Set to PNG if you need transparency
+         * Sets the format that will be used to write all bitmaps to disk in the disk cache (if one is present). By
+         * default bitmaps without transparency are written as JPEGs for the fastest possible decodes and bitmaps with
+         * transparency are written as PNGs to maximize quality. This will override the format used for all bitmaps,
+         * regardless of whether or not they contain transparency.
          *
          * @see Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
          *
-         * <p>
-         *     Note - this call will now be ignored, ARGB_8888 bitmaps will be saved as PNGs, and all other formats
-         *     will be saved as jpegs.
-         * </p>
          *
          * @param bitmapCompressFormat The format to pass to
          *  {@link Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)} when saving
          *  to the disk cache
          * @return This Builder
          */
-        @Deprecated
         public Builder setBitmapCompressFormat(Bitmap.CompressFormat bitmapCompressFormat) {
             this.bitmapCompressFormat = bitmapCompressFormat;
             return this;
@@ -373,6 +371,7 @@ public class ImageManager {
         bgThread.start();
         bgHandler = new Handler(bgThread.getLooper());
         executor = builder.resizeService;
+        bitmapCompressFormat = builder.bitmapCompressFormat;
         bitmapCompressQuality = builder.bitmapCompressQuality;
         memoryCache = builder.memoryCache;
         diskCache = builder.diskCache;
@@ -528,16 +527,24 @@ public class ImageManager {
         diskCache.put(key, new DiskCache.Writer() {
             @Override
             public void write(OutputStream os) {
-                final Bitmap.Config config = bitmap.getConfig();
-                final Bitmap.CompressFormat format;
-                if (config == null || config == Bitmap.Config.ARGB_4444 || config == Bitmap.Config.ARGB_8888) {
-                    format = Bitmap.CompressFormat.PNG;
-                } else {
-                    format = Bitmap.CompressFormat.JPEG;
-                }
-                bitmap.compress(format, bitmapCompressQuality, os);
+                Bitmap.CompressFormat compressFormat = getCompressFormat(bitmap);
+                bitmap.compress(compressFormat, bitmapCompressQuality, os);
             }
         });
+    }
+
+    private Bitmap.CompressFormat getCompressFormat(Bitmap bitmap) {
+        final Bitmap.CompressFormat format;
+        if (bitmapCompressFormat != null) {
+            format = bitmapCompressFormat;
+        } else {
+            if (bitmap.getConfig() == Bitmap.Config.RGB_565 || !bitmap.hasAlpha()) {
+                format = Bitmap.CompressFormat.JPEG;
+            } else {
+                format = Bitmap.CompressFormat.PNG;
+            }
+        }
+        return format;
     }
 
     private void putInMemoryCache(String key, final Bitmap bitmap) {

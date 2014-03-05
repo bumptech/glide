@@ -17,7 +17,6 @@ import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -29,6 +28,7 @@ public class ImageResizer {
     private static final String TAG = "ImageResizer";
     private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
+    private static final int PAINT_FLAGS = Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private final BitmapPool bitmapPool;
 
@@ -226,10 +226,7 @@ public class ImageResizer {
                                                             Bitmap.Config.ARGB_8888 : toCrop.getConfig());
         }
         Canvas canvas = new Canvas(result);
-        Paint paint = new Paint();
-        //only if scaling up
-        paint.setFilterBitmap(false);
-        paint.setAntiAlias(true);
+        Paint paint = new Paint(PAINT_FLAGS);
         canvas.drawBitmap(toCrop, m, paint);
         return result;
     }
@@ -430,7 +427,7 @@ public class ImageResizer {
                 return toOrient;
         }
 
-        //from Bitmap.createBitmap
+        // From Bitmap.createBitmap.
         final RectF newRect = new RectF(0, 0, toOrient.getWidth(), toOrient.getHeight());
         matrix.mapRect(newRect);
 
@@ -445,9 +442,7 @@ public class ImageResizer {
         matrix.postTranslate(-newRect.left, -newRect.top);
 
         final Canvas canvas = new Canvas(result);
-        final Paint paint = new Paint();
-        paint.setFilterBitmap(true);
-        paint.setAntiAlias(true);
+        final Paint paint = new Paint(PAINT_FLAGS);
         canvas.drawBitmap(toOrient, matrix, null);
 
         return result;
