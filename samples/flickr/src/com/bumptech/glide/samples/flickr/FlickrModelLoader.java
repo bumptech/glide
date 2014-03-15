@@ -1,8 +1,8 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import com.bumptech.glide.loader.model.Cache;
-import com.bumptech.glide.loader.model.UrlModelLoader;
+import com.bumptech.glide.loader.bitmap.model.BaseUrlLoader;
+import com.bumptech.glide.loader.bitmap.model.Cache;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -13,7 +13,7 @@ import java.net.URL;
  * ImageManager to download the image and resize it in memory before saving the resized version
  * directly to the disk cache.
  */
-public class FlickrModelLoader extends UrlModelLoader<Photo> {
+public class FlickrModelLoader extends BaseUrlLoader<Photo> {
 
     public FlickrModelLoader(Context context, Cache<URL> modelCache) {
         super(context, modelCache);

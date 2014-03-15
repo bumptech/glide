@@ -12,17 +12,35 @@ import android.os.Build;
 import android.util.Log;
 import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.ByteArrayPool;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.Set;
 
 /**
  * A base class with methods for loading and decoding images from InputStreams.
  */
-public abstract class Downsampler {
+public abstract class Downsampler implements BitmapDecoder<InputStream> {
     private static final String TAG = "Downsampler";
 
+    private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     private static final Set<ImageType> TYPES_THAT_USE_POOL = EnumSet.of(JPEG, PNG_A, PNG);
+
+    @TargetApi(11)
+    private static BitmapFactory.Options getDefaultOptions() {
+       BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
+       decodeBitmapOptions.inDither = false;
+       decodeBitmapOptions.inScaled = false;
+       decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+       decodeBitmapOptions.inSampleSize = 1;
+       if (CAN_RECYCLE)  {
+           decodeBitmapOptions.inMutable = true;
+       }
+       return decodeBitmapOptions;
+    }
+
     private final String id = getClass().toString();
 
     /**
@@ -54,13 +72,26 @@ public abstract class Downsampler {
      *
      */
     public static Downsampler NONE = new Downsampler() {
+        /**
+         * Returns the bitmap represented by the given InputStream as is with no downsampling performed.
+         *
+         * @param is The input stream with data for an image.
+         * @param pool An {@link BitmapPool} to use to reuse bitmaps during the load
+         */
+        public Bitmap decode(InputStream is, BitmapPool pool) {
+            return decode(is, pool, -1, -1);
+        }
+
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return 0;
         }
     };
 
-    private static final int MARK_POSITION = 5 * 1024 * 1024; //5mb, max possible, not preallocated
+    // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer but will resize up to
+    // this amount if necessary.
+    private static final int MARK_POSITION = 5 * 1024 * 1024;
+
 
     /**
      * Load the image for the given InputStream. If a recycled Bitmap whose dimensions exactly match those of the image
@@ -69,14 +100,18 @@ public abstract class Downsampler {
      * Note - this method will throw an exception of a Bitmap with dimensions not matching those of the image for the
      * given InputStream is provided.
      *
-     * @param bis An InputStream to the data for the image
-     * @param options The options to pass to {@link BitmapFactory#decodeStream(java.io.InputStream, android.graphics.Rect, android.graphics.BitmapFactory.Options)}
+     * @param is An InputStream to the data for the image
      * @param pool A pool of recycled bitmaps
      * @param outWidth The width the final image should be close to
      * @param outHeight The height the final image should be close to
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
      */
-    public Bitmap downsample(RecyclableBufferedInputStream bis, BitmapFactory.Options options, BitmapPool pool, int outWidth, int outHeight) {
+    @Override
+    public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight) {
+        final ByteArrayPool byteArrayPool = ByteArrayPool.get();
+        byte[] bytesForOptions = byteArrayPool.getBytes();
+        byte[] bytesForStream = byteArrayPool.getBytes();
+        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytesForStream);
         bis.mark(MARK_POSITION);
         int orientation = 0;
         try {
@@ -90,27 +125,32 @@ public abstract class Downsampler {
             e.printStackTrace();
         }
 
+        final BitmapFactory.Options options = getDefaultOptions();
+        options.inTempStorage = bytesForOptions;
+
         final int[] inDimens = getDimensions(bis, options);
         final int inWidth = inDimens[0];
         final int inHeight = inDimens[1];
 
-        final int degreesToRotate = ImageResizer.getExifOrientationDegrees(orientation);
+        final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
         final int sampleSize;
         if (degreesToRotate == 90 || degreesToRotate == 270) {
-            //if we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
-            //decreased to near our target's height and the image height is decreased to near our target width
+            // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
+            // decreased to near our target's height and the image height is decreased to near our target width.
             sampleSize = getSampleSize(inHeight, inWidth, outWidth, outHeight);
         } else {
             sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
         }
 
         final Bitmap downsampled = downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize);
-        final Bitmap rotated = ImageResizer.rotateImageExif(downsampled, pool, orientation);
+        final Bitmap rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
 
         if (downsampled != rotated && !pool.put(downsampled)) {
             downsampled.recycle();
         }
 
+        byteArrayPool.releaseBytes(bytesForOptions);
+        byteArrayPool.releaseBytes(bytesForStream);
         return rotated;
     }
 

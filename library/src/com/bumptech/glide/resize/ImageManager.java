@@ -8,12 +8,10 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapReferenceCounter;
@@ -27,8 +25,6 @@ import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCacheAdapter;
 import com.bumptech.glide.resize.load.Downsampler;
-import com.bumptech.glide.resize.load.ImageResizer;
-import com.bumptech.glide.resize.load.Transformation;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +43,7 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 /**
  * A class to coordinate image loading, resizing, recycling, and caching. Depending on the provided options and the
- * sdk version, uses a combination of an LRU disk cache and an LRU hard memory cache to try to reduce the number of
+ * sdk version, uses a combination of an LRU disk cache and an LRU memory cache to try to reduce the number of
  * load and resize operations performed and to maximize the number of times Bitmaps are recycled as opposed to
  * allocated. If no options are given defaults to using both a memory and a disk cache and to recycling bitmaps if
  * possible.
@@ -59,10 +55,11 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 public class ImageManager {
     private static final String TAG = "ImageManager";
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
+    // 250 MB
     private static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
     private static final int DEFAULT_BITMAP_COMPRESS_QUALITY = 90;
     private static final float MEMORY_SIZE_RATIO = 1f/10f;
-    public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
+    private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
 
     private final BitmapReferenceCounter bitmapReferenceCounter;
     private final int bitmapCompressQuality;
@@ -75,7 +72,6 @@ public class ImageManager {
     private final Handler bgHandler;
     private final ExecutorService executor;
     private final MemoryCache memoryCache;
-    private final ImageResizer resizer;
     private final DiskCache diskCache;
     private final SafeKeyGenerator safeKeyGenerator = new SafeKeyGenerator();
 
@@ -135,9 +131,6 @@ public class ImageManager {
 
         private Bitmap.CompressFormat bitmapCompressFormat = null;
         private boolean recycleBitmaps = CAN_RECYCLE;
-
-        @Deprecated
-        public BitmapFactory.Options decodeBitmapOptions = ImageResizer.getDefaultOptions();
 
         private BitmapPool bitmapPool;
         private BitmapReferenceCounter bitmapReferenceCounter;
@@ -291,9 +284,11 @@ public class ImageManager {
             if (resizeService == null) {
                 final int numThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
                 resizeService = Executors.newFixedThreadPool(numThreads, new ThreadFactory() {
+                    int threadNum = 1;
                     @Override
                     public Thread newThread(Runnable runnable) {
-                        final Thread result = new Thread(runnable);
+                        final Thread result = new Thread(runnable, "image-manager-resize-" + threadNum);
+                        threadNum++;
                         result.setPriority(THREAD_PRIORITY_BACKGROUND);
                         return result;
                     }
@@ -357,7 +352,6 @@ public class ImageManager {
         diskCache = builder.diskCache;
         bitmapReferenceCounter = builder.bitmapReferenceCounter;
         bitmapPool = builder.bitmapPool;
-        resizer = new ImageResizer(builder.bitmapPool, builder.decodeBitmapOptions);
         memoryCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
             @Override
             public void onImageRemoved(Bitmap removed) {
@@ -383,29 +377,22 @@ public class ImageManager {
     }
 
     /**
-     * Load an image
+     * Loads an image.
      *
-     * @param id A unique id for this image (it may include the width and height but is not required to)
-     * @param streamLoader An object that can fetch the image for the given id, width, and height if it is not cached
-     * @param transformation A transformation to apply to the image
-     * @param downsampler A downsampler to load the image from disk
-     * @param width The desired width of the final image
-     * @param height The desired height of the final image
-     * @param cb A callback to call when the image is ready
+     * @param task A {@link BitmapLoadTask} that will be used to fetch and decode an image if it is not cached.
+     * @param cb A {@link LoadedCallback} to call when the image is ready.
      * @return An {@link ImageManagerJob} that must be retained while the job is still relevant and that can be used
-     *          to cancel a job if the image is no longer needed
+     *          to cancel a job if the image is no longer needed.
      */
-    public LoadToken getImage(String id, StreamLoader streamLoader, Transformation transformation,
-                              Downsampler downsampler, int width, int height, LoadedCallback cb) {
+    public LoadToken getImage(BitmapLoadTask task, LoadedCallback cb) {
         if (shutdown) return null;
 
-        final String key = safeKeyGenerator.getSafeKey(id, transformation, downsampler, width, height);
+        final String key = safeKeyGenerator.getSafeKey(task);
         LoadToken result = null;
         if (!returnFromCache(key, cb)) {
             ImageManagerJob job = jobs.get(key);
             if (job == null) {
-                ImageManagerRunner runner = new ImageManagerRunner(key, streamLoader, transformation, downsampler,
-                        width, height);
+                ImageManagerRunner runner = new ImageManagerRunner(key, task);
                 job = new ImageManagerJob(runner, key);
                 jobs.put(key, job);
                 runner.execute();
@@ -538,23 +525,12 @@ public class ImageManager {
 
     private class ImageManagerRunner implements Runnable {
         public final String key;
-        public final int width;
-        public final int height;
-        private final StreamLoader streamLoader;
-        private final Transformation transformation;
-        private final Downsampler downsampler;
-
+        private final BitmapLoadTask task;
         private volatile Future<?> future;
-        private volatile boolean cancelled = false;
 
-        public ImageManagerRunner(String key, StreamLoader sl, Transformation t, Downsampler d, int width, int height) {
+        public ImageManagerRunner(String key, BitmapLoadTask task) {
             this.key = key;
-            this.height = height;
-            this.width = width;
-
-            this.streamLoader = sl;
-            this.transformation = t;
-            this.downsampler = d;
+            this.task = task;
         }
 
         private void execute() {
@@ -562,8 +538,6 @@ public class ImageManager {
         }
 
         public void cancel() {
-            cancelled = true;
-
             bgHandler.removeCallbacks(this);
 
             final Future current = future;
@@ -571,9 +545,7 @@ public class ImageManager {
                 current.cancel(false);
             }
 
-            if (streamLoader != null) {
-                streamLoader.cancel();
-            }
+            task.cancel();
         }
 
         @Override
@@ -600,9 +572,12 @@ public class ImageManager {
             Bitmap result = null;
             final InputStream is = diskCache.get(key);
             if (is != null) {
-                result = resizer.load(is, width, height, Downsampler.NONE);
+                // Since we're doing no downsampling we don't need the target width or height.
+                result = Downsampler.NONE.decode(is, bitmapPool, -1, -1);
                 if (result == null) {
-                    diskCache.delete(key); //the image must have been corrupted
+                    // If we have data for our key but couldn't decode it, the data must be corrupt, so we will clear it
+                    // from our cache and try to fetch it again.
+                    diskCache.delete(key);
                 }
             }
             return result;
@@ -612,41 +587,18 @@ public class ImageManager {
             future = executor.submit(new Runnable() {
                 @Override
                 public void run() {
-
-                    streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
-                        @Override
-                        public void onStreamReady(final InputStream is) {
-                            if (cancelled) {
-                                return;
-                            }
-
-                            //this callback might be called on some other thread,
-                            //we want to do resizing on our thread, especially if we're called
-                            //back on the main thread, so we will resubmit
-                            future = executor.submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        final Bitmap result = resizeIfNotFound(is, downsampler, transformation);
-                                        finishResize(result, false);
-                                    } catch (Exception e) {
-                                        handleException(e);
-                                    }
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onException(Exception e) {
-                            handleException(e);
-                        }
-                    });
+                    try {
+                        Bitmap result = decodeIfNotFound();
+                        finishResize(result, false);
+                    } catch (Exception e) {
+                        handleException(e);
+                    }
                 }
             });
         }
 
-        private Bitmap resizeIfNotFound(InputStream is, Downsampler downsampler, Transformation transformation) {
-            return resizer.load(is, width, height, downsampler, transformation);
+        private Bitmap decodeIfNotFound() throws Exception {
+            return task.load(bitmapPool);
         }
 
         private void finishResize(final Bitmap result, boolean isInDiskCache) {

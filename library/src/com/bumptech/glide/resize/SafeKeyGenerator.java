@@ -2,12 +2,9 @@ package com.bumptech.glide.resize;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import com.bumptech.glide.resize.load.Downsampler;
-import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.util.Util;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayDeque;
@@ -18,11 +15,10 @@ import java.util.Queue;
 
 public class SafeKeyGenerator {
     private final Map<LoadId, String> loadIdToSafeHash = new HashMap<LoadId, String>();
-    private final ByteBuffer byteBuffer = ByteBuffer.allocate(8);
     private final LoadIdPool loadIdPool = new LoadIdPool();
 
-    public String getSafeKey(String id, Transformation transformation, Downsampler downsampler, int width, int height) {
-        LoadId loadId = loadIdPool.get(id, transformation.getId(), downsampler.getId(), width, height);
+    public String getSafeKey(BitmapLoadTask task) {
+        LoadId loadId = loadIdPool.get(task.getId());
         String safeKey = loadIdToSafeHash.get(loadId);
         if (safeKey == null) {
             try {
@@ -52,12 +48,12 @@ public class SafeKeyGenerator {
             }
         }
 
-        public LoadId get(String id, String transformationId, String downsamplerId, int width, int height) {
+        public LoadId get(String id) {
             LoadId loadId = loadIdQueue.poll();
             if (loadId == null) {
                 loadId = new LoadId();
             }
-            loadId.init(id, transformationId, downsamplerId, width, height);
+            loadId.init(id);
             return loadId;
         }
 
@@ -70,28 +66,14 @@ public class SafeKeyGenerator {
 
     private class LoadId {
         private String id;
-        private String transformationId;
-        private String downsamplerId;
-        private int width;
-        private int height;
 
-        public void init(String id, String transformationId, String downsamplerId, int width, int height) {
+        public void init(String id) {
             this.id = id;
-            this.transformationId = transformationId;
-            this.downsamplerId = downsamplerId;
-            this.width = width;
-            this.height = height;
         }
 
         public String generateSafeKey() throws UnsupportedEncodingException, NoSuchAlgorithmException {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
             messageDigest.update(id.getBytes("UTF-8"));
-            messageDigest.update(transformationId.getBytes("UTF-8"));
-            messageDigest.update(downsamplerId.getBytes("UTF-8"));
-            byteBuffer.position(0);
-            byteBuffer.putInt(width);
-            byteBuffer.putInt(height);
-            messageDigest.update(byteBuffer.array());
             return Util.sha256BytesToHex(messageDigest.digest());
         }
 
@@ -102,23 +84,14 @@ public class SafeKeyGenerator {
 
             LoadId loadId = (LoadId) o;
 
-            if (height != loadId.height) return false;
-            if (width != loadId.width) return false;
-            if (!downsamplerId.equals(loadId.downsamplerId)) return false;
             if (!id.equals(loadId.id)) return false;
-            if (!transformationId.equals(loadId.transformationId)) return false;
 
             return true;
         }
 
         @Override
         public int hashCode() {
-            int result = id.hashCode();
-            result = 31 * result + transformationId.hashCode();
-            result = 31 * result + downsamplerId.hashCode();
-            result = 31 * result + width;
-            result = 31 * result + height;
-            return result;
+            return id.hashCode();
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.bumptech.glide.loader.model;
+package com.bumptech.glide.loader.bitmap.model;
 
 import java.util.HashMap;
 import java.util.Map;

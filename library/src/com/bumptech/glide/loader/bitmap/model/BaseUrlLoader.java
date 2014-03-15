@@ -1,9 +1,10 @@
-package com.bumptech.glide.loader.model;
+package com.bumptech.glide.loader.bitmap.model;
 
 import android.content.Context;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -13,30 +14,30 @@ import java.net.URL;
  *
  * @param <T> The type of the model
  */
-public abstract class UrlModelLoader<T> implements ModelLoader<T> {
-    private final ModelLoader<URL> concreteLoader;
+public abstract class BaseUrlLoader<T> implements ModelLoader<T, InputStream> {
+    private final ModelLoader<URL, InputStream> concreteLoader;
     private final Cache<URL> modelCache;
 
-    public UrlModelLoader(Context context) {
+    public BaseUrlLoader(Context context) {
         this(context, null);
     }
 
-    public UrlModelLoader(Context context, Cache<URL> modelCache) {
-        this(Glide.buildModelLoader(URL.class, context), modelCache);
+    public BaseUrlLoader(Context context, Cache<URL> modelCache) {
+        this(Glide.buildModelLoader(URL.class, InputStream.class, context), modelCache);
     }
 
     @SuppressWarnings("unused")
-    public UrlModelLoader(ModelLoader<URL> concreteLoader) {
+    public BaseUrlLoader(ModelLoader<URL, InputStream> concreteLoader) {
         this(concreteLoader, null);
     }
 
-    public UrlModelLoader(ModelLoader<URL> concreteLoader, Cache<URL> modelCache) {
+    public BaseUrlLoader(ModelLoader<URL, InputStream> concreteLoader, Cache<URL> modelCache) {
         this.concreteLoader = concreteLoader;
         this.modelCache = modelCache;
     }
 
     @Override
-    public StreamLoader getStreamLoader(T model, int width, int height) {
+    public ResourceFetcher<InputStream> getResourceFetcher(T model, int width, int height) {
         final String id = getId(model);
         URL result = null;
         if (modelCache != null) {
@@ -59,7 +60,7 @@ public abstract class UrlModelLoader<T> implements ModelLoader<T> {
             }
         }
 
-        return concreteLoader.getStreamLoader(result, width, height);
+        return concreteLoader.getResourceFetcher(result, width, height);
     }
 
     /**

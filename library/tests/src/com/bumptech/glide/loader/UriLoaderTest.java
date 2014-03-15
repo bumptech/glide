@@ -2,43 +2,46 @@ package com.bumptech.glide.loader;
 
 import android.net.Uri;
 import android.test.AndroidTestCase;
-import com.bumptech.glide.loader.model.ModelLoader;
-import com.bumptech.glide.loader.model.UriLoader;
-import com.bumptech.glide.loader.stream.LocalUriLoader;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.UriLoader;
+import com.bumptech.glide.loader.bitmap.resource.LocalUriFetcher;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 7/25/13
- * Time: 6:36 PM
- * To change this template use File | Settings | File Templates.
+ * Tests for the {@link UriLoader} class.
  */
 public class UriLoaderTest extends AndroidTestCase {
 
     private UriLoader loader;
-    private StreamLoader urlLoader;
+    private ResourceFetcher<InputStream> urlLoader;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        urlLoader = new StreamLoader() {
+        urlLoader = new ResourceFetcher<InputStream>() {
 
             @Override
-            public void loadStream(StreamReadyCallback cb) {
+            public InputStream loadResource() throws Exception {
+                return null;
+            }
+
+            @Override
+            public String getId() {
+                return null;
             }
 
             @Override
             public void cancel() {
             }
         };
-        loader = new UriLoader(getContext(), new ModelLoader<URL>() {
+        loader = new UriLoader(getContext(), new ModelLoader<URL, InputStream>() {
             @Override
-            public StreamLoader getStreamLoader(URL model, int width, int height) {
+            public ResourceFetcher<InputStream> getResourceFetcher(URL model, int width, int height) {
                 return urlLoader;
             }
 
@@ -51,31 +54,31 @@ public class UriLoaderTest extends AndroidTestCase {
 
     public void testHandlesFileUris() throws IOException {
         Uri fileUri = Uri.fromFile(new File("f"));
-        StreamLoader streamLoader = loader.getStreamLoader(fileUri, 0, 0);
-        assertTrue(streamLoader instanceof LocalUriLoader);
+        ResourceFetcher resourceFetcher = loader.getResourceFetcher(fileUri, 0, 0);
+        assertTrue(resourceFetcher instanceof LocalUriFetcher);
     }
 
     public void testHandlesResourceUris() throws IOException {
         Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");// + R.raw.ic_launcher);
-        StreamLoader streamLoader = loader.getStreamLoader(resourceUri, 0, 0);
-        assertTrue(streamLoader instanceof LocalUriLoader);
+        ResourceFetcher resourceFetcher = loader.getResourceFetcher(resourceUri, 0, 0);
+        assertTrue(resourceFetcher instanceof LocalUriFetcher);
     }
 
     public void testHandlesContentUris() {
         Uri contentUri = Uri.parse("content://com.bumptech.glide");
-        StreamLoader streamLoader = loader.getStreamLoader(contentUri, 0, 0);
-        assertTrue(streamLoader instanceof LocalUriLoader);
+        ResourceFetcher resourceFetcher = loader.getResourceFetcher(contentUri, 0, 0);
+        assertTrue(resourceFetcher instanceof LocalUriFetcher);
     }
 
     public void testHandlesHttpUris() {
         Uri httpUri = Uri.parse("http://www.google.com");
-        StreamLoader streamLoader = loader.getStreamLoader(httpUri, 0, 0);
-        assertEquals(urlLoader, streamLoader);
+        ResourceFetcher resourceFetcher = loader.getResourceFetcher(httpUri, 0, 0);
+        assertEquals(urlLoader, resourceFetcher);
     }
 
     public void testHandlesHttpsUris() {
         Uri httpsUri = Uri.parse("https://www.google.com");
-        StreamLoader streamLoader = loader.getStreamLoader(httpsUri, 0, 0);
-        assertEquals(urlLoader, streamLoader);
+        ResourceFetcher resourceFetcher = loader.getResourceFetcher(httpsUri, 0, 0);
+        assertEquals(urlLoader, resourceFetcher);
     }
 }

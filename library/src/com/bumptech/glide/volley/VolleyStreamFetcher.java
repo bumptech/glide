@@ -6,36 +6,46 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
-import com.android.volley.VolleyError;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.android.volley.toolbox.RequestFuture;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
- * A StreamLoader backed by volley for fetching images via http.
+ * A ResourceFetcher backed by volley for fetching images via http.
  */
-public class VolleyStreamLoader implements StreamLoader {
+public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     private final RequestQueue requestQueue;
     private final String url;
     private final RetryPolicy retryPolicy;
     private Request current = null;
 
     @SuppressWarnings("unused")
-    public VolleyStreamLoader(RequestQueue requestQueue, String url) {
+    public VolleyStreamFetcher(RequestQueue requestQueue, String url) {
         this(requestQueue, url, new DefaultRetryPolicy());
     }
 
-    public VolleyStreamLoader(RequestQueue requestQueue, String url, RetryPolicy retryPolicy) {
+    public VolleyStreamFetcher(RequestQueue requestQueue, String url, RetryPolicy retryPolicy) {
         this.requestQueue = requestQueue;
         this.url = url;
         this.retryPolicy = retryPolicy;
     }
 
     @Override
-    public void loadStream(final StreamReadyCallback cb) {
-        Request<Void> request = new GlideRequest(url, cb);
+    public InputStream loadResource() throws Exception {
+        RequestFuture<InputStream> requestFuture = RequestFuture.newFuture();
+        Request<Void> request = new GlideRequest(url, requestFuture);
+
         request.setRetryPolicy(retryPolicy);
         current = requestQueue.add(request);
+
+        return requestFuture.get();
+    }
+
+    @Override
+    public String getId() {
+        return url;
     }
 
     @Override
@@ -48,25 +58,21 @@ public class VolleyStreamLoader implements StreamLoader {
     }
 
     private static class GlideRequest extends Request<Void> {
-        private final StreamReadyCallback cb;
+        private final RequestFuture<InputStream> future;
 
-        public GlideRequest(String url, final StreamReadyCallback cb) {
-            super(Method.GET, url, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    cb.onException(error);
-                }
-            });
-            this.cb = cb;
+        public GlideRequest(String url, RequestFuture<InputStream> future) {
+            super(Method.GET, url, future);
+            this.future = future;
         }
 
         @Override
         protected Response<Void> parseNetworkResponse(NetworkResponse response) {
-            cb.onStreamReady(new ByteArrayInputStream(response.data));
+            future.onResponse(new ByteArrayInputStream(response.data));
             return Response.success(null, getCacheEntry());
         }
 
         @Override
-        protected void deliverResponse(Void response) { }
+        protected void deliverResponse(Void response) {
+        }
     }
 }

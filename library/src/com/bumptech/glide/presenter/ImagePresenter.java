@@ -10,41 +10,37 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
+import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
 import com.bumptech.glide.loader.image.ImageLoader;
-import com.bumptech.glide.loader.model.ModelLoader;
-import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.loader.transformation.None;
-import com.bumptech.glide.loader.transformation.TransformationLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
-import com.bumptech.glide.resize.load.Transformation;
+import com.bumptech.glide.resize.BitmapLoadTask;
 
 /**
  * Wraps an {@link Target} to display arbitrary Bitmaps and provides a framework for fetching and
- * loading bitmaps correctly when targest are being recycled. Uses {@link ModelLoader} to between a
- * model {@link StreamLoader} for a given model, a {@link StreamLoader} to download or otherwise obtain an
- * {@link java.io.InputStream} for a given model, and  an {@link ImageLoader} to load a bitmap from a given
- * {@link java.io.InputStream}. This class also determines the width and height of the wrapped
- * {@link android.widget.ImageView} at runtime and passes that information to the provided {@link ModelLoader} and
- * {@link ImageLoader}.
+ * loading bitmaps correctly when targets are being reused. Uses {@link BitmapLoadFactory} to define a
+ * {@link BitmapLoadTask} that translates a model into a bitmap, {@link ImageLoader} to run a
+ * {@link BitmapLoadTask} on a background thread or retrieve a cached bitmap equivalent to the given task.
+ * This class also determines the width and height of the wrapped {@link android.widget.ImageView} or {@link Target} at
+ * runtime and passes that information to the {@link BitmapLoadFactory}.
  *
  * @param <T> The type of the model that contains information necessary to display an image. Can be as simple
  *            as a String containing a path or a complex data type.
  */
 public class ImagePresenter<T> {
     private static final String TAG = "ImagePresenter";
+    private final BitmapLoadFactory<T> loadFactory;
 
     /**
      * A builder for an {@link ImagePresenter}.
      *
-     * <p> {@link Builder ImagePresenter.Builder#setImageView(android.widget.ImageView) setImageView},
-     * {@link Builder ImagePresenter.Builder#setPathLoader setPathLoader}, and
-     * {@link Builder ImagePresenter.Builder#setImageLoader setIamgeLoader}
-     * are required.
+     * <p> {@link Builder ImagePresenter.Builder#setTarget setTarget}
+     * {@link Builder ImagePresenter.Builder#setBitmapLoadFactory setBitmapLoadFactory}, and
+     * {@link Builder ImagePresenter.Builder#setImageLoader setImageLoader} * are required.
      * </p>
      *
-     * @param <T> The type of the model that the presenter this builder will produce requires to load a path and an
-     *           image from that path.
+     * @param <T> The type of the model that the presenter this builder will produce requires to load an image.
      */
     @SuppressWarnings("unused")
     public static class Builder<T> {
@@ -63,19 +59,13 @@ public class ImagePresenter<T> {
             }
         };
 
-        private ModelLoader<T> modelLoader;
         private int errorResourceId;
         private Drawable errorDrawable;
-        private TransformationLoader<T> transformationLoader;
         private Target target;
+        BitmapLoadFactory<T> loadFactory;
 
         /**
          * Builds an ImagePresenter.
-         *
-         * <p>
-         *     Note - this ImagePresenter will not be retained by default. Consider
-         *     {@link android.view.View#setTag(Object)}, or the view holder pattern.
-         * </p>
          *
          * @return A new ImagePresenter
          */
@@ -86,12 +76,8 @@ public class ImagePresenter<T> {
             if (imageLoader == null) {
                 throw new IllegalArgumentException("cannot create presenter without an image loader");
             }
-            if (modelLoader == null) {
-                throw new IllegalArgumentException("cannot create presenter without a model loader");
-            }
-
-            if (transformationLoader == null) {
-                transformationLoader = new None<T>();
+            if (loadFactory == null) {
+                throw new IllegalArgumentException("cannot create presenter without a bitmap load factory");
             }
 
             return new ImagePresenter<T>(this);
@@ -101,6 +87,8 @@ public class ImagePresenter<T> {
          * Required - Sets the {@link android.widget.ImageView} the presenter will use to display any loaded bitmaps.
          * Alternatively you can instead set a more general target for an object other than an ImageView using
          * {@link #setTarget(com.bumptech.glide.presenter.target.Target, android.content.Context)}.
+         *
+         * @see #setTarget(Target, Context)
          *
          * @param imageView The {@link android.widget.ImageView} to wrap
          * @return This Builder object
@@ -115,6 +103,8 @@ public class ImagePresenter<T> {
          * Required - Sets the {@link Target} the presenter will use to display any loaded bitmaps. If you are loading
          * bitmaps into an {@link ImageView}, you can instead use {@link #setImageView(android.widget.ImageView)}.
          *
+         * @see #setImageView(ImageView)
+         *
          * @param target The {@link Target} to wrap
          * @param context A context that can be held for the duration of the load
          * @return This builder object
@@ -127,14 +117,15 @@ public class ImagePresenter<T> {
         }
 
         /**
-         * Required - Sets the {@link ModelLoader} the presenter will use to obtain an id for and an InputStream to the
-         * image represented by a given model
+         * Required - Sets the {@link BitmapLoadFactory} the presenter will use to obtain an id for and an InputStream
+         * to the image represented by a given model
          *
-         * @param modelLoader The {@link ModelLoader} to use to obtain the id and InputStreams
+         * @param loadFactory The {@link BitmapLoadFactory} to use to obtain the id and InputStreams
          * @return This Builder object
          */
-        public Builder<T> setModelLoader(ModelLoader<T> modelLoader) {
-            this.modelLoader = modelLoader;
+        public Builder<T> setBitmapLoadFactory(BitmapLoadFactory<T> loadFactory) {
+            this.loadFactory = loadFactory;
+
             return this;
         }
 
@@ -255,20 +246,6 @@ public class ImagePresenter<T> {
             this.exceptionHandler = exceptionHandler;
             return this;
         }
-
-        /**
-         * Optional - Sets a transformation loader to use to obtain a transformation to apply to images on a per
-         * model basis.
-         *
-         * @see Transformation
-         *
-         * @param transformationLoader A {@link TransformationLoader} for this model type
-         * @return This builder object
-         */
-        public Builder<T> setTransformationLoader(TransformationLoader<T> transformationLoader) {
-            this.transformationLoader = transformationLoader;
-            return this;
-        }
     }
 
     @SuppressWarnings("all")
@@ -276,9 +253,7 @@ public class ImagePresenter<T> {
 
     private final Target target;
 
-    private final ModelLoader<T> modelLoader;
     private final ImageLoader imageLoader;
-    private final TransformationLoader<T> transformationLoader;
 
     private final Drawable placeholderDrawable;
     private final ImageReadyCallback<T> imageReadyCallback;
@@ -349,7 +324,6 @@ public class ImagePresenter<T> {
 
     protected ImagePresenter(Builder<T> builder) {
         this.imageLoader = builder.imageLoader;
-        this.transformationLoader = builder.transformationLoader;
 
         final Resources res = builder.context.getResources();
         if (builder.placeholderResourceId != 0) {
@@ -366,7 +340,7 @@ public class ImagePresenter<T> {
         this.coordinator = builder.coordinator;
         this.imageReadyCallback = builder.imageReadyCallback;
         this.exceptionHandler = builder.exceptionHandler;
-        this.modelLoader = builder.modelLoader;
+        this.loadFactory = builder.loadFactory;
         this.target = builder.target;
     }
 
@@ -437,20 +411,17 @@ public class ImagePresenter<T> {
 
     private void fetchImage(final T model, int width, int height, final int loadCount) {
         imageLoader.clear();
-        final String id = modelLoader.getId(model);
-        final StreamLoader sl = modelLoader.getStreamLoader(model, width, height);
+        final BitmapLoadTask loadTask = loadFactory.getLoadTask(model, width, height);
 
-        if (id == null || sl == null) {
+        if (loadTask == null) {
             if (Log.isLoggable(TAG, Log.INFO)) {
-                Log.i(TAG, "got null model id or stream loader model=" + model + " id=" + id + " stream loader=" + sl);
+                Log.i(TAG, "got null load task for model=" + model);
             }
             clear();
             return;
         }
 
-        final Transformation t = transformationLoader.getTransformation(model);
-
-        imageToken = imageLoader.fetchImage(id, sl, t, width, height, new ImageLoader.ImageReadyCallback() {
+        imageToken = imageLoader.fetchImage(loadTask, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
                 if (loadCount != currentCount || !canSetImage() || image == null) return false;

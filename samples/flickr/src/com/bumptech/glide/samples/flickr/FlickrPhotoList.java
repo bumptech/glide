@@ -12,20 +12,13 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.loader.model.Cache;
+import com.bumptech.glide.loader.bitmap.model.Cache;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 1/10/13
- * Time: 12:47 PM
- * To change this template use File | Settings | File Templates.
- */
 public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
@@ -94,7 +87,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         }
 
         @Override
-        protected Glide.Request<Photo> getRequest(Photo item) {
+        protected Glide.Request getRequest(Photo item) {
             return Glide.using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(item)
                     .centerCrop();
@@ -150,7 +143,6 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
-
 
             Glide.using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(current)

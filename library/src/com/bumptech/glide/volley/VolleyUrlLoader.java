@@ -6,18 +6,20 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.loader.model.GenericLoaderFactory;
-import com.bumptech.glide.loader.model.ModelLoader;
-import com.bumptech.glide.loader.model.ModelLoaderFactory;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
+import java.io.InputStream;
 import java.net.URL;
 
 /**
  *  A simple model loader for fetching images for a given url
  */
-public class VolleyUrlLoader implements ModelLoader<URL> {
-    public static class Factory implements ModelLoaderFactory<URL> {
+public class VolleyUrlLoader implements ModelLoader<URL, InputStream> {
+
+    public static class Factory implements ModelLoaderFactory<URL, InputStream> {
         private RequestQueue requestQueue;
 
         public Factory() { }
@@ -34,12 +36,12 @@ public class VolleyUrlLoader implements ModelLoader<URL> {
         }
 
         @Override
-        public ModelLoader<URL> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<URL, InputStream> build(Context context, GenericLoaderFactory factories) {
             return new VolleyUrlLoader(getRequestQueue(context));
         }
 
         @Override
-        public Class<? extends ModelLoader<URL>> loaderClass() {
+        public Class<? extends ModelLoader<URL, InputStream>> loaderClass() {
             return VolleyUrlLoader.class;
         }
 
@@ -65,8 +67,8 @@ public class VolleyUrlLoader implements ModelLoader<URL> {
     }
 
     @Override
-    public StreamLoader getStreamLoader(URL url, int width, int height) {
-        return new VolleyStreamLoader(requestQueue, url.toString(), getRetryPolicy());
+    public ResourceFetcher<InputStream> getResourceFetcher(URL url, int width, int height) {
+        return new VolleyStreamFetcher(requestQueue, url.toString(), getRetryPolicy());
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.bumptech.glide.loader.transformation;
+package com.bumptech.glide.loader.bitmap.transformation;
 
 import com.bumptech.glide.resize.load.Transformation;
 

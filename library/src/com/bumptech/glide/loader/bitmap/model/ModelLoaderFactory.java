@@ -1,4 +1,4 @@
-package com.bumptech.glide.loader.model;
+package com.bumptech.glide.loader.bitmap.model;
 
 import android.content.Context;
 
@@ -8,7 +8,7 @@ import android.content.Context;
  * will not be retained statically so it is safe for any ModelLoader built by this factory to retain a reference to a
  * {@link Context}.
  */
-public interface ModelLoaderFactory<T> {
+public interface ModelLoaderFactory<T, Y> {
     /**
      * Build a concrete ModelLoader for this model type.
      *
@@ -17,14 +17,14 @@ public interface ModelLoaderFactory<T> {
      *                  this factory's {@link ModelLoader} may depend on
      * @return A new {@link ModelLoader}
      */
-    public ModelLoader<T> build(Context context, GenericLoaderFactory factories);
+    public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories);
 
     /**
      * Get the class of the {@link ModelLoader} this factory builds.
      *
      * @return The class of the {@link ModelLoader}
      */
-    public Class<? extends ModelLoader<T>> loaderClass();
+    public Class<? extends ModelLoader<T, Y>> loaderClass();
 
     /**
      * A lifecycle method that will be called when this factory is about to replaced

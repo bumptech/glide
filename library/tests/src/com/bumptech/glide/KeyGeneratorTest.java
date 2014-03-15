@@ -2,10 +2,9 @@ package com.bumptech.glide;
 
 import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
+import com.bumptech.glide.resize.BitmapLoadTask;
 import com.bumptech.glide.resize.SafeKeyGenerator;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.resize.load.Downsampler;
-import com.bumptech.glide.resize.load.Transformation;
 
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -31,8 +30,7 @@ public class KeyGeneratorTest extends AndroidTestCase {
     }
 
     private String getRandomKeyFromGenerator() {
-        return keyGenerator.getSafeKey(getRandomId(), new RandomTransformation(), new RandomDownsampler(),
-                getRandomDimen(), getRandomDimen());
+        return keyGenerator.getSafeKey(new RandomBitmapLoadTask());
     }
 
     private static int getRandomDimen() {
@@ -43,29 +41,19 @@ public class KeyGeneratorTest extends AndroidTestCase {
         return UUID.randomUUID().toString();
     }
 
-    private static class RandomDownsampler extends Downsampler {
-
-        @Override
-        protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-            return 0;
-        }
-
+    private static class RandomBitmapLoadTask implements BitmapLoadTask {
         @Override
         public String getId() {
             return getRandomId();
         }
-    }
-
-    private static class RandomTransformation extends Transformation {
 
         @Override
-        public Bitmap transform(Bitmap bitmap, BitmapPool pool, int outWidth, int outHeight) {
+        public void cancel() {
+        }
+
+        @Override
+        public Bitmap load(BitmapPool bitmapPool) throws Exception {
             return null;
-        }
-
-        @Override
-        public String getId() {
-            return getRandomId();
         }
     }
 }

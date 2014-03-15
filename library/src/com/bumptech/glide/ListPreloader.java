@@ -89,7 +89,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
      * @param item The model to load.
      * @return A non null {@link Glide.Request}.
      */
-    protected abstract Glide.Request<T> getRequest(T item);
+    protected abstract Glide.Request getRequest(T item);
 
     private void preload(int start, boolean increasing) {
         if (isIncreasing != increasing) {

@@ -1,36 +1,25 @@
 package com.bumptech.glide;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.test.ActivityTestCase;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.bumptech.glide.loader.model.ModelLoader;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.tests.R;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 7/25/13
- * Time: 12:40 PM
- * To change this template use File | Settings | File Templates.
+ * Tests for the {@link Glide} interface and singleton.
  */
 public class GlideTest extends ActivityTestCase {
     private ImageView imageView;
@@ -137,12 +126,18 @@ public class GlideTest extends ActivityTestCase {
     }
 
     public void testDifferentModelLoadersReplacesPresenter() {
-        ModelLoader<Object> first = new ModelLoader<Object>() {
+        ModelLoader<Object, InputStream> first = new ModelLoader<Object, InputStream>() {
             @Override
-            public StreamLoader getStreamLoader(Object model, int width, int height) {
-                return new StreamLoader() {
+            public ResourceFetcher<InputStream> getResourceFetcher(Object model, int width, int height) {
+                return new ResourceFetcher<InputStream>() {
                     @Override
-                    public void loadStream(StreamReadyCallback cb) {
+                    public InputStream loadResource() throws Exception {
+                        return null;
+                    }
+
+                    @Override
+                    public String getId() {
+                        return null;
                     }
 
                     @Override
@@ -158,12 +153,18 @@ public class GlideTest extends ActivityTestCase {
 
         };
 
-        ModelLoader<Object> second = new ModelLoader<Object>() {
+        ModelLoader<Object, InputStream> second = new ModelLoader<Object, InputStream>() {
             @Override
-            public StreamLoader getStreamLoader(Object model, int width, int height) {
-                return new StreamLoader() {
+            public ResourceFetcher<InputStream> getResourceFetcher(Object model, int width, int height) {
+                return new ResourceFetcher<InputStream>() {
                     @Override
-                    public void loadStream(StreamReadyCallback cb) {
+                    public InputStream loadResource() throws Exception {
+                        return null;
+                    }
+
+                    @Override
+                    public String getId() {
+                        return null;
                     }
 
                     @Override
@@ -294,14 +295,14 @@ public class GlideTest extends ActivityTestCase {
 //                    temp.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
 //                    Glide.using(new ModelLoader<Object>() {
 //                        @Override
-//                        public StreamLoader getStreamLoader(Object model, int width, int height) {
-//                            return new StreamLoader() {
+//                        public ResourceFetcher getResourceFetcher(Object model, int width, int height) {
+//                            return new ResourceFetcher() {
 //                                @Override
-//                                public void loadStream(StreamReadyCallback cb) {
+//                                public void loadResource(ResourceReadyCallback cb) {
 //                                    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 //                                    ByteArrayOutputStream os = new ByteArrayOutputStream();
 //                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
-//                                    cb.onStreamReady(new ByteArrayInputStream(os.toByteArray()));
+//                                    cb.onResourceReady(new ByteArrayInputStream(os.toByteArray()));
 //                                }
 //
 //                                @Override

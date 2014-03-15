@@ -1,37 +1,40 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import com.bumptech.glide.loader.bitmap.BaseBitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.model.BaseUrlLoader;
+import com.bumptech.glide.loader.bitmap.model.ResourceLoader;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
-import com.bumptech.glide.loader.model.FileLoader;
-import com.bumptech.glide.loader.model.GenericLoaderFactory;
-import com.bumptech.glide.loader.model.ModelLoader;
-import com.bumptech.glide.loader.model.ModelLoaderFactory;
-import com.bumptech.glide.loader.model.ResourceLoader;
-import com.bumptech.glide.loader.model.StringLoader;
-import com.bumptech.glide.loader.model.UriLoader;
-import com.bumptech.glide.loader.stream.StreamLoader;
-import com.bumptech.glide.loader.transformation.CenterCrop;
-import com.bumptech.glide.loader.transformation.FitCenter;
-import com.bumptech.glide.loader.transformation.MultiTransformationLoader;
-import com.bumptech.glide.loader.transformation.None;
-import com.bumptech.glide.loader.transformation.TransformationLoader;
+import com.bumptech.glide.loader.bitmap.model.FileLoader;
+import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.StringLoader;
+import com.bumptech.glide.loader.bitmap.model.UriLoader;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
+import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
+import com.bumptech.glide.loader.bitmap.transformation.FitCenter;
+import com.bumptech.glide.loader.bitmap.transformation.MultiTransformationLoader;
+import com.bumptech.glide.loader.bitmap.transformation.None;
+import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
-
 import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
@@ -111,21 +114,22 @@ public class Glide {
     }
 
     protected Glide() {
-        loaderFactory.register(File.class, new FileLoader.Factory());
-        loaderFactory.register(Integer.class, new ResourceLoader.Factory());
-        loaderFactory.register(String.class, new StringLoader.Factory());
-        loaderFactory.register(Uri.class, new UriLoader.Factory());
+        loaderFactory.register(File.class, InputStream.class, new FileLoader.Factory());
+        loaderFactory.register(Integer.class, InputStream.class, new ResourceLoader.Factory());
+        loaderFactory.register(String.class, InputStream.class, new StringLoader.Factory());
+        loaderFactory.register(Uri.class, InputStream.class, new UriLoader.Factory());
         try {
             Class.forName("com.bumptech.glide.volley.VolleyUrlLoader$Factory");
-            loaderFactory.register(URL.class, new VolleyUrlLoader.Factory());
+            loaderFactory.register(URL.class, InputStream.class, new VolleyUrlLoader.Factory());
         } catch (ClassNotFoundException e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Volley not found, missing url loader");
             }
-            loaderFactory.register(URL.class, new ModelLoaderFactory<URL>() {
-                ModelLoader<URL> errorUrlLoader = new ModelLoader<URL>() {
+            loaderFactory.register(URL.class, InputStream.class, new ModelLoaderFactory<URL, InputStream>() {
+                ModelLoader<URL, InputStream> errorUrlLoader = new ModelLoader<URL, InputStream>() {
+
                     @Override
-                    public StreamLoader getStreamLoader(URL model, int width, int height) {
+                    public ResourceFetcher<InputStream> getResourceFetcher(URL model, int width, int height) {
                         throw new IllegalArgumentException("No ModelLoaderFactory for urls registered with Glide");
                     }
 
@@ -136,13 +140,13 @@ public class Glide {
                 };
 
                 @Override
-                public ModelLoader<URL> build(Context context, GenericLoaderFactory factories) {
+                public ModelLoader<URL, InputStream> build(Context context, GenericLoaderFactory factories) {
                     return errorUrlLoader;
                 }
 
                 @Override @SuppressWarnings("unchecked")
-                public Class<? extends ModelLoader<URL>> loaderClass() {
-                    return (Class<ModelLoader<URL>>) errorUrlLoader.getClass();
+                public Class<? extends ModelLoader<URL, InputStream>> loaderClass() {
+                    return (Class<ModelLoader<URL, InputStream>>) errorUrlLoader.getClass();
                 }
 
                 @Override
@@ -207,12 +211,12 @@ public class Glide {
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
      * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Typically the {@link Glide#using(com.bumptech.glide.loader.model.ModelLoader)} syntax is preferred
+     * models. Typically the {@link Glide#using(ModelLoader)} syntax is preferred
      * because it directly links the model with the ModelLoader being used to load it.
      *
      * <p>
      *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
-     *     used for any other model class, {@link com.bumptech.glide.loader.model.ModelLoaderFactory#teardown()}
+     *     used for any other model class, {@link ModelLoaderFactory#teardown()}
      *     will be called.
      * </p>
      *
@@ -225,8 +229,8 @@ public class Glide {
      * @param factory The factory to use
      * @param <T> The type of the model
      */
-    public <T> void register(Class<T> clazz, ModelLoaderFactory<T> factory) {
-        ModelLoaderFactory<T> removed = loaderFactory.register(clazz, factory);
+    public <T> void register(Class<T> clazz, ModelLoaderFactory<T, InputStream> factory) {
+        ModelLoaderFactory<T, InputStream> removed = loaderFactory.register(clazz, InputStream.class, factory);
         if (removed != null) {
             removed.teardown();
         }
@@ -235,19 +239,19 @@ public class Glide {
     /**
      * Build a {@link ModelLoader} for the given model class using a registered factory.
      *
-     * @param clazz The class to get a {@link ModelLoader} for
+     * @param modelClass The class to get a {@link ModelLoader} for
      * @param context Any context
      * @param <T> The type of the model
      * @return A new {@link ModelLoader} for the given model class
      * @throws IllegalArgumentException if no factory exists for the given class
      */
-    public static <T> ModelLoader<T> buildModelLoader(Class<T> clazz, Context context) {
-        return GLIDE.loaderFactory.buildModelLoader(clazz, context);
+    public static <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
+        return GLIDE.loaderFactory.buildModelLoader(modelClass, resourceClass, context);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> ModelLoaderFactory<T> getFactory(T model) {
-        return loaderFactory.getFactory((Class<T>) model.getClass());
+    private <T, Y> ModelLoaderFactory<T, Y> getFactory(T model, Class<Y> resourceClass) {
+        return loaderFactory.getFactory((Class<T>) model.getClass(), resourceClass);
     }
 
     private ImageViewTarget getImageViewTarget(ImageView imageView) {
@@ -279,7 +283,7 @@ public class Glide {
      *     {@link ModelLoader}/{@link ModelLoaderFactory}. You can also optionally use this method to override the
      *     default {@link ModelLoader} for a model for which there is a default. If you would like to permanently
      *     use this factory for all model loads of the this factory's type, see
-     *     {@link #register(Class, com.bumptech.glide.loader.model.ModelLoaderFactory)}.
+     *     {@link #register(Class, ModelLoaderFactory)}.
      * </p>
      *
      * <p>
@@ -287,7 +291,7 @@ public class Glide {
      *     supply a custom {@link ModelLoaderFactory} here to do so, even if a default exists. Fetching a smaller image
      *     means less bandwidth, battery, and memory usage as well as faster image loads. To simply build a url to
      *     download an image using the width and the height of the target, consider passing in a factory for a subclass
-     *     of {@link com.bumptech.glide.loader.model.UrlModelLoader}
+     *     of {@link BaseUrlLoader}
      * </p>
      *
      *
@@ -295,35 +299,64 @@ public class Glide {
      * @param <T> The type of the model to load using this factory
      * @return A {@link ModelRequest} to set the specific model to load
      */
-    public static <T> ModelRequest<T> using(ModelLoaderFactory<T> factory) {
-        return new ModelRequest<T>(factory);
+    public static <T, Y> ModelRequest<T, Y> using(ModelLoaderFactory<T, Y> factory) {
+        return new ModelRequest<T, Y>(factory);
     }
 
     /**
      * Set the {@link ModelLoader} and therefore the model type to use for a new load.
      *
-     * @see #using(com.bumptech.glide.loader.model.ModelLoaderFactory)
+     * @see #using(ModelLoaderFactory)
      *
      * @param modelLoader The model loader to use
      * @param <T> The type of the model to load using this loader
+     * @param <Y> the type of resource the model loader can translate from a given model.
      * @return A {@link ModelRequest} to set the specific model to load
      */
-    public static <T> ModelRequest<T> using(final ModelLoader<T> modelLoader) {
-        return new ModelRequest<T>(new ModelLoaderFactory<T>() {
+    public static <T, Y> ModelRequest<T, Y> usingGeneric(final ModelLoader<T, Y> modelLoader) {
+        return new ModelRequest<T, Y>(new ModelLoaderFactory<T, Y>() {
+
             @Override
-            public ModelLoader<T> build(Context context, GenericLoaderFactory factories) {
+            public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories) {
                 return modelLoader;
             }
 
-
-            @Override @SuppressWarnings("unchecked")
-            public Class<? extends ModelLoader<T>> loaderClass() {
-                return (Class<ModelLoader<T>>) modelLoader.getClass();
+            @SuppressWarnings("unchecked")
+            @Override
+            public Class<? extends ModelLoader<T, Y>> loaderClass() {
+                return (Class<ModelLoader<T, Y>>) modelLoader.getClass();
             }
 
             @Override
             public void teardown() { }
         });
+    }
+
+    /**
+     * Set the {@link ModelLoader} to use for for a new load where the model loader translates from a model to an
+     * {@link InputStream} resource.
+     *
+     * @param modelLoader The model loader to use.
+     * @param <T> The type of the model.
+     * @return A new {@link StreamModelRequest}.
+     */
+    public static <T> StreamModelRequest<T> using(final ModelLoader<T, InputStream> modelLoader) {
+        return new StreamModelRequest<T>(new ModelLoaderFactory<T, InputStream>() {
+            @Override
+            public ModelLoader<T, InputStream> build(Context context, GenericLoaderFactory factories) {
+                return modelLoader;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Class<? extends ModelLoader<T, InputStream>> loaderClass() {
+                return (Class<ModelLoader<T, InputStream>>) modelLoader.getClass();
+            }
+
+            @Override
+            public void teardown() { }
+        });
+
     }
 
     /**
@@ -336,8 +369,8 @@ public class Glide {
      * @param string The string representing the image. Must be either a path, or a uri handled by {@link UriLoader}
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
-    public static Request<String> load(String string) {
-        return new Request<String>(string);
+    public static StreamRequest<String> load(String string) {
+        return new StreamRequest<String>(string);
     }
 
     /**
@@ -350,8 +383,8 @@ public class Glide {
      * @param uri The uri representing the image. Must be a uri handled by {@link UriLoader}
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
-    public static Request<Uri> load(Uri uri) {
-        return new Request<Uri>(uri);
+    public static StreamRequest<Uri> load(Uri uri) {
+        return new StreamRequest<Uri>(uri);
     }
 
     /**
@@ -365,8 +398,8 @@ public class Glide {
      * @param url The URL representing the image.
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
-    public static Request<URL> load(URL url) {
-        return new Request<URL>(url);
+    public static StreamRequest<URL> load(URL url) {
+        return new StreamRequest<URL>(url);
     }
 
     /**
@@ -379,8 +412,8 @@ public class Glide {
      * @param file The File containing the image
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
-    public static Request<File> load(File file) {
-        return new Request<File>(file);
+    public static StreamRequest<File> load(File file) {
+        return new StreamRequest<File>(file);
     }
 
     /**
@@ -394,8 +427,8 @@ public class Glide {
      * @param resourceId the id of the resource containing the image
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
-    public static Request<Integer> load(Integer resourceId) {
-        return new Request<Integer>(resourceId);
+    public static StreamRequest<Integer> load(Integer resourceId) {
+        return new StreamRequest<Integer>(resourceId);
     }
 
     /**
@@ -407,8 +440,8 @@ public class Glide {
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      * @throws IllegalArgumentException If no {@link ModelLoaderFactory} is registered for the given model type
      */
-    public static <T> Request<T> load(T model) {
-        return new Request<T>(model);
+    public static <T> StreamRequest<T> load(T model) {
+        return new StreamRequest<T>(model);
     }
 
     /**
@@ -437,19 +470,37 @@ public class Glide {
     }
 
     /**
+     * A helper class for building requests with custom {@link ModelLoader}s that translate models to
+     * {@link InputStream} resources.
+     *
+     * @param <T> The type of the model.
+     */
+    public static class StreamModelRequest<T> {
+        private final ModelLoaderFactory<T, InputStream> factory;
+
+        private StreamModelRequest(ModelLoaderFactory<T, InputStream> factory) {
+            this.factory = factory;
+        }
+
+        public StreamRequest<T> load(T model) {
+            return new StreamRequest<T>(model, factory);
+        }
+    }
+
+    /**
      * A helper class for building requests with custom {@link ModelLoader}s
      *
      * @param <T> The type of the model (and {@link ModelLoader}
      */
-    public static class ModelRequest<T> {
-        private final ModelLoaderFactory<T> factory;
+    public static class ModelRequest<T, Y> {
+        private final ModelLoaderFactory<T, Y> factory;
 
-        private ModelRequest(ModelLoaderFactory<T> factory) {
+        private ModelRequest(ModelLoaderFactory<T, Y> factory) {
             this.factory = factory;
         }
 
-        public Request<T> load(T model) {
-            return new Request<T>(model, factory);
+        public Request<T, Y> load(T model) {
+            return new Request<T, Y>(model, factory);
         }
     }
 
@@ -457,29 +508,139 @@ public class Glide {
      * Sets a variety of type independent options including resizing, animations, and placeholders. Responsible
      * for building or retrieving an ImagePresenter for the given target and passing the ImagePresenter the given model.
      *
+     * @see Request
+     *
      * @param <T> The type of model that will be loaded into the target
      */
+    public static class StreamRequest<T>  extends Request<T, InputStream> {
+        private StreamRequest(T model) {
+            super(model, InputStream.class);
+            approximate();
+        }
+
+        private StreamRequest(T model, ModelLoaderFactory<T, InputStream> factory) {
+            super(model, factory);
+            approximate();
+        }
+
+        /**
+         * Load images at a size near the size of the target using {@link Downsampler#AT_LEAST}.
+         *
+         * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
+         *
+         * @return This Request
+         */
+        public StreamRequest<T> approximate() {
+            return downsample(Downsampler.AT_LEAST);
+        }
+
+        /**
+         * Load images at their original size using {@link Downsampler#NONE}.
+         *
+         * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
+         *
+         * @return This Request
+         */
+        public StreamRequest<T> asIs() {
+            return downsample(Downsampler.NONE);
+        }
+
+        /**
+         * Load images using the given {@link Downsampler}. Replaces any existing downsampler. Defaults to
+         * {@link Downsampler#AT_LEAST}
+         *
+         * @param downsampler The downsampler
+         * @return This Request
+         */
+        public StreamRequest<T> downsample(Downsampler downsampler) {
+            super.decoder(downsampler);
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> decoder(BitmapDecoder<InputStream> decoder) {
+            super.decoder(decoder);
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> centerCrop() {
+            super.centerCrop();
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> fitCenter() {
+            super.fitCenter();
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> transform(Transformation transformation) {
+            super.transform(transformation);
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> transform(TransformationLoader<T> transformationLoader) {
+            super.transform(transformationLoader);
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> animate(int animationId) {
+            super.animate(animationId);
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> placeholder(int resourceId) {
+            super.placeholder(resourceId);
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> error(int resourceId) {
+            super.error(resourceId);
+            return this;
+        }
+
+        @Override
+        public StreamRequest<T> listener(RequestListener<T> requestListener) {
+            super.listener(requestListener);
+            return this;
+        }
+    }
+
+    /**
+     * Sets a variety of type independent options including resizing, animations, and placeholders. Responsible
+     * for building or retrieving an ImagePresenter for the given target and passing the ImagePresenter the given model.
+     *
+     * @param <T> The type of model that will be loaded into the target.
+     * @param <Y> The type of the resource the model loader for this request will translate the model to and the decoder
+     *           for this request can decode an {@link Bitmap} from.
+     */
     @SuppressWarnings("unused") //public api
-    public static class Request<T> {
+    public static class Request<T, Y> {
 
         private Context context;
         private Target target;
 
-        private ModelLoaderFactory<T> modelLoaderFactory;
+        private ModelLoaderFactory<T, Y> modelLoaderFactory;
         private final T model;
 
         private int animationId = -1;
         private int placeholderId = -1;
         private int errorId = -1;
-        private Downsampler downsampler = Downsampler.AT_LEAST;
         private ArrayList<TransformationLoader<T>> transformationLoaders = new ArrayList<TransformationLoader<T>>();
         private RequestListener<T> requestListener;
+        private BitmapDecoder<Y> decoder;
 
-        private Request(T model) {
-            this(model, GLIDE.getFactory(model));
+        private Request(T model, Class<Y> decoderClazz) {
+            this(model, GLIDE.getFactory(model, decoderClazz));
         }
 
-        private Request(T model, ModelLoaderFactory<T> factory) {
+        private Request(T model, ModelLoaderFactory<T, Y> factory) {
              if (model == null ) {
                 throw new IllegalArgumentException("Model can't be null");
             }
@@ -492,71 +653,51 @@ public class Glide {
         }
 
         /**
-         * Load images at a size near the size of the target using {@link Downsampler#AT_LEAST}.
+         * Loads the image from the given resource type into an {@link Bitmap} using the given
+         * {@link BitmapDecoder}.
          *
-         * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
+         * @see Downsampler
          *
-         * @return This Request
+         * @param decoder The {@link BitmapDecoder} to use to decode the resource.
+         * @return This Request.
          */
-        public Request<T> approximate() {
-            return downsample(Downsampler.AT_LEAST);
-        }
-
-        /**
-         * Load images at their original size using {@link Downsampler#NONE}.
-         *
-         * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
-         *
-         * @return This Request
-         */
-        public Request<T> asIs() {
-            return downsample(Downsampler.NONE);
-        }
-
-        /**
-         * Load images using the given {@link Downsampler}. Replaces any existing downsampler. Defaults to
-         * {@link Downsampler#AT_LEAST}
-         *
-         * @param downsampler The downsampler
-         * @return This Request
-         */
-        public Request<T> downsample(Downsampler downsampler) {
-            this.downsampler = downsampler;
+        public Request<T, Y> decoder(BitmapDecoder<Y> decoder) {
+            this.decoder = decoder;
 
             return this;
         }
 
         /**
-         * Transform images using {@link com.bumptech.glide.loader.transformation.CenterCrop}.
+         * Transform images using {@link CenterCrop}.
          *
-         * @see #transform(com.bumptech.glide.loader.transformation.TransformationLoader)
+         * @see #transform(TransformationLoader)
          *
          * @return This Request
          */
-        public Request<T> centerCrop() {
+        public Request<T, Y> centerCrop() {
             return transform(new CenterCrop<T>());
         }
 
         /**
-         * Transform images using {@link com.bumptech.glide.loader.transformation.FitCenter}.
+         * Transform images using {@link FitCenter}.
          *
-         * @see #transform(com.bumptech.glide.loader.transformation.TransformationLoader)
+         * @see #transform(TransformationLoader)
          *
          * @return This Request
          */
-        public Request<T> fitCenter() {
+        public Request<T, Y> fitCenter() {
             return transform(new FitCenter<T>());
         }
 
         /**
          * Set an arbitrary transformation to apply after an image has been loaded into memory.
          *
-         * @see #transform(com.bumptech.glide.loader.transformation.TransformationLoader)
+         * @see #transform(TransformationLoader)
          *
          * @param transformation The transformation to use
          * @return This Request
          */
-        public Request<T> transform(final Transformation transformation) {
+        public Request<T, Y> transform(final Transformation transformation) {
             return transform(new TransformationLoader<T>() {
                 @Override
                 public Transformation getTransformation(T model) {
@@ -577,7 +718,7 @@ public class Glide {
          * @param transformationLoader The loader to obtaian a transformation for a given model
          * @return This Request
          */
-        public Request<T> transform(TransformationLoader<T> transformationLoader) {
+        public Request<T, Y> transform(TransformationLoader<T> transformationLoader) {
             transformationLoaders.add(transformationLoader);
 
             return this;
@@ -590,7 +731,7 @@ public class Glide {
          * @param animationId The resource id of the animation to run
          * @return This Request
          */
-        public Request<T> animate(int animationId) {
+        public Request<T, Y> animate(int animationId) {
             this.animationId = animationId;
 
             return this;
@@ -602,7 +743,7 @@ public class Glide {
          * @param resourceId The id of the resource to use as a placeholder
          * @return This Request
          */
-        public Request<T> placeholder(int resourceId) {
+        public Request<T, Y> placeholder(int resourceId) {
             this.placeholderId = resourceId;
 
             return this;
@@ -614,7 +755,7 @@ public class Glide {
          * @param resourceId The id of the resource to use as a placeholder
          * @return This request
          */
-        public Request<T> error(int resourceId) {
+        public Request<T, Y> error(int resourceId) {
             this.errorId = resourceId;
 
             return this;
@@ -628,7 +769,7 @@ public class Glide {
          * @param requestListener The request listener to use
          * @return This request
          */
-        public Request<T> listener(RequestListener<T> requestListener) {
+        public Request<T, Y> listener(RequestListener<T> requestListener) {
             this.requestListener = requestListener;
 
             return this;
@@ -646,15 +787,6 @@ public class Glide {
          * @param imageView The view that will display the image
          */
         public void into(ImageView imageView) {
-            //make an effort to support wrap content layout params. This will still blow
-            //up if transformation doesn't handle wrap content, but its a start
-            final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-            if (layoutParams != null &&
-                    (layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
-                    layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT)) {
-                downsampler = Downsampler.NONE;
-            }
-
             finish(imageView.getContext(), GLIDE.getImageViewTargetOrSet(imageView));
         }
 
@@ -712,12 +844,12 @@ public class Glide {
 
         private ImagePresenter<T> buildImagePresenter(final Target target) {
             TransformationLoader<T> transformationLoader = getFinalTransformationLoader();
+            final ModelLoader<T, Y> modelLoader = modelLoaderFactory.build(context, GLIDE.loaderFactory);
 
             ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
                     .setTarget(target, context)
-                    .setModelLoader(modelLoaderFactory.build(context, GLIDE.loaderFactory))
-                    .setImageLoader(new ImageManagerLoader(context, downsampler))
-                    .setTransformationLoader(transformationLoader);
+                    .setBitmapLoadFactory(new BaseBitmapLoadFactory<T, Y>(modelLoader, decoder, transformationLoader))
+                    .setImageLoader(new ImageManagerLoader(context));
 
             if (animationId != -1 || requestListener != null) {
                 final Animation animation;
@@ -818,14 +950,14 @@ public class Glide {
         public final int placeholderId;
         public final int errorId;
 
-        private final String downsamplerId;
         private final String transformationId;
         private final Class requestListenerClass;
+        private final String decoderId;
 
         public Metadata(Request request) {
             modelClass = request.model.getClass();
             modelLoaderClass = request.modelLoaderFactory.loaderClass();
-            downsamplerId = request.downsampler.getId();
+            decoderId = request.decoder.getId();
             transformationId = request.getFinalTransformationId();
             animationId = request.animationId;
             placeholderId = request.placeholderId;
@@ -840,7 +972,7 @@ public class Glide {
             if (animationId != metadata.animationId) return false;
             if (errorId != metadata.errorId) return false;
             if (placeholderId != metadata.placeholderId) return false;
-            if (!downsamplerId.equals(metadata.downsamplerId)) return false;
+            if (!decoderId.equals(metadata.decoderId)) return false;
             if (!modelClass.equals(metadata.modelClass)) return false;
             if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
             if (!transformationId.equals(metadata.transformationId)) return false;

@@ -3,186 +3,21 @@
  */
 package com.bumptech.glide.resize.load;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.media.ExifInterface;
-import android.os.Build;
 import android.util.Log;
-import com.bumptech.glide.resize.RecyclableBufferedInputStream;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
-
-import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
- * A class for synchronously resizing bitmaps with or without Bitmaps to reuse
+ * A class for storing methods to resize Bitmaps
  */
-public class ImageResizer {
-    private static final String TAG = "ImageResizer";
-    private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
-    private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
+public class TransformationUtils {
+    private static final String TAG = "TransformationUtils";
     private static final int PAINT_FLAGS = Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
-    private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
-    private final BitmapPool bitmapPool;
-
-    private final BitmapFactory.Options defaultOptions;
-
-    @TargetApi(11)
-    public static BitmapFactory.Options getDefaultOptions() {
-       BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
-       decodeBitmapOptions.inDither = false;
-       decodeBitmapOptions.inScaled = false;
-       decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
-       decodeBitmapOptions.inSampleSize = 1;
-       if (CAN_RECYCLE)  {
-           decodeBitmapOptions.inMutable = true;
-       }
-       return decodeBitmapOptions;
-    }
-
-    /**
-     * Creates a new resizer that will not recycle Bitmaps
-     */
-    @SuppressWarnings("unused")
-    public ImageResizer() {
-        this(null, null);
-    }
-
-    @SuppressWarnings("unused")
-    public ImageResizer(BitmapPool bitmapPool) {
-        this(bitmapPool, null);
-    }
-
-    @SuppressWarnings("unused")
-    @Deprecated
-    public ImageResizer(BitmapFactory.Options options) {
-        this(null, options);
-    }
-
-    /**
-     * Creates a new resizer that will attempt to recycle {@link android.graphics.Bitmap}s if any are available in the given dimensions
-     *
-     * @param bitmapPool The cache to try to recycle {@link android.graphics.Bitmap}s from
-     */
-    @Deprecated
-    public ImageResizer(BitmapPool bitmapPool, BitmapFactory.Options defaultOptions){
-        if (bitmapPool == null) {
-            this.bitmapPool = new BitmapPoolAdapter();
-        } else {
-            this.bitmapPool = bitmapPool;
-        }
-
-        if (defaultOptions == null) {
-            this.defaultOptions = getDefaultOptions();
-        } else {
-            this.defaultOptions = defaultOptions;
-        }
-    }
-
-    public Bitmap load(InputStream is) {
-        return load(is, -1, -1, Downsampler.NONE, Transformation.NONE);
-    }
-
-    public Bitmap load(InputStream is, int outWidth, int outHeight) {
-        return load(is, outWidth, outHeight, Transformation.NONE);
-    }
-
-    public Bitmap load(InputStream is, int outWidth, int outHeight, Transformation transformation) {
-        return load(is, outWidth, outHeight, Downsampler.AT_LEAST, transformation);
-    }
-
-    public Bitmap load(InputStream is, int outWidth, int outHeight, Downsampler downsampler) {
-        return load(is, outWidth, outHeight, downsampler, Transformation.NONE);
-    }
-
-    public Bitmap load(InputStream is, int outWidth, int outHeight, Downsampler downsampler, Transformation transformation) {
-        byte[] tempBytesForBis = getTempBytes();
-        byte[] tempBytesForOptions = getTempBytes();
-
-        BitmapFactory.Options options = getOptions();
-        options.inTempStorage = tempBytesForOptions;
-
-        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, tempBytesForBis);
-
-        final Bitmap initial = downsampler.downsample(bis, options, bitmapPool, outWidth, outHeight);
-        final Bitmap result = transformation.transform(initial, bitmapPool, outWidth, outHeight);
-
-        if (initial != result && !bitmapPool.put(initial)) {
-            initial.recycle();
-        }
-
-        releaseTempBytes(tempBytesForBis);
-        releaseTempBytes(tempBytesForOptions);
-
-        return result;
-    }
-
-    private BitmapFactory.Options getOptions() {
-        BitmapFactory.Options result = new BitmapFactory.Options();
-        copyOptions(defaultOptions, result);
-        return result;
-    }
-
-    private byte[] getTempBytes() {
-        byte[] result;
-        synchronized (tempQueue) {
-            result = tempQueue.poll();
-        }
-        if (result == null) {
-            result = new byte[TEMP_BYTES_SIZE];
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Created temp bytes");
-            }
-        }
-        return result;
-    }
-
-    private void releaseTempBytes(byte[] bytes) {
-        synchronized (tempQueue) {
-            tempQueue.offer(bytes);
-        }
-    }
-
-    private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to) {
-        if (Build.VERSION.SDK_INT >= 11) {
-            copyOptionsHoneycomb(from, to);
-        } else if (Build.VERSION.SDK_INT >= 10) {
-            copyOptionsGingerbreadMr1(from, to);
-        } else {
-            copyOptionsFroyo(from, to);
-        }
-    }
-
-    @TargetApi(11)
-    private static void copyOptionsHoneycomb(BitmapFactory.Options from, BitmapFactory.Options to) {
-        copyOptionsGingerbreadMr1(from, to);
-        to.inMutable = from.inMutable;
-    }
-
-    @TargetApi(10)
-    private static void copyOptionsGingerbreadMr1(BitmapFactory.Options from, BitmapFactory.Options to) {
-        copyOptionsFroyo(from, to);
-        to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
-    }
-
-    private static void copyOptionsFroyo(BitmapFactory.Options from, BitmapFactory.Options to) {
-        to.inDensity = from.inDensity;
-        to.inDither = from.inDither;
-        to.inInputShareable = from.inInputShareable;
-        to.inPreferredConfig = from.inPreferredConfig;
-        to.inPurgeable = from.inPurgeable;
-        to.inSampleSize = from.inSampleSize;
-        to.inScaled = from.inScaled;
-        to.inScreenDensity = from.inScreenDensity;
-        to.inTargetDensity = from.inTargetDensity;
-    }
 
     /**
      * A potentially expensive operation to crop the given Bitmap so that it fills the given dimensions. This operation
@@ -443,7 +278,7 @@ public class ImageResizer {
 
         final Canvas canvas = new Canvas(result);
         final Paint paint = new Paint(PAINT_FLAGS);
-        canvas.drawBitmap(toOrient, matrix, null);
+        canvas.drawBitmap(toOrient, matrix, paint);
 
         return result;
     }

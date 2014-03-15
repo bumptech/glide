@@ -13,13 +13,16 @@ import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.loader.bitmap.BaseBitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.model.Cache;
+import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
-import com.bumptech.glide.loader.model.Cache;
-import com.bumptech.glide.loader.transformation.CenterCrop;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.Target;
+import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +88,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         }
 
         @Override
-        protected Glide.Request<Photo> getRequest(Photo item) {
+        protected Glide.Request getRequest(Photo item) {
             return Glide.using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(item)
                     .centerCrop();
@@ -136,10 +139,11 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 //reason why ImagePresenter is used here and not in FlickrPhotoList.
                 final Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo>()
-                        .setModelLoader(new FlickrModelLoader(context, urlCache))
+                        .setBitmapLoadFactory(new BaseBitmapLoadFactory<Photo, InputStream>(
+                                new FlickrModelLoader(context, urlCache), Downsampler.AT_LEAST,
+                                new CenterCrop<Photo>()))
                         .setImageView(imageView)
                         .setImageLoader(new ImageManagerLoader(context))
-                        .setTransformationLoader(new CenterCrop<Photo>())
                         .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Photo>() {
                             @Override
                             public void onImageReady(Photo photo, Target target, boolean fromCache) {

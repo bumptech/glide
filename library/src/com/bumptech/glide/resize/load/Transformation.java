@@ -20,7 +20,7 @@ public abstract class Transformation {
                 throw new IllegalArgumentException("Cannot center crop image to width=" + outWidth + " and height="
                         + outHeight);
             }
-            return ImageResizer.centerCrop(pool.get(outWidth, outHeight, bitmap.getConfig()), bitmap, outWidth, outHeight);
+            return TransformationUtils.centerCrop(pool.get(outWidth, outHeight, bitmap.getConfig()), bitmap, outWidth, outHeight);
         }
     };
 
@@ -37,7 +37,7 @@ public abstract class Transformation {
                 throw new IllegalArgumentException("Cannot fit center image to within width=" + outWidth + " or height="
                         + outHeight);
             }
-            return ImageResizer.fitInSpace(bitmap, outWidth, outHeight);
+            return TransformationUtils.fitInSpace(bitmap, outWidth, outHeight);
         }
     };
 

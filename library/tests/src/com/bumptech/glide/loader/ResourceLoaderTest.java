@@ -4,36 +4,26 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.test.ActivityTestCase;
-import com.bumptech.glide.loader.model.ModelLoader;
-import com.bumptech.glide.loader.model.ResourceLoader;
-import com.bumptech.glide.loader.model.UriLoader;
-import com.bumptech.glide.loader.stream.StreamLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.ResourceLoader;
+import com.bumptech.glide.loader.bitmap.model.UriLoader;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.tests.R;
 
 import java.io.InputStream;
 import java.net.URL;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 7/25/13
- * Time: 11:13 PM
- * To change this template use File | Settings | File Templates.
+ * Tests for the {@link ResourceLoader} class.
  */
 public class ResourceLoaderTest extends ActivityTestCase {
-    private boolean cbCalled;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        cbCalled = false;
-    }
 
     public void testCanHandleId() {
         final Context context = getInstrumentation().getContext();
-        ResourceLoader resourceLoader = new ResourceLoader(context, new UriLoader(context, new ModelLoader<URL>() {
+        ResourceLoader resourceLoader = new ResourceLoader(context, new UriLoader(context,
+                new ModelLoader<URL, InputStream>() {
             @Override
-            public StreamLoader getStreamLoader(URL model, int width, int height) {
+            public ResourceFetcher<InputStream> getResourceFetcher(URL model, int width, int height) {
                 return null;
             }
 
@@ -42,21 +32,15 @@ public class ResourceLoaderTest extends ActivityTestCase {
                 return null;
             }
         }));
-        StreamLoader streamLoader = resourceLoader.getStreamLoader(R.raw.ic_launcher, 0, 0);
-        streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
-            @Override
-            public void onStreamReady(InputStream is) {
-                cbCalled = true;
-                Bitmap result = BitmapFactory.decodeStream(is);
-                assertNotNull(result);
-            }
-
-            @Override
-            public void onException(Exception e) {
-                cbCalled = true;
-                assertNull(e);
-            }
-        });
-        assertTrue(cbCalled);
+        ResourceFetcher<InputStream> streamLoader = resourceLoader.getResourceFetcher(R.raw.ic_launcher, 0, 0);
+        InputStream received = null;
+        try {
+            received = streamLoader.loadResource();
+        } catch (Exception e) {
+            assertNull(e);
+        }
+        assertNotNull(received);
+        Bitmap result = BitmapFactory.decodeStream(received);
+        assertNotNull(result);
     }
 }

@@ -1,11 +1,11 @@
-package com.bumptech.glide.loader.transformation;
+package com.bumptech.glide.loader.bitmap.transformation;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.load.Transformation;
 
 /**
- * A transformation that applies an ordered array of one or more transformations to an image
+ * A transformation that applies an ordered array of one or more transformations to an image.
  */
 public class MultiTransformation extends Transformation {
     private final Transformation[] transformations;
@@ -19,8 +19,10 @@ public class MultiTransformation extends Transformation {
 
     @Override
     public Bitmap transform(Bitmap bitmap, BitmapPool pool, int outWidth, int outHeight) {
-        Bitmap current = null; //we don't want to recycle the original image since that
-                               //will be done by the ImageResizer
+        // Set current to null so we don't recycle our original bitmap. Instead rely on the caller of this method to do
+        // so.
+        Bitmap current = null;
+
         Bitmap transformed;
         for (Transformation transformation : transformations) {
             transformed = transformation.transform(bitmap, pool, outWidth, outHeight);
