@@ -6,6 +6,7 @@ import android.test.ActivityTestCase;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
@@ -126,7 +127,8 @@ public class GlideTest extends ActivityTestCase {
     }
 
     public void testDifferentModelLoadersReplacesPresenter() {
-        ModelLoader<Object, InputStream> first = new ModelLoader<Object, InputStream>() {
+        StreamModelLoader<Object> first = new StreamModelLoader<Object>() {
+
             @Override
             public ResourceFetcher<InputStream> getResourceFetcher(Object model, int width, int height) {
                 return new ResourceFetcher<InputStream>() {
@@ -153,7 +155,7 @@ public class GlideTest extends ActivityTestCase {
 
         };
 
-        ModelLoader<Object, InputStream> second = new ModelLoader<Object, InputStream>() {
+        StreamModelLoader<Object> second = new StreamModelLoader<Object>() {
             @Override
             public ResourceFetcher<InputStream> getResourceFetcher(Object model, int width, int height) {
                 return new ResourceFetcher<InputStream>() {

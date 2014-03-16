@@ -3,7 +3,7 @@ package com.bumptech.glide.loader;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.loader.bitmap.model.UriLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
 import com.bumptech.glide.loader.bitmap.resource.LocalUriFetcher;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
@@ -13,11 +13,11 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * Tests for the {@link UriLoader} class.
+ * Tests for the {@link StreamUriLoader} class.
  */
 public class UriLoaderTest extends AndroidTestCase {
 
-    private UriLoader loader;
+    private StreamUriLoader loader;
     private ResourceFetcher<InputStream> urlLoader;
 
     @Override
@@ -39,7 +39,7 @@ public class UriLoaderTest extends AndroidTestCase {
             public void cancel() {
             }
         };
-        loader = new UriLoader(getContext(), new ModelLoader<URL, InputStream>() {
+        loader = new StreamUriLoader(getContext(), new ModelLoader<URL, InputStream>() {
             @Override
             public ResourceFetcher<InputStream> getResourceFetcher(URL model, int width, int height) {
                 return urlLoader;

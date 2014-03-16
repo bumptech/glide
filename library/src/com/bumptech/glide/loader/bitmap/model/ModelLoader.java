@@ -1,5 +1,6 @@
 package com.bumptech.glide.loader.bitmap.model;
 
+import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 
@@ -32,7 +33,7 @@ public interface ModelLoader<T, Y> {
      * the image is already cached.
      *
      * <p>
-     *     Note - If the {@link StringLoader} in any way retains a reference a context, either directly or as an
+     *     Note - If the {@link StreamStringLoader} in any way retains a reference a context, either directly or as an
      *     anonymous inner class, that context may be leaked. The leak will only be an issue if this load can run for a
      *     long time or indefinitely (because of a particularly slow or paused/failed download for example).
      * </p>

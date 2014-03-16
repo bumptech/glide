@@ -9,34 +9,18 @@ import java.io.InputStream;
 /**
  * A model loader for handling resources. Model must be a resource id in the package of the given context.
  */
-public class ResourceLoader implements ModelLoader<Integer, InputStream> {
+public class ResourceLoader<T> implements ModelLoader<Integer, T> {
 
-    public static class Factory implements ModelLoaderFactory<Integer, InputStream> {
-
-        @Override
-        public ModelLoader<Integer, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new ResourceLoader(context, factories.buildModelLoader(Uri.class, InputStream.class, context));
-        }
-
-        @Override
-        public Class<? extends ModelLoader<Integer, InputStream>> loaderClass() {
-            return ResourceLoader.class;
-        }
-
-        @Override
-        public void teardown() { }
-    }
-
-    private final ModelLoader<Uri, InputStream> uriLoader;
+    private final ModelLoader<Uri, T> uriLoader;
     private final Context context;
 
-    public ResourceLoader(Context context, ModelLoader<Uri, InputStream> uriLoader) {
+    public ResourceLoader(Context context, ModelLoader<Uri, T> uriLoader) {
         this.context = context;
         this.uriLoader = uriLoader;
     }
 
     @Override
-    public ResourceFetcher<InputStream> getResourceFetcher(Integer model, int width, int height) {
+    public ResourceFetcher<T> getResourceFetcher(Integer model, int width, int height) {
         Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/" + model.toString());
         return uriLoader.getResourceFetcher(uri, width, height);
     }

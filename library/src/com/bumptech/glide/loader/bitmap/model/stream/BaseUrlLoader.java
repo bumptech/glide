@@ -1,7 +1,9 @@
-package com.bumptech.glide.loader.bitmap.model;
+package com.bumptech.glide.loader.bitmap.model.stream;
 
 import android.content.Context;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.loader.bitmap.model.Cache;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.io.InputStream;
@@ -14,7 +16,7 @@ import java.net.URL;
  *
  * @param <T> The type of the model
  */
-public abstract class BaseUrlLoader<T> implements ModelLoader<T, InputStream> {
+public abstract class BaseUrlLoader<T> implements StreamModelLoader<T> {
     private final ModelLoader<URL, InputStream> concreteLoader;
     private final Cache<URL> modelCache;
 

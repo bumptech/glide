@@ -3,21 +3,28 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.BaseBitmapLoadFactory;
-import com.bumptech.glide.loader.bitmap.model.BaseUrlLoader;
-import com.bumptech.glide.loader.bitmap.model.ResourceLoader;
+import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorFileLoader;
+import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorModelLoader;
+import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorResourceLoader;
+import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorStringLoader;
+import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorUriLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.BaseUrlLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamFileLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
-import com.bumptech.glide.loader.bitmap.model.FileLoader;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
-import com.bumptech.glide.loader.bitmap.model.StringLoader;
-import com.bumptech.glide.loader.bitmap.model.UriLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
 import com.bumptech.glide.loader.bitmap.transformation.FitCenter;
@@ -31,6 +38,7 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
+import com.bumptech.glide.resize.load.VideoBitmapDecoder;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
@@ -114,10 +122,31 @@ public class Glide {
     }
 
     protected Glide() {
-        loaderFactory.register(File.class, InputStream.class, new FileLoader.Factory());
-        loaderFactory.register(Integer.class, InputStream.class, new ResourceLoader.Factory());
-        loaderFactory.register(String.class, InputStream.class, new StringLoader.Factory());
-        loaderFactory.register(Uri.class, InputStream.class, new UriLoader.Factory());
+        loaderFactory.register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
+        loaderFactory.register(File.class, InputStream.class, new StreamFileLoader.Factory());
+        loaderFactory.register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
+        loaderFactory.register(Integer.class, InputStream.class, new StreamResourceLoader.Factory());
+        loaderFactory.register(String.class, ParcelFileDescriptor.class, new FileDescriptorStringLoader.Factory());
+        loaderFactory.register(String.class, InputStream.class, new StreamStringLoader.Factory());
+        loaderFactory.register(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
+        loaderFactory.register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
+        loaderFactory.register(URL.class, ParcelFileDescriptor.class, new ModelLoaderFactory<URL, ParcelFileDescriptor>() {
+            @Override
+            public ModelLoader<URL, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
+                throw new IllegalArgumentException("No ModelLoaderFactory for urls and file descriptors registered " +
+                        "with Glide");
+            }
+
+            @Override
+            public Class<? extends ModelLoader<URL, ParcelFileDescriptor>> loaderClass() {
+                throw new IllegalArgumentException("No ModelLoaderFactory for urls and file descriptors registered " +
+                        "with Glide");
+            }
+
+            @Override
+            public void teardown() {
+            }
+        });
         try {
             Class.forName("com.bumptech.glide.volley.VolleyUrlLoader$Factory");
             loaderFactory.register(URL.class, InputStream.class, new VolleyUrlLoader.Factory());
@@ -130,12 +159,14 @@ public class Glide {
 
                     @Override
                     public ResourceFetcher<InputStream> getResourceFetcher(URL model, int width, int height) {
-                        throw new IllegalArgumentException("No ModelLoaderFactory for urls registered with Glide");
+                        throw new IllegalArgumentException("No ModelLoaderFactory for urls and InputStreams " +
+                                "registered with Glide");
                     }
 
                     @Override
                     public String getId(URL model) {
-                        throw new IllegalArgumentException("No ModelLoaderFactory for urls registered with Glide");
+                        throw new IllegalArgumentException("No ModelLoaderFactory for urls and InputStreams " +
+                                "registered with Glide");
                     }
                 };
 
@@ -313,7 +344,7 @@ public class Glide {
      * @param <Y> the type of resource the model loader can translate from a given model.
      * @return A {@link ModelRequest} to set the specific model to load
      */
-    public static <T, Y> ModelRequest<T, Y> usingGeneric(final ModelLoader<T, Y> modelLoader) {
+    public static <T, Y> ModelRequest<T, Y> using(final ModelLoader<T, Y> modelLoader) {
         return new ModelRequest<T, Y>(new ModelLoaderFactory<T, Y>() {
 
             @Override
@@ -336,21 +367,21 @@ public class Glide {
      * Set the {@link ModelLoader} to use for for a new load where the model loader translates from a model to an
      * {@link InputStream} resource.
      *
-     * @param modelLoader The model loader to use.
+     * @param streamModelLoader The model loader to use.
      * @param <T> The type of the model.
      * @return A new {@link StreamModelRequest}.
      */
-    public static <T> StreamModelRequest<T> using(final ModelLoader<T, InputStream> modelLoader) {
+    public static <T> StreamModelRequest<T> using(final StreamModelLoader<T> streamModelLoader) {
         return new StreamModelRequest<T>(new ModelLoaderFactory<T, InputStream>() {
             @Override
             public ModelLoader<T, InputStream> build(Context context, GenericLoaderFactory factories) {
-                return modelLoader;
+                return streamModelLoader;
             }
 
             @SuppressWarnings("unchecked")
             @Override
             public Class<? extends ModelLoader<T, InputStream>> loaderClass() {
-                return (Class<ModelLoader<T, InputStream>>) modelLoader.getClass();
+                return (Class<StreamModelLoader<T>>) streamModelLoader.getClass();
             }
 
             @Override
@@ -359,14 +390,33 @@ public class Glide {
 
     }
 
+    public static <T> FileDescriptorModelRequest<T> using(final FileDescriptorModelLoader<T> loader) {
+        return new FileDescriptorModelRequest<T>(new ModelLoaderFactory<T, ParcelFileDescriptor>() {
+            @Override
+            public ModelLoader<T, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
+                return loader;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Class<? extends ModelLoader<T, ParcelFileDescriptor>> loaderClass() {
+                return (Class<FileDescriptorModelLoader<T>>) loader.getClass();
+            }
+
+            @Override
+            public void teardown() {
+            }
+        });
+    }
+
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link String} to load the image represented by the
-     * given {@link String}. Defaults to {@link StringLoader.Factory} and {@link StringLoader} to load the given model.
+     * given {@link String}. Defaults to {@link StreamStringLoader.Factory} and {@link StreamStringLoader} to load the given model.
      *
      * @see #using(ModelLoaderFactory)
      * @see ModelRequest#load(String)
      *
-     * @param string The string representing the image. Must be either a path, or a uri handled by {@link UriLoader}
+     * @param string The string representing the image. Must be either a path, or a uri handled by {@link StreamUriLoader}
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static StreamRequest<String> load(String string) {
@@ -375,12 +425,12 @@ public class Glide {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link Uri} to load the image at the given uri.
-     * Defaults to {@link UriLoader.Factory} and {@link UriLoader}.
+     * Defaults to {@link StreamUriLoader.Factory} and {@link StreamUriLoader}.
      *
      * @see #using(ModelLoaderFactory)
      * @see ModelRequest#load(android.net.Uri)
      *
-     * @param uri The uri representing the image. Must be a uri handled by {@link UriLoader}
+     * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
      * @return A {@link Request} to set options for the load and ultimately the target to load the model into
      */
     public static StreamRequest<Uri> load(Uri uri) {
@@ -404,7 +454,7 @@ public class Glide {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link File} to load the image represented by the
-     * given {@link File}. Defaults to {@link FileLoader.Factory} and {@link FileLoader} to load the given model.
+     * given {@link File}. Defaults to {@link StreamFileLoader.Factory} and {@link StreamFileLoader} to load the given model.
      *
      * @see #using(ModelLoaderFactory)
      * @see ModelRequest#load(java.io.File)
@@ -418,7 +468,7 @@ public class Glide {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link Integer} to load the image represented by the
-     * given {@link Integer} resource id. Defaults to {@link ResourceLoader.Factory} and {@link ResourceLoader} to load
+     * given {@link Integer} resource id. Defaults to {@link StreamResourceLoader.Factory} and {@link StreamResourceLoader} to load
      * the given model.
      *
      * @see #using(ModelLoaderFactory)
@@ -467,6 +517,18 @@ public class Glide {
         }
 
         return cancelled;
+    }
+
+    public static class FileDescriptorModelRequest<T> {
+        private ModelLoaderFactory<T, ParcelFileDescriptor> factory;
+
+        private FileDescriptorModelRequest(ModelLoaderFactory<T, ParcelFileDescriptor> factory) {
+            this.factory = factory;
+        }
+
+        public Request<T, ParcelFileDescriptor> load(T model) {
+            return new Request<T, ParcelFileDescriptor>(model, factory).decoder(new VideoBitmapDecoder());
+        }
     }
 
     /**

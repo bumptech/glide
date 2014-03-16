@@ -4,13 +4,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 
-import java.io.InputStream;
+import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
 
 /**
  *
  */
-public class LocalUriFetcher implements ResourceFetcher<InputStream> {
+public abstract class LocalUriFetcher<T> implements ResourceFetcher<T> {
     private final WeakReference<Context> contextRef;
     private final Uri uri;
     private final String id;
@@ -32,21 +32,23 @@ public class LocalUriFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
-    public InputStream loadResource() throws Exception {
+    public final T loadResource() throws Exception {
         Context context = contextRef.get();
         if (context == null) {
             throw new NullPointerException("Context has been cleared in LocalUriFetcher uri: " + uri);
         }
         ContentResolver contentResolver = context.getContentResolver();
-        return contentResolver.openInputStream(uri);
+        return loadResource(uri, contentResolver);
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return id;
     }
 
     @Override
     public void cancel() { }
+
+    protected abstract T loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException;
 }
 

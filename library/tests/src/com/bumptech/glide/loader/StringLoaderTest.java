@@ -3,7 +3,7 @@ package com.bumptech.glide.loader;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.loader.bitmap.model.StringLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.io.File;
@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Tests for the {@link StringLoader} class.
+ * Tests for the {@link StreamStringLoader} class.
  */
 public class StringLoaderTest extends AndroidTestCase {
 
-    private StringLoader stringLoader;
+    private StreamStringLoader stringLoader;
     private Uri uri;
 
     @Override
@@ -36,7 +36,7 @@ public class StringLoaderTest extends AndroidTestCase {
 
         };
 
-        stringLoader = new StringLoader(uriLoader);
+        stringLoader = new StreamStringLoader(uriLoader);
     }
 
     public void testHandlesPaths() throws IOException {

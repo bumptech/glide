@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.io.ByteArrayInputStream;
@@ -188,7 +189,7 @@ public class ListPreloaderTest extends AndroidTestCase {
 
         @Override
         protected Glide.Request getRequest(Object item) {
-            return Glide.using(new ModelLoader<Object, InputStream>() {
+            return Glide.using(new StreamModelLoader<Object>() {
                 @Override
                 public ResourceFetcher<InputStream> getResourceFetcher(final Object model, int width, int height) {
                     return new ResourceFetcher<InputStream>() {
