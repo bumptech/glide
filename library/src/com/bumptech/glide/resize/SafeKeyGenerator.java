@@ -20,15 +20,6 @@ public class SafeKeyGenerator {
     private final Map<LoadId, String> loadIdToSafeHash = new HashMap<LoadId, String>();
     private final ByteBuffer byteBuffer = ByteBuffer.allocate(8);
     private final LoadIdPool loadIdPool = new LoadIdPool();
-    private MessageDigest messageDigest;
-
-    public SafeKeyGenerator() {
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-    }
 
     public String getSafeKey(String id, Transformation transformation, Downsampler downsampler, int width, int height) {
         LoadId loadId = loadIdPool.get(id, transformation.getId(), downsampler.getId(), width, height);
@@ -37,6 +28,8 @@ public class SafeKeyGenerator {
             try {
                 safeKey = loadId.generateSafeKey();
             } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
             loadIdToSafeHash.put(loadId, safeKey);
@@ -90,7 +83,8 @@ public class SafeKeyGenerator {
             this.height = height;
         }
 
-        public String generateSafeKey() throws UnsupportedEncodingException {
+        public String generateSafeKey() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
             messageDigest.update(id.getBytes("UTF-8"));
             messageDigest.update(transformationId.getBytes("UTF-8"));
             messageDigest.update(downsamplerId.getBytes("UTF-8"));
