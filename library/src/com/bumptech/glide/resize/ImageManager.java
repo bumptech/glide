@@ -289,7 +289,7 @@ public class ImageManager {
 
         private void setDefaults() {
             if (resizeService == null) {
-                final int numThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
+                final int numThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
                 resizeService = Executors.newFixedThreadPool(numThreads, new ThreadFactory() {
                     @Override
                     public Thread newThread(Runnable runnable) {
