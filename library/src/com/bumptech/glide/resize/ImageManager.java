@@ -4,6 +4,7 @@
 
 package com.bumptech.glide.resize;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -298,9 +299,14 @@ public class ImageManager {
                     }
                 });
             }
+            final int safeCacheSize = getSafeMemoryCacheSize(context);
+            final boolean isLowMemoryDevice = isLowMemoryDevice(context);
 
             if (memoryCache == null) {
-                memoryCache = new LruMemoryCache(getSafeMemoryCacheSize(context));
+                // On low ram devices we double the default bitmap pool size by default so we decrease
+                // the default memory cache size here to compensate.
+                memoryCache = new LruMemoryCache(
+                        !isLowMemoryDevice && recycleBitmaps ? safeCacheSize / 2 : safeCacheSize);
             }
 
             if (diskCache == null) {
@@ -324,11 +330,20 @@ public class ImageManager {
                 bitmapReferenceCounter = new BitmapReferenceCounterAdapter();
             } else {
                 if (bitmapPool == null) {
-                    bitmapPool = new LruBitmapPool(getSafeMemoryCacheSize(context));
+                    bitmapPool = new LruBitmapPool(
+                            isLowMemoryDevice ? safeCacheSize : 2 * safeCacheSize);
                 }
                 bitmapReferenceCounter = new SerialBitmapReferenceCounter(bitmapPool);
             }
         }
+    }
+
+    @TargetApi(19)
+    private static boolean isLowMemoryDevice(Context context) {
+        final ActivityManager activityManager =
+                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        return Build.VERSION.SDK_INT < 11 ||
+                (Build.VERSION.SDK_INT >= 19 && activityManager.isLowRamDevice());
     }
 
     private ImageManager(Builder builder) {
