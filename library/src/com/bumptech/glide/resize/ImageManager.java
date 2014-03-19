@@ -4,13 +4,11 @@
 
 package com.bumptech.glide.resize;
 
-import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
@@ -60,7 +58,7 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 public class ImageManager {
     private static final String TAG = "ImageManager";
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
-    private static final int DEFAULT_DISK_CACHE_SIZE = 30 * 1024 * 1024;
+    private static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
     private static final int DEFAULT_BITMAP_COMPRESS_QUALITY = 90;
     private static final float MEMORY_SIZE_RATIO = 1f/10f;
     public static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
@@ -114,18 +112,7 @@ public class ImageManager {
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static File getPhotoCacheDir(Context context, String cacheName) {
-        File cacheDir = null;
-
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                !isExternalStorageRemovable()) {
-            //seems like this can still be null even if the above are true
-            cacheDir = context.getExternalCacheDir();
-        }
-
-        if (cacheDir == null) {
-            cacheDir = context.getCacheDir();
-        }
-
+        File cacheDir = context.getCacheDir();
         if (cacheDir != null) {
             File result = new File(cacheDir, cacheName);
             result.mkdirs();
@@ -135,11 +122,6 @@ public class ImageManager {
             Log.e(TAG, "default disk cache dir is null");
         }
         return null;
-    }
-
-    @TargetApi(9)
-    private static boolean isExternalStorageRemovable() {
-        return Build.VERSION.SDK_INT < 9 || Environment.isExternalStorageRemovable();
     }
 
     @SuppressWarnings("unused")
