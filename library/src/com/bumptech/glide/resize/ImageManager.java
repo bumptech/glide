@@ -661,14 +661,19 @@ public class ImageManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        //acquire for the callback before putting in to memory cache so that the bitmap is not
-                        //released to the pool if the bitmap is synchronously released by the memory cache
-                        //we rely on the callback to call releaseBitmap if it doesn't want to use the bitmap
+                        // Acquire the bitmap for this runnable until we've finished notifying
+                        // all consumers. This prevents the bitmap from being put in the bitmap pool
+                        // before all consumers have a change to acquire the bitmap if one of the first
+                        // consumers (usually the memory cache) synchronously releases the bitmap.
+                        bitmapReferenceCounter.acquireBitmap(result);
                         putInMemoryCache(key, result);
                         final ImageManagerJob job = jobs.get(key);
                         if (job != null) {
                             job.onLoadComplete(result);
                         }
+                        // All consumers have had their chance, it's now safe to release the
+                        // bitmap.
+                        bitmapReferenceCounter.releaseBitmap(result);
                     }
                 });
             } else {
