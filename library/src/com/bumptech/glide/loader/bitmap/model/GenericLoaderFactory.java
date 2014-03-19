@@ -39,10 +39,7 @@ public class GenericLoaderFactory {
 
     public <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
         final ModelLoaderFactory<T, Y> factory = getFactory(modelClass, resourceClass);
-        if (factory == null) {
-            throw new IllegalArgumentException("No ModelLoaderFactory registered for class=" + modelClass);
-        }
-        return factory.build(context, this);
+        return factory != null ? factory.build(context, this) : null;
     }
 
     @SuppressWarnings("unchecked")

@@ -139,7 +139,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 //reason why ImagePresenter is used here and not in FlickrPhotoList.
                 final Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo>()
-                        .setBitmapLoadFactory(new BaseBitmapLoadFactory<Photo, InputStream>(
+                        .setBitmapLoadFactory(new BaseBitmapLoadFactory<Photo, InputStream, Void>(
                                 new FlickrModelLoader(context, urlCache), Downsampler.AT_LEAST,
                                 new CenterCrop<Photo>()))
                         .setImageView(imageView)

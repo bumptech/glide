@@ -1,8 +1,8 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import com.bumptech.glide.loader.bitmap.model.BaseUrlLoader;
 import com.bumptech.glide.loader.bitmap.model.Cache;
+import com.bumptech.glide.loader.bitmap.model.stream.BaseUrlLoader;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 

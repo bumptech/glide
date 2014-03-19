@@ -14,7 +14,6 @@ import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorMode
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorStringLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorUriLoader;
-import com.bumptech.glide.loader.bitmap.model.stream.BaseUrlLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamFileLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
@@ -25,7 +24,6 @@ import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
-import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
 import com.bumptech.glide.loader.bitmap.transformation.FitCenter;
 import com.bumptech.glide.loader.bitmap.transformation.MultiTransformationLoader;
@@ -49,7 +47,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * A singleton to present a simple static interface for Glide {@link Glide.Request} and to create and manage an
+ * A singleton to present a simple static interface for Glide {@link GenericRequest} and to create and manage an
  * {@link ImageLoader} and {@link ModelLoaderFactory}s. This class provides most of the functionality of
  * {@link ImagePresenter} with a simpler but less efficient interface. For more complicated cases it may be worth
  * considering using {@link ImagePresenter} and {@link com.bumptech.glide.presenter.ImagePresenter.Builder} directly.
@@ -83,7 +81,7 @@ public class Glide {
          *     For example:
          * <pre>
          * <code>
-         *     public void onException(Exception e, T model, Target target) {
+         *     public void onException(Exception e, ModelType model, Target target) {
          *         target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
          *         Glide.load(model).into(target);
          *     }
@@ -122,68 +120,21 @@ public class Glide {
     }
 
     protected Glide() {
-        loaderFactory.register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
-        loaderFactory.register(File.class, InputStream.class, new StreamFileLoader.Factory());
-        loaderFactory.register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
-        loaderFactory.register(Integer.class, InputStream.class, new StreamResourceLoader.Factory());
-        loaderFactory.register(String.class, ParcelFileDescriptor.class, new FileDescriptorStringLoader.Factory());
-        loaderFactory.register(String.class, InputStream.class, new StreamStringLoader.Factory());
-        loaderFactory.register(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
-        loaderFactory.register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
-        loaderFactory.register(URL.class, ParcelFileDescriptor.class, new ModelLoaderFactory<URL, ParcelFileDescriptor>() {
-            @Override
-            public ModelLoader<URL, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
-                throw new IllegalArgumentException("No ModelLoaderFactory for urls and file descriptors registered " +
-                        "with Glide");
-            }
-
-            @Override
-            public Class<? extends ModelLoader<URL, ParcelFileDescriptor>> loaderClass() {
-                throw new IllegalArgumentException("No ModelLoaderFactory for urls and file descriptors registered " +
-                        "with Glide");
-            }
-
-            @Override
-            public void teardown() {
-            }
-        });
+        register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
+        register(File.class, InputStream.class, new StreamFileLoader.Factory());
+        register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
+        register(Integer.class, InputStream.class, new StreamResourceLoader.Factory());
+        register(String.class, ParcelFileDescriptor.class, new FileDescriptorStringLoader.Factory());
+        register(String.class, InputStream.class, new StreamStringLoader.Factory());
+        register(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
+        register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
         try {
             Class.forName("com.bumptech.glide.volley.VolleyUrlLoader$Factory");
-            loaderFactory.register(URL.class, InputStream.class, new VolleyUrlLoader.Factory());
+            register(URL.class, InputStream.class, new VolleyUrlLoader.Factory());
         } catch (ClassNotFoundException e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Volley not found, missing url loader");
             }
-            loaderFactory.register(URL.class, InputStream.class, new ModelLoaderFactory<URL, InputStream>() {
-                ModelLoader<URL, InputStream> errorUrlLoader = new ModelLoader<URL, InputStream>() {
-
-                    @Override
-                    public ResourceFetcher<InputStream> getResourceFetcher(URL model, int width, int height) {
-                        throw new IllegalArgumentException("No ModelLoaderFactory for urls and InputStreams " +
-                                "registered with Glide");
-                    }
-
-                    @Override
-                    public String getId(URL model) {
-                        throw new IllegalArgumentException("No ModelLoaderFactory for urls and InputStreams " +
-                                "registered with Glide");
-                    }
-                };
-
-                @Override
-                public ModelLoader<URL, InputStream> build(Context context, GenericLoaderFactory factories) {
-                    return errorUrlLoader;
-                }
-
-                @Override @SuppressWarnings("unchecked")
-                public Class<? extends ModelLoader<URL, InputStream>> loaderClass() {
-                    return (Class<ModelLoader<URL, InputStream>>) errorUrlLoader.getClass();
-                }
-
-                @Override
-                public void teardown() {
-                }
-            });
         }
     }
 
@@ -207,7 +158,7 @@ public class Glide {
      * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
      * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
      * {@link #setImageManager(com.bumptech.glide.resize.ImageManager.Builder) setImageManager} to set an
-     * {@link ImageManager} with custom options for use with {@link com.bumptech.glide.Glide.Request} and/or as an
+     * {@link ImageManager} with custom options for use with {@link GenericRequest} and/or as an
      * easily accessible singleton.
      *
      * @return true iff an {@link ImageManager} is currently set
@@ -217,7 +168,7 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ImageManager} to use with {@link Glide.Request}.
+     * Set the {@link ImageManager} to use with {@link GenericRequest}.
      *
      * @see #setImageManager(com.bumptech.glide.resize.ImageManager)
      *
@@ -228,7 +179,7 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ImageManager} to use with {@link Glide.Request} Replaces the current
+     * Set the {@link ImageManager} to use with {@link GenericRequest} Replaces the current
      * {@link ImageManager} if one has already been set.
      *
      * @see #isImageManagerSet()
@@ -242,8 +193,8 @@ public class Glide {
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
      * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Typically the {@link Glide#using(ModelLoader)} syntax is preferred
-     * because it directly links the model with the ModelLoader being used to load it.
+     * models. Typically the {@link Glide#using(StreamModelLoader)} or {@link Glide#using(FileDescriptorModelLoader)}
+     * syntax is preferred because it directly links the model with the ModelLoader being used to load it.
      *
      * <p>
      *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
@@ -256,12 +207,17 @@ public class Glide {
      *     retained statically.
      * </p>
      *
-     * @param clazz The class
-     * @param factory The factory to use
-     * @param <T> The type of the model
+     * @see #using(FileDescriptorModelLoader)
+     * @see #using(StreamModelLoader)
+     *
+     * @param modelClass The model class.
+     * @param resourceClass The resource class the model loader will translate the model type into.
+     * @param factory The factory to use.
+     * @param <T> The type of the model.
+     * @param <Y> the type of the resource.
      */
-    public <T> void register(Class<T> clazz, ModelLoaderFactory<T, InputStream> factory) {
-        ModelLoaderFactory<T, InputStream> removed = loaderFactory.register(clazz, InputStream.class, factory);
+    public <T, Y> void register(Class<T> modelClass, Class<Y> resourceClass, ModelLoaderFactory<T, Y> factory) {
+        ModelLoaderFactory<T, Y> removed = loaderFactory.register(modelClass, resourceClass, factory);
         if (removed != null) {
             removed.teardown();
         }
@@ -307,134 +263,54 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ModelLoaderFactory} and therefore the model type to use for a new load.
-     *
-     * <p>
-     *     Note - You can use this method to set a {@link ModelLoaderFactory} for models that don't have a default
-     *     {@link ModelLoader}/{@link ModelLoaderFactory}. You can also optionally use this method to override the
-     *     default {@link ModelLoader} for a model for which there is a default. If you would like to permanently
-     *     use this factory for all model loads of the this factory's type, see
-     *     {@link #register(Class, ModelLoaderFactory)}.
-     * </p>
-     *
-     * <p>
-     *     Note - If you have the ability to fetch different sized images for a given model, it is most efficient to
-     *     supply a custom {@link ModelLoaderFactory} here to do so, even if a default exists. Fetching a smaller image
-     *     means less bandwidth, battery, and memory usage as well as faster image loads. To simply build a url to
-     *     download an image using the width and the height of the target, consider passing in a factory for a subclass
-     *     of {@link BaseUrlLoader}
-     * </p>
-     *
-     *
-     * @param factory The {@link ModelLoaderFactory} to use to load an image from a given model
-     * @param <T> The type of the model to load using this factory
-     * @return A {@link ModelRequest} to set the specific model to load
-     */
-    public static <T, Y> ModelRequest<T, Y> using(ModelLoaderFactory<T, Y> factory) {
-        return new ModelRequest<T, Y>(factory);
-    }
-
-    /**
-     * Set the {@link ModelLoader} and therefore the model type to use for a new load.
-     *
-     * @see #using(ModelLoaderFactory)
-     *
-     * @param modelLoader The model loader to use
-     * @param <T> The type of the model to load using this loader
-     * @param <Y> the type of resource the model loader can translate from a given model.
-     * @return A {@link ModelRequest} to set the specific model to load
-     */
-    public static <T, Y> ModelRequest<T, Y> using(final ModelLoader<T, Y> modelLoader) {
-        return new ModelRequest<T, Y>(new ModelLoaderFactory<T, Y>() {
-
-            @Override
-            public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories) {
-                return modelLoader;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public Class<? extends ModelLoader<T, Y>> loaderClass() {
-                return (Class<ModelLoader<T, Y>>) modelLoader.getClass();
-            }
-
-            @Override
-            public void teardown() { }
-        });
-    }
-
-    /**
      * Set the {@link ModelLoader} to use for for a new load where the model loader translates from a model to an
-     * {@link InputStream} resource.
+     * {@link InputStream} resource for loading images.
      *
-     * @param streamModelLoader The model loader to use.
+     * @param modelLoader The model loader to use.
      * @param <T> The type of the model.
-     * @return A new {@link StreamModelRequest}.
+     * @return A new {@link ImageModelRequest}.
      */
-    public static <T> StreamModelRequest<T> using(final StreamModelLoader<T> streamModelLoader) {
-        return new StreamModelRequest<T>(new ModelLoaderFactory<T, InputStream>() {
-            @Override
-            public ModelLoader<T, InputStream> build(Context context, GenericLoaderFactory factories) {
-                return streamModelLoader;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public Class<? extends ModelLoader<T, InputStream>> loaderClass() {
-                return (Class<StreamModelLoader<T>>) streamModelLoader.getClass();
-            }
-
-            @Override
-            public void teardown() { }
-        });
-
+    public static <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
+        return new ImageModelRequest<T>(modelLoaderToFactory(modelLoader));
     }
 
-    public static <T> FileDescriptorModelRequest<T> using(final FileDescriptorModelLoader<T> loader) {
-        return new FileDescriptorModelRequest<T>(new ModelLoaderFactory<T, ParcelFileDescriptor>() {
-            @Override
-            public ModelLoader<T, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
-                return loader;
-            }
+    /**
+     * Set the {@link ModelLoader} to use for a new load where the model loader translates from a model to an
+     * {@link ParcelFileDescriptor} resource for loading video thumbnails.
+     *
+     * @param modelLoader The model loader to use.
+     * @param <T> The type of the model.
+     * @return A new {@link VideoModelRequest}.
+     */
+    public static <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
+        return new VideoModelRequest<T>(modelLoaderToFactory(modelLoader));
 
-            @SuppressWarnings("unchecked")
-            @Override
-            public Class<? extends ModelLoader<T, ParcelFileDescriptor>> loaderClass() {
-                return (Class<FileDescriptorModelLoader<T>>) loader.getClass();
-            }
-
-            @Override
-            public void teardown() {
-            }
-        });
     }
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link String} to load the image represented by the
      * given {@link String}. Defaults to {@link StreamStringLoader.Factory} and {@link StreamStringLoader} to load the given model.
      *
-     * @see #using(ModelLoaderFactory)
-     * @see ModelRequest#load(String)
+     * @see #using(StreamModelLoader)
      *
      * @param string The string representing the image. Must be either a path, or a uri handled by {@link StreamUriLoader}
-     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+     * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
      */
-    public static StreamRequest<String> load(String string) {
-        return new StreamRequest<String>(string);
+    public static Request<String> load(String string) {
+        return new Request<String>(string);
     }
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link Uri} to load the image at the given uri.
      * Defaults to {@link StreamUriLoader.Factory} and {@link StreamUriLoader}.
      *
-     * @see #using(ModelLoaderFactory)
-     * @see ModelRequest#load(android.net.Uri)
+     * @see #using(StreamModelLoader)
      *
      * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
-     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+     * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
      */
-    public static StreamRequest<Uri> load(Uri uri) {
-        return new StreamRequest<Uri>(uri);
+    public static Request<Uri> load(Uri uri) {
+        return new Request<Uri>(uri);
     }
 
     /**
@@ -442,28 +318,26 @@ public class Glide {
      * given {@link URL}. Defaults to {@link VolleyUrlLoader.Factory} and {@link VolleyUrlLoader} to load the given
      * model.
      *
-     * @see #using(ModelLoaderFactory)
-     * @see ModelRequest#load(java.net.URL)
+     * @see #using(StreamModelLoader)
      *
      * @param url The URL representing the image.
-     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+     * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
      */
-    public static StreamRequest<URL> load(URL url) {
-        return new StreamRequest<URL>(url);
+    public static Request<URL> load(URL url) {
+        return new Request<URL>(url);
     }
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link File} to load the image represented by the
      * given {@link File}. Defaults to {@link StreamFileLoader.Factory} and {@link StreamFileLoader} to load the given model.
      *
-     * @see #using(ModelLoaderFactory)
-     * @see ModelRequest#load(java.io.File)
+     * @see #using(StreamModelLoader)
      *
      * @param file The File containing the image
-     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+     * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
      */
-    public static StreamRequest<File> load(File file) {
-        return new StreamRequest<File>(file);
+    public static Request<File> load(File file) {
+        return new Request<File>(file);
     }
 
     /**
@@ -471,27 +345,41 @@ public class Glide {
      * given {@link Integer} resource id. Defaults to {@link StreamResourceLoader.Factory} and {@link StreamResourceLoader} to load
      * the given model.
      *
-     * @see #using(ModelLoaderFactory)
-     * @see ModelRequest#load(Integer)
+     * @see #using(StreamModelLoader)
      *
      * @param resourceId the id of the resource containing the image
-     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+     * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
      */
-    public static StreamRequest<Integer> load(Integer resourceId) {
-        return new StreamRequest<Integer>(resourceId);
+    public static Request<Integer> load(Integer resourceId) {
+        return new Request<Integer>(resourceId);
     }
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for the given model type to load the image represented by
      * the given model.
      *
-     * @param model The model to load
-     * @param <T> The type of the model to load
-     * @return A {@link Request} to set options for the load and ultimately the target to load the model into
-     * @throws IllegalArgumentException If no {@link ModelLoaderFactory} is registered for the given model type
+     * @param model The model to load.
+     * @param <T> The type of the model to load.
+     * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the image into.
+     * @throws IllegalArgumentException If no such {@link ModelLoaderFactory} is registered for the given model type.
      */
-    public static <T> StreamRequest<T> load(T model) {
-        return new StreamRequest<T>(model);
+    @SuppressWarnings("unused")
+    public static <T> Request<T> loadFromImage(T model) {
+        return new ImageModelRequest<T>(GLIDE.getFactory(model, InputStream.class)).load(model);
+    }
+
+    /**
+     * Use the {@link ModelLoaderFactory} currently registered for the given model type for
+     * {@link ParcelFileDescriptor}s to load a thumbnail for the video represented by the given model.
+     *
+     * @param model The model to load.
+     * @param <T> The type of the model to load.
+     * @return A {@link Request} to set options for the load an ultimately the target to load the thumbnail into.
+     * @throws IllegalArgumentException If no such {@link ModelLoaderFactory} is registered for the given model type.
+     */
+    @SuppressWarnings("unused")
+    public static <T> Request<T> loadFromVideo(T model) {
+        return new VideoModelRequest<T>(GLIDE.getFactory(model, ParcelFileDescriptor.class)).loadFromVideo(model);
     }
 
     /**
@@ -519,70 +407,83 @@ public class Glide {
         return cancelled;
     }
 
-    public static class FileDescriptorModelRequest<T> {
+    /**
+     * A helper class for building requests with custom {@link ModelLoader}s that translate models to
+     * {@link ParcelFileDescriptor} resources for loading video thumbnails.
+     *
+     * @param <T> The type of the model.
+     */
+    public static class VideoModelRequest<T> {
         private ModelLoaderFactory<T, ParcelFileDescriptor> factory;
 
-        private FileDescriptorModelRequest(ModelLoaderFactory<T, ParcelFileDescriptor> factory) {
+        private VideoModelRequest(ModelLoaderFactory<T, ParcelFileDescriptor> factory) {
             this.factory = factory;
         }
 
-        public Request<T, ParcelFileDescriptor> load(T model) {
-            return new Request<T, ParcelFileDescriptor>(model, factory).decoder(new VideoBitmapDecoder());
+        public Request<T> loadFromVideo(T model) {
+            return new Request<T>(model, null, factory);
         }
     }
 
     /**
      * A helper class for building requests with custom {@link ModelLoader}s that translate models to
-     * {@link InputStream} resources.
+     * {@link InputStream} resources for loading images.
      *
      * @param <T> The type of the model.
      */
-    public static class StreamModelRequest<T> {
+    public static class ImageModelRequest<T> {
         private final ModelLoaderFactory<T, InputStream> factory;
 
-        private StreamModelRequest(ModelLoaderFactory<T, InputStream> factory) {
+        private ImageModelRequest(ModelLoaderFactory<T, InputStream> factory) {
             this.factory = factory;
         }
 
-        public StreamRequest<T> load(T model) {
-            return new StreamRequest<T>(model, factory);
+        public Request<T> load(T model) {
+            return new Request<T>(model, factory, null);
         }
     }
 
     /**
-     * A helper class for building requests with custom {@link ModelLoader}s
-     *
-     * @param <T> The type of the model (and {@link ModelLoader}
+     * An request for the user to provide an {@link Context} to start an image load.
      */
-    public static class ModelRequest<T, Y> {
-        private final ModelLoaderFactory<T, Y> factory;
+    public static class ContextRequest {
+        private final GenericRequest request;
+        private final Target target;
 
-        private ModelRequest(ModelLoaderFactory<T, Y> factory) {
-            this.factory = factory;
+        private ContextRequest(GenericRequest request, Target target) {
+            this.request = request;
+            this.target = target;
         }
 
-        public Request<T, Y> load(T model) {
-            return new Request<T, Y>(model, factory);
+        /**
+         * Start loading the image using the given context. The context will not be referenced statically so any
+         * context is acceptable.
+         *
+         * @param context The context to use to help load the image.
+         */
+        public void with(Context context) {
+            request.finish(context, target);
         }
     }
 
-    /**
-     * Sets a variety of type independent options including resizing, animations, and placeholders. Responsible
-     * for building or retrieving an ImagePresenter for the given target and passing the ImagePresenter the given model.
+     /**
+     * A class for creating a request to load a bitmap for an image or from a video. Sets a variety of type independent
+      * options including resizing, animations, and placeholders.
      *
-     * @see Request
-     *
-     * @param <T> The type of model that will be loaded into the target
+     * @param <ModelType> The type of model that will be loaded into the target.
      */
-    public static class StreamRequest<T>  extends Request<T, InputStream> {
-        private StreamRequest(T model) {
-            super(model, InputStream.class);
-            approximate();
+    @SuppressWarnings("unused") //public api
+    public static class Request<ModelType> extends GenericRequest<ModelType, InputStream, ParcelFileDescriptor> {
+        private Request(ModelType model) {
+            this(model, GLIDE.getFactory(model, InputStream.class),
+                    GLIDE.getFactory(model, ParcelFileDescriptor.class));
         }
 
-        private StreamRequest(T model, ModelLoaderFactory<T, InputStream> factory) {
-            super(model, factory);
-            approximate();
+        private Request(ModelType model,
+                ModelLoaderFactory<ModelType, InputStream> imageFactory,
+                ModelLoaderFactory<ModelType, ParcelFileDescriptor> videoFactory) {
+            super(model, imageFactory, videoFactory);
+            approximate().videoDecoder(new VideoBitmapDecoder());
         }
 
         /**
@@ -592,7 +493,7 @@ public class Glide {
          *
          * @return This Request
          */
-        public StreamRequest<T> approximate() {
+        public Request<ModelType> approximate() {
             return downsample(Downsampler.AT_LEAST);
         }
 
@@ -603,128 +504,161 @@ public class Glide {
          *
          * @return This Request
          */
-        public StreamRequest<T> asIs() {
+        public Request<ModelType> asIs() {
             return downsample(Downsampler.NONE);
         }
 
         /**
-         * Load images using the given {@link Downsampler}. Replaces any existing downsampler. Defaults to
-         * {@link Downsampler#AT_LEAST}
+         * Load images using the given {@link Downsampler}. Replaces any existing image decoder. Defaults to
+         * {@link Downsampler#AT_LEAST}. Will be ignored if the data represented by the model is a video.
+         *
+         * @see #imageDecoder
+         * @see #videoDecoder(BitmapDecoder)
          *
          * @param downsampler The downsampler
          * @return This Request
          */
-        public StreamRequest<T> downsample(Downsampler downsampler) {
-            super.decoder(downsampler);
+        public Request<ModelType> downsample(Downsampler downsampler) {
+            super.imageDecoder(downsampler);
             return this;
         }
 
         @Override
-        public StreamRequest<T> decoder(BitmapDecoder<InputStream> decoder) {
-            super.decoder(decoder);
+        public Request<ModelType> imageDecoder(BitmapDecoder<InputStream> decoder) {
+            super.imageDecoder(decoder);
             return this;
         }
 
         @Override
-        public StreamRequest<T> centerCrop() {
+        public Request<ModelType> videoDecoder(BitmapDecoder<ParcelFileDescriptor> decoder) {
+            super.videoDecoder(decoder);
+            return this;
+        }
+
+        @Override
+        public Request<ModelType> centerCrop() {
             super.centerCrop();
             return this;
         }
 
         @Override
-        public StreamRequest<T> fitCenter() {
+        public Request<ModelType> fitCenter() {
             super.fitCenter();
             return this;
         }
 
         @Override
-        public StreamRequest<T> transform(Transformation transformation) {
+        public Request<ModelType> transform(Transformation transformation) {
             super.transform(transformation);
             return this;
         }
 
         @Override
-        public StreamRequest<T> transform(TransformationLoader<T> transformationLoader) {
+        public Request<ModelType> transform(
+                TransformationLoader<ModelType> transformationLoader) {
             super.transform(transformationLoader);
             return this;
         }
 
         @Override
-        public StreamRequest<T> animate(int animationId) {
+        public Request<ModelType> animate(int animationId) {
             super.animate(animationId);
             return this;
         }
 
         @Override
-        public StreamRequest<T> placeholder(int resourceId) {
+        public Request<ModelType> placeholder(int resourceId) {
             super.placeholder(resourceId);
             return this;
         }
 
         @Override
-        public StreamRequest<T> error(int resourceId) {
+        public Request<ModelType> error(int resourceId) {
             super.error(resourceId);
             return this;
         }
 
         @Override
-        public StreamRequest<T> listener(RequestListener<T> requestListener) {
+        public Request<ModelType> listener(RequestListener<ModelType> requestListener) {
             super.listener(requestListener);
             return this;
         }
     }
 
     /**
-     * Sets a variety of type independent options including resizing, animations, and placeholders. Responsible
-     * for building or retrieving an ImagePresenter for the given target and passing the ImagePresenter the given model.
+     * A generic class that can handle loading a bitmap either from an image or as a thumbnail from a video given
+     * models loaders to translate a model into generic resources for either an image or a video and decoders that can
+     * decode those resources into bitmaps.
      *
-     * @param <T> The type of model that will be loaded into the target.
-     * @param <Y> The type of the resource the model loader for this request will translate the model to and the decoder
-     *           for this request can decode an {@link Bitmap} from.
+     * @param <ModelType> The type of model representing the image or video.
+     * @param <ImageResourceType> The resource type that the image {@link ModelLoader} will provide that can be decoded
+     *                           by the image {@link BitmapDecoder}.
+     * @param <VideoResourceType> The resource type that the video {@link ModelLoader} will provide that can be decoded
+     *                           by the video {@link BitmapDecoder}.
      */
-    @SuppressWarnings("unused") //public api
-    public static class Request<T, Y> {
-
+    private static class GenericRequest<ModelType, ImageResourceType, VideoResourceType> {
         private Context context;
-        private Target target;
-
-        private ModelLoaderFactory<T, Y> modelLoaderFactory;
-        private final T model;
+        private ModelLoaderFactory<ModelType, ImageResourceType> imageModelLoaderFactory;
+        private final ModelLoaderFactory<ModelType, VideoResourceType> videoModelLoaderFactory;
+        private final ModelType model;
 
         private int animationId = -1;
         private int placeholderId = -1;
         private int errorId = -1;
-        private ArrayList<TransformationLoader<T>> transformationLoaders = new ArrayList<TransformationLoader<T>>();
-        private RequestListener<T> requestListener;
-        private BitmapDecoder<Y> decoder;
+        private ArrayList<TransformationLoader<ModelType>> transformationLoaders = new ArrayList<TransformationLoader<ModelType>>();
+        private RequestListener<ModelType> requestListener;
+        private BitmapDecoder<ImageResourceType> imageDecoder;
+        private BitmapDecoder<VideoResourceType> videoDecoder;
 
-        private Request(T model, Class<Y> decoderClazz) {
-            this(model, GLIDE.getFactory(model, decoderClazz));
-        }
-
-        private Request(T model, ModelLoaderFactory<T, Y> factory) {
+        private GenericRequest(ModelType model, ModelLoaderFactory<ModelType, ImageResourceType> imageFactory,
+                ModelLoaderFactory<ModelType, VideoResourceType> videoFactory) {
              if (model == null ) {
                 throw new IllegalArgumentException("Model can't be null");
             }
             this.model = model;
 
-            if (factory == null) {
-                throw new IllegalArgumentException("No ModelLoaderFactory registered for class=" + model.getClass());
+            if (imageFactory == null && videoFactory == null) {
+                throw new IllegalArgumentException("No ModelLoaderFactorys registered for either image or video type,"
+                        + " class=" + model.getClass());
             }
-            this.modelLoaderFactory = factory;
+            this.imageModelLoaderFactory = imageFactory;
+            this.videoModelLoaderFactory = videoFactory;
         }
 
         /**
-         * Loads the image from the given resource type into an {@link Bitmap} using the given
-         * {@link BitmapDecoder}.
+         * Loads the image from the given resource type into an {@link Bitmap} using the given {@link BitmapDecoder}.
+         *
+         * <p>
+         *     Will be ignored if the data represented by the given model is not an image.
+         * </p>
          *
          * @see Downsampler
          *
-         * @param decoder The {@link BitmapDecoder} to use to decode the resource.
+         * @param decoder The {@link BitmapDecoder} to use to decode the image resource.
          * @return This Request.
          */
-        public Request<T, Y> decoder(BitmapDecoder<Y> decoder) {
-            this.decoder = decoder;
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> imageDecoder(
+                BitmapDecoder<ImageResourceType> decoder) {
+            this.imageDecoder = decoder;
+
+            return this;
+        }
+
+        /**
+         * Loads the video from the given resource type into an {@link Bitmap} using the given {@link BitmapDecoder}.
+         *
+         * <p>
+         *     Will be ignored if the data represented by the given model is not a video.
+         * </p>
+         *
+         * @see VideoBitmapDecoder
+         *
+         * @param decoder The {@link BitmapDecoder} to use to decode the video resource.
+         * @return This request.
+         */
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> videoDecoder(
+                BitmapDecoder<VideoResourceType> decoder) {
+            this.videoDecoder = decoder;
 
             return this;
         }
@@ -736,8 +670,8 @@ public class Glide {
          *
          * @return This Request
          */
-        public Request<T, Y> centerCrop() {
-            return transform(new CenterCrop<T>());
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> centerCrop() {
+            return transform(new CenterCrop<ModelType>());
         }
 
         /**
@@ -747,8 +681,8 @@ public class Glide {
          *
          * @return This Request
          */
-        public Request<T, Y> fitCenter() {
-            return transform(new FitCenter<T>());
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> fitCenter() {
+            return transform(new FitCenter<ModelType>());
         }
 
         /**
@@ -759,10 +693,11 @@ public class Glide {
          * @param transformation The transformation to use
          * @return This Request
          */
-        public Request<T, Y> transform(final Transformation transformation) {
-            return transform(new TransformationLoader<T>() {
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> transform(
+                final Transformation transformation) {
+            return transform(new TransformationLoader<ModelType>() {
                 @Override
-                public Transformation getTransformation(T model) {
+                public Transformation getTransformation(ModelType model) {
                     return transformation;
                 }
 
@@ -780,7 +715,8 @@ public class Glide {
          * @param transformationLoader The loader to obtaian a transformation for a given model
          * @return This Request
          */
-        public Request<T, Y> transform(TransformationLoader<T> transformationLoader) {
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> transform(
+                TransformationLoader<ModelType> transformationLoader) {
             transformationLoaders.add(transformationLoader);
 
             return this;
@@ -793,7 +729,7 @@ public class Glide {
          * @param animationId The resource id of the animation to run
          * @return This Request
          */
-        public Request<T, Y> animate(int animationId) {
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> animate(int animationId) {
             this.animationId = animationId;
 
             return this;
@@ -805,7 +741,7 @@ public class Glide {
          * @param resourceId The id of the resource to use as a placeholder
          * @return This Request
          */
-        public Request<T, Y> placeholder(int resourceId) {
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> placeholder(int resourceId) {
             this.placeholderId = resourceId;
 
             return this;
@@ -817,7 +753,7 @@ public class Glide {
          * @param resourceId The id of the resource to use as a placeholder
          * @return This request
          */
-        public Request<T, Y> error(int resourceId) {
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> error(int resourceId) {
             this.errorId = resourceId;
 
             return this;
@@ -831,7 +767,8 @@ public class Glide {
          * @param requestListener The request listener to use
          * @return This request
          */
-        public Request<T, Y> listener(RequestListener<T> requestListener) {
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> listener(
+                RequestListener<ModelType> requestListener) {
             this.requestListener = requestListener;
 
             return this;
@@ -869,9 +806,8 @@ public class Glide {
 
         private void finish(Context context, Target target) {
             this.context = context;
-            this.target = target;
 
-            ImagePresenter<T> imagePresenter = getImagePresenter(target);
+            ImagePresenter<ModelType> imagePresenter = getImagePresenter(target);
             imagePresenter.setModel(model);
         }
 
@@ -880,8 +816,8 @@ public class Glide {
          * the target's ImagePresenter via {@link Target#setImagePresenter(com.bumptech.glide.presenter.ImagePresenter)}
          */
         @SuppressWarnings("unchecked")
-        private ImagePresenter<T> getImagePresenter(Target target) {
-            ImagePresenter<T> result = target.getImagePresenter();
+        private ImagePresenter<ModelType> getImagePresenter(Target target) {
+            ImagePresenter<ModelType> result = target.getImagePresenter();
 
             Metadata previous = GLIDE.metadataTracker.get(target);
             Metadata current = new Metadata(this);
@@ -904,13 +840,22 @@ public class Glide {
             return result;
         }
 
-        private ImagePresenter<T> buildImagePresenter(final Target target) {
-            TransformationLoader<T> transformationLoader = getFinalTransformationLoader();
-            final ModelLoader<T, Y> modelLoader = modelLoaderFactory.build(context, GLIDE.loaderFactory);
+        private ImagePresenter<ModelType> buildImagePresenter(final Target target) {
+            TransformationLoader<ModelType> transformationLoader = getFinalTransformationLoader();
 
-            ImagePresenter.Builder<T> builder = new ImagePresenter.Builder<T>()
+            ModelLoader<ModelType, ImageResourceType> imageModelLoader = null;
+            if (imageModelLoaderFactory != null) {
+                imageModelLoader = imageModelLoaderFactory.build(context, GLIDE.loaderFactory);
+            }
+            ModelLoader<ModelType, VideoResourceType> videoModelLoader = null;
+            if (videoModelLoaderFactory != null) {
+                videoModelLoader = videoModelLoaderFactory.build(context, GLIDE.loaderFactory);
+            }
+
+            ImagePresenter.Builder<ModelType> builder = new ImagePresenter.Builder<ModelType>()
                     .setTarget(target, context)
-                    .setBitmapLoadFactory(new BaseBitmapLoadFactory<T, Y>(modelLoader, decoder, transformationLoader))
+                    .setBitmapLoadFactory(new BaseBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
+                            imageModelLoader, imageDecoder, videoModelLoader, videoDecoder, transformationLoader))
                     .setImageLoader(new ImageManagerLoader(context));
 
             if (animationId != -1 || requestListener != null) {
@@ -920,9 +865,9 @@ public class Glide {
                 } else {
                     animation = null;
                 }
-                builder.setImageReadyCallback(new ImagePresenter.ImageReadyCallback<T>() {
+                builder.setImageReadyCallback(new ImagePresenter.ImageReadyCallback<ModelType>() {
                     @Override
-                    public void onImageReady(T model, Target target, boolean fromCache) {
+                    public void onImageReady(ModelType model, Target target, boolean fromCache) {
                         if (animation != null && !fromCache) {
                             target.startAnimation(animation);
                         }
@@ -942,9 +887,9 @@ public class Glide {
             }
 
             if (requestListener != null) {
-                builder.setExceptionHandler(new ImagePresenter.ExceptionHandler<T>() {
+                builder.setExceptionHandler(new ImagePresenter.ExceptionHandler<ModelType>() {
                     @Override
-                    public void onException(Exception e, T model, boolean isCurrent) {
+                    public void onException(Exception e, ModelType model, boolean isCurrent) {
                         if (isCurrent) {
                             requestListener.onException(e, model, target);
                         }
@@ -955,14 +900,14 @@ public class Glide {
             return builder.build();
         }
 
-        private TransformationLoader<T> getFinalTransformationLoader() {
+        private TransformationLoader<ModelType> getFinalTransformationLoader() {
             switch (transformationLoaders.size()) {
                 case 0:
-                    return new None<T>();
+                    return new None<ModelType>();
                 case 1:
                     return transformationLoaders.get(0);
                 default:
-                    return new MultiTransformationLoader<T>(transformationLoaders);
+                    return new MultiTransformationLoader<ModelType>(transformationLoaders);
             }
         }
 
@@ -982,27 +927,23 @@ public class Glide {
         }
     }
 
-    /**
-     * An request for the user to provide an {@link Context} to start an image load
-     */
-    public static class ContextRequest {
-        private final Request request;
-        private final Target target;
 
-        private ContextRequest(Request request, Target target) {
-            this.request = request;
-            this.target = target;
-        }
+    private static <T, Y> ModelLoaderFactory<T, Y> modelLoaderToFactory(final ModelLoader<T, Y> modelLoader) {
+        return new ModelLoaderFactory<T, Y>() {
+            @Override
+            public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories) {
+                return modelLoader;
+            }
 
-        /**
-         * Start loading the image using the given context. The context will not be referenced statically so any
-         * context is acceptable.
-         *
-         * @param context The context to use to help load the image
-         */
-        public void with(Context context) {
-            request.finish(context, target);
-        }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Class<? extends ModelLoader<T, Y>> loaderClass() {
+                return (Class<ModelLoader<T, Y>>) modelLoader.getClass();
+            }
+
+            @Override
+            public void teardown() { }
+        };
     }
 
     private static class Metadata {
@@ -1016,10 +957,12 @@ public class Glide {
         private final Class requestListenerClass;
         private final String decoderId;
 
-        public Metadata(Request request) {
+        public Metadata(GenericRequest request) {
             modelClass = request.model.getClass();
-            modelLoaderClass = request.modelLoaderFactory.loaderClass();
-            decoderId = request.decoder.getId();
+            modelLoaderClass = request.imageModelLoaderFactory
+                    .loaderClass();
+            decoderId = request.imageDecoder
+                    .getId();
             transformationId = request.getFinalTransformationId();
             animationId = request.animationId;
             placeholderId = request.placeholderId;

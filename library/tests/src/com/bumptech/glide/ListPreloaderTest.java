@@ -3,7 +3,6 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
-import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 

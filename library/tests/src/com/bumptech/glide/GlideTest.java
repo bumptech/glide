@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.test.ActivityTestCase;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.presenter.ImagePresenter;

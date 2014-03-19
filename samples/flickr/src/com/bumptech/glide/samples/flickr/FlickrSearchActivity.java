@@ -31,6 +31,7 @@ import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,8 +113,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         }
 
         requestQueue = Volley.newRequestQueue(this);
-
-        glide.register(URL.class, new VolleyUrlLoader.Factory(requestQueue));
+        glide.register(URL.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
 
         searching = findViewById(R.id.searching);
         searchLoading = findViewById(R.id.search_loading);

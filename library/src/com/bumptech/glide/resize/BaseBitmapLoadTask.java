@@ -8,45 +8,76 @@ import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * A base {@link BitmapLoadTask} that composes {@link ResourceFetcher} and {@link BitmapDecoder} to decode a
- * bitmap.
+ * bitmap from either an image or a video.
  *
- * @param <T> The type of the resource returned by the {@link ResourceFetcher} and used by the
- *          {@link BitmapDecoder} to BitmapResourceLoader the bitmap.
+ * @param <T> The type of the resource returned by the image {@link ResourceFetcher} and used by the
+ *          image {@link BitmapDecoder} to decode the bitmap.
+ * @param <Y> The type of the resource returned by the video {@link ResourceFetcher} and used by the
+ *           video {@link BitmapDecoder} to decode the bitmap.
  */
-public class BaseBitmapLoadTask<T> implements BitmapLoadTask {
+public class BaseBitmapLoadTask<T, Y> implements BitmapLoadTask {
     private final String id;
     private final int width;
     private final int height;
+    private final ResourceFetcher<Y> videoLoader;
+    private final BitmapDecoder<Y> videoDecoder;
     private final Transformation transformation;
-    private ResourceFetcher<T> loader;
-    private BitmapDecoder<T> decoder;
+    private ResourceFetcher<T> imageLoader;
+    private BitmapDecoder<T> imageDecoder;
 
-    public BaseBitmapLoadTask(ResourceFetcher<T> loader, BitmapDecoder<T> decoder, Transformation transformation,
+    public BaseBitmapLoadTask(ResourceFetcher<T> imageLoader, BitmapDecoder<T> imageDecoder,
+            ResourceFetcher<Y> videoLoader, BitmapDecoder<Y> videoDecoder, Transformation transformation,
             int width, int height) {
-        this.loader = loader;
-        this.decoder = decoder;
+        this.imageLoader = imageLoader;
+        this.imageDecoder = imageDecoder;
+        this.videoLoader = videoLoader;
+        this.videoDecoder = videoDecoder;
         this.transformation = transformation;
         this.width = width;
         this.height = height;
-        this.id = loader.getId() + decoder.getId() + transformation.getId() + width + height;
+        this.id = imageLoader.getId() + imageDecoder.getId() + transformation.getId() + width + height;
     }
 
     public void cancel() {
-        loader.cancel();
+        imageLoader.cancel();
     }
 
     @Override
     public Bitmap load(BitmapPool bitmapPool) throws Exception {
-        T resource = loader.loadResource();
-        if (resource == null) {
-            throw new IllegalStateException("Cannot decode null resource");
+        Bitmap original = loadOriginal(bitmapPool);
+        if (original == null) {
+            return null;
         }
-        Bitmap original = decoder.decode(resource, bitmapPool, width, height);
+
         Bitmap transformed = transformation.transform(original, bitmapPool, width, height);
         if (original != transformed) {
             bitmapPool.put(original);
         }
         return transformed;
+    }
+
+    private Bitmap loadOriginal(BitmapPool bitmapPool) throws Exception {
+        Bitmap result = loadOriginal(imageLoader, imageDecoder, bitmapPool);
+        if (result == null) {
+            result = loadOriginal(videoLoader, videoDecoder, bitmapPool);
+        }
+
+        return result;
+    }
+
+    private <X> Bitmap loadOriginal(ResourceFetcher<X> fetcher, BitmapDecoder<X> decoder, BitmapPool bitmapPool)
+            throws Exception {
+        if (fetcher == null || decoder == null) {
+            return  null;
+        }
+
+        X resource = fetcher.loadResource();
+        if (resource == null) {
+            return  null;
+        }
+
+        return decoder.decode(resource, bitmapPool, width, height);
+
     }
 
     public String getId() {

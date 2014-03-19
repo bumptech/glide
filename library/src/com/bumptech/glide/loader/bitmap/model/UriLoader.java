@@ -24,16 +24,12 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
         ResourceFetcher<T> result = null;
         if (isLocalUri(scheme)) {
             result = getLocalUriFetcher(context, model);
-        } else if ("http".equals(scheme) || "https".equals(scheme)) {
+        } else if (urlLoader != null && ("http".equals(scheme) || "https".equals(scheme))) {
             try {
                 result = urlLoader.getResourceFetcher(new URL(model.toString()), width, height);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-        }
-
-        if (result == null) {
-            throw new IllegalArgumentException("No stream loader for uri=" + model);
         }
 
         return result;
