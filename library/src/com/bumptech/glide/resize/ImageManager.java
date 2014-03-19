@@ -679,6 +679,9 @@ public class ImageManager {
         }
 
         private void handleException(final Exception e) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Exception loading image", e);
+            }
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
