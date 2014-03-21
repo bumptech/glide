@@ -232,6 +232,27 @@ public class Glide {
         return GLIDE.loaderFactory.buildModelLoader(modelClass, resourceClass, context);
     }
 
+    /**
+     * A convenience method to build a {@link ModelLoader} for the given model that produces {@link InputStream}s using
+     * a registered factory.
+     *
+     * @see #buildModelLoader(Class, Class, android.content.Context)
+     */
+    public static <T> ModelLoader<T, InputStream> buildStreamModelLoader(Class<T> modelClass, Context context) {
+        return buildModelLoader(modelClass, InputStream.class, context);
+    }
+
+    /**
+     * A convenience method to build a {@link ModelLoader} for the given model class that produces
+     * {@link ParcelFileDescriptor}s using a registered factory.
+     *
+     * @see #buildModelLoader(Class, Class, android.content.Context)
+     */
+    public static <T> ModelLoader<T, ParcelFileDescriptor> buildFileDescriptorModelLoader(Class<T> modelClass,
+            Context context) {
+        return buildModelLoader(modelClass, ParcelFileDescriptor.class, context);
+    }
+
     @SuppressWarnings("unchecked")
     private <T, Y> ModelLoaderFactory<T, Y> getFactory(T model, Class<Y> resourceClass) {
         return loaderFactory.getFactory((Class<T>) model.getClass(), resourceClass);
