@@ -35,11 +35,26 @@ public class BaseBitmapLoadTask<T, Y> implements BitmapLoadTask {
         this.transformation = transformation;
         this.width = width;
         this.height = height;
-        this.id = imageLoader.getId() + imageDecoder.getId() + transformation.getId() + width + height;
+
+        StringBuilder idBuilder = new StringBuilder();
+        if (imageLoader != null && imageDecoder != null) {
+            idBuilder.append(imageLoader.getId());
+            idBuilder.append(imageDecoder.getId());
+        }
+        if (videoLoader != null && videoDecoder != null) {
+            idBuilder.append(videoLoader.getId());
+            idBuilder.append(videoDecoder.getId());
+        }
+        this.id = idBuilder.append(transformation.getId()).append(width).append(height).toString();
     }
 
     public void cancel() {
-        imageLoader.cancel();
+        if (imageLoader != null) {
+            imageLoader.cancel();
+        }
+        if (videoLoader != null) {
+            videoLoader.cancel();
+        }
     }
 
     @Override
