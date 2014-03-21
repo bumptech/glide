@@ -7,7 +7,6 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.BaseBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorFileLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorModelLoader;
@@ -30,7 +29,6 @@ import com.bumptech.glide.loader.bitmap.transformation.MultiTransformationLoader
 import com.bumptech.glide.loader.bitmap.transformation.None;
 import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.load.BitmapDecoder;
@@ -43,8 +41,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * A singleton to present a simple static interface for Glide {@link GenericRequest} and to create and manage an
@@ -59,7 +55,6 @@ import java.util.WeakHashMap;
 public class Glide {
     private static final String TAG = "Glide";
     private static final Glide GLIDE = new Glide();
-    private final Map<Target, Metadata> metadataTracker = new WeakHashMap<Target, Metadata>();
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
 
     private ImageManager imageManager = null;
@@ -772,26 +767,12 @@ public class Glide {
 
         @SuppressWarnings("unchecked")
         private <Y extends Target> ImagePresenter<ModelType, Y> getImagePresenter(Y target) {
-            ImagePresenter<ModelType, Y> result = target.getImagePresenter();
-
-            Metadata previous = GLIDE.metadataTracker.get(target);
-            Metadata current = new Metadata(this);
-
-            if (previous != null && result == null) {
-                previous = null;
+            final ImagePresenter<ModelType, Y> current = target.getImagePresenter();
+            if (current != null) {
+                current.clear();
             }
 
-            if (!current.isIdenticalTo(previous)) {
-                if (result != null) {
-                    result.clear();
-                }
-
-                result = buildImagePresenter(target);
-
-                GLIDE.metadataTracker.put(target, current);
-            }
-
-            return result;
+            return buildImagePresenter(target);
         }
 
         private <Y extends Target> ImagePresenter<ModelType, Y> buildImagePresenter(final Y target) {
@@ -864,21 +845,6 @@ public class Glide {
                     return new MultiTransformationLoader<ModelType>(transformationLoaders);
             }
         }
-
-        private String getFinalTransformationId() {
-            switch (transformationLoaders.size()) {
-                case 0:
-                    return Transformation.NONE.getId();
-                case 1:
-                    return transformationLoaders.get(0).getId();
-                default:
-                    StringBuilder sb = new StringBuilder();
-                    for (TransformationLoader transformationLoader : transformationLoaders) {
-                        sb.append(transformationLoader.getId());
-                    }
-                    return sb.toString();
-            }
-        }
     }
 
     private static <T, Y> ModelLoaderFactory<T, Y> modelLoaderToFactory(final ModelLoader<T, Y> modelLoader) {
@@ -897,47 +863,5 @@ public class Glide {
             @Override
             public void teardown() { }
         };
-    }
-
-    private static class Metadata {
-        public final Class modelClass;
-        public final Class modelLoaderClass;
-        public final int animationId;
-        public final int placeholderId;
-        public final int errorId;
-
-        private final String transformationId;
-        private final Class requestListenerClass;
-        private final String decoderId;
-
-        public Metadata(GenericRequest request) {
-            modelClass = request.model.getClass();
-            modelLoaderClass = request.imageModelLoaderFactory
-                    .loaderClass();
-            decoderId = request.imageDecoder
-                    .getId();
-            transformationId = request.getFinalTransformationId();
-            animationId = request.animationId;
-            placeholderId = request.placeholderId;
-            errorId = request.errorId;
-            requestListenerClass = (request.requestListener != null ?
-                    request.requestListener.getClass() : null);
-        }
-
-        //we don't want to change behavior in sets/maps, just be able to compare properties
-        public boolean isIdenticalTo(Metadata metadata) {
-            if (metadata == null) return false;
-            if (animationId != metadata.animationId) return false;
-            if (errorId != metadata.errorId) return false;
-            if (placeholderId != metadata.placeholderId) return false;
-            if (!decoderId.equals(metadata.decoderId)) return false;
-            if (!modelClass.equals(metadata.modelClass)) return false;
-            if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
-            if (!transformationId.equals(metadata.transformationId)) return false;
-            if (requestListenerClass == null ? metadata.requestListenerClass != null :
-                    !requestListenerClass.equals(metadata.requestListenerClass)) return false;
-
-            return true;
-        }
     }
 }
