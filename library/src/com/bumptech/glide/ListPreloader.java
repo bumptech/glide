@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.widget.AbsListView;
@@ -171,11 +170,16 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         private int photoWidth;
 
         @Override
-        protected int[] getSize() {
-            return new int[] { photoWidth, photoHeight };
+        public void onImageReady(Bitmap bitmap) { }
+
+        @Override
+        protected int getWidth() {
+            return photoWidth;
         }
 
         @Override
-        public void onImageReady(Bitmap bitmap) { }
+        protected int getHeight() {
+            return photoHeight;
+        }
     }
 }

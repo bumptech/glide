@@ -17,20 +17,22 @@ public abstract class SimpleTarget extends BaseTarget {
 
     /**
      * A default implementation that calls {@link com.bumptech.glide.presenter.target.Target.SizeReadyCallback}
-     * synchronously with {@link #getSize()}
+     * synchronously with {@link #getWidth()} and {@link #getHeight()}
      *
      * @param cb The callback that must be called when the size of the target has been determined
      */
     @Override
     public void getSize(SizeReadyCallback cb) {
-        final int[] size = getSize();
-        cb.onSizeReady(size[0], size[1]);
+        cb.onSizeReady(getWidth(), getHeight());
     }
 
     /**
-     * Synchronously return the dimensions of this target as [width, height]
-     *
-     * @return The dimensions of this target
+     * @return The height of this target, which will be used to determine how to load and crop the Bitmap.
      */
-    protected abstract int[] getSize();
+    protected abstract int getWidth();
+
+    /**
+     * @return The width of this target, which will be used to determine how to load and crop the Bitmap.
+     */
+    protected abstract int getHeight();
 }
