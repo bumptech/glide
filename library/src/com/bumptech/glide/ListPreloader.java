@@ -4,7 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.widget.AbsListView;
-import com.bumptech.glide.presenter.target.SimpleTarget;
+import com.bumptech.glide.presenter.target.BaseTarget;
 
 import java.util.ArrayDeque;
 import java.util.LinkedList;
@@ -136,7 +136,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
 
     private void cancelAll() {
         for (int i = 0; i < maxPreload; i++) {
-            Glide.cancel(preloadTargetQueue.next(0, 0));
+            Glide.clear(preloadTargetQueue.next(0, 0));
         }
     }
 
@@ -165,7 +165,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         }
     }
 
-    private static class PreloadTarget extends SimpleTarget {
+    private static class PreloadTarget extends BaseTarget {
         private int photoHeight;
         private int photoWidth;
 
@@ -173,13 +173,9 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         public void onImageReady(Bitmap bitmap) { }
 
         @Override
-        protected int getWidth() {
-            return photoWidth;
+        public void getSize(SizeReadyCallback cb) {
+            cb.onSizeReady(photoWidth, photoHeight);
         }
 
-        @Override
-        protected int getHeight() {
-            return photoHeight;
-        }
     }
 }

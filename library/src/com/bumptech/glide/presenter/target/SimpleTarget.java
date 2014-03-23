@@ -1,38 +1,21 @@
 package com.bumptech.glide.presenter.target;
 
-import android.graphics.drawable.Drawable;
-import android.view.animation.Animation;
-import com.bumptech.glide.presenter.ImagePresenter;
-
 /**
- * A simpler interface for targets with default (usually noop) implementations of non essential methods.
+ * A simpler interface for targets with default (usually noop) implementations of non essential methods that allows the
+ * caller to specify an exact width/height.
  */
+@SuppressWarnings("unused")
 public abstract class SimpleTarget extends BaseTarget {
+    private final int width;
+    private final int height;
 
-    @Override
-    public void setPlaceholder(Drawable placeholder) { }
-
-    @Override
-    public void startAnimation(Animation animation) { }
-
-    /**
-     * A default implementation that calls {@link com.bumptech.glide.presenter.target.Target.SizeReadyCallback}
-     * synchronously with {@link #getWidth()} and {@link #getHeight()}
-     *
-     * @param cb The callback that must be called when the size of the target has been determined
-     */
-    @Override
-    public void getSize(SizeReadyCallback cb) {
-        cb.onSizeReady(getWidth(), getHeight());
+    public SimpleTarget(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
-    /**
-     * @return The height of this target, which will be used to determine how to load and crop the Bitmap.
-     */
-    protected abstract int getWidth();
-
-    /**
-     * @return The width of this target, which will be used to determine how to load and crop the Bitmap.
-     */
-    protected abstract int getHeight();
+    @Override
+    public final void getSize(SizeReadyCallback cb) {
+        cb.onSizeReady(width, height);
+    }
 }

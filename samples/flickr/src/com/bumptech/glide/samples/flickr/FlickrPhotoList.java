@@ -13,7 +13,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.loader.bitmap.model.Cache;
-import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.net.URL;
@@ -33,8 +32,9 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     @Override
     public void onPhotosUpdated(List<Photo> photos) {
         currentPhotos = photos;
-        if (adapter != null)
+        if (adapter != null) {
             adapter.setPhotos(currentPhotos);
+        };
     }
 
     @Override
@@ -45,18 +45,19 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         list.setAdapter(adapter);
         preloader = new FlickrListPreloader(getActivity(), 5);
         list.setOnScrollListener(preloader);
-        if (currentPhotos != null)
+        if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
+        }
         return result;
     }
 
     private static class ViewHolder {
         private final TextView titleText;
-        private final ImageViewTarget imageViewTarget;
+        private final ImageView imageView;
 
         public ViewHolder(ImageView imageView, TextView titleText) {
+            this.imageView = imageView;
             this.titleText = titleText;
-            this.imageViewTarget = new ImageViewTarget(imageView);
         }
     }
 
@@ -153,7 +154,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                     .load(current)
                     .centerCrop()
                     .animate(R.anim.fade_in)
-                    .into(viewHolder.imageViewTarget);
+                    .into(viewHolder.imageView);
 
             viewHolder.titleText.setText(current.title);
             return view;

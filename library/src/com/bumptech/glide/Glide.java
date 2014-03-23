@@ -2,11 +2,14 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.BaseBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorFileLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorModelLoader;
@@ -30,6 +33,8 @@ import com.bumptech.glide.loader.bitmap.transformation.None;
 import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.Target;
+import com.bumptech.glide.presenter.target.ImageViewTarget;
+import com.bumptech.glide.presenter.target.ViewTarget;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
@@ -219,6 +224,11 @@ public class Glide {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private <T, Y> ModelLoaderFactory<T, Y> getFactory(T model, Class<Y> resourceClass) {
+        return loaderFactory.getFactory((Class<T>) model.getClass(), resourceClass);
+    }
+
     /**
      * Build a {@link ModelLoader} for the given model class using a registered factory.
      *
@@ -253,26 +263,36 @@ public class Glide {
         return buildModelLoader(modelClass, ParcelFileDescriptor.class, context);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T, Y> ModelLoaderFactory<T, Y> getFactory(T model, Class<Y> resourceClass) {
-        return loaderFactory.getFactory((Class<T>) model.getClass(), resourceClass);
+
+    /**
+     * Cancel any pending loads Glide may have for the target and free any resources (such as {@link Bitmap}s) that may
+     * have been loaded for the target so they may be reused.
+     *
+     * @param target The Target to cancel loads for.
+     */
+    public static void clear(Target target) {
+        ImagePresenter imagePresenter = target.getImagePresenter();
+        if (imagePresenter != null) {
+            imagePresenter.clear();
+        }
     }
 
     /**
-     * Cancel any pending loads Glide may have for the target. After the load is cancelled Glide will not load
-     * a placeholder or bitmap into the target so it is safe to do so yourself until you start another load.
+     * Cancel any pending loads Glide may have for the view and free any resources that may have been loaded for the
+     * view.
      *
-     * @param target The Target to cancel loads for
-     * @return True iff Glide had ever been asked to load an image for this target
+     * <p>
+     *     Note that this will only work if {@link View#setTag(Object)} is not called on this view outside of Glide.
+     * </p>
+     *
+     * @see #clear(Target).
+     *
+     * @param view The view to cancel loads and free resources for.
+     * @throws IllegalArgumentException if an object other than Glide's metadata is set as the view's tag.
      */
-    public static boolean cancel(Target target) {
-        ImagePresenter current = target.getImagePresenter();
-        final boolean cancelled = current != null;
-        if (cancelled) {
-            current.clear();
-        }
-
-        return cancelled;
+    public static void clear(View view) {
+        Target viewTarget = new CancelTarget(view);
+        clear(viewTarget);
     }
 
     /**
@@ -317,7 +337,6 @@ public class Glide {
          */
         public <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
             return new VideoModelRequest<T>(context, modelLoaderToFactory(modelLoader));
-
         }
 
         /**
@@ -775,25 +794,29 @@ public class Glide {
          * Set the target the image will be loaded into.
          *
          * @param target The target to load te image for
+         * @return The given target.
          */
         public <Y extends Target> Y into(Y target) {
             return finish(target);
         }
 
-        private <Y extends Target> Y finish(Y target) {
-            ImagePresenter<ModelType, Y> imagePresenter = getImagePresenter(target);
-            imagePresenter.setModel(model);
-            return target;
+        /**
+         * Sets the {@link ImageView} the image will be loaded into, cancels any existing loads into the view, and frees
+         * any resources Glide has loaded into the view so they may be reused.
+         *
+         * @see #clear(View)
+         *
+         * @param view The view to cancel previous loads for and load the new image into.
+         * @return The {@link ImageViewTarget} used to wrap the given {@link ImageView}.
+         */
+        public ImageViewTarget into(ImageView view) {
+            return into(new ImageViewTarget(view));
         }
 
-        @SuppressWarnings("unchecked")
-        private <Y extends Target> ImagePresenter<ModelType, Y> getImagePresenter(Y target) {
-            final ImagePresenter<ModelType, Y> current = target.getImagePresenter();
-            if (current != null) {
-                current.clear();
-            }
-
-            return buildImagePresenter(target);
+        private <Y extends Target> Y finish(Y target) {
+            ImagePresenter<ModelType, Y> imagePresenter = buildImagePresenter(target);
+            imagePresenter.setModel(model);
+            return target;
         }
 
         private <Y extends Target> ImagePresenter<ModelType, Y> buildImagePresenter(final Y target) {
@@ -884,5 +907,17 @@ public class Glide {
             @Override
             public void teardown() { }
         };
+    }
+
+    private static class CancelTarget extends ViewTarget<View> {
+        public CancelTarget(View view) {
+            super(view);
+        }
+
+        @Override
+        public void onImageReady(Bitmap bitmap) { }
+
+        @Override
+        public void setPlaceholder(Drawable placeholder) { }
     }
 }
