@@ -105,6 +105,10 @@ public abstract class Downsampler {
         }
 
         final Bitmap downsampled = downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize);
+        if (downsampled == null) {
+            throw new IllegalArgumentException("Unable to decode image sample size: " + sampleSize + " inWidth: "
+                    + inWidth + " inHeight: " + inHeight);
+        }
         final Bitmap rotated = ImageResizer.rotateImageExif(downsampled, pool, orientation);
 
         if (downsampled != rotated && !pool.put(downsampled)) {
@@ -114,12 +118,11 @@ public abstract class Downsampler {
         return rotated;
     }
 
-    protected Bitmap downsampleWithSize(RecyclableBufferedInputStream bis, BitmapFactory.Options options, BitmapPool pool, int inWidth, int inHeight, int sampleSize) {
-        if (sampleSize > 1) {
-            options.inSampleSize = sampleSize;
-        } else {
-            // cannot reuse bitmaps when decoding images that are not PNG or JPG.
-            // look at : https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
+    protected Bitmap downsampleWithSize(RecyclableBufferedInputStream bis, BitmapFactory.Options options,
+            BitmapPool pool, int inWidth, int inHeight, int sampleSize) {
+        // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
+        options.inSampleSize = sampleSize;
+        if (options.inSampleSize == 1 || Build.VERSION.SDK_INT >= 19) {
             if (shouldUsePool(bis)) {
                 setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
             }
@@ -128,9 +131,16 @@ public abstract class Downsampler {
     }
 
     private boolean shouldUsePool(RecyclableBufferedInputStream bis) {
+        // On KitKat+, any bitmap can be used to decode any other bitmap.
+        if (Build.VERSION.SDK_INT >= 19) {
+            return true;
+        }
+
         bis.mark(1024);
         try {
             final ImageType type = new ImageHeaderParser(bis).getType();
+            // cannot reuse bitmaps when decoding images that are not PNG or JPG.
+            // look at : https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
             return TYPES_THAT_USE_POOL.contains(type);
         } catch (IOException e) {
             e.printStackTrace();
