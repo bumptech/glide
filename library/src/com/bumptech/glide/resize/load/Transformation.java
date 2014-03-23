@@ -10,8 +10,10 @@ public abstract class Transformation {
     private final String id = getClass().toString();
 
     /**
-     * Scale the image uniformly (maintaining the image's aspect ratio) so that one of the dimensions of the image
-     * will be equal to the given dimension and the other will be less than the given dimension
+     * Scale the image so that either the width of the image matches the given width and the height of the image is
+     * greater than the given height or vice versa, and then crop the larger dimension to match the given dimension.
+     *
+     * Does not maintain the image's aspect ratio
      */
     public static Transformation CENTER_CROP = new Transformation() {
         @Override
@@ -20,15 +22,14 @@ public abstract class Transformation {
                 throw new IllegalArgumentException("Cannot center crop image to width=" + outWidth + " and height="
                         + outHeight);
             }
-            return ImageResizer.centerCrop(pool.get(outWidth, outHeight, bitmap.getConfig()), bitmap, outWidth, outHeight);
+            final Bitmap toRuse = pool.get(outWidth, outHeight, bitmap.getConfig());
+            return ImageResizer.centerCrop(toRuse, bitmap, outWidth, outHeight);
         }
     };
 
     /**
-     * Scale the image so that either the width of the image matches the given width and the height of the image is
-     * greater than the given height or vice versa, and then crop the larger dimension to match the given dimension.
-     *
-     * Does not maintain the image's aspect ratio
+     * Scale the image uniformly (maintaining the image's aspect ratio) so that one of the dimensions of the image
+     * will be equal to the given dimension and the other will be less than the given dimension
      */
     public static Transformation FIT_CENTER = new Transformation() {
         @Override
@@ -37,7 +38,8 @@ public abstract class Transformation {
                 throw new IllegalArgumentException("Cannot fit center image to within width=" + outWidth + " or height="
                         + outHeight);
             }
-            return ImageResizer.fitInSpace(bitmap, outWidth, outHeight);
+
+            return ImageResizer.fitCenter(bitmap, pool, outWidth, outHeight);
         }
     };
 

@@ -25,10 +25,12 @@ import java.util.Queue;
  * A class for synchronously resizing bitmaps with or without Bitmaps to reuse
  */
 public class ImageResizer {
+    public static final int PAINT_FLAGS = Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
+
     private static final String TAG = "ImageResizer";
     private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
     private static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
-    private static final int PAINT_FLAGS = Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
+
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private final BitmapPool bitmapPool;
 
@@ -275,9 +277,10 @@ public class ImageResizer {
      * @param toFit The Bitmap to shrink
      * @param width The width the final image will fit within
      * @param height The height the final image will fit within
-     * @return A new Bitmap shrunk to fit within the given dimesions, or toFit if toFit's width or height matches the
+     * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or height matches the
      * given dimensions and toFit fits within the given dimensions
      */
+    @Deprecated
     public static Bitmap fitInSpace(Bitmap toFit, int width, int height){
         if (toFit == null) return null;
 
@@ -287,6 +290,46 @@ public class ImageResizer {
             return shrinkToHeight(toFit, height);
         }
     }
+
+    /**
+     * An expensive operation to resize the given Bitmap down so that it fits within the given dimensions maintain
+     * the original proportions.
+     *
+     * @param toFit The Bitmap to shrink.
+     * @param pool The BitmapPool to try to reuse a bitmap from.
+     * @param width The width the final image will fit within.
+     * @param height The height the final image will fit within.
+     * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or height matches the
+     * given dimensions and toFit fits within the given dimensions
+     */
+    public static Bitmap fitCenter(Bitmap toFit, BitmapPool pool, int width, int height) {
+         final float shrinkPercentage;
+        final int targetWidth;
+        final int targetHeight;
+        if (height > width) {
+            shrinkPercentage = width / (float) toFit.getWidth();
+            targetWidth = width;
+            targetHeight = Math.round(shrinkPercentage * toFit.getHeight());
+        } else {
+            shrinkPercentage = height / (float) toFit.getHeight();
+            targetWidth = Math.round(shrinkPercentage * toFit.getWidth());
+            targetHeight = height;
+        }
+
+        Bitmap.Config config = toFit.getConfig() != null ? toFit.getConfig() : Bitmap.Config.ARGB_8888;
+        Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
+        if (toReuse == null) {
+            toReuse = Bitmap.createBitmap(targetWidth, targetHeight, config);
+        }
+        Canvas canvas = new Canvas(toReuse);
+        Matrix matrix = new Matrix();
+        matrix.setScale(shrinkPercentage, shrinkPercentage);
+        Paint paint = new Paint(ImageResizer.PAINT_FLAGS);
+        canvas.drawBitmap(toFit, matrix, paint);
+
+        return toReuse;
+    }
+
 
     /**
      * Returns a matrix with rotation set based on Exif orientation tag.
@@ -443,7 +486,7 @@ public class ImageResizer {
 
         final Canvas canvas = new Canvas(result);
         final Paint paint = new Paint(PAINT_FLAGS);
-        canvas.drawBitmap(toOrient, matrix, null);
+        canvas.drawBitmap(toOrient, matrix, paint);
 
         return result;
     }
