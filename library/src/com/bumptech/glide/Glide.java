@@ -16,6 +16,7 @@ import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorMode
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorStringLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorUriLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamByteArrayLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamFileLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
@@ -325,6 +326,16 @@ public class Glide {
          */
         public <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
             return new ImageModelRequest<T>(context, modelLoaderToFactory(modelLoader));
+        }
+
+        /**
+         * A convenience method to use a {@link StreamByteArrayLoader} to decode an image from a byte array.
+         *
+         * @param modelLoader The byte array loader.
+         * @return A new {@link ImageModelRequest}.
+         */
+        public ImageModelRequest<byte[]> using(StreamByteArrayLoader modelLoader) {
+            return new ImageModelRequest<byte[]>(context, modelLoaderToFactory(modelLoader));
         }
 
         /**
@@ -788,7 +799,6 @@ public class Glide {
 
             return this;
         }
-
 
         /**
          * Set the target the image will be loaded into.
