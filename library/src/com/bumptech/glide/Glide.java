@@ -47,9 +47,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
- * A singleton to present a simple static interface for Glide {@link GenericRequest} and to create and manage an
+ * A singleton to present a simple static interface for Glide {@link Request} and to create and manage an
  * {@link ImageLoader} and {@link ModelLoaderFactory}s. This class provides most of the functionality of
  * {@link ImagePresenter} with a simpler but less efficient interface. For more complicated cases it may be worth
  * considering using {@link ImagePresenter} and {@link com.bumptech.glide.presenter.ImagePresenter.Builder} directly.
@@ -159,7 +160,7 @@ public class Glide {
      * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
      * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
      * {@link #setImageManager(com.bumptech.glide.resize.ImageManager.Builder) setImageManager} to set an
-     * {@link ImageManager} with custom options for use with {@link GenericRequest} and/or as an
+     * {@link ImageManager} with custom options for use with {@link Request} and/or as an
      * easily accessible singleton.
      *
      * @return true iff an {@link ImageManager} is currently set
@@ -169,7 +170,7 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ImageManager} to use with {@link GenericRequest}.
+     * Set the {@link ImageManager} to use with {@link Request}.
      *
      * @see #setImageManager(com.bumptech.glide.resize.ImageManager)
      *
@@ -180,7 +181,7 @@ public class Glide {
     }
 
     /**
-     * Set the {@link ImageManager} to use with {@link GenericRequest} Replaces the current
+     * Set the {@link ImageManager} to use with {@link Request} Replaces the current
      * {@link ImageManager} if one has already been set.
      *
      * @see #isImageManagerSet()
@@ -263,7 +264,6 @@ public class Glide {
             Context context) {
         return buildModelLoader(modelClass, ParcelFileDescriptor.class, context);
     }
-
 
     /**
      * Cancel any pending loads Glide may have for the target and free any resources (such as {@link Bitmap}s) that may
@@ -357,7 +357,7 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param string The string representing the image. Must be either a path, or a uri handled by {@link StreamUriLoader}
-         * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
+         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
          */
         public Request<String> load(String string) {
             return new Request<String>(context, string);
@@ -370,24 +370,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
-         * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
+         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
          */
         public Request<Uri> load(Uri uri) {
             return new Request<Uri>(context, uri);
-        }
-
-        /**
-         * Use the {@link ModelLoaderFactory} currently registered for {@link URL} to load the image represented by the
-         * given {@link URL}. Defaults to {@link VolleyUrlLoader.Factory} and {@link VolleyUrlLoader} to load the given
-         * model.
-         *
-         * @see #using(StreamModelLoader)
-         *
-         * @param url The URL representing the image.
-         * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
-         */
-        public Request<URL> load(URL url) {
-            return new Request<URL>(context, url);
         }
 
         /**
@@ -397,7 +383,7 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param file The File containing the image
-         * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
+         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
          */
         public Request<File> load(File file) {
             return new Request<File>(context, file);
@@ -411,7 +397,7 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param resourceId the id of the resource containing the image
-         * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the model into
+         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
          */
         public Request<Integer> load(Integer resourceId) {
             return new Request<Integer>(context, resourceId);
@@ -423,12 +409,57 @@ public class Glide {
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link GenericRequest} to set options for the load and ultimately the target to load the image into.
+         * @return A {@link Request} to set options for the load and ultimately the target to load the image into.
          * @throws IllegalArgumentException If no such {@link ModelLoaderFactory} is registered for the given model type.
          */
         @SuppressWarnings("unused")
         public <T> Request<T> loadFromImage(T model) {
             return new ImageModelRequest<T>(context, GLIDE.getFactory(model, InputStream.class)).load(model);
+        }
+
+        /**
+         * Use the {@link ModelLoaderFactory} currently registered for {@link URL} to load the image represented by the
+         * given {@link URL}. Defaults to {@link VolleyUrlLoader.Factory} and {@link VolleyUrlLoader} to load the given
+         * model.
+         *
+         * @see #using(StreamModelLoader)
+         *
+         * @param url The URL representing the image.
+         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+         */
+        public Request<URL> loadFromImage(URL url) {
+            return new ImageModelRequest<URL>(context, GLIDE.getFactory(url, InputStream.class)).load(url);
+        }
+
+        /**
+         * Use a new {@link StreamByteArrayLoader} to load an image from the given model.
+         *
+         * @see #loadFromImage(byte[])
+         *
+         * @param model The data to load.
+         * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
+         *           (url, filepath etc). If there is no suitable id, use {@link #loadFromImage(byte[])} instaed.
+         * @return A {@link Request} to set options for the load and ultimately the target to load the image into.
+         */
+        public Request<byte[]> loadFromImage(byte[] model, final String id) {
+            return new ImageModelRequest<byte[]>(context, modelLoaderToFactory(new StreamByteArrayLoader() {
+                @Override
+                public String getId(byte[] model) {
+                    return id;
+                }
+            })).load(model);
+        }
+
+        /**
+         * Use a new {@link StreamByteArrayLoader} to load an image from the given model. Suitable when there is no
+         * simple id that represents the given data.
+         *
+         * @param model the data to load.
+         * @return A {@link Request} to set options for the load and ultimately the target to load the image into.
+         */
+        public Request<byte[]> loadFromImage(byte[] model) {
+            return loadFromImage(model, UUID.randomUUID()
+                    .toString());
         }
 
         /**

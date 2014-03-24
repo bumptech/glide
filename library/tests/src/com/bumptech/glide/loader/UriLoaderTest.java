@@ -59,7 +59,7 @@ public class UriLoaderTest extends AndroidTestCase {
     }
 
     public void testHandlesResourceUris() throws IOException {
-        Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");// + R.raw.ic_launcher);
+        Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
         ResourceFetcher resourceFetcher = loader.getResourceFetcher(resourceUri, 0, 0);
         assertTrue(resourceFetcher instanceof LocalUriFetcher);
     }

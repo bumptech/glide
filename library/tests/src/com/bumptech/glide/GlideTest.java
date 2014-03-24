@@ -55,7 +55,7 @@ public class GlideTest extends ActivityTestCase {
 
     public void testUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
-        Target target = Glide.with(getContext()).load(url).into(imageViewTarget);
+        Target target = Glide.with(getContext()).loadFromImage(url).into(imageViewTarget);
         checkImagePresenter(target, url);
     }
 
