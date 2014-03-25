@@ -40,6 +40,14 @@ public class BaseBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T> {
     public BaseBitmapLoadFactory(ModelLoader<T, Y> imageModelLoader, BitmapDecoder<Y> imageDecoder,
             ModelLoader<T, Z> videoModelLoader, BitmapDecoder<Z> videoDecoder,
             TransformationLoader<T> transformationLoader) {
+        if ((imageModelLoader == null || imageDecoder == null)
+                && (videoModelLoader == null || videoDecoder == null)) {
+            throw new IllegalArgumentException("You must provide at least a video model loader and a video decoder or" +
+                    "an image model loader and an image decoder");
+        }
+        if (transformationLoader == null) {
+            throw new IllegalArgumentException("You must provide a non null transformation loader");
+        }
         this.imageModelLoader = imageModelLoader;
         this.imageDecoder = imageDecoder;
         this.videoModelLoader = videoModelLoader;

@@ -92,7 +92,6 @@ public class BaseBitmapLoadTask<T, Y> implements BitmapLoadTask {
         }
 
         return decoder.decode(resource, bitmapPool, width, height);
-
     }
 
     public String getId() {

@@ -1,4 +1,4 @@
-package com.bumptech.glide.loader;
+package com.bumptech.glide.loader.bitmap.model;
 
 import android.test.ActivityTestCase;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamByteArrayLoader;
