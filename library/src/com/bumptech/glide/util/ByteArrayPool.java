@@ -7,9 +7,11 @@ import java.util.Queue;
 
 public class ByteArrayPool {
     private static final String TAG = "ByteArrayPool";
-    private static final int TEMP_BYTES_SIZE = 16 * 1024; //16kb
-    // 512 KB
-    private static final int MAX_SIZE = (512 * 1024) / TEMP_BYTES_SIZE;
+    // 16 KB.
+    private static final int TEMP_BYTES_SIZE = 16 * 1024;
+    // 512 KB.
+    private static final int MAX_SIZE = 512 * 1024;
+    private static final int MAX_BYTE_ARRAY_COUNT = MAX_SIZE / TEMP_BYTES_SIZE;
 
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();
     private static final ByteArrayPool BYTE_ARRAY_POOL = new ByteArrayPool();
@@ -18,8 +20,12 @@ public class ByteArrayPool {
         return BYTE_ARRAY_POOL;
     }
 
-    private ByteArrayPool() {
+    private ByteArrayPool() {  }
 
+    public void clear() {
+        synchronized (tempQueue) {
+            tempQueue.clear();
+        }
     }
 
     public byte[] getBytes() {
@@ -36,9 +42,18 @@ public class ByteArrayPool {
         return result;
     }
 
-    public void releaseBytes(byte[] bytes) {
-        synchronized (tempQueue) {
-            tempQueue.offer(bytes);
+    public boolean releaseBytes(byte[] bytes) {
+        if (bytes.length != TEMP_BYTES_SIZE) {
+            return false;
         }
+
+        boolean accepted = false;
+        synchronized (tempQueue) {
+            if (tempQueue.size() < MAX_BYTE_ARRAY_COUNT) {
+                accepted = true;
+                tempQueue.offer(bytes);
+            }
+        }
+        return accepted;
     }
 }
