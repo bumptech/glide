@@ -2,19 +2,18 @@ package com.bumptech.glide.resize;
 
 import android.annotation.TargetApi;
 import android.os.Build;
+import com.bumptech.glide.util.LruCache;
 import com.bumptech.glide.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayDeque;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 
 public class SafeKeyGenerator {
-    private final Map<LoadId, String> loadIdToSafeHash = new HashMap<LoadId, String>();
+    private final LruCache<LoadId, String> loadIdToSafeHash = new LruCache<LoadId, String>(250);
     private final LoadIdPool loadIdPool = new LoadIdPool();
 
     public String getSafeKey(BitmapLoad task) {

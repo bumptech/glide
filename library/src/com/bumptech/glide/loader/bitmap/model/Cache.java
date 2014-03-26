@@ -1,7 +1,6 @@
 package com.bumptech.glide.loader.bitmap.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.bumptech.glide.util.LruCache;
 
 /**
  * A simple cache that can be used by {@link ModelLoader} and {@link ModelLoaderFactory} to cache some data for a given
@@ -11,7 +10,7 @@ import java.util.Map;
  * @param <A> Some useful type that may be expensive to create (URL, file path, etc).
  */
 public class Cache<A> {
-    private Map<ModelKey, A> cache = new HashMap<ModelKey, A>();
+    private LruCache<ModelKey, A> cache = new LruCache<ModelKey, A>(250);
 
     private static class ModelKey {
         private final int height;
