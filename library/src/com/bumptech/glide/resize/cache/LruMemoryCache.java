@@ -8,7 +8,8 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 
 import android.graphics.Bitmap;
-import java.util.Iterator;
+import com.bumptech.glide.util.Util;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,10 +20,6 @@ public class LruMemoryCache implements MemoryCache {
     private final int maxSize;
     private ImageRemovedListener imageRemovedListener;
     private int currentSize = 0;
-
-    private static int getSize(Bitmap bitmap) {
-        return bitmap.getHeight() * bitmap.getRowBytes();
-    }
 
     public LruMemoryCache(int size) {
         this.maxSize = size;
@@ -40,7 +37,7 @@ public class LruMemoryCache implements MemoryCache {
 
     @Override
     public Bitmap put(String key, Bitmap bitmap) {
-        currentSize += getSize(bitmap);
+        currentSize += Util.getSize(bitmap);
         final Bitmap result = cache.put(key, bitmap);
         evict();
         return result;
@@ -74,7 +71,7 @@ public class LruMemoryCache implements MemoryCache {
         while (currentSize > size) {
             last = cache.entrySet().iterator().next();
             final Bitmap toRemove = last.getValue();
-            currentSize -= getSize(toRemove);
+            currentSize -= Util.getSize(toRemove);
             cache.remove(last.getKey());
 
             if (imageRemovedListener != null) {

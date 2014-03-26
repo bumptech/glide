@@ -1,7 +1,11 @@
 package com.bumptech.glide.resize.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import com.bumptech.glide.util.Util;
 
+/**
+ * A strategy for reusing bitmaps that requires any returned bitmap's dimensions to exactly match those request.
+ */
 class AttributeStrategy implements LruPoolStrategy {
     private final KeyPool keyPool = new KeyPool();
     private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<Key, Bitmap>();
@@ -36,7 +40,7 @@ class AttributeStrategy implements LruPoolStrategy {
 
     @Override
     public int getSize(Bitmap bitmap) {
-        return bitmap.getHeight() * bitmap.getRowBytes();
+        return Util.getSize(bitmap);
     }
 
     @Override

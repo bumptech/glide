@@ -5,6 +5,10 @@ import android.graphics.Bitmap;
 
 import java.util.TreeMap;
 
+/**
+ * A strategy for reusing bitmaps that relies on {@link Bitmap#reconfigure(int, int, Bitmap.Config)}. Requires KitKat
+ * (API 19) or higher.
+ */
 @TargetApi(19)
 class SizeStrategy implements LruPoolStrategy {
     private static final int MAX_SIZE_MULTIPLE = 4;

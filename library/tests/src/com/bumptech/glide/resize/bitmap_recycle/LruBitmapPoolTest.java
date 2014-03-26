@@ -101,10 +101,6 @@ public class LruBitmapPoolTest extends AndroidTestCase {
         }
     }
 
-    private static final int getSize(Bitmap bitmap) {
-        return bitmap.getRowBytes() * bitmap.getHeight();
-    }
-
     private static class MockStrategy implements LruPoolStrategy {
         private LinkedList<Bitmap> bitmaps = new LinkedList<Bitmap>();
         private int numRemoves;

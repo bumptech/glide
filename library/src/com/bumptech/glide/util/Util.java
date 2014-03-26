@@ -1,5 +1,8 @@
 package com.bumptech.glide.util;
 
+import android.graphics.Bitmap;
+import android.os.Build;
+
 public class Util {
     private static final char[] hexArray = "0123456789abcdef".toCharArray();
     private static final char[] sha256Chars = new char[64]; //32 bytes from sha-256 -> 64 hex chars
@@ -19,4 +22,16 @@ public class Util {
         }
         return new String(hexChars);
     }
+
+    /**
+     * Returns the in memory size of the given {@link Bitmap}.
+     */
+    public static int getSize(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= 19) {
+            return bitmap.getAllocationByteCount();
+        } else {
+            return bitmap.getHeight() * bitmap.getRowBytes();
+        }
+    }
+
 }
