@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import com.bumptech.glide.loader.bitmap.BaseBitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorFileLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorResourceLoader;
@@ -665,7 +665,7 @@ public class Glide {
         private GenericRequest(Context context, ModelType model, ModelLoaderFactory<ModelType, ImageResourceType> imageFactory,
                 ModelLoaderFactory<ModelType, VideoResourceType> videoFactory) {
             if (context == null) {
-                throw new NullPointerException("Context can't be nul");
+                throw new NullPointerException("Context can't be null");
             }
             this.context = context;
 
@@ -874,7 +874,7 @@ public class Glide {
 
             ImagePresenter.Builder<ModelType, Y> builder = new ImagePresenter.Builder<ModelType, Y>()
                     .setTarget(target, context)
-                    .setBitmapLoadFactory(new BaseBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
+                    .setBitmapLoadFactory(new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
                             imageModelLoader, imageDecoder, videoModelLoader, videoDecoder, transformationLoader))
                     .setImageLoader(new ImageManagerLoader(context));
 

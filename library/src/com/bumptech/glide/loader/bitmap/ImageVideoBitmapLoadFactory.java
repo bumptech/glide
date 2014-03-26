@@ -4,14 +4,14 @@ import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.loader.bitmap.transformation.None;
 import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
-import com.bumptech.glide.resize.BaseBitmapLoadTask;
-import com.bumptech.glide.resize.BitmapLoadTask;
+import com.bumptech.glide.resize.BitmapLoad;
+import com.bumptech.glide.resize.ImageVideoBitmapLoad;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * A base {@link BitmapLoadFactory} that composes {@link ModelLoader} and {@link BitmapDecoder} sub-components
- * to create an {@link BitmapLoadTask} capable of loading a model that represents either an image or a video.
+ * to create an {@link BitmapLoad} capable of loading a model that represents either an image or a video.
  *
  * @param <T> The type of the model.
  * @param <Y> The type of the resource that the image {@link ModelLoader} provides and the image {@link BitmapDecoder} can
@@ -19,7 +19,7 @@ import com.bumptech.glide.resize.load.Transformation;
  * @param <Z> The type of resource that the video {@link ModelLoader} provides and the video {@link BitmapDecoder} can
  *           decode.
  */
-public class BaseBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T> {
+public class ImageVideoBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T> {
     private final ModelLoader<T, Y> imageModelLoader;
     private final BitmapDecoder<Y> imageDecoder;
     private final ModelLoader<T, Z> videoModelLoader;
@@ -27,17 +27,17 @@ public class BaseBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T> {
     private final TransformationLoader<T> transformationLoader;
 
     @SuppressWarnings("unused")
-    public BaseBitmapLoadFactory(ModelLoader<T, Y> imageModelLoader, BitmapDecoder<Y> imageDecoder) {
+    public ImageVideoBitmapLoadFactory(ModelLoader<T, Y> imageModelLoader, BitmapDecoder<Y> imageDecoder) {
         this(imageModelLoader, imageDecoder, null, null, new None<T>());
     }
 
     @SuppressWarnings("unused")
-    public BaseBitmapLoadFactory(ModelLoader<T, Y> imageModelLoader, BitmapDecoder<Y> imageDecoder,
+    public ImageVideoBitmapLoadFactory(ModelLoader<T, Y> imageModelLoader, BitmapDecoder<Y> imageDecoder,
             TransformationLoader<T> transformationLoader) {
         this(imageModelLoader, imageDecoder, null, null, transformationLoader);
     }
 
-    public BaseBitmapLoadFactory(ModelLoader<T, Y> imageModelLoader, BitmapDecoder<Y> imageDecoder,
+    public ImageVideoBitmapLoadFactory(ModelLoader<T, Y> imageModelLoader, BitmapDecoder<Y> imageDecoder,
             ModelLoader<T, Z> videoModelLoader, BitmapDecoder<Z> videoDecoder,
             TransformationLoader<T> transformationLoader) {
         if ((imageModelLoader == null || imageDecoder == null)
@@ -56,7 +56,7 @@ public class BaseBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T> {
     }
 
     @Override
-    public BitmapLoadTask getLoadTask(T model, int width, int height) {
+    public BitmapLoad getLoadTask(T model, int width, int height) {
         ResourceFetcher<Y> imageFetcher = null;
         if (imageModelLoader != null) {
             imageFetcher = imageModelLoader.getResourceFetcher(model, width, height);
@@ -66,7 +66,7 @@ public class BaseBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T> {
             videoFetcher = videoModelLoader.getResourceFetcher(model, width, height);
         }
         Transformation transformation = transformationLoader.getTransformation(model);
-        return new BaseBitmapLoadTask<Y, Z>(imageFetcher, imageDecoder, videoFetcher, videoDecoder, transformation,
+        return new ImageVideoBitmapLoad<Y, Z>(imageFetcher, imageDecoder, videoFetcher, videoDecoder, transformation,
                 width, height);
     }
 }

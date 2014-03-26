@@ -9,11 +9,10 @@ import junit.framework.Assert;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-public class BaseBitmapLoadFactoryTest extends AndroidTestCase {
+public class ImageVideoBitmapLoadFactoryTest extends AndroidTestCase {
     // Not magic, just a non 0 number.
     private static final int IMAGE_SIDE = 200;
     private static final String TRANSFORMATION_ID = "id";
@@ -28,7 +27,7 @@ public class BaseBitmapLoadFactoryTest extends AndroidTestCase {
     }
 
     public void testIgnoresNullImageLoader() {
-        BaseBitmapLoadFactory factory = new BaseBitmapLoadFactory(null,
+        ImageVideoBitmapLoadFactory factory = new ImageVideoBitmapLoadFactory(null,
                 mock(BitmapDecoder.class), mock(ModelLoader.class), mock(BitmapDecoder.class),
                 transformationLoader);
 
@@ -36,21 +35,21 @@ public class BaseBitmapLoadFactoryTest extends AndroidTestCase {
     }
 
     public void testIgnoresNullImageDecoder() {
-        BaseBitmapLoadFactory factory = new BaseBitmapLoadFactory(mock(ModelLoader.class), null,
+        ImageVideoBitmapLoadFactory factory = new ImageVideoBitmapLoadFactory(mock(ModelLoader.class), null,
                 mock(ModelLoader.class), mock(BitmapDecoder.class), transformationLoader);
 
         assertNotNull(factory);
     }
 
     public void testIgnoresNullVideoLoader() {
-        BaseBitmapLoadFactory factory = new BaseBitmapLoadFactory(mock(ModelLoader.class),
+        ImageVideoBitmapLoadFactory factory = new ImageVideoBitmapLoadFactory(mock(ModelLoader.class),
                 mock(BitmapDecoder.class), null, mock(BitmapDecoder.class), transformationLoader);
 
         assertNotNull(factory.getLoadTask(new Object(), IMAGE_SIDE, IMAGE_SIDE));
     }
 
     public void testIgnoresNullVideoDecoder() {
-        BaseBitmapLoadFactory factory = new BaseBitmapLoadFactory(mock(ModelLoader.class), mock(BitmapDecoder.class),
+        ImageVideoBitmapLoadFactory factory = new ImageVideoBitmapLoadFactory(mock(ModelLoader.class), mock(BitmapDecoder.class),
                 mock(ModelLoader.class), null, transformationLoader);
 
         assertNotNull(factory.getLoadTask(new Object(), IMAGE_SIDE, IMAGE_SIDE));
@@ -58,7 +57,7 @@ public class BaseBitmapLoadFactoryTest extends AndroidTestCase {
 
     public void testThrowsIfNullVideoAndNullImageLoaders() {
         try {
-            new BaseBitmapLoadFactory(null,
+            new ImageVideoBitmapLoadFactory(null,
                     mock(BitmapDecoder.class), null, mock(BitmapDecoder.class), transformationLoader);
             Assert.fail("Expected IllegalArgumentException with null video and image loaders");
         } catch (IllegalArgumentException e) { }
@@ -66,7 +65,7 @@ public class BaseBitmapLoadFactoryTest extends AndroidTestCase {
 
     public void testThrowsIfNullVideoAndNullImageDecoders() {
         try {
-            new BaseBitmapLoadFactory(mock(ModelLoader.class), null, mock(ModelLoader.class), null,
+            new ImageVideoBitmapLoadFactory(mock(ModelLoader.class), null, mock(ModelLoader.class), null,
                     transformationLoader);
             Assert.fail("Expected IllegalArgumentException with null video and image loaders");
         } catch (IllegalArgumentException e) { }
@@ -74,7 +73,7 @@ public class BaseBitmapLoadFactoryTest extends AndroidTestCase {
 
     public void testThrowsWithNullTransformationLoader() {
         try {
-            new BaseBitmapLoadFactory(mock(ModelLoader.class), mock(BitmapDecoder.class), mock(ModelLoader.class),
+            new ImageVideoBitmapLoadFactory(mock(ModelLoader.class), mock(BitmapDecoder.class), mock(ModelLoader.class),
                     mock(BitmapDecoder.class), null);
             Assert.fail("Expected IllegalArgumentException with null transformation loader");
         } catch (IllegalArgumentException e) { }

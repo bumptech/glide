@@ -6,7 +6,7 @@ import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 /**
  * An interface for loading a bitmap.
  */
-public interface BitmapLoadTask {
+public interface BitmapLoad {
     /**
      * Returns some unique id representing the particular image being loaded (e.g. the image url) and any options
      * that may be being used to transform the image (downsampling, rotation etc.) suitable for use as a cache key.

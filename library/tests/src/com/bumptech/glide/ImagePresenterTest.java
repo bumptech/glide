@@ -13,7 +13,7 @@ import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.target.BaseTarget;
 import com.bumptech.glide.presenter.target.Target;
-import com.bumptech.glide.resize.BitmapLoadTask;
+import com.bumptech.glide.resize.BitmapLoad;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 
 import java.util.ArrayList;
@@ -124,7 +124,7 @@ public class ImagePresenterTest extends AndroidTestCase {
                 .setTarget(target, getContext())
                 .setBitmapLoadFactory(new MockBitmapLoadFactory() {
                     @Override
-                    public BitmapLoadTask getLoadTask(Object model, int width, int height) {
+                    public BitmapLoad getLoadTask(Object model, int width, int height) {
                         return null;
                     }
                 })
@@ -361,7 +361,7 @@ public class ImagePresenterTest extends AndroidTestCase {
         }
 
         @Override
-        public Object fetchImage(BitmapLoadTask loadTask, ImageReadyCallback cb) {
+        public Object fetchImage(BitmapLoad loadTask, ImageReadyCallback cb) {
             if (action != null) {
                 action.onCallbackReceived(cb);
             }
@@ -374,8 +374,8 @@ public class ImagePresenterTest extends AndroidTestCase {
 
     private static class MockBitmapLoadFactory implements BitmapLoadFactory<Object> {
         @Override
-        public BitmapLoadTask getLoadTask(final Object model, int width, int height) {
-            return new BitmapLoadTask() {
+        public BitmapLoad getLoadTask(final Object model, int width, int height) {
+            return new BitmapLoad() {
                 @Override
                 public String getId() {
                     return model.toString();

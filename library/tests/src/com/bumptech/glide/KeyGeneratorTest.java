@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
-import com.bumptech.glide.resize.BitmapLoadTask;
+import com.bumptech.glide.resize.BitmapLoad;
 import com.bumptech.glide.resize.SafeKeyGenerator;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 
@@ -30,7 +30,7 @@ public class KeyGeneratorTest extends AndroidTestCase {
     }
 
     private String getRandomKeyFromGenerator() {
-        return keyGenerator.getSafeKey(new RandomBitmapLoadTask());
+        return keyGenerator.getSafeKey(new RandomBitmapLoad());
     }
 
     private static int getRandomDimen() {
@@ -41,7 +41,7 @@ public class KeyGeneratorTest extends AndroidTestCase {
         return UUID.randomUUID().toString();
     }
 
-    private static class RandomBitmapLoadTask implements BitmapLoadTask {
+    private static class RandomBitmapLoad implements BitmapLoad {
         @Override
         public String getId() {
             return getRandomId();

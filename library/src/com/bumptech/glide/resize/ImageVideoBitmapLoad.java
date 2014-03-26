@@ -7,7 +7,7 @@ import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Transformation;
 
 /**
- * A base {@link BitmapLoadTask} that composes {@link ResourceFetcher} and {@link BitmapDecoder} to decode a
+ * A base {@link BitmapLoad} that composes {@link ResourceFetcher} and {@link BitmapDecoder} to decode a
  * bitmap from either an image or a video.
  *
  * @param <T> The type of the resource returned by the image {@link ResourceFetcher} and used by the
@@ -15,45 +15,45 @@ import com.bumptech.glide.resize.load.Transformation;
  * @param <Y> The type of the resource returned by the video {@link ResourceFetcher} and used by the
  *           video {@link BitmapDecoder} to decode the bitmap.
  */
-public class BaseBitmapLoadTask<T, Y> implements BitmapLoadTask {
+public class ImageVideoBitmapLoad<T, Y> implements BitmapLoad {
     private final String id;
     private final int width;
     private final int height;
-    private final ResourceFetcher<Y> videoLoader;
+    private final ResourceFetcher<Y> videoFetcher;
     private final BitmapDecoder<Y> videoDecoder;
     private final Transformation transformation;
-    private ResourceFetcher<T> imageLoader;
+    private ResourceFetcher<T> imageFetcher;
     private BitmapDecoder<T> imageDecoder;
 
-    public BaseBitmapLoadTask(ResourceFetcher<T> imageLoader, BitmapDecoder<T> imageDecoder,
-            ResourceFetcher<Y> videoLoader, BitmapDecoder<Y> videoDecoder, Transformation transformation,
+    public ImageVideoBitmapLoad(ResourceFetcher<T> imageFetcher, BitmapDecoder<T> imageDecoder,
+            ResourceFetcher<Y> videoFetcher, BitmapDecoder<Y> videoDecoder, Transformation transformation,
             int width, int height) {
-        this.imageLoader = imageLoader;
+        this.imageFetcher = imageFetcher;
         this.imageDecoder = imageDecoder;
-        this.videoLoader = videoLoader;
+        this.videoFetcher = videoFetcher;
         this.videoDecoder = videoDecoder;
         this.transformation = transformation;
         this.width = width;
         this.height = height;
 
         StringBuilder idBuilder = new StringBuilder();
-        if (imageLoader != null && imageDecoder != null) {
-            idBuilder.append(imageLoader.getId());
+        if (imageFetcher != null && imageDecoder != null) {
+            idBuilder.append(imageFetcher.getId());
             idBuilder.append(imageDecoder.getId());
         }
-        if (videoLoader != null && videoDecoder != null) {
-            idBuilder.append(videoLoader.getId());
+        if (videoFetcher != null && videoDecoder != null) {
+            idBuilder.append(videoFetcher.getId());
             idBuilder.append(videoDecoder.getId());
         }
         this.id = idBuilder.append(transformation.getId()).append(width).append(height).toString();
     }
 
     public void cancel() {
-        if (imageLoader != null) {
-            imageLoader.cancel();
+        if (imageFetcher != null) {
+            imageFetcher.cancel();
         }
-        if (videoLoader != null) {
-            videoLoader.cancel();
+        if (videoFetcher != null) {
+            videoFetcher.cancel();
         }
     }
 
@@ -72,9 +72,9 @@ public class BaseBitmapLoadTask<T, Y> implements BitmapLoadTask {
     }
 
     private Bitmap loadOriginal(BitmapPool bitmapPool) throws Exception {
-        Bitmap result = loadOriginal(imageLoader, imageDecoder, bitmapPool);
+        Bitmap result = loadOriginal(imageFetcher, imageDecoder, bitmapPool);
         if (result == null) {
-            result = loadOriginal(videoLoader, videoDecoder, bitmapPool);
+            result = loadOriginal(videoFetcher, videoDecoder, bitmapPool);
         }
 
         return result;

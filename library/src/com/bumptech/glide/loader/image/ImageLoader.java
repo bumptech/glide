@@ -1,7 +1,7 @@
 package com.bumptech.glide.loader.image;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.resize.BitmapLoadTask;
+import com.bumptech.glide.resize.BitmapLoad;
 
 /**
  * An interface used by {@link com.bumptech.glide.presenter.ImagePresenter} to load a bitmap.
@@ -33,13 +33,13 @@ public interface ImageLoader {
     /**
      * Loads the image using the given load task.
      *
-     * @param loadTask The {@link BitmapLoadTask} that defines the image and decoder to use to retrieve a bitmap if
+     * @param loadTask The {@link BitmapLoad} that defines the image and decoder to use to retrieve a bitmap if
      *                 the image is not cached.
      * @param cb The callback to call when the bitmap is loaded into memory, or when a load fails.
      *
      * @return A reference to the fetch that must be retained by the calling object as long as the fetch is relevant.
      */
-    public Object fetchImage(BitmapLoadTask loadTask, ImageReadyCallback cb);
+    public Object fetchImage(BitmapLoad loadTask, ImageReadyCallback cb);
 
     /**
      * Called when the current image load does not need to continue and any corresponding cleanup to save cpu

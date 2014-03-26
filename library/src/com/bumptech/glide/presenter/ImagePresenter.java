@@ -14,14 +14,14 @@ import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
 import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.presenter.target.Target;
-import com.bumptech.glide.resize.BitmapLoadTask;
+import com.bumptech.glide.resize.BitmapLoad;
 import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * Wraps an {@link Target} to display arbitrary Bitmaps and provides a framework for fetching and
  * loading bitmaps correctly when targets are being reused. Uses {@link BitmapLoadFactory} to define a
- * {@link BitmapLoadTask} that translates a model into a bitmap, {@link ImageLoader} to run a
- * {@link BitmapLoadTask} on a background thread or retrieve a cached bitmap equivalent to the given task.
+ * {@link BitmapLoad} that translates a model into a bitmap, {@link ImageLoader} to run a
+ * {@link BitmapLoad} on a background thread or retrieve a cached bitmap equivalent to the given task.
  * This class also determines the width and height of the wrapped {@link android.widget.ImageView} or {@link Target} at
  * runtime and passes that information to the {@link BitmapLoadFactory}.
  *
@@ -411,7 +411,7 @@ public class ImagePresenter<T, Y extends Target> {
 
     private void fetchImage(final T model, int width, int height, final int loadCount) {
         imageLoader.clear();
-        final BitmapLoadTask loadTask = loadFactory.getLoadTask(model, width, height);
+        final BitmapLoad loadTask = loadFactory.getLoadTask(model, width, height);
 
         if (loadTask == null) {
             if (Log.isLoggable(TAG, Log.INFO)) {

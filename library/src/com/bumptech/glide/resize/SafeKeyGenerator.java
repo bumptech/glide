@@ -17,7 +17,7 @@ public class SafeKeyGenerator {
     private final Map<LoadId, String> loadIdToSafeHash = new HashMap<LoadId, String>();
     private final LoadIdPool loadIdPool = new LoadIdPool();
 
-    public String getSafeKey(BitmapLoadTask task) {
+    public String getSafeKey(BitmapLoad task) {
         LoadId loadId = loadIdPool.get(task.getId());
         String safeKey = loadIdToSafeHash.get(loadId);
         if (safeKey == null) {

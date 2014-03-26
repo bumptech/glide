@@ -3,10 +3,9 @@ package com.bumptech.glide.loader.image;
 import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.resize.BitmapLoadTask;
+import com.bumptech.glide.resize.BitmapLoad;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.LoadedCallback;
-import com.bumptech.glide.resize.load.Transformation;
 
 /**
  * A base class for loaders that user ImageManager. Primarily responsible for keeping track of bitmaps for recycling
@@ -26,7 +25,7 @@ public class ImageManagerLoader implements ImageLoader {
     }
 
     @Override
-    public Object fetchImage(BitmapLoadTask loadTask, final ImageReadyCallback cb) {
+    public Object fetchImage(BitmapLoad loadTask, final ImageReadyCallback cb) {
         loadToken = imageManager.getImage(loadTask, new LoadedCallback() {
             @Override
             public void onLoadCompleted(Bitmap loaded) {

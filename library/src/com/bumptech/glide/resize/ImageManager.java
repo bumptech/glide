@@ -379,12 +379,12 @@ public class ImageManager {
     /**
      * Loads an image.
      *
-     * @param task A {@link BitmapLoadTask} that will be used to fetch and decode an image if it is not cached.
+     * @param task A {@link BitmapLoad} that will be used to fetch and decode an image if it is not cached.
      * @param cb A {@link LoadedCallback} to call when the image is ready.
      * @return An {@link ImageManagerJob} that must be retained while the job is still relevant and that can be used
      *          to cancel a job if the image is no longer needed.
      */
-    public LoadToken getImage(BitmapLoadTask task, LoadedCallback cb) {
+    public LoadToken getImage(BitmapLoad task, LoadedCallback cb) {
         if (shutdown) return null;
 
         final String key = safeKeyGenerator.getSafeKey(task);
@@ -525,10 +525,10 @@ public class ImageManager {
 
     private class ImageManagerRunner implements Runnable {
         public final String key;
-        private final BitmapLoadTask task;
+        private final BitmapLoad task;
         private volatile Future<?> future;
 
-        public ImageManagerRunner(String key, BitmapLoadTask task) {
+        public ImageManagerRunner(String key, BitmapLoad task) {
             this.key = key;
             this.task = task;
         }
