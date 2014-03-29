@@ -42,11 +42,6 @@ public abstract class LocalUriFetcher<T> implements ResourceFetcher<T> {
     }
 
     @Override
-    public final String getId() {
-        return id;
-    }
-
-    @Override
     public void cancel() { }
 
     protected abstract T loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException;

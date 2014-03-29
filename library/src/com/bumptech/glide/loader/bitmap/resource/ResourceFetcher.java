@@ -22,8 +22,6 @@ public interface ResourceFetcher<T> {
      */
     public T loadResource() throws Exception;
 
-    public String getId();
-
     /**
      * A method that will be called by an {@link com.bumptech.glide.presenter.ImagePresenter} when a load is no longer
      * relevant (because we now want to load a different image into the view). This method does not need to guarantee

@@ -9,21 +9,14 @@ import java.io.InputStream;
  */
 public class ByteArrayFetcher implements ResourceFetcher<InputStream> {
     private final byte[] bytes;
-    private final String id;
 
-    public ByteArrayFetcher(byte[] bytes, String id) {
+    public ByteArrayFetcher(byte[] bytes) {
         this.bytes = bytes;
-        this.id = id;
     }
 
     @Override
     public InputStream loadResource() throws Exception {
         return new ByteArrayInputStream(bytes);
-    }
-
-    @Override
-    public String getId() {
-        return id;
     }
 
     @Override

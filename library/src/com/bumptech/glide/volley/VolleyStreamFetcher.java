@@ -44,11 +44,6 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
-    public String getId() {
-        return url;
-    }
-
-    @Override
     public void cancel() {
         final Request local = current;
         if (local != null) {

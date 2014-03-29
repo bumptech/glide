@@ -31,6 +31,7 @@ public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor> i
         public void teardown() {
         }
     }
+
     public FileDescriptorFileLoader(ModelLoader<Uri, ParcelFileDescriptor> uriLoader) {
         super(uriLoader);
     }

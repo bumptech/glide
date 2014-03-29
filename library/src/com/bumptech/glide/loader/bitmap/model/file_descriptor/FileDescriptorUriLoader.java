@@ -16,6 +16,7 @@ import java.net.URL;
  * A {@link ModelLoader} For translating {@link Uri} models for local uris into {@link ParcelFileDescriptor} resources.
  */
 public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> implements FileDescriptorModelLoader<Uri> {
+
     public static class Factory implements ModelLoaderFactory<Uri, ParcelFileDescriptor> {
         @Override
         public ModelLoader<Uri, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {

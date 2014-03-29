@@ -5,7 +5,7 @@ import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.loader.bitmap.transformation.None;
 import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
 import com.bumptech.glide.resize.BitmapLoad;
-import com.bumptech.glide.resize.ImageVideoBitmapLoad;
+import com.bumptech.glide.resize.load.ImageVideoBitmapLoad;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Transformation;
 
@@ -57,16 +57,20 @@ public class ImageVideoBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T
 
     @Override
     public BitmapLoad getLoadTask(T model, int width, int height) {
+        String imageId = null;
         ResourceFetcher<Y> imageFetcher = null;
         if (imageModelLoader != null) {
+            imageId = imageModelLoader.getId(model);
             imageFetcher = imageModelLoader.getResourceFetcher(model, width, height);
         }
+        String videoId = null;
         ResourceFetcher<Z> videoFetcher = null;
         if (videoModelLoader != null) {
+            videoId = videoModelLoader.getId(model);
             videoFetcher = videoModelLoader.getResourceFetcher(model, width, height);
         }
         Transformation transformation = transformationLoader.getTransformation(model);
-        return new ImageVideoBitmapLoad<Y, Z>(imageFetcher, imageDecoder, videoFetcher, videoDecoder, transformation,
-                width, height);
+        return new ImageVideoBitmapLoad<Y, Z>(imageId, imageFetcher, imageDecoder, videoId, videoFetcher, videoDecoder,
+                transformation, width, height);
     }
 }
