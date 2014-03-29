@@ -12,7 +12,7 @@ public class ByteArrayFetcherTest extends AndroidTestCase {
             bytes[i] = (byte) i;
         }
 
-        ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes, "");
+        ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes);
         InputStream is = fetcher.loadResource();
 
         int read = 0;
@@ -22,11 +22,5 @@ public class ByteArrayFetcherTest extends AndroidTestCase {
             read++;
         }
         assertEquals(bytes.length, read);
-    }
-
-    public void testReturnsGivenId() {
-        String id = "testId";
-        ByteArrayFetcher fetcher = new ByteArrayFetcher(new byte[10], id);
-        assertEquals(id, fetcher.getId());
     }
 }

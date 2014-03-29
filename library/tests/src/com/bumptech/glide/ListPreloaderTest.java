@@ -201,10 +201,6 @@ public class ListPreloaderTest extends AndroidTestCase {
                             return new ByteArrayInputStream(os.toByteArray());
                         }
 
-                        @Override
-                        public String getId() {
-                            return model.toString();
-                        }
 
                         @Override
                         public void cancel() {

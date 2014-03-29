@@ -11,6 +11,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorFileLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorResourceLoader;
@@ -874,8 +875,15 @@ public class Glide {
 
             ImagePresenter.Builder<ModelType, Y> builder = new ImagePresenter.Builder<ModelType, Y>()
                     .setTarget(target, context)
-                    .setBitmapLoadFactory(new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
-                            imageModelLoader, imageDecoder, videoModelLoader, videoDecoder, transformationLoader))
+                    .setBitmapLoadFactory(
+                            new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
+                                    imageModelLoader != null && imageDecoder != null ?
+                                    new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(
+                                            imageModelLoader, imageDecoder) : null,
+                                    videoModelLoader != null && videoDecoder != null ?
+                                    new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
+                                            videoModelLoader, videoDecoder) : null,
+                                    transformationLoader))
                     .setImageLoader(new ImageManagerLoader(context));
 
             if (animationId != -1 || requestListener != null) {

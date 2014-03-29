@@ -2,9 +2,8 @@ package com.bumptech.glide.resize;
 
 import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
-import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.resize.load.BitmapDecoder;
+import com.bumptech.glide.resize.load.ImageVideoBitmapLoad;
 import com.bumptech.glide.resize.load.Transformation;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -14,7 +13,6 @@ import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,46 +23,44 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
     private static final int IMAGE_SIDE = 235;
 
     public void testLoadsOnlyWithImageLoaderIfImageLoaderSucceeds() throws Exception {
-        Object imageFetcherResult = new Object();
-        ResourceFetcher imageFetcher = mock(ResourceFetcher.class);
-        when(imageFetcher.loadResource()).thenReturn(imageFetcherResult);
-
         Bitmap expected = Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8);
-        BitmapDecoder imageDecoder = mock(BitmapDecoder.class);
-        when(imageDecoder.decode(eq(imageFetcherResult), any(BitmapPool.class), anyInt(), anyInt()))
-                .thenReturn(expected);
+        BitmapLoad imageLoad = mock(BitmapLoad.class);
+        when(imageLoad.load(any(BitmapPool.class))).thenReturn(expected);
 
-        ResourceFetcher videoFetcher = mock(ResourceFetcher.class);
-        BitmapDecoder videoDecoder = mock(BitmapDecoder.class);
+        Bitmap notExpected = Bitmap.createBitmap(11, 11, Bitmap.Config.ARGB_8888);
+        BitmapLoad videoLoad = mock(BitmapLoad.class);
+        when(videoLoad.load(any(BitmapPool.class))).thenReturn(notExpected);
 
         Transformation transformation = mock(Transformation.class);
-        when(transformation.transform(eq(expected), any(BitmapPool.class), anyInt(), anyInt()))
-                .thenReturn(expected);
+        when(transformation.transform(any(Bitmap.class), any(BitmapPool.class), anyInt(), anyInt()))
+                .thenAnswer(new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        return invocation.getArguments()[0];
+                    }
+                });
 
-        ImageVideoBitmapLoad task = new ImageVideoBitmapLoad(imageFetcher, imageDecoder, videoFetcher, videoDecoder,
-                transformation, IMAGE_SIDE, IMAGE_SIDE);
-
-        Bitmap result = task.load(mock(BitmapPool.class));
-        assertEquals(expected, result);
-
-        verify(videoFetcher, never()).loadResource();
-        verify(videoDecoder, never()).decode(anyObject(), any(BitmapPool.class), anyInt(), anyInt());
-    }
-
-    public void testLoadsWithVideoLoaderIfImageLoaderFails() throws Exception {
-        Bitmap expected = Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8);
-        Bitmap notExpected = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
-
-        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(null, notExpected, new Object(), expected);
+        ImageVideoBitmapLoad task = new ImageVideoBitmapLoad(imageLoad, videoLoad,
+                IMAGE_SIDE, IMAGE_SIDE, transformation);
 
         Bitmap result = task.load(mock(BitmapPool.class));
 
         assertEquals(expected, result);
+        verify(videoLoad, never()).load(any(BitmapPool.class));
     }
 
-    public void testLoadsWithVideoLoaderIfImageDecoderFails() throws Exception {
+    public void testLoadsWithImageLoaderIfVideoLoaderFails() throws Exception {
         Bitmap expected = Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8);
-        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(new Object(), null, new Object(), expected);
+        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(expected, null);
+
+        Bitmap result = task.load(mock(BitmapPool.class));
+
+        assertEquals(expected, result);
+    }
+
+    public void testLoadsWithVideoLoaderIfImageLoadFails() throws Exception {
+        Bitmap expected = Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8);
+        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(null, expected);
 
         Bitmap result = task.load(mock(BitmapPool.class));
 
@@ -72,7 +68,7 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
     }
 
     public void testReturnsNullIfImageAndVideoLoadsFail() throws Exception {
-        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(new Object(), null, new Object(), null);
+        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(null, null);
 
         Bitmap result = task.load(mock(BitmapPool.class));
 
@@ -87,7 +83,7 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
         when(transformation.transform(eq(fromImage), any(BitmapPool.class), anyInt(), anyInt()))
                 .thenReturn(transformed);
 
-        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(new Object(), fromImage, null, null, transformation);
+        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(fromImage, null, transformation);
 
         Bitmap result = task.load(mock(BitmapPool.class));
 
@@ -102,7 +98,7 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
         when(transformation.transform(eq(fromVideo), any(BitmapPool.class), anyInt(), anyInt()))
                 .thenReturn(transformed);
 
-        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(null, null, new Object(), fromVideo, transformation);
+        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(null, fromVideo, transformation);
 
         Bitmap result = task.load(mock(BitmapPool.class));
 
@@ -114,8 +110,7 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
 
         int width = 123;
         int height = 456;
-        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(new Object(),
-                Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8), new Object(),
+        ImageVideoBitmapLoad task = createBaseBitmapLoadTask(Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8),
                 Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8), transformation, width, height);
 
         task.load(mock(BitmapPool.class));
@@ -126,7 +121,7 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
     public void testGeneratesIdWithAllArguments() {
         List<String> allIds = new ArrayList<String>();
         String initialId = getGeneratedIdWithMutatedArgumentIdAt(-1);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 2; i++) {
             allIds.add(getGeneratedIdWithMutatedArgumentIdAt(i));
         }
         for (String id : allIds) {
@@ -134,33 +129,24 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
         }
     }
 
-    private ImageVideoBitmapLoad createBaseBitmapLoadTask(Object imageFetcherResult, Bitmap imageDecoderResult,
-            Object videoFetcherResult, Bitmap videoDecoderResult) throws Exception {
-        return createBaseBitmapLoadTask(imageFetcherResult, imageDecoderResult, videoFetcherResult, videoDecoderResult,
-                null);
+    private ImageVideoBitmapLoad createBaseBitmapLoadTask(Bitmap imageDecoderResult, Bitmap videoDecoderResult)
+            throws Exception {
+        return createBaseBitmapLoadTask(imageDecoderResult, videoDecoderResult, null);
     }
 
-    private ImageVideoBitmapLoad createBaseBitmapLoadTask(Object imageFetcherResult, Bitmap imageDecoderResult,
-            Object videoFetcherResult, Bitmap videoDecoderResult, Transformation transformation) throws Exception {
-        return createBaseBitmapLoadTask(imageFetcherResult, imageDecoderResult, videoFetcherResult, videoDecoderResult,
-                transformation, IMAGE_SIDE, IMAGE_SIDE);
+    private ImageVideoBitmapLoad createBaseBitmapLoadTask(Bitmap imageDecoderResult,
+            Bitmap videoDecoderResult, Transformation transformation) throws Exception {
+        return createBaseBitmapLoadTask(imageDecoderResult, videoDecoderResult, transformation, IMAGE_SIDE, IMAGE_SIDE);
     }
 
-    private ImageVideoBitmapLoad createBaseBitmapLoadTask(Object imageFetcherResult, Bitmap imageDecoderResult,
-            Object videoFetcherResult, Bitmap videoDecoderResult, Transformation transformation, int width, int height) throws Exception {
-           ResourceFetcher imageFetcher = mock(ResourceFetcher.class);
-        when(imageFetcher.loadResource()).thenReturn(imageFetcherResult);
+    private ImageVideoBitmapLoad createBaseBitmapLoadTask(Bitmap imageDecoderResult, Bitmap videoDecoderResult,
+            Transformation transformation, int width, int height) throws Exception {
 
-        BitmapDecoder imageDecoder = mock(BitmapDecoder.class);
-        when(imageDecoder.decode(anyObject(), any(BitmapPool.class), anyInt(), anyInt()))
-                .thenReturn(imageDecoderResult);
+        BitmapLoad imageLoad = mock(BitmapLoad.class);
+        when(imageLoad.load(any(BitmapPool.class))).thenReturn(imageDecoderResult);
 
-        ResourceFetcher videoFetcher = mock(ResourceFetcher.class);
-        when(videoFetcher.loadResource()).thenReturn(videoFetcherResult);
-
-        BitmapDecoder videoDecoder = mock(BitmapDecoder.class);
-        when(videoDecoder.decode(anyObject(), any(BitmapPool.class), anyInt(), anyInt()))
-                .thenReturn(videoDecoderResult);
+        BitmapLoad videoLoad = mock(BitmapLoad.class);
+        when(videoLoad.load(any(BitmapPool.class))).thenReturn(videoDecoderResult);
 
         if (transformation == null) {
             transformation = mock(Transformation.class);
@@ -173,36 +159,24 @@ public class ImageVideoBitmapLoadTaskTest extends AndroidTestCase {
                     });
         }
 
-        return new ImageVideoBitmapLoad(imageFetcher, imageDecoder, videoFetcher, videoDecoder,
-                transformation, width, height);
+        return new ImageVideoBitmapLoad(imageLoad, videoLoad, width, height, transformation);
     }
 
     private String getGeneratedIdWithMutatedArgumentIdAt(int argumentIndex) {
-        String imageLoaderId = "ImageLoaderId" + (argumentIndex == 0 ? "1" : "");
-        ResourceFetcher imageLoader = mock(ResourceFetcher.class);
-        when(imageLoader.getId()).thenReturn(imageLoaderId);
+        String imageLoadId = "ImageLoadId" + (argumentIndex == 0 ? "1" : "");
+        BitmapLoad imageLoad = mock(BitmapLoad.class);
+        when(imageLoad.getId()).thenReturn(imageLoadId);
 
-        String imageDecoderId = "ImageDecoderId" + (argumentIndex == 1 ? "1" : "");
-        BitmapDecoder imageDecoder = mock(BitmapDecoder.class);
-        when(imageDecoder.getId()).thenReturn(imageDecoderId);
+        String videoLoadId = "VideoLoadId" + (argumentIndex == 1 ? "1" : "");
+        BitmapLoad videoLoad = mock(BitmapLoad.class);
+        when(videoLoad.getId()).thenReturn(videoLoadId);
 
-        String videoLoaderId = "VideoLoaderId" + (argumentIndex == 2 ? "1" : "");
-        ResourceFetcher videoLoader = mock(ResourceFetcher.class);
-        when(videoLoader.getId()).thenReturn(videoLoaderId);
-
-        String videoDecoderId = "VideoDecoderId" + (argumentIndex == 3 ? "1" : "");
-        BitmapDecoder videoDecoder = mock(BitmapDecoder.class);
-        when(videoDecoder.getId()).thenReturn(videoDecoderId);
-
-        String transformationId = "TransformationId" + (argumentIndex == 4 ? "1" : "");
+        String transformationId = "TransformationId" + (argumentIndex == 2 ? "1" : "");
         Transformation transformation = mock(Transformation.class);
         when(transformation.getId()).thenReturn(transformationId);
 
-        int width = 1234 + (argumentIndex == 5 ? 1 : 0);
-        int height = 5678 + (argumentIndex == 6 ? 1 : 0);
-
-        ImageVideoBitmapLoad task = new ImageVideoBitmapLoad(imageLoader, imageDecoder, videoLoader, videoDecoder,
-                transformation, width, height);
+        ImageVideoBitmapLoad task = new ImageVideoBitmapLoad(imageLoad, videoLoad, IMAGE_SIDE, IMAGE_SIDE,
+                transformation);
         return task.getId();
     }
 }
