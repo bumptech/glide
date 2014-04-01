@@ -27,6 +27,7 @@ import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
+import com.bumptech.glide.volley.RequestQueueWrapper;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
@@ -112,7 +113,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                     .setDiskCache(diskCache));
         }
 
-        requestQueue = Volley.newRequestQueue(this);
+        requestQueue = RequestQueueWrapper.getRequestQueue(this);
         glide.register(URL.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
 
         searching = findViewById(R.id.searching);

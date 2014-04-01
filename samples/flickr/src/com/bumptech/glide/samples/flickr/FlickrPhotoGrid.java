@@ -14,6 +14,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.Cache;
 import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
 import com.bumptech.glide.loader.image.ImageManagerLoader;
@@ -143,8 +144,10 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 final Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
                 imagePresenter = new ImagePresenter.Builder<Photo, ImageViewTarget>()
                         .setBitmapLoadFactory(new ImageVideoBitmapLoadFactory<Photo, InputStream, Void>(
-                                new FlickrModelLoader(context, urlCache), Downsampler.AT_LEAST,
-                                new CenterCrop<Photo>()))
+                                new ResourceBitmapLoadFactory<Photo, InputStream>(
+                                        new FlickrModelLoader(context, urlCache), Downsampler.AT_LEAST),
+                                null,
+                                        new CenterCrop<Photo>()))
                         .setTarget(new ImageViewTarget(imageView), context)
                         .setImageLoader(new ImageManagerLoader(context))
                         .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Photo, ImageViewTarget>() {

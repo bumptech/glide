@@ -30,7 +30,7 @@ public class VolleyUrlLoader implements ModelLoader<URL, InputStream> {
 
         protected RequestQueue getRequestQueue(Context context) {
             if (requestQueue == null) {
-                requestQueue = Volley.newRequestQueue(context);
+                requestQueue = RequestQueueWrapper.getRequestQueue(context);
             }
             return requestQueue;
         }

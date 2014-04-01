@@ -10,13 +10,12 @@ import java.security.NoSuchAlgorithmException;
 public class SafeKeyGenerator {
     private final LruCache<String, String> loadIdToSafeHash = new LruCache<String, String>(250);
 
-    public String getSafeKey(BitmapLoad task) {
-        final String id = task.getId();
-        String safeKey = loadIdToSafeHash.get(id);
+    public String getSafeKey(String key) {
+        String safeKey = loadIdToSafeHash.get(key);
         if (safeKey == null) {
             try {
                 MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-                messageDigest.update(id.getBytes("UTF-8"));
+                messageDigest.update(key.getBytes("UTF-8"));
                 safeKey = Util.sha256BytesToHex(messageDigest.digest());
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -25,5 +24,10 @@ public class SafeKeyGenerator {
             }
         }
         return safeKey;
+    }
+
+    public String getSafeKey(BitmapLoad task) {
+        final String id = task.getId();
+        return getSafeKey(id);
     }
 }

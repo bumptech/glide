@@ -6,6 +6,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.RequestFuture;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
@@ -20,6 +21,7 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     private final String url;
     private final RetryPolicy retryPolicy;
     private Request current = null;
+    private RequestFuture<InputStream> requestFuture;
 
     @SuppressWarnings("unused")
     public VolleyStreamFetcher(RequestQueue requestQueue, String url) {
@@ -34,11 +36,13 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
 
     @Override
     public InputStream loadResource() throws Exception {
-        RequestFuture<InputStream> requestFuture = RequestFuture.newFuture();
-        Request<Void> request = new GlideRequest(url, requestFuture);
+        requestFuture = RequestFuture.newFuture();
+        GlideRequest request = new GlideRequest(url, requestFuture);
 
         request.setRetryPolicy(retryPolicy);
+        request.setShouldCache(true);
         current = requestQueue.add(request);
+        requestFuture.setRequest(current);
 
         return requestFuture.get();
     }
@@ -46,13 +50,18 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     @Override
     public void cancel() {
         final Request local = current;
+        RequestFuture localFuture = requestFuture;
+        if (localFuture != null) {
+            localFuture.cancel(false);
+            requestFuture = null;
+        }
         if (local != null) {
             local.cancel();
             current = null;
         }
     }
 
-    private static class GlideRequest extends Request<Void> {
+    private static class GlideRequest extends Request<byte[]> {
         private final RequestFuture<InputStream> future;
 
         public GlideRequest(String url, RequestFuture<InputStream> future) {
@@ -61,13 +70,13 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
         }
 
         @Override
-        protected Response<Void> parseNetworkResponse(NetworkResponse response) {
-            future.onResponse(new ByteArrayInputStream(response.data));
-            return Response.success(null, getCacheEntry());
+        protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
+            return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
         }
 
         @Override
-        protected void deliverResponse(Void response) {
+        protected void deliverResponse(byte[] response) {
+            future.onResponse(new ByteArrayInputStream(response));
         }
     }
 }

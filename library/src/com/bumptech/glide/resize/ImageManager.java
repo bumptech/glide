@@ -360,6 +360,10 @@ public class ImageManager {
         });
     }
 
+    public DiskCache getDiskCache() {
+        return diskCache;
+    }
+
     /**
      * Get the {@link BitmapPool} this ImageManager is using. If Bitmap recycling is not supported, an
      * {@link BitmapPoolAdapter} will be returned. For the pool to be useful you must return a bitmap to the pool for
