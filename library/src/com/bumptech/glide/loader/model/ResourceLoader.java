@@ -2,6 +2,7 @@ package com.bumptech.glide.loader.model;
 
 import android.content.Context;
 import android.net.Uri;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
 /**
@@ -28,6 +29,10 @@ public class ResourceLoader implements ModelLoader<Integer> {
 
     private final ModelLoader<Uri> uriLoader;
     private final Context context;
+
+    public ResourceLoader(Context context) {
+        this(context, Glide.buildModelLoader(Uri.class, context));
+    }
 
     public ResourceLoader(Context context, ModelLoader<Uri> uriLoader) {
         this.context = context;

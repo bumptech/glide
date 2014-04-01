@@ -3,6 +3,7 @@ package com.bumptech.glide.loader.model;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.stream.LocalUriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 
@@ -32,6 +33,10 @@ public class UriLoader implements ModelLoader<Uri> {
 
     private final Context context;
     private final ModelLoader<URL> urlLoader;
+
+    public UriLoader(Context context) {
+        this(context, Glide.buildModelLoader(URL.class, context));
+    }
 
     public UriLoader(Context context, ModelLoader<URL> urlLoader) {
         this.context = context;
