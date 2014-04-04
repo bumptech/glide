@@ -52,7 +52,7 @@ public class ImagePresenter<T, Y extends Target> {
         private ExceptionHandler<T> exceptionHandler = new ExceptionHandler<T>() {
             @Override
             public void onException(Exception e, T model, boolean isCurrent) {
-                if (Log.isLoggable(TAG, Log.ERROR)) {
+                if (isCurrent && Log.isLoggable(TAG, Log.ERROR)) {
                     Log.e(TAG, "onImageLoadException model= " + model, e);
                 }
             }

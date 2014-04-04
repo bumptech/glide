@@ -7,7 +7,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.RequestFuture;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.io.ByteArrayInputStream;
@@ -20,8 +19,7 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     private final RequestQueue requestQueue;
     private final String url;
     private final RetryPolicy retryPolicy;
-    private Request current = null;
-    private RequestFuture<InputStream> requestFuture;
+    private VolleyRequestFuture<InputStream> requestFuture;
 
     @SuppressWarnings("unused")
     public VolleyStreamFetcher(RequestQueue requestQueue, String url) {
@@ -36,35 +34,29 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
 
     @Override
     public InputStream loadResource() throws Exception {
-        requestFuture = RequestFuture.newFuture();
+        requestFuture = VolleyRequestFuture.newFuture();
         GlideRequest request = new GlideRequest(url, requestFuture);
 
         request.setRetryPolicy(retryPolicy);
         request.setShouldCache(true);
-        current = requestQueue.add(request);
-        requestFuture.setRequest(current);
+        requestFuture.setRequest(requestQueue.add(request));
 
         return requestFuture.get();
     }
 
     @Override
     public void cancel() {
-        final Request local = current;
-        RequestFuture localFuture = requestFuture;
+        VolleyRequestFuture<InputStream> localFuture = requestFuture;
         if (localFuture != null) {
-            localFuture.cancel(false);
+            localFuture.cancel(true);
             requestFuture = null;
-        }
-        if (local != null) {
-            local.cancel();
-            current = null;
         }
     }
 
     private static class GlideRequest extends Request<byte[]> {
-        private final RequestFuture<InputStream> future;
+        private final VolleyRequestFuture<InputStream> future;
 
-        public GlideRequest(String url, RequestFuture<InputStream> future) {
+        public GlideRequest(String url, VolleyRequestFuture<InputStream> future) {
             super(Method.GET, url, future);
             this.future = future;
         }
