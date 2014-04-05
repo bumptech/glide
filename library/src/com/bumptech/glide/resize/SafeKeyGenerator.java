@@ -25,9 +25,4 @@ public class SafeKeyGenerator {
         }
         return safeKey;
     }
-
-    public String getSafeKey(BitmapLoad task) {
-        final String id = task.getId();
-        return getSafeKey(id);
-    }
 }

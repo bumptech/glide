@@ -4,6 +4,7 @@
 
 package com.bumptech.glide.resize.cache;
 
+import com.bumptech.glide.resize.SafeKeyGenerator;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.File;
@@ -23,6 +24,7 @@ public class DiskLruCacheWrapper implements DiskCache {
     private static final int VALUE_COUNT = 1;
     private static DiskLruCache CACHE = null;
     private static DiskLruCacheWrapper WRAPPER = null;
+    private final SafeKeyGenerator safeKeyGenerator;
 
     private synchronized static DiskLruCache getDiskLruCache(File directory, int maxSize) throws IOException {
         if (CACHE == null) {
@@ -52,16 +54,18 @@ public class DiskLruCacheWrapper implements DiskCache {
 
     protected DiskLruCacheWrapper(DiskLruCache diskLruCache) {
         this.diskLruCache = diskLruCache;
+        this.safeKeyGenerator = new SafeKeyGenerator();
     }
 
     @Override
     public InputStream get(String key) {
+        String safeKey = safeKeyGenerator.getSafeKey(key);
         InputStream result = null;
         try {
             //It is possible that the there will be a put in between these two gets. If so that shouldn't be a problem
             //because we will always put the same value at the same key so our input streams will still represent
             //the same data
-            final DiskLruCache.Snapshot snapshot = diskLruCache.get(key);
+            final DiskLruCache.Snapshot snapshot = diskLruCache.get(safeKey);
             if (snapshot != null) {
                 result = snapshot.getInputStream(0);
             }
@@ -73,8 +77,9 @@ public class DiskLruCacheWrapper implements DiskCache {
 
     @Override
     public void put(String key, Writer writer) {
+        String safeKey = safeKeyGenerator.getSafeKey(key);
         try {
-            DiskLruCache.Editor editor = diskLruCache.edit(key);
+            DiskLruCache.Editor editor = diskLruCache.edit(safeKey);
             //editor will be null if there are two concurrent puts
             //worst case just silently fail
             if (editor != null) {
@@ -96,8 +101,9 @@ public class DiskLruCacheWrapper implements DiskCache {
 
     @Override
     public void delete(String key) {
+        String safeKey = safeKeyGenerator.getSafeKey(key);
         try {
-            diskLruCache.remove(key);
+            diskLruCache.remove(safeKey);
         } catch (IOException e) {
             e.printStackTrace();
         }

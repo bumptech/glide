@@ -30,30 +30,10 @@ public class KeyGeneratorTest extends AndroidTestCase {
     }
 
     private String getRandomKeyFromGenerator() {
-        return keyGenerator.getSafeKey(new RandomBitmapLoad());
-    }
-
-    private static int getRandomDimen() {
-        return (int) Math.round(Math.random() * 1000);
+        return keyGenerator.getSafeKey(getRandomId());
     }
 
     private static String getRandomId() {
         return UUID.randomUUID().toString();
-    }
-
-    private static class RandomBitmapLoad implements BitmapLoad {
-        @Override
-        public String getId() {
-            return getRandomId();
-        }
-
-        @Override
-        public void cancel() {
-        }
-
-        @Override
-        public Bitmap load(BitmapPool bitmapPool) throws Exception {
-            return null;
-        }
     }
 }

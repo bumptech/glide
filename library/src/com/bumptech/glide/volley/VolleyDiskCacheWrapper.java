@@ -5,7 +5,6 @@ import com.android.volley.Cache;
 import com.android.volley.toolbox.ByteArrayPool;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.PoolingByteArrayOutputStream;
-import com.bumptech.glide.resize.SafeKeyGenerator;
 import com.bumptech.glide.resize.cache.DiskCache;
 
 import java.io.EOFException;
@@ -19,8 +18,8 @@ import java.util.Map;
 /**
  * Closely based on {@link DiskBasedCache}.
  */
-public class DiskLruVolleyCache implements Cache {
-    private static final String TAG = "DiskLruVolleyCache";
+public class VolleyDiskCacheWrapper implements Cache {
+    private static final String TAG = "VolleyDiskCacheWrapper";
     /** Magic number for current version of cache file format. */
     private static final int CACHE_MAGIC = 0x20120504;
     // 2 mb.
@@ -29,19 +28,16 @@ public class DiskLruVolleyCache implements Cache {
     private static final int DEFAULT_BYTE_ARRAY_SIZE = 8 * 1024;
 
     private final DiskCache diskCache;
-    private final SafeKeyGenerator keyGenerator;
     private final ByteArrayPool byteArrayPool;
 
-    public DiskLruVolleyCache(DiskCache diskCache) {
+    public VolleyDiskCacheWrapper(DiskCache diskCache) {
         this.diskCache = diskCache;
-        this.keyGenerator = new SafeKeyGenerator();
         this.byteArrayPool = new ByteArrayPool(BYTE_POOL_SIZE);
     }
 
     @Override
     public Entry get(String key) {
-        String safeKey = keyGenerator.getSafeKey(key);
-        InputStream result = diskCache.get(safeKey);
+        InputStream result = diskCache.get(key);
         if (result == null) {
             return null;
         }
@@ -53,7 +49,7 @@ public class DiskLruVolleyCache implements Cache {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 e.printStackTrace();
             }
-            diskCache.delete(safeKey);
+            diskCache.delete(key);
         } finally {
             try {
                 result.close();
@@ -64,8 +60,7 @@ public class DiskLruVolleyCache implements Cache {
 
     @Override
     public void put(final String key, final Entry entry) {
-        String safeKey = keyGenerator.getSafeKey(key);
-        diskCache.put(safeKey, new DiskCache.Writer() {
+        diskCache.put(key, new DiskCache.Writer() {
             @Override
             public void write(OutputStream os) {
                 CacheHeader header = new CacheHeader(key, entry);
@@ -98,8 +93,7 @@ public class DiskLruVolleyCache implements Cache {
 
     @Override
     public void remove(String key) {
-        String safeKey = keyGenerator.getSafeKey(key);
-        diskCache.delete(safeKey);
+        diskCache.delete(key);
     }
 
     @Override

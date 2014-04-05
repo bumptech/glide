@@ -73,7 +73,6 @@ public class ImageManager {
     private final ExecutorService executor;
     private final MemoryCache memoryCache;
     private final DiskCache diskCache;
-    private final SafeKeyGenerator safeKeyGenerator = new SafeKeyGenerator();
 
     /**
      * Get the maximum safe memory cache size for this particular device based on the # of mb allocated to each app.
@@ -391,7 +390,7 @@ public class ImageManager {
     public LoadToken getImage(BitmapLoad task, LoadedCallback cb) {
         if (shutdown) return null;
 
-        final String key = safeKeyGenerator.getSafeKey(task);
+        final String key = task.getId();
         LoadToken result = null;
         if (!returnFromCache(key, cb)) {
             ImageManagerJob job = jobs.get(key);

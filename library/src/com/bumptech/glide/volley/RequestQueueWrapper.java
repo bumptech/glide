@@ -2,18 +2,16 @@ package com.bumptech.glide.volley;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.cache.DiskCache;
 
 import static android.content.pm.PackageManager.NameNotFoundException;
 
@@ -39,7 +37,10 @@ public class RequestQueueWrapper {
 
         Network network = new BasicNetwork(stack);
 
-        RequestQueue queue = new RequestQueue(new DiskLruVolleyCache(Glide.get().getImageManager(context).getDiskCache()), network);
+        DiskCache diskCache = Glide.get().getImageManager(context).getDiskCache();
+        VolleyDiskCacheWrapper volleyCache = new VolleyDiskCacheWrapper(diskCache);
+
+        RequestQueue queue = new RequestQueue(volleyCache, network);
         queue.start();
         return queue;
     }
