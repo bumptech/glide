@@ -142,6 +142,9 @@ public class ImageManager {
          * @param context Any context (will not be retained after build)
          */
         public Builder(Context context) {
+            if (context == null) {
+                throw new NullPointerException("Context must not be null");
+            }
             this.context = context;
             if (!CAN_RECYCLE) {
                 bitmapPool = new BitmapPoolAdapter();

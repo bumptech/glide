@@ -8,11 +8,4 @@
             <zipgroupfileset dir="libs" includes="*.jar" />
         </jar>
     </target>
-    <target name="glide-minus-volley" depends="-compile">
-        <jar destfile="bin/glide-minus-volley-${mymanifest.manifest.android:versionName}.jar"
-            basedir="bin/classes"
-            excludes="com/bumptech/glide/volley/">
-            <zipgroupfileset dir="libs" includes="disklrucache*.jar" />
-        </jar>
-    </target>
 </project>

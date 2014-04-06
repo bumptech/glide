@@ -5,11 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import com.android.volley.RequestQueue;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorFileLoader;
@@ -61,10 +61,9 @@ import java.util.UUID;
  * </p>
  */
 public class Glide {
-    private static final String TAG = "Glide";
-    private static final Glide GLIDE = new Glide();
+    private static Glide GLIDE;
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
-
+    private final RequestQueue requestQueue;
     private ImageManager imageManager = null;
 
     /**
@@ -118,11 +117,29 @@ public class Glide {
      *
      * @return the singleton
      */
-    public static Glide get() {
+    public static Glide get(Context context) {
+        if (GLIDE == null) {
+            GLIDE = new GlideBuilder(context).createGlide();
+        }
+
         return GLIDE;
     }
 
-    protected Glide() {
+    public static boolean isSetup() {
+        return GLIDE != null;
+    }
+
+    public static void setup(GlideBuilder builder) {
+        if (GLIDE != null) {
+            throw new IllegalArgumentException("Glide is already setup, check with isSetup() first");
+        }
+
+        GLIDE = builder.createGlide();
+    }
+
+    Glide(ImageManager imageManager, RequestQueue requestQueue) {
+        this.imageManager = imageManager;
+        this.requestQueue = requestQueue;
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
         register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
@@ -131,66 +148,21 @@ public class Glide {
         register(String.class, InputStream.class, new StreamStringLoader.Factory());
         register(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
         register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
-        try {
-            Class.forName("com.bumptech.glide.volley.VolleyUrlLoader$Factory");
-            register(URL.class, InputStream.class, new VolleyUrlLoader.Factory());
-        } catch (ClassNotFoundException e) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Volley not found, missing url loader");
-            }
-        }
+        register(URL.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
     }
 
     /**
-     * Return the current {@link ImageManager} or create and return a new one if one is not currently set.
-     *
-     * @see #setImageManager(com.bumptech.glide.resize.ImageManager.Builder)
-     * @see #isImageManagerSet()
-     *
-     * @param context Any {@link Context}. This will not be retained passed this call
-     * @return The current ImageManager
+     * Returns the {@link ImageManager} Glide is using to load images.
      */
-    public ImageManager getImageManager(Context context) {
-        if (!isImageManagerSet()) {
-            setImageManager(new ImageManager.Builder(context));
-        }
+    public ImageManager getImageManager() {
         return imageManager;
     }
 
     /**
-     * Use to check whether or not an {@link ImageManager} has been set yet. Can be used in
-     * {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate} along with
-     * {@link #setImageManager(com.bumptech.glide.resize.ImageManager.Builder) setImageManager} to set an
-     * {@link ImageManager} with custom options for use with {@link Request} and/or as an
-     * easily accessible singleton.
-     *
-     * @return true iff an {@link ImageManager} is currently set
+     * Returns the {@link RequestQueue} Glide is using to fetch images over http/https.
      */
-    public boolean isImageManagerSet() {
-        return imageManager != null;
-    }
-
-    /**
-     * Set the {@link ImageManager} to use with {@link Request}.
-     *
-     * @see #setImageManager(com.bumptech.glide.resize.ImageManager)
-     *
-     * @param builder The builder that will be used to construct a new ImageManager
-     */
-    public void setImageManager(ImageManager.Builder builder) {
-        setImageManager(builder.build());
-    }
-
-    /**
-     * Set the {@link ImageManager} to use with {@link Request} Replaces the current
-     * {@link ImageManager} if one has already been set.
-     *
-     * @see #isImageManagerSet()
-     *
-     * @param imageManager The ImageManager to use
-     */
-    public void setImageManager(ImageManager imageManager) {
-        this.imageManager = imageManager;
+    public RequestQueue getRequestQueue() {
+        return requestQueue;
     }
 
     /**
@@ -242,7 +214,7 @@ public class Glide {
      * @throws IllegalArgumentException if no factory exists for the given class
      */
     public static <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
-        return GLIDE.loaderFactory.buildModelLoader(modelClass, resourceClass, context);
+        return Glide.get(context).loaderFactory.buildModelLoader(modelClass, resourceClass, context);
     }
 
     /**
@@ -415,7 +387,8 @@ public class Glide {
          */
         @SuppressWarnings("unused")
         public <T> Request<T> loadFromImage(T model) {
-            return new ImageModelRequest<T>(context, GLIDE.getFactory(model, InputStream.class)).load(model);
+            return new ImageModelRequest<T>(context, Glide.get(context).getFactory(model, InputStream.class))
+                    .load(model);
         }
 
         /**
@@ -429,7 +402,7 @@ public class Glide {
          * @return A {@link Request} to set options for the load and ultimately the target to load the model into
          */
         public Request<URL> loadFromImage(URL url) {
-            return new ImageModelRequest<URL>(context, GLIDE.getFactory(url, InputStream.class)).load(url);
+            return new ImageModelRequest<URL>(context, Glide.get(context).getFactory(url, InputStream.class)).load(url);
         }
 
         /**
@@ -474,7 +447,7 @@ public class Glide {
          */
         @SuppressWarnings("unused")
         public <T> Request<T> loadFromVideo(T model) {
-            return new VideoModelRequest<T>(context, GLIDE.getFactory(model, ParcelFileDescriptor.class))
+            return new VideoModelRequest<T>(context, Glide.get(context).getFactory(model, ParcelFileDescriptor.class))
                     .loadFromVideo(model);
         }
     }
@@ -528,8 +501,8 @@ public class Glide {
     @SuppressWarnings("unused") //public api
     public static class Request<ModelType> extends GenericRequest<ModelType, InputStream, ParcelFileDescriptor> {
         private Request(Context context, ModelType model) {
-            this(context, model, GLIDE.getFactory(model, InputStream.class),
-                    GLIDE.getFactory(model, ParcelFileDescriptor.class));
+            this(context, model, Glide.get(context).getFactory(model, InputStream.class),
+                    Glide.get(context).getFactory(model, ParcelFileDescriptor.class));
         }
 
         private Request(Context context, ModelType model,
@@ -866,11 +839,11 @@ public class Glide {
 
             ModelLoader<ModelType, ImageResourceType> imageModelLoader = null;
             if (imageModelLoaderFactory != null) {
-                imageModelLoader = imageModelLoaderFactory.build(context, GLIDE.loaderFactory);
+                imageModelLoader = imageModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
             }
             ModelLoader<ModelType, VideoResourceType> videoModelLoader = null;
             if (videoModelLoaderFactory != null) {
-                videoModelLoader = videoModelLoaderFactory.build(context, GLIDE.loaderFactory);
+                videoModelLoader = videoModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
             }
 
             ImagePresenter.Builder<ModelType, Y> builder = new ImagePresenter.Builder<ModelType, Y>()

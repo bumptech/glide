@@ -30,7 +30,11 @@ public class GlideTest extends ActivityTestCase {
     }
 
     private Context getContext() {
-        return getInstrumentation().getContext();
+        Context result = getInstrumentation().getTargetContext();
+        if (result == null) {
+            throw new IllegalArgumentException();
+        }
+        return result;
     }
 
     private void checkImagePresenter(Target target, Object model) {

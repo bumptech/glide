@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.flickr;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,24 +15,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.resize.ImageManager;
-import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
-import com.bumptech.glide.resize.cache.DiskCache;
-import com.bumptech.glide.resize.cache.DiskCacheAdapter;
-import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
-import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
-import com.bumptech.glide.volley.RequestQueueWrapper;
-import com.bumptech.glide.volley.VolleyUrlLoader;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
-    private static final String CACHE_NAME = "flickr_cache";
     private static final String TAG = "FlickrSearchActivity";
 
     private int searchCount = 0;
@@ -52,8 +36,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     private Set<PhotoViewer> photoViewers = new HashSet<PhotoViewer>();
     private List<Photo> currentPhotos = new ArrayList<Photo>();
     private View searchLoading;
-    private RequestQueue requestQueue;
-
     private enum Page {
         SMALL,
         MEDIUM,
@@ -86,35 +68,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flickr_search_activity);
-
-        final Glide glide = Glide.get();
-        if (!glide.isImageManagerSet()) {
-            File cacheDir = ImageManager.getPhotoCacheDir(this, CACHE_NAME);
-
-            DiskCache diskCache;
-            try {
-                diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
-            } catch (IOException e) {
-                if (Log.isLoggable(TAG, Log.ERROR)) {
-                    Log.e(TAG, "Exception creating disk cache", e);
-                }
-                diskCache = new DiskCacheAdapter();
-            }
-
-            // When we can recycle bitmaps, the smaller our cache is, the more quickly our scrolling will become smooth
-            // so prefer large bitmap pool and a small cache.
-            final int safeMemCacheSize = ImageManager.getSafeMemoryCacheSize(this);
-            glide.setImageManager(new ImageManager.Builder(this)
-                    .setBitmapCompressQuality(70)
-                    .setMemoryCache(new LruMemoryCache(
-                            Build.VERSION.SDK_INT >= 11 ? safeMemCacheSize / 2 : safeMemCacheSize))
-                    .setBitmapPool(new LruBitmapPool(
-                            Build.VERSION.SDK_INT >= 11 ? Math.round(safeMemCacheSize * 1.5f) : safeMemCacheSize))
-                    .setDiskCache(diskCache));
-        }
-
-        requestQueue = RequestQueueWrapper.getRequestQueue(this);
-        glide.register(URL.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
 
         searching = findViewById(R.id.searching);
         searchLoading = findViewById(R.id.search_loading);
@@ -170,13 +123,13 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        Glide.get().getImageManager(this).trimMemory(level);
+        Glide.get(this).getImageManager().trimMemory(level);
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Glide.get().getImageManager(this).clearMemory();
+        Glide.get(this).getImageManager().clearMemory();
     }
 
     private void executeSearch() {
@@ -191,7 +144,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         searchLoading.setVisibility(View.VISIBLE);
         searchTerm.setText(getString(R.string.searching_for, searchString));
 
-        Api.get(requestQueue).search(searchString, new Api.SearchCallback() {
+        Api.get(Glide.get(this).getRequestQueue()).search(searchString, new Api.SearchCallback() {
             @Override
             public void onSearchCompleted(List<Photo> photos) {
                 if (currentSearch != searchCount) return;

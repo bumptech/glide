@@ -5,7 +5,6 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.RetryPolicy;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
@@ -22,22 +21,13 @@ public class VolleyUrlLoader implements ModelLoader<URL, InputStream> {
     public static class Factory implements ModelLoaderFactory<URL, InputStream> {
         private RequestQueue requestQueue;
 
-        public Factory() { }
-
         public Factory(RequestQueue requestQueue) {
             this.requestQueue = requestQueue;
         }
 
-        protected RequestQueue getRequestQueue(Context context) {
-            if (requestQueue == null) {
-                requestQueue = RequestQueueWrapper.getRequestQueue(context);
-            }
-            return requestQueue;
-        }
-
         @Override
         public ModelLoader<URL, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new VolleyUrlLoader(getRequestQueue(context));
+            return new VolleyUrlLoader(requestQueue);
         }
 
         @Override

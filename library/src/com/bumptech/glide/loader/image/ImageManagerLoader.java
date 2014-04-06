@@ -17,7 +17,7 @@ public class ImageManagerLoader implements ImageLoader {
     private ImageManager.LoadToken loadToken;
 
     public ImageManagerLoader(Context context) {
-        this(Glide.get().getImageManager(context));
+        this(Glide.get(context).getImageManager());
     }
 
     public ImageManagerLoader(ImageManager imageManager) {
