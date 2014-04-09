@@ -408,9 +408,11 @@ public class ImageManager {
                         width, height);
                 job = new ImageManagerJob(runner, key);
                 jobs.put(key, job);
+                job.addCallback(cb);
                 runner.execute();
+            } else {
+                job.addCallback(cb);
             }
-            job.addCallback(cb);
             result = new LoadToken(cb, job);
         }
         return result;
@@ -482,6 +484,12 @@ public class ImageManager {
         public void cancel(LoadedCallback cb) {
             cbs.remove(cb);
             if (cbs.size() == 0) {
+                // Note: this is potentially dangerous. The runner asynchronously asks our jobs map for a job
+                // matching our key after posting a runnable to the main thread and as a result, the job it gets back
+                // may not be this job. We protect against this for cancellation by not delivering failures from
+                // cancelled runners, so new jobs will not receive errors from cancelled jobs. However, new jobs may
+                // receive results from old runners if the old runner was cancelled, but completed successfully anyway
+                // because it received the cancellation too late.
                 runner.cancel();
                 jobs.remove(key);
             }
@@ -545,7 +553,7 @@ public class ImageManager {
         private final Downsampler downsampler;
 
         private volatile Future<?> future;
-        private volatile boolean cancelled = false;
+        private volatile boolean isCancelled = false;
 
         public ImageManagerRunner(String key, StreamLoader sl, Transformation t, Downsampler d, int width, int height) {
             this.key = key;
@@ -562,7 +570,10 @@ public class ImageManager {
         }
 
         public void cancel() {
-            cancelled = true;
+            if (isCancelled) {
+                return;
+            }
+            isCancelled = true;
 
             bgHandler.removeCallbacks(this);
 
@@ -616,7 +627,7 @@ public class ImageManager {
                     streamLoader.loadStream(new StreamLoader.StreamReadyCallback() {
                         @Override
                         public void onStreamReady(final InputStream is) {
-                            if (cancelled) {
+                            if (isCancelled) {
                                 return;
                             }
 
@@ -685,6 +696,10 @@ public class ImageManager {
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (isCancelled) {
+                        return;
+                    }
+
                     final ImageManagerJob job = jobs.get(key);
                     if (job != null) {
                         job.onLoadFailed(e);
