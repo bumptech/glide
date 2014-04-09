@@ -398,15 +398,15 @@ public class ImageManager {
         if (!returnFromCache(key, cb)) {
             ImageManagerJob job = jobs.get(key);
             if (job == null) {
-                ImageManagerRunner runner = new ImageManagerRunner(key, task);
-                job = new ImageManagerJob(runner, key);
+                ImageManagerRunner runner = new ImageManagerRunner(key, task, task.getId());
+                job = new ImageManagerJob(runner, key, task.getId());
                 jobs.put(key, job);
                 job.addCallback(cb);
                 runner.execute();
             } else {
                 job.addCallback(cb);
             }
-            result = new LoadToken(cb, job);
+            result = new LoadToken(cb, job, task.getId());
         }
         return result;
     }
@@ -460,15 +460,21 @@ public class ImageManager {
     private class ImageManagerJob {
         private final ImageManagerRunner runner;
         private final String key;
+        private final String tag;
         private final List<LoadedCallback> cbs = new ArrayList<LoadedCallback>();
 
-        public ImageManagerJob(ImageManagerRunner runner, String key) {
+        public ImageManagerJob(ImageManagerRunner runner, String key, String tag) {
             this.runner = runner;
             this.key = key;
+            this.tag = tag;
         }
 
         public void addCallback(LoadedCallback cb) {
             cbs.add(cb);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "add callback for tag: " + tag + " total: " + cbs.size()
+                        + " ImageManagerJob: " + hashCode());
+            }
         }
 
         /**
@@ -476,6 +482,10 @@ public class ImageManager {
          */
         public void cancel(LoadedCallback cb) {
             cbs.remove(cb);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Cancel callback from ImageManagerJob for tag: " + tag + " total cbs: " + cbs.size()
+                        + " ImageManagerJob: " + hashCode());
+            }
             if (cbs.size() == 0) {
                 // Note: this is potentially dangerous. The runner asynchronously asks our jobs map for a job
                 // matching our key after posting a runnable to the main thread and as a result, the job it gets back
@@ -489,6 +499,10 @@ public class ImageManager {
         }
 
         public void onLoadComplete(Bitmap result) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Load complete in ImageManagerJob for tag: " + tag + " total cbs: " + cbs.size()
+                        + " ImageManagerJob: " + hashCode());
+            }
             for (LoadedCallback cb : cbs) {
                 bitmapReferenceCounter.acquireBitmap(result);
                 cb.onLoadCompleted(result);
@@ -497,6 +511,10 @@ public class ImageManager {
         }
 
         public void onLoadFailed(Exception e) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Load failed in ImageManagerJob for tag: " + tag + " total cbs: " + cbs.size()
+                        + " ImageManagerJob: " + hashCode());
+            }
             for (LoadedCallback cb : cbs) {
                 cb.onLoadFailed(e);
             }
@@ -540,12 +558,14 @@ public class ImageManager {
     private class ImageManagerRunner implements Runnable {
         public final String key;
         private final BitmapLoad task;
+        private final String tag;
         private volatile Future<?> future;
         private boolean isCancelled = false;
 
-        public ImageManagerRunner(String key, BitmapLoad task) {
+        public ImageManagerRunner(String key, BitmapLoad task, String tag) {
             this.key = key;
             this.task = task;
+            this.tag = tag;
         }
 
         private void execute() {
@@ -563,6 +583,10 @@ public class ImageManager {
             final Future current = future;
             if (current != null) {
                 current.cancel(false);
+            }
+
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Cancel job id: " + tag);
             }
 
             task.cancel();
@@ -652,7 +676,7 @@ public class ImageManager {
 
         private void handleException(final Exception e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Exception loading image", e);
+                Log.d(TAG, "Exception loading image tag: " + tag, e);
             }
             mainHandler.post(new Runnable() {
                 @Override
@@ -673,13 +697,18 @@ public class ImageManager {
     public static class LoadToken {
         private final ImageManagerJob job;
         private final LoadedCallback cb;
+        private final String tag;
 
-        public LoadToken(LoadedCallback cb, ImageManagerJob job) {
+        public LoadToken(LoadedCallback cb, ImageManagerJob job, String tag) {
             this.cb = cb;
             this.job = job;
+            this.tag = tag;
         }
 
         public void cancel() {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Cancel load token tag: " + tag + " cb: " + cb.hashCode());
+            }
             job.cancel(cb);
         }
     }
