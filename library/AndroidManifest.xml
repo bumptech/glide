@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.bumptech.glide"
           android:versionCode="4"
-          android:versionName="3.0.0" >
+          android:versionName="3.1.0a" >
   <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19" />
   <application />
 </manifest>
