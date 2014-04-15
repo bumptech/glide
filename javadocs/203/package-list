@@ -1,0 +1,13 @@
+com.bumptech.glide
+com.bumptech.glide.loader.image
+com.bumptech.glide.loader.model
+com.bumptech.glide.loader.stream
+com.bumptech.glide.loader.transformation
+com.bumptech.glide.presenter
+com.bumptech.glide.presenter.target
+com.bumptech.glide.resize
+com.bumptech.glide.resize.bitmap_recycle
+com.bumptech.glide.resize.cache
+com.bumptech.glide.resize.load
+com.bumptech.glide.util
+com.bumptech.glide.volley
