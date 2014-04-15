@@ -27,7 +27,6 @@ import com.bumptech.glide.resize.cache.MemoryCacheAdapter;
 import com.bumptech.glide.resize.load.Downsampler;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -309,12 +308,7 @@ public class ImageManager {
             if (diskCache == null) {
                 File cacheDir = getPhotoCacheDir(context);
                 if (cacheDir != null) {
-                    try {
-                        diskCache = DiskLruCacheWrapper.get(cacheDir, DEFAULT_DISK_CACHE_SIZE);
-                    } catch (IOException e) {
-                        //this is probably a corrupt or full sd card, so default to not using a disk cache
-                        e.printStackTrace();
-                    }
+                    diskCache = DiskLruCacheWrapper.get(cacheDir, DEFAULT_DISK_CACHE_SIZE);
                 }
 
                 if (diskCache == null) {

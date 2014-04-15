@@ -2,6 +2,7 @@ package com.bumptech.glide.loader.bitmap.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
@@ -28,6 +29,10 @@ public class StreamResourceLoader extends ResourceLoader<InputStream> implements
 
         @Override
         public void teardown() { }
+    }
+
+    public StreamResourceLoader(Context context) {
+        this(context, Glide.buildStreamModelLoader(Uri.class, context));
     }
 
     public StreamResourceLoader(Context context, ModelLoader<Uri, InputStream> uriLoader) {

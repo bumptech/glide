@@ -2,6 +2,7 @@ package com.bumptech.glide.loader.bitmap.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
@@ -33,6 +34,10 @@ public class StreamUriLoader extends UriLoader<InputStream> implements StreamMod
 
         @Override
         public void teardown() { }
+    }
+
+    public StreamUriLoader(Context context) {
+        this(context, Glide.buildStreamModelLoader(URL.class, context));
     }
 
     public StreamUriLoader(Context context, ModelLoader<URL, InputStream> urlLoader) {

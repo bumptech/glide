@@ -3,6 +3,7 @@ package com.bumptech.glide.loader.bitmap.model.file_descriptor;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
@@ -29,6 +30,10 @@ public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescripto
 
         @Override
         public void teardown() { }
+    }
+
+    public FileDescriptorStringLoader(Context context) {
+        this(Glide.buildFileDescriptorModelLoader(Uri.class, context));
     }
 
     public FileDescriptorStringLoader(ModelLoader<Uri, ParcelFileDescriptor> uriLoader) {

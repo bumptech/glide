@@ -2,6 +2,7 @@ package com.bumptech.glide.loader.bitmap.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
@@ -14,6 +15,7 @@ import java.io.InputStream;
  * {@link InputStream} resources.
  */
 public class StreamStringLoader extends StringLoader<InputStream> implements StreamModelLoader<String> {
+
     public static class Factory implements ModelLoaderFactory<String, InputStream> {
         @Override
         public ModelLoader<String, InputStream> build(Context context, GenericLoaderFactory factories) {
@@ -27,6 +29,10 @@ public class StreamStringLoader extends StringLoader<InputStream> implements Str
 
         @Override
         public void teardown() { }
+    }
+
+    public StreamStringLoader(Context context) {
+        this(Glide.buildStreamModelLoader(Uri.class, context));
     }
 
     public StreamStringLoader(ModelLoader<Uri, InputStream> uriLoader) {

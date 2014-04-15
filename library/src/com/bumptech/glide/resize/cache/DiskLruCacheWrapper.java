@@ -5,6 +5,7 @@
 package com.bumptech.glide.resize.cache;
 
 import com.bumptech.glide.resize.SafeKeyGenerator;
+import android.util.Log;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.File;
@@ -19,19 +20,12 @@ import java.io.OutputStream;
  * @see #get(java.io.File, int)
  */
 public class DiskLruCacheWrapper implements DiskCache {
+    private static final String TAG = "DiskLruCacheWrapper";
 
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
-    private static DiskLruCache CACHE = null;
     private static DiskLruCacheWrapper WRAPPER = null;
     private final SafeKeyGenerator safeKeyGenerator;
-
-    private synchronized static DiskLruCache getDiskLruCache(File directory, int maxSize) throws IOException {
-        if (CACHE == null) {
-            CACHE = DiskLruCache.open(directory, APP_VERSION, VALUE_COUNT, maxSize);
-        }
-        return CACHE;
-    }
 
     /**
      * Get a DiskCache in the given directory and size. If a disk cache has alread been created with
@@ -41,20 +35,30 @@ public class DiskLruCacheWrapper implements DiskCache {
      * @param directory The directory for the disk cache
      * @param maxSize The max size for the disk cache
      * @return The new disk cache with the given arguments, or the current cache if one already exists
-     * @throws IOException
      */
-    public synchronized static DiskCache get(File directory, int maxSize) throws IOException {
+    public synchronized static DiskCache get(File directory, int maxSize) {
         if (WRAPPER == null) {
-            WRAPPER = new DiskLruCacheWrapper(getDiskLruCache(directory, maxSize));
+            WRAPPER = new DiskLruCacheWrapper(directory, maxSize);
         }
         return WRAPPER;
     }
 
-    private final DiskLruCache diskLruCache;
+    private final File directory;
+    private final int maxSize;
 
-    protected DiskLruCacheWrapper(DiskLruCache diskLruCache) {
-        this.diskLruCache = diskLruCache;
+    private DiskLruCache diskLruCache;
+
+    protected DiskLruCacheWrapper(File directory, int maxSize) {
+        this.directory = directory;
+        this.maxSize = maxSize;
         this.safeKeyGenerator = new SafeKeyGenerator();
+    }
+
+    private synchronized DiskLruCache getDiskCache() throws IOException {
+        if (diskLruCache == null) {
+            diskLruCache = DiskLruCache.open(directory, APP_VERSION, VALUE_COUNT, maxSize);
+        }
+        return diskLruCache;
     }
 
     @Override
@@ -65,12 +69,14 @@ public class DiskLruCacheWrapper implements DiskCache {
             //It is possible that the there will be a put in between these two gets. If so that shouldn't be a problem
             //because we will always put the same value at the same key so our input streams will still represent
             //the same data
-            final DiskLruCache.Snapshot snapshot = diskLruCache.get(safeKey);
+            final DiskLruCache.Snapshot snapshot = getDiskCache().get(safeKey);
             if (snapshot != null) {
                 result = snapshot.getInputStream(0);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Unable to get from disk cache", e);
+            }
         }
         return result;
     }
@@ -79,7 +85,7 @@ public class DiskLruCacheWrapper implements DiskCache {
     public void put(String key, Writer writer) {
         String safeKey = safeKeyGenerator.getSafeKey(key);
         try {
-            DiskLruCache.Editor editor = diskLruCache.edit(safeKey);
+            DiskLruCache.Editor editor = getDiskCache().edit(safeKey);
             //editor will be null if there are two concurrent puts
             //worst case just silently fail
             if (editor != null) {
@@ -95,7 +101,9 @@ public class DiskLruCacheWrapper implements DiskCache {
                 editor.commit();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Unable to put to disk cache", e);
+            }
         }
     }
 
@@ -103,9 +111,11 @@ public class DiskLruCacheWrapper implements DiskCache {
     public void delete(String key) {
         String safeKey = safeKeyGenerator.getSafeKey(key);
         try {
-            diskLruCache.remove(safeKey);
+            getDiskCache().remove(safeKey);
         } catch (IOException e) {
-            e.printStackTrace();
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Unable to delete from disk cache", e);
+            }
         }
     }
 }
