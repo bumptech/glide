@@ -22,7 +22,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
-import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.samples.flickr.api.Api;
@@ -30,7 +29,6 @@ import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,15 +87,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         if (!glide.isImageManagerSet()) {
             File cacheDir = ImageManager.getPhotoCacheDir(this, CACHE_NAME);
 
-            DiskCache diskCache;
-            try {
-                diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
-            } catch (IOException e) {
-                if (Log.isLoggable(TAG, Log.ERROR)) {
-                    Log.e(TAG, "Exception creating disk cache", e);
-                }
-                diskCache = new DiskCacheAdapter();
-            }
+            DiskCache diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
 
             // When we can recycle bitmaps, the smaller our cache is, the more quickly our scrolling will become smooth
             // so prefer large bitmap pool and a small cache.
