@@ -19,6 +19,16 @@ public interface BitmapLoad {
     public void cancel();
 
     /**
+     * Returns the metadata for this load, or null if none is presenter.
+     */
+    public Metadata getMetadata();
+
+    /**
+     * Sets the {@link Metadata} for this load.
+     */
+    public void setMetadata(Metadata metadata);
+
+    /**
      * Returns a decoded bitmap.
      *
      * @param bitmapPool A bitmap pool that can be used to reuse bitmaps during the load. Any bitmaps generated during

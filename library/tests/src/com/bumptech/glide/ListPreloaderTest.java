@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
+import com.bumptech.glide.resize.Metadata;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -195,7 +196,7 @@ public class ListPreloaderTest extends AndroidTestCase {
                 public ResourceFetcher<InputStream> getResourceFetcher(final Object model, int width, int height) {
                     return new ResourceFetcher<InputStream>() {
                         @Override
-                        public InputStream loadResource() throws Exception {
+                        public InputStream loadResource(Metadata metadata) throws Exception {
                             ByteArrayOutputStream os = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
                             return new ByteArrayInputStream(os.toByteArray());

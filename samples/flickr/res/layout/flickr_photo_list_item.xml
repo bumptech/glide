@@ -10,7 +10,7 @@
     android:layout_width="0dp"
     android:layout_height="fill_parent"
     android:layout_weight="1"
-    android:scaleType="center" />
+    android:scaleType="centerCrop" />
   <TextView
     android:id="@+id/title_view"
     android:layout_width="0dp"

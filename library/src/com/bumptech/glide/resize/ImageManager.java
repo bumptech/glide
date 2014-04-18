@@ -34,9 +34,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
@@ -283,9 +287,10 @@ public class ImageManager {
 
         private void setDefaults() {
             if (resizeService == null) {
-                final int numThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
-                resizeService = Executors.newFixedThreadPool(numThreads, new ThreadFactory() {
-                    int threadNum = 1;
+
+                resizeService = new ThreadPoolExecutor(4, 4, 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue
+                        <Runnable>(), new ThreadFactory() {
+                     int threadNum = 1;
                     @Override
                     public Thread newThread(Runnable runnable) {
                         final Thread result = new Thread(runnable, "image-manager-resize-" + threadNum);
@@ -293,7 +298,12 @@ public class ImageManager {
                         result.setPriority(THREAD_PRIORITY_BACKGROUND);
                         return result;
                     }
-                });
+                }) {
+                    @Override
+                    protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
+                        return new LoadTask<T>(runnable, value);
+                    }
+                };
             }
             final int safeCacheSize = getSafeMemoryCacheSize(context);
             final boolean isLowMemoryDevice = isLowMemoryDevice(context);
@@ -549,12 +559,32 @@ public class ImageManager {
         }
     }
 
+    public static class LoadToken {
+        private final ImageManagerJob job;
+        private final LoadedCallback cb;
+        private final String tag;
+
+        public LoadToken(LoadedCallback cb, ImageManagerJob job, String tag) {
+            this.cb = cb;
+            this.job = job;
+            this.tag = tag;
+        }
+
+        public void cancel() {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Cancel load token tag: " + tag + " cb: " + cb.hashCode());
+            }
+            job.cancel(cb);
+        }
+    }
+
     private class ImageManagerRunner implements Runnable {
         public final String key;
         private final BitmapLoad task;
         private final String tag;
         private volatile Future<?> future;
-        private boolean isCancelled = false;
+        private volatile boolean isCancelled = false;
+        private long startTime;
 
         public ImageManagerRunner(String key, BitmapLoad task, String tag) {
             this.key = key;
@@ -563,6 +593,7 @@ public class ImageManager {
         }
 
         private void execute() {
+            startTime = System.currentTimeMillis();
             bgHandler.post(this);
         }
 
@@ -580,7 +611,7 @@ public class ImageManager {
             }
 
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Cancel job id: " + tag);
+                Log.v(TAG, "Cancel job id: " + tag + " time: " + (System.currentTimeMillis() - startTime));
             }
 
             task.cancel();
@@ -588,6 +619,10 @@ public class ImageManager {
 
         @Override
         public void run() {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "start running id: " + tag + " waited " + (System.currentTimeMillis() - startTime)
+                        + " cancelled: " + isCancelled);
+            }
             Bitmap result = null;
             try {
                 result = getFromDiskCache(key);
@@ -622,21 +657,29 @@ public class ImageManager {
         }
 
         private void resizeWithPool() {
-            future = executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Bitmap result = decodeIfNotFound();
-                        finishResize(result, false);
-                    } catch (Exception e) {
-                        handleException(e);
-                    }
-                }
-            });
+            future = executor.submit(new LoadRunnable());
         }
 
-        private Bitmap decodeIfNotFound() throws Exception {
-            return task.load(bitmapPool);
+        private class LoadRunnable implements Runnable, Prioritized {
+            @Override
+            public void run() {
+                if (isCancelled) {
+                    return;
+                }
+
+                try {
+                    Bitmap result = task.load(bitmapPool);
+                    finishResize(result, false);
+                } catch (Exception e) {
+                    handleException(e);
+                }
+            }
+
+            @Override
+            public int getPriority() {
+                Metadata metadata = task.getMetadata() != null ? task.getMetadata() : Metadata.DEFAULT;
+                return metadata.priority.ordinal();
+            }
         }
 
         private void finishResize(final Bitmap result, boolean isInDiskCache) {
@@ -648,6 +691,10 @@ public class ImageManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "Finishing on main thread tag: " + tag + " time: "
+                                    + (System.currentTimeMillis() - startTime) + " cancelled: " + isCancelled);
+                        }
                         // Acquire the bitmap for this runnable until we've finished notifying
                         // all consumers. This prevents the bitmap from being put in the bitmap pool
                         // before all consumers have a change to acquire the bitmap if one of the first
@@ -688,22 +735,25 @@ public class ImageManager {
         }
     }
 
-    public static class LoadToken {
-        private final ImageManagerJob job;
-        private final LoadedCallback cb;
-        private final String tag;
+    private interface Prioritized {
+        public int getPriority();
+    }
 
-        public LoadToken(LoadedCallback cb, ImageManagerJob job, String tag) {
-            this.cb = cb;
-            this.job = job;
-            this.tag = tag;
+    private static class LoadTask<T> extends FutureTask<T> implements Runnable, Comparable<LoadTask> {
+        int priority;
+
+        public LoadTask(Runnable runnable, T result) {
+            super(runnable, result);
+            priority = ((Prioritized) runnable).getPriority();
         }
 
-        public void cancel() {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Cancel load token tag: " + tag + " cb: " + cb.hashCode());
-            }
-            job.cancel(cb);
+        public int getPriority() {
+            return priority;
+        }
+
+        @Override
+        public int compareTo(LoadTask loadTask) {
+            return priority - loadTask.getPriority();
         }
     }
 }

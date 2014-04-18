@@ -1,6 +1,7 @@
 package com.bumptech.glide.loader.bitmap.resource;
 
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.resize.Metadata;
 
 /**
  * A base class for lazily and retrieving a resource that can be used to load an image.
@@ -19,8 +20,10 @@ public interface ResourceFetcher<T> {
      * {@link java.util.concurrent.ExecutorService} that may have more than one background thread.
      *
      * This method will only be called when the corresponding image is not in the cache.
+     *
+     * @param metadata Load related metadata that the fetcher can use to adjust how it obtains it's resource.
      */
-    public T loadResource() throws Exception;
+    public T loadResource(Metadata metadata) throws Exception;
 
     /**
      * A method that will be called by an {@link com.bumptech.glide.presenter.ImagePresenter} when a load is no longer

@@ -38,6 +38,7 @@ public interface ModelLoader<T, Y> {
      *     long time or indefinitely (because of a particularly slow or paused/failed download for example).
      * </p>
      *
+     *
      * @param model The model representing the image
      * @param width The width of the view the image will be loaded into
      * @param height The height of the view the image will be loaded into

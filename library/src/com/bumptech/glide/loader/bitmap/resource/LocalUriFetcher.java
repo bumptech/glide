@@ -3,6 +3,7 @@ package com.bumptech.glide.loader.bitmap.resource;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import com.bumptech.glide.resize.Metadata;
 
 import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
@@ -32,7 +33,7 @@ public abstract class LocalUriFetcher<T> implements ResourceFetcher<T> {
     }
 
     @Override
-    public final T loadResource() throws Exception {
+    public final T loadResource(Metadata metadata) throws Exception {
         Context context = contextRef.get();
         if (context == null) {
             throw new NullPointerException("Context has been cleared in LocalUriFetcher uri: " + uri);

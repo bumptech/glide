@@ -15,6 +15,7 @@ import com.bumptech.glide.loader.image.ImageLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.resize.BitmapLoad;
+import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.load.Transformation;
 
 /**
@@ -28,8 +29,9 @@ import com.bumptech.glide.resize.load.Transformation;
  * @param <T> The type of the model that contains information necessary to display an image. Can be as simple
  *            as a String containing a path or a complex data type.
  */
-public class ImagePresenter<T, Y extends Target> {
+public class ImagePresenter<T, Y extends Target> implements Presenter<T> {
     private static final String TAG = "ImagePresenter";
+    private final Metadata metadata;
 
     /**
      * A builder for an {@link ImagePresenter}.
@@ -63,6 +65,8 @@ public class ImagePresenter<T, Y extends Target> {
         private BitmapLoadFactory<T> loadFactory;
         private TransformationLoader<T> transformationLoader;
         private Y target;
+        private float sizeMultiplier = 1f;
+        private Metadata metadata;
 
         /**
          * Builds an ImagePresenter.
@@ -106,6 +110,32 @@ public class ImagePresenter<T, Y extends Target> {
          */
         public Builder<T, Y> setBitmapLoadFactory(BitmapLoadFactory<T> loadFactory) {
             this.loadFactory = loadFactory;
+            return this;
+        }
+
+        /**
+         * Optional - Set a size modifier to adjust the size given by the target so that lower resolution images can be
+         * loaded either as thumbnails or to avoid overly dense images on certain devices (ie using xhdpi sizes on
+         * xxhdpi devices).
+         *
+         * @param multiplier A size multiplier to adjust the width and height provided by the target.
+         * @return This Builder object.
+         */
+        public Builder<T, Y> setSizeMultiplier(float multiplier) {
+            if (multiplier < 0f || multiplier > 1f) {
+                throw new IllegalArgumentException("Modifier must be between 0 and 1");
+            }
+            this.sizeMultiplier = multiplier;
+            return this;
+        }
+
+        /**
+         * Optional - Set metadata related to how media loads are run.
+         * @param metadata Some load metadata.
+         * @return This Builder object.
+         */
+        public Builder<T, Y> setMetadata(Metadata metadata) {
+            this.metadata = metadata;
             return this;
         }
 
@@ -263,28 +293,7 @@ public class ImagePresenter<T, Y extends Target> {
     private final BitmapLoadFactory<T> loadFactory;
     private boolean loadedFromCache = false;
     private final Drawable errorDrawable;
-
-    /**
-     * An interface used to coordinate multiple {@link ImagePresenter} objects acting on the same view
-     */
-    public interface ImagePresenterCoordinator {
-
-        /**
-         * Determines if a presenter can display a loaded bitmap
-         *
-         * @param presenter The presenter requesting permission to display a bitmap
-         * @return True iff the presenter can display a bitmap
-         */
-        public boolean canSetImage(ImagePresenter presenter);
-
-        /**
-         * Determines if a presenter can display a placeholder
-         *
-         * @param presenter The presenter requesting permission to display a placeholder
-         * @return True iff the presenter can display a placeholder
-         */
-        public boolean canSetPlaceholder(ImagePresenter presenter);
-    }
+    private final float sizeModifier;
 
     /**
      * An interface for logging or otherwise handling exceptions that may occur during an image load
@@ -332,16 +341,18 @@ public class ImagePresenter<T, Y extends Target> {
             this.errorDrawable = builder.errorDrawable;
         }
 
+        this.sizeModifier = builder.sizeMultiplier;
+        this.metadata = builder.metadata;
         this.coordinator = builder.coordinator;
         this.imageReadyCallback = builder.imageReadyCallback;
         this.exceptionHandler = builder.exceptionHandler;
         this.loadFactory = builder.loadFactory;
         this.target = builder.target;
-        final ImagePresenter previous = builder.target.getImagePresenter();
+        final Presenter previous = builder.target.getPresenter();
         if (previous != null) {
             previous.clear();
         }
-        builder.target.setImagePresenter(this);
+        builder.target.setPresenter(this);
     }
 
     /**
@@ -371,6 +382,8 @@ public class ImagePresenter<T, Y extends Target> {
             target.getSize(new Target.SizeReadyCallback() {
                 @Override
                 public void onSizeReady(int width, int height) {
+                    width = Math.round(sizeModifier * width);
+                    height = Math.round(sizeModifier * height);
                     fetchImage(model, width, height, loadCount);
                 }
             });
@@ -421,14 +434,19 @@ public class ImagePresenter<T, Y extends Target> {
             return;
         }
 
+        loadTask.setMetadata(metadata);
+
         imageToken = imageLoader.fetchImage(loadTask, new ImageLoader.ImageReadyCallback() {
             @Override
             public boolean onImageReady(Bitmap image) {
-                if (loadCount != currentCount || !canSetImage() || image == null) return false;
+                if (loadCount != currentCount || !canSetImage() || image == null) {
+                    return false;
+                }
 
                 target.onImageReady(image);
-                if (imageReadyCallback != null)
+                if (imageReadyCallback != null && canCallReadyCallback()) {
                     imageReadyCallback.onImageReady(model, target, loadedFromCache);
+                }
                 isImageSet = true;
                 return true;
             }
@@ -440,7 +458,7 @@ public class ImagePresenter<T, Y extends Target> {
                     isErrorSet = true;
                     target.setPlaceholder(errorDrawable);
                 }
-                if (exceptionHandler != null) {
+                if (exceptionHandler != null && canCallErrorCallback()) {
                     exceptionHandler.onException(e, model, relevant);
                 }
             }
@@ -448,7 +466,7 @@ public class ImagePresenter<T, Y extends Target> {
     }
 
     /**
-     * For use primarily with {@link com.bumptech.glide.presenter.ImagePresenter.ImagePresenterCoordinator}
+     * For use primarily with {@link com.bumptech.glide.presenter.ImagePresenterCoordinator}
      *
      * @return True iff the wrapped {@link android.widget.ImageView} is displaying an image loaded by this
      *          {@link ImagePresenter}. False if the wrapped {@link android.widget.ImageView} is displaying a
@@ -464,5 +482,13 @@ public class ImagePresenter<T, Y extends Target> {
 
     private boolean canSetPlaceholder() {
         return coordinator == null || coordinator.canSetPlaceholder(this);
+    }
+
+    private boolean canCallReadyCallback() {
+        return coordinator == null || coordinator.canCallReadyCallback(this);
+    }
+
+    private boolean canCallErrorCallback() {
+        return coordinator == null || coordinator.canCallErrorCallback(this);
     }
 }

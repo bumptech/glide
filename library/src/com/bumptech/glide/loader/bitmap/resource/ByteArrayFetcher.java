@@ -1,5 +1,7 @@
 package com.bumptech.glide.loader.bitmap.resource;
 
+import com.bumptech.glide.resize.Metadata;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
@@ -15,7 +17,7 @@ public class ByteArrayFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
-    public InputStream loadResource() throws Exception {
+    public InputStream loadResource(Metadata metadata) throws Exception {
         return new ByteArrayInputStream(bytes);
     }
 

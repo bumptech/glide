@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.presenter.Presenter;
 
 /**
  * A base {@link Target} for loading {@link Bitmap}s that provides basic or empty implementations for most methods.
@@ -21,16 +22,16 @@ import com.bumptech.glide.presenter.ImagePresenter;
  */
 public abstract class BaseTarget implements Target {
 
-    private ImagePresenter imagePresenter;
+    private Presenter presenter;
 
     @Override
-    public void setImagePresenter(ImagePresenter imagePresenter) {
-        this.imagePresenter = imagePresenter;
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
     }
 
     @Override
-    public ImagePresenter getImagePresenter() {
-        return imagePresenter;
+    public Presenter getPresenter() {
+        return presenter;
     }
 
     @Override

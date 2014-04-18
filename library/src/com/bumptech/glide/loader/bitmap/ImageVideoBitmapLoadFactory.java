@@ -41,8 +41,6 @@ public class ImageVideoBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T
 
     @Override
     public BitmapLoad getLoadTask(T model, int width, int height) {
-        String imageId = null;
-        ResourceFetcher<Y> imageFetcher = null;
         BitmapLoad imageLoad = null;
         if (imageLoadFactory != null) {
             imageLoad = imageLoadFactory.getLoadTask(model, width, height);

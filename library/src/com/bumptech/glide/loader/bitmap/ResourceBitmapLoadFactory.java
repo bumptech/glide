@@ -5,6 +5,7 @@ import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.BitmapLoad;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.ResourceBitmapLoad;
+import com.bumptech.glide.resize.load.Transformation;
 
 public class ResourceBitmapLoadFactory<T, Y> implements BitmapLoadFactory<T> {
     private final ModelLoader<T, Y> modelLoader;
@@ -25,6 +26,6 @@ public class ResourceBitmapLoadFactory<T, Y> implements BitmapLoadFactory<T> {
     public BitmapLoad getLoadTask(T model, int width, int height) {
         final String id = modelLoader.getId(model);
         final ResourceFetcher<Y> resourceFetcher = modelLoader.getResourceFetcher(model, width, height);
-        return new ResourceBitmapLoad<Y>(id, resourceFetcher, decoder, width, height);
+        return new ResourceBitmapLoad<Y>(id, resourceFetcher, decoder, width, height, Transformation.NONE);
     }
 }

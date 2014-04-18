@@ -11,8 +11,11 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.widget.ListView;
 import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.presenter.Presenter;
 
 import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A base {@link Target} for loading {@link Bitmap}s into {@link View}s that provides default implementations for most
@@ -59,17 +62,17 @@ public abstract class ViewTarget<T extends View> implements Target {
     }
 
     @Override
-    public void setImagePresenter(ImagePresenter imagePresenter) {
-        view.setTag(imagePresenter);
+    public void setPresenter(Presenter presenter) {
+        view.setTag(presenter);
     }
 
     @Override
-    public ImagePresenter getImagePresenter() {
+    public Presenter getPresenter() {
         Object tag = view.getTag();
-        ImagePresenter presenter = null;
+        Presenter presenter = null;
         if (tag != null) {
-            if ((tag instanceof ImagePresenter)) {
-                presenter = (ImagePresenter) tag;
+            if ((tag instanceof Presenter)) {
+                presenter = (Presenter) tag;
             } else {
                 throw new IllegalArgumentException("You must not call setTag() on a view Glide is targeting");
             }
@@ -79,28 +82,36 @@ public abstract class ViewTarget<T extends View> implements Target {
 
     private static class SizeDeterminer {
         private final View view;
-        private SizeReadyCallback cb;
+        private Set<SizeReadyCallback> cbs = new HashSet<SizeReadyCallback>();
         private SizeDeterminerLayoutListener layoutListener;
 
         public SizeDeterminer(View view) {
             this.view = view;
         }
 
+        private void notifyCbs(int width, int height) {
+            for (SizeReadyCallback cb : cbs) {
+                cb.onSizeReady(width, height);
+            }
+            cbs.clear();
+        }
+
         private void checkCurrentDimens() {
-            if (cb == null) return;
+            if (cbs.isEmpty()) {
+                return;
+            }
 
             boolean calledCallback = true;
             ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             if (isViewSizeValid()) {
-                cb.onSizeReady(view.getWidth(), view.getHeight());
+                notifyCbs(view.getWidth(), view.getHeight());
             } else if (isLayoutParamsSizeValid()) {
-                cb.onSizeReady(layoutParams.width, layoutParams.height);
+                notifyCbs(layoutParams.width, layoutParams.height);
             } else {
                 calledCallback = false;
             }
 
             if (calledCallback) {
-                cb = null;
                 // Keep a reference to the layout listener and remove it here
                 // rather than having the observer remove itself because the observer
                 // we add the listener to will be almost immediately merged into
@@ -115,7 +126,6 @@ public abstract class ViewTarget<T extends View> implements Target {
         }
 
         public void getSize(SizeReadyCallback cb) {
-            this.cb = null;
             ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             if (isViewSizeValid()) {
                 cb.onSizeReady(view.getWidth(), view.getHeight());
@@ -134,7 +144,7 @@ public abstract class ViewTarget<T extends View> implements Target {
                 }
                 cb.onSizeReady(display.getWidth(), display.getHeight());
             } else {
-                this.cb = cb;
+                cbs.add(cb);
                 final ViewTreeObserver observer = view.getViewTreeObserver();
                 layoutListener = new SizeDeterminerLayoutListener(this);
                 observer.addOnGlobalLayoutListener(layoutListener);

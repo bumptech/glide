@@ -34,7 +34,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         currentPhotos = photos;
         if (adapter != null) {
             adapter.setPhotos(currentPhotos);
-        };
+        }
     }
 
     @Override
@@ -95,6 +95,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             return Glide.with(context)
                     .using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(item)
+                    .thumbnail(0.25f)
                     .centerCrop();
         }
     }
@@ -152,6 +153,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             Glide.with(getActivity())
                     .using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(current)
+                    .thumbnail(0.25f)
                     .centerCrop()
                     .animate(R.anim.fade_in)
                     .into(viewHolder.imageView);

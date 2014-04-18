@@ -4,8 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
-import java.io.InputStream;
-
 /**
  * A model loader for handling resources. Model must be a resource id in the package of the given context.
  */

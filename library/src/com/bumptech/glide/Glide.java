@@ -34,10 +34,14 @@ import com.bumptech.glide.loader.bitmap.transformation.MultiTransformationLoader
 import com.bumptech.glide.loader.bitmap.transformation.None;
 import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.presenter.Presenter;
+import com.bumptech.glide.presenter.ThumbImagePresenter;
 import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
 import com.bumptech.glide.presenter.target.ViewTarget;
 import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.Metadata;
+import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
@@ -245,9 +249,9 @@ public class Glide {
      * @param target The Target to cancel loads for.
      */
     public static void clear(Target target) {
-        ImagePresenter imagePresenter = target.getImagePresenter();
-        if (imagePresenter != null) {
-            imagePresenter.clear();
+        Presenter presenter = target.getPresenter();
+        if (presenter != null) {
+            presenter.clear();
         }
     }
 
@@ -549,6 +553,11 @@ public class Glide {
             return this;
         }
 
+        public Request<ModelType> thumbnail(float sizeMultiplier) {
+            super.thumbnail(sizeMultiplier);
+            return this;
+        }
+
         @Override
         public Request<ModelType> imageDecoder(BitmapDecoder<InputStream> decoder) {
             super.imageDecoder(decoder);
@@ -635,6 +644,7 @@ public class Glide {
         private RequestListener<ModelType> requestListener;
         private BitmapDecoder<ImageResourceType> imageDecoder;
         private BitmapDecoder<VideoResourceType> videoDecoder;
+        private Float thumbSizeMultiplier;
 
         private GenericRequest(Context context, ModelType model, ModelLoaderFactory<ModelType, ImageResourceType> imageFactory,
                 ModelLoaderFactory<ModelType, VideoResourceType> videoFactory) {
@@ -654,6 +664,14 @@ public class Glide {
             }
             this.imageModelLoaderFactory = imageFactory;
             this.videoModelLoaderFactory = videoFactory;
+        }
+
+        public GenericRequest thumbnail(float sizeMultiplier) {
+            if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
+                throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
+            }
+            this.thumbSizeMultiplier = sizeMultiplier;
+            return this;
         }
 
         /**
@@ -812,7 +830,9 @@ public class Glide {
          * @return The given target.
          */
         public <Y extends Target> Y into(Y target) {
-            return finish(target);
+            Presenter<ModelType> presenter = buildImagePresenter(target);
+            presenter.setModel(model);
+            return target;
         }
 
         /**
@@ -828,23 +848,10 @@ public class Glide {
             return into(new ImageViewTarget(view));
         }
 
-        private <Y extends Target> Y finish(Y target) {
-            ImagePresenter<ModelType, Y> imagePresenter = buildImagePresenter(target);
-            imagePresenter.setModel(model);
-            return target;
-        }
-
-        private <Y extends Target> ImagePresenter<ModelType, Y> buildImagePresenter(final Y target) {
+        private <Y extends Target> ImagePresenter.Builder<ModelType, Y> buildImagePresenter(
+                ModelLoader<ModelType, ImageResourceType> imageModelLoader,
+                ModelLoader<ModelType, VideoResourceType> videoModelLoader, final Y target) {
             TransformationLoader<ModelType> transformationLoader = getFinalTransformationLoader();
-
-            ModelLoader<ModelType, ImageResourceType> imageModelLoader = null;
-            if (imageModelLoaderFactory != null) {
-                imageModelLoader = imageModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
-            }
-            ModelLoader<ModelType, VideoResourceType> videoModelLoader = null;
-            if (videoModelLoaderFactory != null) {
-                videoModelLoader = videoModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
-            }
 
             ImagePresenter.Builder<ModelType, Y> builder = new ImagePresenter.Builder<ModelType, Y>()
                     .setTarget(target, context)
@@ -898,7 +905,39 @@ public class Glide {
                 });
             }
 
-            return builder.build();
+            return builder;
+        }
+
+
+        private <Y extends Target> Presenter<ModelType> buildImagePresenter(final Y target) {
+
+            ModelLoader<ModelType, ImageResourceType> imageModelLoader = null;
+            if (imageModelLoaderFactory != null) {
+                imageModelLoader = imageModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
+            }
+            ModelLoader<ModelType, VideoResourceType> videoModelLoader = null;
+            if (videoModelLoaderFactory != null) {
+                videoModelLoader = videoModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
+            }
+
+            ImagePresenter.Builder<ModelType, Y> fullBuilder
+                    = buildImagePresenter(imageModelLoader, videoModelLoader, target);
+
+            final Presenter<ModelType> result;
+            if (thumbSizeMultiplier != null) {
+                ImagePresenter.Builder<ModelType, Y> thumbBuilder = buildImagePresenter(imageModelLoader,
+                        videoModelLoader, target);
+                result = new ThumbImagePresenter.Builder<ModelType, Y>()
+                        .setFullPresenterBuilder(fullBuilder)
+                        .setThumbPresenterBuilder(thumbBuilder
+                                .setSizeMultiplier(thumbSizeMultiplier)
+                                .setMetadata(new Metadata(Priority.HIGH)))
+                        .setTarget(target, context)
+                        .build();
+            } else {
+                result = fullBuilder.build();
+            }
+            return result;
         }
 
         private TransformationLoader<ModelType> getFinalTransformationLoader() {

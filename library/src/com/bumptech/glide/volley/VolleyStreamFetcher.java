@@ -1,5 +1,6 @@
 package com.bumptech.glide.volley;
 
+import android.util.Log;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -8,6 +9,8 @@ import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
+import com.bumptech.glide.resize.Metadata;
+import com.bumptech.glide.resize.Priority;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -33,12 +36,11 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
-    public InputStream loadResource() throws Exception {
+    public InputStream loadResource(Metadata metadata) throws Exception {
         requestFuture = VolleyRequestFuture.newFuture();
-        GlideRequest request = new GlideRequest(url, requestFuture);
+        GlideRequest request = new GlideRequest(url, requestFuture, glideToVolleyPriority(metadata));
 
         request.setRetryPolicy(retryPolicy);
-        request.setShouldCache(true);
         requestFuture.setRequest(requestQueue.add(request));
 
         return requestFuture.get();
@@ -53,12 +55,36 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
         }
     }
 
+    private static Request.Priority glideToVolleyPriority(Metadata metadata) {
+        if (metadata == null) {
+            metadata = Metadata.DEFAULT;
+        }
+        switch (metadata.priority) {
+            case LOW:
+                return Request.Priority.LOW;
+            case HIGH:
+                return Request.Priority.HIGH;
+            case IMMEDIATE:
+                return Request.Priority.IMMEDIATE;
+            default:
+                return Request.Priority.NORMAL;
+
+        }
+    }
+
     private static class GlideRequest extends Request<byte[]> {
         private final VolleyRequestFuture<InputStream> future;
+        private Priority priority;
 
-        public GlideRequest(String url, VolleyRequestFuture<InputStream> future) {
+        public GlideRequest(String url, VolleyRequestFuture<InputStream> future, Priority priority) {
             super(Method.GET, url, future);
             this.future = future;
+            this.priority = priority;
+        }
+
+        @Override
+        public Priority getPriority() {
+            return priority;
         }
 
         @Override
