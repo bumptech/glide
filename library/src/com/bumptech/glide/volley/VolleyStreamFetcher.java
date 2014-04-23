@@ -51,7 +51,6 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
         VolleyRequestFuture<InputStream> localFuture = requestFuture;
         if (localFuture != null) {
             localFuture.cancel(true);
-            requestFuture = null;
         }
     }
 
