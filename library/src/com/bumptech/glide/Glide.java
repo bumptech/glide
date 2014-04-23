@@ -496,9 +496,9 @@ public class Glide {
         }
     }
 
-     /**
+    /**
      * A class for creating a request to load a bitmap for an image or from a video. Sets a variety of type independent
-      * options including resizing, animations, and placeholders.
+     * options including resizing, animations, and placeholders.
      *
      * @param <ModelType> The type of model that will be loaded into the target.
      */
@@ -557,6 +557,16 @@ public class Glide {
             super.thumbnail(sizeMultiplier);
             return this;
         }
+
+        public Request<ModelType> thumbnail(Request<ModelType> thumbnailRequest) {
+            super.thumbnail(thumbnailRequest);
+            return this;
+        }
+
+         public Request<ModelType> sizeMultiplier(float sizeMultiplier) {
+             super.sizeMultiplier(sizeMultiplier);
+             return this;
+         }
 
         @Override
         public Request<ModelType> imageDecoder(BitmapDecoder<InputStream> decoder) {
@@ -645,6 +655,8 @@ public class Glide {
         private BitmapDecoder<ImageResourceType> imageDecoder;
         private BitmapDecoder<VideoResourceType> videoDecoder;
         private Float thumbSizeMultiplier;
+        private GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnailRequest;
+        private Float sizeMultiplier;
 
         private GenericRequest(Context context, ModelType model, ModelLoaderFactory<ModelType, ImageResourceType> imageFactory,
                 ModelLoaderFactory<ModelType, VideoResourceType> videoFactory) {
@@ -666,11 +678,81 @@ public class Glide {
             this.videoModelLoaderFactory = videoFactory;
         }
 
-        public GenericRequest thumbnail(float sizeMultiplier) {
+        /**
+         * Loads and displays the image retrieved by the given thumbnail request if it finishes before this request.
+         * Best used for loading thumbnail images that are smaller and will be loaded more quickly than the fullsize
+         * image. There are no guarantees about the order in which the requests will actually finish. However, if the
+         * thumb request completes after the full request, the thumb image will never replace the full image.
+         *
+         * @see #thumbnail(float)
+         *
+         * <p>
+         *     Note - Any options on the main request will not be passed on to the thumbnail request. For example, if
+         *     you want an animation to occur when either the full image loads or the thumbnail loads, you need to call
+         *     {@link #animate(int)} on both the thumb and the full request. For a simpler thumbnail option, see
+         *     {@link #thumbnail(float)}.
+         * </p>
+         *
+         * <p>
+         *     Only the thumbnail call on the main request will be obeyed.
+         * </p>
+         *
+         * @param thumbnailRequest The request to use to load the thumbnail.
+         * @return This builder object.
+         */
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnail(
+                GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnailRequest) {
+            this.thumbnailRequest = thumbnailRequest;
+
+            return this;
+        }
+
+        /**
+         * Loads an image in an identical manner to this request except with the dimensions of the target multiplied
+         * by the given size multiplier. If the thumbnail load completes before the fullsize load, the thumbnail will
+         * be shown. If the thumbnail load completes afer the fullsize load, the thumbnail will not be shown.
+         *
+         * <p>
+         *     Note - The thumbnail image will be smaller than the size requested so the target (or {@link ImageView})
+         *     must be able to scale the thumbnail appropriately. See {@link ImageView.ScaleType}.
+         * </p>
+         *
+         * <p>
+         *     Almost all options will be copied from the original load, including the {@link ModelLoader},
+         *     {@link BitmapDecoder}, and {@link Transformation}s. However, {@link #placeholder(int)} and
+         *     {@link #error(int)}, and {@link #listener(RequestListener)} will only be used on the fullsize load and
+         *     will not be copied for the thumbnail load.
+         * </p>
+         *
+         * <p>
+         *     Only the thumbnail call on the main request will be obeyed.
+         * </p>
+         *
+         * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the thumbnail.
+         * @return This builder object.
+         */
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnail(float sizeMultiplier) {
             if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
                 throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
             }
             this.thumbSizeMultiplier = sizeMultiplier;
+
+            return this;
+        }
+
+        /**
+         * Applies a multiplier to the {@link Target}'s size before loading the image. Useful for loading thumbnails
+         * or trying to avoid loading huge bitmaps on devices with overly dense screens.
+         *
+         * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the image.
+         * @return This builder object.
+         */
+        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> sizeMultiplier(float sizeMultiplier) {
+            if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
+                throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
+            }
+            this.sizeMultiplier = sizeMultiplier;
+
             return this;
         }
 
@@ -848,9 +930,9 @@ public class Glide {
             return into(new ImageViewTarget(view));
         }
 
-        private <Y extends Target> ImagePresenter.Builder<ModelType, Y> buildImagePresenter(
+        private <Y extends Target> ImagePresenter.Builder<ModelType, Y> createPresenterBuilder(
                 ModelLoader<ModelType, ImageResourceType> imageModelLoader,
-                ModelLoader<ModelType, VideoResourceType> videoModelLoader, final Y target) {
+                ModelLoader<ModelType, VideoResourceType> videoModelLoader, final Y target, final boolean isThumbCopy) {
             TransformationLoader<ModelType> transformationLoader = getFinalTransformationLoader();
 
             ImagePresenter.Builder<ModelType, Y> builder = new ImagePresenter.Builder<ModelType, Y>()
@@ -866,7 +948,9 @@ public class Glide {
                                     transformationLoader))
                     .setImageLoader(new ImageManagerLoader(context));
 
-            if (animationId != -1 || requestListener != null) {
+            // We need to set the animation on both the full and the thumb copy so that the animation always occurs
+            // regardless of whether the full or the thumb finishes first.
+            if (animationId != -1 || (requestListener != null && !isThumbCopy)) {
                 final Animation animation;
                 if (animationId != -1) {
                     animation = AnimationUtils.loadAnimation(context, animationId);
@@ -875,8 +959,13 @@ public class Glide {
                 }
                 builder.setImageReadyCallback(new ImagePresenter.ImageReadyCallback<ModelType, Y>() {
                     @Override
-                    public void onImageReady(ModelType model, Y target, boolean fromCache) {
-                        if (animation != null && !fromCache) {
+                    public void onImageReady(ModelType model, Y target, boolean isFromMemoryCache,
+                            boolean isAnyImageSet) {
+                        if (isAnyImageSet) {
+                            return;
+                        }
+
+                        if (animation != null && !isFromMemoryCache) {
                             target.startAnimation(animation);
                         }
                         if (requestListener != null) {
@@ -886,15 +975,19 @@ public class Glide {
                 });
             }
 
-            if (placeholderId != -1) {
+            if (sizeMultiplier != null && !isThumbCopy) {
+                builder.setSizeMultiplier(sizeMultiplier);
+            }
+
+            if (placeholderId != -1 && !isThumbCopy) {
                 builder.setPlaceholderResource(placeholderId);
             }
 
-            if (errorId != -1) {
+            if (errorId != -1 && !isThumbCopy) {
                 builder.setErrorResource(errorId);
             }
 
-            if (requestListener != null) {
+            if (requestListener != null && !isThumbCopy) {
                 builder.setExceptionHandler(new ImagePresenter.ExceptionHandler<ModelType>() {
                     @Override
                     public void onException(Exception e, ModelType model, boolean isCurrent) {
@@ -921,16 +1014,24 @@ public class Glide {
             }
 
             ImagePresenter.Builder<ModelType, Y> fullBuilder
-                    = buildImagePresenter(imageModelLoader, videoModelLoader, target);
+                    = createPresenterBuilder(imageModelLoader, videoModelLoader, target, false);
 
             final Presenter<ModelType> result;
-            if (thumbSizeMultiplier != null) {
-                ImagePresenter.Builder<ModelType, Y> thumbBuilder = buildImagePresenter(imageModelLoader,
-                        videoModelLoader, target);
+            ImagePresenter.Builder<ModelType, Y> thumbBuilder = null;
+            if (thumbnailRequest != null) {
+                // We want thumb copy here to be false because we want to obey all of the options requested by the user.
+                thumbBuilder = thumbnailRequest.createPresenterBuilder(imageModelLoader, videoModelLoader, target,
+                        false /*isThumbCopy*/);
+            } else if (thumbSizeMultiplier != null) {
+                thumbBuilder = createPresenterBuilder(imageModelLoader, videoModelLoader, target, true /*isThumbCopy*/)
+                        .setExceptionHandler(null)
+                        .setSizeMultiplier(thumbSizeMultiplier);
+                fullBuilder = fullBuilder.setImageReadyCallback(null);
+            }
+            if (thumbBuilder != null) {
                 result = new ThumbImagePresenter.Builder<ModelType, Y>()
                         .setFullPresenterBuilder(fullBuilder)
                         .setThumbPresenterBuilder(thumbBuilder
-                                .setSizeMultiplier(thumbSizeMultiplier)
                                 .setMetadata(new Metadata(Priority.HIGH)))
                         .setTarget(target, context)
                         .build();

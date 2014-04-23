@@ -138,12 +138,7 @@ public class ThumbImagePresenter<A, B extends Target> implements ImagePresenterC
     }
 
     @Override
-    public boolean canCallReadyCallback(ImagePresenter presenter) {
-        return presenter == thumbPresenter || !thumbPresenter.isImageSet();
-    }
-
-    @Override
-    public boolean canCallErrorCallback(ImagePresenter presenter) {
-        return presenter == fullPresenter;
+    public boolean isAnyImageSet() {
+        return fullPresenter.isImageSet() || thumbPresenter.isImageSet();
     }
 }

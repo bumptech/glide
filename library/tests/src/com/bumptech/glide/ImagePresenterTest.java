@@ -303,7 +303,7 @@ public class ImagePresenterTest extends AndroidTestCase {
                 }))
                 .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Object, Target>() {
                     @Override
-                    public void onImageReady(Object model, Target target, boolean fromCache) {
+                    public void onImageReady(Object model, Target target, boolean isFromMemoryCache) {
                         wasImageSetCallbackCalled.set(true);
                     }
                 })

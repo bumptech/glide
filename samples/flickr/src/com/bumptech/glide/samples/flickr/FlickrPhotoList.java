@@ -13,6 +13,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.loader.bitmap.model.Cache;
+import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.net.URL;

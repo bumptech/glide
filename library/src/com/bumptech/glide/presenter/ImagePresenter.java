@@ -318,12 +318,14 @@ public class ImagePresenter<T, Y extends Target> implements Presenter<T> {
     public interface ImageReadyCallback<T, Y extends Target> {
 
         /**
-         * The method called when a bitmap is set
+         * The method called when a bitmap is set.
          *
-         * @param target The target that will display the bitmap
-         * @param fromCache True iff the load completed without a placeholder being shown.
+         * @param model The model being loaded.
+         * @param target The target that will display the bitmap.
+         * @param isFromMemoryCache True iff the load completed synchronously.
+         * @param isAnyImageSet True if any image other than a placeholder has been set on the given target.
          */
-        public void onImageReady(T model, Y target, boolean fromCache);
+        public void onImageReady(T model, Y target, boolean isFromMemoryCache, boolean isAnyImageSet);
     }
 
     protected ImagePresenter(Builder<T, Y> builder) {
@@ -444,8 +446,9 @@ public class ImagePresenter<T, Y extends Target> implements Presenter<T> {
                 }
 
                 target.onImageReady(image);
-                if (imageReadyCallback != null && canCallReadyCallback()) {
-                    imageReadyCallback.onImageReady(model, target, loadedFromCache);
+                if (imageReadyCallback != null) {
+                    imageReadyCallback.onImageReady(model, target, loadedFromCache,
+                            coordinator != null && coordinator.isAnyImageSet());
                 }
                 isImageSet = true;
                 return true;
@@ -458,7 +461,7 @@ public class ImagePresenter<T, Y extends Target> implements Presenter<T> {
                     isErrorSet = true;
                     target.setPlaceholder(errorDrawable);
                 }
-                if (exceptionHandler != null && canCallErrorCallback()) {
+                if (exceptionHandler != null) {
                     exceptionHandler.onException(e, model, relevant);
                 }
             }
@@ -482,13 +485,5 @@ public class ImagePresenter<T, Y extends Target> implements Presenter<T> {
 
     private boolean canSetPlaceholder() {
         return coordinator == null || coordinator.canSetPlaceholder(this);
-    }
-
-    private boolean canCallReadyCallback() {
-        return coordinator == null || coordinator.canCallReadyCallback(this);
-    }
-
-    private boolean canCallErrorCallback() {
-        return coordinator == null || coordinator.canCallErrorCallback(this);
     }
 }

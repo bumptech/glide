@@ -152,8 +152,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                         .setImageLoader(new ImageManagerLoader(context))
                         .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Photo, ImageViewTarget>() {
                             @Override
-                            public void onImageReady(Photo photo, ImageViewTarget target, boolean fromCache) {
-                                if (!fromCache) {
+                            public void onImageReady(Photo photo, ImageViewTarget target, boolean fromCache,
+                                    boolean isAnyImageSet) {
+                                if (!fromCache && !isAnyImageSet) {
                                     target.startAnimation(fadeIn);
                                 }
                             }
