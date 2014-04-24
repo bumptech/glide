@@ -12,36 +12,39 @@ import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorFileLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorStringLoader;
 import com.bumptech.glide.loader.bitmap.model.file_descriptor.FileDescriptorUriLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamByteArrayLoader;
-import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamFileLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
-import com.bumptech.glide.loader.image.ImageLoader;
-import com.bumptech.glide.loader.image.ImageManagerLoader;
-import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
-import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
 import com.bumptech.glide.loader.bitmap.transformation.FitCenter;
 import com.bumptech.glide.loader.bitmap.transformation.MultiTransformationLoader;
 import com.bumptech.glide.loader.bitmap.transformation.None;
 import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
+import com.bumptech.glide.loader.image.ImageLoader;
+import com.bumptech.glide.loader.image.ImageManagerLoader;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.Presenter;
 import com.bumptech.glide.presenter.ThumbImagePresenter;
-import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.presenter.target.ImageViewTarget;
+import com.bumptech.glide.presenter.target.Target;
 import com.bumptech.glide.presenter.target.ViewTarget;
+import com.bumptech.glide.resize.BitmapRequestBuilder;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.Request;
+import com.bumptech.glide.resize.ThumbnailRequestCoordinator;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
@@ -55,7 +58,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 /**
- * A singleton to present a simple static interface for Glide {@link Request} and to create and manage an
+ * A singleton to present a simple static interface for Glide {@link RequestBuilder} and to create and manage an
  * {@link ImageLoader} and {@link ModelLoaderFactory}s. This class provides most of the functionality of
  * {@link ImagePresenter} with a simpler but less efficient interface. For more complicated cases it may be worth
  * considering using {@link ImagePresenter} and {@link com.bumptech.glide.presenter.ImagePresenter.Builder} directly.
@@ -113,7 +116,7 @@ public class Glide {
          * @param model The specific model that was used to load the image.
          * @param target The target the model was loaded into.
          */
-        public abstract void onImageReady(T model, Target target);
+        public abstract void onImageReady(T model, Target target, boolean isFromMemoryCache, boolean isAnyImageSet);
     }
 
     /**
@@ -217,7 +220,8 @@ public class Glide {
      * @return A new {@link ModelLoader} for the given model class
      * @throws IllegalArgumentException if no factory exists for the given class
      */
-    public static <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
+    public static <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
+            Context context) {
         return Glide.get(context).loaderFactory.buildModelLoader(modelClass, resourceClass, context);
     }
 
@@ -284,7 +288,7 @@ public class Glide {
     }
 
     /**
-     * A {@link Request} builder that returns a request for a model that represents an image.
+     * A {@link RequestBuilder} builder that returns a request for a model that represents an image.
      */
     public static class ModelRequest {
         private final Context context;
@@ -328,16 +332,18 @@ public class Glide {
         }
 
         /**
-         * Use the {@link ModelLoaderFactory} currently registered for {@link String} to load the image represented by the
-         * given {@link String}. Defaults to {@link StreamStringLoader.Factory} and {@link StreamStringLoader} to load the given model.
+         * Use the {@link ModelLoaderFactory} currently registered for {@link String} to load the image represented by
+         * the given {@link String}. Defaults to {@link StreamStringLoader.Factory} and {@link StreamStringLoader} to
+         * load the given model.
          *
          * @see #using(StreamModelLoader)
          *
-         * @param string The string representing the image. Must be either a path, or a uri handled by {@link StreamUriLoader}
-         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+         * @param string The string representing the image. Must be either a path, or a uri handled by
+         *      {@link StreamUriLoader}
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
          */
-        public Request<String> load(String string) {
-            return new Request<String>(context, string);
+        public RequestBuilder<String> load(String string) {
+            return new RequestBuilder<String>(context, string);
         }
 
         /**
@@ -347,10 +353,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
-         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
          */
-        public Request<Uri> load(Uri uri) {
-            return new Request<Uri>(context, uri);
+        public RequestBuilder<Uri> load(Uri uri) {
+            return new RequestBuilder<Uri>(context, uri);
         }
 
         /**
@@ -360,10 +366,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param file The File containing the image
-         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
          */
-        public Request<File> load(File file) {
-            return new Request<File>(context, file);
+        public RequestBuilder<File> load(File file) {
+            return new RequestBuilder<File>(context, file);
         }
 
         /**
@@ -374,10 +380,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param resourceId the id of the resource containing the image
-         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
          */
-        public Request<Integer> load(Integer resourceId) {
-            return new Request<Integer>(context, resourceId);
+        public RequestBuilder<Integer> load(Integer resourceId) {
+            return new RequestBuilder<Integer>(context, resourceId);
         }
 
         /**
@@ -386,11 +392,11 @@ public class Glide {
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link Request} to set options for the load and ultimately the target to load the image into.
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image into.
          * @throws IllegalArgumentException If no such {@link ModelLoaderFactory} is registered for the given model type.
          */
         @SuppressWarnings("unused")
-        public <T> Request<T> loadFromImage(T model) {
+        public <T> RequestBuilder<T> loadFromImage(T model) {
             return new ImageModelRequest<T>(context, Glide.get(context).getFactory(model, InputStream.class))
                     .load(model);
         }
@@ -403,9 +409,9 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param url The URL representing the image.
-         * @return A {@link Request} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
          */
-        public Request<URL> loadFromImage(URL url) {
+        public RequestBuilder<URL> loadFromImage(URL url) {
             return new ImageModelRequest<URL>(context, Glide.get(context).getFactory(url, InputStream.class)).load(url);
         }
 
@@ -417,9 +423,9 @@ public class Glide {
          * @param model The data to load.
          * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
          *           (url, filepath etc). If there is no suitable id, use {@link #loadFromImage(byte[])} instaed.
-         * @return A {@link Request} to set options for the load and ultimately the target to load the image into.
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image into.
          */
-        public Request<byte[]> loadFromImage(byte[] model, final String id) {
+        public RequestBuilder<byte[]> loadFromImage(byte[] model, final String id) {
             return new ImageModelRequest<byte[]>(context, modelLoaderToFactory(new StreamByteArrayLoader() {
                 @Override
                 public String getId(byte[] model) {
@@ -433,9 +439,9 @@ public class Glide {
          * simple id that represents the given data.
          *
          * @param model the data to load.
-         * @return A {@link Request} to set options for the load and ultimately the target to load the image into.
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image into.
          */
-        public Request<byte[]> loadFromImage(byte[] model) {
+        public RequestBuilder<byte[]> loadFromImage(byte[] model) {
             return loadFromImage(model, UUID.randomUUID()
                     .toString());
         }
@@ -446,11 +452,11 @@ public class Glide {
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link Request} to set options for the load an ultimately the target to load the thumbnail into.
+         * @return A {@link RequestBuilder} to set options for the load an ultimately the target to load the thumbnail into.
          * @throws IllegalArgumentException If no such {@link ModelLoaderFactory} is registered for the given model type.
          */
         @SuppressWarnings("unused")
-        public <T> Request<T> loadFromVideo(T model) {
+        public <T> RequestBuilder<T> loadFromVideo(T model) {
             return new VideoModelRequest<T>(context, Glide.get(context).getFactory(model, ParcelFileDescriptor.class))
                     .loadFromVideo(model);
         }
@@ -471,8 +477,8 @@ public class Glide {
             this.factory = factory;
         }
 
-        public Request<T> loadFromVideo(T model) {
-            return new Request<T>(context, model, null, factory);
+        public RequestBuilder<T> loadFromVideo(T model) {
+            return new RequestBuilder<T>(context, model, null, factory);
         }
     }
 
@@ -491,8 +497,8 @@ public class Glide {
             this.factory = factory;
         }
 
-        public Request<T> load(T model) {
-            return new Request<T>(context, model, factory, null);
+        public RequestBuilder<T> load(T model) {
+            return new RequestBuilder<T>(context, model, factory, null);
         }
     }
 
@@ -503,13 +509,14 @@ public class Glide {
      * @param <ModelType> The type of model that will be loaded into the target.
      */
     @SuppressWarnings("unused") //public api
-    public static class Request<ModelType> extends GenericRequest<ModelType, InputStream, ParcelFileDescriptor> {
-        private Request(Context context, ModelType model) {
+    public static class RequestBuilder<ModelType> extends
+            GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor> {
+        private RequestBuilder(Context context, ModelType model) {
             this(context, model, Glide.get(context).getFactory(model, InputStream.class),
                     Glide.get(context).getFactory(model, ParcelFileDescriptor.class));
         }
 
-        private Request(Context context, ModelType model,
+        private RequestBuilder(Context context, ModelType model,
                 ModelLoaderFactory<ModelType, InputStream> imageFactory,
                 ModelLoaderFactory<ModelType, ParcelFileDescriptor> videoFactory) {
             super(context, model, imageFactory, videoFactory);
@@ -521,9 +528,9 @@ public class Glide {
          *
          * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
          *
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public Request<ModelType> approximate() {
+        public RequestBuilder<ModelType> approximate() {
             return downsample(Downsampler.AT_LEAST);
         }
 
@@ -532,9 +539,9 @@ public class Glide {
          *
          * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
          *
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public Request<ModelType> asIs() {
+        public RequestBuilder<ModelType> asIs() {
             return downsample(Downsampler.NONE);
         }
 
@@ -546,85 +553,85 @@ public class Glide {
          * @see #videoDecoder(BitmapDecoder)
          *
          * @param downsampler The downsampler
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public Request<ModelType> downsample(Downsampler downsampler) {
+        public RequestBuilder<ModelType> downsample(Downsampler downsampler) {
             super.imageDecoder(downsampler);
             return this;
         }
 
-        public Request<ModelType> thumbnail(float sizeMultiplier) {
+        public RequestBuilder<ModelType> thumbnail(float sizeMultiplier) {
             super.thumbnail(sizeMultiplier);
             return this;
         }
 
-        public Request<ModelType> thumbnail(Request<ModelType> thumbnailRequest) {
+        public RequestBuilder<ModelType> thumbnail(RequestBuilder<ModelType> thumbnailRequest) {
             super.thumbnail(thumbnailRequest);
             return this;
         }
 
-         public Request<ModelType> sizeMultiplier(float sizeMultiplier) {
+         public RequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
              super.sizeMultiplier(sizeMultiplier);
              return this;
          }
 
         @Override
-        public Request<ModelType> imageDecoder(BitmapDecoder<InputStream> decoder) {
+        public RequestBuilder<ModelType> imageDecoder(BitmapDecoder<InputStream> decoder) {
             super.imageDecoder(decoder);
             return this;
         }
 
         @Override
-        public Request<ModelType> videoDecoder(BitmapDecoder<ParcelFileDescriptor> decoder) {
+        public RequestBuilder<ModelType> videoDecoder(BitmapDecoder<ParcelFileDescriptor> decoder) {
             super.videoDecoder(decoder);
             return this;
         }
 
         @Override
-        public Request<ModelType> centerCrop() {
+        public RequestBuilder<ModelType> centerCrop() {
             super.centerCrop();
             return this;
         }
 
         @Override
-        public Request<ModelType> fitCenter() {
+        public RequestBuilder<ModelType> fitCenter() {
             super.fitCenter();
             return this;
         }
 
         @Override
-        public Request<ModelType> transform(Transformation transformation) {
+        public RequestBuilder<ModelType> transform(Transformation transformation) {
             super.transform(transformation);
             return this;
         }
 
         @Override
-        public Request<ModelType> transform(
+        public RequestBuilder<ModelType> transform(
                 TransformationLoader<ModelType> transformationLoader) {
             super.transform(transformationLoader);
             return this;
         }
 
         @Override
-        public Request<ModelType> animate(int animationId) {
+        public RequestBuilder<ModelType> animate(int animationId) {
             super.animate(animationId);
             return this;
         }
 
         @Override
-        public Request<ModelType> placeholder(int resourceId) {
+        public RequestBuilder<ModelType> placeholder(int resourceId) {
             super.placeholder(resourceId);
             return this;
         }
 
         @Override
-        public Request<ModelType> error(int resourceId) {
+        public RequestBuilder<ModelType> error(int resourceId) {
             super.error(resourceId);
             return this;
         }
 
         @Override
-        public Request<ModelType> listener(RequestListener<ModelType> requestListener) {
+        public RequestBuilder<ModelType> listener(RequestListener<ModelType> requestListener) {
             super.listener(requestListener);
             return this;
         }
@@ -641,24 +648,27 @@ public class Glide {
      * @param <VideoResourceType> The resource type that the video {@link ModelLoader} will provide that can be decoded
      *                           by the video {@link BitmapDecoder}.
      */
-    private static class GenericRequest<ModelType, ImageResourceType, VideoResourceType> {
+    private static class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> {
         private Context context;
         private ModelLoaderFactory<ModelType, ImageResourceType> imageModelLoaderFactory;
         private final ModelLoaderFactory<ModelType, VideoResourceType> videoModelLoaderFactory;
         private final ModelType model;
 
-        private int animationId = -1;
-        private int placeholderId = -1;
-        private int errorId = -1;
-        private ArrayList<TransformationLoader<ModelType>> transformationLoaders = new ArrayList<TransformationLoader<ModelType>>();
+        private ArrayList<TransformationLoader<ModelType>> transformationLoaders =
+                new ArrayList<TransformationLoader<ModelType>>();
+
+        private int animationId;
+        private int placeholderId;
+        private int errorId;
         private RequestListener<ModelType> requestListener;
         private BitmapDecoder<ImageResourceType> imageDecoder;
         private BitmapDecoder<VideoResourceType> videoDecoder;
         private Float thumbSizeMultiplier;
-        private GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnailRequest;
-        private Float sizeMultiplier;
+        private GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequestBuilder;
+        private Float sizeMultiplier = 1f;
 
-        private GenericRequest(Context context, ModelType model, ModelLoaderFactory<ModelType, ImageResourceType> imageFactory,
+        private GenericRequestBuilder(Context context, ModelType model,
+                ModelLoaderFactory<ModelType, ImageResourceType> imageFactory,
                 ModelLoaderFactory<ModelType, VideoResourceType> videoFactory) {
             if (context == null) {
                 throw new NullPointerException("Context can't be null");
@@ -700,9 +710,9 @@ public class Glide {
          * @param thumbnailRequest The request to use to load the thumbnail.
          * @return This builder object.
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnail(
-                GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnailRequest) {
-            this.thumbnailRequest = thumbnailRequest;
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnail(
+                GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequest) {
+            this.thumbnailRequestBuilder = thumbnailRequest;
 
             return this;
         }
@@ -731,7 +741,7 @@ public class Glide {
          * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the thumbnail.
          * @return This builder object.
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> thumbnail(float sizeMultiplier) {
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnail(float sizeMultiplier) {
             if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
                 throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
             }
@@ -747,7 +757,8 @@ public class Glide {
          * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the image.
          * @return This builder object.
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> sizeMultiplier(float sizeMultiplier) {
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> sizeMultiplier(
+                float sizeMultiplier) {
             if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
                 throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
             }
@@ -766,9 +777,9 @@ public class Glide {
          * @see Downsampler
          *
          * @param decoder The {@link BitmapDecoder} to use to decode the image resource.
-         * @return This Request.
+         * @return This RequestBuilder.
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> imageDecoder(
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> imageDecoder(
                 BitmapDecoder<ImageResourceType> decoder) {
             this.imageDecoder = decoder;
 
@@ -787,7 +798,7 @@ public class Glide {
          * @param decoder The {@link BitmapDecoder} to use to decode the video resource.
          * @return This request.
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> videoDecoder(
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> videoDecoder(
                 BitmapDecoder<VideoResourceType> decoder) {
             this.videoDecoder = decoder;
 
@@ -799,9 +810,9 @@ public class Glide {
          *
          * @see #transform(TransformationLoader)
          *
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> centerCrop() {
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> centerCrop() {
             return transform(new CenterCrop<ModelType>());
         }
 
@@ -810,9 +821,9 @@ public class Glide {
          *
          * @see #transform(TransformationLoader)
          *
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> fitCenter() {
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> fitCenter() {
             return transform(new FitCenter<ModelType>());
         }
 
@@ -822,9 +833,9 @@ public class Glide {
          * @see #transform(TransformationLoader)
          *
          * @param transformation The transformation to use
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> transform(
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> transform(
                 final Transformation transformation) {
             return transform(new TransformationLoader<ModelType>() {
                 @Override
@@ -844,9 +855,9 @@ public class Glide {
          * transformations
          *
          * @param transformationLoader The loader to obtaian a transformation for a given model
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> transform(
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> transform(
                 TransformationLoader<ModelType> transformationLoader) {
             transformationLoaders.add(transformationLoader);
 
@@ -858,9 +869,9 @@ public class Glide {
          * was loaded asynchronously (ie was not in the memory cache)
          *
          * @param animationId The resource id of the animation to run
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> animate(int animationId) {
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> animate(int animationId) {
             this.animationId = animationId;
 
             return this;
@@ -870,9 +881,9 @@ public class Glide {
          * Sets a resource to display while an image is loading
          *
          * @param resourceId The id of the resource to use as a placeholder
-         * @return This Request
+         * @return This RequestBuilder
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> placeholder(int resourceId) {
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> placeholder(int resourceId) {
             this.placeholderId = resourceId;
 
             return this;
@@ -884,21 +895,21 @@ public class Glide {
          * @param resourceId The id of the resource to use as a placeholder
          * @return This request
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> error(int resourceId) {
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> error(int resourceId) {
             this.errorId = resourceId;
 
             return this;
         }
 
         /**
-         * Sets a Request listener to monitor the image load. It's best to create a single instance of an exception
-         * handler per type of request (usually activity/fragment) rather than pass one in per request to avoid some
-         * redundant object allocation.
+         * Sets a RequestBuilder listener to monitor the image load. It's best to create a single instance of an
+         * exception handler per type of request (usually activity/fragment) rather than pass one in per request to
+         * avoid some redundant object allocation.
          *
          * @param requestListener The request listener to use
          * @return This request
          */
-        public GenericRequest<ModelType, ImageResourceType, VideoResourceType> listener(
+        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> listener(
                 RequestListener<ModelType> requestListener) {
             this.requestListener = requestListener;
 
@@ -912,8 +923,16 @@ public class Glide {
          * @return The given target.
          */
         public <Y extends Target> Y into(Y target) {
-            Presenter<ModelType> presenter = buildImagePresenter(target);
-            presenter.setModel(model);
+//            Presenter<ModelType> presenter = buildImagePresenter(target);
+//            presenter.setModel(model);
+            Request previous = target.getRequest();
+            if (previous != null) {
+                previous.clear();
+            }
+
+            Request request = buildRequest(target);
+            target.setRequest(request);
+            request.run();
             return target;
         }
 
@@ -961,15 +980,11 @@ public class Glide {
                     @Override
                     public void onImageReady(ModelType model, Y target, boolean isFromMemoryCache,
                             boolean isAnyImageSet) {
-                        if (isAnyImageSet) {
-                            return;
-                        }
-
-                        if (animation != null && !isFromMemoryCache) {
+                        if (animation != null && !isFromMemoryCache && !isAnyImageSet) {
                             target.startAnimation(animation);
                         }
                         if (requestListener != null) {
-                            requestListener.onImageReady(null, target);
+                            requestListener.onImageReady(null, target, isFromMemoryCache, isAnyImageSet);
                         }
                     }
                 });
@@ -1001,6 +1016,76 @@ public class Glide {
             return builder;
         }
 
+        private <Y extends Target> Request buildRequest(Y target) {
+            final Request result;
+            if (thumbnailRequestBuilder != null) {
+                ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
+                Request fullRequest = buildBitmapRequest(target)
+                        .setRequestCoordinator(requestCoordinator)
+                        .build();
+
+                if (thumbnailRequestBuilder.animationId == 0 && animationId != 0) {
+                    thumbnailRequestBuilder.animationId = animationId;
+                }
+
+                if (thumbnailRequestBuilder.requestListener == null && requestListener != null) {
+                    thumbnailRequestBuilder.requestListener = requestListener;
+                }
+                Request thumbnailRequest = thumbnailRequestBuilder.buildBitmapRequest(target)
+                        .setRequestCoordinator(requestCoordinator)
+                        .build();
+
+                requestCoordinator.setRequests(fullRequest, thumbnailRequest);
+                result = requestCoordinator;
+            } else if (thumbSizeMultiplier != null) {
+                ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
+                Request fullRequest = buildBitmapRequest(target)
+                        .setRequestCoordinator(requestCoordinator)
+                        .build();
+                Request thumbnailRequest = buildBitmapRequest(target)
+                        .setRequestCoordinator(requestCoordinator)
+                        .setSizeMultiplier(thumbSizeMultiplier)
+                        .build();
+                requestCoordinator.setRequests(fullRequest, thumbnailRequest);
+                result = requestCoordinator;
+            } else {
+                result = buildBitmapRequest(target).build();
+            }
+            return result;
+        }
+
+        private <Y extends Target> BitmapRequestBuilder<ModelType> buildBitmapRequest(Y target) {
+             ModelLoader<ModelType, ImageResourceType> imageModelLoader = null;
+            if (imageModelLoaderFactory != null) {
+                imageModelLoader = imageModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
+            }
+            ModelLoader<ModelType, VideoResourceType> videoModelLoader = null;
+            if (videoModelLoaderFactory != null) {
+                videoModelLoader = videoModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
+            }
+            TransformationLoader<ModelType> transformationLoader = getFinalTransformationLoader();
+
+            return new BitmapRequestBuilder<ModelType>()
+                    .setContext(context)
+                    .setPriority(Priority.NORMAL)
+                    .setImageManager(Glide.get(context).imageManager)
+                    .setModel(model)
+                    .setTarget(target)
+                    .setBitmapLoadFactory(
+                            new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
+                                    imageModelLoader != null && imageDecoder != null ?
+                                    new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(
+                                            imageModelLoader, imageDecoder) : null,
+                                    videoModelLoader != null && videoDecoder != null ?
+                                    new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
+                                            videoModelLoader, videoDecoder) : null,
+                                    transformationLoader))
+                    .setAnimation(animationId)
+                    .setRequestListener(requestListener)
+                    .setPlaceholderResource(placeholderId)
+                    .setErrorResource(errorId)
+                    .setSizeMultiplier(sizeMultiplier);
+        }
 
         private <Y extends Target> Presenter<ModelType> buildImagePresenter(final Y target) {
 
@@ -1018,9 +1103,9 @@ public class Glide {
 
             final Presenter<ModelType> result;
             ImagePresenter.Builder<ModelType, Y> thumbBuilder = null;
-            if (thumbnailRequest != null) {
+            if (thumbnailRequestBuilder != null) {
                 // We want thumb copy here to be false because we want to obey all of the options requested by the user.
-                thumbBuilder = thumbnailRequest.createPresenterBuilder(imageModelLoader, videoModelLoader, target,
+                thumbBuilder = thumbnailRequestBuilder.createPresenterBuilder(imageModelLoader, videoModelLoader, target,
                         false /*isThumbCopy*/);
             } else if (thumbSizeMultiplier != null) {
                 thumbBuilder = createPresenterBuilder(imageModelLoader, videoModelLoader, target, true /*isThumbCopy*/)

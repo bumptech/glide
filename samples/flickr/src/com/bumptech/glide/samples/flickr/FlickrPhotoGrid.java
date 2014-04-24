@@ -91,7 +91,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         }
 
         @Override
-        protected Glide.Request<Photo> getRequest(Photo item) {
+        protected Glide.RequestBuilder<Photo> getRequest(Photo item) {
             return Glide.with(context)
                     .using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(item)

@@ -41,7 +41,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
      */
     public ListPreloader(int maxPreload) {
         this.maxPreload = maxPreload;
-        preloadTargetQueue = new PreloadTargetQueue(maxPreload);
+        preloadTargetQueue = new PreloadTargetQueue(maxPreload + 1);
     }
 
     @Override
@@ -83,9 +83,9 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
      * target and context will be provided by the preloader.
      *
      * @param item The model to load.
-     * @return A non null {@link Glide.Request}.
+     * @return A non null {@link Glide.RequestBuilder}.
      */
-    protected abstract Glide.Request getRequest(T item);
+    protected abstract Glide.RequestBuilder getRequest(T item);
 
     private void preload(int start, boolean increasing) {
         if (isIncreasing != increasing) {
@@ -111,13 +111,13 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
 
         if (from < to) {
             // Increasing
-            final int numItems = items.size();
-            for (int i = 0; i < numItems; i++) {
+            for (int i = items.size() - 1; i >= 0; i--) {
                 preloadItem(items, i);
             }
         } else {
             // Decreasing
-            for (int i = items.size() - 1; i >= 0; i--) {
+            final int numItems = items.size();
+            for (int i = 0; i < numItems; i++) {
                 preloadItem(items, i);
             }
         }

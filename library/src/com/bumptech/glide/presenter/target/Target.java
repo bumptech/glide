@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.Presenter;
+import com.bumptech.glide.resize.BitmapRequest;
+import com.bumptech.glide.resize.Request;
 
 /**
  * An interface that Glide can load an image into
@@ -50,4 +52,8 @@ public interface Target {
     public void setPresenter(Presenter presenter);
 
     public Presenter getPresenter();
+
+    public void setRequest(Request request);
+
+    public Request getRequest();
 }

@@ -12,6 +12,8 @@ import android.view.animation.Animation;
 import android.widget.ListView;
 import com.bumptech.glide.presenter.ImagePresenter;
 import com.bumptech.glide.presenter.Presenter;
+import com.bumptech.glide.resize.BitmapRequest;
+import com.bumptech.glide.resize.Request;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
@@ -78,6 +80,16 @@ public abstract class ViewTarget<T extends View> implements Target {
             }
         }
         return presenter;
+    }
+
+    @Override
+    public void setRequest(Request request) {
+        view.setTag(request);
+    }
+
+    @Override
+    public Request getRequest() {
+        return (Request) view.getTag();
     }
 
     private static class SizeDeterminer {
