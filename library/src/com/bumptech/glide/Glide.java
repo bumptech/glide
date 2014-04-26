@@ -61,7 +61,7 @@ public class Glide {
     private static Glide GLIDE;
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
     private final RequestQueue requestQueue;
-    private ImageManager imageManager = null;
+    private final ImageManager imageManager;
 
     /**
      * A class for monitoring the status of a request while images load.
