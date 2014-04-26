@@ -12,6 +12,8 @@ import java.util.Map;
 public class GenericLoaderFactory {
     private Map<Class, Map<Class, ModelLoaderFactory>> modelClassToResourceFactories =
             new HashMap<Class, Map<Class, ModelLoaderFactory>>();
+    private Map<Class, Map<Class, ModelLoader>> cachedModelLoaders =
+            new HashMap<Class, Map<Class, ModelLoader>>();
 
     @SuppressWarnings("unchecked")
     public <T, Y> ModelLoaderFactory<T, Y> register(Class<T> modelClass, Class<Y> resourceClass,
@@ -34,12 +36,58 @@ public class GenericLoaderFactory {
                 }
             }
         }
+
+        cachedModelLoaders.clear();
+
         return previous;
     }
 
     public <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
+        ModelLoader<T, Y> result = getCachedLoader(modelClass, resourceClass);
+        if (result != null) {
+            return result;
+        }
+
         final ModelLoaderFactory<T, Y> factory = getFactory(modelClass, resourceClass);
-        return factory != null ? factory.build(context, this) : null;
+        if (factory != null) {
+            result = factory.build(context, this);
+            cacheModelLoader(modelClass, resourceClass, result);
+        }
+        return result;
+    }
+
+    private <T, Y> void cacheModelLoader(Class<T> modelClass, Class<Y> resourceClass, ModelLoader<T, Y> modelLoader) {
+        Map<Class, ModelLoader> resourceToLoaders = cachedModelLoaders.get(modelClass);
+        if (resourceToLoaders == null) {
+            resourceToLoaders = new HashMap<Class, ModelLoader>();
+            cachedModelLoaders.put(modelClass, resourceToLoaders);
+        }
+        resourceToLoaders.put(resourceClass, modelLoader);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T, Y> ModelLoader<T, Y> getCachedLoader(Class<T> modelClass, Class<Y> resourceClass) {
+        Map<Class, ModelLoader> resourceToLoaders = cachedModelLoaders.get(modelClass);
+        ModelLoader result = null;
+        if (resourceToLoaders != null) {
+            result = resourceToLoaders.get(resourceClass);
+        }
+
+        if (result == null) {
+            for (Class registeredModelClass : cachedModelLoaders.keySet()) {
+                if (registeredModelClass.isAssignableFrom(modelClass)) {
+                    Map<Class,  ModelLoader> currentResourceToLoaders = cachedModelLoaders.get(registeredModelClass);
+                    if (currentResourceToLoaders != null) {
+                        result = currentResourceToLoaders.get(resourceClass);
+                        if (result != null) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     @SuppressWarnings("unchecked")

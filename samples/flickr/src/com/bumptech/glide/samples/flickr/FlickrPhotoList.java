@@ -13,17 +13,14 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.loader.bitmap.model.Cache;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
-    private Cache<URL> urlCache = new Cache<URL>();
     private FlickrListPreloader preloader;
 
     public static FlickrPhotoList newInstance() {
@@ -94,8 +91,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         @Override
         protected RequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(context)
-                    .using(new FlickrModelLoader(getActivity(), urlCache))
-                    .load(item)
+                    .loadFromImage(item)
                     .thumbnail(0.25f)
                     .centerCrop();
         }
@@ -152,8 +148,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             }
 
             Glide.with(getActivity())
-                    .using(new FlickrModelLoader(getActivity(), urlCache))
-                    .load(current)
+                    .loadFromImage(current)
                     .thumbnail(0.25f)
                     .centerCrop()
                     .animate(R.anim.fade_in)

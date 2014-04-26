@@ -9,6 +9,7 @@ import android.content.Context;
  * {@link Context}.
  */
 public interface ModelLoaderFactory<T, Y> {
+
     /**
      * Build a concrete ModelLoader for this model type.
      *
@@ -18,13 +19,6 @@ public interface ModelLoaderFactory<T, Y> {
      * @return A new {@link ModelLoader}
      */
     public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories);
-
-    /**
-     * Get the class of the {@link ModelLoader} this factory builds.
-     *
-     * @return The class of the {@link ModelLoader}
-     */
-    public Class<? extends ModelLoader<T, Y>> loaderClass();
 
     /**
      * A lifecycle method that will be called when this factory is about to replaced

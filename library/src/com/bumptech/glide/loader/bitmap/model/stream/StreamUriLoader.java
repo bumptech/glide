@@ -28,11 +28,6 @@ public class StreamUriLoader extends UriLoader<InputStream> implements StreamMod
         }
 
         @Override
-        public Class<? extends ModelLoader<Uri, InputStream>> loaderClass() {
-            return StreamUriLoader.class;
-        }
-
-        @Override
         public void teardown() { }
     }
 

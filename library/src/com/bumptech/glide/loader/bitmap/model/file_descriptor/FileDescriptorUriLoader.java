@@ -26,11 +26,6 @@ public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> imp
         }
 
         @Override
-        public Class<? extends ModelLoader<Uri, ParcelFileDescriptor>> loaderClass() {
-            return FileDescriptorUriLoader.class;
-        }
-
-        @Override
         public void teardown() { }
     }
 

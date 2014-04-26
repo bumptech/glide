@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,6 +74,8 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 .detectAll()
                 .penaltyLog()
                 .build());
+
+        Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
 
         searching = findViewById(R.id.searching);
         searchLoading = findViewById(R.id.search_loading);

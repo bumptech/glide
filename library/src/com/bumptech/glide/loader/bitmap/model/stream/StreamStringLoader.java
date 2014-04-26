@@ -23,11 +23,6 @@ public class StreamStringLoader extends StringLoader<InputStream> implements Str
         }
 
         @Override
-        public Class<? extends ModelLoader<String, InputStream>> loaderClass() {
-            return StreamStringLoader.class;
-        }
-
-        @Override
         public void teardown() { }
     }
 

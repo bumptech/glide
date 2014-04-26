@@ -24,11 +24,6 @@ public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor> i
         }
 
         @Override
-        public Class<? extends ModelLoader<File, ParcelFileDescriptor>> loaderClass() {
-            return FileDescriptorFileLoader.class;
-        }
-
-        @Override
         public void teardown() {
         }
     }

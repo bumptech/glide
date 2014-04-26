@@ -2,7 +2,6 @@ package com.bumptech.glide.volley;
 
 import android.content.Context;
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.RetryPolicy;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
@@ -31,23 +30,7 @@ public class VolleyUrlLoader implements ModelLoader<URL, InputStream> {
         }
 
         @Override
-        public Class<? extends ModelLoader<URL, InputStream>> loaderClass() {
-            return VolleyUrlLoader.class;
-        }
-
-        @Override
-        public void teardown() {
-            if (requestQueue != null) {
-                requestQueue.stop();
-                requestQueue.cancelAll(new RequestQueue.RequestFilter() {
-                    @Override
-                    public boolean apply(Request<?> request) {
-                        return true;
-                    }
-                });
-                requestQueue = null;
-            }
-        }
+        public void teardown() { }
     }
 
     private final RequestQueue requestQueue;

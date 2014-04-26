@@ -23,11 +23,6 @@ public class StreamResourceLoader extends ResourceLoader<InputStream> implements
         }
 
         @Override
-        public Class<? extends ModelLoader<Integer, InputStream>> loaderClass() {
-            return StreamResourceLoader.class;
-        }
-
-        @Override
         public void teardown() { }
     }
 

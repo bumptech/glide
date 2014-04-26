@@ -23,11 +23,6 @@ public class StreamFileLoader extends FileLoader<InputStream> implements StreamM
         }
 
         @Override
-        public Class<? extends ModelLoader<File, InputStream>> loaderClass() {
-            return StreamFileLoader.class;
-        }
-
-        @Override
         public void teardown() { }
     }
 
