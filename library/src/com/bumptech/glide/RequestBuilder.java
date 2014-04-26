@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
-import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
@@ -20,13 +20,13 @@ import java.io.InputStream;
 public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor> {
 
     RequestBuilder(Context context, ModelType model) {
-        this(context, model, Glide.get(context).getFactory(model, InputStream.class),
-                Glide.get(context).getFactory(model, ParcelFileDescriptor.class));
+        this(context, model, Glide.buildStreamModelLoader(model, context),
+                Glide.buildFileDescriptorModelLoader(model, context));
     }
 
-    RequestBuilder(Context context, ModelType model, ModelLoaderFactory<ModelType, InputStream> imageFactory,
-            ModelLoaderFactory<ModelType, ParcelFileDescriptor> videoFactory) {
-        super(context, model, imageFactory, videoFactory);
+    RequestBuilder(Context context, ModelType model, ModelLoader<ModelType, InputStream> imageLoader,
+            ModelLoader<ModelType, ParcelFileDescriptor> videoLoader) {
+        super(context, model, imageLoader, videoLoader);
 
         approximate().videoDecoder(new VideoBitmapDecoder());
     }

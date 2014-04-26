@@ -183,22 +183,49 @@ public class Glide {
     }
 
     /**
-     * Build a {@link ModelLoader} for the given model class using a registered factory.
+     * Build a {@link ModelLoader} for the given model class using registered {@link ModelLoaderFactory}s.
      *
-     * @param modelClass The class to get a {@link ModelLoader} for
-     * @param context Any context
-     * @param <T> The type of the model
-     * @return A new {@link ModelLoader} for the given model class
-     * @throws IllegalArgumentException if no factory exists for the given class
+     * @see  #buildModelLoader(Object, Class, Context)
+     * @see  #buildStreamModelLoader(Class, Context)
+     * @see  #buildFileDescriptorModelLoader(Class, Context)
+     *
+     * @param modelClass The class to get a {@link ModelLoader} for.
+     * @param resourceClass The resource class to get a {@link ModelLoader} for.
+     * @param context Any context.
+     * @param <T> The type of the model.
+     * @param <Y> The type of the resource.
+     * @return A new {@link ModelLoader} for the given model class.
      */
     public static <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
             Context context) {
-        return Glide.get(context).loaderFactory.buildModelLoader(modelClass, resourceClass, context);
+        return Glide.get(context).getLoaderFactory().buildModelLoader(modelClass, resourceClass, context);
     }
 
     /**
-     * A convenience method to build a {@link ModelLoader} for the given model that produces {@link InputStream}s using
-     * a registered factory.
+     * A convenience method to build a {@link ModelLoader} for a given model object using registered
+     * {@link ModelLoaderFactory}s.
+     *
+     * @see #buildModelLoader(Class, Class, Context)
+     *
+     * @param model A non null model object whose class we will get a {@link ModelLoader} for.
+     * @param resourceClass The resource class to get a {@link ModelLoader} for.
+     * @param context Any context.
+     * @param <T> The type of the model.
+     * @param <Y> The type of the resource.
+     * @return A new {@link ModelLoader} for the given model and resource classes.
+     * @throws NullPointerException if model is null.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, Y> ModelLoader<T, Y> buildModelLoader(T model, Class<Y> resourceClass, Context context) {
+        if (model == null) {
+            throw new NullPointerException("You must pass in a non-null model (URL, file path, etc).");
+        }
+        return buildModelLoader((Class<T>) model.getClass(), resourceClass, context);
+    }
+
+    /**
+     * A method to build a {@link ModelLoader} for the given model that produces {@link InputStream}s using a registered
+     * factory.
      *
      * @see #buildModelLoader(Class, Class, android.content.Context)
      */
@@ -207,7 +234,17 @@ public class Glide {
     }
 
     /**
-     * A convenience method to build a {@link ModelLoader} for the given model class that produces
+     * A method to build a {@link ModelLoader} for the given model that produces {@link InputStream}s using a registered
+     * factory.
+     *
+     * @see #buildModelLoader(Object, Class, Context)
+     */
+    public static <T> ModelLoader<T, InputStream> buildStreamModelLoader(T model, Context context) {
+        return buildModelLoader(model, InputStream.class, context);
+    }
+
+    /**
+     * A method to build a {@link ModelLoader} for the given model class that produces
      * {@link ParcelFileDescriptor}s using a registered factory.
      *
      * @see #buildModelLoader(Class, Class, android.content.Context)
@@ -215,6 +252,16 @@ public class Glide {
     public static <T> ModelLoader<T, ParcelFileDescriptor> buildFileDescriptorModelLoader(Class<T> modelClass,
             Context context) {
         return buildModelLoader(modelClass, ParcelFileDescriptor.class, context);
+    }
+
+    /**
+     * A method to build a {@link ModelLoader} for the given model class that produces
+     * {@link ParcelFileDescriptor}s using a registered factory.
+     *
+     * @see #buildModelLoader(Object, Class, android.content.Context)
+     */
+    public static <T> ModelLoader<T, ParcelFileDescriptor> buildFileDescriptorModelLoader(T model, Context context) {
+        return buildModelLoader(model, ParcelFileDescriptor.class, context);
     }
 
     /**
@@ -227,31 +274,8 @@ public class Glide {
         return new ModelRequest(context);
     }
 
-    @SuppressWarnings("unchecked")
-    <T, Y> ModelLoaderFactory<T, Y> getFactory(T model, Class<Y> resourceClass) {
-        return loaderFactory.getFactory((Class<T>) model.getClass(), resourceClass);
-    }
-
-    GenericLoaderFactory getLoaderFactory() {
+    private GenericLoaderFactory getLoaderFactory() {
         return loaderFactory;
-    }
-
-    private static <T, Y> ModelLoaderFactory<T, Y> modelLoaderToFactory(final ModelLoader<T, Y> modelLoader) {
-        return new ModelLoaderFactory<T, Y>() {
-            @Override
-            public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories) {
-                return modelLoader;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public Class<? extends ModelLoader<T, Y>> loaderClass() {
-                return (Class<ModelLoader<T, Y>>) modelLoader.getClass();
-            }
-
-            @Override
-            public void teardown() { }
-        };
     }
 
     /**
@@ -273,7 +297,7 @@ public class Glide {
          * @return A new {@link ImageModelRequest}.
          */
         public <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
-            return new ImageModelRequest<T>(context, modelLoaderToFactory(modelLoader));
+            return new ImageModelRequest<T>(context, modelLoader);
         }
 
         /**
@@ -283,7 +307,7 @@ public class Glide {
          * @return A new {@link ImageModelRequest}.
          */
         public ImageModelRequest<byte[]> using(StreamByteArrayLoader modelLoader) {
-            return new ImageModelRequest<byte[]>(context, modelLoaderToFactory(modelLoader));
+            return new ImageModelRequest<byte[]>(context, modelLoader);
         }
 
         /**
@@ -295,7 +319,7 @@ public class Glide {
          * @return A new {@link VideoModelRequest}.
          */
         public <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
-            return new VideoModelRequest<T>(context, modelLoaderToFactory(modelLoader));
+            return new VideoModelRequest<T>(context, modelLoader);
         }
 
         /**
@@ -347,24 +371,25 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param resourceId the id of the resource containing the image
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * into.
          */
         public RequestBuilder<Integer> load(Integer resourceId) {
             return new RequestBuilder<Integer>(context, resourceId);
         }
 
         /**
-         * Use the {@link ModelLoaderFactory} currently registered for the given model type to load the image represented by
-         * the given model.
+         * Use the {@link ModelLoaderFactory} currently registered for the given model type to load the image
+         * represented by the given model.
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image into.
-         * @throws IllegalArgumentException If no such {@link ModelLoaderFactory} is registered for the given model type.
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * into.
          */
         @SuppressWarnings("unused")
         public <T> RequestBuilder<T> loadFromImage(T model) {
-            return new ImageModelRequest<T>(context, Glide.get(context).getFactory(model, InputStream.class))
+            return new ImageModelRequest<T>(context, buildStreamModelLoader(model, context))
                     .load(model);
         }
 
@@ -379,7 +404,8 @@ public class Glide {
          * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
          */
         public RequestBuilder<URL> loadFromImage(URL url) {
-            return new ImageModelRequest<URL>(context, Glide.get(context).getFactory(url, InputStream.class)).load(url);
+            return new ImageModelRequest<URL>(context, buildStreamModelLoader(url, context))
+                    .load(url);
         }
 
         /**
@@ -393,12 +419,12 @@ public class Glide {
          * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image into.
          */
         public RequestBuilder<byte[]> loadFromImage(byte[] model, final String id) {
-            return new ImageModelRequest<byte[]>(context, modelLoaderToFactory(new StreamByteArrayLoader() {
+            return new ImageModelRequest<byte[]>(context, new StreamByteArrayLoader() {
                 @Override
                 public String getId(byte[] model) {
                     return id;
                 }
-            })).load(model);
+            }).load(model);
         }
 
         /**
@@ -406,7 +432,8 @@ public class Glide {
          * simple id that represents the given data.
          *
          * @param model the data to load.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image into.
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * into.
          */
         public RequestBuilder<byte[]> loadFromImage(byte[] model) {
             return loadFromImage(model, UUID.randomUUID()
@@ -419,12 +446,12 @@ public class Glide {
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link RequestBuilder} to set options for the load an ultimately the target to load the thumbnail into.
-         * @throws IllegalArgumentException If no such {@link ModelLoaderFactory} is registered for the given model type.
+         * @return A {@link RequestBuilder} to set options for the load an ultimately the target to load the thumbnail
+         * into.
          */
         @SuppressWarnings("unused")
         public <T> RequestBuilder<T> loadFromVideo(T model) {
-            return new VideoModelRequest<T>(context, Glide.get(context).getFactory(model, ParcelFileDescriptor.class))
+            return new VideoModelRequest<T>(context, buildFileDescriptorModelLoader(model, context))
                     .loadFromVideo(model);
         }
     }
@@ -437,15 +464,15 @@ public class Glide {
      */
     public static class VideoModelRequest<T> {
         private final Context context;
-        private ModelLoaderFactory<T, ParcelFileDescriptor> factory;
+        private final ModelLoader<T, ParcelFileDescriptor> loader;
 
-        private VideoModelRequest(Context context, ModelLoaderFactory<T, ParcelFileDescriptor> factory) {
+        private VideoModelRequest(Context context, ModelLoader<T, ParcelFileDescriptor> loader) {
             this.context = context;
-            this.factory = factory;
+            this.loader = loader;
         }
 
         public RequestBuilder<T> loadFromVideo(T model) {
-            return new RequestBuilder<T>(context, model, null, factory);
+            return new RequestBuilder<T>(context, model, null, loader);
         }
     }
 
@@ -456,16 +483,16 @@ public class Glide {
      * @param <T> The type of the model.
      */
     public static class ImageModelRequest<T> {
-        private final ModelLoaderFactory<T, InputStream> factory;
         private final Context context;
+        private final ModelLoader<T, InputStream> loader;
 
-        private ImageModelRequest(Context context, ModelLoaderFactory<T, InputStream> factory) {
+        private ImageModelRequest(Context context, ModelLoader<T, InputStream> loader) {
             this.context = context;
-            this.factory = factory;
+            this.loader = loader;
         }
 
         public RequestBuilder<T> load(T model) {
-            return new RequestBuilder<T>(context, model, factory, null);
+            return new RequestBuilder<T>(context, model, loader, null);
         }
     }
 

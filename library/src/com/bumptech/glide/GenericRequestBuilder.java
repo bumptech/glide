@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
@@ -35,10 +34,10 @@ import java.util.List;
  *                           by the video {@link BitmapDecoder}.
  */
 public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> {
-    private Context context;
-    private ModelLoaderFactory<ModelType, ImageResourceType> imageModelLoaderFactory;
+    private final Context context;
+    private final ModelLoader<ModelType, ImageResourceType> imageLoader;
+    private final ModelLoader<ModelType, VideoResourceType> videoLoader;
     private final List<Transformation> transformations = new ArrayList<Transformation>();
-    private final ModelLoaderFactory<ModelType, VideoResourceType> videoModelLoaderFactory;
     private final ModelType model;
 
     private int animationId;
@@ -51,10 +50,10 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
 
-    GenericRequestBuilder(Context context, ModelType model,
-            ModelLoaderFactory<ModelType, ImageResourceType> imageFactory,
-            ModelLoaderFactory<ModelType, VideoResourceType> videoFactory) {
-        if (context == null) {
+    public GenericRequestBuilder(Context context, ModelType model,
+            ModelLoader<ModelType, ImageResourceType> imageLoader,
+            ModelLoader<ModelType, VideoResourceType> videoLoader) {
+         if (context == null) {
             throw new NullPointerException("Context can't be null");
         }
         this.context = context;
@@ -64,12 +63,12 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         }
         this.model = model;
 
-        if (imageFactory == null && videoFactory == null) {
-            throw new NullPointerException("No ModelLoaderFactorys registered for either image or video type,"
-                    + " class=" + model.getClass());
+        if (imageLoader == null && videoLoader == null) {
+            throw new NullPointerException("No ModelLoaders given or registered for model class="
+                    + model.getClass());
         }
-        this.imageModelLoaderFactory = imageFactory;
-        this.videoModelLoaderFactory = videoFactory;
+        this.imageLoader = imageLoader;
+        this.videoLoader = videoLoader;
     }
 
     /**
@@ -344,16 +343,6 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     }
 
     private <Y extends Target> BitmapRequestBuilder<ModelType> buildBitmapRequest(Y target) {
-         ModelLoader<ModelType, ImageResourceType> imageModelLoader = null;
-        if (imageModelLoaderFactory != null) {
-            imageModelLoader = imageModelLoaderFactory.build(context, Glide.get(context).getLoaderFactory());
-        }
-        ModelLoader<ModelType, VideoResourceType> videoModelLoader = null;
-        if (videoModelLoaderFactory != null) {
-            videoModelLoader = videoModelLoaderFactory.build(context, Glide.get(context).getLoaderFactory());
-        }
-        final Transformation transformation = getFinalTransformation();
-
         return new BitmapRequestBuilder<ModelType>()
                 .setContext(context)
                 .setPriority(Priority.NORMAL)
@@ -362,13 +351,13 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setTarget(target)
                 .setBitmapLoadFactory(
                         new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
-                                imageModelLoader != null && imageDecoder != null ?
+                                imageLoader != null && imageDecoder != null ?
                                 new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(
-                                        imageModelLoader, imageDecoder) : null,
-                                videoModelLoader != null && videoDecoder != null ?
+                                        imageLoader, imageDecoder) : null,
+                                videoLoader != null && videoDecoder != null ?
                                 new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
-                                        videoModelLoader, videoDecoder) : null,
-                                transformation))
+                                        videoLoader, videoDecoder) : null,
+                                getFinalTransformation()))
                 .setAnimation(animationId)
                 .setRequestListener(requestListener)
                 .setPlaceholderResource(placeholderId)

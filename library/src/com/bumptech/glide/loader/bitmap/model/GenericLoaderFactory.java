@@ -43,7 +43,7 @@ public class GenericLoaderFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T, Y> ModelLoaderFactory<T, Y> getFactory(Class<T> modelClass, Class<Y> resourceClass) {
+    private <T, Y> ModelLoaderFactory<T, Y> getFactory(Class<T> modelClass, Class<Y> resourceClass) {
         Map<Class, ModelLoaderFactory> resourceToFactories = modelClassToResourceFactories.get(modelClass);
         ModelLoaderFactory result = null;
         if (resourceToFactories != null) {
