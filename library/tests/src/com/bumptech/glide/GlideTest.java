@@ -6,8 +6,8 @@ import android.test.ActivityTestCase;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.target.ImageViewTarget;
-import com.bumptech.glide.presenter.target.Target;
+import com.bumptech.glide.resize.target.ImageViewTarget;
+import com.bumptech.glide.resize.target.Target;
 
 import java.io.File;
 import java.net.MalformedURLException;

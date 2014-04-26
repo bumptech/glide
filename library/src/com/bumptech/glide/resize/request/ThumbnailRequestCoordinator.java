@@ -1,4 +1,4 @@
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.request;
 
 /**
  * A coordinator that coordinates two individual {@link Request}s that load a small thumbnail version of an image and

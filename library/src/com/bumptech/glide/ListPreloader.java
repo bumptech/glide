@@ -4,7 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.widget.AbsListView;
-import com.bumptech.glide.presenter.target.BaseTarget;
+import com.bumptech.glide.resize.target.BaseTarget;
 
 import java.util.ArrayDeque;
 import java.util.LinkedList;

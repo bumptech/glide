@@ -1,14 +1,11 @@
-package com.bumptech.glide.presenter.target;
+package com.bumptech.glide.resize.target;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.Animation;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.Presenter;
-import com.bumptech.glide.resize.BitmapRequest;
-import com.bumptech.glide.resize.Request;
+import com.bumptech.glide.resize.request.Request;
 
 /**
  * A base {@link Target} for loading {@link Bitmap}s that provides basic or empty implementations for most methods.
@@ -24,18 +21,7 @@ import com.bumptech.glide.resize.Request;
  */
 public abstract class BaseTarget implements Target {
 
-    private Presenter presenter;
     private Request request;
-
-    @Override
-    public void setPresenter(Presenter presenter) {
-        this.presenter = presenter;
-    }
-
-    @Override
-    public Presenter getPresenter() {
-        return presenter;
-    }
 
     @Override
     public void setRequest(Request request) {

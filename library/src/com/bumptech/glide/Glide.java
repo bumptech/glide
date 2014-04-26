@@ -6,8 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
@@ -26,42 +24,34 @@ import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
-import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
-import com.bumptech.glide.loader.bitmap.transformation.FitCenter;
-import com.bumptech.glide.loader.bitmap.transformation.MultiTransformationLoader;
-import com.bumptech.glide.loader.bitmap.transformation.None;
-import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
-import com.bumptech.glide.loader.image.ImageLoader;
-import com.bumptech.glide.loader.image.ImageManagerLoader;
-import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.Presenter;
-import com.bumptech.glide.presenter.ThumbImagePresenter;
-import com.bumptech.glide.presenter.target.ImageViewTarget;
-import com.bumptech.glide.presenter.target.Target;
-import com.bumptech.glide.presenter.target.ViewTarget;
-import com.bumptech.glide.resize.BitmapRequestBuilder;
 import com.bumptech.glide.resize.ImageManager;
-import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
-import com.bumptech.glide.resize.Request;
-import com.bumptech.glide.resize.ThumbnailRequestCoordinator;
+import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.Downsampler;
+import com.bumptech.glide.resize.load.MultiTransformation;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.load.VideoBitmapDecoder;
+import com.bumptech.glide.resize.request.BitmapRequestBuilder;
+import com.bumptech.glide.resize.request.Request;
+import com.bumptech.glide.resize.request.ThumbnailRequestCoordinator;
+import com.bumptech.glide.resize.target.ImageViewTarget;
+import com.bumptech.glide.resize.target.Target;
+import com.bumptech.glide.resize.target.ViewTarget;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
- * A singleton to present a simple static interface for Glide {@link RequestBuilder} and to create and manage an
- * {@link ImageLoader} and {@link ModelLoaderFactory}s. This class provides most of the functionality of
- * {@link ImagePresenter} with a simpler but less efficient interface. For more complicated cases it may be worth
- * considering using {@link ImagePresenter} and {@link com.bumptech.glide.presenter.ImagePresenter.Builder} directly.
+ * A singleton to present a simple static interface for building requests with {@link RequestBuilder} and maintaining
+ * an {@link ImageManager} and it's {@link BitmapPool}, {@link DiskCache} and {@link MemoryCache}.
  *
  * <p>
  * Note - This class is not thread safe.
@@ -132,10 +122,25 @@ public class Glide {
         return GLIDE;
     }
 
+    /**
+     * Returns false if the {@link Glide} singleton has not yet been created and can therefore be setup using
+     * {@link #setup(GlideBuilder)}.
+     *
+     * @see #setup(GlideBuilder)
+     */
     public static boolean isSetup() {
         return GLIDE != null;
     }
 
+    /**
+     * Creates the {@link Glide} singleton using the given builder. Can be used to set options like cache sizes and
+     * locations.
+     *
+     * @see #isSetup()
+     *
+     * @param builder The builder.
+     * @throws IllegalArgumentException if the Glide singleton has already been created.
+     */
     public static void setup(GlideBuilder builder) {
         if (GLIDE != null) {
             throw new IllegalArgumentException("Glide is already setup, check with isSetup() first");
@@ -253,9 +258,9 @@ public class Glide {
      * @param target The Target to cancel loads for.
      */
     public static void clear(Target target) {
-        Presenter presenter = target.getPresenter();
-        if (presenter != null) {
-            presenter.clear();
+        Request request = target.getRequest();
+        if (request!= null) {
+            request.clear();
         }
     }
 
@@ -606,13 +611,6 @@ public class Glide {
         }
 
         @Override
-        public RequestBuilder<ModelType> transform(
-                TransformationLoader<ModelType> transformationLoader) {
-            super.transform(transformationLoader);
-            return this;
-        }
-
-        @Override
         public RequestBuilder<ModelType> animate(int animationId) {
             super.animate(animationId);
             return this;
@@ -651,11 +649,9 @@ public class Glide {
     private static class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> {
         private Context context;
         private ModelLoaderFactory<ModelType, ImageResourceType> imageModelLoaderFactory;
+        private final List<Transformation> transformations = new ArrayList<Transformation>();
         private final ModelLoaderFactory<ModelType, VideoResourceType> videoModelLoaderFactory;
         private final ModelType model;
-
-        private ArrayList<TransformationLoader<ModelType>> transformationLoaders =
-                new ArrayList<TransformationLoader<ModelType>>();
 
         private int animationId;
         private int placeholderId;
@@ -806,60 +802,34 @@ public class Glide {
         }
 
         /**
-         * Transform images using {@link CenterCrop}.
-         *
-         * @see #transform(TransformationLoader)
+         * Transform images using {@link Transformation#CENTER_CROP}.
          *
          * @return This RequestBuilder
          */
         public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> centerCrop() {
-            return transform(new CenterCrop<ModelType>());
+            return transform(Transformation.CENTER_CROP);
         }
 
         /**
-         * Transform images using {@link FitCenter}.
-         *
-         * @see #transform(TransformationLoader)
+         * Transform images using {@link Transformation#FIT_CENTER}.
          *
          * @return This RequestBuilder
          */
         public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> fitCenter() {
-            return transform(new FitCenter<ModelType>());
+            return transform(Transformation.FIT_CENTER);
         }
 
-        /**
-         * Set an arbitrary transformation to apply after an image has been loaded into memory.
-         *
-         * @see #transform(TransformationLoader)
-         *
-         * @param transformation The transformation to use
-         * @return This RequestBuilder
-         */
-        public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> transform(
-                final Transformation transformation) {
-            return transform(new TransformationLoader<ModelType>() {
-                @Override
-                public Transformation getTransformation(ModelType model) {
-                    return transformation;
-                }
-
-                @Override
-                public String getId() {
-                    return transformation.getId();
-                }
-            });
-        }
 
         /**
-         * Transform images with the given {@link TransformationLoader}. Appends this transformation onto any existing
+         * Transform images with the given {@link Transformation}. Appends this transformation onto any existing
          * transformations
          *
-         * @param transformationLoader The loader to obtaian a transformation for a given model
+         * @param transformation the transformation to apply.
          * @return This RequestBuilder
          */
         public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> transform(
-                TransformationLoader<ModelType> transformationLoader) {
-            transformationLoaders.add(transformationLoader);
+                Transformation transformation) {
+            transformations.add(transformation);
 
             return this;
         }
@@ -923,8 +893,6 @@ public class Glide {
          * @return The given target.
          */
         public <Y extends Target> Y into(Y target) {
-//            Presenter<ModelType> presenter = buildImagePresenter(target);
-//            presenter.setModel(model);
             Request previous = target.getRequest();
             if (previous != null) {
                 previous.clear();
@@ -947,73 +915,6 @@ public class Glide {
          */
         public ImageViewTarget into(ImageView view) {
             return into(new ImageViewTarget(view));
-        }
-
-        private <Y extends Target> ImagePresenter.Builder<ModelType, Y> createPresenterBuilder(
-                ModelLoader<ModelType, ImageResourceType> imageModelLoader,
-                ModelLoader<ModelType, VideoResourceType> videoModelLoader, final Y target, final boolean isThumbCopy) {
-            TransformationLoader<ModelType> transformationLoader = getFinalTransformationLoader();
-
-            ImagePresenter.Builder<ModelType, Y> builder = new ImagePresenter.Builder<ModelType, Y>()
-                    .setTarget(target, context)
-                    .setBitmapLoadFactory(
-                            new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
-                                    imageModelLoader != null && imageDecoder != null ?
-                                    new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(
-                                            imageModelLoader, imageDecoder) : null,
-                                    videoModelLoader != null && videoDecoder != null ?
-                                    new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
-                                            videoModelLoader, videoDecoder) : null,
-                                    transformationLoader))
-                    .setImageLoader(new ImageManagerLoader(context));
-
-            // We need to set the animation on both the full and the thumb copy so that the animation always occurs
-            // regardless of whether the full or the thumb finishes first.
-            if (animationId != -1 || (requestListener != null && !isThumbCopy)) {
-                final Animation animation;
-                if (animationId != -1) {
-                    animation = AnimationUtils.loadAnimation(context, animationId);
-                } else {
-                    animation = null;
-                }
-                builder.setImageReadyCallback(new ImagePresenter.ImageReadyCallback<ModelType, Y>() {
-                    @Override
-                    public void onImageReady(ModelType model, Y target, boolean isFromMemoryCache,
-                            boolean isAnyImageSet) {
-                        if (animation != null && !isFromMemoryCache && !isAnyImageSet) {
-                            target.startAnimation(animation);
-                        }
-                        if (requestListener != null) {
-                            requestListener.onImageReady(null, target, isFromMemoryCache, isAnyImageSet);
-                        }
-                    }
-                });
-            }
-
-            if (sizeMultiplier != null && !isThumbCopy) {
-                builder.setSizeMultiplier(sizeMultiplier);
-            }
-
-            if (placeholderId != -1 && !isThumbCopy) {
-                builder.setPlaceholderResource(placeholderId);
-            }
-
-            if (errorId != -1 && !isThumbCopy) {
-                builder.setErrorResource(errorId);
-            }
-
-            if (requestListener != null && !isThumbCopy) {
-                builder.setExceptionHandler(new ImagePresenter.ExceptionHandler<ModelType>() {
-                    @Override
-                    public void onException(Exception e, ModelType model, boolean isCurrent) {
-                        if (isCurrent) {
-                            requestListener.onException(e, model, target);
-                        }
-                    }
-                });
-            }
-
-            return builder;
         }
 
         private <Y extends Target> Request buildRequest(Y target) {
@@ -1063,7 +964,7 @@ public class Glide {
             if (videoModelLoaderFactory != null) {
                 videoModelLoader = videoModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
             }
-            TransformationLoader<ModelType> transformationLoader = getFinalTransformationLoader();
+            final Transformation transformation = getFinalTransformation();
 
             return new BitmapRequestBuilder<ModelType>()
                     .setContext(context)
@@ -1079,7 +980,7 @@ public class Glide {
                                     videoModelLoader != null && videoDecoder != null ?
                                     new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
                                             videoModelLoader, videoDecoder) : null,
-                                    transformationLoader))
+                                    transformation))
                     .setAnimation(animationId)
                     .setRequestListener(requestListener)
                     .setPlaceholderResource(placeholderId)
@@ -1087,53 +988,14 @@ public class Glide {
                     .setSizeMultiplier(sizeMultiplier);
         }
 
-        private <Y extends Target> Presenter<ModelType> buildImagePresenter(final Y target) {
-
-            ModelLoader<ModelType, ImageResourceType> imageModelLoader = null;
-            if (imageModelLoaderFactory != null) {
-                imageModelLoader = imageModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
-            }
-            ModelLoader<ModelType, VideoResourceType> videoModelLoader = null;
-            if (videoModelLoaderFactory != null) {
-                videoModelLoader = videoModelLoaderFactory.build(context, Glide.get(context).loaderFactory);
-            }
-
-            ImagePresenter.Builder<ModelType, Y> fullBuilder
-                    = createPresenterBuilder(imageModelLoader, videoModelLoader, target, false);
-
-            final Presenter<ModelType> result;
-            ImagePresenter.Builder<ModelType, Y> thumbBuilder = null;
-            if (thumbnailRequestBuilder != null) {
-                // We want thumb copy here to be false because we want to obey all of the options requested by the user.
-                thumbBuilder = thumbnailRequestBuilder.createPresenterBuilder(imageModelLoader, videoModelLoader, target,
-                        false /*isThumbCopy*/);
-            } else if (thumbSizeMultiplier != null) {
-                thumbBuilder = createPresenterBuilder(imageModelLoader, videoModelLoader, target, true /*isThumbCopy*/)
-                        .setExceptionHandler(null)
-                        .setSizeMultiplier(thumbSizeMultiplier);
-                fullBuilder = fullBuilder.setImageReadyCallback(null);
-            }
-            if (thumbBuilder != null) {
-                result = new ThumbImagePresenter.Builder<ModelType, Y>()
-                        .setFullPresenterBuilder(fullBuilder)
-                        .setThumbPresenterBuilder(thumbBuilder
-                                .setMetadata(new Metadata(Priority.HIGH)))
-                        .setTarget(target, context)
-                        .build();
-            } else {
-                result = fullBuilder.build();
-            }
-            return result;
-        }
-
-        private TransformationLoader<ModelType> getFinalTransformationLoader() {
-            switch (transformationLoaders.size()) {
+        private Transformation getFinalTransformation() {
+            switch (transformations.size()) {
                 case 0:
-                    return new None<ModelType>();
+                    return Transformation.NONE;
                 case 1:
-                    return transformationLoaders.get(0);
+                    return transformations.get(0);
                 default:
-                    return new MultiTransformationLoader<ModelType>(transformationLoaders);
+                    return new MultiTransformation(transformations);
             }
         }
     }

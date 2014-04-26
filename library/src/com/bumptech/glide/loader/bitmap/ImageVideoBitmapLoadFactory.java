@@ -1,13 +1,9 @@
 package com.bumptech.glide.loader.bitmap;
 
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-import com.bumptech.glide.loader.bitmap.transformation.None;
-import com.bumptech.glide.loader.bitmap.transformation.TransformationLoader;
-import com.bumptech.glide.resize.BitmapLoad;
-import com.bumptech.glide.resize.load.ImageVideoBitmapLoad;
 import com.bumptech.glide.resize.load.BitmapDecoder;
-import com.bumptech.glide.resize.load.ResourceBitmapLoad;
+import com.bumptech.glide.resize.load.BitmapLoad;
+import com.bumptech.glide.resize.load.ImageVideoBitmapLoad;
 import com.bumptech.glide.resize.load.Transformation;
 
 /**
@@ -21,22 +17,23 @@ import com.bumptech.glide.resize.load.Transformation;
  *           decode.
  */
 public class ImageVideoBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T> {
-    private final TransformationLoader<T> transformationLoader;
     private final ResourceBitmapLoadFactory<T, Y> imageLoadFactory;
     private final ResourceBitmapLoadFactory<T, Z> videoLoadFactory;
+    private final Transformation transformation;
 
     public ImageVideoBitmapLoadFactory(ResourceBitmapLoadFactory<T, Y> imageLoadFactory,
-            ResourceBitmapLoadFactory<T, Z> videoLoadFactory, TransformationLoader<T> transformationLoader) {
+            ResourceBitmapLoadFactory<T, Z> videoLoadFactory,
+            Transformation transformation) {
         this.imageLoadFactory = imageLoadFactory;
         this.videoLoadFactory = videoLoadFactory;
         if (imageLoadFactory == null && videoLoadFactory == null) {
             throw new IllegalArgumentException("You must provide at least a video model loader and a video decoder or" +
                     "an image model loader and an image decoder");
         }
-        if (transformationLoader == null) {
-            throw new IllegalArgumentException("You must provide a non null transformation loader");
+        if (transformation == null) {
+            throw new IllegalArgumentException("You must provide a non null transformation");
         }
-        this.transformationLoader = transformationLoader;
+        this.transformation = transformation;
     }
 
     @Override
@@ -49,7 +46,6 @@ public class ImageVideoBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T
         if (videoLoadFactory != null) {
             videoLoad = videoLoadFactory.getLoadTask(model, width, height);
         }
-        Transformation transformation = transformationLoader.getTransformation(model);
         return new ImageVideoBitmapLoad(imageLoad, videoLoad, width, height, transformation);
     }
 }

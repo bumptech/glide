@@ -1,4 +1,4 @@
-package com.bumptech.glide.presenter.target;
+package com.bumptech.glide.resize.target;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;

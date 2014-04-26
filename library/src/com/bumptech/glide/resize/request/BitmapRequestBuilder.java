@@ -1,4 +1,4 @@
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.request;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,7 +6,9 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
-import com.bumptech.glide.presenter.target.Target;
+import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.target.Target;
 
 /**
  * A simple builder class for {@link BitmapRequest}.

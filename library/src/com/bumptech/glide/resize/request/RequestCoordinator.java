@@ -1,4 +1,4 @@
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.request;
 
 import com.bumptech.glide.resize.target.Target;
 

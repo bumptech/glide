@@ -1,4 +1,4 @@
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.request;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,14 +8,18 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
-import com.bumptech.glide.presenter.target.Target;
+import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.Metadata;
+import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.load.BitmapLoad;
+import com.bumptech.glide.resize.target.Target;
 
 /**
  * A {@link Request} that loads an {@link Bitmap} into a given {@link Target}.
  *
  * @param <T> The type of the model that the {@link Bitmap} will be loaded from.
  */
-public class BitmapRequest<T> implements Request, LoadedCallback, Target.SizeReadyCallback {
+public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, Target.SizeReadyCallback {
     private static final String TAG = "BitmapRequest";
 
     private final int placeholderResourceId;

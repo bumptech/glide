@@ -2,7 +2,7 @@ package com.bumptech.glide.loader.bitmap;
 
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-import com.bumptech.glide.resize.BitmapLoad;
+import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.ResourceBitmapLoad;
 import com.bumptech.glide.resize.load.Transformation;

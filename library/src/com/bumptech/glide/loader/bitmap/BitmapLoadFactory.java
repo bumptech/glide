@@ -1,7 +1,7 @@
 package com.bumptech.glide.loader.bitmap;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.resize.BitmapLoad;
+import com.bumptech.glide.resize.load.BitmapLoad;
 
 /**
  * An interface for providing a {@link BitmapLoad} to load a bitmap for a given model, width, and height.

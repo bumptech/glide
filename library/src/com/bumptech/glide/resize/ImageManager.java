@@ -24,6 +24,7 @@ import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.resize.cache.LruMemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.cache.MemoryCacheAdapter;
+import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.load.Downsampler;
 
 import java.io.File;
@@ -733,6 +734,14 @@ public class ImageManager {
                 }
             });
         }
+    }
+
+    /**
+     * An interface to handle loads completing successfully or failing
+     */
+    public interface LoadedCallback {
+        public void onLoadCompleted(Bitmap loaded);
+        public void onLoadFailed(Exception e);
     }
 
     private interface Prioritized {

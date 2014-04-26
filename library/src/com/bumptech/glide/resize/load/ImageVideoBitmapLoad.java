@@ -3,7 +3,6 @@ package com.bumptech.glide.resize.load;
 import android.graphics.Bitmap;
 import android.util.Log;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-import com.bumptech.glide.resize.BitmapLoad;
 import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 

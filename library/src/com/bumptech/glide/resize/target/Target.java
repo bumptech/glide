@@ -1,12 +1,9 @@
-package com.bumptech.glide.presenter.target;
+package com.bumptech.glide.resize.target;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
-import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.Presenter;
-import com.bumptech.glide.resize.BitmapRequest;
-import com.bumptech.glide.resize.Request;
+import com.bumptech.glide.resize.request.Request;
 
 /**
  * An interface that Glide can load an image into
@@ -48,10 +45,6 @@ public interface Target {
      * @param animation The animation to display
      */
     public void startAnimation(Animation animation);
-
-    public void setPresenter(Presenter presenter);
-
-    public Presenter getPresenter();
 
     public void setRequest(Request request);
 

@@ -3,6 +3,7 @@ package com.bumptech.glide.resize;
 import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.load.ImageVideoBitmapLoad;
 import com.bumptech.glide.resize.load.Transformation;
 import org.mockito.invocation.InvocationOnMock;

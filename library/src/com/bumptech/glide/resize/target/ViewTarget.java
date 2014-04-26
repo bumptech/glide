@@ -1,4 +1,4 @@
-package com.bumptech.glide.presenter.target;
+package com.bumptech.glide.resize.target;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,10 +10,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.widget.ListView;
-import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.Presenter;
-import com.bumptech.glide.resize.BitmapRequest;
-import com.bumptech.glide.resize.Request;
+import com.bumptech.glide.resize.request.Request;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
@@ -64,32 +61,22 @@ public abstract class ViewTarget<T extends View> implements Target {
     }
 
     @Override
-    public void setPresenter(Presenter presenter) {
-        view.setTag(presenter);
-    }
-
-    @Override
-    public Presenter getPresenter() {
-        Object tag = view.getTag();
-        Presenter presenter = null;
-        if (tag != null) {
-            if ((tag instanceof Presenter)) {
-                presenter = (Presenter) tag;
-            } else {
-                throw new IllegalArgumentException("You must not call setTag() on a view Glide is targeting");
-            }
-        }
-        return presenter;
-    }
-
-    @Override
     public void setRequest(Request request) {
         view.setTag(request);
     }
 
     @Override
     public Request getRequest() {
-        return (Request) view.getTag();
+        Object tag = view.getTag();
+        Request request = null;
+        if (tag != null) {
+            if (tag instanceof Request) {
+                request = (Request) tag;
+            } else {
+                throw new IllegalArgumentException("You must not call setTag() on a view Glide is targeting");
+            }
+        }
+        return request;
     }
 
     private static class SizeDeterminer {

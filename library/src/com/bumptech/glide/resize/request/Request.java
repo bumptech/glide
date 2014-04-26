@@ -1,6 +1,6 @@
-package com.bumptech.glide.resize;
+package com.bumptech.glide.resize.request;
 
-import com.bumptech.glide.presenter.target.Target;
+import com.bumptech.glide.resize.target.Target;
 
 /**
  * A request that loads an asset for an {@link Target}.

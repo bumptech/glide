@@ -1,4 +1,4 @@
-package com.bumptech.glide.presenter.target;
+package com.bumptech.glide.resize.target;
 
 /**
  * A simpler interface for targets with default (usually noop) implementations of non essential methods that allows the

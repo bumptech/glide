@@ -1,10 +1,7 @@
 package com.bumptech.glide;
 
-import android.graphics.Bitmap;
 import android.test.AndroidTestCase;
-import com.bumptech.glide.resize.BitmapLoad;
 import com.bumptech.glide.resize.SafeKeyGenerator;
-import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 
 import java.util.UUID;
 import java.util.regex.Matcher;

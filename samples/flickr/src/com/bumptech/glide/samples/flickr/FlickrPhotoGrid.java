@@ -5,25 +5,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
-import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.Cache;
-import com.bumptech.glide.loader.bitmap.transformation.CenterCrop;
-import com.bumptech.glide.loader.image.ImageManagerLoader;
-import com.bumptech.glide.presenter.ImagePresenter;
-import com.bumptech.glide.presenter.target.ImageViewTarget;
-import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,44 +120,24 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         @Override
         public View getView(int position, View view, ViewGroup container) {
             final Photo current = photos.get(position);
-            final ImagePresenter<Photo, ImageViewTarget> imagePresenter;
+            final ImageView imageView;
             if (view == null) {
-                ImageView imageView = (ImageView) inflater.inflate(R.layout.flickr_photo_grid_item, container, false);
+                imageView = (ImageView) inflater.inflate(R.layout.flickr_photo_grid_item, container, false);
                 ViewGroup.LayoutParams params = imageView.getLayoutParams();
                 params.width = photoSize;
                 params.height = photoSize;
-
-                final Context context = getActivity();
-
-                // This is an example of how one might use ImagePresenter directly, there is otherwise no particular
-                // reason why ImagePresenter is used here and not in FlickrPhotoList.
-                final Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
-                imagePresenter = new ImagePresenter.Builder<Photo, ImageViewTarget>()
-                        .setBitmapLoadFactory(new ImageVideoBitmapLoadFactory<Photo, InputStream, Void>(
-                                new ResourceBitmapLoadFactory<Photo, InputStream>(
-                                        new FlickrModelLoader(context, urlCache), Downsampler.AT_LEAST),
-                                null,
-                                        new CenterCrop<Photo>()))
-                        .setTarget(new ImageViewTarget(imageView), context)
-                        .setImageLoader(new ImageManagerLoader(context))
-                        .setImageReadyCallback(new ImagePresenter.ImageReadyCallback<Photo, ImageViewTarget>() {
-                            @Override
-                            public void onImageReady(Photo photo, ImageViewTarget target, boolean fromCache,
-                                    boolean isAnyImageSet) {
-                                if (!fromCache && !isAnyImageSet) {
-                                    target.startAnimation(fadeIn);
-                                }
-                            }
-                        })
-                        .build();
-                view = imageView;
-                view.setTag(imagePresenter);
             } else {
-                imagePresenter = (ImagePresenter<Photo, ImageViewTarget>) view.getTag();
+                imageView = (ImageView) view;
             }
 
-            imagePresenter.setModel(current);
-            return view;
+            Glide.with(getActivity())
+                    .using(new FlickrModelLoader(getActivity(), urlCache))
+                    .load(current)
+                    .animate(R.anim.fade_in)
+                    .centerCrop()
+                    .into(imageView);
+
+            return imageView;
         }
 
     }
