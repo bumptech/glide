@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Priority;
@@ -24,7 +24,7 @@ public class BitmapRequestBuilder<T> {
     float sizeMultiplier;
     Drawable placeholderDrawable;
     Drawable errorDrawable;
-    Glide.RequestListener<T> requestListener;
+    RequestListener<T> requestListener;
     Animation animation;
     int placeholderResourceId;
     int errorResourceId;
@@ -67,7 +67,7 @@ public class BitmapRequestBuilder<T> {
         return this;
     }
 
-    public BitmapRequestBuilder<T> setRequestListener(Glide.RequestListener<T> requestListener) {
+    public BitmapRequestBuilder<T> setRequestListener(RequestListener<T> requestListener) {
         this.requestListener = requestListener;
         return this;
     }

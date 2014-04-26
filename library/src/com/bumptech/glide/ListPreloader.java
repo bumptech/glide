@@ -83,9 +83,9 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
      * target and context will be provided by the preloader.
      *
      * @param item The model to load.
-     * @return A non null {@link Glide.RequestBuilder}.
+     * @return A non null {@link RequestBuilder}.
      */
-    protected abstract Glide.RequestBuilder getRequest(T item);
+    protected abstract RequestBuilder getRequestBuilder(T item);
 
     private void preload(int start, boolean increasing) {
         if (isIncreasing != increasing) {
@@ -130,7 +130,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         final T item = items.get(position);
         final int[] dimensions = getDimensions(item);
         if (dimensions != null) {
-            getRequest(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
+            getRequestBuilder(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
         }
     }
 

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.loader.bitmap.model.Cache;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -81,7 +82,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         }
 
         @Override
-        protected Glide.RequestBuilder<Photo> getRequest(Photo item) {
+        protected RequestBuilder<Photo> getRequestBuilder(Photo item) {
             return Glide.with(context)
                     .using(new FlickrModelLoader(getActivity(), urlCache))
                     .load(item)

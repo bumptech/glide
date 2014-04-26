@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Metadata;
@@ -33,7 +33,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
     private final ImageManager imageManager;
     private final Priority priority;
     private final Target target;
-    private final Glide.RequestListener<T> requestListener;
+    private final RequestListener<T> requestListener;
     private final float sizeMultiplier;
 
     private Drawable placeholderDrawable;
