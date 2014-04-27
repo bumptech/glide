@@ -154,9 +154,9 @@ public class ListPreloaderTest extends AndroidTestCase {
             }
 
             @Override
-            protected Glide.RequestBuilder getRequest(Object item) {
+            protected RequestBuilder getRequestBuilder(Object item) {
                 loadedObjects.add(item);
-                return super.getRequest(item);
+                return super.getRequestBuilder(item);
             }
         };
 
@@ -190,7 +190,7 @@ public class ListPreloaderTest extends AndroidTestCase {
         }
 
         @Override
-        protected Glide.RequestBuilder getRequest(Object item) {
+        protected RequestBuilder getRequestBuilder(Object item) {
             return Glide.with(context).using(new StreamModelLoader<Object>() {
                 @Override
                 public ResourceFetcher<InputStream> getResourceFetcher(final Object model, int width, int height) {

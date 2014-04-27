@@ -153,7 +153,8 @@ public class Glide {
      * this method is to replace one of the default factories or add an implementation for other similar low level
      * models. Typically the {@link ModelRequest#using(StreamModelLoader)} or
      * {@link ModelRequest#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
-     * with the ModelLoader being used to load it.
+     * with the ModelLoader being used to load it. Any factory replaced by the given factory will have its
+     * {@link ModelLoaderFactory#teardown()}} method called.
      *
      * <p>
      *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
@@ -177,6 +178,22 @@ public class Glide {
      */
     public <T, Y> void register(Class<T> modelClass, Class<Y> resourceClass, ModelLoaderFactory<T, Y> factory) {
         ModelLoaderFactory<T, Y> removed = loaderFactory.register(modelClass, resourceClass, factory);
+        if (removed != null) {
+            removed.teardown();
+        }
+    }
+
+    /**
+     * Removes any {@link ModelLoaderFactory} registered for the given model and resource classes if one exists. If a
+     * {@link ModelLoaderFactory} is removed, its {@link ModelLoaderFactory#teardown()}} method will be called.
+     *
+     * @param modelClass The model class.
+     * @param resourceClass The resource class.
+     * @param <T> The type of the model.
+     * @param <Y> The type of the resource.
+     */
+    public <T, Y> void unregister(Class<T> modelClass, Class<Y> resourceClass) {
+        ModelLoaderFactory<T, Y> removed = loaderFactory.unregister(modelClass, resourceClass);
         if (removed != null) {
             removed.teardown();
         }

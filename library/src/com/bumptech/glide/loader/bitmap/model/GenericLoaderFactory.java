@@ -15,9 +15,43 @@ public class GenericLoaderFactory {
     private Map<Class, Map<Class, ModelLoader>> cachedModelLoaders =
             new HashMap<Class, Map<Class, ModelLoader>>();
 
+    /**
+     * Removes and returns the registered {@link ModelLoaderFactory} for the given model and resource classes. Returns
+     * null if no such factory is registered. Clears all cached model loaders.
+     *
+     * @param modelClass The model class.
+     * @param resourceClass The resource class.
+     * @param <T> The type of the model the class.
+     * @param <Y> The type of the resource class.
+     */
+    @SuppressWarnings("unchecked")
+    public <T, Y> ModelLoaderFactory<T, Y> unregister(Class<T> modelClass, Class<Y> resourceClass) {
+        cachedModelLoaders.clear();
+
+        ModelLoaderFactory<T, Y> result = null;
+        Map<Class, ModelLoaderFactory> resourceToFactories = modelClassToResourceFactories.get(modelClass);
+        if (resourceToFactories != null) {
+            result = resourceToFactories.remove(resourceClass);
+        }
+        return result;
+    }
+
+    /**
+     * Registers the given {@link ModelLoaderFactory} for the given model and resource classes and returns the previous
+     * factory registered for the given model and resource classes or null if no such factory existed. Clears all cached
+     * model loaders.
+     *
+     * @param modelClass The model class.
+     * @param resourceClass The resource class.
+     * @param factory The factory to register.
+     * @param <T> The type of the model.
+     * @param <Y> The type of the resource.
+     */
     @SuppressWarnings("unchecked")
     public <T, Y> ModelLoaderFactory<T, Y> register(Class<T> modelClass, Class<Y> resourceClass,
             ModelLoaderFactory<T, Y> factory) {
+        cachedModelLoaders.clear();
+
         Map<Class, ModelLoaderFactory> resourceToFactories = modelClassToResourceFactories.get(modelClass);
         if (resourceToFactories == null) {
             resourceToFactories = new HashMap<Class, ModelLoaderFactory>();
@@ -37,11 +71,19 @@ public class GenericLoaderFactory {
             }
         }
 
-        cachedModelLoaders.clear();
-
         return previous;
     }
 
+    /**
+     * Returns a {@link ModelLoader} for the given model and resource classes by either returning a cached
+     * {@link ModelLoader} or building a new a new {@link ModelLoader} using registered {@link ModelLoaderFactory}s.
+     * Returns null if no {@link ModelLoaderFactory} is registered for the given classes.
+     *
+     * @param modelClass The model class.
+     * @param resourceClass The resource class.
+     * @param <T> The type of the model.
+     * @param <Y> The type of the resource.
+     */
     public <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
         ModelLoader<T, Y> result = getCachedLoader(modelClass, resourceClass);
         if (result != null) {

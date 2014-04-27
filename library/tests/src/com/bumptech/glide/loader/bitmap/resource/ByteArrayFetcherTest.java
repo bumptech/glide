@@ -1,8 +1,11 @@
 package com.bumptech.glide.loader.bitmap.resource;
 
 import android.test.AndroidTestCase;
+import com.bumptech.glide.resize.Metadata;
 
 import java.io.InputStream;
+
+import static org.mockito.Mockito.mock;
 
 public class ByteArrayFetcherTest extends AndroidTestCase {
 
@@ -13,7 +16,7 @@ public class ByteArrayFetcherTest extends AndroidTestCase {
         }
 
         ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes);
-        InputStream is = fetcher.loadResource();
+        InputStream is = fetcher.loadResource(mock(Metadata.class));
 
         int read = 0;
         byte current;

@@ -5,13 +5,19 @@ import android.net.Uri;
 import android.test.ActivityTestCase;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.bumptech.glide.presenter.ImagePresenter;
+import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.resize.target.ImageViewTarget;
 import com.bumptech.glide.resize.target.Target;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for the {@link Glide} interface and singleton.
@@ -37,64 +43,80 @@ public class GlideTest extends ActivityTestCase {
         return result;
     }
 
-    private void checkImagePresenter(Target target, Object model) {
-        ImagePresenter imagePresenter = target.getImagePresenter();
-        imagePresenter.setModel(model);
-
-        boolean caughtException = false;
-        try {
-            imagePresenter.setModel(new Float(4.4f));
-        } catch (ClassCastException e) {
-            caughtException = true;
-        }
-
-        assertTrue(caughtException);
-    }
-
     public void testFileDefaultLoader() {
         File file = new File("fake");
         Target target = Glide.with(getContext()).load(file).into(imageViewTarget);
-        checkImagePresenter(target, file);
+        assertNotNull(target.getRequest());
     }
 
     public void testUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
         Target target = Glide.with(getContext()).loadFromImage(url).into(imageViewTarget);
-        checkImagePresenter(target, url);
+        assertNotNull(target.getRequest());
     }
 
     public void testUriDefaultLoader() {
         Uri uri = Uri.fromFile(new File("Fake"));
         Target target = Glide.with(getContext()).load(uri).into(imageViewTarget);
-        checkImagePresenter(target, uri);
+        assertNotNull(target.getRequest());
     }
 
     public void testStringDefaultLoader() {
         String string = "http://www.google.com";
         Target target = Glide.with(getContext()).load(string).into(imageViewTarget);
-        checkImagePresenter(target, string);
+        assertNotNull(target.getRequest());
     }
 
     public void testIntegerDefaultLoader() {
         int integer = 1234;
         Target target = Glide.with(getContext()).load(integer).into(imageViewTarget);
-        checkImagePresenter(target, integer);
+        assertNotNull(target.getRequest());
     }
 
-    public void testCanHandleWrapContent() {
-        imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        Target target = Glide.with(getContext()).load("fake").into(imageViewTarget);
-
-        assertNotNull(target.getImagePresenter());
+    public void testByteArrayDefaultLoader() {
+        byte[] bytes = new byte[10];
+        Target target = Glide.with(getContext()).loadFromImage(bytes).into(imageViewTarget);
+        assertNotNull(target.getRequest());
     }
 
-    public void testCanHandleWrapContentMatchParent() {
-        imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        Target target = Glide.with(getContext()).load("fake").into(imageViewTarget);
+    public void testByteArrayWithIdDefaultLoader() {
+        byte[] bytes = new byte[10];
+        String id = "test";
+        Target target = Glide.with(getContext()).loadFromImage(bytes, id).into(imageViewTarget);
+        assertNotNull(target.getRequest());
+    }
 
-        assertNotNull(target.getImagePresenter());
+    public void testUnregisteredModelThrowsException() {
+        Float unregistered = 0.5f;
+        try {
+            Glide.with(getContext()).load(unregistered).into(imageViewTarget);
+            fail("Expected load using model with no registered factory to throw an exception!");
+        } catch (Exception e) { }
+    }
+
+    public void testUnregisteredModelWithGivenLoaderDoesNotThrow() {
+        Float unregistered = 0.5f;
+        StreamModelLoader<Float> mockLoader = mock(StreamModelLoader.class);
+        Glide.with(getContext())
+                .using(mockLoader)
+                .load(unregistered)
+                .into(imageViewTarget);
+    }
+
+    public void testNonDefaultModelWithRegisteredFactoryDoesNotThrow() {
+        Glide glide = Glide.get(getContext());
+        glide.register(Float.class, InputStream.class, new ModelLoaderFactory<Float, InputStream>() {
+            @Override
+            public ModelLoader<Float, InputStream> build(Context context, GenericLoaderFactory factories) {
+                return mock(ModelLoader.class);
+            }
+
+            @Override
+            public void teardown() {
+            }
+        });
+        Glide.with(getContext()).load(0.5f).into(imageViewTarget);
+        glide.unregister(Float.class, InputStream.class);
     }
 
 //    public void testMemoryLeak() throws InterruptedException {
