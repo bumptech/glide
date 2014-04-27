@@ -331,7 +331,8 @@ public class Glide {
          *
          * @param string The string representing the image. Must be either a path, or a uri handled by
          *      {@link StreamUriLoader}
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * into.
          */
         public RequestBuilder<String> load(String string) {
             return new RequestBuilder<String>(context, string);
@@ -344,7 +345,8 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * into.
          */
         public RequestBuilder<Uri> load(Uri uri) {
             return new RequestBuilder<Uri>(context, uri);
@@ -352,21 +354,23 @@ public class Glide {
 
         /**
          * Use the {@link ModelLoaderFactory} currently registered for {@link File} to load the image represented by the
-         * given {@link File}. Defaults to {@link StreamFileLoader.Factory} and {@link StreamFileLoader} to load the given model.
+         * given {@link File}. Defaults to {@link StreamFileLoader.Factory} and {@link StreamFileLoader} to load the
+         * given model.
          *
          * @see #using(StreamModelLoader)
          *
          * @param file The File containing the image
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * into.
          */
         public RequestBuilder<File> load(File file) {
             return new RequestBuilder<File>(context, file);
         }
 
         /**
-         * Use the {@link ModelLoaderFactory} currently registered for {@link Integer} to load the image represented by the
-         * given {@link Integer} resource id. Defaults to {@link StreamResourceLoader.Factory} and {@link StreamResourceLoader} to load
-         * the given model.
+         * Use the {@link ModelLoaderFactory} currently registered for {@link Integer} to load the image represented by
+         * the given {@link Integer} resource id. Defaults to {@link StreamResourceLoader.Factory} and
+         * {@link StreamResourceLoader} to load the given model.
          *
          * @see #using(StreamModelLoader)
          *
@@ -389,8 +393,7 @@ public class Glide {
          */
         @SuppressWarnings("unused")
         public <T> RequestBuilder<T> loadFromImage(T model) {
-            return new ImageModelRequest<T>(context, buildStreamModelLoader(model, context))
-                    .load(model);
+            return new RequestBuilder<T>(context, model, buildStreamModelLoader(model, context), null);
         }
 
         /**
@@ -401,11 +404,11 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param url The URL representing the image.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model into
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * into.
          */
         public RequestBuilder<URL> loadFromImage(URL url) {
-            return new ImageModelRequest<URL>(context, buildStreamModelLoader(url, context))
-                    .load(url);
+            return new RequestBuilder<URL>(context, url, buildStreamModelLoader(url, context), null);
         }
 
         /**
@@ -416,15 +419,16 @@ public class Glide {
          * @param model The data to load.
          * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
          *           (url, filepath etc). If there is no suitable id, use {@link #loadFromImage(byte[])} instaed.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image into.
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * into.
          */
         public RequestBuilder<byte[]> loadFromImage(byte[] model, final String id) {
-            return new ImageModelRequest<byte[]>(context, new StreamByteArrayLoader() {
+            return new RequestBuilder<byte[]>(context, model, new StreamByteArrayLoader() {
                 @Override
                 public String getId(byte[] model) {
                     return id;
                 }
-            }).load(model);
+            }, null);
         }
 
         /**
@@ -446,13 +450,26 @@ public class Glide {
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link RequestBuilder} to set options for the load an ultimately the target to load the thumbnail
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
          * into.
          */
         @SuppressWarnings("unused")
         public <T> RequestBuilder<T> loadFromVideo(T model) {
-            return new VideoModelRequest<T>(context, buildFileDescriptorModelLoader(model, context))
-                    .loadFromVideo(model);
+            return new RequestBuilder<T>(context, model, null, buildFileDescriptorModelLoader(model, context));
+        }
+
+        /**
+         * Use the {@link ModelLoaderFactory}s currently registered for the given model type for
+         * {@link InputStream}s and {@link ParcelFileDescriptor}s to load a thumbnail from either the image or the video
+         * represented by the given model.
+         *
+         * @param model The model the load.
+         * @param <T> The type of the model to load.
+         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * into.
+         */
+        public <T> RequestBuilder<T> load(T model) {
+            return new RequestBuilder<T>(context, model);
         }
     }
 
