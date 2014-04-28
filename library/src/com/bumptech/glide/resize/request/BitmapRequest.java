@@ -100,7 +100,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
     private void resetPlaceHolder() {
         if (!canSetPlaceholder()) return;
 
-        if (placeholderDrawable == null && placeholderResourceId != 0) {
+        if (placeholderDrawable == null && placeholderResourceId > 0) {
             placeholderDrawable = context.getResources().getDrawable(placeholderResourceId);
         }
         target.setPlaceholder(placeholderDrawable);
@@ -115,7 +115,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
 
         target.onImageReady(loaded);
         if (!loadedFromMemoryCache && !isAnyImageSet()) {
-            if (animation == null && animationId != 0) {
+            if (animation == null && animationId > 0) {
                 animation = AnimationUtils.loadAnimation(context, animationId);
             }
             if (animation != null) {
@@ -139,7 +139,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
 
         isError = true;
         if (canSetPlaceholder()) {
-            if (errorDrawable == null && errorResourceId != 0) {
+            if (errorDrawable == null && errorResourceId > 0) {
                 errorDrawable = context.getResources().getDrawable(errorResourceId);
             }
             target.setPlaceholder(errorDrawable);

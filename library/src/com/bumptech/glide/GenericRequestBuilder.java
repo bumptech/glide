@@ -377,7 +377,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                     .setRequestCoordinator(requestCoordinator)
                     .build();
 
-            if (thumbnailRequestBuilder.animationId == 0) {
+            if (thumbnailRequestBuilder.animationId <= 0) {
                 thumbnailRequestBuilder.animationId = animationId;
             }
 
