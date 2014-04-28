@@ -9,6 +9,7 @@ import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.load.BitmapDecoder;
+import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.MultiTransformation;
 import com.bumptech.glide.resize.load.Transformation;
@@ -49,6 +50,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private Float thumbSizeMultiplier;
     private GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
+    private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
 
     public GenericRequestBuilder(Context context, ModelType model,
             ModelLoader<ModelType, ImageResourceType> imageLoader,
@@ -179,11 +181,32 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @see VideoBitmapDecoder
      *
      * @param decoder The {@link BitmapDecoder} to use to decode the video resource.
-     * @return This request.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> videoDecoder(
             BitmapDecoder<VideoResourceType> decoder) {
         this.videoDecoder = decoder;
+
+        return this;
+    }
+
+    /**
+     * Sets the preferred format for {@link Bitmap}s decoded in this request. Defaults to
+     * {@link DecodeFormat#PREFER_RGB_565}.
+     *
+     * <p>
+     *     Note - If using a {@link Transformation} that expect bitmaps to support transparency, this should always be
+     *     set to ALWAYS_ARGB_8888. RGB_565 requires fewer bytes per pixel and is generally preferable, but it does not
+     *     support transparency.
+     * </p>
+     *
+     * @see DecodeFormat
+     *
+     * @param format The format to use.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> format(DecodeFormat format) {
+        this.decodeFormat = format;
 
         return this;
     }
@@ -352,12 +375,13 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setBitmapLoadFactory(
                         new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
                                 imageLoader != null && imageDecoder != null ?
-                                new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(
-                                        imageLoader, imageDecoder) : null,
+                                        new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(
+                                                imageLoader, imageDecoder, decodeFormat) : null,
                                 videoLoader != null && videoDecoder != null ?
-                                new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
-                                        videoLoader, videoDecoder) : null,
+                                        new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
+                                                videoLoader, videoDecoder, decodeFormat) : null,
                                 getFinalTransformation()))
+                .setDecodeFormat(decodeFormat)
                 .setAnimation(animationId)
                 .setRequestListener(requestListener)
                 .setPlaceholderResource(placeholderId)

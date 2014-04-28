@@ -483,7 +483,7 @@ public class ImageManager {
         }
 
         /**
-         * Try to cancel the job. Does not guarantee that the job will not finish.
+         * Try to cancel the job.  not guarantee that the job will not finish.
          */
         public void cancel(LoadedCallback cb) {
             cbs.remove(cb);
@@ -541,12 +541,10 @@ public class ImageManager {
         final Bitmap.CompressFormat format;
         if (bitmapCompressFormat != null) {
             format = bitmapCompressFormat;
+        } else if (bitmap.hasAlpha()) {
+            format = Bitmap.CompressFormat.PNG;
         } else {
-            if (bitmap.getConfig() == Bitmap.Config.RGB_565 || !bitmap.hasAlpha()) {
-                format = Bitmap.CompressFormat.JPEG;
-            } else {
-                format = Bitmap.CompressFormat.PNG;
-            }
+            format = Bitmap.CompressFormat.JPEG;
         }
         return format;
     }
@@ -647,7 +645,7 @@ public class ImageManager {
             final InputStream is = diskCache.get(key);
             if (is != null) {
                 // Since we're doing no downsampling we don't need the target width or height.
-                result = Downsampler.NONE.decode(is, bitmapPool, -1, -1);
+                result = Downsampler.NONE.decode(is, bitmapPool, -1, -1, task.getMetadata().decodeFormat);
                 if (result == null) {
                     // If we have data for our key but couldn't decode it, the data must be corrupt, so we will clear it
                     // from our cache and try to fetch it again.

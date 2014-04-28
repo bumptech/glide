@@ -8,6 +8,7 @@ import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.target.Target;
 
 /**
@@ -31,6 +32,7 @@ public class BitmapRequestBuilder<T> {
     Context context;
     RequestCoordinator requestCoordinator;
     int animationId;
+    DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
 
     public BitmapRequestBuilder<T> setModel(T model) {
         this.model = model;
@@ -49,6 +51,11 @@ public class BitmapRequestBuilder<T> {
 
     public BitmapRequestBuilder<T> setImageManager(ImageManager imageManager) {
         this.imageManager = imageManager;
+        return this;
+    }
+
+    public BitmapRequestBuilder<T> setDecodeFormat(DecodeFormat decodeFormat) {
+        this.decodeFormat = decodeFormat;
         return this;
     }
 

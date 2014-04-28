@@ -3,8 +3,6 @@ package com.bumptech.glide.resize.load;
 import android.graphics.Bitmap;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 
-import java.io.IOException;
-
 /**
  * A bitmap decoder for a given resource type.
  *
@@ -19,9 +17,11 @@ public interface BitmapDecoder<T> {
      *                   obtained from the pool other than the bitmap returned by this method should be returned to the
      *                   pool.
      * @param outWidth The target width for the returned bitmap (need not match exactly).
-     * @param outHeight The target height for the returne bitmap (need not match exactly).
+     * @param outHeight The target height for the returned bitmap (need not match exactly).
+     * @param decodeFormat The desired configuration for the returned bitmap.
      */
-    public Bitmap decode(T resource, BitmapPool bitmapPool, int outWidth, int outHeight) throws Exception;
+    public Bitmap decode(T resource, BitmapPool bitmapPool, int outWidth, int outHeight, DecodeFormat decodeFormat)
+            throws Exception;
 
     /**
      * Returns some unique String id that distinguishes this decoder from any other decoder.

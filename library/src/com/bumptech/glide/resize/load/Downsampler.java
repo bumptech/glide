@@ -1,10 +1,5 @@
 package com.bumptech.glide.resize.load;
 
-import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType;
-import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG_A;
-import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.JPEG;
-import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG;
-
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +13,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.Set;
+
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.JPEG;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG_A;
 
 /**
  * A base class with methods for loading and decoding images from InputStreams.
@@ -33,7 +33,6 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
        BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
        decodeBitmapOptions.inDither = false;
        decodeBitmapOptions.inScaled = false;
-       decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
        decodeBitmapOptions.inSampleSize = 1;
        if (CAN_RECYCLE)  {
            decodeBitmapOptions.inMutable = true;
@@ -72,16 +71,6 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      *
      */
     public static Downsampler NONE = new Downsampler() {
-        /**
-         * Returns the bitmap represented by the given InputStream as is with no downsampling performed.
-         *
-         * @param is The input stream with data for an image.
-         * @param pool An {@link BitmapPool} to use to reuse bitmaps during the load
-         */
-        public Bitmap decode(InputStream is, BitmapPool pool) {
-            return decode(is, pool, -1, -1);
-        }
-
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return 0;
@@ -107,7 +96,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
      */
     @Override
-    public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight) {
+    public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight, DecodeFormat decodeFormat) {
         final ByteArrayPool byteArrayPool = ByteArrayPool.get();
         byte[] bytesForOptions = byteArrayPool.getBytes();
         byte[] bytesForStream = byteArrayPool.getBytes();
@@ -142,7 +131,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
             sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
         }
 
-        final Bitmap downsampled = downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize);
+        final Bitmap downsampled = downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize, decodeFormat);
         if (downsampled == null) {
             throw new IllegalArgumentException("Unable to decode image sample size: " + sampleSize + " inWidth: "
                     + inWidth + " inHeight: " + inHeight);
@@ -159,12 +148,14 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     }
 
     protected Bitmap downsampleWithSize(RecyclableBufferedInputStream bis, BitmapFactory.Options options,
-            BitmapPool pool, int inWidth, int inHeight, int sampleSize) {
+            BitmapPool pool, int inWidth, int inHeight, int sampleSize, DecodeFormat decodeFormat) {
         // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
+        Bitmap.Config config = getConfig(bis, decodeFormat);
         options.inSampleSize = sampleSize;
+        options.inPreferredConfig = config;
         if (options.inSampleSize == 1 || Build.VERSION.SDK_INT >= 19) {
             if (shouldUsePool(bis)) {
-                setInBitmap(options, pool.get(inWidth, inHeight, getConfig(bis)));
+                setInBitmap(options, pool.get(inWidth, inHeight, config));
             }
         }
         return decodeStream(bis, options);
@@ -194,11 +185,15 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         return false;
     }
 
-    private Bitmap.Config getConfig(RecyclableBufferedInputStream bis) {
-        Bitmap.Config result = Bitmap.Config.RGB_565;
+    private Bitmap.Config getConfig(RecyclableBufferedInputStream bis, DecodeFormat format) {
+        if (format == DecodeFormat.ALWAYS_ARGB_8888) {
+            return Bitmap.Config.ARGB_8888;
+        }
+
+        boolean hasAlpha = false;
         bis.mark(1024); //we probably only need 25, but this is safer (particularly since the buffer size is > 1024)
         try {
-            result = new ImageHeaderParser(bis).hasAlpha() ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+            hasAlpha = new ImageHeaderParser(bis).hasAlpha();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -208,7 +203,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
                 e.printStackTrace();
             }
         }
-        return result;
+
+        return hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
     }
 
     /**

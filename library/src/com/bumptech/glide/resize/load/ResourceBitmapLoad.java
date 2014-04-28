@@ -12,15 +12,17 @@ public class ResourceBitmapLoad<T> implements BitmapLoad {
     private final int width;
     private final int height;
     private final Transformation transformation;
+    private final DecodeFormat decodeFormat;
     private Metadata metadata;
 
     public ResourceBitmapLoad(String modelId, ResourceFetcher<T> fetcher, BitmapDecoder<T> decoder, int width,
-            int height, Transformation transformation) {
+            int height, Transformation transformation, DecodeFormat decodeFormat) {
         this.fetcher = fetcher;
         this.decoder = decoder;
         this.width = width;
         this.height = height;
         this.transformation = transformation;
+        this.decodeFormat = decodeFormat;
 
         this.id = modelId + decoder.getId() + width + height;
     }
@@ -56,7 +58,7 @@ public class ResourceBitmapLoad<T> implements BitmapLoad {
 
         T resource = fetcher.loadResource(metadata);
         if (resource != null) {
-            original = decoder.decode(resource, bitmapPool, width, height);
+            original = decoder.decode(resource, bitmapPool, width, height, decodeFormat);
         }
         Bitmap transformed = original;
         if (original != null) {

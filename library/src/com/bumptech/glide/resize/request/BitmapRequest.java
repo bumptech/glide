@@ -12,6 +12,7 @@ import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.load.BitmapLoad;
+import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.target.Target;
 
 /**
@@ -25,6 +26,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
     private final int placeholderResourceId;
     private final int errorResourceId;
     private final Context context;
+    private final DecodeFormat decodeFormat;
     private Animation animation;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
@@ -60,6 +62,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         this.animationId = builder.animationId;
         this.animation = builder.animation;
         this.requestCoordinator = builder.requestCoordinator;
+        this.decodeFormat = builder.decodeFormat;
     }
 
     @Override
@@ -165,7 +168,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
             return;
         }
 
-        loadTask.setMetadata(new Metadata(priority));
+        loadTask.setMetadata(new Metadata(priority, decodeFormat));
 
         token = imageManager.getImage(loadTask, this);
     }

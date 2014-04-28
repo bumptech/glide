@@ -5,13 +5,13 @@ import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 
 public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
     private static final String ID = "VideoBitmapDecoder";
     @Override
-    public Bitmap decode(ParcelFileDescriptor resource, BitmapPool bitmapPool, int outWidth, int outHeight)
+    public Bitmap decode(ParcelFileDescriptor resource, BitmapPool bitmapPool, int outWidth, int outHeight,
+            DecodeFormat decodeFormat)
             throws IOException {
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
         mediaMetadataRetriever.setDataSource(resource.getFileDescriptor());

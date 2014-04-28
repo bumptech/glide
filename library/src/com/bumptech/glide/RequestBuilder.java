@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.load.BitmapDecoder;
+import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.load.VideoBitmapDecoder;
@@ -92,6 +93,11 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
     @Override
     public RequestBuilder<ModelType> videoDecoder(BitmapDecoder<ParcelFileDescriptor> decoder) {
         super.videoDecoder(decoder);
+        return this;
+    }
+
+    public RequestBuilder<ModelType> format(DecodeFormat format) {
+        super.format(format);
         return this;
     }
 
