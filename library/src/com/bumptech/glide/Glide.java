@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.view.View;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
@@ -44,6 +45,7 @@ import java.util.UUID;
  * </p>
  */
 public class Glide {
+    private static final String TAG = "Glide";
     private static Glide GLIDE;
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
     private final RequestQueue requestQueue;
@@ -229,13 +231,15 @@ public class Glide {
      * @param context Any context.
      * @param <T> The type of the model.
      * @param <Y> The type of the resource.
-     * @return A new {@link ModelLoader} for the given model and resource classes.
-     * @throws NullPointerException if model is null.
+     * @return A new {@link ModelLoader} for the given model and resource classes, or null if model is null.
      */
     @SuppressWarnings("unchecked")
     public static <T, Y> ModelLoader<T, Y> buildModelLoader(T model, Class<Y> resourceClass, Context context) {
         if (model == null) {
-            throw new NullPointerException("You must pass in a non-null model (URL, file path, etc).");
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unable to load null model, setting placeholder only");
+            }
+            return null;
         }
         return buildModelLoader((Class<T>) model.getClass(), resourceClass, context);
     }

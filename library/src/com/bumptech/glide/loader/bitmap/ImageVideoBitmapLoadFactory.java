@@ -27,8 +27,8 @@ public class ImageVideoBitmapLoadFactory<T, Y, Z> implements BitmapLoadFactory<T
         this.imageLoadFactory = imageLoadFactory;
         this.videoLoadFactory = videoLoadFactory;
         if (imageLoadFactory == null && videoLoadFactory == null) {
-            throw new IllegalArgumentException("You must provide at least a video model loader and a video decoder or" +
-                    "an image model loader and an image decoder");
+            throw new IllegalArgumentException("You must provide at least a video model loader and a video decoder or"
+                    + " an image model loader and an image decoder");
         }
         if (transformation == null) {
             throw new IllegalArgumentException("You must provide a non null transformation");

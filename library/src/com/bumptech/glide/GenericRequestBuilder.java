@@ -6,11 +6,13 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.load.BitmapDecoder;
+import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.MultiTransformation;
@@ -65,12 +67,9 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         }
         this.context = context;
 
-        if (model == null ) {
-            throw new NullPointerException("Model can't be null");
-        }
         this.model = model;
 
-        if (imageLoader == null && videoLoader == null) {
+        if (model != null && imageLoader == null && videoLoader == null) {
             throw new NullPointerException("No ModelLoaders given or registered for model class="
                     + model.getClass());
         }
@@ -352,7 +351,9 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
         Request request = buildRequest(target);
         target.setRequest(request);
-        request.run();
+        if (request != null) {
+            request.run();
+        }
         return target;
     }
 
@@ -371,6 +372,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
     private <Y extends Target> Request buildRequest(Y target) {
         final Request result;
+
         if (thumbnailRequestBuilder != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
             Request fullRequest = buildBitmapRequest(target)
@@ -418,15 +420,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setImageManager(Glide.get(context).getImageManager())
                 .setModel(model)
                 .setTarget(target)
-                .setBitmapLoadFactory(
-                        new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(
-                                imageLoader != null && imageDecoder != null ?
-                                        new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(
-                                                imageLoader, imageDecoder, decodeFormat) : null,
-                                videoLoader != null && videoDecoder != null ?
-                                        new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(
-                                                videoLoader, videoDecoder, decodeFormat) : null,
-                                getFinalTransformation()))
+                .setBitmapLoadFactory(getLoadFactory())
                 .setDecodeFormat(decodeFormat)
                 .setAnimation(animationId)
                 .setAnimation(animation)
@@ -436,6 +430,35 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setErrorResource(errorId)
                 .setErrorDrawable(errorPlaceholder)
                 .setSizeMultiplier(sizeMultiplier);
+    }
+
+    private BitmapLoadFactory<ModelType> getLoadFactory() {
+        if (model == null) {
+            return new BitmapLoadFactory<ModelType>() {
+                @Override
+                public BitmapLoad getLoadTask(Object model, int width, int height) {
+                    return null;
+                }
+            };
+        }
+
+        final ResourceBitmapLoadFactory<ModelType, ImageResourceType> imageFactory;
+        if (imageLoader != null && imageDecoder != null) {
+            imageFactory = new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(imageLoader, imageDecoder,
+                    decodeFormat);
+        } else {
+            imageFactory = null;
+        }
+
+        final ResourceBitmapLoadFactory<ModelType, VideoResourceType> videoFactory;
+        if (videoLoader != null && videoDecoder != null) {
+            videoFactory = new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(videoLoader, videoDecoder,
+                    decodeFormat);
+        } else {
+            videoFactory = null;
+        }
+        return new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(imageFactory,
+                videoFactory, getFinalTransformation());
     }
 
     private Transformation getFinalTransformation() {

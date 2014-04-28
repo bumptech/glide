@@ -72,7 +72,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         loadedFromMemoryCache = bitmap != null;
 
         if (bitmap == null && !isError) {
-            resetPlaceHolder();
+            setPlaceHolder();
         }
     }
 
@@ -85,7 +85,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
 
     public void clear() {
         cancel();
-        resetPlaceHolder();
+        setPlaceHolder();
         if (bitmap != null) {
             imageManager.releaseBitmap(bitmap);
             bitmap = null;
@@ -97,13 +97,22 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         return bitmap != null;
     }
 
-    private void resetPlaceHolder() {
+    private void setPlaceHolder() {
         if (!canSetPlaceholder()) return;
 
         if (placeholderDrawable == null && placeholderResourceId > 0) {
             placeholderDrawable = context.getResources().getDrawable(placeholderResourceId);
         }
         target.setPlaceholder(placeholderDrawable);
+    }
+
+    private void setErrorPlaceholder() {
+        if (!canSetPlaceholder()) return;
+
+        if (errorDrawable == null && errorResourceId > 0) {
+            errorDrawable = context.getResources().getDrawable(errorResourceId);
+        }
+        target.setPlaceholder(errorDrawable);
     }
 
     @Override
@@ -138,12 +147,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         }
 
         isError = true;
-        if (canSetPlaceholder()) {
-            if (errorDrawable == null && errorResourceId > 0) {
-                errorDrawable = context.getResources().getDrawable(errorResourceId);
-            }
-            target.setPlaceholder(errorDrawable);
-        }
+        setErrorPlaceholder();
 
         //TODO: what if this is a thumbnail request?
         if (requestListener != null) {
@@ -161,10 +165,10 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         height = Math.round(sizeMultiplier * height);
         BitmapLoad loadTask = bitmapLoadFactory.getLoadTask(model, width, height);
         if (loadTask == null) {
-            if (Log.isLoggable(TAG, Log.INFO)) {
-                Log.i(TAG, "got null load task for model=" + model);
+            if (model != null && Log.isLoggable(TAG, Log.INFO)) {
+                Log.i(TAG, "Got null load task for model=" + model);
             }
-            clear();
+            setErrorPlaceholder();
             return;
         }
 

@@ -119,6 +119,11 @@ public class GlideTest extends ActivityTestCase {
         glide.unregister(Float.class, InputStream.class);
     }
 
+    public void testNullModelDoesNotThrow() {
+        String nullString = null;
+        Glide.with(getContext()).load(nullString).into(imageViewTarget);
+    }
+
 //    public void testMemoryLeak() throws InterruptedException {
 //        final int numRequests = 200;
 //        final HandlerThread handlerThread = new HandlerThread("memory_leak");
