@@ -1,7 +1,9 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
+import android.view.animation.Animation;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.DecodeFormat;
@@ -126,14 +128,32 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
     }
 
     @Override
+    public RequestBuilder<ModelType> animate(Animation animation) {
+        super.animate(animation);
+        return this;
+    }
+
+    @Override
     public RequestBuilder<ModelType> placeholder(int resourceId) {
         super.placeholder(resourceId);
         return this;
     }
 
     @Override
+    public RequestBuilder<ModelType> placeholder(Drawable drawable) {
+        super.placeholder(drawable);
+        return this;
+    }
+
+    @Override
     public RequestBuilder<ModelType> error(int resourceId) {
         super.error(resourceId);
+        return this;
+    }
+
+    @Override
+    public RequestBuilder<ModelType> error(Drawable drawable) {
+        super.error(drawable);
         return this;
     }
 

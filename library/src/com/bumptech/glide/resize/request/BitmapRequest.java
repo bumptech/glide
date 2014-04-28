@@ -27,7 +27,6 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
     private final int errorResourceId;
     private final Context context;
     private final DecodeFormat decodeFormat;
-    private Animation animation;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
     private final T model;
@@ -38,6 +37,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
     private final RequestListener<T> requestListener;
     private final float sizeMultiplier;
 
+    private Animation animation;
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
     private boolean isCancelled;

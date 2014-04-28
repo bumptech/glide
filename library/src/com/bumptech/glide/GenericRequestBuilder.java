@@ -2,7 +2,9 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
@@ -42,6 +44,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private final ModelType model;
 
     private int animationId;
+    private Animation animation;
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType> requestListener;
@@ -51,6 +54,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
+    private Drawable placeholderDrawable;
+    private Drawable errorPlaceholder;
 
     public GenericRequestBuilder(Context context, ModelType model,
             ModelLoader<ModelType, ImageResourceType> imageLoader,
@@ -258,6 +263,19 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     }
 
     /**
+     * Sets an animation to run on the wrapped target when an image load finishes. Will only be run if the image
+     * was loaded asynchronously (ie was not in the memory cache)
+     *
+     * @param animation The animation to run
+     * @return This RequestBuilder
+     */
+    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> animate(Animation animation) {
+        this.animation = animation;
+
+        return this;
+    }
+
+    /**
      * Sets a resource to display while an image is loading
      *
      * @param resourceId The id of the resource to use as a placeholder
@@ -270,6 +288,18 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     }
 
     /**
+     * Sets a drawable to display while an image is loading.
+     *
+     * @param drawable The drawable to display as a placeholder.
+     * @return This RequestBuilder.
+     */
+    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> placeholder(Drawable drawable) {
+        this.placeholderDrawable = drawable;
+
+        return this;
+    }
+
+    /**
      * Sets a resource to display if a load fails
      *
      * @param resourceId The id of the resource to use as a placeholder
@@ -277,6 +307,18 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> error(int resourceId) {
         this.errorId = resourceId;
+
+        return this;
+    }
+
+    /**
+     * Sets a {@link Drawable} to display if a load fails.
+     *
+     * @param drawable The drawable to display.
+     * @return This RequestBuilder.
+     */
+    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> error(Drawable drawable) {
+        this.errorPlaceholder = drawable;
 
         return this;
     }
@@ -335,8 +377,12 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                     .setRequestCoordinator(requestCoordinator)
                     .build();
 
-            if (thumbnailRequestBuilder.animationId == 0 && animationId != 0) {
+            if (thumbnailRequestBuilder.animationId == 0) {
                 thumbnailRequestBuilder.animationId = animationId;
+            }
+
+            if (thumbnailRequestBuilder.animation == null) {
+                thumbnailRequestBuilder.animation = animation;
             }
 
             if (thumbnailRequestBuilder.requestListener == null && requestListener != null) {
@@ -383,9 +429,12 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                                 getFinalTransformation()))
                 .setDecodeFormat(decodeFormat)
                 .setAnimation(animationId)
+                .setAnimation(animation)
                 .setRequestListener(requestListener)
                 .setPlaceholderResource(placeholderId)
+                .setPlaceholderDrawable(placeholderDrawable)
                 .setErrorResource(errorId)
+                .setErrorDrawable(errorPlaceholder)
                 .setSizeMultiplier(sizeMultiplier);
     }
 
