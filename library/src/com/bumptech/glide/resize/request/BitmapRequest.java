@@ -168,7 +168,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
             if (model != null && Log.isLoggable(TAG, Log.INFO)) {
                 Log.i(TAG, "Got null load task for model=" + model);
             }
-            setErrorPlaceholder();
+            onLoadFailed(null);
             return;
         }
 
