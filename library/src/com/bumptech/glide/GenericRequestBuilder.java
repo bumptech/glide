@@ -58,6 +58,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;
+    private Priority priority = null;
 
     public GenericRequestBuilder(Context context, ModelType model,
             ModelLoader<ModelType, ImageResourceType> imageLoader,
@@ -211,6 +212,18 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> format(DecodeFormat format) {
         this.decodeFormat = format;
+
+        return this;
+    }
+
+    /**
+     * Sets the priority for this load.
+     *
+     * @param priority A priority.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> priority(Priority priority) {
+        this.priority = priority;
 
         return this;
     }
@@ -372,6 +385,9 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
     private <Y extends Target> Request buildRequest(Y target) {
         final Request result;
+        if (priority == null) {
+            priority = Priority.NORMAL;
+        }
 
         if (thumbnailRequestBuilder != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
@@ -390,6 +406,11 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
             if (thumbnailRequestBuilder.requestListener == null && requestListener != null) {
                 thumbnailRequestBuilder.requestListener = requestListener;
             }
+
+            if (thumbnailRequestBuilder.priority == null) {
+                thumbnailRequestBuilder.priority = getThumbnailPriority();
+            }
+
             Request thumbnailRequest = thumbnailRequestBuilder.buildBitmapRequest(target)
                     .setRequestCoordinator(requestCoordinator)
                     .build();
@@ -404,6 +425,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
             Request thumbnailRequest = buildBitmapRequest(target)
                     .setRequestCoordinator(requestCoordinator)
                     .setSizeMultiplier(thumbSizeMultiplier)
+                    .setPriority(getThumbnailPriority())
                     .build();
             requestCoordinator.setRequests(fullRequest, thumbnailRequest);
             result = requestCoordinator;
@@ -413,10 +435,22 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         return result;
     }
 
+    private Priority getThumbnailPriority() {
+        final Priority result;
+        if (priority == Priority.LOW) {
+            result = Priority.NORMAL;
+        } else if (priority == Priority.NORMAL) {
+            result = Priority.HIGH;
+        } else {
+            result = Priority.IMMEDIATE;
+        }
+        return result;
+    }
+
     private <Y extends Target> BitmapRequestBuilder<ModelType> buildBitmapRequest(Y target) {
         return new BitmapRequestBuilder<ModelType>()
                 .setContext(context)
-                .setPriority(Priority.NORMAL)
+                .setPriority(priority)
                 .setImageManager(Glide.get(context).getImageManager())
                 .setModel(model)
                 .setTarget(target)

@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
@@ -98,8 +99,15 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
         return this;
     }
 
+    @Override
     public RequestBuilder<ModelType> format(DecodeFormat format) {
         super.format(format);
+        return this;
+    }
+
+    @Override
+    public RequestBuilder<ModelType> priority(Priority priority) {
+        super.priority(priority);
         return this;
     }
 

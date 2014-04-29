@@ -92,7 +92,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         protected RequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(context)
                     .loadFromImage(item)
-                    .thumbnail(0.25f)
+                    .thumbnail(0.1f)
                     .centerCrop();
         }
     }
@@ -149,7 +149,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
             Glide.with(getActivity())
                     .loadFromImage(current)
-                    .thumbnail(0.25f)
+                    .thumbnail(0.1f)
                     .centerCrop()
                     .animate(R.anim.fade_in)
                     .into(viewHolder.imageView);

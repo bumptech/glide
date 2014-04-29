@@ -36,12 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
@@ -288,23 +282,8 @@ public class ImageManager {
 
         private void setDefaults() {
             if (resizeService == null) {
-
-                resizeService = new ThreadPoolExecutor(4, 4, 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue
-                        <Runnable>(), new ThreadFactory() {
-                     int threadNum = 1;
-                    @Override
-                    public Thread newThread(Runnable runnable) {
-                        final Thread result = new Thread(runnable, "image-manager-resize-" + threadNum);
-                        threadNum++;
-                        result.setPriority(THREAD_PRIORITY_BACKGROUND);
-                        return result;
-                    }
-                }) {
-                    @Override
-                    protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-                        return new LoadTask<T>(runnable, value);
-                    }
-                };
+                final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
+                resizeService = new FifoPriorityThreadPoolExecutor(cores);
             }
             final int safeCacheSize = getSafeMemoryCacheSize(context);
             final boolean isLowMemoryDevice = isLowMemoryDevice(context);
@@ -740,27 +719,5 @@ public class ImageManager {
     public interface LoadedCallback {
         public void onLoadCompleted(Bitmap loaded);
         public void onLoadFailed(Exception e);
-    }
-
-    private interface Prioritized {
-        public int getPriority();
-    }
-
-    private static class LoadTask<T> extends FutureTask<T> implements Runnable, Comparable<LoadTask> {
-        int priority;
-
-        public LoadTask(Runnable runnable, T result) {
-            super(runnable, result);
-            priority = ((Prioritized) runnable).getPriority();
-        }
-
-        public int getPriority() {
-            return priority;
-        }
-
-        @Override
-        public int compareTo(LoadTask loadTask) {
-            return priority - loadTask.getPriority();
-        }
     }
 }
