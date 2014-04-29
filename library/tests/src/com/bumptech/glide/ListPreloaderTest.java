@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.mockito.Mockito.mock;
+
 public class ListPreloaderTest extends AndroidTestCase {
 
     @Override
@@ -39,13 +41,43 @@ public class ListPreloaderTest extends AndroidTestCase {
         assertTrue(called.get());
     }
 
+    public void testGetItemsIsCalledInOrderIncreasing() {
+        final int toPreload = 10;
+        final List<Object> objects = new ArrayList<Object>();
+        for (int i = 0; i < toPreload; i++) {
+            objects.add(new Object());
+        }
+
+        ListPreloader preloader = new ListPreloader(toPreload) {
+            int expectedPosition;
+            @Override
+            protected int[] getDimensions(Object item) {
+                return new int[] { 10, 10 };
+            }
+
+            @Override
+            protected List getItems(int start, int end) {
+                return objects;
+            }
+
+            @Override
+            protected RequestBuilder getRequestBuilder(Object item) {
+                assertEquals(objects.get(expectedPosition), item);
+                expectedPosition++;
+                return mock(RequestBuilder.class);
+            }
+        };
+
+        preloader.onScroll(null, 1, 10, 30);
+    }
+
     public void testGetItemsIsCalledDecreasing() {
         final AtomicBoolean called = new AtomicBoolean(false);
         ListPreloaderAdapter preloader = new ListPreloaderAdapter(getContext(), 10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 // Ignore the preload caused from us starting at the end
-                if (start == 30) {
+                if (start == 40) {
                     return Collections.EMPTY_LIST;
                 }
                 called.set(true);
@@ -54,9 +86,43 @@ public class ListPreloaderTest extends AndroidTestCase {
                 return super.getItems(start, end);
             }
         };
-        preloader.onScroll(null, 30, 10, 30);
-        preloader.onScroll(null, 29, 10, 30);
+        preloader.onScroll(null, 30, 10, 40);
+        preloader.onScroll(null, 29, 10, 40);
         assertTrue(called.get());
+    }
+
+    public void testGetItemsIsCalledInOrderDecreasing() {
+        final int toPreload = 10;
+        final List<Object> objects = new ArrayList<Object>();
+        for (int i = 0; i < toPreload; i++) {
+            objects.add(new Object());
+        }
+
+        ListPreloader preloader = new ListPreloader(toPreload) {
+            int expectedPosition = toPreload - 1;
+            @Override
+            protected int[] getDimensions(Object item) {
+                return new int[] { 10, 10 };
+            }
+
+            @Override
+            protected List getItems(int start, int end) {
+                if (start == 40) {
+                    return  Collections.EMPTY_LIST;
+                }
+                return objects;
+            }
+
+            @Override
+            protected RequestBuilder getRequestBuilder(Object item) {
+                assertEquals(objects.get(expectedPosition), item);
+                expectedPosition--;
+                return mock(RequestBuilder.class);
+            }
+        };
+
+        preloader.onScroll(null, 30, 10, 40);
+        preloader.onScroll(null, 29, 10, 40);
     }
 
     public void testGetItemsIsNeverCalledWithEndGreaterThanTotalItems() {

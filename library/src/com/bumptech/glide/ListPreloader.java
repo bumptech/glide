@@ -111,13 +111,13 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
 
         if (from < to) {
             // Increasing
-            for (int i = items.size() - 1; i >= 0; i--) {
+            final int numItems = items.size();
+            for (int i = 0; i < numItems; i++) {
                 preloadItem(items, i);
             }
         } else {
             // Decreasing
-            final int numItems = items.size();
-            for (int i = 0; i < numItems; i++) {
+            for (int i = items.size() - 1; i >= 0; i--) {
                 preloadItem(items, i);
             }
         }
