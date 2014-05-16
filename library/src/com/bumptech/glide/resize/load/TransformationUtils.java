@@ -67,64 +67,6 @@ public class TransformationUtils {
     }
 
     /**
-     * An expensive operation to resize the given image, maintaining the original proportions, so that its width
-     * matches the given width
-     *
-     * @param toShrink The Bitmap to shrink
-     * @param width The width of the final Bitmap
-     * @return A new Bitmap shrunk to the given width, or toShrink if toShrink's width is equivalent to the given width
-     */
-    public static Bitmap shrinkToWidth(Bitmap toShrink, int width){
-        Bitmap shrunk = toShrink;
-        float widthPercent = ((float) width/toShrink.getWidth());
-        if (widthPercent != 1) {
-            int shrunkImageHeight = Math.round(widthPercent * toShrink.getHeight());
-            shrunk = Bitmap.createScaledBitmap(toShrink, width, shrunkImageHeight, true);
-        }
-        return shrunk;
-    }
-
-    /**
-     * An expensive operation to resize the given image, maintaining the original proportions, so that its height
-     * matches the given height
-     *
-     * @param toShrink The Bitmap to shrink
-     * @param height The height of the final Bitmap
-     * @return A new Bitmap shrunk to the given height, or toShrink if toShink's height is equivalent to the given
-     *          height
-     */
-    public static Bitmap shrinkToHeight(Bitmap toShrink, int height){
-        Bitmap shrunk = toShrink;
-        float heightPercent = ((float) height/toShrink.getHeight());
-        if (heightPercent != 1) {
-            int shrunkImageWidth = Math.round(heightPercent * toShrink.getWidth());
-            shrunk = Bitmap.createScaledBitmap(toShrink, shrunkImageWidth, height, true);
-        }
-        return shrunk;
-    }
-
-    /**
-     * An expensive operation to resize the given Bitmap down so that it fits within the given dimensions maintaining
-     * the original proportions
-     *
-     * @param toFit The Bitmap to shrink
-     * @param width The width the final image will fit within
-     * @param height The height the final image will fit within
-     * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or height matches the
-     * given dimensions and toFit fits within the given dimensions
-     */
-    @Deprecated
-    public static Bitmap fitInSpace(Bitmap toFit, int width, int height){
-        if (toFit == null) return null;
-
-        if (height > width){
-            return shrinkToWidth(toFit, width);
-        } else {
-            return shrinkToHeight(toFit, height);
-        }
-    }
-
-    /**
      * An expensive operation to resize the given Bitmap down so that it fits within the given dimensions maintain
      * the original proportions.
      *
@@ -136,18 +78,12 @@ public class TransformationUtils {
      * given dimensions and toFit fits within the given dimensions
      */
     public static Bitmap fitCenter(Bitmap toFit, BitmapPool pool, int width, int height) {
-         final float shrinkPercentage;
-        final int targetWidth;
-        final int targetHeight;
-        if (height > width) {
-            shrinkPercentage = width / (float) toFit.getWidth();
-            targetWidth = width;
-            targetHeight = Math.round(shrinkPercentage * toFit.getHeight());
-        } else {
-            shrinkPercentage = height / (float) toFit.getHeight();
-            targetWidth = Math.round(shrinkPercentage * toFit.getWidth());
-            targetHeight = height;
-        }
+        final float widthPercentage = width / (float) toFit.getWidth();
+        final float heightPercentage = height / (float) toFit.getHeight();
+        final float minPercentage = Math.min(widthPercentage, heightPercentage);
+
+        final int targetWidth = Math.round(minPercentage * toFit.getWidth());
+        final int targetHeight = Math.round(minPercentage * toFit.getHeight());
 
         Bitmap.Config config = toFit.getConfig() != null ? toFit.getConfig() : Bitmap.Config.ARGB_8888;
         Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
@@ -156,13 +92,12 @@ public class TransformationUtils {
         }
         Canvas canvas = new Canvas(toReuse);
         Matrix matrix = new Matrix();
-        matrix.setScale(shrinkPercentage, shrinkPercentage);
+        matrix.setScale(minPercentage, minPercentage);
         Paint paint = new Paint(PAINT_FLAGS);
         canvas.drawBitmap(toFit, matrix, paint);
 
         return toReuse;
     }
-
 
     /**
      * Returns a matrix with rotation set based on Exif orientation tag.
