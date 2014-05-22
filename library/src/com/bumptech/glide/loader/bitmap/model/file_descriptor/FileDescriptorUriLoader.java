@@ -4,14 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.loader.GlideUrl;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.UriLoader;
 import com.bumptech.glide.loader.bitmap.resource.FileDescriptorLocalUriFetcher;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-
-import java.net.URL;
 
 /**
  * A {@link ModelLoader} For translating {@link Uri} models for local uris into {@link ParcelFileDescriptor} resources.
@@ -21,7 +20,7 @@ public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> imp
     public static class Factory implements ModelLoaderFactory<Uri, ParcelFileDescriptor> {
         @Override
         public ModelLoader<Uri, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
-            return new FileDescriptorUriLoader(context, factories.buildModelLoader(URL.class, ParcelFileDescriptor.class,
+            return new FileDescriptorUriLoader(context, factories.buildModelLoader(GlideUrl.class, ParcelFileDescriptor.class,
                     context));
         }
 
@@ -30,10 +29,10 @@ public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> imp
     }
 
     public FileDescriptorUriLoader(Context context) {
-        this(context, Glide.buildFileDescriptorModelLoader(URL.class, context));
+        this(context, Glide.buildFileDescriptorModelLoader(GlideUrl.class, context));
     }
 
-    public FileDescriptorUriLoader(Context context, ModelLoader<URL, ParcelFileDescriptor> urlLoader) {
+    public FileDescriptorUriLoader(Context context, ModelLoader<GlideUrl, ParcelFileDescriptor> urlLoader) {
         super(context, urlLoader);
     }
 

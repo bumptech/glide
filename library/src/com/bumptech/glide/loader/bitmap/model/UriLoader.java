@@ -3,16 +3,14 @@ package com.bumptech.glide.loader.bitmap.model;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import com.bumptech.glide.loader.GlideUrl;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
     private final Context context;
-    private final ModelLoader<URL, T> urlLoader;
+    private final ModelLoader<GlideUrl, T> urlLoader;
 
-    public UriLoader(Context context, ModelLoader<URL, T> urlLoader) {
+    public UriLoader(Context context, ModelLoader<GlideUrl, T> urlLoader) {
         this.context = context;
         this.urlLoader = urlLoader;
     }
@@ -25,11 +23,7 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
         if (isLocalUri(scheme)) {
             result = getLocalUriFetcher(context, model);
         } else if (urlLoader != null && ("http".equals(scheme) || "https".equals(scheme))) {
-            try {
-                result = urlLoader.getResourceFetcher(new URL(model.toString()), width, height);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            result = urlLoader.getResourceFetcher(new GlideUrl(model.toString()), width, height);
         }
 
         return result;

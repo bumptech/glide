@@ -3,6 +3,7 @@ package com.bumptech.glide.loader.bitmap.model;
 import android.content.Context;
 import android.net.Uri;
 import android.test.AndroidTestCase;
+import com.bumptech.glide.loader.GlideUrl;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
@@ -10,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -25,7 +25,7 @@ public class UriLoaderTest extends AndroidTestCase {
 
     private UriLoader loader;
     private ResourceFetcher<InputStream> localUriFetcher;
-    private ModelLoader<URL, InputStream> urlLoader;
+    private ModelLoader<GlideUrl, InputStream> urlLoader;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -64,13 +64,13 @@ public class UriLoaderTest extends AndroidTestCase {
         Uri httpUri = Uri.parse("http://www.google.com");
         loader.getResourceFetcher(httpUri, IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(urlLoader).getResourceFetcher(eq(new URL(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(urlLoader).getResourceFetcher(eq(new GlideUrl(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     public void testHandlesHttpsUris() throws MalformedURLException {
         Uri httpsUri = Uri.parse("https://www.google.com");
         loader.getResourceFetcher(httpsUri, IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(urlLoader).getResourceFetcher(eq(new URL(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(urlLoader).getResourceFetcher(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 }

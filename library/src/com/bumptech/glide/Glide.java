@@ -8,6 +8,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
 import com.android.volley.RequestQueue;
+import com.bumptech.glide.loader.GlideUrl;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
@@ -22,6 +23,7 @@ import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
+import com.bumptech.glide.loader.bitmap.model.stream.StreamUrlLoader;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
@@ -102,7 +104,9 @@ public class Glide {
         register(String.class, InputStream.class, new StreamStringLoader.Factory());
         register(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
         register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
-        register(URL.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
+        register(URL.class, InputStream.class, new StreamUrlLoader.Factory());
+        register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
+
     }
 
     /**

@@ -3,6 +3,7 @@ package com.bumptech.glide.loader.bitmap.model.stream;
 import android.content.Context;
 import android.net.Uri;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.loader.GlideUrl;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
@@ -11,7 +12,6 @@ import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.loader.bitmap.resource.StreamLocalUriFetcher;
 
 import java.io.InputStream;
-import java.net.URL;
 
 /**
  * A {@link ModelLoader} for translating uri models into {@link InputStream} resources. Capable of handling 'http',
@@ -24,7 +24,7 @@ public class StreamUriLoader extends UriLoader<InputStream> implements StreamMod
 
         @Override
         public ModelLoader<Uri, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new StreamUriLoader(context, factories.buildModelLoader(URL.class, InputStream.class, context));
+            return new StreamUriLoader(context, factories.buildModelLoader(GlideUrl.class, InputStream.class, context));
         }
 
         @Override
@@ -32,10 +32,10 @@ public class StreamUriLoader extends UriLoader<InputStream> implements StreamMod
     }
 
     public StreamUriLoader(Context context) {
-        this(context, Glide.buildStreamModelLoader(URL.class, context));
+        this(context, Glide.buildStreamModelLoader(GlideUrl.class, context));
     }
 
-    public StreamUriLoader(Context context, ModelLoader<URL, InputStream> urlLoader) {
+    public StreamUriLoader(Context context, ModelLoader<GlideUrl, InputStream> urlLoader) {
         super(context, urlLoader);
     }
 

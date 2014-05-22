@@ -4,20 +4,20 @@ import android.content.Context;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.RetryPolicy;
+import com.bumptech.glide.loader.GlideUrl;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.io.InputStream;
-import java.net.URL;
 
 /**
  *  A simple model loader for fetching images for a given url
  */
-public class VolleyUrlLoader implements ModelLoader<URL, InputStream> {
+public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
-    public static class Factory implements ModelLoaderFactory<URL, InputStream> {
+    public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
         private RequestQueue requestQueue;
 
         public Factory(RequestQueue requestQueue) {
@@ -25,7 +25,7 @@ public class VolleyUrlLoader implements ModelLoader<URL, InputStream> {
         }
 
         @Override
-        public ModelLoader<URL, InputStream> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {
             return new VolleyUrlLoader(requestQueue);
         }
 
@@ -40,12 +40,12 @@ public class VolleyUrlLoader implements ModelLoader<URL, InputStream> {
     }
 
     @Override
-    public ResourceFetcher<InputStream> getResourceFetcher(URL url, int width, int height) {
+    public ResourceFetcher<InputStream> getResourceFetcher(GlideUrl url, int width, int height) {
         return new VolleyStreamFetcher(requestQueue, url.toString(), getRetryPolicy());
     }
 
     @Override
-    public String getId(URL url) {
+    public String getId(GlideUrl url) {
         return url.toString();
     }
 

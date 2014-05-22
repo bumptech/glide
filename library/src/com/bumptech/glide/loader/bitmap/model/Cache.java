@@ -10,7 +10,7 @@ import com.bumptech.glide.util.LruCache;
  * @param <A> Some useful type that may be expensive to create (URL, file path, etc).
  */
 public class Cache<A> {
-    private LruCache<ModelKey, A> cache = new LruCache<ModelKey, A>(250);
+    private static final int DEFAULT_SIZE = 250;
 
     private static class ModelKey {
         private final int height;
@@ -44,6 +44,16 @@ public class Cache<A> {
             result = 31 * result + id.hashCode();
             return result;
         }
+    }
+
+    private final LruCache<ModelKey, A> cache;
+
+    public Cache() {
+        this(DEFAULT_SIZE);
+    }
+
+    public Cache(int size) {
+        cache = new LruCache<ModelKey, A>(size);
     }
 
     /**
