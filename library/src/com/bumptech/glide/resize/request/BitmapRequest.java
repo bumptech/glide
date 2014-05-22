@@ -67,9 +67,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
 
     @Override
     public void run() {
-        loadedFromMemoryCache = true;
         target.getSize(this);
-        loadedFromMemoryCache = bitmap != null;
 
         if (bitmap == null && !isError) {
             setPlaceHolder();
@@ -121,7 +119,6 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
             imageManager.releaseBitmap(loaded);
             return;
         }
-
         target.onImageReady(loaded);
         if (!loadedFromMemoryCache && !isAnyImageSet()) {
             if (animation == null && animationId > 0) {
@@ -174,7 +171,9 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
 
         loadTask.setMetadata(new Metadata(priority, decodeFormat));
 
+        loadedFromMemoryCache = true;
         token = imageManager.getImage(loadTask, this);
+        loadedFromMemoryCache = bitmap != null;
     }
 
     private boolean canSetImage() {
