@@ -4,6 +4,7 @@ library/build/*
 library/local.properties
 library/.gradle
 library/.settings
+library/target
 *.iml
 .idea/*
 *.DS_Store
@@ -14,6 +15,7 @@ samples/flickr/gen
 samples/flickr/out
 samples/flickr/bin
 samples/flickr/local.properties
+samples/flickr/target
 *.keystore
 **/.idea/*
 .settings

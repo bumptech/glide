@@ -16,7 +16,7 @@
   the package of com.bumptech.glide.  To run the tests use the command:
   "adb shell am instrument -w com.bumptech.glide.tests/android.test.InstrumentationTestRunner"
   -->
-  <instrumentation android:name="com.bumptech.glide.MockitoInstrumentationTestRunner"
+  <instrumentation android:name="android.test.InstrumentationTestRunner"
                    android:targetPackage="com.bumptech.glide"
                    android:label="Tests for com.bumptech.glide"/>
 </manifest>

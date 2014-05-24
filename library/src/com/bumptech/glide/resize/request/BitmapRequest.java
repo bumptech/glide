@@ -110,7 +110,11 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         if (errorDrawable == null && errorResourceId > 0) {
             errorDrawable = context.getResources().getDrawable(errorResourceId);
         }
-        target.setPlaceholder(errorDrawable);
+        if (errorDrawable == null) {
+            setPlaceHolder();
+        } else {
+            target.setPlaceholder(errorDrawable);
+        }
     }
 
     @Override
