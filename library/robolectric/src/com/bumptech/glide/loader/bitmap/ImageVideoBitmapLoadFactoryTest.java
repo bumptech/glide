@@ -3,14 +3,11 @@ package com.bumptech.glide.loader.bitmap;
 import com.bumptech.glide.resize.load.Transformation;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricTestRunner.class)
 public class ImageVideoBitmapLoadFactoryTest {
     // Not magic, just a non 0 number.
     private static final int IMAGE_SIDE = 200;

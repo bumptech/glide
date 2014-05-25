@@ -2,8 +2,6 @@ package com.bumptech.glide.resize;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -11,7 +9,6 @@ import java.util.regex.Pattern;
 
 import static junit.framework.Assert.assertTrue;
 
-@RunWith(RobolectricTestRunner.class)
 public class KeyGeneratorTest {
     private SafeKeyGenerator keyGenerator;
 

@@ -1,8 +1,6 @@
 package com.bumptech.glide.resize;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 
-@RunWith(RobolectricTestRunner.class)
 public class FifoPriorityThreadPoolExecutorTest {
 
     @Test

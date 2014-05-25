@@ -2,15 +2,12 @@ package com.bumptech.glide.loader.bitmap.model.stream;
 
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 
-@RunWith(RobolectricTestRunner.class)
 public class StreamByteArrayLoaderTest {
 
     @Test

@@ -2,15 +2,12 @@ package com.bumptech.glide.loader.bitmap.resource;
 
 import com.bumptech.glide.resize.Metadata;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
-@RunWith(RobolectricTestRunner.class)
 public class ByteArrayFetcherTest {
 
     @Test
