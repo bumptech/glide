@@ -60,7 +60,7 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
         if (metadata == null) {
             metadata = Metadata.DEFAULT;
         }
-        switch (metadata.priority) {
+        switch (metadata.getPriority()) {
             case LOW:
                 return Request.Priority.LOW;
             case HIGH:

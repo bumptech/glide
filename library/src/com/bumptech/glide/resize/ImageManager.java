@@ -624,7 +624,7 @@ public class ImageManager {
             final InputStream is = diskCache.get(key);
             if (is != null) {
                 // Since we're doing no downsampling we don't need the target width or height.
-                result = Downsampler.NONE.decode(is, bitmapPool, -1, -1, task.getMetadata().decodeFormat);
+                result = Downsampler.NONE.decode(is, bitmapPool, -1, -1, task.getMetadata().getDecodeFormat());
                 if (result == null) {
                     // If we have data for our key but couldn't decode it, the data must be corrupt, so we will clear it
                     // from our cache and try to fetch it again.
@@ -656,7 +656,7 @@ public class ImageManager {
             @Override
             public int getPriority() {
                 Metadata metadata = task.getMetadata() != null ? task.getMetadata() : Metadata.DEFAULT;
-                return metadata.priority.ordinal();
+                return metadata.getPriority().ordinal();
             }
         }
 

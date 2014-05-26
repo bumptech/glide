@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -114,6 +115,15 @@ public class SourceResourceRunnerTest {
         harness.runner.run();
 
         verify(harness.fetcher, never()).loadResource(any(Metadata.class));
+    }
+
+    @Test
+    public void testPriorityMatchesMetadataPriority() {
+        when(harness.metadata.getPriority()).thenReturn(Priority.LOW);
+        assertEquals(Priority.LOW.ordinal(), harness.runner.getPriority());
+
+        when(harness.metadata.getPriority()).thenReturn(Priority.HIGH);
+        assertEquals(Priority.HIGH.ordinal(), harness.runner.getPriority());
     }
 
     @SuppressWarnings("unchecked")

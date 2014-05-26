@@ -10,7 +10,7 @@ import java.io.OutputStream;
  * @param <T> The type of the data the resource will be decoded from.
  * @param <Z> The type of the resource that will be decoded.
  */
-public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer {
+public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, Prioritized {
     private final String id;
     private final int width;
     private final int height;
@@ -68,5 +68,10 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer {
     @Override
     public void write(OutputStream os) {
         encoder.encode(result, os);
+    }
+
+    @Override
+    public int getPriority() {
+        return metadata.getPriority().ordinal();
     }
 }
