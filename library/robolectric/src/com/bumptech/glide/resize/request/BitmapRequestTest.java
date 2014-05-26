@@ -112,7 +112,6 @@ public class BitmapRequestTest {
                 .build();
 
         request.run();
-        request.onSizeReady(10, 10);
 
         assertEquals(placeholder, target.currentPlaceholder);
     }
@@ -136,7 +135,6 @@ public class BitmapRequestTest {
                 .build();
 
         request.run();
-        request.onSizeReady(10, 10);
 
         assertEquals(errorPlaceholder, target.currentPlaceholder);
     }

@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
@@ -23,14 +24,19 @@ import java.io.InputStream;
 @SuppressWarnings("unused") //public api
 public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor> {
 
-    RequestBuilder(Context context, ModelType model) {
+    RequestBuilder(Context context, ModelType model, RequestContext requestContext) {
         this(context, model, Glide.buildStreamModelLoader(model, context),
-                Glide.buildFileDescriptorModelLoader(model, context));
+                Glide.buildFileDescriptorModelLoader(model, context), requestContext);
     }
 
+    @SuppressWarnings("unchecked")
     RequestBuilder(Context context, ModelType model, ModelLoader<ModelType, InputStream> imageLoader,
-            ModelLoader<ModelType, ParcelFileDescriptor> videoLoader) {
-        super(context, model, imageLoader, videoLoader);
+            ModelLoader<ModelType, ParcelFileDescriptor> videoLoader, RequestContext requestContext) {
+        super(context, model, imageLoader, videoLoader, requestContext);
+        if (model != null) {
+            requestContext.register(imageLoader, (Class <ModelType>) model.getClass(), InputStream.class);
+            requestContext.register(videoLoader, (Class <ModelType>) model.getClass(), ParcelFileDescriptor.class);
+        }
 
         approximate().videoDecoder(new VideoBitmapDecoder());
     }

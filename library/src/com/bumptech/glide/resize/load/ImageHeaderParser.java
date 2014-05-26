@@ -1,13 +1,17 @@
 package com.bumptech.glide.resize.load;
 
-import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.*;
-
 import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.GIF;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.JPEG;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.PNG_A;
+import static com.bumptech.glide.resize.load.ImageHeaderParser.ImageType.UNKNOWN;
 
 /**
  * A class for parsing the exif orientation from an InputStream for an image. Handles jpegs and tiffs.
@@ -59,7 +63,6 @@ public class ImageHeaderParser {
     public ImageHeaderParser(InputStream is) {
         streamReader = new StreamReader(is);
     }
-
 
     // 0xD0A3C68 -> <htm
     // 0xCAFEBABE -> <!DOCTYPE...

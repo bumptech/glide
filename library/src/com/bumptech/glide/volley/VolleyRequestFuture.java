@@ -66,7 +66,7 @@ public class VolleyRequestFuture<T> implements Future<T>, Response.Listener<T>,
         return new VolleyRequestFuture<E>();
     }
 
-    private VolleyRequestFuture() {}
+    public VolleyRequestFuture() {}
 
     public synchronized void setRequest(Request<?> request) {
         mRequest = request;

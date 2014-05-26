@@ -1,14 +1,29 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Build;
 import com.android.volley.RequestQueue;
+import com.bumptech.glide.resize.Engine;
+import com.bumptech.glide.resize.EngineBuilder;
 import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.RequestContext;
+import com.bumptech.glide.resize.bitmap.BitmapEncoder;
+import com.bumptech.glide.resize.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
+import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.volley.RequestQueueWrapper;
+
+import java.io.InputStream;
 
 public class GlideBuilder {
     private ImageManager imageManager;
     private RequestQueue requestQueue;
     private Context context;
+    private Engine engine;
+    private RequestContext requestContext;
+    private BitmapPool bitmapPool;
 
     public GlideBuilder(Context context) {
         this.context = context.getApplicationContext();
@@ -24,6 +39,21 @@ public class GlideBuilder {
         return this;
     }
 
+    GlideBuilder setRequestContext(RequestContext requestContext) {
+        this.requestContext = requestContext;
+        return this;
+    }
+
+    public GlideBuilder setEngine(Engine engine) {
+        this.engine = engine;
+        return this;
+    }
+
+    public GlideBuilder setBitmapPool(BitmapPool bitmapPool) {
+        this.bitmapPool = bitmapPool;
+        return this;
+    }
+
     Glide createGlide() {
         if (imageManager == null) {
             imageManager = new ImageManager.Builder(context).build();
@@ -31,6 +61,29 @@ public class GlideBuilder {
         if (requestQueue == null) {
             requestQueue = RequestQueueWrapper.getRequestQueue(context);
         }
-        return new Glide(imageManager, requestQueue);
+        if (engine == null) {
+            engine = new EngineBuilder(context).build();
+        }
+
+        //TODO: reconcile this with resource cache.
+        if (bitmapPool == null) {
+            if (Build.VERSION.SDK_INT >= 11) {
+                final int safeCacheSize = ImageManager.getSafeMemoryCacheSize(context);
+                final boolean isLowMemoryDevice = ImageManager.isLowMemoryDevice(context);
+                bitmapPool = new LruBitmapPool(
+                        isLowMemoryDevice ? safeCacheSize : 2 * safeCacheSize);
+            } else {
+                bitmapPool = new BitmapPoolAdapter();
+            }
+        }
+
+        // Order matters here, this must be last.
+        if (requestContext == null) {
+            requestContext = new RequestContext();
+            requestContext.register(new BitmapEncoder(), Bitmap.class);
+            requestContext.register(new StreamBitmapDecoder(bitmapPool), InputStream.class, Bitmap.class);
+        }
+
+        return new Glide(engine, imageManager, requestQueue, requestContext);
     }
 }

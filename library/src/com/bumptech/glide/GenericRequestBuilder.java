@@ -11,6 +11,7 @@ import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.load.DecodeFormat;
@@ -44,7 +45,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private final ModelLoader<ModelType, VideoResourceType> videoLoader;
     private final List<Transformation> transformations = new ArrayList<Transformation>();
     private final ModelType model;
-
+    private final RequestContext requestContext;
     private int animationId;
     private Animation animation;
     private int placeholderId;
@@ -62,11 +63,17 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
     public GenericRequestBuilder(Context context, ModelType model,
             ModelLoader<ModelType, ImageResourceType> imageLoader,
-            ModelLoader<ModelType, VideoResourceType> videoLoader) {
+            ModelLoader<ModelType, VideoResourceType> videoLoader, RequestContext requestContext) {
          if (context == null) {
             throw new NullPointerException("Context can't be null");
         }
         this.context = context;
+
+        if (requestContext == null) {
+            throw new NullPointerException("RequestContext can't be null");
+        }
+
+        this.requestContext = requestContext;
 
         this.model = model;
 
@@ -452,6 +459,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setContext(context)
                 .setPriority(priority)
                 .setImageManager(Glide.get(context).getImageManager())
+                .setEngine(Glide.get(context).getEngine())
+                .setRequestContext(requestContext)
                 .setModel(model)
                 .setTarget(target)
                 .setBitmapLoadFactory(getLoadFactory())

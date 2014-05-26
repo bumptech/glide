@@ -6,8 +6,10 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
+import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.target.Target;
 
@@ -33,6 +35,8 @@ public class BitmapRequestBuilder<T> {
     RequestCoordinator requestCoordinator;
     int animationId;
     DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
+    Engine engine;
+    RequestContext requestContext;
 
     public BitmapRequestBuilder<T> setModel(T model) {
         this.model = model;
@@ -111,6 +115,16 @@ public class BitmapRequestBuilder<T> {
 
     public BitmapRequestBuilder<T> setRequestCoordinator(RequestCoordinator requestCoordinator) {
         this.requestCoordinator = requestCoordinator;
+        return this;
+    }
+
+    public BitmapRequestBuilder<T> setEngine(Engine engine) {
+        this.engine = engine;
+        return this;
+    }
+
+    public BitmapRequestBuilder<T> setRequestContext(RequestContext requestContext) {
+        this.requestContext = requestContext;
         return this;
     }
 

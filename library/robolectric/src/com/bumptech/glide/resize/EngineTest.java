@@ -34,6 +34,13 @@ public class EngineTest {
     }
 
     @Test
+    public void testCallbackIsAddedToNewRunners() {
+        harness.doLoad();
+
+        verify(harness.job).addCallback(eq(harness.cb));
+    }
+
+    @Test
     public void testLoadStatusIsReturnedForNewLoad() {
         assertNotNull(harness.doLoad());
     }
@@ -60,7 +67,7 @@ public class EngineTest {
         harness.doLoad();
         harness.doLoad();
 
-        verify(harness.runner.getJob()).addCallback(any(ResourceCallback.class));
+        verify(harness.runner.getJob(), times(2)).addCallback(any(ResourceCallback.class));
     }
 
     @Test
@@ -110,8 +117,8 @@ public class EngineTest {
         int height = 100;
 
         ResourceCache cache = mock(ResourceCache.class);
-        ResourceRunner runner = mock(ResourceRunner.class);
-        EngineJob job;
+        ResourceRunner<Object> runner = mock(ResourceRunner.class);
+        EngineJob<Object> job;
         Engine engine;
 
         public EngineTestHarness() {

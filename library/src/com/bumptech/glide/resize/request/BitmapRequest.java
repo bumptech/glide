@@ -8,19 +8,30 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
+import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
+import com.bumptech.glide.resize.RequestContext;
+import com.bumptech.glide.resize.Resource;
+import com.bumptech.glide.resize.ResourceCallback;
+import com.bumptech.glide.resize.ResourceDecoder;
+import com.bumptech.glide.resize.ResourceEncoder;
 import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.target.Target;
+
+import java.io.InputStream;
 
 /**
  * A {@link Request} that loads an {@link Bitmap} into a given {@link Target}.
  *
  * @param <T> The type of the model that the {@link Bitmap} will be loaded from.
  */
-public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, Target.SizeReadyCallback {
+public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, Target.SizeReadyCallback,
+        ResourceCallback<Bitmap> {
     private static final String TAG = "BitmapRequest";
 
     private final int placeholderResourceId;
@@ -36,7 +47,8 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
     private final Target target;
     private final RequestListener<T> requestListener;
     private final float sizeMultiplier;
-
+    private final Engine engine;
+    private final RequestContext requestContext;
     private Animation animation;
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
@@ -63,16 +75,24 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         this.animation = builder.animation;
         this.requestCoordinator = builder.requestCoordinator;
         this.decodeFormat = builder.decodeFormat;
+        this.engine = builder.engine;
+        this.requestContext = builder.requestContext;
     }
 
     @Override
     public void run() {
+        if (model == null) {
+            onLoadFailed(null);
+            return;
+        }
+
         target.getSize(this);
 
         if (bitmap == null && !isError) {
             setPlaceHolder();
         }
     }
+
 
     public void cancel() {
         isCancelled = true;
@@ -158,6 +178,10 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
 
     @Override
     public void onSizeReady(int width, int height) {
+        if (true) {
+            runWithEngine(width, height);
+            return;
+        }
         // This should only be called once.
         if (isCancelled) {
             return;
@@ -180,6 +204,25 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         loadedFromMemoryCache = bitmap != null;
     }
 
+    private void runWithEngine(int width, int height) {
+        if (isCancelled) {
+            return;
+        }
+
+        width = Math.round(sizeMultiplier * width);
+        height = Math.round(sizeMultiplier * height);
+        ResourceDecoder<InputStream, Bitmap> cacheDecoder = requestContext.getCacheDecoder(Bitmap.class);
+        ResourceDecoder<InputStream, Bitmap> decoder = requestContext.getDecoder(InputStream.class, Bitmap.class);
+        ResourceEncoder<Bitmap> encoder = requestContext.getEncoder(Bitmap.class);
+        ModelLoader<T, InputStream> modelLoader = requestContext.getModelLoader((Class<T>)model.getClass(),
+                InputStream.class);
+
+        final String id = modelLoader.getId(model);
+        final ResourceFetcher<InputStream> resourceFetcher = modelLoader.getResourceFetcher(model, width, height);
+
+        engine.load(id, width, height, cacheDecoder, resourceFetcher, decoder, encoder, Metadata.DEFAULT, this);
+    }
+
     private boolean canSetImage() {
         return requestCoordinator == null || requestCoordinator.canSetImage(this);
     }
@@ -190,5 +233,39 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
 
     private boolean isAnyImageSet() {
         return requestCoordinator != null && requestCoordinator.isAnyRequestComplete();
+    }
+
+    @Override
+    public void onResourceReady(Resource<Bitmap> resource) {
+        Bitmap loaded = resource.get();
+        target.onImageReady(loaded);
+        if (!loadedFromMemoryCache && !isAnyImageSet()) {
+            if (animation == null && animationId > 0) {
+                animation = AnimationUtils.loadAnimation(context, animationId);
+            }
+            if (animation != null) {
+                target.startAnimation(animation);
+            }
+        }
+        if (requestListener != null) {
+            requestListener.onImageReady(model, target, loadedFromMemoryCache, isAnyImageSet());
+        }
+
+        bitmap = loaded;
+    }
+
+    @Override
+    public void onException(Exception e) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "load failed", e);
+        }
+
+        isError = true;
+        setErrorPlaceholder();
+
+        //TODO: what if this is a thumbnail request?
+        if (requestListener != null) {
+            requestListener.onException(e, model, target);
+        }
     }
 }
