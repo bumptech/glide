@@ -15,9 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static junit.framework.Assert.assertNotNull;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
 public class DefaultResourceRunnerFactoryTest {
@@ -34,27 +32,19 @@ public class DefaultResourceRunnerFactoryTest {
         assertNotNull(harness.build());
     }
 
-    @Test
-    public void testExecutorIsUsedByRunners() {
-        ResourceRunner runner = harness.build();
-
-        runner.queue();
-
-        verify(harness.service).submit(eq(runner));
-    }
-
     @SuppressWarnings("unchecked")
     private class DefaultFactoryHarness {
         ResourceCache resourceCache = mock(ResourceCache.class);
         Map<String, ResourceRunner> runners = new HashMap<String, ResourceRunner>();
         DiskCache diskCache = mock(DiskCache.class);
         Handler mainHandler = new Handler();
+        Handler bgHandler = mock(Handler.class);
         ExecutorService service = mock(ExecutorService.class);
         int width = 100;
         int height = 100;
 
         DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(resourceCache, runners, diskCache,
-                mainHandler, service);
+                mainHandler, service, bgHandler);
 
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
         ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);

@@ -1,8 +1,7 @@
 package com.bumptech.glide.resize;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.DiskCacheAdapter;
 import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
@@ -20,6 +19,7 @@ public class EngineBuilder {
     DefaultResourceRunnerFactory factory;
     ResourceCache cache;
     Map<String, ResourceRunner> runners = new HashMap<String, ResourceRunner>();
+    private Handler bgHandler;
 
     public EngineBuilder(Context context) {
         this.context = context;
@@ -27,6 +27,11 @@ public class EngineBuilder {
 
     public EngineBuilder setExecutorService(ExecutorService service) {
         this.service = service;
+        return this;
+    }
+
+    public EngineBuilder setBackgroundHandler(Handler bgHandler) {
+        this.bgHandler = bgHandler;
         return this;
     }
 
@@ -54,8 +59,15 @@ public class EngineBuilder {
             service = Executors.newFixedThreadPool(cores);
         }
 
+        if (bgHandler == null) {
+            HandlerThread handlerThread = new HandlerThread("EngineThread");
+            handlerThread.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            handlerThread.start();
+            bgHandler = new Handler(handlerThread.getLooper());
+        }
+
         factory = new DefaultResourceRunnerFactory(cache, runners, diskCache, new Handler(Looper.getMainLooper()),
-                service);
+                service, bgHandler);
 
         return new Engine(this);
     }

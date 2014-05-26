@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Handler;
 import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
@@ -67,6 +68,16 @@ public class GlideTest {
             }
         }).when(target).getSize(any(Target.SizeReadyCallback.class));
 
+        Handler bgHandler = mock(Handler.class);
+        when(bgHandler.post(any(Runnable.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Runnable runnable = (Runnable) invocation.getArguments()[0];
+                runnable.run();
+                return true;
+            }
+        });
+
         // Run all tasks on the main thread so they complete synchronously.
         ExecutorService service = mock(ExecutorService.class);
         when(service.submit(any(Runnable.class))).thenAnswer(new Answer<Object>() {
@@ -93,6 +104,7 @@ public class GlideTest {
         Glide.setup(new GlideBuilder(Robolectric.application)
                 .setEngine(new EngineBuilder(Robolectric.application)
                         .setExecutorService(service)
+                        .setBackgroundHandler(bgHandler)
                         .build())
                 .setImageManager(new ImageManager.Builder(Robolectric.application)
                         .setResizeService(service)

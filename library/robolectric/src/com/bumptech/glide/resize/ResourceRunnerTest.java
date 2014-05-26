@@ -1,8 +1,11 @@
 package com.bumptech.glide.resize;
 
+import android.os.Handler;
 import com.bumptech.glide.resize.cache.DiskCache;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -21,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(RobolectricTestRunner.class)
 public class ResourceRunnerTest {
     private static final String ID = "asdf";
     private ResourceRunnerHarness harness;
@@ -97,18 +101,18 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testSubmittedToExecutorServiceWhenQueued() {
+    public void testPostedToBackgroundHandlerWhenQueued() {
         harness.runner.queue();
 
-        verify(harness.service).submit(eq(harness.runner));
+        verify(harness.bgHandler).post(eq(harness.runner));
     }
 
     @Test
-    public void testFutureFromExecutorServiceIsCancelledWhenCancelled() {
+    public void testRemovedFromBackgroundHandlerWhenCancelled() {
         harness.runner.queue();
         harness.runner.cancel();
 
-        verify(harness.future).cancel(anyBoolean());
+        verify(harness.bgHandler).removeCallbacks(eq(harness.runner));
     }
 
     @Test
@@ -145,10 +149,11 @@ public class ResourceRunnerTest {
         SourceResourceRunner<Object, Object> sourceRunner = mock(SourceResourceRunner.class);
         ExecutorService service = mock(ExecutorService.class);
         EngineJob<Object> engineJob = mock(EngineJob.class);
+        Handler bgHandler = mock(Handler.class);
         int width = 100;
         int height = 100;
         ResourceRunner<Object> runner = new ResourceRunner(ID, width, height, diskCache, decoder, sourceRunner, service,
-                engineJob);
+                bgHandler, engineJob);
         Future future = mock(Future.class);
         Future sourceFuture = mock(Future.class);
         Resource<Object> result = mock(Resource.class);

@@ -1,5 +1,6 @@
 package com.bumptech.glide.resize;
 
+import android.os.Handler;
 import com.bumptech.glide.resize.cache.DiskCache;
 
 import java.io.InputStream;
@@ -19,12 +20,12 @@ public class ResourceRunner<Z> implements Runnable {
     private final int width;
     private final int height;
     private final DiskCache diskCache;
-
+    private final Handler bgHandler;
     private volatile Future<?> future;
     private volatile boolean isCancelled;
 
     public ResourceRunner(String id, int width, int height, DiskCache diskCache, ResourceDecoder<InputStream, Z> cacheDecoder,
-            SourceResourceRunner sourceRunner, ExecutorService executorService, EngineJob<Z> job) {
+            SourceResourceRunner sourceRunner, ExecutorService executorService, Handler bgHandler, EngineJob<Z> job) {
         this.id = id;
         this.width = width;
         this.height = height;
@@ -32,6 +33,7 @@ public class ResourceRunner<Z> implements Runnable {
         this.cacheDecoder = cacheDecoder;
         this.sourceRunner = sourceRunner;
         this.executorService = executorService;
+        this.bgHandler = bgHandler;
         this.job = job;
     }
 
@@ -41,12 +43,15 @@ public class ResourceRunner<Z> implements Runnable {
 
     public void cancel() {
         isCancelled = true;
-        future.cancel(false);
+        bgHandler.removeCallbacks(this);
+        if (future != null) {
+            future.cancel(false);
+        }
         sourceRunner.cancel();
     }
 
     public void queue() {
-        future = executorService.submit(this);
+        bgHandler.post(this);
     }
 
     @Override
@@ -71,5 +76,4 @@ public class ResourceRunner<Z> implements Runnable {
         }
         return result;
     }
-
 }
