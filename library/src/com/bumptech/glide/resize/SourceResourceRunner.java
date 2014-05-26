@@ -5,20 +5,30 @@ import com.bumptech.glide.resize.cache.DiskCache;
 
 import java.io.OutputStream;
 
-public class SourceResourceRunner<T> implements Runnable, DiskCache.Writer {
+/**
+ *
+ * @param <T> The type of the data the resource will be decoded from.
+ * @param <Z> The type of the resource that will be decoded.
+ */
+public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer {
     private final String id;
-    private final ResourceFetcher<T> resourceFetcher;
-    private final ResourceDecoder<T> decoder;
-    private final ResourceEncoder<T> encoder;
+    private final int width;
+    private final int height;
+    private final ResourceFetcher<T> fetcher;
+    private final ResourceDecoder<T, Z> decoder;
+    private final ResourceEncoder<Z> encoder;
     private DiskCache diskCache;
     private Metadata metadata;
-    private ResourceCallback cb;
-    private Resource result;
+    private ResourceCallback<Z> cb;
+    private Resource<Z> result;
+    private volatile boolean isCancelled;
 
-    public SourceResourceRunner(String id, ResourceFetcher<T> resourceFetcher, ResourceDecoder<T> decoder,
-            ResourceEncoder<T> encoder, DiskCache diskCache, Metadata metadata, ResourceCallback cb) {
+    public SourceResourceRunner(String id, int width, int height, ResourceFetcher<T> resourceFetcher, ResourceDecoder<T, Z> decoder,
+            ResourceEncoder<Z> encoder, DiskCache diskCache, Metadata metadata, ResourceCallback<Z> cb) {
         this.id = id;
-        this.resourceFetcher = resourceFetcher;
+        this.width = width;
+        this.height = height;
+        this.fetcher = resourceFetcher;
         this.decoder = decoder;
         this.encoder = encoder;
         this.diskCache = diskCache;
@@ -26,13 +36,22 @@ public class SourceResourceRunner<T> implements Runnable, DiskCache.Writer {
         this.cb = cb;
     }
 
+    public void cancel() {
+        isCancelled = true;
+        fetcher.cancel();
+    }
+
     @Override
     public void run() {
+        if (isCancelled) {
+            return;
+        }
+
         try {
             result = null;
-            T toDecode = resourceFetcher.loadResource(metadata);
+            T toDecode = fetcher.loadResource(metadata);
             if (toDecode != null) {
-                result = decoder.decode(toDecode);
+                result = decoder.decode(toDecode, width, height);
             }
             if (result != null) {
                 diskCache.put(id, this);

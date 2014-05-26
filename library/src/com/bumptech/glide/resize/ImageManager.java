@@ -320,7 +320,7 @@ public class ImageManager {
     }
 
     @TargetApi(19)
-    private static boolean isLowMemoryDevice(Context context) {
+    public static boolean isLowMemoryDevice(Context context) {
         final ActivityManager activityManager =
                 (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         return Build.VERSION.SDK_INT < 11 ||

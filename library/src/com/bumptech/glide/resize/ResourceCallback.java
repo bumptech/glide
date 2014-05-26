@@ -1,8 +1,8 @@
 package com.bumptech.glide.resize;
 
-interface ResourceCallback {
+public interface ResourceCallback<Z> {
 
-    public void onResourceReady(Resource resource);
+    public void onResourceReady(Resource<Z> resource);
 
     public void onException(Exception e);
 }

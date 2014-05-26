@@ -1,0 +1,69 @@
+package com.bumptech.glide.resize;
+
+import android.os.Handler;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
+import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.cache.ResourceCache;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+
+import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+@RunWith(RobolectricTestRunner.class)
+public class DefaultResourceRunnerFactoryTest {
+    private static final String ID = "asdfasdf";
+    private DefaultFactoryHarness harness;
+
+    @Before
+    public void setUp() {
+        harness = new DefaultFactoryHarness();
+    }
+
+    @Test
+    public void testProducesNonNullRunners() {
+        assertNotNull(harness.build());
+    }
+
+    @Test
+    public void testExecutorIsUsedByRunners() {
+        ResourceRunner runner = harness.build();
+
+        runner.queue();
+
+        verify(harness.service).submit(eq(runner));
+    }
+
+    @SuppressWarnings("unchecked")
+    private class DefaultFactoryHarness {
+        ResourceCache resourceCache = mock(ResourceCache.class);
+        Map<String, ResourceRunner> runners = new HashMap<String, ResourceRunner>();
+        DiskCache diskCache = mock(DiskCache.class);
+        Handler mainHandler = new Handler();
+        ExecutorService service = mock(ExecutorService.class);
+        int width = 100;
+        int height = 100;
+
+        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(resourceCache, runners, diskCache,
+                mainHandler, service);
+
+        ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
+        ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);
+        ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
+        ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
+        Metadata metadata = mock(Metadata.class);
+
+        public ResourceRunner build() {
+            return factory.build(ID, width, height, cacheDecoder, fetcher, decoder, encoder, metadata);
+        }
+    }
+}
