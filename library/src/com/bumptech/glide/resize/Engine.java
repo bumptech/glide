@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Engine {
+public class Engine implements EngineJobListener {
 
     static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
@@ -19,26 +19,28 @@ public class Engine {
 
     public static class LoadStatus {
         private final EngineJob engineJob;
+        private final ResourceCallback cb;
 
-        public LoadStatus(EngineJob engineJob) {
+        public LoadStatus(ResourceCallback cb, EngineJob engineJob) {
+            this.cb = cb;
             this.engineJob = engineJob;
         }
 
         public void cancel() {
-            engineJob.cancel();
+            engineJob.removeCallback(cb);
         }
     }
 
     public Engine(EngineBuilder builder) {
         this.factory = builder.factory;
         this.cache = builder.cache;
-        this.runners = builder.runners;
+        this.runners = new HashMap<String, ResourceRunner>();
     }
 
-    Engine(ResourceRunnerFactory factory, ResourceCache cache) {
+    Engine(ResourceRunnerFactory factory, ResourceCache cache, Map<String, ResourceRunner> runners) {
         this.factory = factory;
         this.cache = cache;
-        this.runners = new HashMap<String, ResourceRunner>();
+        this.runners = runners;
     }
 
     /**
@@ -65,13 +67,24 @@ public class Engine {
         if (current != null) {
             EngineJob<Z> job = current.getJob();
             job.addCallback(cb);
-            return new LoadStatus(job);
+            return new LoadStatus(cb, job);
         }
 
-        ResourceRunner<Z> runner = factory.build(id, width, height, cacheDecoder, fetcher, decoder, encoder, metadata);
+        ResourceRunner<Z> runner = factory.build(id, width, height, cacheDecoder, fetcher, decoder, encoder, metadata,
+                this, cb);
         runners.put(id, runner);
-        runner.getJob().addCallback(cb);
         runner.queue();
-        return new LoadStatus(runner.getJob());
+        return new LoadStatus(cb, runner.getJob());
+    }
+
+    @Override
+    public void onEngineJobComplete(String id) {
+        runners.remove(id);
+    }
+
+    @Override
+    public void onEngineJobCancelled(String id) {
+        ResourceRunner runner = runners.remove(id);
+        runner.cancel();
     }
 }

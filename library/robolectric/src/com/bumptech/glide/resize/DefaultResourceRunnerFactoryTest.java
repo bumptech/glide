@@ -10,8 +10,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static junit.framework.Assert.assertNotNull;
@@ -35,15 +33,16 @@ public class DefaultResourceRunnerFactoryTest {
     @SuppressWarnings("unchecked")
     private class DefaultFactoryHarness {
         ResourceCache resourceCache = mock(ResourceCache.class);
-        Map<String, ResourceRunner> runners = new HashMap<String, ResourceRunner>();
+        EngineJobListener listener = mock(EngineJobListener.class);
         DiskCache diskCache = mock(DiskCache.class);
         Handler mainHandler = new Handler();
         Handler bgHandler = mock(Handler.class);
         ExecutorService service = mock(ExecutorService.class);
+        ResourceCallback<Object> cb = mock(ResourceCallback.class);
         int width = 100;
         int height = 100;
 
-        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(resourceCache, runners, diskCache,
+        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(resourceCache, diskCache,
                 mainHandler, service, bgHandler);
 
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
@@ -53,7 +52,7 @@ public class DefaultResourceRunnerFactoryTest {
         Metadata metadata = mock(Metadata.class);
 
         public ResourceRunner build() {
-            return factory.build(ID, width, height, cacheDecoder, fetcher, decoder, encoder, metadata);
+            return factory.build(ID, width, height, cacheDecoder, fetcher, decoder, encoder, metadata, listener, cb);
         }
     }
 }

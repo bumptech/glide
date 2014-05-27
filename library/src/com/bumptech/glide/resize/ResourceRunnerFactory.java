@@ -17,6 +17,7 @@ interface ResourceRunnerFactory {
      * @param <Z> The type of the reosurce that will be decoded.
      * @return
      */
-    public <T, Z> ResourceRunner build(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
-            ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder, ResourceEncoder<Z> encoder, Metadata metadata);
+    public <T, Z> ResourceRunner<Z> build(String id, int width, int height,
+            ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
+            ResourceEncoder<Z> encoder, Metadata metadata, EngineJobListener listener, ResourceCallback<Z> cb);
 }

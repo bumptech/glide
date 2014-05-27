@@ -6,21 +6,18 @@ import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.ResourceCache;
 
 import java.io.InputStream;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     private final Handler bgHandler;
     private ResourceCache resourceCache;
-    private Map<String, ResourceRunner> runners;
     private DiskCache diskCache;
     private Handler mainHandler;
     private ExecutorService service;
 
-    public DefaultResourceRunnerFactory(ResourceCache resourceCache, Map<String, ResourceRunner> runners,
-            DiskCache diskCache, Handler mainHandler, ExecutorService service, Handler bgHandler) {
+    public DefaultResourceRunnerFactory(ResourceCache resourceCache, DiskCache diskCache, Handler mainHandler,
+            ExecutorService service, Handler bgHandler) {
         this.resourceCache = resourceCache;
-        this.runners = runners;
         this.diskCache = diskCache;
         this.mainHandler = mainHandler;
         this.service = service;
@@ -40,11 +37,15 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
      * @return
      */
     @Override
-    public <T, Z> ResourceRunner build(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
-            ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder, ResourceEncoder<Z> encoder, Metadata metadata) {
-        EngineJob<Z> engineJob = new EngineJob<Z>(id, resourceCache, runners, mainHandler);
+    public <T, Z> ResourceRunner<Z> build(String id, int width, int height,
+            ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
+            ResourceEncoder<Z> encoder, Metadata metadata, EngineJobListener listener, ResourceCallback<Z> cb) {
+
+        EngineJob<Z> engineJob = new EngineJob<Z>(id, resourceCache, mainHandler, listener, cb);
+
         SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(id, width, height, fetcher, decoder,
                 encoder, diskCache, metadata, engineJob);
+
         return new ResourceRunner<Z>(id, width, height, diskCache, cacheDecoder, sourceRunner, service, bgHandler,
                 engineJob);
     }

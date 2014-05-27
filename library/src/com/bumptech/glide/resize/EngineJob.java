@@ -4,7 +4,6 @@ import android.os.Handler;
 import com.bumptech.glide.resize.cache.ResourceCache;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -12,27 +11,42 @@ import java.util.Set;
  */
 public class EngineJob<Z> implements ResourceCallback<Z> {
     private final String id;
+    private final EngineJobListener listener;
     private ResourceCache cache;
-    private final Map<String, ResourceRunner> runners;
     private Handler mainHandler;
     private Set<ResourceCallback<Z>> cbs = new HashSet<ResourceCallback<Z>>();
     private boolean isCancelled = false;
 
-    public EngineJob(String id, ResourceCache cache, Map<String, ResourceRunner> runners, Handler mainHandler) {
+    public EngineJob(String id, ResourceCache cache, Handler mainHandler, EngineJobListener listener,
+            ResourceCallback<Z> cb) {
         this.id = id;
         this.cache = cache;
-        this.runners = runners;
+        this.listener = listener;
         this.mainHandler = mainHandler;
+
+        addCallback(cb);
     }
 
     public void addCallback(ResourceCallback<Z> cb) {
         cbs.add(cb);
     }
 
-    public void cancel() {
+    public void removeCallback(ResourceCallback cb) {
+        cbs.remove(cb);
+        if (cbs.size() == 0) {
+            cancel();
+        }
+    }
+
+    // Exposed for testing.
+    void cancel() {
         isCancelled = true;
-        ResourceRunner runner = runners.remove(id);
-        runner.cancel();
+        listener.onEngineJobCancelled(id);
+    }
+
+    // Exposed for testing.
+    boolean isCancelled() {
+        return isCancelled;
     }
 
     @Override
@@ -44,7 +58,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                     return;
                 }
 
-                runners.remove(id);
+                listener.onEngineJobComplete(id);
                 cache.put(id, resource);
                 for (ResourceCallback<Z> cb : cbs) {
                     cb.onResourceReady(resource);
@@ -63,7 +77,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                     return;
                 }
 
-                runners.remove(id);
+                listener.onEngineJobComplete(id);
                 for (ResourceCallback cb : cbs) {
                     cb.onException(e);
                 }

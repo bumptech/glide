@@ -6,10 +6,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
-import static org.mockito.Matchers.any;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -34,23 +37,23 @@ public class EngineTest {
     }
 
     @Test
-    public void testCallbackIsAddedToNewRunners() {
-        harness.doLoad();
-
-        verify(harness.job).addCallback(eq(harness.cb));
-    }
-
-    @Test
     public void testLoadStatusIsReturnedForNewLoad() {
         assertNotNull(harness.doLoad());
     }
 
     @Test
-    public void testEngineJobReceivesCancelFromLoadStatus() {
+    public void testEngineJobReceivesRemoveCallbackFromLoadStatus() {
         Engine.LoadStatus loadStatus = harness.doLoad();
         loadStatus.cancel();
 
-        verify(harness.job).cancel();
+        verify(harness.job).removeCallback(eq(harness.cb));
+    }
+
+    @Test
+    public void testNewRunnerIsAddedToRunnersMap() {
+        harness.doLoad();
+
+        assertTrue(harness.runners.containsKey(ID));
     }
 
     @Test
@@ -65,9 +68,12 @@ public class EngineTest {
     @SuppressWarnings("unchecked")
     public void testCallbackIsAddedToExistingRunnerWithExistingLoad() {
         harness.doLoad();
+
+        ResourceCallback newCallback = mock(ResourceCallback.class);
+        harness.cb = newCallback;
         harness.doLoad();
 
-        verify(harness.runner.getJob(), times(2)).addCallback(any(ResourceCallback.class));
+        verify(harness.job).addCallback(eq(newCallback));
     }
 
     @Test
@@ -104,6 +110,42 @@ public class EngineTest {
         assertNull(loadStatus);
     }
 
+    @Test
+    public void testRunnerIsRemovedFromRunnersOnEngineNotifiedJobComplete() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobComplete(ID);
+
+        assertFalse(harness.runners.containsKey(ID));
+    }
+
+    @Test
+    public void testRunnerIsNotCancelledOnEngineNotifiedJobComplete() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobComplete(ID);
+
+        verify(harness.runner, never()).cancel();
+    }
+
+    @Test
+    public void testRunnerIsRemovedFromRunnersOnEngineNotifiedJobCancel() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobCancelled(ID);
+
+        assertFalse(harness.runners.containsKey(ID));
+    }
+
+    @Test
+    public void testRunnerIsCancelledOnEngineNotifiedJobCanceled() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobCancelled(ID);
+
+        verify(harness.runner).cancel();
+    }
+
     @SuppressWarnings("unchecked")
     private static class EngineTestHarness {
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
@@ -113,6 +155,7 @@ public class EngineTest {
         Metadata metadata = mock(Metadata.class);
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
         Resource<Object> result = mock(Resource.class);
+        Map<String, ResourceRunner> runners = new HashMap<String, ResourceRunner>();
         int width = 100;
         int height = 100;
 
@@ -123,13 +166,14 @@ public class EngineTest {
 
         public EngineTestHarness() {
             ResourceRunnerFactory factory = mock(ResourceRunnerFactory.class);
-            when(factory.build(eq(ID), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder), eq(encoder),
-                    eq(metadata))).thenReturn(runner);
 
             job = mock(EngineJob.class);
             when(runner.getJob()).thenReturn(job);
 
-            engine = new Engine(factory, cache);
+            engine = new Engine(factory, cache, runners);
+
+            when(factory.build(eq(ID), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder), eq(encoder),
+                    eq(metadata), eq(engine), eq(cb))).thenReturn(runner);
         }
 
         public Engine.LoadStatus doLoad() {
