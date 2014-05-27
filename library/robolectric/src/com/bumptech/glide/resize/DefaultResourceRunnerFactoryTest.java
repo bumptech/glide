@@ -39,11 +39,12 @@ public class DefaultResourceRunnerFactoryTest {
         Handler bgHandler = mock(Handler.class);
         ExecutorService service = mock(ExecutorService.class);
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
+        ResourceReferenceCounter resourceReferenceCounter = mock(ResourceReferenceCounter.class);
         int width = 100;
         int height = 100;
 
         DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(resourceCache, diskCache,
-                mainHandler, service, bgHandler);
+                mainHandler, service, bgHandler, resourceReferenceCounter);
 
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
         ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);

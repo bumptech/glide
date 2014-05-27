@@ -16,9 +16,10 @@ import java.util.concurrent.Executors;
 public class EngineBuilder {
     private ExecutorService service;
     private Context context;
-    DefaultResourceRunnerFactory factory;
-    ResourceCache cache;
     private Handler bgHandler;
+    ResourceRunnerFactory factory;
+    ResourceCache cache;
+    ResourceReferenceCounter resourceReferenceCounter;
 
     public EngineBuilder(Context context) {
         this.context = context;
@@ -65,8 +66,10 @@ public class EngineBuilder {
             bgHandler = new Handler(handlerThread.getLooper());
         }
 
+        this.resourceReferenceCounter = new DefaultResourceReferenceCounter();
+
         factory = new DefaultResourceRunnerFactory(cache, diskCache, new Handler(Looper.getMainLooper()), service,
-                bgHandler);
+                bgHandler, resourceReferenceCounter);
 
         return new Engine(this);
     }

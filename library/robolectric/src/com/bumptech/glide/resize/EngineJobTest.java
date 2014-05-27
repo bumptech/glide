@@ -5,6 +5,8 @@ import com.bumptech.glide.resize.cache.ResourceCache;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
@@ -12,8 +14,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
@@ -103,6 +107,7 @@ public class EngineJobTest {
         assertTrue(harness.job.isCancelled());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void removingSomeCallbacksDoesNotCancelRunner() {
         harness.job.addCallback(mock(ResourceCallback.class));
@@ -111,19 +116,38 @@ public class EngineJobTest {
         assertFalse(harness.job.isCancelled());
     }
 
+    @Test
+    public void testResourceIsAcquiredOncePerConsumerAndHeldAndReleasedBeforeAndAfterNotifyingConsumers() {
+        harness.job.onResourceReady(harness.resource);
+
+        verify(harness.referenceCounter, times(3)).acquireResource(eq(harness.resource));
+        verify(harness.referenceCounter, times(1)).releaseResource(eq(harness.resource));
+    }
+
+    @Test
+    public void testResourceIsNotRecycledIfResourceCacheEvictsSynchronously() {
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                harness.referenceCounter.releaseResource(harness.resource);
+                return null;
+            }
+        }).when(harness.resourceCache).put(eq(ID), eq(harness.resource));
+
+        harness.job.onResourceReady(harness.resource);
+        verify(harness.referenceCounter, times(3)).acquireResource(eq(harness.resource));
+        verify(harness.referenceCounter, times(2)).releaseResource(harness.resource);
+    }
+
     @SuppressWarnings("unchecked")
     private static class EngineJobHarness {
-        ResourceRunner runner = mock(ResourceRunner.class);
         ResourceCache resourceCache = mock(ResourceCache.class);
         Handler mainHandler = new Handler();
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         EngineJobListener listener = mock(EngineJobListener.class);
+        ResourceReferenceCounter referenceCounter = mock(ResourceReferenceCounter.class);
 
-        EngineJob <Object> job = new EngineJob<Object>(ID, resourceCache, mainHandler, listener, cb);
-
-        public EngineJobHarness() {
-            job.addCallback(cb);
-        }
+        EngineJob <Object> job = new EngineJob<Object>(ID, resourceCache, mainHandler, referenceCounter, listener, cb);
     }
 }

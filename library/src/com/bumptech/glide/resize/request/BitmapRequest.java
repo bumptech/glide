@@ -57,6 +57,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
     private boolean loadedFromMemoryCache;
     private Bitmap bitmap;
     private ImageManager.LoadToken token;
+    private Resource<Bitmap> resource;
 
     public BitmapRequest(BitmapRequestBuilder<T> builder) {
         this.model = builder.model;
@@ -107,6 +108,10 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
         if (bitmap != null) {
             imageManager.releaseBitmap(bitmap);
             bitmap = null;
+        }
+        if (resource != null) {
+            engine.recycle(resource);
+            resource = null;
         }
     }
 
@@ -251,7 +256,7 @@ public class BitmapRequest<T> implements Request, ImageManager.LoadedCallback, T
             requestListener.onImageReady(model, target, loadedFromMemoryCache, isAnyImageSet());
         }
 
-        bitmap = loaded;
+        this.resource = resource;
     }
 
     @Override

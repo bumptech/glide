@@ -31,7 +31,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
         if (bitmap == null) {
             return null;
         } else {
-            return new BitmapResource(bitmap);
+            return new BitmapResource(bitmap, bitmapPool);
         }
     }
 }

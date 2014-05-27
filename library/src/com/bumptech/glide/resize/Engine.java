@@ -8,13 +8,14 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Engine implements EngineJobListener {
+public class Engine implements EngineJobListener, ResourceCache.ResourceRemovedListener {
 
     static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
     static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
 
     private final Map<String, ResourceRunner> runners;
     private final ResourceRunnerFactory factory;
+    private final ResourceReferenceCounter resourceReferenceCounter;
     private ResourceCache cache;
 
     public static class LoadStatus {
@@ -32,15 +33,17 @@ public class Engine implements EngineJobListener {
     }
 
     public Engine(EngineBuilder builder) {
-        this.factory = builder.factory;
-        this.cache = builder.cache;
-        this.runners = new HashMap<String, ResourceRunner>();
+        this(builder.factory, builder.cache, new HashMap<String, ResourceRunner>(), builder.resourceReferenceCounter);
     }
 
-    Engine(ResourceRunnerFactory factory, ResourceCache cache, Map<String, ResourceRunner> runners) {
+    Engine(ResourceRunnerFactory factory, ResourceCache cache, Map<String, ResourceRunner> runners,
+            ResourceReferenceCounter referenceCounter) {
         this.factory = factory;
         this.cache = cache;
         this.runners = runners;
+        this.resourceReferenceCounter = referenceCounter;
+
+        cache.setResourceRemovedListener(this);
     }
 
     /**
@@ -86,5 +89,14 @@ public class Engine implements EngineJobListener {
     public void onEngineJobCancelled(String id) {
         ResourceRunner runner = runners.remove(id);
         runner.cancel();
+    }
+
+    @Override
+    public void onResourceRemoved(Resource resource) {
+        recycle(resource);
+    }
+
+    public void recycle(Resource resource) {
+        resourceReferenceCounter.releaseResource(resource);
     }
 }

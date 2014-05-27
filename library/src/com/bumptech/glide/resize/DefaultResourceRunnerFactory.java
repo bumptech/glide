@@ -10,18 +10,20 @@ import java.util.concurrent.ExecutorService;
 
 class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     private final Handler bgHandler;
+    private final ResourceReferenceCounter referenceCounter;
     private ResourceCache resourceCache;
     private DiskCache diskCache;
     private Handler mainHandler;
     private ExecutorService service;
 
     public DefaultResourceRunnerFactory(ResourceCache resourceCache, DiskCache diskCache, Handler mainHandler,
-            ExecutorService service, Handler bgHandler) {
+            ExecutorService service, Handler bgHandler, ResourceReferenceCounter referenceCounter) {
         this.resourceCache = resourceCache;
         this.diskCache = diskCache;
         this.mainHandler = mainHandler;
         this.service = service;
         this.bgHandler = bgHandler;
+        this.referenceCounter = referenceCounter;
     }
 
     /**
@@ -41,7 +43,7 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
             ResourceEncoder<Z> encoder, Metadata metadata, EngineJobListener listener, ResourceCallback<Z> cb) {
 
-        EngineJob<Z> engineJob = new EngineJob<Z>(id, resourceCache, mainHandler, listener, cb);
+        EngineJob<Z> engineJob = new EngineJob<Z>(id, resourceCache, mainHandler, referenceCounter, listener, cb);
 
         SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(id, width, height, fetcher, decoder,
                 encoder, diskCache, metadata, engineJob);

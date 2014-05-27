@@ -86,11 +86,11 @@ public class EngineTest {
 
     @Test
     public void testResourceIsReturnedFromCacheIfPresent() {
-        when(harness.cache.get(eq(ID))).thenReturn(harness.result);
+        when(harness.cache.get(eq(ID))).thenReturn(harness.resource);
 
         harness.doLoad();
 
-        verify(harness.cb).onResourceReady(eq(harness.result));
+        verify(harness.cb).onResourceReady(eq(harness.resource));
     }
 
     @Test
@@ -146,6 +146,25 @@ public class EngineTest {
         verify(harness.runner).cancel();
     }
 
+    @Test
+    public void testResourceReferenceCounterIsNotifiedWhenResourceRecycled() {
+        harness.engine.recycle(harness.resource);
+
+        verify(harness.resourceReferenceCounter).releaseResource(eq(harness.resource));
+    }
+
+    @Test
+    public void testEngineAddedAsListenerToResourceCache() {
+        verify(harness.cache).setResourceRemovedListener(eq(harness.engine));
+    }
+
+    @Test
+    public void testResourceReferenceCounterIsNotifiedWhenResourceRemovedFromCache() {
+        harness.engine.onResourceRemoved(harness.resource);
+
+        verify(harness.resourceReferenceCounter).releaseResource(eq(harness.resource));
+    }
+
     @SuppressWarnings("unchecked")
     private static class EngineTestHarness {
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
@@ -154,8 +173,9 @@ public class EngineTest {
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         Metadata metadata = mock(Metadata.class);
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
-        Resource<Object> result = mock(Resource.class);
+        Resource<Object> resource = mock(Resource.class);
         Map<String, ResourceRunner> runners = new HashMap<String, ResourceRunner>();
+        ResourceReferenceCounter resourceReferenceCounter = mock(ResourceReferenceCounter.class);
         int width = 100;
         int height = 100;
 
@@ -170,7 +190,7 @@ public class EngineTest {
             job = mock(EngineJob.class);
             when(runner.getJob()).thenReturn(job);
 
-            engine = new Engine(factory, cache, runners);
+            engine = new Engine(factory, cache, runners, resourceReferenceCounter);
 
             when(factory.build(eq(ID), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder), eq(encoder),
                     eq(metadata), eq(engine), eq(cb))).thenReturn(runner);

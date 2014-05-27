@@ -12,17 +12,19 @@ import java.util.Set;
 public class EngineJob<Z> implements ResourceCallback<Z> {
     private final String id;
     private final EngineJobListener listener;
+    private final ResourceReferenceCounter referenceCounter;
     private ResourceCache cache;
     private Handler mainHandler;
     private Set<ResourceCallback<Z>> cbs = new HashSet<ResourceCallback<Z>>();
     private boolean isCancelled = false;
 
-    public EngineJob(String id, ResourceCache cache, Handler mainHandler, EngineJobListener listener,
-            ResourceCallback<Z> cb) {
+    public EngineJob(String id, ResourceCache cache, Handler mainHandler, ResourceReferenceCounter referenceCounter,
+            EngineJobListener listener, ResourceCallback<Z> cb) {
         this.id = id;
         this.cache = cache;
         this.listener = listener;
         this.mainHandler = mainHandler;
+        this.referenceCounter = referenceCounter;
 
         addCallback(cb);
     }
@@ -58,11 +60,15 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                     return;
                 }
 
+                referenceCounter.acquireResource(resource);
                 listener.onEngineJobComplete(id);
+                referenceCounter.acquireResource(resource);
                 cache.put(id, resource);
                 for (ResourceCallback<Z> cb : cbs) {
+                    referenceCounter.acquireResource(resource);
                     cb.onResourceReady(resource);
                 }
+                referenceCounter.releaseResource(resource);
 
             }
         });

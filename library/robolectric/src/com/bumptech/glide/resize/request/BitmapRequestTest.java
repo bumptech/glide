@@ -8,6 +8,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
+import com.bumptech.glide.resize.Engine;
+import com.bumptech.glide.resize.Resource;
 import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.target.Target;
 import org.junit.Test;
@@ -20,10 +22,28 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class BitmapRequestTest {
+
+    @Test
+    public void testResourceIsRecycledOnClear() {
+        Resource<Bitmap> resource = mock(Resource.class);
+        Engine engine = mock(Engine.class);
+
+        BitmapRequest request = new BitmapRequestBuilder()
+                .setContext(Robolectric.application)
+                .setEngine(engine)
+                .setTarget(mock(Target.class))
+                .build();
+
+        request.onResourceReady(resource);
+        request.clear();
+
+        verify(engine).recycle(eq(resource));
+    }
 
     @Test
     public void testPlaceholderResourceIsSet() {
