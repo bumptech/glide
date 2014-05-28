@@ -385,6 +385,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
     private <Y extends Target> Request buildRequest(Y target) {
         final Request result;
+
         if (priority == null) {
             priority = Metadata.DEFAULT.getPriority();
         }
@@ -441,9 +442,19 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
     private <Y extends Target> Request buildBitmapRequest(Y target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
-        if (imageType == null) {
+        if (model == null) {
+            return buildBitmapRequestForType(target, imageType, sizeMultiplier, priority, null).build();
+        }
+        final boolean canLoadImageType = requestContext.canLoad(model.getClass(), imageType, Bitmap.class);
+        final boolean canLoadVideoType = requestContext.canLoad(model.getClass(), videoType, Bitmap.class);
+        if (!canLoadImageType && !canLoadVideoType) {
+            throw new IllegalArgumentException("Unable to load Bitmap, missing required dependencies for image and "
+                    + "video loads for the given types");
+        }
+
+        if (!canLoadImageType) {
             return buildBitmapRequestForType(target, videoType, sizeMultiplier, priority, requestCoordinator).build();
-        } else if (videoType == null) {
+        } else if (!canLoadVideoType) {
             return buildBitmapRequestForType(target, imageType, sizeMultiplier, priority, requestCoordinator).build();
         } else {
             MultiTypeRequestCoordinator typeCoordinator = new MultiTypeRequestCoordinator(requestCoordinator);
@@ -461,8 +472,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         return new BitmapRequestBuilder<ModelType, Z>(resourceClass)
                 .setContext(context)
                 .setPriority(priority)
-                .setImageManager(Glide.get(context).getImageManager())
-                .setEngine(Glide.get(context).getEngine())
+                .setEngine(Glide.get(context)
+                        .getEngine())
                 .setRequestContext(requestContext)
                 .setModel(model)
                 .setTarget(target)

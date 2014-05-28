@@ -35,4 +35,9 @@ public class FileDescriptorBitmapDecoder implements ResourceDecoder<ParcelFileDe
             return new BitmapResource(bitmap, bitmapPool);
         }
     }
+
+    @Override
+    public String getId() {
+        return "com.bumptech.glide.resize.bitmap.FileDescriptorBitmapDecoder";
+    }
 }

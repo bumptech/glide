@@ -58,25 +58,37 @@ public class Engine implements EngineJobListener, ResourceCache.ResourceRemovedL
      * @param <T> The type of data the resource will be decoded from.
      * @param <Z> The type of the resource that will be decoded.
      */
-    public <T, Z> LoadStatus load(String id, int width, int height,  ResourceDecoder<InputStream, Z> cacheDecoder,
+    public <T, Z> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
             ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
             ResourceEncoder<Z> encoder, Metadata metadata, ResourceCallback<Z> cb) {
-        Resource<Z> cached = cache.get(id);
+        final String key = new StringBuilder()
+                .append(id)
+                .append(width)
+                .append(height)
+                .append(cacheDecoder.getId())
+                .append(decoder.getId())
+                .append(transformation.getId())
+                .append(encoder.getId())
+                .toString();
+
+        Resource<Z> cached = cache.get(key);
         if (cached != null) {
+            resourceReferenceCounter.acquireResource(cached);
             cb.onResourceReady(cached);
             return null;
         }
 
-        ResourceRunner<Z> current = runners.get(id);
+        ResourceRunner<Z> current = runners.get(key);
         if (current != null) {
             EngineJob<Z> job = current.getJob();
             job.addCallback(cb);
             return new LoadStatus(cb, job);
         }
 
-        ResourceRunner<Z> runner = factory.build(id, width, height, cacheDecoder, fetcher, decoder, transformation,
-                encoder, metadata, this, cb);
-        runners.put(id, runner);
+        ResourceRunner<Z> runner = factory.build(key, width, height, cacheDecoder, fetcher, decoder, transformation,
+                encoder, metadata, this);
+        runner.getJob().addCallback(cb);
+        runners.put(key, runner);
         runner.queue();
         return new LoadStatus(cb, runner.getJob());
     }

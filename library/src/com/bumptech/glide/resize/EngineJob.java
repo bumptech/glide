@@ -16,17 +16,16 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
     private ResourceCache cache;
     private Handler mainHandler;
     private Set<ResourceCallback<Z>> cbs = new HashSet<ResourceCallback<Z>>();
-    private boolean isCancelled = false;
+    private boolean isCancelled;
+    private boolean isComplete;
 
     public EngineJob(String id, ResourceCache cache, Handler mainHandler, ResourceReferenceCounter referenceCounter,
-            EngineJobListener listener, ResourceCallback<Z> cb) {
+            EngineJobListener listener) {
         this.id = id;
         this.cache = cache;
         this.listener = listener;
         this.mainHandler = mainHandler;
         this.referenceCounter = referenceCounter;
-
-        addCallback(cb);
     }
 
     public void addCallback(ResourceCallback<Z> cb) {
@@ -42,6 +41,9 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
 
     // Exposed for testing.
     void cancel() {
+        if (isComplete || isCancelled) {
+            return;
+        }
         isCancelled = true;
         listener.onEngineJobCancelled(id);
     }
@@ -59,6 +61,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                 if (isCancelled) {
                     return;
                 }
+                isComplete = true;
 
                 referenceCounter.acquireResource(resource);
                 listener.onEngineJobComplete(id);
@@ -82,6 +85,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                 if (isCancelled) {
                     return;
                 }
+                isComplete = true;
 
                 listener.onEngineJobComplete(id);
                 for (ResourceCallback cb : cbs) {

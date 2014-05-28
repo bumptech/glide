@@ -139,6 +139,22 @@ public class EngineJobTest {
         verify(harness.referenceCounter, times(2)).releaseResource(harness.resource);
     }
 
+    @Test
+    public void testDoesNotNotifyCancelledIfCompletesBeforeCancel() {
+        harness.job.onResourceReady(harness.resource);
+        harness.job.cancel();
+
+        verify(harness.listener, never()).onEngineJobCancelled(eq(ID));
+    }
+
+    @Test
+    public void testDoesNotNotifyCancelledIfAlreadyCancelled() {
+        harness.job.cancel();
+        harness.job.cancel();
+
+        verify(harness.listener, times(1)).onEngineJobCancelled(eq(ID));
+    }
+
     @SuppressWarnings("unchecked")
     private static class EngineJobHarness {
         ResourceCache resourceCache = mock(ResourceCache.class);
@@ -148,6 +164,10 @@ public class EngineJobTest {
         EngineJobListener listener = mock(EngineJobListener.class);
         ResourceReferenceCounter referenceCounter = mock(ResourceReferenceCounter.class);
 
-        EngineJob <Object> job = new EngineJob<Object>(ID, resourceCache, mainHandler, referenceCounter, listener, cb);
+        EngineJob <Object> job = new EngineJob<Object>(ID, resourceCache, mainHandler, referenceCounter, listener);
+
+        public EngineJobHarness() {
+            job.addCallback(cb);
+        }
     }
 }

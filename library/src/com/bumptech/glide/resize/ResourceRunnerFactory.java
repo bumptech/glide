@@ -22,5 +22,5 @@ interface ResourceRunnerFactory {
     public <T, Z> ResourceRunner<Z> build(String id, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
             Transformation<Z> transformation,  ResourceEncoder<Z> encoder, Metadata metadata,
-            EngineJobListener listener, ResourceCallback<Z> cb);
+            EngineJobListener listener);
 }

@@ -25,12 +25,18 @@ public class CenterCrop implements Transformation<Bitmap> {
             throw new IllegalArgumentException("Cannot center crop image to width=" + outWidth + " and height="
                     + outHeight);
         }
+
         final Bitmap toReuse = pool.get(outWidth, outHeight, resource.get().getConfig());
         Bitmap transformed = TransformationUtils.centerCrop(toReuse, resource.get(), outWidth, outHeight);
-        if (toReuse != transformed && !pool.put(toReuse)) {
+        if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
             toReuse.recycle();
         }
-        return new BitmapResource(transformed, pool);
+
+        if (transformed == resource.get()) {
+            return resource;
+        } else {
+            return new BitmapResource(transformed, pool);
+        }
     }
 
     @Override

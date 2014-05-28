@@ -34,4 +34,9 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
             return new BitmapResource(bitmap, bitmapPool);
         }
     }
+
+    @Override
+    public String getId() {
+        return "com.bumptech.glide.resize.bitmap.StreamBitmapDecoder";
+    }
 }

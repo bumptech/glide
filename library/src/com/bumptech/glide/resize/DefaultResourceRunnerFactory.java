@@ -30,10 +30,10 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     @Override
     public <T, Z> ResourceRunner<Z> build(String id, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
-            Transformation<Z> transformation, ResourceEncoder<Z> encoder, Metadata metadata, EngineJobListener listener,
-            ResourceCallback<Z> cb) {
+            Transformation<Z> transformation, ResourceEncoder<Z> encoder, Metadata metadata,
+            EngineJobListener listener) {
 
-        EngineJob<Z> engineJob = new EngineJob<Z>(id, resourceCache, mainHandler, referenceCounter, listener, cb);
+        EngineJob<Z> engineJob = new EngineJob<Z>(id, resourceCache, mainHandler, referenceCounter, listener);
 
         SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(id, width, height, fetcher, decoder,
                 transformation, encoder, diskCache, metadata, engineJob);

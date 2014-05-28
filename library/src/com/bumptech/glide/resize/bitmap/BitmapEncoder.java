@@ -26,6 +26,11 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
 
     }
 
+    @Override
+    public String getId() {
+        return "com.bumptech.glide.resize.bitmap.BitmapEncoder";
+    }
+
     private Bitmap.CompressFormat getFormat(Bitmap bitmap) {
         if (compressFormat != null) {
             return compressFormat;

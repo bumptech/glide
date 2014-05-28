@@ -79,6 +79,11 @@ public abstract class ViewTarget<T extends View> implements Target {
         return request;
     }
 
+    @Override
+    public String toString() {
+        return "Target for: " + view;
+    }
+
     private static class SizeDeterminer {
         private final View view;
         private Set<SizeReadyCallback> cbs = new HashSet<SizeReadyCallback>();

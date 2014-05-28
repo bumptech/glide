@@ -20,6 +20,15 @@ public class RequestContext {
         this.parent = null;
     }
 
+    public <A, T, Z> boolean canLoad(Class<A> modelClass, Class<T> sourceClass, Class<Z> resourceClass) {
+        boolean hasModelLoader = contains(new MultiClassKey(ModelLoader.class, modelClass, sourceClass));
+        boolean hasDecoder = contains(new MultiClassKey(ResourceDecoder.class, sourceClass, resourceClass));
+        boolean hasEncoder = contains(new MultiClassKey(ResourceEncoder.class, resourceClass));
+        boolean hasCacheDecoder = contains(new MultiClassKey(ResourceDecoder.class, InputStream.class, resourceClass));
+
+        return hasModelLoader && hasDecoder && hasEncoder && hasCacheDecoder;
+    }
+
     public <A, T> void register(ModelLoader<A, T> modelLoader, Class<A> modelClass, Class<T> sourceClass) {
         registerGeneric(modelLoader, ModelLoader.class, modelClass, sourceClass);
     }
@@ -53,6 +62,9 @@ public class RequestContext {
     }
 
     void registerGeneric(Object object, Class... classes) {
+        if (object == null) {
+            throw new NullPointerException("Cannot register a null object");
+        }
         getDependencies().put(new MultiClassKey(classes), object);
     }
 
@@ -69,6 +81,17 @@ public class RequestContext {
             }
         }
         return result;
+    }
+
+    private boolean contains(MultiClassKey key) {
+        boolean contains = false;
+        if (dependencies != null) {
+            contains = dependencies.containsKey(key);
+        }
+        if (!contains && parent != null) {
+            contains = parent.contains(key);
+        }
+        return contains;
     }
 
     private Map<MultiClassKey, Object> getDependencies() {

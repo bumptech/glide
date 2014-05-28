@@ -19,7 +19,6 @@ import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.EngineBuilder;
-import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.request.Request;
 import com.bumptech.glide.resize.target.Target;
@@ -117,9 +116,6 @@ public class GlideTest {
                 .setEngine(new EngineBuilder(Robolectric.application)
                         .setExecutorService(service)
                         .setBackgroundHandler(bgHandler)
-                        .build())
-                .setImageManager(new ImageManager.Builder(Robolectric.application)
-                        .setResizeService(service)
                         .build())
                 .setRequestQueue(requestQueue));
 

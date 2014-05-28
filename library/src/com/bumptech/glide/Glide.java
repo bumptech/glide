@@ -53,7 +53,6 @@ public class Glide {
     private static Glide GLIDE;
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
     private final RequestQueue requestQueue;
-    private final ImageManager imageManager;
     private final Engine engine;
     private final RequestContext requestContext;
     private final BitmapPool bitmapPool;
@@ -102,10 +101,9 @@ public class Glide {
         GLIDE = null;
     }
 
-    Glide(Engine engine, ImageManager imageManager, RequestQueue requestQueue, RequestContext requestContext,
+    Glide(Engine engine, RequestQueue requestQueue, RequestContext requestContext,
             BitmapPool bitmapPool) {
         this.engine = engine;
-        this.imageManager = imageManager;
         this.requestQueue = requestQueue;
         this.requestContext = requestContext;
         this.bitmapPool = bitmapPool;
@@ -121,14 +119,6 @@ public class Glide {
         register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
     }
 
-    /**
-     * Returns the {@link ImageManager} Glide is using to load images.
-     */
-    public ImageManager getImageManager() {
-        return imageManager;
-    }
-
-    //TODO: don't make this public
     Engine getEngine() {
         return engine;
     }
@@ -525,12 +515,16 @@ public class Glide {
         private <T> RequestBuilder<T> loadGeneric(T model) {
             if (model != null) {
                 ModelLoader<T, InputStream> streamModelLoader = buildStreamModelLoader(model, context);
-                requestContext.register(streamModelLoader, (Class<T>) model.getClass(), InputStream.class);
+                if (streamModelLoader != null) {
+                    requestContext.register(streamModelLoader, (Class<T>) model.getClass(), InputStream.class);
+                }
 
                 ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
                         buildFileDescriptorModelLoader(model, context);
-                requestContext.register(fileDescriptorModelLoader, (Class<T>) model.getClass(),
-                        ParcelFileDescriptor.class);
+                if (fileDescriptorModelLoader != null) {
+                    requestContext.register(fileDescriptorModelLoader, (Class<T>) model.getClass(),
+                            ParcelFileDescriptor.class);
+                }
             }
             return new RequestBuilder<T>(context, model, requestContext);
         }

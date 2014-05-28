@@ -17,7 +17,6 @@ import com.bumptech.glide.resize.Resource;
 import com.bumptech.glide.resize.ResourceCallback;
 import com.bumptech.glide.resize.ResourceDecoder;
 import com.bumptech.glide.resize.ResourceEncoder;
-import com.bumptech.glide.resize.bitmap.BitmapResource;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.target.Target;
@@ -96,9 +95,11 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
         isCancelled = true;
         if (loadStatus != null) {
             loadStatus.cancel();
+            loadStatus = null;
         }
     }
 
+    @Override
     public void clear() {
         cancel();
         setPlaceHolder();

@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 
 import static com.bumptech.glide.resize.RequestContext.DependencyNotFoundException;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class RequestContextTest {
@@ -95,5 +97,81 @@ public class RequestContextTest {
         RequestContext child = new RequestContext(parent);
 
         child.getGeneric(Object.class);
+    }
+
+    @Test
+    public void testReturnsCanLoadIfHasRequiredDependencies() {
+        RequestContext parent = new RequestContext();
+        RequestContext requestContext = new RequestContext(parent);
+        parent.register(mock(ModelLoader.class), Object.class, Object.class);
+        requestContext.register(mock(ResourceDecoder.class), Object.class, Object.class);
+        requestContext.register(mock(ResourceDecoder.class), Object.class);
+        requestContext.register(mock(ResourceEncoder.class), Object.class);
+
+        assertTrue(requestContext.canLoad(Object.class, Object.class, Object.class));
+    }
+
+    @Test
+    public void testReturnsCanNotLoadIfMissingModelLoader() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register(mock(ResourceDecoder.class), Object.class, Object.class);
+        requestContext.register(mock(ResourceDecoder.class), Object.class);
+        requestContext.register(mock(ResourceEncoder.class), Object.class);
+
+        assertFalse(requestContext.canLoad(Object.class, Object.class, Object.class));
+    }
+
+    @Test
+    public void testReturnsCanNotLoadIfMissingDecoder() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register(mock(ModelLoader.class), Object.class, Object.class);
+        requestContext.register(mock(ResourceDecoder.class), Object.class);
+        requestContext.register(mock(ResourceEncoder.class), Object.class);
+
+        assertFalse(requestContext.canLoad(Object.class, Object.class, Object.class));
+    }
+
+    @Test
+    public void testReturnsCanNotLoadIfMissingCacheDecoder() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register(mock(ModelLoader.class), Object.class, Object.class);
+        requestContext.register(mock(ResourceDecoder.class), Object.class, Object.class);
+        requestContext.register(mock(ResourceEncoder.class), Object.class);
+
+        assertFalse(requestContext.canLoad(Object.class, Object.class, Object.class));
+    }
+
+    @Test
+    public void testReturnsCanNotLoadIfMissingEncoder() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register(mock(ModelLoader.class), Object.class, Object.class);
+        requestContext.register(mock(ResourceDecoder.class), Object.class);
+        requestContext.register(mock(ResourceDecoder.class), Object.class, Object.class);
+
+        assertFalse(requestContext.canLoad(Object.class, Object.class, Object.class));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsOnNullModel() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register((ModelLoader) null, Object.class, Object.class);
+    }
+
+    @Test(expected =  NullPointerException.class)
+    public void testThrowsOnNullDecoder() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register((ResourceDecoder) null, Object.class, Object.class);
+    }
+
+    @Test(expected =  NullPointerException.class)
+    public void testThrowsOnNullCacheDecoder() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register((ResourceDecoder) null, Object.class);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsOnNullEncoder() {
+        RequestContext requestContext = new RequestContext();
+        requestContext.register((ResourceEncoder) null, Object.class);
     }
 }

@@ -10,4 +10,6 @@ import java.io.IOException;
 public interface ResourceDecoder<T, Z> {
 
     public Resource<Z> decode(T source, int width, int height) throws IOException;
+
+    public String getId();
 }

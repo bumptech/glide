@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.resize.Engine;
-import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.load.DecodeFormat;
@@ -22,7 +21,6 @@ import com.bumptech.glide.resize.target.Target;
 public class BitmapRequestBuilder<T, Z> {
     Class<Z> resourceClass;
     T model;
-    ImageManager imageManager;
     Target target;
     Priority priority;
     float sizeMultiplier;
@@ -51,11 +49,6 @@ public class BitmapRequestBuilder<T, Z> {
 
     public BitmapRequestBuilder<T, Z> setContext(Context context) {
         this.context = context;
-        return this;
-    }
-
-    public BitmapRequestBuilder<T, Z> setImageManager(ImageManager imageManager) {
-        this.imageManager = imageManager;
         return this;
     }
 

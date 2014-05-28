@@ -23,6 +23,8 @@ import com.bumptech.glide.resize.target.Target;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
@@ -33,6 +35,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,7 +75,7 @@ public class BitmapRequestTest {
     }
 
     @Test
-    public void testIsNotCompleteBeforeReceiveingResource() {
+    public void testIsNotCompleteBeforeReceivingResource() {
         BitmapRequest request = harness.getBuilder().build();
 
         assertFalse(request.isComplete());
@@ -85,6 +88,28 @@ public class BitmapRequestTest {
         request.onResourceReady(mock(Resource.class));
 
         assertTrue(request.isComplete());
+    }
+
+    @Test
+    public void testResourceIsNotCompleteWhenAskingCoordinatorIfCanSetImage() {
+        RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
+        requestCoordinator = mock(RequestCoordinator.class);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Request request = (Request) invocation.getArguments()[0];
+                assertFalse(request.isComplete());
+                return true;
+            }
+        }).when(requestCoordinator).canSetImage(any(Request.class));
+
+        BitmapRequest request = harness.getBuilder()
+                .setRequestCoordinator(requestCoordinator)
+                .build();
+
+        request.onResourceReady(mock(Resource.class));
+
+        verify(requestCoordinator).canSetImage(eq(request));
     }
 
     @Test

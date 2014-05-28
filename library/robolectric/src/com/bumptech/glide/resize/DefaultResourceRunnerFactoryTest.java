@@ -56,7 +56,7 @@ public class DefaultResourceRunnerFactoryTest {
 
         public ResourceRunner build() {
             return factory.build(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, metadata,
-                    listener, cb);
+                    listener);
         }
     }
 }
