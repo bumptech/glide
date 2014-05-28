@@ -3,12 +3,14 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.EngineBuilder;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.bitmap.BitmapEncoder;
+import com.bumptech.glide.resize.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.resize.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
@@ -82,8 +84,10 @@ public class GlideBuilder {
             requestContext = new RequestContext();
             requestContext.register(new BitmapEncoder(), Bitmap.class);
             requestContext.register(new StreamBitmapDecoder(bitmapPool), InputStream.class, Bitmap.class);
+            requestContext.register(new FileDescriptorBitmapDecoder(bitmapPool), ParcelFileDescriptor.class,
+                    Bitmap.class);
         }
 
-        return new Glide(engine, imageManager, requestQueue, requestContext);
+        return new Glide(engine, imageManager, requestQueue, requestContext, bitmapPool);
     }
 }

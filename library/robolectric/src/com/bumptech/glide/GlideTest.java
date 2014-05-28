@@ -2,15 +2,19 @@ package com.bumptech.glide;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
 import com.bumptech.glide.loader.GlideUrl;
 import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
+import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
@@ -30,12 +34,19 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowContentResolver;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -52,6 +63,7 @@ import static org.mockito.Mockito.when;
  * Tests for the {@link Glide} interface and singleton.
  */
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = { GlideTest.ShadowFileDescriptorContentResolver.class, GlideTest.ShadowMediaMetadataRetriever.class })
 public class GlideTest {
     private Target target = null;
 
@@ -138,8 +150,25 @@ public class GlideTest {
         Glide.tearDown();
     }
 
+
+    @Test
+    public void testFileDefaultLoaderWithInputStream() throws Exception {
+        registerFailFactory(File.class, ParcelFileDescriptor.class);
+        runTestFileDefaultLoader();
+    }
+
+    @Test
+    public void testFileDefaultLoaderWithFileDescriptor() throws Exception {
+        registerFailFactory(File.class, InputStream.class);
+        runTestFileDefaultLoader();
+    }
+
     @Test
     public void testFileDefaultLoader() {
+        runTestFileDefaultLoader();
+    }
+
+    private void runTestFileDefaultLoader() {
         File file = new File("fake");
         mockUri(Uri.fromFile(file));
 
@@ -150,7 +179,7 @@ public class GlideTest {
     }
 
     @Test
-    public void testUrlDefaultLoader() throws MalformedURLException {
+    public void runTestUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
 
         Glide.with(getContext()).loadFromImage(url).into(target);
@@ -160,7 +189,23 @@ public class GlideTest {
     }
 
     @Test
+    public void testUriDefaultLoaderWithInputStream() throws Exception {
+        registerFailFactory(Uri.class, ParcelFileDescriptor.class);
+        runTestUriDefaultLoader();
+    }
+
+    @Test
+    public void testUriDefaultLoaderWithFileDescriptor() throws Exception {
+        registerFailFactory(Uri.class, InputStream.class);
+        runTestUriDefaultLoader();
+    }
+
+    @Test
     public void testUriDefaultLoader() {
+        runTestUriDefaultLoader();
+    }
+
+    private void runTestUriDefaultLoader() {
         Uri uri = Uri.parse("content://test/something");
         mockUri(uri);
 
@@ -171,9 +216,57 @@ public class GlideTest {
     }
 
     @Test
-    public void testStringDefaultLoader() {
-        String string = "http://www.google.com";
+    public void testStringDefaultLoaderWithUrl() {
+        runTestStringDefaultLoader("http://www.google.com");
+    }
 
+    @Test
+    public void testFileStringDefaultLoaderWithInputStream() throws Exception {
+        registerFailFactory(String.class, ParcelFileDescriptor.class);
+        runTestFileStringDefaultLoader();
+    }
+
+    @Test
+    public void testFileStringDefaultLoaderWithFileDescriptor() throws Exception {
+        registerFailFactory(String.class, ParcelFileDescriptor.class);
+        runTestFileStringDefaultLoader();
+    }
+
+    @Test
+    public void testFileStringDefaultLoader() {
+        runTestFileStringDefaultLoader();
+    }
+
+    private void runTestFileStringDefaultLoader() {
+        String path = "/some/random/path";
+        mockUri(Uri.fromFile(new File(path)));
+        runTestStringDefaultLoader(path);
+    }
+
+    @Test
+    public void testUriStringDefaultLoaderWithInputStream() throws Exception {
+        registerFailFactory(String.class, ParcelFileDescriptor.class);
+        runTestUriStringDefaultLoader();
+    }
+
+    @Test
+    public void testUriStringDefaultLoaerWithFileDescriptor() throws Exception {
+        registerFailFactory(String.class, InputStream.class);
+        runTestUriStringDefaultLoader();
+    }
+
+    @Test
+    public void testUriStringDefaultLoader() {
+        runTestUriStringDefaultLoader();
+    }
+
+    private void runTestUriStringDefaultLoader() {
+        String stringUri = "content://some/random/uri";
+        mockUri(Uri.parse(stringUri));
+        runTestStringDefaultLoader(stringUri);
+    }
+
+    private void runTestStringDefaultLoader(String string) {
         Glide.with(getContext()).load(string).into(target);
 
         verify(target).onImageReady(any(Bitmap.class));
@@ -181,7 +274,23 @@ public class GlideTest {
     }
 
     @Test
+    public void testIntegerDefaultLoaderWithInputStream() throws Exception {
+        registerFailFactory(Integer.class, ParcelFileDescriptor.class);
+        runTestIntegerDefaultLoader();
+    }
+
+    @Test
+    public void testIntegerDefaultLoaderWithFileDescriptor() throws Exception {
+        registerFailFactory(Integer.class, InputStream.class);
+        runTestIntegerDefaultLoader();
+    }
+
+    @Test
     public void testIntegerDefaultLoader() {
+        runTestIntegerDefaultLoader();
+    }
+
+    private void runTestIntegerDefaultLoader() {
         int integer = 1234;
         mockUri("android.resource://" + getContext().getPackageName() + "/" + integer);
 
@@ -245,9 +354,28 @@ public class GlideTest {
         mockUri(Uri.parse(uriString));
     }
 
+    @SuppressWarnings("unchecked")
+    private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) throws Exception {
+        ResourceFetcher<Z> failFetcher = mock(ResourceFetcher.class);
+        when(failFetcher.loadResource(any(Metadata.class))).thenThrow(new IOException("test"));
+        ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
+        when(failLoader.getId(any(failModel))).thenReturn("fakeId");
+        when(failLoader.getResourceFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
+        ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
+        when(failFactory.build(any(Context.class), any(GenericLoaderFactory.class))).thenReturn(failLoader);
+
+        Glide.get(getContext()).register(failModel, failResource, failFactory);
+    }
+
+
     private void mockUri(Uri uri) {
         ContentResolver contentResolver = Robolectric.application.getContentResolver();
-        Robolectric.shadowOf(contentResolver).registerInputStream(uri, new ByteArrayInputStream(new byte[0]));
+        ShadowFileDescriptorContentResolver shadowContentResolver = Robolectric.shadowOf_(contentResolver);
+        shadowContentResolver.registerInputStream(uri, new ByteArrayInputStream(new byte[0]));
+        AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
+        ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
+        when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(parcelFileDescriptor);
+        shadowContentResolver.registerAssetFileDescriptor(uri, assetFileDescriptor);
     }
 
     private Context getContext() {
@@ -282,6 +410,36 @@ public class GlideTest {
                 .thenReturn(fetcher);
 
         return modelLoader;
+    }
+
+    @Implements(ContentResolver.class)
+    public static class ShadowFileDescriptorContentResolver extends ShadowContentResolver {
+        private final Map<Uri, AssetFileDescriptor> uriToFileDescriptors = new HashMap<Uri, AssetFileDescriptor>();
+
+        public void registerAssetFileDescriptor(Uri uri, AssetFileDescriptor assetFileDescriptor) {
+            uriToFileDescriptors.put(uri, assetFileDescriptor);
+        }
+
+        @Implementation
+        @SuppressWarnings("unused")
+        public AssetFileDescriptor openAssetFileDescriptor(Uri uri, String type) {
+            if (!uriToFileDescriptors.containsKey(uri)) {
+                throw new IllegalArgumentException("You must first register an AssetFileDescriptor for uri: " + uri);
+            }
+            return uriToFileDescriptors.get(uri);
+        }
+    }
+
+    @Implements(MediaMetadataRetriever.class)
+    public static class ShadowMediaMetadataRetriever {
+
+        @Implementation
+        @SuppressWarnings("unused")
+        public Bitmap getFrameAtTime() {
+            Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+            Robolectric.shadowOf(bitmap).appendDescription(" from MediaMetadataRetriever");
+            return bitmap;
+        }
     }
 }
 

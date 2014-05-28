@@ -11,7 +11,6 @@ import com.bumptech.glide.resize.cache.ResourceCache;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class EngineBuilder {
     private ExecutorService service;
@@ -53,10 +52,8 @@ public class EngineBuilder {
         }
 
         if (service == null) {
-            //TODO: re-enabled prioritization.
             final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
-//            service = new FifoPriorityThreadPoolExecutor(cores);
-            service = Executors.newFixedThreadPool(cores);
+            service = new FifoPriorityThreadPoolExecutor(cores);
         }
 
         if (bgHandler == null) {

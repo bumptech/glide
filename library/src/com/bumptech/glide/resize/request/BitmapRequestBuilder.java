@@ -16,11 +16,12 @@ import com.bumptech.glide.resize.target.Target;
 /**
  * A simple builder class for {@link BitmapRequest}.
  *
- * @param <T> The model type the {@link BitmapRequest} will load a {@link Bitmap} from.
+ * @param <T, Z> The model type the {@link BitmapRequest} will load an {@link Bitmap} from.
+ * @param <Z> The resource type the {@link BitmapRequest} will load an {@link Bitmap} from.
  */
-public class BitmapRequestBuilder<T> {
+public class BitmapRequestBuilder<T, Z> {
+    Class<Z> resourceClass;
     T model;
-    BitmapLoadFactory<T> bitmapLoadFactory;
     ImageManager imageManager;
     Target target;
     Priority priority;
@@ -38,97 +39,96 @@ public class BitmapRequestBuilder<T> {
     Engine engine;
     RequestContext requestContext;
 
-    public BitmapRequestBuilder<T> setModel(T model) {
+    public BitmapRequestBuilder(Class<Z> resourceClass) {
+        this.resourceClass = resourceClass;
+    }
+
+    public BitmapRequestBuilder<T, Z> setModel(T model) {
         this.model = model;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setContext(Context context) {
+    public BitmapRequestBuilder<T, Z> setContext(Context context) {
         this.context = context;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setBitmapLoadFactory(BitmapLoadFactory<T> bitmapLoadFactory) {
-        this.bitmapLoadFactory = bitmapLoadFactory;
-        return this;
-    }
-
-    public BitmapRequestBuilder<T> setImageManager(ImageManager imageManager) {
+    public BitmapRequestBuilder<T, Z> setImageManager(ImageManager imageManager) {
         this.imageManager = imageManager;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setDecodeFormat(DecodeFormat decodeFormat) {
+    public BitmapRequestBuilder<T, Z> setDecodeFormat(DecodeFormat decodeFormat) {
         this.decodeFormat = decodeFormat;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setTarget(Target target) {
+    public BitmapRequestBuilder<T, Z> setTarget(Target target) {
         this.target = target;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setPriority(Priority priority) {
+    public BitmapRequestBuilder<T, Z> setPriority(Priority priority) {
         this.priority = priority;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setSizeMultiplier(float sizeMultiplier) {
+    public BitmapRequestBuilder<T, Z> setSizeMultiplier(float sizeMultiplier) {
         this.sizeMultiplier = sizeMultiplier;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setRequestListener(RequestListener<T> requestListener) {
+    public BitmapRequestBuilder<T, Z> setRequestListener(RequestListener<T> requestListener) {
         this.requestListener = requestListener;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setAnimation(int animationId) {
+    public BitmapRequestBuilder<T, Z> setAnimation(int animationId) {
         this.animationId = animationId;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setAnimation(Animation animation) {
+    public BitmapRequestBuilder<T, Z> setAnimation(Animation animation) {
         this.animation = animation;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setPlaceholderResource(int resourceId) {
+    public BitmapRequestBuilder<T, Z> setPlaceholderResource(int resourceId) {
         this.placeholderResourceId = resourceId;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setPlaceholderDrawable(Drawable placeholderDrawable) {
+    public BitmapRequestBuilder<T, Z> setPlaceholderDrawable(Drawable placeholderDrawable) {
         this.placeholderDrawable = placeholderDrawable;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setErrorResource(int resourceId) {
+    public BitmapRequestBuilder<T, Z> setErrorResource(int resourceId) {
         this.errorResourceId = resourceId;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setErrorDrawable(Drawable errorDrawable) {
+    public BitmapRequestBuilder<T, Z> setErrorDrawable(Drawable errorDrawable) {
         this.errorDrawable = errorDrawable;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setRequestCoordinator(RequestCoordinator requestCoordinator) {
+    public BitmapRequestBuilder<T, Z> setRequestCoordinator(RequestCoordinator requestCoordinator) {
         this.requestCoordinator = requestCoordinator;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setEngine(Engine engine) {
+    public BitmapRequestBuilder<T, Z> setEngine(Engine engine) {
         this.engine = engine;
         return this;
     }
 
-    public BitmapRequestBuilder<T> setRequestContext(RequestContext requestContext) {
+    public BitmapRequestBuilder<T, Z> setRequestContext(RequestContext requestContext) {
         this.requestContext = requestContext;
         return this;
     }
 
-    public BitmapRequest<T> build() {
-        return new BitmapRequest<T>(this);
+    public BitmapRequest<T, Z> build() {
+        return new BitmapRequest<T, Z>(this);
     }
 }

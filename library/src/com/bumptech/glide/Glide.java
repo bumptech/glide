@@ -56,6 +56,7 @@ public class Glide {
     private final ImageManager imageManager;
     private final Engine engine;
     private final RequestContext requestContext;
+    private final BitmapPool bitmapPool;
 
     /**
      * Get the singleton.
@@ -101,11 +102,13 @@ public class Glide {
         GLIDE = null;
     }
 
-    Glide(Engine engine, ImageManager imageManager, RequestQueue requestQueue, RequestContext requestContext) {
+    Glide(Engine engine, ImageManager imageManager, RequestQueue requestQueue, RequestContext requestContext,
+            BitmapPool bitmapPool) {
         this.engine = engine;
         this.imageManager = imageManager;
         this.requestQueue = requestQueue;
         this.requestContext = requestContext;
+        this.bitmapPool = bitmapPool;
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
         register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
@@ -126,8 +129,12 @@ public class Glide {
     }
 
     //TODO: don't make this public
-    public Engine getEngine() {
+    Engine getEngine() {
         return engine;
+    }
+
+    BitmapPool getBitmapPool() {
+        return bitmapPool;
     }
 
     /**
@@ -376,7 +383,7 @@ public class Glide {
          * into.
          */
         public RequestBuilder<String> load(String string) {
-            return new RequestBuilder<String>(context, string, requestContext);
+            return loadGeneric(string);
         }
 
         /**
@@ -390,7 +397,7 @@ public class Glide {
          * into.
          */
         public RequestBuilder<Uri> load(Uri uri) {
-            return new RequestBuilder<Uri>(context, uri, requestContext);
+            return loadGeneric(uri);
         }
 
         /**
@@ -405,7 +412,7 @@ public class Glide {
          * into.
          */
         public RequestBuilder<File> load(File file) {
-            return new RequestBuilder<File>(context, file, requestContext);
+            return loadGeneric(file);
         }
 
         /**
@@ -420,7 +427,7 @@ public class Glide {
          * into.
          */
         public RequestBuilder<Integer> load(Integer resourceId) {
-            return new RequestBuilder<Integer>(context, resourceId, requestContext);
+            return loadGeneric(resourceId);
         }
 
         /**
@@ -434,7 +441,7 @@ public class Glide {
          */
         @SuppressWarnings("unused")
         public <T> RequestBuilder<T> loadFromImage(T model) {
-            return new RequestBuilder<T>(context, model, buildStreamModelLoader(model, context), null, requestContext);
+            return loadGeneric(model);
         }
 
         /**
@@ -449,7 +456,7 @@ public class Glide {
          * into.
          */
         public RequestBuilder<URL> loadFromImage(URL url) {
-            return new RequestBuilder<URL>(context, url, buildStreamModelLoader(url, context), null, requestContext);
+            return loadGeneric(url);
         }
 
         /**
@@ -464,12 +471,14 @@ public class Glide {
          * into.
          */
         public RequestBuilder<byte[]> loadFromImage(byte[] model, final String id) {
-            return new RequestBuilder<byte[]>(context, model, new StreamByteArrayLoader() {
+            requestContext.register(new StreamByteArrayLoader() {
                 @Override
                 public String getId(byte[] model) {
                     return id;
                 }
-            }, null, requestContext);
+            }, byte[].class, InputStream.class);
+
+            return new RequestBuilder<byte[]>(context, model, requestContext);
         }
 
         /**
@@ -496,8 +505,7 @@ public class Glide {
          */
         @SuppressWarnings("unused")
         public <T> RequestBuilder<T> loadFromVideo(T model) {
-            return new RequestBuilder<T>(context, model, null, buildFileDescriptorModelLoader(model, context),
-                    requestContext);
+            return loadGeneric(model);
         }
 
         /**
@@ -511,6 +519,19 @@ public class Glide {
          * into.
          */
         public <T> RequestBuilder<T> load(T model) {
+            return loadGeneric(model);
+        }
+
+        private <T> RequestBuilder<T> loadGeneric(T model) {
+            if (model != null) {
+                ModelLoader<T, InputStream> streamModelLoader = buildStreamModelLoader(model, context);
+                requestContext.register(streamModelLoader, (Class<T>) model.getClass(), InputStream.class);
+
+                ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
+                        buildFileDescriptorModelLoader(model, context);
+                requestContext.register(fileDescriptorModelLoader, (Class<T>) model.getClass(),
+                        ParcelFileDescriptor.class);
+            }
             return new RequestBuilder<T>(context, model, requestContext);
         }
     }
@@ -538,7 +559,8 @@ public class Glide {
         }
 
         public RequestBuilder<T> loadFromVideo(T model) {
-            return new RequestBuilder<T>(context, model, null, loader, requestContext);
+            requestContext.register(loader, (Class<T>) model.getClass(), ParcelFileDescriptor.class);
+            return new RequestBuilder<T>(context, model, requestContext);
         }
     }
 
@@ -553,15 +575,15 @@ public class Glide {
         private RequestContext requestContext;
         private final ModelLoader<T, InputStream> loader;
 
-        private ImageModelRequest(Context context, RequestContext requestContext,
-                ModelLoader<T, InputStream> loader) {
+        private ImageModelRequest(Context context, RequestContext requestContext, ModelLoader<T, InputStream> loader) {
             this.context = context;
             this.requestContext = requestContext;
             this.loader = loader;
         }
 
         public RequestBuilder<T> load(T model) {
-            return new RequestBuilder<T>(context, model, loader, null, requestContext);
+            requestContext.register(loader, (Class <T>) model.getClass(), InputStream.class);
+            return new RequestBuilder<T>(context, model, requestContext);
         }
     }
 

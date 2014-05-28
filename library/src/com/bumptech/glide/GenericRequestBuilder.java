@@ -6,21 +6,21 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
-import com.bumptech.glide.loader.bitmap.ImageVideoBitmapLoadFactory;
-import com.bumptech.glide.loader.bitmap.ResourceBitmapLoadFactory;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
+import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.RequestContext;
+import com.bumptech.glide.resize.ResourceDecoder;
 import com.bumptech.glide.resize.load.BitmapDecoder;
-import com.bumptech.glide.resize.load.BitmapLoad;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.MultiTransformation;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.load.VideoBitmapDecoder;
 import com.bumptech.glide.resize.request.BitmapRequestBuilder;
+import com.bumptech.glide.resize.request.MultiTypeRequestCoordinator;
 import com.bumptech.glide.resize.request.Request;
+import com.bumptech.glide.resize.request.RequestCoordinator;
 import com.bumptech.glide.resize.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.resize.target.ImageViewTarget;
 import com.bumptech.glide.resize.target.Target;
@@ -40,19 +40,17 @@ import java.util.List;
  *                           by the video {@link BitmapDecoder}.
  */
 public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> {
-    private final Context context;
-    private final ModelLoader<ModelType, ImageResourceType> imageLoader;
-    private final ModelLoader<ModelType, VideoResourceType> videoLoader;
+    protected final Context context;
     private final List<Transformation> transformations = new ArrayList<Transformation>();
     private final ModelType model;
     private final RequestContext requestContext;
+    private final Class<ImageResourceType> imageType;
+    private final Class<VideoResourceType> videoType;
     private int animationId;
     private Animation animation;
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType> requestListener;
-    private BitmapDecoder<ImageResourceType> imageDecoder;
-    private BitmapDecoder<VideoResourceType> videoDecoder;
     private Float thumbSizeMultiplier;
     private GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
@@ -61,10 +59,11 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private Drawable errorPlaceholder;
     private Priority priority = null;
 
-    public GenericRequestBuilder(Context context, ModelType model,
-            ModelLoader<ModelType, ImageResourceType> imageLoader,
-            ModelLoader<ModelType, VideoResourceType> videoLoader, RequestContext requestContext) {
-         if (context == null) {
+    public GenericRequestBuilder(Context context, ModelType model, RequestContext requestContext,
+            Class<ImageResourceType> imageType, Class<VideoResourceType> videoType) {
+        this.imageType = imageType;
+        this.videoType = videoType;
+        if (context == null) {
             throw new NullPointerException("Context can't be null");
         }
         this.context = context;
@@ -77,12 +76,12 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
         this.model = model;
 
-        if (model != null && imageLoader == null && videoLoader == null) {
-            throw new NullPointerException("No ModelLoaders given or registered for model class="
-                    + model.getClass());
-        }
-        this.imageLoader = imageLoader;
-        this.videoLoader = videoLoader;
+//        if (model != null && imageLoader == null && videoLoader == null) {
+//            throw new NullPointerException("No ModelLoaders given or registered for model class="
+//                    + model.getClass());
+//        }
+//        this.imageLoader = imageLoader;
+//        this.videoLoader = videoLoader;
     }
 
     /**
@@ -177,8 +176,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @return This RequestBuilder.
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> imageDecoder(
-            BitmapDecoder<ImageResourceType> decoder) {
-        this.imageDecoder = decoder;
+            ResourceDecoder<ImageResourceType, Bitmap> decoder) {
+        requestContext.register(decoder, imageType, Bitmap.class);
 
         return this;
     }
@@ -196,8 +195,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> videoDecoder(
-            BitmapDecoder<VideoResourceType> decoder) {
-        this.videoDecoder = decoder;
+            ResourceDecoder<VideoResourceType, Bitmap> decoder) {
+        requestContext.register(decoder, videoType, Bitmap.class);
 
         return this;
     }
@@ -393,14 +392,12 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private <Y extends Target> Request buildRequest(Y target) {
         final Request result;
         if (priority == null) {
-            priority = Priority.NORMAL;
+            priority = Metadata.DEFAULT.getPriority();
         }
 
         if (thumbnailRequestBuilder != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
-            Request fullRequest = buildBitmapRequest(target)
-                    .setRequestCoordinator(requestCoordinator)
-                    .build();
+            Request fullRequest = buildBitmapRequest(target, sizeMultiplier, priority, requestCoordinator);
 
             if (thumbnailRequestBuilder.animationId <= 0) {
                 thumbnailRequestBuilder.animationId = animationId;
@@ -418,26 +415,20 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 thumbnailRequestBuilder.priority = getThumbnailPriority();
             }
 
-            Request thumbnailRequest = thumbnailRequestBuilder.buildBitmapRequest(target)
-                    .setRequestCoordinator(requestCoordinator)
-                    .build();
+            Request thumbnailRequest = thumbnailRequestBuilder.buildBitmapRequest(target,
+                    thumbnailRequestBuilder.sizeMultiplier, thumbnailRequestBuilder.priority, requestCoordinator);
 
             requestCoordinator.setRequests(fullRequest, thumbnailRequest);
             result = requestCoordinator;
         } else if (thumbSizeMultiplier != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
-            Request fullRequest = buildBitmapRequest(target)
-                    .setRequestCoordinator(requestCoordinator)
-                    .build();
-            Request thumbnailRequest = buildBitmapRequest(target)
-                    .setRequestCoordinator(requestCoordinator)
-                    .setSizeMultiplier(thumbSizeMultiplier)
-                    .setPriority(getThumbnailPriority())
-                    .build();
+            Request fullRequest = buildBitmapRequest(target, sizeMultiplier, priority, requestCoordinator);
+            Request thumbnailRequest = buildBitmapRequest(target, thumbSizeMultiplier, getThumbnailPriority(),
+                    requestCoordinator);
             requestCoordinator.setRequests(fullRequest, thumbnailRequest);
             result = requestCoordinator;
         } else {
-            result = buildBitmapRequest(target).build();
+            result = buildBitmapRequest(target, sizeMultiplier, priority, null);
         }
         return result;
     }
@@ -454,8 +445,26 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         return result;
     }
 
-    private <Y extends Target> BitmapRequestBuilder<ModelType> buildBitmapRequest(Y target) {
-        return new BitmapRequestBuilder<ModelType>()
+    private <Y extends Target> Request buildBitmapRequest(Y target, float sizeMultiplier, Priority priority,
+            RequestCoordinator requestCoordinator) {
+        if (imageType == null) {
+            return buildBitmapRequestForType(target, videoType, sizeMultiplier, priority, requestCoordinator).build();
+        } else if (videoType == null) {
+            return buildBitmapRequestForType(target, imageType, sizeMultiplier, priority, requestCoordinator).build();
+        } else {
+            MultiTypeRequestCoordinator typeCoordinator = new MultiTypeRequestCoordinator(requestCoordinator);
+            Request imageRequest =
+                    buildBitmapRequestForType(target, imageType, sizeMultiplier, priority, typeCoordinator).build();
+            Request videoRequest =
+                    buildBitmapRequestForType(target, videoType, sizeMultiplier, priority, typeCoordinator).build();
+            typeCoordinator.setRequests(imageRequest, videoRequest);
+            return typeCoordinator;
+        }
+    }
+
+    private <Y extends Target, Z> BitmapRequestBuilder<ModelType, Z> buildBitmapRequestForType(Y target,
+            Class <Z> resourceClass, float sizeMultiplier, Priority priority, RequestCoordinator requestCoordinator) {
+        return new BitmapRequestBuilder<ModelType, Z>(resourceClass)
                 .setContext(context)
                 .setPriority(priority)
                 .setImageManager(Glide.get(context).getImageManager())
@@ -463,7 +472,6 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setRequestContext(requestContext)
                 .setModel(model)
                 .setTarget(target)
-                .setBitmapLoadFactory(getLoadFactory())
                 .setDecodeFormat(decodeFormat)
                 .setAnimation(animationId)
                 .setAnimation(animation)
@@ -472,36 +480,9 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setPlaceholderDrawable(placeholderDrawable)
                 .setErrorResource(errorId)
                 .setErrorDrawable(errorPlaceholder)
-                .setSizeMultiplier(sizeMultiplier);
-    }
-
-    private BitmapLoadFactory<ModelType> getLoadFactory() {
-        if (model == null) {
-            return new BitmapLoadFactory<ModelType>() {
-                @Override
-                public BitmapLoad getLoadTask(Object model, int width, int height) {
-                    return null;
-                }
-            };
-        }
-
-        final ResourceBitmapLoadFactory<ModelType, ImageResourceType> imageFactory;
-        if (imageLoader != null && imageDecoder != null) {
-            imageFactory = new ResourceBitmapLoadFactory<ModelType, ImageResourceType>(imageLoader, imageDecoder,
-                    decodeFormat);
-        } else {
-            imageFactory = null;
-        }
-
-        final ResourceBitmapLoadFactory<ModelType, VideoResourceType> videoFactory;
-        if (videoLoader != null && videoDecoder != null) {
-            videoFactory = new ResourceBitmapLoadFactory<ModelType, VideoResourceType>(videoLoader, videoDecoder,
-                    decodeFormat);
-        } else {
-            videoFactory = null;
-        }
-        return new ImageVideoBitmapLoadFactory<ModelType, ImageResourceType, VideoResourceType>(imageFactory,
-                videoFactory, getFinalTransformation());
+                .setSizeMultiplier(sizeMultiplier)
+                .setPriority(priority)
+                .setRequestCoordinator(requestCoordinator);
     }
 
     private Transformation getFinalTransformation() {

@@ -4,14 +4,13 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
-import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.RequestContext;
-import com.bumptech.glide.resize.load.BitmapDecoder;
+import com.bumptech.glide.resize.bitmap.FileDescriptorBitmapDecoder;
+import com.bumptech.glide.resize.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
 import com.bumptech.glide.resize.load.Transformation;
-import com.bumptech.glide.resize.load.VideoBitmapDecoder;
 
 import java.io.InputStream;
 
@@ -25,20 +24,8 @@ import java.io.InputStream;
 public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor> {
 
     RequestBuilder(Context context, ModelType model, RequestContext requestContext) {
-        this(context, model, Glide.buildStreamModelLoader(model, context),
-                Glide.buildFileDescriptorModelLoader(model, context), requestContext);
-    }
+        super(context, model, requestContext, InputStream.class, ParcelFileDescriptor.class);
 
-    @SuppressWarnings("unchecked")
-    RequestBuilder(Context context, ModelType model, ModelLoader<ModelType, InputStream> imageLoader,
-            ModelLoader<ModelType, ParcelFileDescriptor> videoLoader, RequestContext requestContext) {
-        super(context, model, imageLoader, videoLoader, requestContext);
-        if (model != null) {
-            requestContext.register(imageLoader, (Class <ModelType>) model.getClass(), InputStream.class);
-            requestContext.register(videoLoader, (Class <ModelType>) model.getClass(), ParcelFileDescriptor.class);
-        }
-
-        approximate().videoDecoder(new VideoBitmapDecoder());
     }
 
     /**
@@ -68,13 +55,13 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
      * {@link Downsampler#AT_LEAST}. Will be ignored if the data represented by the model is a video.
      *
      * @see #imageDecoder
-     * @see #videoDecoder(BitmapDecoder)
      *
      * @param downsampler The downsampler
      * @return This RequestBuilder
      */
-    public RequestBuilder<ModelType> downsample(Downsampler downsampler) {
-        super.imageDecoder(downsampler);
+    private RequestBuilder<ModelType> downsample(Downsampler downsampler) {
+        super.imageDecoder(new StreamBitmapDecoder(downsampler, Glide.get(context).getBitmapPool(),
+                DecodeFormat.PREFER_RGB_565));
         return this;
     }
 
@@ -93,14 +80,12 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
          return this;
      }
 
-    @Override
-    public RequestBuilder<ModelType> imageDecoder(BitmapDecoder<InputStream> decoder) {
+    public RequestBuilder<ModelType> imageDecoder(StreamBitmapDecoder decoder) {
         super.imageDecoder(decoder);
         return this;
     }
 
-    @Override
-    public RequestBuilder<ModelType> videoDecoder(BitmapDecoder<ParcelFileDescriptor> decoder) {
+    public RequestBuilder<ModelType> videoDecoder(FileDescriptorBitmapDecoder decoder) {
         super.videoDecoder(decoder);
         return this;
     }

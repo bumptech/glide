@@ -22,4 +22,9 @@ public interface Request {
      * Returns true if the request has successfully completed.
      */
     public boolean isComplete();
+
+    /**
+     * Returns true if the request has failed.
+     */
+    public boolean isFailed();
 }

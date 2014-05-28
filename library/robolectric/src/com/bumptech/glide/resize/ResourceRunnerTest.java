@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -42,7 +43,7 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testCacheDecoderIsCalledIfInCache() {
+    public void testCacheDecoderIsCalledIfInCache() throws IOException {
         InputStream result = new ByteArrayInputStream(new byte[0]);
         when(harness.diskCache.get(eq(ID))).thenReturn(result);
 
@@ -52,7 +53,7 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testCallbackIsCalledIfCacheDecodeSucceeds() {
+    public void testCallbackIsCalledIfCacheDecodeSucceeds() throws IOException {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.diskCache.get(eq(ID))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
@@ -73,7 +74,7 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testCallbackIsNotCalledIfCacheDecodeFails() {
+    public void testCallbackIsNotCalledIfCacheDecodeFails() throws IOException {
         when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
         harness.runner.run();
@@ -91,7 +92,7 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testSourceRunnerIsQueuedIfCacheDecodeFails() {
+    public void testSourceRunnerIsQueuedIfCacheDecodeFails() throws IOException {
         when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
 

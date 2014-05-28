@@ -46,4 +46,9 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     public boolean isComplete() {
         return full.isComplete();
     }
+
+    @Override
+    public boolean isFailed() {
+        return full.isFailed();
+    }
 }

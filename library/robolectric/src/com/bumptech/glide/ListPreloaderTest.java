@@ -1,18 +1,9 @@
 package com.bumptech.glide;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
-import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-import com.bumptech.glide.resize.Metadata;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,7 +21,7 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsCalledIncreasing() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(Robolectric.application, 10) {
+        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 called.set(true);
@@ -77,7 +68,7 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsCalledDecreasing() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(Robolectric.application, 10) {
+        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 // Ignore the preload caused from us starting at the end
@@ -133,7 +124,7 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsNeverCalledWithEndGreaterThanTotalItems() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(Robolectric.application, 10) {
+        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 called.set(true);
@@ -149,7 +140,7 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsNeverCalledWithStartLessThanZero() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(Robolectric.application, 10) {
+        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 if (start == 17) {
@@ -169,7 +160,7 @@ public class ListPreloaderTest {
     @Test
     public void testDontPreloadItemsRepeatedlyWhileIncreasing() {
         final AtomicInteger called = new AtomicInteger();
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(Robolectric.application, 10) {
+        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 final int current = called.getAndIncrement();
@@ -193,7 +184,7 @@ public class ListPreloaderTest {
     @Test
     public void testDontPreloadItemsRepeatedlyWhileDecreasing() {
         final AtomicInteger called = new AtomicInteger();
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(Robolectric.application, 10) {
+        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 if (start == 30) {
@@ -223,7 +214,7 @@ public class ListPreloaderTest {
         objects.add(new Object());
         objects.add(new Object());
         final HashSet<Object> loadedObjects = new HashSet<Object>();
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(Robolectric.application, 10) {
+        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
             @Override
             protected List<Object> getItems(int start, int end) {
                 return objects;
@@ -245,12 +236,9 @@ public class ListPreloaderTest {
     }
 
     private static class ListPreloaderAdapter extends ListPreloader<Object> {
-        private final Context context;
-        public Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
-        public ListPreloaderAdapter(Context context, int maxPreload) {
+        public ListPreloaderAdapter(int maxPreload) {
             super(maxPreload);
-            this.context = context;
         }
 
         @Override
@@ -267,29 +255,7 @@ public class ListPreloaderTest {
 
         @Override
         protected RequestBuilder getRequestBuilder(Object item) {
-            return Glide.with(context).using(new StreamModelLoader<Object>() {
-                @Override
-                public ResourceFetcher<InputStream> getResourceFetcher(final Object model, int width, int height) {
-                    return new ResourceFetcher<InputStream>() {
-                        @Override
-                        public InputStream loadResource(Metadata metadata) throws Exception {
-                            ByteArrayOutputStream os = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
-                            return new ByteArrayInputStream(os.toByteArray());
-                        }
-
-
-                        @Override
-                        public void cancel() {
-                        }
-                    };
-                }
-
-                @Override
-                public String getId(Object model) {
-                    return String.valueOf(model.hashCode());
-                }
-            }).load(item);
+            return mock(RequestBuilder.class);
         }
     }
 }
