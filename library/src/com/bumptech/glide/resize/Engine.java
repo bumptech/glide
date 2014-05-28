@@ -10,9 +10,10 @@ import java.util.Map;
 
 public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener {
 
-    private final Map<String, ResourceRunner> runners;
+    private final Map<Key, ResourceRunner> runners;
     private final ResourceRunnerFactory factory;
     private final ResourceReferenceCounter resourceReferenceCounter;
+    private KeyFactory keyFactory;
     private final MemoryCache cache;
 
     public static class LoadStatus {
@@ -30,16 +31,17 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     public Engine(EngineBuilder builder) {
-        this(builder.factory, builder.memoryCache, new HashMap<String, ResourceRunner>(),
-                builder.resourceReferenceCounter);
+        this(builder.factory, builder.memoryCache, new HashMap<Key, ResourceRunner>(),
+                builder.resourceReferenceCounter, builder.keyFactory);
     }
 
-    Engine(ResourceRunnerFactory factory, MemoryCache cache, Map<String, ResourceRunner> runners,
-            ResourceReferenceCounter referenceCounter) {
+    Engine(ResourceRunnerFactory factory, MemoryCache cache, Map<Key, ResourceRunner> runners,
+            ResourceReferenceCounter referenceCounter, KeyFactory keyFactory) {
         this.factory = factory;
         this.cache = cache;
         this.runners = runners;
         this.resourceReferenceCounter = referenceCounter;
+        this.keyFactory = keyFactory;
 
         cache.setResourceRemovedListener(this);
     }
@@ -58,15 +60,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     public <T, Z> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
             ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
             ResourceEncoder<Z> encoder, Metadata metadata, ResourceCallback<Z> cb) {
-        final String key = new StringBuilder()
-                .append(id)
-                .append(width)
-                .append(height)
-                .append(cacheDecoder.getId())
-                .append(decoder.getId())
-                .append(transformation.getId())
-                .append(encoder.getId())
-                .toString();
+
+        Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder);
 
         Resource<Z> cached = cache.get(key);
         if (cached != null) {
@@ -91,13 +86,13 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     @Override
-    public void onEngineJobComplete(String id) {
-        runners.remove(id);
+    public void onEngineJobComplete(Key key) {
+        runners.remove(key);
     }
 
     @Override
-    public void onEngineJobCancelled(String id) {
-        ResourceRunner runner = runners.remove(id);
+    public void onEngineJobCancelled(Key key) {
+        ResourceRunner runner = runners.remove(key);
         runner.cancel();
     }
 

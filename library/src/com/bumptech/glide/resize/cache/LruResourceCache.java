@@ -1,12 +1,13 @@
 package com.bumptech.glide.resize.cache;
 
+import com.bumptech.glide.resize.Key;
 import com.bumptech.glide.resize.Resource;
 import com.bumptech.glide.util.LruCache;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 
-public class LruResourceCache extends LruCache<String, Resource> implements MemoryCache {
+public class LruResourceCache extends LruCache<Key, Resource> implements MemoryCache {
     private ResourceRemovedListener listener;
 
     public LruResourceCache(int size) {

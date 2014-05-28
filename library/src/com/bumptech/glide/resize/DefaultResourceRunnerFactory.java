@@ -28,17 +28,17 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     }
 
     @Override
-    public <T, Z> ResourceRunner<Z> build(String id, int width, int height,
+    public <T, Z> ResourceRunner<Z> build(Key key, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
             Transformation<Z> transformation, ResourceEncoder<Z> encoder, Metadata metadata,
             EngineJobListener listener) {
 
-        EngineJob<Z> engineJob = new EngineJob<Z>(id, memoryCache, mainHandler, referenceCounter, listener);
+        EngineJob<Z> engineJob = new EngineJob<Z>(key, memoryCache, mainHandler, referenceCounter, listener);
 
-        SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(id, width, height, fetcher, decoder,
+        SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(key, width, height, fetcher, decoder,
                 transformation, encoder, diskCache, metadata, engineJob);
 
-        return new ResourceRunner<Z>(id, width, height, diskCache, cacheDecoder, sourceRunner, service, bgHandler,
+        return new ResourceRunner<Z>(key, width, height, diskCache, cacheDecoder, sourceRunner, service, bgHandler,
                 engineJob);
     }
 }

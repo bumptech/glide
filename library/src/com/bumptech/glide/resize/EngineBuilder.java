@@ -17,6 +17,7 @@ public class EngineBuilder {
 
     ResourceRunnerFactory factory;
     ResourceReferenceCounter resourceReferenceCounter;
+    KeyFactory keyFactory;
 
     public EngineBuilder(MemoryCache memoryCache, DiskCache diskCache) {
         this.memoryCache = memoryCache;
@@ -47,6 +48,8 @@ public class EngineBuilder {
         }
 
         this.resourceReferenceCounter = new DefaultResourceReferenceCounter();
+
+        keyFactory = new EngineKeyFactory();
 
         factory = new DefaultResourceRunnerFactory(memoryCache, diskCache, new Handler(Looper.getMainLooper()), service,
                 bgHandler, resourceReferenceCounter);

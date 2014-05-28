@@ -22,11 +22,19 @@ public class RequestContext {
 
     public <A, T, Z> boolean canLoad(Class<A> modelClass, Class<T> sourceClass, Class<Z> resourceClass) {
         boolean hasModelLoader = contains(new MultiClassKey(ModelLoader.class, modelClass, sourceClass));
+        if (!hasModelLoader) {
+            return false;
+        }
         boolean hasDecoder = contains(new MultiClassKey(ResourceDecoder.class, sourceClass, resourceClass));
+        if (!hasDecoder) {
+            return false;
+        }
         boolean hasEncoder = contains(new MultiClassKey(ResourceEncoder.class, resourceClass));
+        if (!hasEncoder) {
+            return false;
+        }
         boolean hasCacheDecoder = contains(new MultiClassKey(ResourceDecoder.class, InputStream.class, resourceClass));
-
-        return hasModelLoader && hasDecoder && hasEncoder && hasCacheDecoder;
+        return hasCacheDecoder;
     }
 
     public <A, T> void register(ModelLoader<A, T> modelLoader, Class<A> modelClass, Class<T> sourceClass) {

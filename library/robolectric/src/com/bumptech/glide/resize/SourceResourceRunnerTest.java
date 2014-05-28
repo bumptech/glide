@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class SourceResourceRunnerTest {
-    private static final String ID = "asdf2";
     private SourceResourceHarness harness;
 
     @Before
@@ -171,8 +170,8 @@ public class SourceResourceRunnerTest {
         Transformation<Object> transformation = mock(Transformation.class);
         int width = 150;
         int height = 200;
-        SourceResourceRunner<Object, Object> runner = new SourceResourceRunner<Object, Object>(ID, width, height,
-                fetcher, decoder, transformation, encoder, diskCache, metadata, cb);
+        SourceResourceRunner<Object, Object> runner = new SourceResourceRunner<Object, Object>(mock(Key.class), width,
+                height, fetcher, decoder, transformation, encoder, diskCache, metadata, cb);
 
         public SourceResourceHarness() {
             when(transformation.transform(eq(result), eq(width), eq(height))).thenReturn(result);

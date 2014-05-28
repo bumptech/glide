@@ -1,5 +1,7 @@
 package com.bumptech.glide.resize.cache;
 
+import com.bumptech.glide.resize.Key;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -21,7 +23,7 @@ public interface DiskCache {
      * @param key The key in the cache
      * @return An InputStream representing the data at key at the time get is called
      */
-    public InputStream get(String key);
+    public InputStream get(Key key);
 
     /**
      * Write to a key in the cache. {@link Writer} is used so that the cache implementation
@@ -30,12 +32,12 @@ public interface DiskCache {
      * @param key The key to write to
      * @param writer An interface that will write data given an OutputStream for the key
      */
-    public void put(String key, Writer writer);
+    public void put(Key key, Writer writer);
 
     /**
      * Remove the key and value from the cache
      *
      * @param key The key to remove
      */
-    public void delete(String key);
+    public void delete(Key key);
 }

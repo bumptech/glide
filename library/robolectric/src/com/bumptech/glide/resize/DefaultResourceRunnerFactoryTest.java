@@ -55,7 +55,7 @@ public class DefaultResourceRunnerFactoryTest {
         Metadata metadata = mock(Metadata.class);
 
         public ResourceRunner build() {
-            return factory.build(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, metadata,
+            return factory.build(mock(Key.class), width, height, cacheDecoder, fetcher, decoder, transformation, encoder, metadata,
                     listener);
         }
     }

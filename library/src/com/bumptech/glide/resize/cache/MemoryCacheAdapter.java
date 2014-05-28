@@ -1,5 +1,6 @@
 package com.bumptech.glide.resize.cache;
 
+import com.bumptech.glide.resize.Key;
 import com.bumptech.glide.resize.Resource;
 
 public class MemoryCacheAdapter implements MemoryCache {
@@ -7,17 +8,17 @@ public class MemoryCacheAdapter implements MemoryCache {
     private ResourceRemovedListener listener;
 
     @Override
-    public boolean contains(String key) {
+    public boolean contains(Key key) {
         return false;
     }
 
     @Override
-    public Resource get(String key) {
+    public Resource get(Key key) {
         return null;
     }
 
     @Override
-    public Resource put(String key, Resource resource) {
+    public Resource put(Key key, Resource resource) {
         listener.onResourceRemoved(resource);
         return null;
     }

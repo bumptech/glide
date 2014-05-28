@@ -17,7 +17,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -37,7 +36,7 @@ public class ResourceRunnerTest {
 
     @Test
     public void testSourceRunnerIsSubmittedIfCacheDecoderThrows() throws IOException {
-        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("Test"));
 
         harness.runner.run();
@@ -47,35 +46,35 @@ public class ResourceRunnerTest {
 
     @Test
     public void testDiskCacheEntryIsDeletedIfCacheDecoderThrows() throws IOException {
-        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("Test"));
 
         harness.runner.run();
 
-        verify(harness.diskCache).delete(eq(ID));
+        verify(harness.diskCache).delete(eq(harness.key));
     }
 
     @Test
     public void testDiskCacheEntryIsDeletedIfDiskCacheContainsIdAndCacheDecoderReturnsNull() throws IOException {
-        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
 
         harness.runner.run();
 
-        verify(harness.diskCache).delete(eq(ID));
+        verify(harness.diskCache).delete(eq(harness.key));
     }
 
     @Test
     public void testDiskCacheIsAlwaysChecked() {
         harness.runner.run();
 
-        verify(harness.diskCache).get(eq(ID));
+        verify(harness.diskCache).get(eq(harness.key));
     }
 
     @Test
     public void testCacheDecoderIsCalledIfInCache() throws IOException {
         InputStream result = new ByteArrayInputStream(new byte[0]);
-        when(harness.diskCache.get(eq(ID))).thenReturn(result);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(result);
 
         harness.runner.run();
 
@@ -85,7 +84,7 @@ public class ResourceRunnerTest {
     @Test
     public void testCallbackIsCalledIfCacheDecodeSucceeds() throws IOException {
         InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.diskCache.get(eq(ID))).thenReturn(is);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
 
         harness.runner.run();
@@ -95,17 +94,17 @@ public class ResourceRunnerTest {
 
     @Test
     public void testCallbackIsNotCalledIfDiskCacheReturnsNull() {
-        when(harness.diskCache.get(eq(ID))).thenReturn(null);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(null);
 
         harness.runner.run();
 
-        verify(harness.diskCache, atLeastOnce()).get(eq(ID));
+        verify(harness.diskCache, atLeastOnce()).get(eq(harness.key));
         verify(harness.engineJob, never()).onException(any(Exception.class));
     }
 
     @Test
     public void testCallbackIsNotCalledIfCacheDecodeFails() throws IOException {
-        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
         harness.runner.run();
 
@@ -114,7 +113,7 @@ public class ResourceRunnerTest {
 
     @Test
     public void testSourceRunnerIsQueuedIfNotInCache() {
-        when(harness.diskCache.get(eq(ID))).thenReturn(null);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(null);
 
         harness.runner.run();
 
@@ -123,7 +122,7 @@ public class ResourceRunnerTest {
 
     @Test
     public void testSourceRunnerIsQueuedIfCacheDecodeFails() throws IOException {
-        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
 
         harness.runner.run();
@@ -152,7 +151,7 @@ public class ResourceRunnerTest {
         harness.runner.cancel();
         harness.runner.run();
 
-        verify(harness.diskCache, never()).get(anyString());
+        verify(harness.diskCache, never()).get(any(Key.class));
     }
 
     @Test
@@ -175,6 +174,7 @@ public class ResourceRunnerTest {
 
     @SuppressWarnings("unchecked")
     private static class ResourceRunnerHarness {
+        Key key = mock(Key.class);
         DiskCache diskCache = mock(DiskCache.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         SourceResourceRunner<Object, Object> sourceRunner = mock(SourceResourceRunner.class);
@@ -183,13 +183,14 @@ public class ResourceRunnerTest {
         Handler bgHandler = mock(Handler.class);
         int width = 100;
         int height = 100;
-        ResourceRunner<Object> runner = new ResourceRunner(ID, width, height, diskCache, decoder, sourceRunner, service,
-                bgHandler, engineJob);
+        ResourceRunner<Object> runner = new ResourceRunner(key, width, height, diskCache, decoder,
+                sourceRunner, service, bgHandler, engineJob);
         Future future = mock(Future.class);
         Future sourceFuture = mock(Future.class);
         Resource<Object> result = mock(Resource.class);
 
         public ResourceRunnerHarness() {
+            when(key.toString()).thenReturn(ID);
             when(service.submit(eq(runner))).thenReturn(future);
             when(service.submit(eq(sourceRunner))).thenReturn(sourceFuture);
         }

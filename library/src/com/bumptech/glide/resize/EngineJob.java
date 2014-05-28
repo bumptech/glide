@@ -10,18 +10,18 @@ import java.util.Set;
  * @param <Z> The type of the resource that will be decoded.
  */
 public class EngineJob<Z> implements ResourceCallback<Z> {
-    private final String id;
     private final EngineJobListener listener;
     private final ResourceReferenceCounter referenceCounter;
+    private Key key;
     private MemoryCache cache;
     private Handler mainHandler;
     private Set<ResourceCallback<Z>> cbs = new HashSet<ResourceCallback<Z>>();
     private boolean isCancelled;
     private boolean isComplete;
 
-    public EngineJob(String id, MemoryCache cache, Handler mainHandler, ResourceReferenceCounter referenceCounter,
+    public EngineJob(Key key, MemoryCache cache, Handler mainHandler, ResourceReferenceCounter referenceCounter,
             EngineJobListener listener) {
-        this.id = id;
+        this.key = key;
         this.cache = cache;
         this.listener = listener;
         this.mainHandler = mainHandler;
@@ -45,7 +45,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
             return;
         }
         isCancelled = true;
-        listener.onEngineJobCancelled(id);
+        listener.onEngineJobCancelled(key);
     }
 
     // Exposed for testing.
@@ -64,9 +64,9 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                 isComplete = true;
 
                 referenceCounter.acquireResource(resource);
-                listener.onEngineJobComplete(id);
+                listener.onEngineJobComplete(key);
                 referenceCounter.acquireResource(resource);
-                cache.put(id, resource);
+                cache.put(key, resource);
                 for (ResourceCallback<Z> cb : cbs) {
                     referenceCounter.acquireResource(resource);
                     cb.onResourceReady(resource);
@@ -87,7 +87,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                 }
                 isComplete = true;
 
-                listener.onEngineJobComplete(id);
+                listener.onEngineJobComplete(key);
                 for (ResourceCallback cb : cbs) {
                     cb.onException(e);
                 }

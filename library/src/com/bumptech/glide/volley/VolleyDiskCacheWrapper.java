@@ -5,6 +5,7 @@ import com.android.volley.Cache;
 import com.android.volley.toolbox.ByteArrayPool;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.PoolingByteArrayOutputStream;
+import com.bumptech.glide.resize.StringKey;
 import com.bumptech.glide.resize.cache.DiskCache;
 
 import java.io.EOFException;
@@ -37,7 +38,7 @@ public class VolleyDiskCacheWrapper implements Cache {
 
     @Override
     public Entry get(String key) {
-        InputStream result = diskCache.get(key);
+        InputStream result = diskCache.get(new StringKey(key));
         if (result == null) {
             return null;
         }
@@ -49,7 +50,7 @@ public class VolleyDiskCacheWrapper implements Cache {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 e.printStackTrace();
             }
-            diskCache.delete(key);
+            diskCache.delete(new StringKey(key));
         } finally {
             try {
                 result.close();
@@ -60,7 +61,7 @@ public class VolleyDiskCacheWrapper implements Cache {
 
     @Override
     public void put(final String key, final Entry entry) {
-        diskCache.put(key, new DiskCache.Writer() {
+        diskCache.put(new StringKey(key), new DiskCache.Writer() {
             @Override
             public void write(OutputStream os) {
                 CacheHeader header = new CacheHeader(key, entry);
@@ -93,7 +94,7 @@ public class VolleyDiskCacheWrapper implements Cache {
 
     @Override
     public void remove(String key) {
-        diskCache.delete(key);
+        diskCache.delete(new StringKey(key));
     }
 
     @Override
@@ -202,7 +203,6 @@ public class VolleyDiskCacheWrapper implements Cache {
                 return false;
             }
         }
-
     }
 
     /*

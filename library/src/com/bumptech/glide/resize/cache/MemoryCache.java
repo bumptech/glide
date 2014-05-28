@@ -1,6 +1,7 @@
 package com.bumptech.glide.resize.cache;
 
 import android.content.ComponentCallbacks2;
+import com.bumptech.glide.resize.Key;
 import com.bumptech.glide.resize.Resource;
 
 /**
@@ -19,14 +20,14 @@ public interface MemoryCache {
      * @param key The key
      * @return true iff the key has a non null value in the cache
      */
-    public boolean contains(String key);
+    public boolean contains(Key key);
 
     /**
      * Get a value from the cache
      * @param key The key
      * @return The bitmap at key or null if the key is not present
      */
-    public Resource get(String key);
+    public Resource get(Key key);
 
     /**
      * Add bitmap to the cache with the given key
@@ -34,7 +35,7 @@ public interface MemoryCache {
      * @param resource The {@link Resource} to store
      * @return The old value of key (null if key is not in map)
      */
-    public Resource put(String key, Resource resource);
+    public Resource put(Key key, Resource resource);
 
     /**
      * Set the listener to be called when a bitmap is removed from the cache

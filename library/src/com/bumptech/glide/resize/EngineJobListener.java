@@ -2,7 +2,7 @@ package com.bumptech.glide.resize;
 
 public interface EngineJobListener {
 
-    public void onEngineJobComplete(String id);
+    public void onEngineJobComplete(Key key);
 
-    public void onEngineJobCancelled(String id);
+    public void onEngineJobCancelled(Key key);
 }

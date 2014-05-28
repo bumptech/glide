@@ -12,7 +12,7 @@ import java.io.OutputStream;
  * @param <Z> The type of the resource that will be decoded.
  */
 public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, Prioritized {
-    private final String id;
+    private final Key key;
     private final int width;
     private final int height;
     private final ResourceFetcher<T> fetcher;
@@ -25,10 +25,10 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
     private Resource<Z> result;
     private volatile boolean isCancelled;
 
-    public SourceResourceRunner(String id, int width, int height, ResourceFetcher<T> resourceFetcher,
+    public SourceResourceRunner(Key key, int width, int height, ResourceFetcher<T> resourceFetcher,
             ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
             DiskCache diskCache, Metadata metadata, ResourceCallback<Z> cb) {
-        this.id = id;
+        this.key = key;
         this.width = width;
         this.height = height;
         this.fetcher = resourceFetcher;
@@ -64,7 +64,8 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
                 }
             }
             if (result != null) {
-                diskCache.put(id, this);
+                //TODO:
+                diskCache.put(key, this);
                 cb.onResourceReady(result);
             } else {
                 cb.onException(null);

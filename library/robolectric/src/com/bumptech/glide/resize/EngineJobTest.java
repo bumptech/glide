@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
 public class EngineJobTest {
-    private static final String ID = "asdfas";
     private EngineJobHarness harness;
 
     @Before
@@ -44,7 +43,7 @@ public class EngineJobTest {
 
         Robolectric.runUiThreadTasks();
 
-        verify(harness.listener).onEngineJobComplete(eq(ID));
+        verify(harness.listener).onEngineJobComplete(eq(harness.key));
     }
 
     @Test
@@ -52,7 +51,7 @@ public class EngineJobTest {
         harness.job.onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
-        verify(harness.memoryCache).put(eq(ID), eq(harness.resource));
+        verify(harness.memoryCache).put(eq(harness.key), eq(harness.resource));
     }
 
     @Test
@@ -70,14 +69,14 @@ public class EngineJobTest {
         harness.job.onException(new Exception("test"));
 
         Robolectric.runUiThreadTasks();
-        verify(harness.listener).onEngineJobComplete(eq(ID));
+        verify(harness.listener).onEngineJobComplete(eq(harness.key));
     }
 
     @Test
     public void testListenerNotifiedOfCancelOnCancel() {
         harness.job.cancel();
 
-        verify(harness.listener).onEngineJobCancelled(eq(ID));
+        verify(harness.listener).onEngineJobCancelled(eq(harness.key));
     }
 
     @Test
@@ -132,7 +131,7 @@ public class EngineJobTest {
                 harness.referenceCounter.releaseResource(harness.resource);
                 return null;
             }
-        }).when(harness.memoryCache).put(eq(ID), eq(harness.resource));
+        }).when(harness.memoryCache).put(eq(harness.key), eq(harness.resource));
 
         harness.job.onResourceReady(harness.resource);
         verify(harness.referenceCounter, times(3)).acquireResource(eq(harness.resource));
@@ -144,7 +143,7 @@ public class EngineJobTest {
         harness.job.onResourceReady(harness.resource);
         harness.job.cancel();
 
-        verify(harness.listener, never()).onEngineJobCancelled(eq(ID));
+        verify(harness.listener, never()).onEngineJobCancelled(eq(harness.key));
     }
 
     @Test
@@ -152,11 +151,12 @@ public class EngineJobTest {
         harness.job.cancel();
         harness.job.cancel();
 
-        verify(harness.listener, times(1)).onEngineJobCancelled(eq(ID));
+        verify(harness.listener, times(1)).onEngineJobCancelled(eq(harness.key));
     }
 
     @SuppressWarnings("unchecked")
     private static class EngineJobHarness {
+        Key key = mock(Key.class);
         MemoryCache memoryCache = mock(MemoryCache.class);
         Handler mainHandler = new Handler();
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
@@ -164,7 +164,7 @@ public class EngineJobTest {
         EngineJobListener listener = mock(EngineJobListener.class);
         ResourceReferenceCounter referenceCounter = mock(ResourceReferenceCounter.class);
 
-        EngineJob <Object> job = new EngineJob<Object>(ID, memoryCache, mainHandler, referenceCounter, listener);
+        EngineJob <Object> job = new EngineJob<Object>(key, memoryCache, mainHandler, referenceCounter, listener);
 
         public EngineJobHarness() {
             job.addCallback(cb);

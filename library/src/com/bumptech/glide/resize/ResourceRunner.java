@@ -15,7 +15,8 @@ import java.util.concurrent.Future;
  */
 public class ResourceRunner<Z> implements Runnable {
     private static final String TAG = "ResourceRunner";
-    private final String id;
+
+    private final Key key;
     private final SourceResourceRunner sourceRunner;
     private final ExecutorService executorService;
     private final EngineJob<Z> job;
@@ -27,9 +28,9 @@ public class ResourceRunner<Z> implements Runnable {
     private volatile Future<?> future;
     private volatile boolean isCancelled;
 
-    public ResourceRunner(String id, int width, int height, DiskCache diskCache, ResourceDecoder<InputStream, Z> cacheDecoder,
+    public ResourceRunner(Key key, int width, int height, DiskCache diskCache, ResourceDecoder<InputStream, Z> cacheDecoder,
             SourceResourceRunner sourceRunner, ExecutorService executorService, Handler bgHandler, EngineJob<Z> job) {
-        this.id = id;
+        this.key = key;
         this.width = width;
         this.height = height;
         this.diskCache = diskCache;
@@ -73,7 +74,8 @@ public class ResourceRunner<Z> implements Runnable {
 
     private Resource<Z> loadFromDiskCache() {
         Resource<Z> result = null;
-        InputStream fromCache = diskCache.get(id);
+        //TODO:
+        InputStream fromCache = diskCache.get(key);
         if (fromCache != null) {
             try {
                 result = cacheDecoder.decode(fromCache, width, height);
@@ -86,7 +88,7 @@ public class ResourceRunner<Z> implements Runnable {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
                     Log.d(TAG, "Failed to decode image from cache");
                 }
-                diskCache.delete(id);
+                diskCache.delete(key);
             }
         }
         return result;

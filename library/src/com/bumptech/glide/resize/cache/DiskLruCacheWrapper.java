@@ -4,8 +4,9 @@
 
 package com.bumptech.glide.resize.cache;
 
-import com.bumptech.glide.resize.SafeKeyGenerator;
 import android.util.Log;
+import com.bumptech.glide.resize.Key;
+import com.bumptech.glide.resize.SafeKeyGenerator;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.File;
@@ -62,8 +63,8 @@ public class DiskLruCacheWrapper implements DiskCache {
     }
 
     @Override
-    public InputStream get(String key) {
-        String safeKey = safeKeyGenerator.getSafeKey(key);
+    public InputStream get(Key key) {
+        String safeKey = safeKeyGenerator.getSafeKey(key.toString());
         InputStream result = null;
         try {
             //It is possible that the there will be a put in between these two gets. If so that shouldn't be a problem
@@ -82,8 +83,8 @@ public class DiskLruCacheWrapper implements DiskCache {
     }
 
     @Override
-    public void put(String key, Writer writer) {
-        String safeKey = safeKeyGenerator.getSafeKey(key);
+    public void put(Key key, Writer writer) {
+        String safeKey = safeKeyGenerator.getSafeKey(key.toString());
         try {
             DiskLruCache.Editor editor = getDiskCache().edit(safeKey);
             //editor will be null if there are two concurrent puts
@@ -108,8 +109,8 @@ public class DiskLruCacheWrapper implements DiskCache {
     }
 
     @Override
-    public void delete(String key) {
-        String safeKey = safeKeyGenerator.getSafeKey(key);
+    public void delete(Key key) {
+        String safeKey = safeKeyGenerator.getSafeKey(key.toString());
         try {
             getDiskCache().remove(safeKey);
         } catch (IOException e) {

@@ -1,6 +1,7 @@
 package com.bumptech.glide.resize.cache;
 
 import android.content.ComponentCallbacks2;
+import com.bumptech.glide.resize.Key;
 import com.bumptech.glide.resize.Resource;
 import org.junit.Test;
 
@@ -24,8 +25,8 @@ public class LruResourceCacheTest {
         public TrimClearMemoryCacheHarness() {
             when(first.getSize()).thenReturn(50);
             when(second.getSize()).thenReturn(50);
-            resourceCache.put("1", first);
-            resourceCache.put("2", second);
+            resourceCache.put(new MockKey(), first);
+            resourceCache.put(new MockKey(), second);
             resourceCache.setResourceRemovedListener(listener);
         }
     }
@@ -69,7 +70,7 @@ public class LruResourceCacheTest {
         ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
 
         resourceCache.setResourceRemovedListener(listener);
-        resourceCache.put("a", resource);
+        resourceCache.put(new MockKey(), resource);
 
         verify(listener).onResourceRemoved(eq(resource));
     }
@@ -78,24 +79,31 @@ public class LruResourceCacheTest {
     public void testSizeIsBasedOnResource() {
         LruResourceCache resourceCache = new LruResourceCache(100);
         Resource first = getResource(50);
-        resourceCache.put("1", first);
+        MockKey firstKey = new MockKey();
+        resourceCache.put(firstKey, first);
         Resource second = getResource(50);
-        resourceCache.put("2", second);
+        MockKey secondKey = new MockKey();
+        resourceCache.put(secondKey, second);
 
-        assertTrue(resourceCache.contains("1"));
-        assertTrue(resourceCache.contains("2"));
+        assertTrue(resourceCache.contains(firstKey));
+        assertTrue(resourceCache.contains(secondKey));
 
         Resource third = getResource(50);
-        resourceCache.put("3", third);
+        MockKey thirdKey = new MockKey();
+        resourceCache.put(thirdKey, third);
 
-        assertFalse(resourceCache.contains("1"));
-        assertTrue(resourceCache.contains("2"));
-        assertTrue(resourceCache.contains("3"));
+        assertFalse(resourceCache.contains(firstKey));
+        assertTrue(resourceCache.contains(secondKey));
+        assertTrue(resourceCache.contains(thirdKey));
     }
 
     private Resource getResource(int size) {
         Resource resource = mock(Resource.class);
         when(resource.getSize()).thenReturn(size);
         return resource;
+    }
+
+    private static class MockKey implements Key {
+
     }
 }
