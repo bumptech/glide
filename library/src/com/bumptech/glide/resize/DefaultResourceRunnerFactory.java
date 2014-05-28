@@ -3,7 +3,7 @@ package com.bumptech.glide.resize;
 import android.os.Handler;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.cache.DiskCache;
-import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.load.Transformation;
 
 import java.io.InputStream;
@@ -12,14 +12,14 @@ import java.util.concurrent.ExecutorService;
 class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     private final Handler bgHandler;
     private final ResourceReferenceCounter referenceCounter;
-    private ResourceCache resourceCache;
+    private MemoryCache memoryCache;
     private DiskCache diskCache;
     private Handler mainHandler;
     private ExecutorService service;
 
-    public DefaultResourceRunnerFactory(ResourceCache resourceCache, DiskCache diskCache, Handler mainHandler,
+    public DefaultResourceRunnerFactory(MemoryCache memoryCache, DiskCache diskCache, Handler mainHandler,
             ExecutorService service, Handler bgHandler, ResourceReferenceCounter referenceCounter) {
-        this.resourceCache = resourceCache;
+        this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.mainHandler = mainHandler;
         this.service = service;
@@ -33,7 +33,7 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
             Transformation<Z> transformation, ResourceEncoder<Z> encoder, Metadata metadata,
             EngineJobListener listener) {
 
-        EngineJob<Z> engineJob = new EngineJob<Z>(id, resourceCache, mainHandler, referenceCounter, listener);
+        EngineJob<Z> engineJob = new EngineJob<Z>(id, memoryCache, mainHandler, referenceCounter, listener);
 
         SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(id, width, height, fetcher, decoder,
                 transformation, encoder, diskCache, metadata, engineJob);

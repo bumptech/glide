@@ -7,7 +7,6 @@ import android.os.ParcelFileDescriptor;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.EngineBuilder;
-import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.bitmap.BitmapEncoder;
 import com.bumptech.glide.resize.bitmap.FileDescriptorBitmapDecoder;
@@ -15,8 +14,14 @@ import com.bumptech.glide.resize.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
+import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.cache.DiskCacheAdapter;
+import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
+import com.bumptech.glide.resize.cache.LruResourceCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.volley.RequestQueueWrapper;
 
+import java.io.File;
 import java.io.InputStream;
 
 public class GlideBuilder {
@@ -24,6 +29,8 @@ public class GlideBuilder {
     private Context context;
     private Engine engine;
     private BitmapPool bitmapPool;
+    private MemoryCache memoryCache;
+    private DiskCache diskCache;
 
     public GlideBuilder(Context context) {
         this.context = context.getApplicationContext();
@@ -34,13 +41,23 @@ public class GlideBuilder {
         return this;
     }
 
-    public GlideBuilder setEngine(Engine engine) {
-        this.engine = engine;
+    public GlideBuilder setBitmapPool(BitmapPool bitmapPool) {
+        this.bitmapPool = bitmapPool;
         return this;
     }
 
-    public GlideBuilder setBitmapPool(BitmapPool bitmapPool) {
-        this.bitmapPool = bitmapPool;
+    public GlideBuilder setMemoryCache(MemoryCache memoryCache) {
+        this.memoryCache = memoryCache;
+        return this;
+    }
+
+    public GlideBuilder setDiskCache(DiskCache diskCache) {
+        this.diskCache = diskCache;
+        return this;
+    }
+
+    GlideBuilder setEngine(Engine engine) {
+        this.engine = engine;
         return this;
     }
 
@@ -48,20 +65,36 @@ public class GlideBuilder {
         if (requestQueue == null) {
             requestQueue = RequestQueueWrapper.getRequestQueue(context);
         }
-        if (engine == null) {
-            engine = new EngineBuilder(context).build();
-        }
 
-        //TODO: reconcile this with resource cache.
+        final int safeCacheSize = Glide.getSafeMemoryCacheSize(context);
+        final boolean isLowMemoryDevice = Glide.isLowMemoryDevice(context);
         if (bitmapPool == null) {
             if (Build.VERSION.SDK_INT >= 11) {
-                final int safeCacheSize = ImageManager.getSafeMemoryCacheSize(context);
-                final boolean isLowMemoryDevice = ImageManager.isLowMemoryDevice(context);
                 bitmapPool = new LruBitmapPool(
                         isLowMemoryDevice ? safeCacheSize : 2 * safeCacheSize);
             } else {
                 bitmapPool = new BitmapPoolAdapter();
             }
+        }
+
+        if (memoryCache == null) {
+            memoryCache = new LruResourceCache(!isLowMemoryDevice && Glide.CAN_REUSE_BITMAPS ?
+                    safeCacheSize / 2 : safeCacheSize);
+        }
+
+        if (diskCache == null) {
+            File cacheDir = Glide.getPhotoCacheDir(context);
+            if (cacheDir != null) {
+                diskCache = DiskLruCacheWrapper.get(cacheDir, Glide.DEFAULT_DISK_CACHE_SIZE);
+            }
+            if (diskCache == null) {
+                diskCache = new DiskCacheAdapter();
+            }
+        }
+
+        if (engine == null) {
+            engine = new EngineBuilder(memoryCache, diskCache)
+                    .build();
         }
 
         // Order matters here, this must be last.
@@ -71,6 +104,6 @@ public class GlideBuilder {
         requestContext.register(new FileDescriptorBitmapDecoder(bitmapPool), ParcelFileDescriptor.class,
                 Bitmap.class);
 
-        return new Glide(engine, requestQueue, requestContext, bitmapPool);
+        return new Glide(engine, requestQueue, requestContext, memoryCache, bitmapPool);
     }
 }

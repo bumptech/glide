@@ -23,9 +23,7 @@ public class LruCache<T, Y> {
         return 1;
     }
 
-    protected void onItemRemoved(Y item) {
-
-    }
+    protected void onItemRemoved(Y item) {  }
 
     public int getCurrentSize() {
         return currentSize;
@@ -40,6 +38,12 @@ public class LruCache<T, Y> {
     }
 
     public Y put(T key, Y item) {
+        final int itemSize = getSize(item);
+        if (itemSize >= maxSize) {
+            onItemRemoved(item);
+            return null;
+        }
+
         currentSize += getSize(item);
         final Y result = cache.put(key, item);
         evict();

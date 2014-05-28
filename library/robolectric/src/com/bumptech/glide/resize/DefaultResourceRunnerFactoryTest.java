@@ -3,7 +3,7 @@ package com.bumptech.glide.resize;
 import android.os.Handler;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.cache.DiskCache;
-import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.load.Transformation;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class DefaultResourceRunnerFactoryTest {
 
     @SuppressWarnings("unchecked")
     private class DefaultFactoryHarness {
-        ResourceCache resourceCache = mock(ResourceCache.class);
+        MemoryCache memoryCache = mock(MemoryCache.class);
         EngineJobListener listener = mock(EngineJobListener.class);
         DiskCache diskCache = mock(DiskCache.class);
         Handler mainHandler = new Handler();
@@ -45,7 +45,7 @@ public class DefaultResourceRunnerFactoryTest {
         int width = 100;
         int height = 100;
 
-        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(resourceCache, diskCache,
+        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(memoryCache, diskCache,
                 mainHandler, service, bgHandler, resourceReferenceCounter);
 
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);

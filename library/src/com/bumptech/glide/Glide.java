@@ -1,9 +1,13 @@
 package com.bumptech.glide;
 
+import android.annotation.TargetApi;
+import android.app.ActivityManager;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +29,6 @@ import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUrlLoader;
 import com.bumptech.glide.resize.Engine;
-import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
@@ -42,20 +45,89 @@ import java.util.UUID;
 
 /**
  * A singleton to present a simple static interface for building requests with {@link RequestBuilder} and maintaining
- * an {@link ImageManager} and it's {@link BitmapPool}, {@link DiskCache} and {@link MemoryCache}.
+ * an {@link Engine}, {@link BitmapPool}, {@link DiskCache} and {@link MemoryCache}.
  *
  * <p>
  * Note - This class is not thread safe.
  * </p>
  */
 public class Glide {
+    public static boolean CAN_REUSE_BITMAPS = Build.VERSION.SDK_INT >= 11;
+
+    // 250 MB
+    static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
+
+    private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final String TAG = "Glide";
+    private static final float MEMORY_SIZE_RATIO = 1f/10f;
     private static Glide GLIDE;
+
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
     private final RequestQueue requestQueue;
     private final Engine engine;
     private final RequestContext requestContext;
     private final BitmapPool bitmapPool;
+    private final MemoryCache memoryCache;
+
+    /**
+     * Returns true if this device is a low ram device or has an older sdk version and likely has relatively little
+     * available ram.
+     *
+     * @see ActivityManager#isLowRamDevice()
+     */
+    @TargetApi(19)
+    public static boolean isLowMemoryDevice(Context context) {
+        final ActivityManager activityManager =
+                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        return Build.VERSION.SDK_INT < 11 ||
+                (Build.VERSION.SDK_INT >= 19 && activityManager.isLowRamDevice());
+    }
+
+    /**
+     * Get the maximum safe memory cache size for this particular device based on the # of mb allocated to each app.
+     * This is a conservative estimate that has been safe for 2.2+ devices consistently. It is probably rather small
+     * for newer devices.
+     *
+     * @param context A context
+     * @return The maximum safe size for the memory cache for this devices in bytes
+     */
+    public static int getSafeMemoryCacheSize(Context context){
+        final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        return Math.round(MEMORY_SIZE_RATIO * activityManager.getMemoryClass() * 1024 * 1024);
+    }
+
+    /**
+     * Try to get the external cache directory if available and default to the internal. Use a default name for the
+     * cache directory if no name is provided
+     *
+     * @param context A context
+     * @return A File representing the default disk cache directory
+     */
+    public static File getPhotoCacheDir(Context context) {
+        return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
+    }
+
+    /**
+     * Try to get the external cache directory if available and default to the internal. Use a default name for the
+     * cache directory if no name is provided
+     *
+     * @param context A context
+     * @param cacheName The name of the subdirectory in which to store the cache
+     * @return A File representing the default disk cache directory
+     */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static File getPhotoCacheDir(Context context, String cacheName) {
+        File cacheDir = context.getCacheDir();
+        if (cacheDir != null) {
+            File result = new File(cacheDir, cacheName);
+            result.mkdirs();
+            return result;
+        }
+        if (Log.isLoggable(TAG, Log.ERROR)) {
+            Log.e(TAG, "default disk cache dir is null");
+        }
+        return null;
+    }
 
     /**
      * Get the singleton.
@@ -90,7 +162,7 @@ public class Glide {
      * @throws IllegalArgumentException if the Glide singleton has already been created.
      */
     public static void setup(GlideBuilder builder) {
-        if (GLIDE != null) {
+        if (isSetup()) {
             throw new IllegalArgumentException("Glide is already setup, check with isSetup() first");
         }
 
@@ -102,11 +174,12 @@ public class Glide {
     }
 
     Glide(Engine engine, RequestQueue requestQueue, RequestContext requestContext,
-            BitmapPool bitmapPool) {
+            MemoryCache memoryCache, BitmapPool bitmapPool) {
         this.engine = engine;
         this.requestQueue = requestQueue;
         this.requestContext = requestContext;
         this.bitmapPool = bitmapPool;
+        this.memoryCache = memoryCache;
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
         register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
@@ -127,11 +200,35 @@ public class Glide {
         return bitmapPool;
     }
 
+    private GenericLoaderFactory getLoaderFactory() {
+        return loaderFactory;
+    }
+
     /**
      * Returns the {@link RequestQueue} Glide is using to fetch images over http/https.
      */
     public RequestQueue getRequestQueue() {
         return requestQueue;
+    }
+
+    /**
+     * Clears as much memory as possible.
+     *
+     * @see ComponentCallbacks2#onLowMemory()
+     */
+    public void clearMemory() {
+        bitmapPool.clearMemory();
+        memoryCache.clearMemory();
+    }
+
+    /**
+     * Clears some memory with the exact amount depending on the given level.
+     *
+     * @see ComponentCallbacks2#onTrimMemory(int)
+     */
+    public void trimMemory(int level) {
+        bitmapPool.trimMemory(level);
+        memoryCache.trimMemory(level);
     }
 
     /**
@@ -308,10 +405,6 @@ public class Glide {
      */
     public static ModelRequest with(Context context) {
         return new ModelRequest(context);
-    }
-
-    private GenericLoaderFactory getLoaderFactory() {
-        return loaderFactory;
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.bumptech.glide.resize;
 
 import android.os.Handler;
-import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,13 +13,13 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
     private final String id;
     private final EngineJobListener listener;
     private final ResourceReferenceCounter referenceCounter;
-    private ResourceCache cache;
+    private MemoryCache cache;
     private Handler mainHandler;
     private Set<ResourceCallback<Z>> cbs = new HashSet<ResourceCallback<Z>>();
     private boolean isCancelled;
     private boolean isComplete;
 
-    public EngineJob(String id, ResourceCache cache, Handler mainHandler, ResourceReferenceCounter referenceCounter,
+    public EngineJob(String id, MemoryCache cache, Handler mainHandler, ResourceReferenceCounter referenceCounter,
             EngineJobListener listener) {
         this.id = id;
         this.cache = cache;

@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 /**
  * An implementation of ModelStreamLoader that leverages the StreamOpener class and the ExecutorService backing the
- * ImageManager to download the image and resize it in memory before saving the resized version
+ * Engine to download the image and resize it in memory before saving the resized version
  * directly to the disk cache.
  */
 public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {

@@ -1,41 +1,35 @@
-/*
- * Copyright (c) 2012. Bump Technologies Inc. All Rights Reserved.
- */
-
 package com.bumptech.glide.resize.cache;
+
+import com.bumptech.glide.resize.Resource;
+import com.bumptech.glide.util.LruCache;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 
-import android.graphics.Bitmap;
-import com.bumptech.glide.util.LruCache;
-import com.bumptech.glide.util.Util;
+public class LruResourceCache extends LruCache<String, Resource> implements MemoryCache {
+    private ResourceRemovedListener listener;
 
-public class LruMemoryCache extends LruCache<String, Bitmap> implements MemoryCache {
-    private ImageRemovedListener imageRemovedListener;
-
-    public LruMemoryCache(int size) {
+    public LruResourceCache(int size) {
         super(size);
     }
 
     @Override
-    protected int getSize(Bitmap item) {
-        return Util.getSize(item);
+    public void setResourceRemovedListener(ResourceRemovedListener listener) {
+        this.listener = listener;
     }
 
     @Override
-    protected void onItemRemoved(Bitmap item) {
-        if (imageRemovedListener != null) {
-            imageRemovedListener.onImageRemoved(item);
+    protected void onItemRemoved(Resource item) {
+        if (listener != null) {
+            listener.onResourceRemoved(item);
         }
     }
 
     @Override
-    public void setImageRemovedListener(ImageRemovedListener listener) {
-        this.imageRemovedListener = listener;
+    protected int getSize(Resource item) {
+        return item.getSize();
     }
 
-    @Override
     public void trimMemory(int level) {
         if (level >= TRIM_MEMORY_MODERATE) {
             // Nearing middle of list of cached background apps
@@ -46,5 +40,6 @@ public class LruMemoryCache extends LruCache<String, Bitmap> implements MemoryCa
             // Evict oldest half of our bitmap cache
             trimToSize(getCurrentSize() / 2);
         }
+
     }
 }

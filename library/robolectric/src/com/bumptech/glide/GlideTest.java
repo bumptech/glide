@@ -20,6 +20,9 @@ import com.bumptech.glide.loader.bitmap.model.stream.StreamModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.EngineBuilder;
 import com.bumptech.glide.resize.Metadata;
+import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.request.Request;
 import com.bumptech.glide.resize.target.Target;
 import com.bumptech.glide.volley.VolleyRequestFuture;
@@ -52,6 +55,7 @@ import java.util.concurrent.Future;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -113,7 +117,7 @@ public class GlideTest {
         RequestQueue requestQueue = new RequestQueue(new NoCache(), network);
         requestQueue.start();
         Glide.setup(new GlideBuilder(Robolectric.application)
-                .setEngine(new EngineBuilder(Robolectric.application)
+                .setEngine(new EngineBuilder(mock(MemoryCache.class), mock(DiskCache.class))
                         .setExecutorService(service)
                         .setBackgroundHandler(bgHandler)
                         .build())
@@ -146,6 +150,39 @@ public class GlideTest {
         Glide.tearDown();
     }
 
+    @Test
+    public void testClearMemory() {
+        BitmapPool bitmapPool = mock(BitmapPool.class);
+        MemoryCache memoryCache = mock(MemoryCache.class);
+
+        Glide glide = new GlideBuilder(getContext())
+                .setBitmapPool(bitmapPool)
+                .setMemoryCache(memoryCache)
+                .createGlide();
+
+        glide.clearMemory();
+
+        verify(bitmapPool).clearMemory();
+        verify(memoryCache).clearMemory();
+    }
+
+    @Test
+    public void testTrimMemory() {
+        BitmapPool bitmapPool = mock(BitmapPool.class);
+        MemoryCache memoryCache = mock(MemoryCache.class);
+
+        Glide glide = new GlideBuilder(getContext())
+                .setBitmapPool(bitmapPool)
+                .setMemoryCache(memoryCache)
+                .createGlide();
+
+        final int level = 123;
+
+        glide.trimMemory(level);
+
+        verify(bitmapPool).trimMemory(eq(level));
+        verify(memoryCache).trimMemory(eq(level));
+    }
 
     @Test
     public void testFileDefaultLoaderWithInputStream() throws Exception {

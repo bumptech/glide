@@ -1,263 +1,156 @@
 package com.bumptech.glide.resize.cache;
 
-import android.content.ComponentCallbacks2;
-import android.graphics.Bitmap;
+import com.bumptech.glide.util.LruCache;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricTestRunner.class)
 public class LruCacheTest {
     // 1MB
-    private static final int SIZE = 1024 * 1024;
-    private LruMemoryCache cache;
-    private String key;
-    private Bitmap test;
+    private static final int SIZE = 2;
+    private LruCache<String, Object> cache;
+    private CacheListener listener;
+    private String currentKey;
 
     @Before
     public void setUp() throws Exception {
-        cache = new LruMemoryCache(SIZE);
-        key = getKey();
-        test = getBitmap();
+        currentKey = "";
+        listener = mock(CacheListener.class);
+        cache = new TestLruCache(SIZE, listener);
+        when(listener.getSize(anyObject())).thenReturn(1);
     }
 
     @Test
-    public void testCanAddABitmap() {
-        cache.put(key, test);
-        assertNotNull(cache.get(key));
-    }
+    public void testCanAddAndRetrieveItem() {
+        String key = getKey();
+        Object object = new Object();
 
-    @Test
-    public void testLeastRecentlyAddKeyEvictedFirstIfGetsAreEqual() {
-        LruMemoryCache smallCache = new LruMemoryCache(2 * getSize(test));
-        smallCache.put(key, test);
-        smallCache.put(getKey(), getBitmap());
-        final AtomicInteger totalRemoved = new AtomicInteger();
-        smallCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                assertEquals(test, removed);
-                totalRemoved.getAndIncrement();
-            }
-        });
-        smallCache.put(getKey(), getBitmap());
-        assertEquals(1, totalRemoved.get());
-    }
+        cache.put(key, object);
 
-    @Test
-    public void testLeastRecentlyUsedKeyEvictedFirst() {
-        LruMemoryCache smallCache = new LruMemoryCache(2 * getSize(test));
-        smallCache.put(key, test);
-        smallCache.put(getKey(), getBitmap());
-        smallCache.get(key);
-        final AtomicInteger totalRemoved = new AtomicInteger();
-        smallCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                assertNotSame(test, removed);
-                totalRemoved.getAndIncrement();
-            }
-        });
-        smallCache.put(getKey(), getBitmap());
-        assertEquals(1, totalRemoved.get());
-    }
-
-    @Test
-    public void testImageRemovedListenerCalledWhenBitmapEvicted() {
-        LruMemoryCache smallCache = new LruMemoryCache(getSize(test));
-        smallCache.put(getKey(), test);
-        final AtomicInteger totalRemoved = new AtomicInteger();
-        smallCache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                totalRemoved.getAndIncrement();
-            }
-        });
-        smallCache.put(getKey(), getBitmap());
-        assertEquals(1, totalRemoved.get());
-    }
-
-    @Test
-    public void testBitmapLargerThanCacheIsImmediatelyEvicted() {
-        final Bitmap tooLarge = Bitmap.createBitmap(1000, 1000, Bitmap.Config.ARGB_8888);
-        assertTrue(getSize(tooLarge) > SIZE);
-        final AtomicInteger totalRemoved = new AtomicInteger();
-        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                totalRemoved.incrementAndGet();
-                assertEquals(tooLarge, removed);
-            }
-        });
-        cache.put(key, tooLarge);
-        assertFalse(cache.contains(key));
-        assertEquals(1, totalRemoved.get());
-    }
-
-    @Test
-    public void testEmptyCacheDoesNotContainKey() {
-        assertFalse(cache.contains(key));
+        assertEquals(object, cache.get(key));
     }
 
     @Test
     public void testCacheContainsAddedBitmap() {
-        assertFalse(cache.contains(key));
-        cache.put(key, test);
+        final String key = getKey();
+        cache.put(key, new Object());
         assertTrue(cache.contains(key));
     }
 
     @Test
+    public void testEmptyCacheDoesNotContainKey() {
+        assertFalse(cache.contains(getKey()));
+    }
+
+    @Test
     public void testItIsSizeLimited() {
-        final AtomicInteger totalRemoved = new AtomicInteger();
-        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                totalRemoved.incrementAndGet();
-            }
-        });
-        fillCache();
-        assertEquals(0, totalRemoved.get());
-        cache.put(key, test);
-        assertEquals(1, totalRemoved.get());
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+        verify(listener, never()).onItemRemoved(anyObject());
+        cache.put(getKey(), new Object());
+        verify(listener).onItemRemoved(anyObject());
     }
 
     @Test
-    public void testClearMemoryDoesNotRecycleBitmaps() {
-        fillCache();
-        final AtomicInteger cleared = new AtomicInteger();
-        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                assertFalse(removed.isRecycled());
-                cleared.getAndIncrement();
-            }
-        });
+    public void testLeastRecentlyAddKeyEvictedFirstIfGetsAreEqual() {
+        Object first = new Object();
+        cache.put(getKey(), first);
+        cache.put(getKey(), new Object());
+        cache.put(getKey(), new Object());
+
+        verify(listener).onItemRemoved(eq(first));
+        verify(listener, times(1)).onItemRemoved(any(Object.class));
+    }
+
+    @Test
+    public void testLeastRecentlyUsedKeyEvictedFirst() {
+        String mostRecentlyUsedKey = getKey();
+        Object mostRecentlyUsedObject = new Object();
+        String leastRecentlyUsedKey = getKey();
+        Object leastRecentlyUsedObject = new Object();
+
+        cache.put(mostRecentlyUsedKey, mostRecentlyUsedObject);
+        cache.put(leastRecentlyUsedKey, leastRecentlyUsedObject);
+
+        cache.get(mostRecentlyUsedKey);
+        cache.put(getKey(), new Object());
+
+        verify(listener).onItemRemoved(eq(leastRecentlyUsedObject));
+        verify(listener, times(1)).onItemRemoved(any(Object.class));
+    }
+
+    @Test
+    public void testItemLargerThanCacheIsImmediatelyEvicted() {
+        Object tooLarge = new Object();
+        when(listener.getSize(eq(tooLarge))).thenReturn(SIZE + 1);
+        cache.put(getKey(), tooLarge);
+
+        verify(listener).onItemRemoved(eq(tooLarge));
+    }
+
+    @Test
+    public void testItemLargerThanCacheDoesNotCauseAdditionalEvictions() {
+        cache.put(getKey(), new Object());
+
+        Object tooLarge = new Object();
+        when(listener.getSize(eq(tooLarge))).thenReturn(SIZE + 1);
+
+        cache.put(getKey(), tooLarge);
+
+        verify(listener, times(1)).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testClearMemoryRemovesAllItems() {
+        String first = getKey();
+        String second = getKey();
+        cache.put(first, new Object());
+        cache.put(second, new Object());
+
         cache.clearMemory();
-        assertTrue(cleared.get() > 0);
+
+        assertFalse(cache.contains(first));
+        assertFalse(cache.contains(second));
     }
 
-    @Test
-    public void testTrimMemoryDoesNotRecycleBitmaps() {
-        fillCache();
-        final AtomicInteger cleared = new AtomicInteger();
-        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                assertFalse(removed.isRecycled());
-                cleared.getAndIncrement();
-            }
-        });
-        cache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-        assertTrue(cleared.get() > 0);
+    private String getKey() {
+        currentKey += "1";
+        return currentKey;
     }
 
-    @Test
-    public void testClearMemoryCallsListener() {
-        List<String> keys = fillCache();
-        final AtomicInteger totalRemoved = new AtomicInteger();
-        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                totalRemoved.getAndIncrement();
-            }
-        });
-        cache.clearMemory();
-        assertEquals(keys.size(), totalRemoved.get());
+    private interface CacheListener {
+        public void onItemRemoved(Object item);
+        public int getSize(Object item);
     }
 
-    @Test
-    public void testTrimMemoryCallsListener() {
-        List<String> keys = fillCache();
-        final AtomicInteger totalRemoved = new AtomicInteger();
-        cache.setImageRemovedListener(new MemoryCache.ImageRemovedListener() {
-            @Override
-            public void onImageRemoved(Bitmap removed) {
-                totalRemoved.getAndIncrement();
-            }
-        });
-        cache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-        assertEquals(keys.size(), totalRemoved.get());
-    }
+    private static class TestLruCache extends LruCache<String, Object> {
+        private final CacheListener listener;
 
-    @Test
-    public void testClearMemory() {
-        List<String> keys = fillCache();
-        cache.clearMemory();
-        for (String key : keys) {
-            assertFalse(cache.contains(key));
-        }
-    }
-
-    @Test
-    public void testTrimMemoryCompleteClearsCache() {
-        List<String> keys = fillCache();
-        cache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-        for (String key : keys) {
-            assertFalse(cache.contains(key));
-        }
-    }
-
-    @Test
-    public void testTrimMemoryModerateClearsCache() {
-        List<String> keys = fillCache();
-        cache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
-        for (String key : keys) {
-            assertFalse(cache.contains(key));
-        }
-    }
-
-    @Test
-    public void testTrimMemoryBackgroundRemovesHalfOfCache() {
-        List<String> keys = fillCache();
-        cache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-        int totalMisses = 0;
-        for (String key : keys) {
-            if (!cache.contains(key)) {
-                totalMisses++;
-            }
+        public TestLruCache(int size, CacheListener listener) {
+            super(size);
+            this.listener = listener;
         }
 
-        assertEquals((int) Math.ceil(keys.size() / (double) 2), totalMisses);
-    }
-
-    private List<String> fillCache() {
-        List<String> keys = new ArrayList<String>();
-        Bitmap toPut = getBitmap();
-        int bitmapSize = getSize(toPut);
-        for (int i = 0; i < SIZE / bitmapSize; i++) {
-            final String key = getKey();
-            cache.put(key, Bitmap.createBitmap(toPut));
-            keys.add(key);
+        @Override
+        protected void onItemRemoved(Object item) {
+            listener.onItemRemoved(item);
         }
 
-        for (String key : keys) {
-            assertTrue(cache.contains(key));
+        @Override
+        protected int getSize(Object item) {
+            return listener.getSize(item);
         }
-
-        return keys;
-    }
-
-    private static Bitmap getBitmap() {
-        return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    }
-
-    private static int getSize(Bitmap bitmap) {
-        return bitmap.getRowBytes() * bitmap.getHeight();
-    }
-
-    private static String getKey() {
-        return UUID.randomUUID().toString();
     }
 }

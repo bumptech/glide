@@ -1,17 +1,17 @@
 package com.bumptech.glide.resize.cache;
 
 import android.content.ComponentCallbacks2;
-import android.graphics.Bitmap;
+import com.bumptech.glide.resize.Resource;
 
 /**
- * An interface for adding and removing from an in memory cache
+ * An interface for adding and removing resources from an in memory cache
  */
 public interface MemoryCache {
     /**
      * An interface that will be called whenever a bitmap is removed from the cache.
      */
-    public interface ImageRemovedListener {
-        public void onImageRemoved(Bitmap removed);
+    public interface ResourceRemovedListener {
+        public void onResourceRemoved(Resource removed);
     }
 
     /**
@@ -26,21 +26,21 @@ public interface MemoryCache {
      * @param key The key
      * @return The bitmap at key or null if the key is not present
      */
-    public Bitmap get(String key);
+    public Resource get(String key);
 
     /**
      * Add bitmap to the cache with the given key
      * @param key The key to retrieve the bitmap
-     * @param bitmap The bitmap to store
+     * @param resource The {@link Resource} to store
      * @return The old value of key (null if key is not in map)
      */
-    public Bitmap put(String key, Bitmap bitmap);
+    public Resource put(String key, Resource resource);
 
     /**
      * Set the listener to be called when a bitmap is removed from the cache
      * @param listener The listener
      */
-    public void setImageRemovedListener(ImageRemovedListener listener);
+    public void setResourceRemovedListener(ResourceRemovedListener listener);
 
     /**
      * Evict all items from the memory cache.

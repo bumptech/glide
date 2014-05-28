@@ -131,13 +131,13 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        Glide.get(this).getImageManager().trimMemory(level);
+        Glide.get(this).trimMemory(level);
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Glide.get(this).getImageManager().clearMemory();
+        Glide.get(this).clearMemory();
     }
 
     private void executeSearch() {

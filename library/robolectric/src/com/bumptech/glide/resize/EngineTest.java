@@ -1,7 +1,7 @@
 package com.bumptech.glide.resize;
 
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.load.Transformation;
 import org.junit.Before;
 import org.junit.Test;
@@ -173,7 +173,7 @@ public class EngineTest {
     }
 
     @Test
-    public void testEngineAddedAsListenerToResourceCache() {
+    public void testEngineAddedAsListenerToMemoryCache() {
         verify(harness.cache).setResourceRemovedListener(eq(harness.engine));
     }
 
@@ -227,7 +227,7 @@ public class EngineTest {
         int width = 100;
         int height = 100;
 
-        ResourceCache cache = mock(ResourceCache.class);
+        MemoryCache cache = mock(MemoryCache.class);
         ResourceRunner<Object> runner = mock(ResourceRunner.class);
         EngineJob<Object> job;
         Engine engine;

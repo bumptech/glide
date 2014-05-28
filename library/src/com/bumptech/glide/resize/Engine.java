@@ -1,23 +1,19 @@
 package com.bumptech.glide.resize;
 
-import android.os.Build;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.resize.load.Transformation;
 
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Engine implements EngineJobListener, ResourceCache.ResourceRemovedListener {
-
-    static final boolean CAN_RECYCLE = Build.VERSION.SDK_INT >= 11;
-    static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
+public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener {
 
     private final Map<String, ResourceRunner> runners;
     private final ResourceRunnerFactory factory;
     private final ResourceReferenceCounter resourceReferenceCounter;
-    private ResourceCache cache;
+    private final MemoryCache cache;
 
     public static class LoadStatus {
         private final EngineJob engineJob;
@@ -34,10 +30,11 @@ public class Engine implements EngineJobListener, ResourceCache.ResourceRemovedL
     }
 
     public Engine(EngineBuilder builder) {
-        this(builder.factory, builder.cache, new HashMap<String, ResourceRunner>(), builder.resourceReferenceCounter);
+        this(builder.factory, builder.memoryCache, new HashMap<String, ResourceRunner>(),
+                builder.resourceReferenceCounter);
     }
 
-    Engine(ResourceRunnerFactory factory, ResourceCache cache, Map<String, ResourceRunner> runners,
+    Engine(ResourceRunnerFactory factory, MemoryCache cache, Map<String, ResourceRunner> runners,
             ResourceReferenceCounter referenceCounter) {
         this.factory = factory;
         this.cache = cache;

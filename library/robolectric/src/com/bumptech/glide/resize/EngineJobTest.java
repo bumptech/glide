@@ -1,7 +1,7 @@
 package com.bumptech.glide.resize;
 
 import android.os.Handler;
-import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.cache.MemoryCache;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +52,7 @@ public class EngineJobTest {
         harness.job.onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
-        verify(harness.resourceCache).put(eq(ID), eq(harness.resource));
+        verify(harness.memoryCache).put(eq(ID), eq(harness.resource));
     }
 
     @Test
@@ -125,14 +125,14 @@ public class EngineJobTest {
     }
 
     @Test
-    public void testResourceIsNotRecycledIfResourceCacheEvictsSynchronously() {
+    public void testResourceIsNotRecycledIfMemoryCacheEvictsSynchronously() {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 harness.referenceCounter.releaseResource(harness.resource);
                 return null;
             }
-        }).when(harness.resourceCache).put(eq(ID), eq(harness.resource));
+        }).when(harness.memoryCache).put(eq(ID), eq(harness.resource));
 
         harness.job.onResourceReady(harness.resource);
         verify(harness.referenceCounter, times(3)).acquireResource(eq(harness.resource));
@@ -157,14 +157,14 @@ public class EngineJobTest {
 
     @SuppressWarnings("unchecked")
     private static class EngineJobHarness {
-        ResourceCache resourceCache = mock(ResourceCache.class);
+        MemoryCache memoryCache = mock(MemoryCache.class);
         Handler mainHandler = new Handler();
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         EngineJobListener listener = mock(EngineJobListener.class);
         ResourceReferenceCounter referenceCounter = mock(ResourceReferenceCounter.class);
 
-        EngineJob <Object> job = new EngineJob<Object>(ID, resourceCache, mainHandler, referenceCounter, listener);
+        EngineJob <Object> job = new EngineJob<Object>(ID, memoryCache, mainHandler, referenceCounter, listener);
 
         public EngineJobHarness() {
             job.addCallback(cb);
