@@ -3,6 +3,7 @@ package com.bumptech.glide.resize;
 import android.os.Build;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.load.Transformation;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -57,9 +58,9 @@ public class Engine implements EngineJobListener, ResourceCache.ResourceRemovedL
      * @param <T> The type of data the resource will be decoded from.
      * @param <Z> The type of the resource that will be decoded.
      */
-    public <T, Z> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
-            ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder, ResourceEncoder<Z> encoder, Metadata metadata,
-            ResourceCallback<Z> cb) {
+    public <T, Z> LoadStatus load(String id, int width, int height,  ResourceDecoder<InputStream, Z> cacheDecoder,
+            ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
+            ResourceEncoder<Z> encoder, Metadata metadata, ResourceCallback<Z> cb) {
         Resource<Z> cached = cache.get(id);
         if (cached != null) {
             cb.onResourceReady(cached);
@@ -73,8 +74,8 @@ public class Engine implements EngineJobListener, ResourceCache.ResourceRemovedL
             return new LoadStatus(cb, job);
         }
 
-        ResourceRunner<Z> runner = factory.build(id, width, height, cacheDecoder, fetcher, decoder, encoder, metadata,
-                this, cb);
+        ResourceRunner<Z> runner = factory.build(id, width, height, cacheDecoder, fetcher, decoder, transformation,
+                encoder, metadata, this, cb);
         runners.put(id, runner);
         runner.queue();
         return new LoadStatus(cb, runner.getJob());

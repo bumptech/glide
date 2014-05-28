@@ -1,6 +1,7 @@
 package com.bumptech.glide.resize;
 
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
+import com.bumptech.glide.resize.load.Transformation;
 
 import java.io.InputStream;
 
@@ -11,6 +12,7 @@ interface ResourceRunnerFactory {
      * @param cacheDecoder
      * @param fetcher
      * @param decoder
+     * @param transformation
      * @param encoder
      * @param metadata
      * @param <T> The type of data the resource will be decoded from.
@@ -19,5 +21,6 @@ interface ResourceRunnerFactory {
      */
     public <T, Z> ResourceRunner<Z> build(String id, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
-            ResourceEncoder<Z> encoder, Metadata metadata, EngineJobListener listener, ResourceCallback<Z> cb);
+            Transformation<Z> transformation,  ResourceEncoder<Z> encoder, Metadata metadata,
+            EngineJobListener listener, ResourceCallback<Z> cb);
 }

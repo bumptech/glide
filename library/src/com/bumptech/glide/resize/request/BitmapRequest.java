@@ -17,7 +17,9 @@ import com.bumptech.glide.resize.Resource;
 import com.bumptech.glide.resize.ResourceCallback;
 import com.bumptech.glide.resize.ResourceDecoder;
 import com.bumptech.glide.resize.ResourceEncoder;
+import com.bumptech.glide.resize.bitmap.BitmapResource;
 import com.bumptech.glide.resize.load.DecodeFormat;
+import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.target.Target;
 
 import java.io.InputStream;
@@ -35,6 +37,7 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     private final int errorResourceId;
     private final Context context;
     private final Class<Z> resourceClass;
+    private final Transformation<Bitmap> transformation;
     private DecodeFormat decodeFormat;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
@@ -72,6 +75,7 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
         this.decodeFormat = builder.decodeFormat;
         this.engine = builder.engine;
         this.requestContext = builder.requestContext;
+        this.transformation = builder.transformation;
     }
 
     @Override
@@ -155,7 +159,8 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
         final Metadata metadata = new Metadata(priority, decodeFormat);
 
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(id, width, height, cacheDecoder, resourceFetcher, decoder, encoder, metadata, this);
+        loadStatus = engine.load(id, width, height, cacheDecoder, resourceFetcher, decoder, transformation,
+                encoder, metadata, this);
         loadedFromMemoryCache = resource != null;
     }
 

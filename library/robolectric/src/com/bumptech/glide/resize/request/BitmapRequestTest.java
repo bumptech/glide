@@ -18,6 +18,7 @@ import com.bumptech.glide.resize.ResourceCallback;
 import com.bumptech.glide.resize.ResourceDecoder;
 import com.bumptech.glide.resize.ResourceEncoder;
 import com.bumptech.glide.resize.load.DecodeFormat;
+import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.target.Target;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,16 +114,16 @@ public class BitmapRequestTest {
         request.onSizeReady(100, 100);
 
         verify(harness.engine).load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(ResourceFetcher.class), any(ResourceDecoder.class), any(ResourceEncoder.class), eq(expected),
-                any(ResourceCallback.class));
+                any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(ResourceEncoder.class), eq(expected), any(ResourceCallback.class));
     }
 
     @Test
     public void testEngineLoadCancelledOnCancel() {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
-        when(harness.engine.load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class), any(ResourceFetcher.class),
-                any(ResourceDecoder.class), any(ResourceEncoder.class), any(Metadata.class),
-                any(ResourceCallback.class))).thenReturn(loadStatus);
+        when(harness.engine.load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
+                any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(ResourceEncoder.class), any(Metadata.class), any(ResourceCallback.class))).thenReturn(loadStatus);
 
         BitmapRequest request = harness.getBuilder().build();
 

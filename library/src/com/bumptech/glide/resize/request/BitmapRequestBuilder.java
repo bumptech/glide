@@ -5,18 +5,18 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import com.bumptech.glide.RequestListener;
-import com.bumptech.glide.loader.bitmap.BitmapLoadFactory;
 import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.ImageManager;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.load.DecodeFormat;
+import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.target.Target;
 
 /**
  * A simple builder class for {@link BitmapRequest}.
  *
- * @param <T, Z> The model type the {@link BitmapRequest} will load an {@link Bitmap} from.
+ * @param <T> The model type the {@link BitmapRequest} will load an {@link Bitmap} from.
  * @param <Z> The resource type the {@link BitmapRequest} will load an {@link Bitmap} from.
  */
 public class BitmapRequestBuilder<T, Z> {
@@ -38,6 +38,7 @@ public class BitmapRequestBuilder<T, Z> {
     DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     Engine engine;
     RequestContext requestContext;
+    Transformation<Bitmap> transformation;
 
     public BitmapRequestBuilder(Class<Z> resourceClass) {
         this.resourceClass = resourceClass;
@@ -125,6 +126,11 @@ public class BitmapRequestBuilder<T, Z> {
 
     public BitmapRequestBuilder<T, Z> setRequestContext(RequestContext requestContext) {
         this.requestContext = requestContext;
+        return this;
+    }
+
+    public BitmapRequestBuilder<T, Z> setTransformation(Transformation<Bitmap> transformation) {
+        this.transformation = transformation;
         return this;
     }
 

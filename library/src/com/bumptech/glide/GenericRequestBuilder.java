@@ -11,6 +11,8 @@ import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
 import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.ResourceDecoder;
+import com.bumptech.glide.resize.bitmap.CenterCrop;
+import com.bumptech.glide.resize.bitmap.FitCenter;
 import com.bumptech.glide.resize.load.BitmapDecoder;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Downsampler;
@@ -41,7 +43,7 @@ import java.util.List;
  */
 public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> {
     protected final Context context;
-    private final List<Transformation> transformations = new ArrayList<Transformation>();
+    private final List<Transformation<Bitmap>> transformations = new ArrayList<Transformation<Bitmap>>();
     private final ModelType model;
     private final RequestContext requestContext;
     private final Class<ImageResourceType> imageType;
@@ -75,13 +77,6 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         this.requestContext = requestContext;
 
         this.model = model;
-
-//        if (model != null && imageLoader == null && videoLoader == null) {
-//            throw new NullPointerException("No ModelLoaders given or registered for model class="
-//                    + model.getClass());
-//        }
-//        this.imageLoader = imageLoader;
-//        this.videoLoader = videoLoader;
     }
 
     /**
@@ -235,23 +230,22 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     }
 
     /**
-     * Transform images using {@link Transformation#CENTER_CROP}.
+     * Transform images using {@link CenterCrop}.
      *
      * @return This RequestBuilder
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> centerCrop() {
-        return transform(Transformation.CENTER_CROP);
+        return transform(new CenterCrop(Glide.get(context).getBitmapPool()));
     }
 
     /**
-     * Transform images using {@link Transformation#FIT_CENTER}.
+     * Transform images using {@link FitCenter}.
      *
      * @return This RequestBuilder
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> fitCenter() {
-        return transform(Transformation.FIT_CENTER);
+        return transform(new FitCenter(Glide.get(context).getBitmapPool()));
     }
-
 
     /**
      * Transform images with the given {@link Transformation}. Appends this transformation onto any existing
@@ -261,7 +255,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @return This RequestBuilder
      */
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> transform(
-            Transformation transformation) {
+            Transformation<Bitmap> transformation) {
         transformations.add(transformation);
 
         return this;
@@ -463,7 +457,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     }
 
     private <Y extends Target, Z> BitmapRequestBuilder<ModelType, Z> buildBitmapRequestForType(Y target,
-            Class <Z> resourceClass, float sizeMultiplier, Priority priority, RequestCoordinator requestCoordinator) {
+            Class<Z> resourceClass, float sizeMultiplier, Priority priority, RequestCoordinator requestCoordinator) {
         return new BitmapRequestBuilder<ModelType, Z>(resourceClass)
                 .setContext(context)
                 .setPriority(priority)
@@ -482,17 +476,19 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setErrorDrawable(errorPlaceholder)
                 .setSizeMultiplier(sizeMultiplier)
                 .setPriority(priority)
+                .setTransformation(getFinalTransformation())
                 .setRequestCoordinator(requestCoordinator);
     }
 
-    private Transformation getFinalTransformation() {
+    @SuppressWarnings("unchecked")
+    private Transformation<Bitmap> getFinalTransformation() {
         switch (transformations.size()) {
             case 0:
                 return Transformation.NONE;
             case 1:
                 return transformations.get(0);
             default:
-                return new MultiTransformation(transformations);
+                return new MultiTransformation<Bitmap>(transformations);
         }
     }
 }

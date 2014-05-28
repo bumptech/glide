@@ -2,10 +2,9 @@ package com.bumptech.glide.resize;
 
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.load.Transformation;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,7 +17,6 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,6 +59,7 @@ public class SourceResourceRunnerTest {
         verify(harness.cb).onResourceReady(eq(harness.result));
     }
 
+
     @Test
     public void testResourceIsWrittenToCacheIfFetchedAndDecoded() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -68,18 +67,52 @@ public class SourceResourceRunnerTest {
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
 
         final OutputStream expected = new ByteArrayOutputStream();
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                DiskCache.Writer writer = (DiskCache.Writer) invocation.getArguments()[1];
-                writer.write(expected);
-                return null;
-            }
-        }).when(harness.diskCache).put(eq(ID), any(DiskCache.Writer.class));
+
+        harness.runner.run();
+        harness.runner.write(expected);
+
+        verify(harness.encoder).encode(eq(harness.result), eq(expected));
+    }
+
+    @Test
+    public void testResourceIsTransformedBeforeBeingWrittenToCache() throws Exception {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.fetcher.loadResource(eq(harness.metadata))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        Resource transformed = mock(Resource.class);
+        when(harness.transformation.transform(eq(harness.result), eq(harness.width), eq(harness.height)))
+                .thenReturn(transformed);
+
+        OutputStream expected = new ByteArrayOutputStream();
+        harness.runner.run();
+        harness.runner.write(expected);
+
+        verify(harness.encoder).encode(eq(transformed), eq(expected));
+    }
+
+    @Test
+    public void testDecodedResourceIsRecycledIfTransformedResourceIsDifferent() throws Exception {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.fetcher.loadResource(eq(harness.metadata))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        Resource transformed = mock(Resource.class);
+        when(harness.transformation.transform(eq(harness.result), eq(harness.width), eq(harness.height)))
+                .thenReturn(transformed);
 
         harness.runner.run();
 
-        verify(harness.encoder).encode(eq(harness.result), eq(expected));
+        verify(harness.result).recycle();
+    }
+
+    @Test
+    public void testDecodedResourceIsNotRecycledIfResourceIsNotTransformed() throws Exception {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.fetcher.loadResource(eq(harness.metadata))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+
+        harness.runner.run();
+
+        verify(harness.result, never()).recycle();
     }
 
     @Test
@@ -135,9 +168,14 @@ public class SourceResourceRunnerTest {
         Metadata metadata = mock(Metadata.class);
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
         Resource<Object> result = mock(Resource.class);
+        Transformation<Object> transformation = mock(Transformation.class);
         int width = 150;
         int height = 200;
         SourceResourceRunner<Object, Object> runner = new SourceResourceRunner<Object, Object>(ID, width, height,
-                fetcher, decoder, encoder, diskCache, metadata, cb);
+                fetcher, decoder, transformation, encoder, diskCache, metadata, cb);
+
+        public SourceResourceHarness() {
+            when(transformation.transform(eq(result), eq(width), eq(height))).thenReturn(result);
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.bumptech.glide.resize;
 
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.load.Transformation;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -176,6 +177,7 @@ public class EngineTest {
         Resource<Object> resource = mock(Resource.class);
         Map<String, ResourceRunner> runners = new HashMap<String, ResourceRunner>();
         ResourceReferenceCounter resourceReferenceCounter = mock(ResourceReferenceCounter.class);
+        Transformation transformation = mock(Transformation.class);
         int width = 100;
         int height = 100;
 
@@ -192,12 +194,13 @@ public class EngineTest {
 
             engine = new Engine(factory, cache, runners, resourceReferenceCounter);
 
-            when(factory.build(eq(ID), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder), eq(encoder),
-                    eq(metadata), eq(engine), eq(cb))).thenReturn(runner);
+            when(factory.build(eq(ID), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
+                    eq(transformation), eq(encoder), eq(metadata), eq(engine), eq(cb))).thenReturn(runner);
         }
 
         public Engine.LoadStatus doLoad() {
-            return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, encoder, metadata, cb);
+            return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, metadata,
+                    cb);
         }
     }
 }

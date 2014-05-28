@@ -1,25 +1,24 @@
 package com.bumptech.glide.resize.load;
 
-import android.graphics.Bitmap;
-import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.resize.Resource;
 
 import java.util.List;
 
 /**
  * A transformation that applies an ordered array of one or more transformations to an image.
  */
-public class MultiTransformation extends Transformation {
-    private Transformation[] transformations;
-    private List<Transformation> transformationList;
+public class MultiTransformation<T> implements Transformation<T> {
+    private Transformation<T>[] transformations;
+    private List<Transformation<T>> transformationList;
 
-    public MultiTransformation(Transformation... transformations) {
+    public MultiTransformation(Transformation<T>... transformations) {
         if (transformations.length < 1) {
             throw new IllegalArgumentException("MultiTransformation must contain at least one Transformation");
         }
         this.transformations = transformations;
     }
 
-    public MultiTransformation(List<Transformation> transformationList) {
+    public MultiTransformation(List<Transformation<T>> transformationList) {
         if (transformationList.size() < 1) {
             throw new IllegalArgumentException("MultiTransformation must contain at least one Transformation");
         }
@@ -28,28 +27,28 @@ public class MultiTransformation extends Transformation {
     }
 
     @Override
-    public Bitmap transform(Bitmap bitmap, BitmapPool pool, int outWidth, int outHeight) {
+    public Resource<T> transform(Resource<T> resource, int outWidth, int outHeight) {
         // Set current to null so we don't recycle our original bitmap. Instead rely on the caller of this method to do
         // so.
-        Bitmap current = null;
+        Resource<T> current = null;
 
         if (transformations != null) {
-            for (Transformation transformation : transformations) {
-                current = transform(current, transformation, pool, outWidth, outHeight);
+            for (Transformation<T> transformation : transformations) {
+                current = transform(current, transformation, outWidth, outHeight);
             }
         } else {
-            for (Transformation transformation : transformationList) {
-                current = transform(current, transformation, pool, outWidth, outHeight);
+            for (Transformation<T> transformation : transformationList) {
+                current = transform(current, transformation, outWidth, outHeight);
             }
 
         }
         return current;
     }
 
-    private Bitmap transform(Bitmap current, Transformation transformation, BitmapPool pool, int outWidth,
+    private Resource<T> transform(Resource<T> current, Transformation<T> transformation, int outWidth,
             int outHeight) {
-        Bitmap transformed = transformation.transform(current, pool, outWidth, outHeight);
-        if (current != null && current != transformed && !pool.put(current)) {
+        Resource<T> transformed = transformation.transform(current, outWidth, outHeight);
+        if (current != null && current != transformed) {
             current.recycle();
         }
 

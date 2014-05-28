@@ -4,6 +4,7 @@ import android.os.Handler;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.ResourceCache;
+import com.bumptech.glide.resize.load.Transformation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +41,7 @@ public class DefaultResourceRunnerFactoryTest {
         ExecutorService service = mock(ExecutorService.class);
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
         ResourceReferenceCounter resourceReferenceCounter = mock(ResourceReferenceCounter.class);
+        Transformation<Object> transformation = mock(Transformation.class);
         int width = 100;
         int height = 100;
 
@@ -53,7 +55,8 @@ public class DefaultResourceRunnerFactoryTest {
         Metadata metadata = mock(Metadata.class);
 
         public ResourceRunner build() {
-            return factory.build(ID, width, height, cacheDecoder, fetcher, decoder, encoder, metadata, listener, cb);
+            return factory.build(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, metadata,
+                    listener, cb);
         }
     }
 }

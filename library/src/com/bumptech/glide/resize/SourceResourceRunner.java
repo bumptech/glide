@@ -2,6 +2,7 @@ package com.bumptech.glide.resize;
 
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.load.Transformation;
 
 import java.io.OutputStream;
 
@@ -16,6 +17,7 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
     private final int height;
     private final ResourceFetcher<T> fetcher;
     private final ResourceDecoder<T, Z> decoder;
+    private Transformation<Z> transformation;
     private final ResourceEncoder<Z> encoder;
     private DiskCache diskCache;
     private Metadata metadata;
@@ -23,13 +25,15 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
     private Resource<Z> result;
     private volatile boolean isCancelled;
 
-    public SourceResourceRunner(String id, int width, int height, ResourceFetcher<T> resourceFetcher, ResourceDecoder<T, Z> decoder,
-            ResourceEncoder<Z> encoder, DiskCache diskCache, Metadata metadata, ResourceCallback<Z> cb) {
+    public SourceResourceRunner(String id, int width, int height, ResourceFetcher<T> resourceFetcher,
+            ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
+            DiskCache diskCache, Metadata metadata, ResourceCallback<Z> cb) {
         this.id = id;
         this.width = width;
         this.height = height;
         this.fetcher = resourceFetcher;
         this.decoder = decoder;
+        this.transformation = transformation;
         this.encoder = encoder;
         this.diskCache = diskCache;
         this.metadata = metadata;
@@ -48,10 +52,16 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
         }
 
         try {
-            result = null;
             T toDecode = fetcher.loadResource(metadata);
             if (toDecode != null) {
-                result = decoder.decode(toDecode, width, height);
+                Resource<Z> decoded = decoder.decode(toDecode, width, height);
+                if (decoded != null) {
+                    Resource<Z> transformed = transformation.transform(decoded, width, height);
+                    if (decoded != transformed) {
+                        decoded.recycle();
+                    }
+                    result = transformed;
+                }
             }
             if (result != null) {
                 diskCache.put(id, this);
