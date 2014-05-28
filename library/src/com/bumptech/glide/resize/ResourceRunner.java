@@ -1,8 +1,10 @@
 package com.bumptech.glide.resize;
 
 import android.os.Handler;
+import android.util.Log;
 import com.bumptech.glide.resize.cache.DiskCache;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -12,6 +14,7 @@ import java.util.concurrent.Future;
  * @param <Z> The type of the resource that will be decoded.
  */
 public class ResourceRunner<Z> implements Runnable {
+    private static final String TAG = "ResourceRunner";
     private final String id;
     private final SourceResourceRunner sourceRunner;
     private final ExecutorService executorService;
@@ -72,7 +75,19 @@ public class ResourceRunner<Z> implements Runnable {
         Resource<Z> result = null;
         InputStream fromCache = diskCache.get(id);
         if (fromCache != null) {
-            result = cacheDecoder.decode(fromCache, width, height);
+            try {
+                result = cacheDecoder.decode(fromCache, width, height);
+            } catch (IOException e) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Exception decoding image from cache", e);
+                }
+            }
+            if (result == null) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Failed to decode image from cache");
+                }
+                diskCache.delete(id);
+            }
         }
         return result;
     }

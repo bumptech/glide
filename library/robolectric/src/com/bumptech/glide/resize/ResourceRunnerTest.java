@@ -36,6 +36,36 @@ public class ResourceRunnerTest {
     }
 
     @Test
+    public void testSourceRunnerIsSubmittedIfCacheDecoderThrows() throws IOException {
+        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("Test"));
+
+        harness.runner.run();
+
+        verify(harness.service).submit(eq(harness.sourceRunner));
+    }
+
+    @Test
+    public void testDiskCacheEntryIsDeletedIfCacheDecoderThrows() throws IOException {
+        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("Test"));
+
+        harness.runner.run();
+
+        verify(harness.diskCache).delete(eq(ID));
+    }
+
+    @Test
+    public void testDiskCacheEntryIsDeletedIfDiskCacheContainsIdAndCacheDecoderReturnsNull() throws IOException {
+        when(harness.diskCache.get(eq(ID))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
+
+        harness.runner.run();
+
+        verify(harness.diskCache).delete(eq(ID));
+    }
+
+    @Test
     public void testDiskCacheIsAlwaysChecked() {
         harness.runner.run();
 
