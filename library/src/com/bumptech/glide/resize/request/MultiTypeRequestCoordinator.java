@@ -31,7 +31,12 @@ public class MultiTypeRequestCoordinator implements RequestCoordinator, Request 
 
     @Override
     public boolean isComplete() {
-        return isAnyRequestComplete();
+        for (Request request : requests) {
+            if (request.isComplete()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -60,11 +65,7 @@ public class MultiTypeRequestCoordinator implements RequestCoordinator, Request 
         if (parent != null && parent.isAnyRequestComplete()) {
             return true;
         }
-         for (Request request : requests) {
-            if (request.isComplete()) {
-                return true;
-            }
-        }
-        return false;
+
+        return isComplete();
     }
 }
