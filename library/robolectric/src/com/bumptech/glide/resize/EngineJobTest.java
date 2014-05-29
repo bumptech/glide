@@ -9,6 +9,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowLooper;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -152,6 +153,18 @@ public class EngineJobTest {
         harness.job.cancel();
 
         verify(harness.listener, times(1)).onEngineJobCancelled(eq(harness.key));
+    }
+
+    @Test
+    public void testReleasesResourceIfCancelledOnReady() {
+        ShadowLooper shadowLooper = Robolectric.shadowOf(harness.mainHandler.getLooper());
+        shadowLooper.pause();
+
+        harness.job.onResourceReady(harness.resource);
+        harness.job.cancel();
+        shadowLooper.runOneTask();
+
+        verify(harness.resource).recycle();
     }
 
     @SuppressWarnings("unchecked")

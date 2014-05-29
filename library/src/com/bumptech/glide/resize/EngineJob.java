@@ -59,6 +59,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
             @Override
             public void run() {
                 if (isCancelled) {
+                    resource.recycle();
                     return;
                 }
                 isComplete = true;
