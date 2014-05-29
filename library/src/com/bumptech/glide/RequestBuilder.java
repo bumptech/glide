@@ -5,13 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
-import com.bumptech.glide.resize.FixedLoadProvider;
-import com.bumptech.glide.resize.Priority;
-import com.bumptech.glide.resize.bitmap.FileDescriptorBitmapDecoder;
-import com.bumptech.glide.resize.bitmap.StreamBitmapDecoder;
-import com.bumptech.glide.resize.load.DecodeFormat;
-import com.bumptech.glide.resize.load.Downsampler;
-import com.bumptech.glide.resize.load.Transformation;
+import com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDecoder;
+import com.bumptech.glide.request.bitmap.RequestListener;
+import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.data.bitmap.Downsampler;
+import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.provider.LoadProvider;
 
 import java.io.InputStream;
 
@@ -32,7 +32,7 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
     /**
      * Load images at a size near the size of the target using {@link Downsampler#AT_LEAST}.
      *
-     * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
+     * @see #downsample(Downsampler)
      *
      * @return This RequestBuilder
      */
@@ -43,7 +43,7 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
     /**
      * Load images at their original size using {@link Downsampler#NONE}.
      *
-     * @see #downsample(com.bumptech.glide.resize.load.Downsampler)
+     * @see #downsample(Downsampler)
      *
      * @return This RequestBuilder
      */

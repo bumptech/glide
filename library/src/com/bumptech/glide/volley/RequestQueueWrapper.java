@@ -12,7 +12,7 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.NoCache;
-import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import static android.content.pm.PackageManager.NameNotFoundException;
 

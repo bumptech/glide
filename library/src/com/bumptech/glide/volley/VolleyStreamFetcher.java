@@ -7,8 +7,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
-import com.bumptech.glide.resize.Metadata;
+import com.bumptech.glide.Metadata;
+import com.bumptech.glide.load.resource.ResourceFetcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

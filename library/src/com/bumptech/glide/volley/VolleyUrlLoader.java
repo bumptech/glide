@@ -4,11 +4,11 @@ import android.content.Context;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.RetryPolicy;
-import com.bumptech.glide.loader.GlideUrl;
-import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
-import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
-import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
+import com.bumptech.glide.load.model.GenericLoaderFactory;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.resource.ResourceFetcher;
 
 import java.io.InputStream;
 

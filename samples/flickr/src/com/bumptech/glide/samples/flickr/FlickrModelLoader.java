@@ -1,12 +1,12 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import com.bumptech.glide.loader.GlideUrl;
-import com.bumptech.glide.loader.bitmap.model.Cache;
-import com.bumptech.glide.loader.bitmap.model.GenericLoaderFactory;
-import com.bumptech.glide.loader.bitmap.model.ModelLoader;
-import com.bumptech.glide.loader.bitmap.model.ModelLoaderFactory;
-import com.bumptech.glide.loader.bitmap.model.stream.BaseGlideUrlLoader;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.ModelCache;
+import com.bumptech.glide.load.model.GenericLoaderFactory;
+import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -18,11 +18,11 @@ import java.io.InputStream;
  * directly to the disk cache.
  */
 public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
-    private final Cache<String> stringCache;
+    private final ModelCache<String> stringCache;
 
     public static class Factory implements ModelLoaderFactory<Photo, InputStream> {
-        private final Cache<GlideUrl> modelCache = new Cache<GlideUrl>();
-        private final Cache<String> stringCache = new Cache<String>();
+        private final ModelCache<GlideUrl> modelCache = new ModelCache<GlideUrl>();
+        private final ModelCache<String> stringCache = new ModelCache<String>();
 
         @Override
         public ModelLoader<Photo, InputStream> build(Context context, GenericLoaderFactory factories) {
@@ -34,7 +34,7 @@ public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
         }
     }
 
-    public FlickrModelLoader(Context context, Cache<GlideUrl> modelCache, Cache<String> stringCache) {
+    public FlickrModelLoader(Context context, ModelCache<GlideUrl> modelCache, ModelCache<String> stringCache) {
         super(context, modelCache);
         this.stringCache = stringCache;
     }

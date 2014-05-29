@@ -1,8 +1,8 @@
 package com.bumptech.glide.util;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.resize.load.TransformationUtils;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.data.bitmap.TransformationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;

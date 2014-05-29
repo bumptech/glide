@@ -5,8 +5,8 @@ import com.android.volley.Cache;
 import com.android.volley.toolbox.ByteArrayPool;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.PoolingByteArrayOutputStream;
-import com.bumptech.glide.resize.StringKey;
-import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.load.engine.cache.StringKey;
+import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import java.io.EOFException;
 import java.io.IOException;
