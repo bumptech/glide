@@ -1,6 +1,7 @@
 package com.bumptech.glide.loader.bitmap.model;
 
 import android.content.Context;
+import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,23 @@ public class GenericLoaderFactory {
             new HashMap<Class, Map<Class, ModelLoaderFactory>>();
     private Map<Class, Map<Class, ModelLoader>> cachedModelLoaders =
             new HashMap<Class, Map<Class, ModelLoader>>();
+
+    private static final ModelLoader NULL_MODEL_LOADER = new ModelLoader() {
+        @Override
+        public ResourceFetcher getResourceFetcher(Object model, int width, int height) {
+            throw new NoSuchMethodError("This should never be called!");
+        }
+
+        @Override
+        public String getId(Object model) {
+            throw new NoSuchMethodError("This should never be called!");
+        }
+
+        @Override
+        public String toString() {
+            return "NULL_MODEL_LOADER";
+        }
+    };
 
     /**
      * Removes and returns the registered {@link ModelLoaderFactory} for the given model and resource classes. Returns
@@ -87,15 +105,30 @@ public class GenericLoaderFactory {
     public <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
         ModelLoader<T, Y> result = getCachedLoader(modelClass, resourceClass);
         if (result != null) {
-            return result;
+            // We've already tried to create a model loader and can't with the currently registered set of factories, but
+            // we can't use null to demonstrate that failure because model loaders that haven't been requested yet will
+            // be null in the cache. To avoid this, we use a special signal model loader.
+            if (NULL_MODEL_LOADER.equals(result)) {
+                return null;
+            } else {
+                return result;
+            }
         }
 
         final ModelLoaderFactory<T, Y> factory = getFactory(modelClass, resourceClass);
         if (factory != null) {
             result = factory.build(context, this);
             cacheModelLoader(modelClass, resourceClass, result);
+        } else {
+            // We can't generate a model loader for the given arguments with the currently registered set of factories.
+            cacheNullLoader(modelClass, resourceClass);
         }
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T, Y> void cacheNullLoader(Class<T> modelClass, Class<Y> resourceClass) {
+        cacheModelLoader(modelClass, resourceClass, NULL_MODEL_LOADER);
     }
 
     private <T, Y> void cacheModelLoader(Class<T> modelClass, Class<Y> resourceClass, ModelLoader<T, Y> modelLoader) {
@@ -113,20 +146,6 @@ public class GenericLoaderFactory {
         ModelLoader result = null;
         if (resourceToLoaders != null) {
             result = resourceToLoaders.get(resourceClass);
-        }
-
-        if (result == null) {
-            for (Class registeredModelClass : cachedModelLoaders.keySet()) {
-                if (registeredModelClass.isAssignableFrom(modelClass)) {
-                    Map<Class,  ModelLoader> currentResourceToLoaders = cachedModelLoaders.get(registeredModelClass);
-                    if (currentResourceToLoaders != null) {
-                        result = currentResourceToLoaders.get(resourceClass);
-                        if (result != null) {
-                            break;
-                        }
-                    }
-                }
-            }
         }
 
         return result;
