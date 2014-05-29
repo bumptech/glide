@@ -6,13 +6,13 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import com.bumptech.glide.LoadProvider;
 import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
-import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.Resource;
 import com.bumptech.glide.resize.ResourceCallback;
 import com.bumptech.glide.resize.ResourceDecoder;
@@ -35,8 +35,8 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     private final int placeholderResourceId;
     private final int errorResourceId;
     private final Context context;
-    private final Class<Z> resourceClass;
     private final Transformation<Bitmap> transformation;
+    private final LoadProvider<T, Z, Bitmap> loadProvider;
     private DecodeFormat decodeFormat;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
@@ -46,7 +46,6 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     private final RequestListener<T> requestListener;
     private final float sizeMultiplier;
     private final Engine engine;
-    private final RequestContext requestContext;
     private Animation animation;
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
@@ -57,7 +56,7 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     private Engine.LoadStatus loadStatus;
 
     public BitmapRequest(BitmapRequestBuilder<T, Z> builder) {
-        this.resourceClass = builder.resourceClass;
+        this.loadProvider = builder.loadProvider;
         this.model = builder.model;
         this.context = builder.context.getApplicationContext();
         this.priority = builder.priority;
@@ -73,7 +72,6 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
         this.requestCoordinator = builder.requestCoordinator;
         this.decodeFormat = builder.decodeFormat;
         this.engine = builder.engine;
-        this.requestContext = builder.requestContext;
         this.transformation = builder.transformation;
     }
 
@@ -149,11 +147,10 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
 
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
-        ResourceDecoder<InputStream, Bitmap> cacheDecoder = requestContext.getCacheDecoder(Bitmap.class);
-        ResourceDecoder<Z, Bitmap> decoder = requestContext.getDecoder(resourceClass, Bitmap.class);
-        ResourceEncoder<Bitmap> encoder = requestContext.getEncoder(Bitmap.class);
-        ModelLoader<T, Z> modelLoader = requestContext.getModelLoader((Class<T>) model.getClass(),
-                resourceClass);
+        ResourceDecoder<InputStream, Bitmap> cacheDecoder = loadProvider.getCacheDecoder();
+        ResourceDecoder<Z, Bitmap> decoder = loadProvider.getSourceDecoder();
+        ResourceEncoder <Bitmap> encoder = loadProvider.getEncoder();
+        ModelLoader<T, Z> modelLoader = loadProvider.getModelLoader();
 
         final String id = modelLoader.getId(model);
         final ResourceFetcher<Z> resourceFetcher = modelLoader.getResourceFetcher(model, width, height);

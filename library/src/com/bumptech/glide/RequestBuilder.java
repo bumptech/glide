@@ -1,11 +1,12 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
+import com.bumptech.glide.resize.FixedLoadProvider;
 import com.bumptech.glide.resize.Priority;
-import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.resize.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.resize.load.DecodeFormat;
@@ -23,9 +24,9 @@ import java.io.InputStream;
 @SuppressWarnings("unused") //public api
 public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor> {
 
-    RequestBuilder(Context context, ModelType model, RequestContext requestContext) {
-        super(context, model, requestContext, InputStream.class, ParcelFileDescriptor.class);
-
+    RequestBuilder(Context context, ModelType model, LoadProvider<ModelType, InputStream, Bitmap> streamLoadProvider,
+            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider) {
+        super(context, model, streamLoadProvider, fileDescriptorLoadProvider);
     }
 
     /**
@@ -115,7 +116,7 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
     }
 
     @Override
-    public RequestBuilder<ModelType> transform(Transformation transformation) {
+    public RequestBuilder<ModelType> transform(Transformation<Bitmap> transformation) {
         super.transform(transformation);
         return this;
     }

@@ -1,16 +1,10 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Build;
-import android.os.ParcelFileDescriptor;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.EngineBuilder;
-import com.bumptech.glide.resize.RequestContext;
-import com.bumptech.glide.resize.bitmap.BitmapEncoder;
-import com.bumptech.glide.resize.bitmap.FileDescriptorBitmapDecoder;
-import com.bumptech.glide.resize.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
@@ -22,7 +16,6 @@ import com.bumptech.glide.resize.cache.MemoryCache;
 import com.bumptech.glide.volley.RequestQueueWrapper;
 
 import java.io.File;
-import java.io.InputStream;
 
 public class GlideBuilder {
     private RequestQueue requestQueue;
@@ -97,13 +90,6 @@ public class GlideBuilder {
                     .build();
         }
 
-        // Order matters here, this must be last.
-        RequestContext requestContext = new RequestContext();
-        requestContext.register(new BitmapEncoder(), Bitmap.class);
-        requestContext.register(new StreamBitmapDecoder(bitmapPool), InputStream.class, Bitmap.class);
-        requestContext.register(new FileDescriptorBitmapDecoder(bitmapPool), ParcelFileDescriptor.class,
-                Bitmap.class);
-
-        return new Glide(engine, requestQueue, requestContext, memoryCache, bitmapPool);
+        return new Glide(engine, requestQueue, memoryCache, bitmapPool);
     }
 }

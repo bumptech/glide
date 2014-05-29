@@ -7,12 +7,12 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+import com.bumptech.glide.LoadProvider;
 import com.bumptech.glide.loader.bitmap.model.ModelLoader;
 import com.bumptech.glide.loader.bitmap.resource.ResourceFetcher;
 import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.Metadata;
 import com.bumptech.glide.resize.Priority;
-import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.Resource;
 import com.bumptech.glide.resize.ResourceCallback;
 import com.bumptech.glide.resize.ResourceDecoder;
@@ -44,23 +44,23 @@ import static org.mockito.Mockito.when;
 public class BitmapRequestTest {
     private RequestHarness harness;
 
+    @SuppressWarnings("unchecked")
     private static class RequestHarness {
         Engine engine = mock(Engine.class);
-        RequestContext requestContext = mock(RequestContext.class);
         Object model = new Object();
         Target target = mock(Target.class);
         Context context = Robolectric.application;
-
+        LoadProvider<Object, Object, Bitmap> loadProvider = mock(LoadProvider.class);
 
         public RequestHarness() {
-            when(requestContext.getModelLoader(eq(Object.class), eq(Object.class)))
-                    .thenReturn(mock(ModelLoader.class));
+            ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
+            when(loadProvider.getModelLoader()).thenReturn(modelLoader);
         }
 
         public BitmapRequestBuilder<Object, Object> getBuilder() {
-            return new BitmapRequestBuilder<Object, Object>(Object.class)
+            return new BitmapRequestBuilder<Object, Object>()
                     .setContext(context)
-                    .setRequestContext(requestContext)
+                    .setLoadProvider(loadProvider)
                     .setEngine(engine)
                     .setTarget(target)
                     .setPriority(Metadata.DEFAULT.getPriority())

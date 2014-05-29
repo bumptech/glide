@@ -4,10 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+import com.bumptech.glide.LoadProvider;
 import com.bumptech.glide.RequestListener;
 import com.bumptech.glide.resize.Engine;
 import com.bumptech.glide.resize.Priority;
-import com.bumptech.glide.resize.RequestContext;
 import com.bumptech.glide.resize.load.DecodeFormat;
 import com.bumptech.glide.resize.load.Transformation;
 import com.bumptech.glide.resize.target.Target;
@@ -19,7 +19,6 @@ import com.bumptech.glide.resize.target.Target;
  * @param <Z> The resource type the {@link BitmapRequest} will load an {@link Bitmap} from.
  */
 public class BitmapRequestBuilder<T, Z> {
-    Class<Z> resourceClass;
     T model;
     Target target;
     Priority priority;
@@ -35,12 +34,8 @@ public class BitmapRequestBuilder<T, Z> {
     int animationId;
     DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     Engine engine;
-    RequestContext requestContext;
     Transformation<Bitmap> transformation;
-
-    public BitmapRequestBuilder(Class<Z> resourceClass) {
-        this.resourceClass = resourceClass;
-    }
+    LoadProvider<T, Z, Bitmap> loadProvider;
 
     public BitmapRequestBuilder<T, Z> setModel(T model) {
         this.model = model;
@@ -117,8 +112,8 @@ public class BitmapRequestBuilder<T, Z> {
         return this;
     }
 
-    public BitmapRequestBuilder<T, Z> setRequestContext(RequestContext requestContext) {
-        this.requestContext = requestContext;
+    public BitmapRequestBuilder<T, Z> setLoadProvider(LoadProvider<T, Z, Bitmap> loadProvider) {
+        this.loadProvider = loadProvider;
         return this;
     }
 

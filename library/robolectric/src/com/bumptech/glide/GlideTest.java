@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
@@ -380,7 +381,13 @@ public class GlideTest {
     @Test
     public void testNullModelDoesNotThrow() {
         String nullString = null;
-        Glide.with(getContext()).load(nullString).into(target);
+        Drawable drawable = mock(Drawable.class);
+        Glide.with(getContext())
+                .load(nullString)
+                .placeholder(drawable)
+                .into(target);
+
+        verify(target).setPlaceholder(drawable);
     }
 
     private void mockUri(String uriString) {

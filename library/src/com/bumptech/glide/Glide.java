@@ -28,8 +28,11 @@ import com.bumptech.glide.loader.bitmap.model.stream.StreamResourceLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamStringLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUriLoader;
 import com.bumptech.glide.loader.bitmap.model.stream.StreamUrlLoader;
+import com.bumptech.glide.resize.DataLoadProvider;
 import com.bumptech.glide.resize.Engine;
-import com.bumptech.glide.resize.RequestContext;
+import com.bumptech.glide.resize.FileDescriptorBitmapDataLoadProvider;
+import com.bumptech.glide.resize.FixedLoadProvider;
+import com.bumptech.glide.resize.StreamBitmapDataLoadProvider;
 import com.bumptech.glide.resize.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.resize.cache.DiskCache;
 import com.bumptech.glide.resize.cache.MemoryCache;
@@ -65,9 +68,10 @@ public class Glide {
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
     private final RequestQueue requestQueue;
     private final Engine engine;
-    private final RequestContext requestContext;
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
+    private final DataLoadProvider<InputStream, Bitmap> defaultStreamProvider;
+    private final DataLoadProvider<ParcelFileDescriptor, Bitmap> defaultFileDescriptorProvider;
 
     /**
      * Returns true if this device is a low ram device or has an older sdk version and likely has relatively little
@@ -173,13 +177,15 @@ public class Glide {
         GLIDE = null;
     }
 
-    Glide(Engine engine, RequestQueue requestQueue, RequestContext requestContext,
-            MemoryCache memoryCache, BitmapPool bitmapPool) {
+    Glide(Engine engine, RequestQueue requestQueue, MemoryCache memoryCache, BitmapPool bitmapPool) {
         this.engine = engine;
         this.requestQueue = requestQueue;
-        this.requestContext = requestContext;
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
+
+        defaultStreamProvider = new StreamBitmapDataLoadProvider(bitmapPool);
+        defaultFileDescriptorProvider = new FileDescriptorBitmapDataLoadProvider(bitmapPool);
+
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
         register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
@@ -404,7 +410,8 @@ public class Glide {
      * @return A model request to pass in the object representing the image to be loaded.
      */
     public static ModelRequest with(Context context) {
-        return new ModelRequest(context);
+        return new ModelRequest(context, Glide.get(context).defaultStreamProvider,
+                Glide.get(context).defaultFileDescriptorProvider);
     }
 
     /**
@@ -412,11 +419,14 @@ public class Glide {
      */
     public static class ModelRequest {
         private final Context context;
-        private final RequestContext requestContext;
+        private final DataLoadProvider<InputStream, Bitmap> streamDataProvider;
+        private final DataLoadProvider<ParcelFileDescriptor, Bitmap> fileDescriptorDataProvider;
 
-        private ModelRequest(Context context) {
+        private ModelRequest(Context context, DataLoadProvider<InputStream, Bitmap> streamDataProvider,
+                DataLoadProvider<ParcelFileDescriptor, Bitmap> fileDescriptorDataProvider) {
             this.context = context;
-            this.requestContext = Glide.get(context).buildContext();
+            this.streamDataProvider = streamDataProvider;
+            this.fileDescriptorDataProvider = fileDescriptorDataProvider;
         }
 
         /**
@@ -428,7 +438,7 @@ public class Glide {
          * @return A new {@link ImageModelRequest}.
          */
         public <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
-            return new ImageModelRequest<T>(context, requestContext, modelLoader);
+            return new ImageModelRequest<T>(context, modelLoader, streamDataProvider);
         }
 
         /**
@@ -438,7 +448,7 @@ public class Glide {
          * @return A new {@link ImageModelRequest}.
          */
         public ImageModelRequest<byte[]> using(StreamByteArrayLoader modelLoader) {
-            return new ImageModelRequest<byte[]>(context, requestContext, modelLoader);
+            return new ImageModelRequest<byte[]>(context, modelLoader, streamDataProvider);
         }
 
         /**
@@ -450,7 +460,7 @@ public class Glide {
          * @return A new {@link VideoModelRequest}.
          */
         public <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
-            return new VideoModelRequest<T>(context, requestContext, modelLoader);
+            return new VideoModelRequest<T>(context, modelLoader, fileDescriptorDataProvider);
         }
 
         /**
@@ -554,14 +564,17 @@ public class Glide {
          * into.
          */
         public RequestBuilder<byte[]> loadFromImage(byte[] model, final String id) {
-            requestContext.register(new StreamByteArrayLoader() {
+            StreamByteArrayLoader loader = new StreamByteArrayLoader() {
                 @Override
                 public String getId(byte[] model) {
                     return id;
                 }
-            }, byte[].class, InputStream.class);
+            };
 
-            return new RequestBuilder<byte[]>(context, model, requestContext);
+            LoadProvider<byte[], InputStream, Bitmap> loadProvider =
+                    new FixedLoadProvider<byte[], InputStream, Bitmap>(loader, streamDataProvider);
+
+            return new RequestBuilder<byte[]>(context, model, loadProvider, null);
         }
 
         /**
@@ -606,25 +619,22 @@ public class Glide {
         }
 
         private <T> RequestBuilder<T> loadGeneric(T model) {
-            if (model != null) {
-                ModelLoader<T, InputStream> streamModelLoader = buildStreamModelLoader(model, context);
-                if (streamModelLoader != null) {
-                    requestContext.register(streamModelLoader, (Class<T>) model.getClass(), InputStream.class);
-                }
-
-                ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
-                        buildFileDescriptorModelLoader(model, context);
-                if (fileDescriptorModelLoader != null) {
-                    requestContext.register(fileDescriptorModelLoader, (Class<T>) model.getClass(),
-                            ParcelFileDescriptor.class);
-                }
+            LoadProvider<T, InputStream, Bitmap> streamLoadProvider = null;
+            ModelLoader<T, InputStream> streamModelLoader = buildStreamModelLoader(model, context);
+            if (streamModelLoader != null) {
+                streamLoadProvider = new FixedLoadProvider<T, InputStream, Bitmap>(streamModelLoader, streamDataProvider);
             }
-            return new RequestBuilder<T>(context, model, requestContext);
-        }
-    }
 
-    private RequestContext buildContext() {
-        return new RequestContext(requestContext);
+            LoadProvider<T, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider = null;
+            ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
+                    buildFileDescriptorModelLoader(model, context);
+            if (fileDescriptorModelLoader != null) {
+                fileDescriptorLoadProvider =
+                        new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap>(fileDescriptorModelLoader,
+                                fileDescriptorDataProvider);
+            }
+            return new RequestBuilder<T>(context, model, streamLoadProvider, fileDescriptorLoadProvider);
+        }
     }
 
     /**
@@ -636,18 +646,18 @@ public class Glide {
     public static class VideoModelRequest<T> {
         private final Context context;
         private final ModelLoader<T, ParcelFileDescriptor> loader;
-        private final RequestContext requestContext;
+        private DataLoadProvider<ParcelFileDescriptor, Bitmap> dataLoadProvider;
 
-        private VideoModelRequest(Context context, RequestContext requestContext,
-                ModelLoader<T, ParcelFileDescriptor> loader) {
+        private VideoModelRequest(Context context, ModelLoader<T, ParcelFileDescriptor> loader,
+                DataLoadProvider<ParcelFileDescriptor, Bitmap> dataLoadProvider) {
             this.context = context;
-            this.requestContext = requestContext;
             this.loader = loader;
+            this.dataLoadProvider = dataLoadProvider;
         }
 
         public RequestBuilder<T> loadFromVideo(T model) {
-            requestContext.register(loader, (Class<T>) model.getClass(), ParcelFileDescriptor.class);
-            return new RequestBuilder<T>(context, model, requestContext);
+            return new RequestBuilder<T>(context, model, null,
+                    new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap>(loader, dataLoadProvider));
         }
     }
 
@@ -659,18 +669,19 @@ public class Glide {
      */
     public static class ImageModelRequest<T> {
         private final Context context;
-        private RequestContext requestContext;
         private final ModelLoader<T, InputStream> loader;
+        private DataLoadProvider<InputStream, Bitmap> dataLoadProvider;
 
-        private ImageModelRequest(Context context, RequestContext requestContext, ModelLoader<T, InputStream> loader) {
+        private ImageModelRequest(Context context, ModelLoader<T, InputStream> loader,
+                DataLoadProvider<InputStream, Bitmap> dataLoadProvider) {
             this.context = context;
-            this.requestContext = requestContext;
             this.loader = loader;
+            this.dataLoadProvider = dataLoadProvider;
         }
 
         public RequestBuilder<T> load(T model) {
-            requestContext.register(loader, (Class <T>) model.getClass(), InputStream.class);
-            return new RequestBuilder<T>(context, model, requestContext);
+            return new RequestBuilder<T>(context, model,
+                    new FixedLoadProvider<T, InputStream, Bitmap>(loader, dataLoadProvider), null);
         }
     }
 

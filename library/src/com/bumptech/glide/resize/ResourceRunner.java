@@ -74,7 +74,6 @@ public class ResourceRunner<Z> implements Runnable {
 
     private Resource<Z> loadFromDiskCache() {
         Resource<Z> result = null;
-        //TODO:
         InputStream fromCache = diskCache.get(key);
         if (fromCache != null) {
             try {

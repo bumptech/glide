@@ -64,7 +64,6 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
                 }
             }
             if (result != null) {
-                //TODO:
                 diskCache.put(key, this);
                 cb.onResourceReady(result);
             } else {
