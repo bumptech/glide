@@ -3,6 +3,9 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 import android.graphics.Bitmap;
 
 public class BitmapPoolAdapter implements BitmapPool {
+    @Override
+    public void setSizeMultiplier(float sizeMultiplier) {
+    }
 
     @Override
     public boolean put(Bitmap bitmap) {

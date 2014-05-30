@@ -1,17 +1,18 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
+import android.graphics.Bitmap;
+import android.os.Build;
+import android.util.Log;
+
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
-
-import android.graphics.Bitmap;
-import android.util.Log;
-import android.os.Build;
 
 public class LruBitmapPool implements BitmapPool {
     private static final String TAG = "LruBitmapPool";
     private final LruPoolStrategy strategy;
 
-    private final int maxSize;
+    private final int initialMaxSize;
+    private int maxSize;
     private int currentSize = 0;
     private int hits;
     private int misses;
@@ -20,17 +21,25 @@ public class LruBitmapPool implements BitmapPool {
 
     // Exposed for testing only.
     LruBitmapPool(int maxSize, LruPoolStrategy strategy) {
+        this.initialMaxSize = maxSize;
         this.maxSize = maxSize;
         this.strategy = strategy;
     }
 
     public LruBitmapPool(int maxSize) {
+        initialMaxSize = maxSize;
         this.maxSize = maxSize;
         if (Build.VERSION.SDK_INT >= 19) {
             strategy = new SizeStrategy();
         } else {
             strategy = new AttributeStrategy();
         }
+    }
+
+    @Override
+    public void setSizeMultiplier(float sizeMultiplier) {
+        maxSize = Math.round(initialMaxSize * sizeMultiplier);
+        evict();
     }
 
     @Override

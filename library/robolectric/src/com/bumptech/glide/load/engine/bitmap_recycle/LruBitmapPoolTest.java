@@ -114,6 +114,37 @@ public class LruBitmapPoolTest {
         assertEquals("Failed level=" + trimLevel, expectedSize, strategy.numRemoves);
     }
 
+    @Test
+    public void testCanIncreaseSizeDynamically() {
+        int sizeMultiplier = 2;
+        pool.setSizeMultiplier(2);
+        fillPool(pool, MAX_SIZE * sizeMultiplier);
+
+        assertEquals(0, strategy.numRemoves);
+    }
+
+    @Test
+    public void testCanDecreaseSizeDynamically() {
+        fillPool(pool, MAX_SIZE);
+        assertEquals(0, strategy.numRemoves);
+
+        float sizeMultiplier = 0.5f;
+        pool.setSizeMultiplier(sizeMultiplier);
+
+        assertEquals(Math.round(MAX_SIZE * sizeMultiplier), strategy.numRemoves);
+    }
+
+    @Test
+    public void testCanResetSizeDynamically() {
+        int sizeMultiplier = 2;
+        pool.setSizeMultiplier(sizeMultiplier);
+        fillPool(pool, MAX_SIZE * sizeMultiplier);
+
+        pool.setSizeMultiplier(1);
+
+        assertEquals(Math.round(MAX_SIZE * sizeMultiplier) - MAX_SIZE, strategy.numRemoves);
+    }
+
     private void fillPool(LruBitmapPool pool, int fillCount) {
         for (int i = 0; i < fillCount; i++) {
             pool.put(createMutableBitmap());
