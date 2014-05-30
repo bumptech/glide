@@ -67,9 +67,6 @@ public class Glide {
     private final DataLoadProvider<InputStream, Bitmap> defaultStreamProvider;
     private final DataLoadProvider<ParcelFileDescriptor, Bitmap> defaultFileDescriptorProvider;
 
-
-
-
     /**
      * Try to get the external cache directory if available and default to the internal. Use a default name for the
      * cache directory if no name is provided
@@ -205,6 +202,22 @@ public class Glide {
     public void trimMemory(int level) {
         bitmapPool.trimMemory(level);
         memoryCache.trimMemory(level);
+    }
+
+    /**
+     * Adjusts Glide's current and maximum memory usage based on the given {@link MemoryCategory}.
+     *
+     * <p>
+     *     The default {@link MemoryCategory} is {@link MemoryCategory#NORMAL}. {@link MemoryCategory#HIGH} increases
+     *     Glide's maximum memory usage by up to 50% and {@link MemoryCategory#LOW} decreases Glide's maximum memory
+     *     usage by 50%. This method should be used to temporarily increase or decrease memory useage for a single
+     *     Activity or part of the app. Use {@link GlideBuilder#setMemoryCache(MemoryCache)} to set a permanent
+     *     memory size if you want to change the default.
+     * </p>
+     */
+    public void setMemoryCategory(MemoryCategory memoryCategory) {
+        memoryCache.setSizeMultiplier(memoryCategory.getMultiplier());
+        bitmapPool.setSizeMultiplier(memoryCategory.getMultiplier());
     }
 
     /**

@@ -151,6 +151,22 @@ public class GlideTest {
     }
 
     @Test
+    public void testCanSetMemoryCategory() {
+        MemoryCache memoryCache = mock(MemoryCache.class);
+        BitmapPool bitmapPool = mock(BitmapPool.class);
+
+        MemoryCategory memoryCategory = MemoryCategory.NORMAL;
+        Glide glide = new GlideBuilder(getContext())
+                .setMemoryCache(memoryCache)
+                .setBitmapPool(bitmapPool)
+                .createGlide();
+        glide.setMemoryCategory(memoryCategory);
+
+        verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
+        verify(bitmapPool).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
+    }
+
+    @Test
     public void testClearMemory() {
         BitmapPool bitmapPool = mock(BitmapPool.class);
         MemoryCache memoryCache = mock(MemoryCache.class);
