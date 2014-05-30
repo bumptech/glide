@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.volley.RequestQueueWrapper;
 
 import java.io.File;
@@ -59,20 +60,17 @@ public class GlideBuilder {
             requestQueue = RequestQueueWrapper.getRequestQueue(context);
         }
 
-        final int safeCacheSize = Glide.getSafeMemoryCacheSize(context);
-        final boolean isLowMemoryDevice = Glide.isLowMemoryDevice(context);
+        MemorySizeCalculator calculator = new MemorySizeCalculator(context);
         if (bitmapPool == null) {
             if (Build.VERSION.SDK_INT >= 11) {
-                bitmapPool = new LruBitmapPool(
-                        isLowMemoryDevice ? safeCacheSize : 2 * safeCacheSize);
+                bitmapPool = new LruBitmapPool(calculator.getBitmapPoolSize());
             } else {
                 bitmapPool = new BitmapPoolAdapter();
             }
         }
 
         if (memoryCache == null) {
-            memoryCache = new LruResourceCache(!isLowMemoryDevice && Glide.CAN_REUSE_BITMAPS ?
-                    safeCacheSize / 2 : safeCacheSize);
+            memoryCache = new LruResourceCache(calculator.getMemoryCacheSize());
         }
 
         if (diskCache == null) {
