@@ -12,11 +12,21 @@ import java.util.Map;
  */
 public class LruCache<T, Y> {
     private final LinkedHashMap<T, Y> cache = new LinkedHashMap<T, Y>(100, 0.75f, true);
-    private final int maxSize;
+    private int maxSize;
+    private final int initialMaxSize;
     private int currentSize = 0;
 
     public LruCache(int size) {
+        this.initialMaxSize = size;
         this.maxSize = size;
+    }
+
+    public void setSizeMultiplier(float multiplier) {
+        if (multiplier < 0) {
+            throw new IllegalArgumentException("Multiplier must be >= 0");
+        }
+        maxSize = Math.round(initialMaxSize * multiplier);
+        evict();
     }
 
     protected int getSize(Y item) {

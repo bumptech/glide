@@ -125,6 +125,57 @@ public class LruCacheTest {
         assertFalse(cache.contains(second));
     }
 
+    @Test
+    public void testCanIncreaseSizeDynamically() {
+        int sizeMultiplier = 2;
+        cache.setSizeMultiplier(sizeMultiplier);
+        for (int i = 0; i < SIZE * sizeMultiplier; i++) {
+            cache.put(getKey(), new Object());
+        }
+
+        verify(listener, never()).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testCanDecreaseSizeDynamically() {
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+        verify(listener, never()).onItemRemoved(anyObject());
+
+        cache.setSizeMultiplier(0.5f);
+
+        verify(listener).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testCanResetSizeDynamically() {
+        int sizeMultiplier = 2;
+        cache.setSizeMultiplier(sizeMultiplier);
+        for (int i = 0; i < SIZE * sizeMultiplier; i++) {
+            cache.put(getKey(), new Object());
+        }
+
+        cache.setSizeMultiplier(1);
+
+        verify(listener, times(sizeMultiplier)).onItemRemoved(anyObject());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsIfMultiplierLessThanZero() {
+        cache.setSizeMultiplier(-1);
+    }
+
+    @Test
+    public void testCanHandleZeroAsMultiplier() {
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+        cache.setSizeMultiplier(0);
+
+        verify(listener, times(SIZE)).onItemRemoved(anyObject());
+    }
+
     private String getKey() {
         currentKey += "1";
         return currentKey;

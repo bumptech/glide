@@ -16,6 +16,18 @@ public interface MemoryCache {
     }
 
     /**
+     * Adjust the maximum size of the cache by multiplying the original size of the cache by the given multiplier.
+     *
+     * <p>
+     *     If the size multiplier causes the size of the cache to be decreased, items will be evicted until the cache
+     *     is smaller than the new size.
+     * </p>
+     *
+     * @param multiplier A size multiplier >= 0.
+     */
+    public void setSizeMultiplier(float multiplier);
+
+    /**
      * Tell if cache contains key
      * @param key The key
      * @return true iff the key has a non null value in the cache

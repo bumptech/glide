@@ -8,6 +8,10 @@ public class MemoryCacheAdapter implements MemoryCache {
     private ResourceRemovedListener listener;
 
     @Override
+    public void setSizeMultiplier(float multiplier) {
+    }
+
+    @Override
     public boolean contains(Key key) {
         return false;
     }
