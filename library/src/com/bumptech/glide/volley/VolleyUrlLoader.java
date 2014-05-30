@@ -1,9 +1,7 @@
 package com.bumptech.glide.volley;
 
 import android.content.Context;
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
-import com.android.volley.RetryPolicy;
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -53,16 +51,12 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
     @Override
     public ResourceFetcher<InputStream> getResourceFetcher(GlideUrl url, int width, int height) {
-        return new VolleyStreamFetcher(requestQueue, url.toString(), getRetryPolicy(), futureFactory.build());
+        return new VolleyStreamFetcher(requestQueue, url.toString(), futureFactory.build());
     }
 
     @Override
     public String getId(GlideUrl url) {
         return url.toString();
-    }
-
-    protected RetryPolicy getRetryPolicy() {
-        return new DefaultRetryPolicy();
     }
 
     private static class DefaultFutureFactory implements FutureFactory {

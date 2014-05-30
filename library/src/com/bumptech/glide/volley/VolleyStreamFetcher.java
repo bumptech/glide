@@ -1,11 +1,9 @@
 package com.bumptech.glide.volley;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.bumptech.glide.Metadata;
 import com.bumptech.glide.load.resource.ResourceFetcher;
@@ -19,19 +17,16 @@ import java.io.InputStream;
 public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     private final RequestQueue requestQueue;
     private final String url;
-    private final RetryPolicy retryPolicy;
     private VolleyRequestFuture<InputStream> requestFuture;
 
     @SuppressWarnings("unused")
     public VolleyStreamFetcher(RequestQueue requestQueue, String url) {
-        this(requestQueue, url, new DefaultRetryPolicy(), null);
+        this(requestQueue, url,  null);
     }
 
-    public VolleyStreamFetcher(RequestQueue requestQueue, String url, RetryPolicy retryPolicy,
-            VolleyRequestFuture<InputStream> requestFuture) {
+    public VolleyStreamFetcher(RequestQueue requestQueue, String url, VolleyRequestFuture<InputStream> requestFuture) {
         this.requestQueue = requestQueue;
         this.url = url;
-        this.retryPolicy = retryPolicy;
         this.requestFuture = requestFuture;
         if (requestFuture == null) {
             this.requestFuture = VolleyRequestFuture.newFuture();
@@ -42,7 +37,6 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     public InputStream loadResource(Metadata metadata) throws Exception {
         GlideRequest request = new GlideRequest(url, requestFuture, glideToVolleyPriority(metadata));
 
-        request.setRetryPolicy(retryPolicy);
         requestFuture.setRequest(requestQueue.add(request));
 
         return requestFuture.get();
