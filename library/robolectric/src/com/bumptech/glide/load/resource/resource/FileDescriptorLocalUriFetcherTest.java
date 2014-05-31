@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.resource.FileDescriptorLocalUriFetcher;
-import com.bumptech.glide.Metadata;
 import com.bumptech.glide.tests.ContentResolverShadow;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +36,7 @@ public class FileDescriptorLocalUriFetcherTest {
         shadow.registerFileDescriptor(uri, assetFileDescriptor);
 
         FileDescriptorLocalUriFetcher fetcher = new FileDescriptorLocalUriFetcher(context, uri);
-        ParcelFileDescriptor descriptor = fetcher.loadResource(mock(Metadata.class));
+        ParcelFileDescriptor descriptor = fetcher.loadResource(Priority.NORMAL);
 
         assertEquals(parcelFileDescriptor, descriptor);
     }

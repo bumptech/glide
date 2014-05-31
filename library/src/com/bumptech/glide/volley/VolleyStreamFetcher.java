@@ -5,7 +5,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.bumptech.glide.Metadata;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.resource.ResourceFetcher;
 
 import java.io.ByteArrayInputStream;
@@ -34,8 +34,8 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
-    public InputStream loadResource(Metadata metadata) throws Exception {
-        GlideRequest request = new GlideRequest(url, requestFuture, glideToVolleyPriority(metadata));
+    public InputStream loadResource(Priority priority) throws Exception {
+        GlideRequest request = new GlideRequest(url, requestFuture, glideToVolleyPriority(priority));
 
         requestFuture.setRequest(requestQueue.add(request));
 
@@ -50,11 +50,8 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
         }
     }
 
-    private static Request.Priority glideToVolleyPriority(Metadata metadata) {
-        if (metadata == null) {
-            metadata = Metadata.DEFAULT;
-        }
-        switch (metadata.getPriority()) {
+    private static Request.Priority glideToVolleyPriority(Priority priority) {
+        switch (priority) {
             case LOW:
                 return Request.Priority.LOW;
             case HIGH:

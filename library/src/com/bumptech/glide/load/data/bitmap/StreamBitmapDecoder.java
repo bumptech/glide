@@ -36,6 +36,10 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
 
     @Override
     public String getId() {
-        return "com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder";
+        return new StringBuilder()
+                .append("com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder")
+                .append(downsampler.getId())
+                .append(decodeFormat.name())
+                .toString();
     }
 }

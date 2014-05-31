@@ -1,14 +1,14 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.Metadata;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -212,7 +212,7 @@ public class EngineTest {
 
         verify(harness.factory).build(eq(harness.cacheKey), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(Metadata.class), any(EngineJobListener.class));
+                any(ResourceEncoder.class), any(Priority.class), any(EngineJobListener.class));
     }
 
 
@@ -224,8 +224,8 @@ public class EngineTest {
         ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
-        Metadata metadata = mock(Metadata.class);
-        ResourceCallback<Object> cb = mock(ResourceCallback.class);
+        Priority priority = Priority.NORMAL;
+        ResourceCallback <Object> cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         Map<Key, ResourceRunner> runners = new HashMap<Key, ResourceRunner>();
         ResourceReferenceCounter resourceReferenceCounter = mock(ResourceReferenceCounter.class);
@@ -250,11 +250,11 @@ public class EngineTest {
             engine = new Engine(factory, cache, runners, resourceReferenceCounter, keyFactory);
 
             when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
-                    eq(transformation), eq(encoder), eq(metadata), eq(engine))).thenReturn(runner);
+                    eq(transformation), eq(encoder), eq(priority), eq(engine))).thenReturn(runner);
         }
 
         public Engine.LoadStatus doLoad() {
-            return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, metadata,
+            return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, priority,
                     cb);
         }
     }

@@ -5,13 +5,14 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
-import com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDecoder;
-import com.bumptech.glide.request.bitmap.RequestListener;
-import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.data.bitmap.Downsampler;
+import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.bitmap.Downsampler;
+import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.bitmap.RequestListener;
 
 import java.io.InputStream;
 
@@ -23,10 +24,14 @@ import java.io.InputStream;
  */
 @SuppressWarnings("unused") //public api
 public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor> {
+    private final BitmapPool bitmapPool;
+    private Downsampler downsampler = Downsampler.AT_LEAST;
+    private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
 
     RequestBuilder(Context context, ModelType model, LoadProvider<ModelType, InputStream, Bitmap> streamLoadProvider,
-            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider) {
+            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider, BitmapPool bitmapPool) {
         super(context, model, streamLoadProvider, fileDescriptorLoadProvider);
+        this.bitmapPool = bitmapPool;
     }
 
     /**
@@ -61,11 +66,12 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
      * @return This RequestBuilder
      */
     private RequestBuilder<ModelType> downsample(Downsampler downsampler) {
-        super.imageDecoder(new StreamBitmapDecoder(downsampler, Glide.get(context).getBitmapPool(),
-                DecodeFormat.PREFER_RGB_565));
+        this.downsampler = downsampler;
+        super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, decodeFormat));
         return this;
     }
 
+    @Override
     public RequestBuilder<ModelType> thumbnail(float sizeMultiplier) {
         super.thumbnail(sizeMultiplier);
         return this;
@@ -76,24 +82,42 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
         return this;
     }
 
-     public RequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
-         super.sizeMultiplier(sizeMultiplier);
-         return this;
-     }
-
-    public RequestBuilder<ModelType> imageDecoder(StreamBitmapDecoder decoder) {
-        super.imageDecoder(decoder);
-        return this;
-    }
-
-    public RequestBuilder<ModelType> videoDecoder(FileDescriptorBitmapDecoder decoder) {
-        super.videoDecoder(decoder);
+    @Override
+    public RequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
+        super.sizeMultiplier(sizeMultiplier);
         return this;
     }
 
     @Override
+    public RequestBuilder<ModelType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
+        super.imageDecoder(decoder);
+        return this;
+    }
+
+    @Override
+    public RequestBuilder<ModelType> videoDecoder(ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
+        super.videoDecoder(decoder);
+        return this;
+    }
+
+    /**
+     * Sets the preferred format for {@link Bitmap}s decoded in this request. Defaults to
+     * {@link DecodeFormat#PREFER_RGB_565}.
+     *
+     * <p>
+     *     Note - If using a {@link Transformation} that expect bitmaps to support transparency, this should always be
+     *     set to ALWAYS_ARGB_8888. RGB_565 requires fewer bytes per pixel and is generally preferable, but it does not
+     *     support transparency.
+     * </p>
+     *
+     * @see DecodeFormat
+     *
+     * @param format The format to use.
+     * @return This request builder.
+     */
     public RequestBuilder<ModelType> format(DecodeFormat format) {
-        super.format(format);
+        this.decodeFormat = format;
+        super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, format));
         return this;
     }
 

@@ -1,13 +1,12 @@
 package com.bumptech.glide.load.resource.resource;
 
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.resource.ByteArrayFetcher;
-import com.bumptech.glide.Metadata;
 import org.junit.Test;
 
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 public class ByteArrayFetcherTest {
 
@@ -19,7 +18,7 @@ public class ByteArrayFetcherTest {
         }
 
         ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes);
-        InputStream is = fetcher.loadResource(mock(Metadata.class));
+        InputStream is = fetcher.loadResource(Priority.NORMAL);
 
         int read = 0;
         byte current;

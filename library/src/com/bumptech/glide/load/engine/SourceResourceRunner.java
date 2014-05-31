@@ -1,15 +1,15 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.Metadata;
-import com.bumptech.glide.load.engine.executor.Prioritized;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.executor.Prioritized;
+import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.request.ResourceCallback;
 
 import java.io.OutputStream;
 
@@ -27,14 +27,14 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
     private Transformation<Z> transformation;
     private final ResourceEncoder<Z> encoder;
     private DiskCache diskCache;
-    private Metadata metadata;
+    private Priority priority;
     private ResourceCallback<Z> cb;
     private Resource<Z> result;
     private volatile boolean isCancelled;
 
     public SourceResourceRunner(Key key, int width, int height, ResourceFetcher<T> resourceFetcher,
             ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
-            DiskCache diskCache, Metadata metadata, ResourceCallback<Z> cb) {
+            DiskCache diskCache, Priority priority, ResourceCallback<Z> cb) {
         this.key = key;
         this.width = width;
         this.height = height;
@@ -43,7 +43,7 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
         this.transformation = transformation;
         this.encoder = encoder;
         this.diskCache = diskCache;
-        this.metadata = metadata;
+        this.priority = priority;
         this.cb = cb;
     }
 
@@ -59,7 +59,7 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
         }
 
         try {
-            T toDecode = fetcher.loadResource(metadata);
+            T toDecode = fetcher.loadResource(priority);
             if (toDecode != null) {
                 Resource<Z> decoded = decoder.decode(toDecode, width, height);
                 if (decoded != null) {
@@ -89,6 +89,6 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
 
     @Override
     public int getPriority() {
-        return metadata.getPriority().ordinal();
+        return priority.ordinal();
     }
 }

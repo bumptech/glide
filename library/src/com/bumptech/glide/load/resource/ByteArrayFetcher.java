@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource;
 
-import com.bumptech.glide.Metadata;
+import com.bumptech.glide.Priority;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ public class ByteArrayFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
-    public InputStream loadResource(Metadata metadata) throws Exception {
+    public InputStream loadResource(Priority priority) throws Exception {
         return new ByteArrayInputStream(bytes);
     }
 

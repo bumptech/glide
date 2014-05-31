@@ -47,11 +47,6 @@ public class BitmapRequestBuilder<T, Z> {
         return this;
     }
 
-    public BitmapRequestBuilder<T, Z> setDecodeFormat(DecodeFormat decodeFormat) {
-        this.decodeFormat = decodeFormat;
-        return this;
-    }
-
     public BitmapRequestBuilder<T, Z> setTarget(Target target) {
         this.target = target;
         return this;

@@ -6,20 +6,18 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.RequestCoordinator;
-import com.bumptech.glide.Metadata;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestCoordinator;
+import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.request.target.Target;
 
 import java.io.InputStream;
@@ -38,7 +36,6 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     private final Context context;
     private final Transformation<Bitmap> transformation;
     private final LoadProvider<T, Z, Bitmap> loadProvider;
-    private DecodeFormat decodeFormat;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
     private final T model;
@@ -71,7 +68,6 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
         this.animationId = builder.animationId;
         this.animation = builder.animation;
         this.requestCoordinator = builder.requestCoordinator;
-        this.decodeFormat = builder.decodeFormat;
         this.engine = builder.engine;
         this.transformation = builder.transformation;
     }
@@ -155,11 +151,10 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
 
         final String id = modelLoader.getId(model);
         final ResourceFetcher<Z> resourceFetcher = modelLoader.getResourceFetcher(model, width, height);
-        final Metadata metadata = new Metadata(priority, decodeFormat);
 
         loadedFromMemoryCache = true;
         loadStatus = engine.load(id, width, height, cacheDecoder, resourceFetcher, decoder, transformation,
-                encoder, metadata, this);
+                encoder, priority, this);
         loadedFromMemoryCache = resource != null;
     }
 

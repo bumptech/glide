@@ -6,24 +6,23 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-import com.bumptech.glide.request.bitmap.RequestListener;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.bitmap.BitmapDecoder;
+import com.bumptech.glide.load.data.bitmap.CenterCrop;
+import com.bumptech.glide.load.data.bitmap.Downsampler;
+import com.bumptech.glide.load.data.bitmap.FitCenter;
+import com.bumptech.glide.load.data.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.provider.ChildLoadProvider;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.data.bitmap.CenterCrop;
-import com.bumptech.glide.load.data.bitmap.FitCenter;
-import com.bumptech.glide.load.data.bitmap.BitmapDecoder;
-import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.data.bitmap.Downsampler;
-import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.request.bitmap.BitmapRequestBuilder;
 import com.bumptech.glide.request.MultiTypeRequestCoordinator;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
+import com.bumptech.glide.request.bitmap.BitmapRequestBuilder;
+import com.bumptech.glide.request.bitmap.RequestListener;
 import com.bumptech.glide.request.target.ImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
@@ -55,7 +54,6 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private Float thumbSizeMultiplier;
     private GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
-    private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;
     private Priority priority = null;
@@ -192,27 +190,6 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> videoDecoder(
             ResourceDecoder<VideoResourceType, Bitmap> decoder) {
         videoLoadProvider.setSourceDecoder(decoder);
-
-        return this;
-    }
-
-    /**
-     * Sets the preferred format for {@link Bitmap}s decoded in this request. Defaults to
-     * {@link DecodeFormat#PREFER_RGB_565}.
-     *
-     * <p>
-     *     Note - If using a {@link Transformation} that expect bitmaps to support transparency, this should always be
-     *     set to ALWAYS_ARGB_8888. RGB_565 requires fewer bytes per pixel and is generally preferable, but it does not
-     *     support transparency.
-     * </p>
-     *
-     * @see DecodeFormat
-     *
-     * @param format The format to use.
-     * @return This request builder.
-     */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> format(DecodeFormat format) {
-        this.decodeFormat = format;
 
         return this;
     }
@@ -387,7 +364,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         final Request result;
 
         if (priority == null) {
-            priority = Metadata.DEFAULT.getPriority();
+            priority = Priority.NORMAL;
         }
 
         if (thumbnailRequestBuilder != null) {
@@ -467,6 +444,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private <Y extends Target, Z> BitmapRequestBuilder<ModelType, Z> buildBitmapRequestForType(Y target,
             LoadProvider<ModelType, Z, Bitmap> loadProvider, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
+
         return new BitmapRequestBuilder<ModelType, Z>()
                 .setContext(context)
                 .setLoadProvider(loadProvider)
@@ -474,7 +452,6 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 .setEngine(Glide.get(context).getEngine())
                 .setModel(model)
                 .setTarget(target)
-                .setDecodeFormat(decodeFormat)
                 .setAnimation(animationId)
                 .setAnimation(animation)
                 .setRequestListener(requestListener)

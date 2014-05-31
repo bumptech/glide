@@ -1,14 +1,14 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.Metadata;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
-import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.resource.ResourceFetcher;
 
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
@@ -34,13 +34,13 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     @Override
     public <T, Z> ResourceRunner<Z> build(Key key, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
-            Transformation<Z> transformation, ResourceEncoder<Z> encoder, Metadata metadata,
+            Transformation<Z> transformation, ResourceEncoder<Z> encoder, Priority priority,
             EngineJobListener listener) {
 
         EngineJob<Z> engineJob = new EngineJob<Z>(key, memoryCache, mainHandler, referenceCounter, listener);
 
         SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(key, width, height, fetcher, decoder,
-                transformation, encoder, diskCache, metadata, engineJob);
+                transformation, encoder, diskCache, priority, engineJob);
 
         return new ResourceRunner<Z>(key, width, height, diskCache, cacheDecoder, sourceRunner, service, bgHandler,
                 engineJob);

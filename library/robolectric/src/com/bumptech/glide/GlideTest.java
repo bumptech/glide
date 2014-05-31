@@ -412,7 +412,7 @@ public class GlideTest {
     @SuppressWarnings("unchecked")
     private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) throws Exception {
         ResourceFetcher<Z> failFetcher = mock(ResourceFetcher.class);
-        when(failFetcher.loadResource(any(Metadata.class))).thenThrow(new IOException("test"));
+        when(failFetcher.loadResource(any(Priority.class))).thenThrow(new IOException("test"));
         ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
         when(failLoader.getId(any(failModel))).thenReturn("fakeId");
         when(failLoader.getResourceFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
@@ -452,7 +452,7 @@ public class GlideTest {
         StreamModelLoader<T> modelLoader = mock(StreamModelLoader.class);
         ResourceFetcher<InputStream> fetcher = mock(ResourceFetcher.class);
         try {
-            when(fetcher.loadResource(any(Metadata.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
+            when(fetcher.loadResource(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
         } catch (Exception e) { }
         when(modelLoader.getId(any(modelClass))).thenAnswer(new Answer<Object>() {
             @Override

@@ -1,8 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
-import com.bumptech.glide.Metadata;
-import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -10,6 +9,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,11 +57,11 @@ public class DefaultResourceRunnerFactoryTest {
         ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
-        Metadata metadata = mock(Metadata.class);
+        Priority priority = Priority.LOW;
 
         public ResourceRunner build() {
-            return factory.build(mock(Key.class), width, height, cacheDecoder, fetcher, decoder, transformation, encoder, metadata,
-                    listener);
+            return factory.build(mock(Key.class), width, height, cacheDecoder, fetcher, decoder, transformation,
+                    encoder, priority, listener);
         }
     }
 }

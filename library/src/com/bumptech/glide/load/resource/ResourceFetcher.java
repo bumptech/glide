@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource;
 
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.Metadata;
 
 /**
  * A base class for lazily and retrieving a resource that can be used to load an image.
@@ -21,18 +21,20 @@ public interface ResourceFetcher<T> {
      *
      * This method will only be called when the corresponding image is not in the cache.
      *
-     * @param metadata Load related metadata that the fetcher can use to adjust how it obtains it's resource.
+     * @param priority The priority with which the request should be completed.
      */
-    public T loadResource(Metadata metadata) throws Exception;
+    public T loadResource(Priority priority) throws Exception;
 
     /**
-     * A method that will be called by an {@link com.bumptech.glide.presenter.ImagePresenter} when a load is no longer
-     * relevant (because we now want to load a different image into the view). This method does not need to guarantee
-     * that any in process loads do not finish. It also may be called before a load starts or after it finishes.
+     * A method that will be called when a load is no longer relevant and has been cancelled. This method does not need
+     * to guarantee that any in process loads do not finish. It also may be called before a load starts or after it
+     * finishes.
      *
-     * The best way to use this method is to cancel any loads that have not yet started, but allow those that are in
-     * process to finish since its we typically will want to display the same image in a different view in
-     * the near future.
+     * <p>
+     *  The best way to use this method is to cancel any loads that have not yet started, but allow those that are in
+     *  process to finish since its we typically will want to display the same image in a different view in
+     *  the near future.
+     * </p>
      */
     public void cancel();
 }

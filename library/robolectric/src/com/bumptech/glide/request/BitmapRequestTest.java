@@ -7,17 +7,15 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
-import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.Metadata;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.BitmapRequest;
 import com.bumptech.glide.request.bitmap.BitmapRequestBuilder;
 import com.bumptech.glide.request.target.Target;
@@ -64,8 +62,7 @@ public class BitmapRequestTest {
                     .setLoadProvider(loadProvider)
                     .setEngine(engine)
                     .setTarget(target)
-                    .setPriority(Metadata.DEFAULT.getPriority())
-                    .setDecodeFormat(Metadata.DEFAULT.getDecodeFormat())
+                    .setPriority(Priority.NORMAL)
                     .setModel(model);
         }
     }
@@ -130,10 +127,9 @@ public class BitmapRequestTest {
 
     @Test
     public void testEngineLoadPassedCorrectMetadata() {
-        Metadata expected = new Metadata(Priority.IMMEDIATE, DecodeFormat.ALWAYS_ARGB_8888);
+        Priority expected = Priority.HIGH;
         BitmapRequest request = harness.getBuilder()
-                .setPriority(expected.getPriority())
-                .setDecodeFormat(expected.getDecodeFormat())
+                .setPriority(expected)
                 .build();
 
 
@@ -149,7 +145,7 @@ public class BitmapRequestTest {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
         when(harness.engine.load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(Metadata.class), any(ResourceCallback.class))).thenReturn(loadStatus);
+                any(ResourceEncoder.class), any(Priority.class), any(ResourceCallback.class))).thenReturn(loadStatus);
 
         BitmapRequest request = harness.getBuilder().build();
 

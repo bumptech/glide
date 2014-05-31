@@ -1,14 +1,14 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.Metadata;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.request.ResourceCallback;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -59,13 +59,13 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param fetcher
      * @param decoder
      * @param encoder
-     * @param metadata
+     * @param priority
      * @param <T> The type of data the resource will be decoded from.
      * @param <Z> The type of the resource that will be decoded.
      */
     public <T, Z> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
             ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
-            ResourceEncoder<Z> encoder, Metadata metadata, ResourceCallback<Z> cb) {
+            ResourceEncoder<Z> encoder, Priority priority, ResourceCallback<Z> cb) {
 
         Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder);
 
@@ -84,7 +84,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
 
         ResourceRunner<Z> runner = factory.build(key, width, height, cacheDecoder, fetcher, decoder, transformation,
-                encoder, metadata, this);
+                encoder, priority, this);
         runner.getJob().addCallback(cb);
         runners.put(key, runner);
         runner.queue();
