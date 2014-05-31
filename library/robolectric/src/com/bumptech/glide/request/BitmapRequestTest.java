@@ -17,7 +17,6 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.ResourceFetcher;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.BitmapRequest;
-import com.bumptech.glide.request.bitmap.BitmapRequestBuilder;
 import com.bumptech.glide.request.target.Target;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +48,13 @@ public class BitmapRequestTest {
         Object model = new Object();
         Target target = mock(Target.class);
         Context context = Robolectric.application;
+        Resource<Object> resource = mock(Resource.class);
+        RequestCoordinator requestCoordinator = null;
+        Priority priority = Priority.NORMAL;
+        int placeholderResourceId = 0;
+        Drawable placeholderDrawable = null;
+        int errorResourceId = 0;
+        Drawable errorDrawable = null;
         LoadProvider<Object, Object, Bitmap> loadProvider = mock(LoadProvider.class);
 
         public RequestHarness() {
@@ -56,14 +62,10 @@ public class BitmapRequestTest {
             when(loadProvider.getModelLoader()).thenReturn(modelLoader);
         }
 
-        public BitmapRequestBuilder<Object, Object> getBuilder() {
-            return BitmapRequestBuilder.get()
-                    .setContext(context)
-                    .setLoadProvider(loadProvider)
-                    .setEngine(engine)
-                    .setTarget(target)
-                    .setPriority(Priority.NORMAL)
-                    .setModel(model);
+        public BitmapRequest<Object, Object> getRequest() {
+            return new BitmapRequest<Object, Object>(loadProvider, model, context, priority, target, 1f,
+                    placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, null, 0, null,
+                    requestCoordinator, engine, mock(Transformation.class));
         }
     }
 
@@ -74,16 +76,16 @@ public class BitmapRequestTest {
 
     @Test
     public void testIsNotCompleteBeforeReceivingResource() {
-        BitmapRequest request = harness.getBuilder().build();
+        BitmapRequest request = harness.getRequest();
 
         assertFalse(request.isComplete());
     }
 
     @Test
     public void testIsCompleteAfterReceivingResource() {
-        BitmapRequest request = harness.getBuilder().build();
+        BitmapRequest request = harness.getRequest();
 
-        request.onResourceReady(mock(Resource.class));
+        request.onResourceReady(harness.resource);
 
         assertTrue(request.isComplete());
     }
@@ -101,25 +103,24 @@ public class BitmapRequestTest {
             }
         }).when(requestCoordinator).canSetImage(any(Request.class));
 
-        BitmapRequest request = harness.getBuilder()
-                .setRequestCoordinator(requestCoordinator)
-                .build();
+        harness.requestCoordinator = requestCoordinator;
+        BitmapRequest request = harness.getRequest();
 
-        request.onResourceReady(mock(Resource.class));
+        request.onResourceReady(harness.resource);
 
         verify(requestCoordinator).canSetImage(eq(request));
     }
 
     @Test
     public void testIsNotFailedWithoutException() {
-        BitmapRequest request = harness.getBuilder().build();
+        BitmapRequest request = harness.getRequest();
 
         assertFalse(request.isFailed());
     }
 
     @Test
     public void testIsFailedAfterException() {
-        BitmapRequest request = harness.getBuilder().build();
+        BitmapRequest request = harness.getRequest();
 
         request.onException(new Exception("test"));
         assertTrue(request.isFailed());
@@ -128,9 +129,8 @@ public class BitmapRequestTest {
     @Test
     public void testEngineLoadPassedCorrectMetadata() {
         Priority expected = Priority.HIGH;
-        BitmapRequest request = harness.getBuilder()
-                .setPriority(expected)
-                .build();
+        harness.priority = expected;
+        BitmapRequest request = harness.getRequest();
 
 
         request.onSizeReady(100, 100);
@@ -147,7 +147,7 @@ public class BitmapRequestTest {
                 any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
                 any(ResourceEncoder.class), any(Priority.class), any(ResourceCallback.class))).thenReturn(loadStatus);
 
-        BitmapRequest request = harness.getBuilder().build();
+        BitmapRequest request = harness.getRequest();
 
         request.onSizeReady(100, 100);
         request.cancel();
@@ -157,14 +157,12 @@ public class BitmapRequestTest {
 
     @Test
     public void testResourceIsRecycledOnClear() {
-        Resource<Bitmap> resource = mock(Resource.class);
+        BitmapRequest request = harness.getRequest();
 
-        BitmapRequest request = harness.getBuilder().build();
-
-        request.onResourceReady(resource);
+        request.onResourceReady(harness.resource);
         request.clear();
 
-        verify(resource).release();
+        verify(harness.resource).release();
     }
 
     @Test
@@ -175,11 +173,10 @@ public class BitmapRequestTest {
         Context context = mockContextToReturn(expectedId, expected);
         MockTarget target = new MockTarget();
 
-        BitmapRequest request = harness.getBuilder()
-                .setContext(context)
-                .setPlaceholderResource(expectedId)
-                .setTarget(target)
-                .build();
+        harness.context = context;
+        harness.placeholderResourceId = expectedId;
+        harness.target = target;
+        BitmapRequest request = harness.getRequest();
         request.run();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -191,10 +188,9 @@ public class BitmapRequestTest {
 
         MockTarget target = new MockTarget();
 
-        BitmapRequest request = harness.getBuilder()
-                .setPlaceholderDrawable(expected)
-                .setTarget(target)
-                .build();
+        harness.placeholderDrawable = expected;
+        harness.target = target;
+        BitmapRequest request = harness.getRequest();
         request.run();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -208,11 +204,10 @@ public class BitmapRequestTest {
         Context context = mockContextToReturn(expectedId, expected);
         MockTarget target = new MockTarget();
 
-        BitmapRequest request = harness.getBuilder()
-                .setContext(context)
-                .setErrorResource(expectedId)
-                .setTarget(target)
-                .build();
+        harness.context = context;
+        harness.errorResourceId = expectedId;
+        harness.target = target;
+        BitmapRequest request = harness.getRequest();
 
         request.onException(null);
 
@@ -225,10 +220,9 @@ public class BitmapRequestTest {
 
         MockTarget target = new MockTarget();
 
-        BitmapRequest request = harness.getBuilder()
-                .setErrorDrawable(expected)
-                .setTarget(target)
-                .build();
+        harness.errorDrawable = expected;
+        harness.target = target;
+        BitmapRequest request = harness.getRequest();
 
         request.onException(null);
 
@@ -239,14 +233,12 @@ public class BitmapRequestTest {
     public void setTestPlaceholderDrawableSetOnNullModel() {
         Drawable placeholder = new ColorDrawable(Color.RED);
 
-
         MockTarget target = new MockTarget();
 
-        BitmapRequest request = harness.getBuilder()
-                .setPlaceholderDrawable(placeholder)
-                .setTarget(target)
-                .setModel(null)
-                .build();
+        harness.placeholderDrawable = placeholder;
+        harness.target = target;
+        harness.model = null;
+        BitmapRequest request = harness.getRequest();
 
         request.run();
 
@@ -260,12 +252,11 @@ public class BitmapRequestTest {
 
         MockTarget target = new MockTarget();
 
-        BitmapRequest request = harness.getBuilder()
-                .setPlaceholderDrawable(placeholder)
-                .setErrorDrawable(errorPlaceholder)
-                .setTarget(target)
-                .setModel(null)
-                .build();
+        harness.placeholderDrawable = placeholder;
+        harness.errorDrawable = errorPlaceholder;
+        harness.target = target;
+        harness.model = null;
+        BitmapRequest request = harness.getRequest();
 
         request.run();
 

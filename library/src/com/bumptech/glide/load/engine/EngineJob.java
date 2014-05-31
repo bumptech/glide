@@ -6,8 +6,8 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.request.ResourceCallback;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @param <Z> The type of the resource that will be decoded.
@@ -17,7 +17,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
     private Key key;
     private MemoryCache cache;
     private Handler mainHandler;
-    private Set<ResourceCallback<Z>> cbs = new HashSet<ResourceCallback<Z>>();
+    private List<ResourceCallback<Z>> cbs = new ArrayList<ResourceCallback<Z>>();
     private boolean isCancelled;
     private boolean isComplete;
 

@@ -20,6 +20,7 @@ public class EngineKey implements Key {
     private final Transformation transformation;
     private final ResourceEncoder encoder;
     private String stringKey;
+    private int hashCode;
 
     public EngineKey(String id, int width, int height, ResourceDecoder cacheDecoder, ResourceDecoder decoder,
             Transformation transformation, ResourceEncoder encoder) {
@@ -45,43 +46,39 @@ public class EngineKey implements Key {
 
         if (!id.equals(engineKey.id)) {
             return false;
-        }
-        if (height != engineKey.height) {
+        } else if (height != engineKey.height) {
             return false;
-        }
-        if (width != engineKey.width) {
+        } else if (width != engineKey.width) {
             return false;
-        }
-        if (!transformation.getId().equals(engineKey.transformation
+        } else  if (!transformation.getId().equals(engineKey.transformation
                 .getId())) {
             return false;
-        }
-        if (!decoder.getId().equals(engineKey.decoder
+        } else if (!decoder.getId().equals(engineKey.decoder
                 .getId())) {
             return false;
-        }
-        if (!cacheDecoder.getId().equals(engineKey.cacheDecoder
+        } else if (!cacheDecoder.getId().equals(engineKey.cacheDecoder
                 .getId())) {
             return false;
-        }
-        if (!encoder.getId().equals(engineKey.encoder
+        } else if (!encoder.getId().equals(engineKey.encoder
                 .getId())) {
             return false;
+        } else {
+            return true;
         }
-
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + width;
-        result = 31 * result + height;
-        result = 31 * result + cacheDecoder.getId().hashCode();
-        result = 31 * result + decoder.getId().hashCode();
-        result = 31 * result + transformation.getId().hashCode();
-        result = 31 * result + encoder.getId().hashCode();
-        return result;
+        if (hashCode == 0) {
+            hashCode = id.hashCode();
+            hashCode = 31 * hashCode + width;
+            hashCode = 31 * hashCode + height;
+            hashCode = 31 * hashCode + cacheDecoder.getId().hashCode();
+            hashCode = 31 * hashCode + decoder.getId().hashCode();
+            hashCode = 31 * hashCode + transformation.getId().hashCode();
+            hashCode = 31 * hashCode + encoder.getId().hashCode();
+        }
+        return hashCode;
     }
 
     @Override

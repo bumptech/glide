@@ -21,7 +21,7 @@ import com.bumptech.glide.request.MultiTypeRequestCoordinator;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
-import com.bumptech.glide.request.bitmap.BitmapRequestBuilder;
+import com.bumptech.glide.request.bitmap.BitmapRequest;
 import com.bumptech.glide.request.bitmap.RequestListener;
 import com.bumptech.glide.request.target.ImageViewTarget;
 import com.bumptech.glide.request.target.Target;
@@ -420,50 +420,29 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
     private <Y extends Target> Request buildBitmapRequest(Y target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         if (model == null) {
-            return buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, null).build();
+            return buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, null);
         }
         if (imageLoadProvider == null) {
-            return buildBitmapRequestForType(target, videoLoadProvider, sizeMultiplier, priority, requestCoordinator)
-                    .build();
+            return buildBitmapRequestForType(target, videoLoadProvider, sizeMultiplier, priority, requestCoordinator);
         } else if (videoLoadProvider == null) {
-            return buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, requestCoordinator)
-                    .build();
+            return buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, requestCoordinator);
         } else {
             MultiTypeRequestCoordinator typeCoordinator = new MultiTypeRequestCoordinator(requestCoordinator);
             Request imageRequest =
-                    buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, typeCoordinator)
-                            .build();
+                    buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, typeCoordinator);
             Request videoRequest =
-                    buildBitmapRequestForType(target, videoLoadProvider, sizeMultiplier, priority, typeCoordinator)
-                            .build();
+                    buildBitmapRequestForType(target, videoLoadProvider, sizeMultiplier, priority, typeCoordinator);
             typeCoordinator.setRequests(imageRequest, videoRequest);
             return typeCoordinator;
         }
     }
 
-    private <Y extends Target, Z> BitmapRequestBuilder<ModelType, Z> buildBitmapRequestForType(Y target,
+    private <Y extends Target, Z> Request buildBitmapRequestForType(Y target,
             LoadProvider<ModelType, Z, Bitmap> loadProvider, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
-
-        final BitmapRequestBuilder<ModelType, Z> builder = BitmapRequestBuilder.get();
-        return builder
-                .setContext(context)
-                .setLoadProvider(loadProvider)
-                .setPriority(priority)
-                .setEngine(Glide.get(context).getEngine())
-                .setModel(model)
-                .setTarget(target)
-                .setAnimation(animationId)
-                .setAnimation(animation)
-                .setRequestListener(requestListener)
-                .setPlaceholderResource(placeholderId)
-                .setPlaceholderDrawable(placeholderDrawable)
-                .setErrorResource(errorId)
-                .setErrorDrawable(errorPlaceholder)
-                .setSizeMultiplier(sizeMultiplier)
-                .setPriority(priority)
-                .setTransformation(getFinalTransformation())
-                .setRequestCoordinator(requestCoordinator);
+        return new BitmapRequest<ModelType, Z>(loadProvider, model, context, priority, target, sizeMultiplier,
+                placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener, animationId, animation,
+                requestCoordinator, Glide.get(context).getEngine(), getFinalTransformation());
     }
 
     @SuppressWarnings("unchecked")

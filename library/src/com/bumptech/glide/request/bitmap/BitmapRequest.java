@@ -53,23 +53,26 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     private Resource<Bitmap> resource;
     private Engine.LoadStatus loadStatus;
 
-    public BitmapRequest(BitmapRequestBuilder<T, Z> builder) {
-        this.loadProvider = builder.loadProvider;
-        this.model = builder.model;
-        this.context = builder.context.getApplicationContext();
-        this.priority = builder.priority;
-        this.target = builder.target;
-        this.sizeMultiplier = builder.sizeMultiplier;
-        this.placeholderDrawable = builder.placeholderDrawable;
-        this.placeholderResourceId = builder.placeholderResourceId;
-        this.errorDrawable = builder.errorDrawable;
-        this.errorResourceId = builder.errorResourceId;
-        this.requestListener = builder.requestListener;
-        this.animationId = builder.animationId;
-        this.animation = builder.animation;
-        this.requestCoordinator = builder.requestCoordinator;
-        this.engine = builder.engine;
-        this.transformation = builder.transformation;
+    public BitmapRequest(LoadProvider<T, Z, Bitmap> loadProvider, T model, Context context, Priority priority,
+            Target target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
+            Drawable errorDrawable, int errorResourceId, RequestListener<T> requestListener, int animationId,
+            Animation animation, RequestCoordinator requestCoordinator, Engine engine, Transformation<Bitmap> transformation) {
+        this.loadProvider = loadProvider;
+        this.model = model;
+        this.context = context;
+        this.priority = priority;
+        this.target = target;
+        this.sizeMultiplier = sizeMultiplier;
+        this.placeholderDrawable = placeholderDrawable;
+        this.placeholderResourceId = placeholderResourceId;
+        this.errorDrawable = errorDrawable;
+        this.errorResourceId = errorResourceId;
+        this.requestListener = requestListener;
+        this.animationId = animationId;
+        this.animation = animation;
+        this.requestCoordinator = requestCoordinator;
+        this.engine = engine;
+        this.transformation = transformation;
     }
 
     @Override
