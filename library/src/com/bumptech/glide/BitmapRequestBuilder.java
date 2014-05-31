@@ -8,7 +8,9 @@ import android.view.animation.Animation;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.bitmap.CenterCrop;
 import com.bumptech.glide.load.data.bitmap.Downsampler;
+import com.bumptech.glide.load.data.bitmap.FitCenter;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.provider.LoadProvider;
@@ -23,12 +25,14 @@ import java.io.InputStream;
  * @param <ModelType> The type of model that will be loaded into the target.
  */
 @SuppressWarnings("unused") //public api
-public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor> {
+public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor,
+        Bitmap> {
     private final BitmapPool bitmapPool;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
 
-    RequestBuilder(Context context, ModelType model, LoadProvider<ModelType, InputStream, Bitmap> streamLoadProvider,
+    BitmapRequestBuilder(Context context, ModelType model,
+            LoadProvider<ModelType, InputStream, Bitmap> streamLoadProvider,
             LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider, BitmapPool bitmapPool) {
         super(context, model, streamLoadProvider, fileDescriptorLoadProvider);
         this.bitmapPool = bitmapPool;
@@ -41,7 +45,7 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
      *
      * @return This RequestBuilder
      */
-    public RequestBuilder<ModelType> approximate() {
+    public BitmapRequestBuilder<ModelType> approximate() {
         return downsample(Downsampler.AT_LEAST);
     }
 
@@ -52,7 +56,7 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
      *
      * @return This RequestBuilder
      */
-    public RequestBuilder<ModelType> asIs() {
+    public BitmapRequestBuilder<ModelType> asIs() {
         return downsample(Downsampler.NONE);
     }
 
@@ -65,37 +69,37 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
      * @param downsampler The downsampler
      * @return This RequestBuilder
      */
-    private RequestBuilder<ModelType> downsample(Downsampler downsampler) {
+    private BitmapRequestBuilder<ModelType> downsample(Downsampler downsampler) {
         this.downsampler = downsampler;
         super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, decodeFormat));
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> thumbnail(float sizeMultiplier) {
+    public BitmapRequestBuilder<ModelType> thumbnail(float sizeMultiplier) {
         super.thumbnail(sizeMultiplier);
         return this;
     }
 
-    public RequestBuilder<ModelType> thumbnail(RequestBuilder<ModelType> thumbnailRequest) {
+    public BitmapRequestBuilder<ModelType> thumbnail(BitmapRequestBuilder<ModelType> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
+    public BitmapRequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
         super.sizeMultiplier(sizeMultiplier);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
+    public BitmapRequestBuilder<ModelType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
         super.imageDecoder(decoder);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> videoDecoder(ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
+    public BitmapRequestBuilder<ModelType> videoDecoder(ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
         super.videoDecoder(decoder);
         return this;
     }
@@ -115,74 +119,80 @@ public class RequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, 
      * @param format The format to use.
      * @return This request builder.
      */
-    public RequestBuilder<ModelType> format(DecodeFormat format) {
+    public BitmapRequestBuilder<ModelType> format(DecodeFormat format) {
         this.decodeFormat = format;
         super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, format));
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> priority(Priority priority) {
+    public BitmapRequestBuilder<ModelType> priority(Priority priority) {
         super.priority(priority);
         return this;
     }
 
-    @Override
-    public RequestBuilder<ModelType> centerCrop() {
-        super.centerCrop();
-        return this;
+    /**
+     * Transform images using {@link CenterCrop}.
+     *
+     * @return This RequestBuilder
+     */
+    public BitmapRequestBuilder<ModelType> centerCrop() {
+        return transform(new CenterCrop(Glide.get(context).getBitmapPool()));
+    }
+
+    /**
+     * Transform images using {@link FitCenter}.
+     *
+     * @return This RequestBuilder
+     */
+    public BitmapRequestBuilder<ModelType> fitCenter() {
+        return transform(new FitCenter(Glide.get(context).getBitmapPool()));
     }
 
     @Override
-    public RequestBuilder<ModelType> fitCenter() {
-        super.fitCenter();
-        return this;
-    }
-
-    @Override
-    public RequestBuilder<ModelType> transform(Transformation<Bitmap> transformation) {
+    public BitmapRequestBuilder<ModelType> transform(Transformation<Bitmap> transformation) {
         super.transform(transformation);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> animate(int animationId) {
+    public BitmapRequestBuilder<ModelType> animate(int animationId) {
         super.animate(animationId);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> animate(Animation animation) {
+    public BitmapRequestBuilder<ModelType> animate(Animation animation) {
         super.animate(animation);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> placeholder(int resourceId) {
+    public BitmapRequestBuilder<ModelType> placeholder(int resourceId) {
         super.placeholder(resourceId);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> placeholder(Drawable drawable) {
+    public BitmapRequestBuilder<ModelType> placeholder(Drawable drawable) {
         super.placeholder(drawable);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> error(int resourceId) {
+    public BitmapRequestBuilder<ModelType> error(int resourceId) {
         super.error(resourceId);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> error(Drawable drawable) {
+    public BitmapRequestBuilder<ModelType> error(Drawable drawable) {
         super.error(drawable);
         return this;
     }
 
     @Override
-    public RequestBuilder<ModelType> listener(RequestListener<ModelType> requestListener) {
+    public BitmapRequestBuilder<ModelType> listener(RequestListener<ModelType> requestListener) {
         super.listener(requestListener);
         return this;
     }

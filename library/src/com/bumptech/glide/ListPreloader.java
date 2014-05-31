@@ -82,9 +82,9 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
      * target and context will be provided by the preloader.
      *
      * @param item The model to load.
-     * @return A non null {@link RequestBuilder}.
+     * @return A non null {@link BitmapRequestBuilder}.
      */
-    protected abstract RequestBuilder getRequestBuilder(T item);
+    protected abstract BitmapRequestBuilder getRequestBuilder(T item);
 
     private void preload(int start, boolean increasing) {
         if (isIncreasing != increasing) {

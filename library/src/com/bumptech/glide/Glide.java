@@ -44,7 +44,7 @@ import java.net.URL;
 import java.util.UUID;
 
 /**
- * A singleton to present a simple static interface for building requests with {@link RequestBuilder} and maintaining
+ * A singleton to present a simple static interface for building requests with {@link BitmapRequestBuilder} and maintaining
  * an {@link Engine}, {@link BitmapPool}, {@link DiskCache} and {@link MemoryCache}.
  *
  * <p>
@@ -398,7 +398,7 @@ public class Glide {
     }
 
     /**
-     * A {@link RequestBuilder} builder that returns a request for a model that represents an image.
+     * A {@link BitmapRequestBuilder} builder that returns a request for a model that represents an image.
      */
     public static class ModelRequest {
         private final Context context;
@@ -457,10 +457,10 @@ public class Glide {
          *
          * @param string The string representing the image. Must be either a path, or a uri handled by
          *      {@link StreamUriLoader}
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
          * into.
          */
-        public RequestBuilder<String> load(String string) {
+        public BitmapRequestBuilder<String> load(String string) {
             return loadGeneric(string);
         }
 
@@ -471,10 +471,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
          * into.
          */
-        public RequestBuilder<Uri> load(Uri uri) {
+        public BitmapRequestBuilder<Uri> load(Uri uri) {
             return loadGeneric(uri);
         }
 
@@ -486,10 +486,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param file The File containing the image
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
          * into.
          */
-        public RequestBuilder<File> load(File file) {
+        public BitmapRequestBuilder<File> load(File file) {
             return loadGeneric(file);
         }
 
@@ -501,10 +501,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param resourceId the id of the resource containing the image
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
          * into.
          */
-        public RequestBuilder<Integer> load(Integer resourceId) {
+        public BitmapRequestBuilder<Integer> load(Integer resourceId) {
             return loadGeneric(resourceId);
         }
 
@@ -514,11 +514,11 @@ public class Glide {
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
          * into.
          */
         @SuppressWarnings("unused")
-        public <T> RequestBuilder<T> loadFromImage(T model) {
+        public <T> BitmapRequestBuilder<T> loadFromImage(T model) {
             return loadGeneric(model);
         }
 
@@ -530,10 +530,10 @@ public class Glide {
          * @see #using(StreamModelLoader)
          *
          * @param url The URL representing the image.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the model
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
          * into.
          */
-        public RequestBuilder<URL> loadFromImage(URL url) {
+        public BitmapRequestBuilder<URL> loadFromImage(URL url) {
             return loadGeneric(url);
         }
 
@@ -545,10 +545,10 @@ public class Glide {
          * @param model The data to load.
          * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
          *           (url, filepath etc). If there is no suitable id, use {@link #loadFromImage(byte[])} instaed.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
          * into.
          */
-        public RequestBuilder<byte[]> loadFromImage(byte[] model, final String id) {
+        public BitmapRequestBuilder<byte[]> loadFromImage(byte[] model, final String id) {
             StreamByteArrayLoader loader = new StreamByteArrayLoader() {
                 @Override
                 public String getId(byte[] model) {
@@ -559,7 +559,7 @@ public class Glide {
             LoadProvider<byte[], InputStream, Bitmap> loadProvider =
                     new FixedLoadProvider<byte[], InputStream, Bitmap>(loader, streamDataProvider);
 
-            return new RequestBuilder<byte[]>(context, model, loadProvider, null, bitmapPool);
+            return new BitmapRequestBuilder<byte[]>(context, model, loadProvider, null, bitmapPool);
         }
 
         /**
@@ -567,10 +567,10 @@ public class Glide {
          * simple id that represents the given data.
          *
          * @param model the data to load.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
          * into.
          */
-        public RequestBuilder<byte[]> loadFromImage(byte[] model) {
+        public BitmapRequestBuilder<byte[]> loadFromImage(byte[] model) {
             return loadFromImage(model, UUID.randomUUID()
                     .toString());
         }
@@ -581,11 +581,11 @@ public class Glide {
          *
          * @param model The model to load.
          * @param <T> The type of the model to load.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
          * into.
          */
         @SuppressWarnings("unused")
-        public <T> RequestBuilder<T> loadFromVideo(T model) {
+        public <T> BitmapRequestBuilder<T> loadFromVideo(T model) {
             return loadGeneric(model);
         }
 
@@ -596,14 +596,14 @@ public class Glide {
          *
          * @param model The model the load.
          * @param <T> The type of the model to load.
-         * @return A {@link RequestBuilder} to set options for the load and ultimately the target to load the image
+         * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
          * into.
          */
-        public <T> RequestBuilder<T> load(T model) {
+        public <T> BitmapRequestBuilder<T> load(T model) {
             return loadGeneric(model);
         }
 
-        private <T> RequestBuilder<T> loadGeneric(T model) {
+        private <T> BitmapRequestBuilder<T> loadGeneric(T model) {
             LoadProvider<T, InputStream, Bitmap> streamLoadProvider = null;
             ModelLoader<T, InputStream> streamModelLoader = buildStreamModelLoader(model, context);
             if (streamModelLoader != null) {
@@ -618,7 +618,7 @@ public class Glide {
                         new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap>(fileDescriptorModelLoader,
                                 fileDescriptorDataProvider);
             }
-            return new RequestBuilder<T>(context, model, streamLoadProvider, fileDescriptorLoadProvider, bitmapPool);
+            return new BitmapRequestBuilder<T>(context, model, streamLoadProvider, fileDescriptorLoadProvider, bitmapPool);
         }
     }
 
@@ -642,8 +642,8 @@ public class Glide {
             this.bitmapPool = bitmapPool;
         }
 
-        public RequestBuilder<T> loadFromVideo(T model) {
-            return new RequestBuilder<T>(context, model, null,
+        public BitmapRequestBuilder<T> loadFromVideo(T model) {
+            return new BitmapRequestBuilder<T>(context, model, null,
                     new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap>(loader, dataLoadProvider), bitmapPool);
         }
     }
@@ -668,8 +668,8 @@ public class Glide {
             this.bitmapPool = bitmapPool;
         }
 
-        public RequestBuilder<T> load(T model) {
-            return new RequestBuilder<T>(context, model,
+        public BitmapRequestBuilder<T> load(T model) {
+            return new BitmapRequestBuilder<T>(context, model,
                     new FixedLoadProvider<T, InputStream, Bitmap>(loader, dataLoadProvider), null, bitmapPool);
         }
     }

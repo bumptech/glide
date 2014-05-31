@@ -1,7 +1,6 @@
 package com.bumptech.glide.request.bitmap;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.animation.Animation;
@@ -23,24 +22,25 @@ import com.bumptech.glide.request.target.Target;
 import java.io.InputStream;
 
 /**
- * A {@link Request} that loads an {@link Bitmap} into a given {@link Target}.
+ * A {@link com.bumptech.glide.request.Request} that loads a {@link Resource} into a given {@link Target}.
  *
- * @param <A> The type of the model that the {@link Bitmap} will be loaded from.
- * @param <T> The type of the resource that the {@link Bitmap} will be loaded from.
+ * @param <A> The type of the model that the resource will be loaded from.
+ * @param <T> The type of the data that the resource will be loaded from.
+ * @param <Z> The type of the resource that will be loaded.
  */
-public class BitmapRequest<A, T> implements Request, Target.SizeReadyCallback, ResourceCallback<Bitmap> {
-    private static final String TAG = "BitmapRequest";
+public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallback, ResourceCallback<Z> {
+    private static final String TAG = "Request";
 
     private final int placeholderResourceId;
     private final int errorResourceId;
     private final Context context;
-    private final Transformation<Bitmap> transformation;
-    private final LoadProvider<A, T, Bitmap> loadProvider;
+    private final Transformation<Z> transformation;
+    private final LoadProvider<A, T, Z> loadProvider;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
     private final A model;
     private Priority priority;
-    private final Target<Bitmap> target;
+    private final Target<Z> target;
     private final RequestListener<A> requestListener;
     private final float sizeMultiplier;
     private final Engine engine;
@@ -50,14 +50,14 @@ public class BitmapRequest<A, T> implements Request, Target.SizeReadyCallback, R
     private boolean isCancelled;
     private boolean isError;
     private boolean loadedFromMemoryCache;
-    private Resource<Bitmap> resource;
+    private Resource<Z> resource;
     private Engine.LoadStatus loadStatus;
 
-    public BitmapRequest(LoadProvider<A, T, Bitmap> loadProvider, A model, Context context, Priority priority,
-            Target<Bitmap> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
+    public GenericRequest(LoadProvider<A, T, Z> loadProvider, A model, Context context, Priority priority,
+            Target<Z> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
             Drawable errorDrawable, int errorResourceId, RequestListener<A> requestListener, int animationId,
             Animation animation, RequestCoordinator requestCoordinator, Engine engine,
-            Transformation<Bitmap> transformation) {
+            Transformation<Z> transformation) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -148,9 +148,9 @@ public class BitmapRequest<A, T> implements Request, Target.SizeReadyCallback, R
 
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
-        ResourceDecoder<InputStream, Bitmap> cacheDecoder = loadProvider.getCacheDecoder();
-        ResourceDecoder<T, Bitmap> decoder = loadProvider.getSourceDecoder();
-        ResourceEncoder <Bitmap> encoder = loadProvider.getEncoder();
+        ResourceDecoder<InputStream, Z> cacheDecoder = loadProvider.getCacheDecoder();
+        ResourceDecoder<T, Z> decoder = loadProvider.getSourceDecoder();
+        ResourceEncoder <Z> encoder = loadProvider.getEncoder();
         ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
 
         final String id = modelLoader.getId(model);
@@ -175,7 +175,7 @@ public class BitmapRequest<A, T> implements Request, Target.SizeReadyCallback, R
     }
 
     @Override
-    public void onResourceReady(Resource<Bitmap> resource) {
+    public void onResourceReady(Resource<Z> resource) {
         if (!canSetImage()) {
             resource.release();
             return;

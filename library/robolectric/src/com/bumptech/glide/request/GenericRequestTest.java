@@ -2,7 +2,6 @@ package com.bumptech.glide.request;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -16,7 +15,7 @@ import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.ResourceFetcher;
 import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.request.bitmap.BitmapRequest;
+import com.bumptech.glide.request.bitmap.GenericRequest;
 import com.bumptech.glide.request.target.Target;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class BitmapRequestTest {
+public class GenericRequestTest {
     private RequestHarness harness;
 
     @SuppressWarnings("unchecked")
@@ -55,15 +54,15 @@ public class BitmapRequestTest {
         Drawable placeholderDrawable = null;
         int errorResourceId = 0;
         Drawable errorDrawable = null;
-        LoadProvider<Object, Object, Bitmap> loadProvider = mock(LoadProvider.class);
+        LoadProvider<Object, Object, Object> loadProvider = mock(LoadProvider.class);
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
             when(loadProvider.getModelLoader()).thenReturn(modelLoader);
         }
 
-        public BitmapRequest<Object, Object> getRequest() {
-            return new BitmapRequest<Object, Object>(loadProvider, model, context, priority, target, 1f,
+        public GenericRequest<Object, Object, Object> getRequest() {
+            return new GenericRequest<Object, Object, Object>(loadProvider, model, context, priority, target, 1f,
                     placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, null, 0, null,
                     requestCoordinator, engine, mock(Transformation.class));
         }
@@ -76,14 +75,14 @@ public class BitmapRequestTest {
 
     @Test
     public void testIsNotCompleteBeforeReceivingResource() {
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         assertFalse(request.isComplete());
     }
 
     @Test
     public void testIsCompleteAfterReceivingResource() {
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
 
@@ -96,14 +95,14 @@ public class BitmapRequestTest {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                Request request = (Request) invocation.getArguments()[0];
+                com.bumptech.glide.request.Request request = (com.bumptech.glide.request.Request) invocation.getArguments()[0];
                 assertFalse(request.isComplete());
                 return true;
             }
-        }).when(requestCoordinator).canSetImage(any(Request.class));
+        }).when(requestCoordinator).canSetImage(any(com.bumptech.glide.request.Request.class));
 
         harness.requestCoordinator = requestCoordinator;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
 
@@ -112,14 +111,14 @@ public class BitmapRequestTest {
 
     @Test
     public void testIsNotFailedWithoutException() {
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         assertFalse(request.isFailed());
     }
 
     @Test
     public void testIsFailedAfterException() {
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.onException(new Exception("test"));
         assertTrue(request.isFailed());
@@ -129,7 +128,7 @@ public class BitmapRequestTest {
     public void testEngineLoadPassedCorrectMetadata() {
         Priority expected = Priority.HIGH;
         harness.priority = expected;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
 
         request.onSizeReady(100, 100);
@@ -146,7 +145,7 @@ public class BitmapRequestTest {
                 any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
                 any(ResourceEncoder.class), any(Priority.class), any(ResourceCallback.class))).thenReturn(loadStatus);
 
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.onSizeReady(100, 100);
         request.cancel();
@@ -156,7 +155,7 @@ public class BitmapRequestTest {
 
     @Test
     public void testResourceIsRecycledOnClear() {
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
         request.clear();
@@ -175,7 +174,7 @@ public class BitmapRequestTest {
         harness.context = context;
         harness.placeholderResourceId = expectedId;
         harness.target = target;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
         request.run();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -189,7 +188,7 @@ public class BitmapRequestTest {
 
         harness.placeholderDrawable = expected;
         harness.target = target;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
         request.run();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -206,7 +205,7 @@ public class BitmapRequestTest {
         harness.context = context;
         harness.errorResourceId = expectedId;
         harness.target = target;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.onException(null);
 
@@ -221,7 +220,7 @@ public class BitmapRequestTest {
 
         harness.errorDrawable = expected;
         harness.target = target;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.onException(null);
 
@@ -237,7 +236,7 @@ public class BitmapRequestTest {
         harness.placeholderDrawable = placeholder;
         harness.target = target;
         harness.model = null;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.run();
 
@@ -255,7 +254,7 @@ public class BitmapRequestTest {
         harness.errorDrawable = errorPlaceholder;
         harness.target = target;
         harness.model = null;
-        BitmapRequest request = harness.getRequest();
+        GenericRequest request = harness.getRequest();
 
         request.run();
 
@@ -295,7 +294,7 @@ public class BitmapRequestTest {
         }
 
         @Override
-        public void setRequest(Request request) {
+        public void setRequest(com.bumptech.glide.request.Request request) {
         }
 
         @Override

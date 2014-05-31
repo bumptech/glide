@@ -55,10 +55,10 @@ public class ListPreloaderTest {
             }
 
             @Override
-            protected RequestBuilder getRequestBuilder(Object item) {
+            protected BitmapRequestBuilder getRequestBuilder(Object item) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition++;
-                return mock(RequestBuilder.class);
+                return mock(BitmapRequestBuilder.class);
             }
         };
 
@@ -110,10 +110,10 @@ public class ListPreloaderTest {
             }
 
             @Override
-            protected RequestBuilder getRequestBuilder(Object item) {
+            protected BitmapRequestBuilder getRequestBuilder(Object item) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition--;
-                return mock(RequestBuilder.class);
+                return mock(BitmapRequestBuilder.class);
             }
         };
 
@@ -221,7 +221,7 @@ public class ListPreloaderTest {
             }
 
             @Override
-            protected RequestBuilder getRequestBuilder(Object item) {
+            protected BitmapRequestBuilder getRequestBuilder(Object item) {
                 loadedObjects.add(item);
                 return super.getRequestBuilder(item);
             }
@@ -254,8 +254,8 @@ public class ListPreloaderTest {
         }
 
         @Override
-        protected RequestBuilder getRequestBuilder(Object item) {
-            return mock(RequestBuilder.class);
+        protected BitmapRequestBuilder getRequestBuilder(Object item) {
+            return mock(BitmapRequestBuilder.class);
         }
     }
 }

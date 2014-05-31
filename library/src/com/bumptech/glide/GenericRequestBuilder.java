@@ -3,27 +3,22 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.bitmap.BitmapDecoder;
-import com.bumptech.glide.load.data.bitmap.CenterCrop;
 import com.bumptech.glide.load.data.bitmap.Downsampler;
-import com.bumptech.glide.load.data.bitmap.FitCenter;
 import com.bumptech.glide.load.data.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.MultiTypeRequestCoordinator;
-import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
-import com.bumptech.glide.request.bitmap.BitmapRequest;
+import com.bumptech.glide.request.bitmap.GenericRequest;
 import com.bumptech.glide.request.bitmap.RequestListener;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
@@ -35,36 +30,37 @@ import java.util.List;
  * decode those resources into bitmaps.
  *
  * @param <ModelType> The type of model representing the image or video.
- * @param <ImageResourceType> The resource type that the image {@link ModelLoader} will provide that can be decoded
- *                           by the image {@link BitmapDecoder}.
- * @param <VideoResourceType> The resource type that the video {@link ModelLoader} will provide that can be decoded
- *                           by the video {@link BitmapDecoder}.
+ * @param <ImageDataType> The data type that the image {@link ModelLoader} will provide that can be decoded by the image
+ *      {@link BitmapDecoder}.
+ * @param <VideoDataType> The data type that the video {@link ModelLoader} will provide that can be decoded by the video
+ *      {@link BitmapDecoder}.
+ * @param <ResourceType> The type of the resource that will be loaded.
  */
-public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> {
+public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> {
     protected final Context context;
-    private final List<Transformation<Bitmap>> transformations = new ArrayList<Transformation<Bitmap>>();
+    private final List<Transformation<ResourceType>> transformations = new ArrayList<Transformation<ResourceType>>();
     private final ModelType model;
-    private final ChildLoadProvider<ModelType, ImageResourceType, Bitmap> imageLoadProvider;
-    private final ChildLoadProvider<ModelType, VideoResourceType, Bitmap> videoLoadProvider;
+    private final ChildLoadProvider<ModelType, ImageDataType, ResourceType> imageLoadProvider;
+    private final ChildLoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider;
     private int animationId;
     private Animation animation;
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType> requestListener;
     private Float thumbSizeMultiplier;
-    private GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequestBuilder;
+    private GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;
     private Priority priority = null;
 
     public GenericRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, ImageResourceType, Bitmap> imageLoadProvider,
-            LoadProvider<ModelType, VideoResourceType, Bitmap> videoLoadProvider) {
+            LoadProvider<ModelType, ImageDataType, ResourceType> imageLoadProvider,
+            LoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider) {
         this.imageLoadProvider = imageLoadProvider != null ?
-                new ChildLoadProvider<ModelType, ImageResourceType, Bitmap>(imageLoadProvider) : null;
+                new ChildLoadProvider<ModelType, ImageDataType, ResourceType>(imageLoadProvider) : null;
         this.videoLoadProvider = videoLoadProvider != null ?
-                new ChildLoadProvider<ModelType, VideoResourceType, Bitmap>(videoLoadProvider) : null;
+                new ChildLoadProvider<ModelType, VideoDataType, ResourceType>(videoLoadProvider) : null;
 
         if (context == null) {
             throw new NullPointerException("Context can't be null");
@@ -99,8 +95,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param thumbnailRequest The request to use to load the thumbnail.
      * @return This builder object.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnail(
-            GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnailRequest) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnail(
+            GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnailRequest) {
         this.thumbnailRequestBuilder = thumbnailRequest;
 
         return this;
@@ -130,7 +126,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the thumbnail.
      * @return This builder object.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> thumbnail(float sizeMultiplier) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnail(float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
         }
@@ -146,7 +142,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the image.
      * @return This builder object.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> sizeMultiplier(
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> sizeMultiplier(
             float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
@@ -168,8 +164,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param decoder The {@link BitmapDecoder} to use to decode the image resource.
      * @return This RequestBuilder.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> imageDecoder(
-            ResourceDecoder<ImageResourceType, Bitmap> decoder) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> imageDecoder(
+            ResourceDecoder<ImageDataType, ResourceType> decoder) {
         imageLoadProvider.setSourceDecoder(decoder);
 
         return this;
@@ -187,8 +183,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param decoder The {@link BitmapDecoder} to use to decode the video resource.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> videoDecoder(
-            ResourceDecoder<VideoResourceType, Bitmap> decoder) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> videoDecoder(
+            ResourceDecoder<VideoDataType, ResourceType> decoder) {
         videoLoadProvider.setSourceDecoder(decoder);
 
         return this;
@@ -200,29 +196,12 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param priority A priority.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> priority(Priority priority) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> priority(Priority priority) {
         this.priority = priority;
 
         return this;
     }
 
-    /**
-     * Transform images using {@link CenterCrop}.
-     *
-     * @return This RequestBuilder
-     */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> centerCrop() {
-        return transform(new CenterCrop(Glide.get(context).getBitmapPool()));
-    }
-
-    /**
-     * Transform images using {@link FitCenter}.
-     *
-     * @return This RequestBuilder
-     */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> fitCenter() {
-        return transform(new FitCenter(Glide.get(context).getBitmapPool()));
-    }
 
     /**
      * Transform images with the given {@link Transformation}. Appends this transformation onto any existing
@@ -231,8 +210,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param transformation the transformation to apply.
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> transform(
-            Transformation<Bitmap> transformation) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> transform(
+            Transformation<ResourceType> transformation) {
         transformations.add(transformation);
 
         return this;
@@ -245,7 +224,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param animationId The resource id of the animation to run
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> animate(int animationId) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> animate(int animationId) {
         this.animationId = animationId;
 
         return this;
@@ -258,7 +237,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param animation The animation to run
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> animate(Animation animation) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> animate(Animation animation) {
         this.animation = animation;
 
         return this;
@@ -270,7 +249,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param resourceId The id of the resource to use as a placeholder
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> placeholder(int resourceId) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> placeholder(int resourceId) {
         this.placeholderId = resourceId;
 
         return this;
@@ -282,7 +261,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param drawable The drawable to display as a placeholder.
      * @return This RequestBuilder.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> placeholder(Drawable drawable) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> placeholder(Drawable drawable) {
         this.placeholderDrawable = drawable;
 
         return this;
@@ -294,7 +273,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param resourceId The id of the resource to use as a placeholder
      * @return This request
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> error(int resourceId) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> error(int resourceId) {
         this.errorId = resourceId;
 
         return this;
@@ -306,7 +285,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param drawable The drawable to display.
      * @return This RequestBuilder.
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> error(Drawable drawable) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> error(Drawable drawable) {
         this.errorPlaceholder = drawable;
 
         return this;
@@ -320,7 +299,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param requestListener The request listener to use
      * @return This request
      */
-    public GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceType> listener(
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> listener(
             RequestListener<ModelType> requestListener) {
         this.requestListener = requestListener;
 
@@ -333,13 +312,13 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param target The target to load te image for
      * @return The given target.
      */
-    public <Y extends Target<Bitmap>> Y into(Y target) {
-        Request previous = target.getRequest();
+    public <Y extends Target<ResourceType>> Y into(Y target) {
+        com.bumptech.glide.request.Request previous = target.getRequest();
         if (previous != null) {
             previous.clear();
         }
 
-        Request request = buildRequest(target);
+        com.bumptech.glide.request.Request request = buildRequest(target);
         target.setRequest(request);
         if (request != null) {
             request.run();
@@ -347,21 +326,22 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         return target;
     }
 
-    /**
-     * Sets the {@link ImageView} the image will be loaded into, cancels any existing loads into the view, and frees
-     * any resources Glide has loaded into the view so they may be reused.
-     *
-     * @see Glide#clear(View)
-     *
-     * @param view The view to cancel previous loads for and load the new image into.
-     * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
-     */
-    public BitmapImageViewTarget into(ImageView view) {
-        return into(new BitmapImageViewTarget(view));
-    }
+//TODO:
+//    /**
+//     * Sets the {@link ImageView} the image will be loaded into, cancels any existing loads into the view, and frees
+//     * any resources Glide has loaded into the view so they may be reused.
+//     *
+//     * @see Glide#clear(View)
+//     *
+//     * @param view The view to cancel previous loads for and load the new image into.
+//     * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
+//     */
+//    public BitmapImageViewTarget into(ImageView view) {
+//        return into(new BitmapImageViewTarget(view));
+//    }
 
-    private Request buildRequest(Target<Bitmap> target) {
-        final Request result;
+    private com.bumptech.glide.request.Request buildRequest(Target<ResourceType> target) {
+        final com.bumptech.glide.request.Request result;
 
         if (priority == null) {
             priority = Priority.NORMAL;
@@ -369,7 +349,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
 
         if (thumbnailRequestBuilder != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
-            Request fullRequest = buildBitmapRequest(target, sizeMultiplier, priority, requestCoordinator);
+            com.bumptech.glide.request.Request fullRequest = buildRequest(target, sizeMultiplier, priority, requestCoordinator);
 
             if (thumbnailRequestBuilder.animationId <= 0) {
                 thumbnailRequestBuilder.animationId = animationId;
@@ -387,20 +367,20 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
                 thumbnailRequestBuilder.priority = getThumbnailPriority();
             }
 
-            Request thumbnailRequest = thumbnailRequestBuilder.buildBitmapRequest(target,
+            com.bumptech.glide.request.Request thumbnailRequest = thumbnailRequestBuilder.buildRequest(target,
                     thumbnailRequestBuilder.sizeMultiplier, thumbnailRequestBuilder.priority, requestCoordinator);
 
             requestCoordinator.setRequests(fullRequest, thumbnailRequest);
             result = requestCoordinator;
         } else if (thumbSizeMultiplier != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
-            Request fullRequest = buildBitmapRequest(target, sizeMultiplier, priority, requestCoordinator);
-            Request thumbnailRequest = buildBitmapRequest(target, thumbSizeMultiplier, getThumbnailPriority(),
+            com.bumptech.glide.request.Request fullRequest = buildRequest(target, sizeMultiplier, priority, requestCoordinator);
+            com.bumptech.glide.request.Request thumbnailRequest = buildRequest(target, thumbSizeMultiplier, getThumbnailPriority(),
                     requestCoordinator);
             requestCoordinator.setRequests(fullRequest, thumbnailRequest);
             result = requestCoordinator;
         } else {
-            result = buildBitmapRequest(target, sizeMultiplier, priority, null);
+            result = buildRequest(target, sizeMultiplier, priority, null);
         }
         return result;
     }
@@ -417,43 +397,43 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         return result;
     }
 
-    private Request buildBitmapRequest(Target<Bitmap> target, float sizeMultiplier, Priority priority,
+    private com.bumptech.glide.request.Request buildRequest(Target<ResourceType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         if (model == null) {
-            return buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, null);
+            return buildRequestForDataType(target, imageLoadProvider, sizeMultiplier, priority, null);
         }
         if (imageLoadProvider == null) {
-            return buildBitmapRequestForType(target, videoLoadProvider, sizeMultiplier, priority, requestCoordinator);
+            return buildRequestForDataType(target, videoLoadProvider, sizeMultiplier, priority, requestCoordinator);
         } else if (videoLoadProvider == null) {
-            return buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, requestCoordinator);
+            return buildRequestForDataType(target, imageLoadProvider, sizeMultiplier, priority, requestCoordinator);
         } else {
             MultiTypeRequestCoordinator typeCoordinator = new MultiTypeRequestCoordinator(requestCoordinator);
-            Request imageRequest =
-                    buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, typeCoordinator);
-            Request videoRequest =
-                    buildBitmapRequestForType(target, videoLoadProvider, sizeMultiplier, priority, typeCoordinator);
+            com.bumptech.glide.request.Request imageRequest =
+                    buildRequestForDataType(target, imageLoadProvider, sizeMultiplier, priority, typeCoordinator);
+            com.bumptech.glide.request.Request videoRequest =
+                    buildRequestForDataType(target, videoLoadProvider, sizeMultiplier, priority, typeCoordinator);
             typeCoordinator.setRequests(imageRequest, videoRequest);
             return typeCoordinator;
         }
     }
 
-    private <Z> Request buildBitmapRequestForType(Target<Bitmap> target,
-            LoadProvider<ModelType, Z, Bitmap> loadProvider, float sizeMultiplier, Priority priority,
+    private <Z> com.bumptech.glide.request.Request buildRequestForDataType(Target<ResourceType> target,
+            LoadProvider<ModelType, Z, ResourceType> loadProvider, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
-        return new BitmapRequest<ModelType, Z>(loadProvider, model, context, priority, target, sizeMultiplier,
-                placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener, animationId, animation,
-                requestCoordinator, Glide.get(context).getEngine(), getFinalTransformation());
+        return new GenericRequest<ModelType, Z, ResourceType>(loadProvider, model, context, priority, target,
+                sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
+                animationId, animation, requestCoordinator, Glide.get(context).getEngine(), getFinalTransformation());
     }
 
     @SuppressWarnings("unchecked")
-    private Transformation<Bitmap> getFinalTransformation() {
+    private Transformation<ResourceType> getFinalTransformation() {
         switch (transformations.size()) {
             case 0:
                 return Transformation.NONE;
             case 1:
                 return transformations.get(0);
             default:
-                return new MultiTransformation<Bitmap>(transformations);
+                return new MultiTransformation<ResourceType>(transformations);
         }
     }
 }

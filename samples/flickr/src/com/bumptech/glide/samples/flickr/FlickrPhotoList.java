@@ -10,9 +10,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.bumptech.glide.BitmapRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.util.ArrayList;
@@ -89,7 +89,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         }
 
         @Override
-        protected RequestBuilder getRequestBuilder(Photo item) {
+        protected BitmapRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(context)
                     .loadFromImage(item)
                     .thumbnail(0.1f)
