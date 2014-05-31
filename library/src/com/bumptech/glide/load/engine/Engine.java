@@ -18,7 +18,6 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     private final Map<Key, ResourceRunner> runners;
     private final ResourceRunnerFactory factory;
-    private final ResourceReferenceCounter resourceReferenceCounter;
     private KeyFactory keyFactory;
     private final MemoryCache cache;
 
@@ -37,16 +36,13 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     public Engine(EngineBuilder builder) {
-        this(builder.factory, builder.memoryCache, new HashMap<Key, ResourceRunner>(),
-                builder.resourceReferenceCounter, builder.keyFactory);
+        this(builder.factory, builder.memoryCache, new HashMap<Key, ResourceRunner>(), builder.keyFactory);
     }
 
-    Engine(ResourceRunnerFactory factory, MemoryCache cache, Map<Key, ResourceRunner> runners,
-            ResourceReferenceCounter referenceCounter, KeyFactory keyFactory) {
+    Engine(ResourceRunnerFactory factory, MemoryCache cache, Map<Key, ResourceRunner> runners, KeyFactory keyFactory) {
         this.factory = factory;
         this.cache = cache;
         this.runners = runners;
-        this.resourceReferenceCounter = referenceCounter;
         this.keyFactory = keyFactory;
 
         cache.setResourceRemovedListener(this);
@@ -71,7 +67,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
         Resource<Z> cached = cache.get(key);
         if (cached != null) {
-            resourceReferenceCounter.acquireResource(cached);
+            cached.acquire(1);
             cb.onResourceReady(cached);
             return null;
         }
@@ -104,10 +100,6 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     @Override
     public void onResourceRemoved(Resource resource) {
-        recycle(resource);
-    }
-
-    public void recycle(Resource resource) {
-        resourceReferenceCounter.releaseResource(resource);
+        resource.release();
     }
 }

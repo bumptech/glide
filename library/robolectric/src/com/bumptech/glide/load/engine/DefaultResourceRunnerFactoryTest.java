@@ -9,7 +9,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +22,6 @@ import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 public class DefaultResourceRunnerFactoryTest {
-    private static final String ID = "asdfasdf";
     private DefaultFactoryHarness harness;
 
     @Before
@@ -44,14 +42,12 @@ public class DefaultResourceRunnerFactoryTest {
         Handler mainHandler = new Handler();
         Handler bgHandler = mock(Handler.class);
         ExecutorService service = mock(ExecutorService.class);
-        ResourceCallback<Object> cb = mock(ResourceCallback.class);
-        ResourceReferenceCounter resourceReferenceCounter = mock(ResourceReferenceCounter.class);
         Transformation<Object> transformation = mock(Transformation.class);
         int width = 100;
         int height = 100;
 
         DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(memoryCache, diskCache,
-                mainHandler, service, bgHandler, resourceReferenceCounter);
+                mainHandler, service, bgHandler);
 
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
         ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);

@@ -1,10 +1,10 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.request.ResourceCallback;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +14,6 @@ import java.util.Set;
  */
 public class EngineJob<Z> implements ResourceCallback<Z> {
     private final EngineJobListener listener;
-    private final ResourceReferenceCounter referenceCounter;
     private Key key;
     private MemoryCache cache;
     private Handler mainHandler;
@@ -22,13 +21,11 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
     private boolean isCancelled;
     private boolean isComplete;
 
-    public EngineJob(Key key, MemoryCache cache, Handler mainHandler, ResourceReferenceCounter referenceCounter,
-            EngineJobListener listener) {
+    public EngineJob(Key key, MemoryCache cache, Handler mainHandler, EngineJobListener listener) {
         this.key = key;
         this.cache = cache;
         this.listener = listener;
         this.mainHandler = mainHandler;
-        this.referenceCounter = referenceCounter;
     }
 
     public void addCallback(ResourceCallback<Z> cb) {
@@ -67,15 +64,13 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                 }
                 isComplete = true;
 
-                referenceCounter.acquireResource(resource);
+                // 1 for memory cache.
+                resource.acquire(cbs.size() + 1);
                 listener.onEngineJobComplete(key);
-                referenceCounter.acquireResource(resource);
                 cache.put(key, resource);
                 for (ResourceCallback<Z> cb : cbs) {
-                    referenceCounter.acquireResource(resource);
                     cb.onResourceReady(resource);
                 }
-                referenceCounter.releaseResource(resource);
 
             }
         });

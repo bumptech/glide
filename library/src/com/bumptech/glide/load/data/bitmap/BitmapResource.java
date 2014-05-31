@@ -5,7 +5,7 @@ import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Util;
 
-public class BitmapResource implements Resource<Bitmap> {
+public class BitmapResource extends Resource<Bitmap> {
     private Bitmap bitmap;
     private BitmapPool bitmapPool;
 
@@ -25,7 +25,7 @@ public class BitmapResource implements Resource<Bitmap> {
     }
 
     @Override
-    public void recycle() {
+    public void recycleInternal() {
         if (!bitmapPool.put(bitmap)) {
             bitmap.recycle();
         }

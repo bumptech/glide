@@ -79,6 +79,7 @@ public class BitmapEncoderTest {
                 string.contains(expected));
     }
 
+    @SuppressWarnings("unchecked")
     private static class EncoderHarness {
         Bitmap.CompressFormat compressFormat = null;
         Resource<Bitmap> resource = mock(Resource.class);
@@ -101,11 +102,13 @@ public class BitmapEncoderTest {
     public static class AlphaShadowBitmap extends ShadowBitmap {
         private boolean hasAlpha;
 
+        @SuppressWarnings("unused")
         @Implementation
         public void setHasAlpha(boolean hasAlpha) {
             this.hasAlpha = hasAlpha;
         }
 
+        @SuppressWarnings("unused")
         @Implementation
         public boolean hasAlpha() {
             return hasAlpha;

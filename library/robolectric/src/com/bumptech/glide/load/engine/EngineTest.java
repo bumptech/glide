@@ -116,7 +116,7 @@ public class EngineTest {
 
         harness.doLoad();
 
-        verify(harness.resourceReferenceCounter).acquireResource(eq(harness.resource));
+        verify(harness.resource).acquire(1);
     }
 
     @Test
@@ -173,22 +173,15 @@ public class EngineTest {
     }
 
     @Test
-    public void testResourceReferenceCounterIsNotifiedWhenResourceRecycled() {
-        harness.engine.recycle(harness.resource);
-
-        verify(harness.resourceReferenceCounter).releaseResource(eq(harness.resource));
-    }
-
-    @Test
     public void testEngineAddedAsListenerToMemoryCache() {
         verify(harness.cache).setResourceRemovedListener(eq(harness.engine));
     }
 
     @Test
-    public void testResourceReferenceCounterIsNotifiedWhenResourceRemovedFromCache() {
+    public void testResourceIsReleasedWhenRemovedFromCache() {
         harness.engine.onResourceRemoved(harness.resource);
 
-        verify(harness.resourceReferenceCounter).releaseResource(eq(harness.resource));
+        verify(harness.resource).release();
     }
 
     @Test
@@ -228,7 +221,6 @@ public class EngineTest {
         ResourceCallback <Object> cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         Map<Key, ResourceRunner> runners = new HashMap<Key, ResourceRunner>();
-        ResourceReferenceCounter resourceReferenceCounter = mock(ResourceReferenceCounter.class);
         Transformation transformation = mock(Transformation.class);
         ResourceRunnerFactory factory = mock(ResourceRunnerFactory.class);
         int width = 100;
@@ -247,7 +239,7 @@ public class EngineTest {
             job = mock(EngineJob.class);
             when(runner.getJob()).thenReturn(job);
 
-            engine = new Engine(factory, cache, runners, resourceReferenceCounter, keyFactory);
+            engine = new Engine(factory, cache, runners, keyFactory);
 
             when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
                     eq(transformation), eq(encoder), eq(priority), eq(engine))).thenReturn(runner);

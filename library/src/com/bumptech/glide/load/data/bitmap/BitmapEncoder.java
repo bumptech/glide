@@ -23,7 +23,6 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
     public void encode(Resource<Bitmap> resource, OutputStream os) {
         final Bitmap bitmap = resource.get();
         bitmap.compress(getFormat(bitmap), quality, os);
-
     }
 
     @Override

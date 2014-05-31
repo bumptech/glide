@@ -99,7 +99,7 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
         cancel();
         setPlaceHolder();
         if (resource != null) {
-            engine.recycle(resource);
+            resource.release();
             resource = null;
         }
     }
@@ -173,7 +173,7 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     @Override
     public void onResourceReady(Resource<Bitmap> resource) {
         if (!canSetImage()) {
-            engine.recycle(resource);
+            resource.release();
             return;
         }
         Bitmap loaded = resource.get();

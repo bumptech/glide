@@ -164,7 +164,7 @@ public class BitmapRequestTest {
         request.onResourceReady(resource);
         request.clear();
 
-        verify(harness.engine).recycle(eq(resource));
+        verify(resource).release();
     }
 
     @Test

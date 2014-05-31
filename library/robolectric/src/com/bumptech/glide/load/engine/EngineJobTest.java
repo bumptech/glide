@@ -120,11 +120,10 @@ public class EngineJobTest {
     }
 
     @Test
-    public void testResourceIsAcquiredOncePerConsumerAndHeldAndReleasedBeforeAndAfterNotifyingConsumers() {
+    public void testResourceIsAcquiredOncePerConsumerAndOnceForCache() {
         harness.job.onResourceReady(harness.resource);
 
-        verify(harness.referenceCounter, times(3)).acquireResource(eq(harness.resource));
-        verify(harness.referenceCounter, times(1)).releaseResource(eq(harness.resource));
+        verify(harness.resource).acquire(eq(2));
     }
 
     @Test
@@ -132,14 +131,14 @@ public class EngineJobTest {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                harness.referenceCounter.releaseResource(harness.resource);
+                harness.resource.release();
                 return null;
             }
         }).when(harness.memoryCache).put(eq(harness.key), eq(harness.resource));
 
         harness.job.onResourceReady(harness.resource);
-        verify(harness.referenceCounter, times(3)).acquireResource(eq(harness.resource));
-        verify(harness.referenceCounter, times(2)).releaseResource(harness.resource);
+        verify(harness.resource).acquire(eq(2));
+        verify(harness.resource, times(1)).release();
     }
 
     @Test
@@ -178,9 +177,8 @@ public class EngineJobTest {
         ResourceCallback<Object> cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         EngineJobListener listener = mock(EngineJobListener.class);
-        ResourceReferenceCounter referenceCounter = mock(ResourceReferenceCounter.class);
 
-        EngineJob<Object> job = new EngineJob<Object>(key, memoryCache, mainHandler, referenceCounter, listener);
+        EngineJob<Object> job = new EngineJob<Object>(key, memoryCache, mainHandler, listener);
 
         public EngineJobHarness() {
             job.addCallback(cb);
