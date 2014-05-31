@@ -34,7 +34,7 @@ import java.util.Set;
  *
  * @param <T> The specific subclass of view wrapped by this target.
  */
-public abstract class ViewTarget<T extends View> implements Target {
+public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
     private static final String TAG = "ViewTarget";
     private final T view;
     private final SizeDeterminer sizeDeterminer;

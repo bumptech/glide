@@ -1,14 +1,16 @@
 package com.bumptech.glide.request.target;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+import com.bumptech.glide.Resource;
 import com.bumptech.glide.request.Request;
 
 /**
  * An interface that Glide can load an image into
+ *
+ * @param <Z> The type of resource the target can display.
  */
-public interface Target {
+public interface Target<Z> {
 
     /**
      * A callback that must be called when the target has determined its size. For fixed size targets it can
@@ -20,9 +22,9 @@ public interface Target {
 
     /**
      * The method that will be called when the image load has finished
-     * @param bitmap The loaded image
+     * @param resource the loaded resource.
      */
-    public void onImageReady(Bitmap bitmap);
+    public void onResourceReady(Resource<Z> resource);
 
     /**
      * A method that can optionally be implemented to set any placeholder that might have been passed to Glide to

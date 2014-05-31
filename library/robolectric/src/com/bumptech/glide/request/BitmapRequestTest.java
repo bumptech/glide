@@ -93,7 +93,6 @@ public class BitmapRequestTest {
     @Test
     public void testResourceIsNotCompleteWhenAskingCoordinatorIfCanSetImage() {
         RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
-        requestCoordinator = mock(RequestCoordinator.class);
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -274,11 +273,11 @@ public class BitmapRequestTest {
         return context;
     }
 
-    private static class MockTarget implements Target {
+    private static class MockTarget implements Target<Object> {
         private Drawable currentPlaceholder;
 
         @Override
-        public void onImageReady(Bitmap bitmap) {
+        public void onResourceReady(Resource<Object> resource) {
             currentPlaceholder = null;
         }
 

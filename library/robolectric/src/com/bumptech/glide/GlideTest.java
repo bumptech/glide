@@ -223,7 +223,7 @@ public class GlideTest {
 
         Glide.with(getContext()).load(file).into(target);
 
-        verify(target).onImageReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
     }
 
@@ -233,7 +233,7 @@ public class GlideTest {
 
         Glide.with(getContext()).loadFromImage(url).into(target);
 
-        verify(target).onImageReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
     }
 
@@ -260,7 +260,7 @@ public class GlideTest {
 
         Glide.with(getContext()).load(uri).into(target);
 
-        verify(target).onImageReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
     }
 
@@ -318,7 +318,7 @@ public class GlideTest {
     private void runTestStringDefaultLoader(String string) {
         Glide.with(getContext()).load(string).into(target);
 
-        verify(target).onImageReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
     }
 
@@ -345,7 +345,7 @@ public class GlideTest {
 
         Glide.with(getContext()).load(integer).into(target);
 
-        verify(target).onImageReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
     }
 
@@ -354,7 +354,7 @@ public class GlideTest {
         byte[] bytes = new byte[10];
         Glide.with(getContext()).loadFromImage(bytes).into(target);
 
-        verify(target).onImageReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
     }
 
@@ -364,7 +364,7 @@ public class GlideTest {
         String id = "test";
         Glide.with(getContext()).loadFromImage(bytes, id).into(target);
 
-        verify(target).onImageReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
     }
 

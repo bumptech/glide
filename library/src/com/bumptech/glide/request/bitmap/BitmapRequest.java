@@ -25,23 +25,23 @@ import java.io.InputStream;
 /**
  * A {@link Request} that loads an {@link Bitmap} into a given {@link Target}.
  *
- * @param <T> The type of the model that the {@link Bitmap} will be loaded from.
- * @param <Z> The type of the resource that the {@link Bitmap} will be loaded from.
+ * @param <A> The type of the model that the {@link Bitmap} will be loaded from.
+ * @param <T> The type of the resource that the {@link Bitmap} will be loaded from.
  */
-public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, ResourceCallback<Bitmap> {
+public class BitmapRequest<A, T> implements Request, Target.SizeReadyCallback, ResourceCallback<Bitmap> {
     private static final String TAG = "BitmapRequest";
 
     private final int placeholderResourceId;
     private final int errorResourceId;
     private final Context context;
     private final Transformation<Bitmap> transformation;
-    private final LoadProvider<T, Z, Bitmap> loadProvider;
+    private final LoadProvider<A, T, Bitmap> loadProvider;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
-    private final T model;
+    private final A model;
     private Priority priority;
-    private final Target target;
-    private final RequestListener<T> requestListener;
+    private final Target<Bitmap> target;
+    private final RequestListener<A> requestListener;
     private final float sizeMultiplier;
     private final Engine engine;
     private Animation animation;
@@ -53,10 +53,11 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
     private Resource<Bitmap> resource;
     private Engine.LoadStatus loadStatus;
 
-    public BitmapRequest(LoadProvider<T, Z, Bitmap> loadProvider, T model, Context context, Priority priority,
-            Target target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
-            Drawable errorDrawable, int errorResourceId, RequestListener<T> requestListener, int animationId,
-            Animation animation, RequestCoordinator requestCoordinator, Engine engine, Transformation<Bitmap> transformation) {
+    public BitmapRequest(LoadProvider<A, T, Bitmap> loadProvider, A model, Context context, Priority priority,
+            Target<Bitmap> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
+            Drawable errorDrawable, int errorResourceId, RequestListener<A> requestListener, int animationId,
+            Animation animation, RequestCoordinator requestCoordinator, Engine engine,
+            Transformation<Bitmap> transformation) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -148,12 +149,12 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
         ResourceDecoder<InputStream, Bitmap> cacheDecoder = loadProvider.getCacheDecoder();
-        ResourceDecoder<Z, Bitmap> decoder = loadProvider.getSourceDecoder();
+        ResourceDecoder<T, Bitmap> decoder = loadProvider.getSourceDecoder();
         ResourceEncoder <Bitmap> encoder = loadProvider.getEncoder();
-        ModelLoader<T, Z> modelLoader = loadProvider.getModelLoader();
+        ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
 
         final String id = modelLoader.getId(model);
-        final ResourceFetcher<Z> resourceFetcher = modelLoader.getResourceFetcher(model, width, height);
+        final ResourceFetcher<T> resourceFetcher = modelLoader.getResourceFetcher(model, width, height);
 
         loadedFromMemoryCache = true;
         loadStatus = engine.load(id, width, height, cacheDecoder, resourceFetcher, decoder, transformation,
@@ -179,8 +180,7 @@ public class BitmapRequest<T, Z> implements Request, Target.SizeReadyCallback, R
             resource.release();
             return;
         }
-        Bitmap loaded = resource.get();
-        target.onImageReady(loaded);
+        target.onResourceReady(resource);
         if (!loadedFromMemoryCache && !isAnyImageSet()) {
             if (animation == null && animationId > 0) {
                 animation = AnimationUtils.loadAnimation(context, animationId);

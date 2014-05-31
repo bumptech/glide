@@ -674,13 +674,13 @@ public class Glide {
         }
     }
 
-    private static class ClearTarget extends ViewTarget<View> {
+    private static class ClearTarget extends ViewTarget<View, Object> {
         public ClearTarget(View view) {
             super(view);
         }
 
         @Override
-        public void onImageReady(Bitmap bitmap) { }
+        public void onResourceReady(Resource<Object> resource) { }
 
         @Override
         public void setPlaceholder(Drawable placeholder) { }

@@ -23,7 +23,7 @@ import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.bitmap.BitmapRequest;
 import com.bumptech.glide.request.bitmap.RequestListener;
-import com.bumptech.glide.request.target.ImageViewTarget;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
@@ -333,7 +333,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @param target The target to load te image for
      * @return The given target.
      */
-    public <Y extends Target> Y into(Y target) {
+    public <Y extends Target<Bitmap>> Y into(Y target) {
         Request previous = target.getRequest();
         if (previous != null) {
             previous.clear();
@@ -354,13 +354,13 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
      * @see Glide#clear(View)
      *
      * @param view The view to cancel previous loads for and load the new image into.
-     * @return The {@link ImageViewTarget} used to wrap the given {@link ImageView}.
+     * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
      */
-    public ImageViewTarget into(ImageView view) {
-        return into(new ImageViewTarget(view));
+    public BitmapImageViewTarget into(ImageView view) {
+        return into(new BitmapImageViewTarget(view));
     }
 
-    private <Y extends Target> Request buildRequest(Y target) {
+    private Request buildRequest(Target<Bitmap> target) {
         final Request result;
 
         if (priority == null) {
@@ -417,7 +417,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         return result;
     }
 
-    private <Y extends Target> Request buildBitmapRequest(Y target, float sizeMultiplier, Priority priority,
+    private Request buildBitmapRequest(Target<Bitmap> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         if (model == null) {
             return buildBitmapRequestForType(target, imageLoadProvider, sizeMultiplier, priority, null);
@@ -437,7 +437,7 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
         }
     }
 
-    private <Y extends Target, Z> Request buildBitmapRequestForType(Y target,
+    private <Z> Request buildBitmapRequestForType(Target<Bitmap> target,
             LoadProvider<ModelType, Z, Bitmap> loadProvider, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         return new BitmapRequest<ModelType, Z>(loadProvider, model, context, priority, target, sizeMultiplier,
