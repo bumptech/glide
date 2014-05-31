@@ -13,6 +13,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     private final Downsampler downsampler;
     private BitmapPool bitmapPool;
     private DecodeFormat decodeFormat;
+    private String id;
 
     public StreamBitmapDecoder(BitmapPool bitmapPool) {
         this(Downsampler.AT_LEAST, bitmapPool, DecodeFormat.PREFER_RGB_565);
@@ -36,10 +37,13 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
 
     @Override
     public String getId() {
-        return new StringBuilder()
+        if (id == null) {
+            id = new StringBuilder()
                 .append("com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder")
                 .append(downsampler.getId())
                 .append(decodeFormat.name())
                 .toString();
+        }
+        return id;
     }
 }
