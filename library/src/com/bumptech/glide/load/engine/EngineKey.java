@@ -43,13 +43,16 @@ public class EngineKey implements Key {
 
         EngineKey engineKey = (EngineKey) o;
 
+        if (!id.equals(engineKey.id)) {
+            return false;
+        }
         if (height != engineKey.height) {
             return false;
         }
         if (width != engineKey.width) {
             return false;
         }
-        if (!cacheDecoder.getId().equals(engineKey.cacheDecoder
+        if (!transformation.getId().equals(engineKey.transformation
                 .getId())) {
             return false;
         }
@@ -57,14 +60,11 @@ public class EngineKey implements Key {
                 .getId())) {
             return false;
         }
-        if (!encoder.getId().equals(engineKey.encoder
+        if (!cacheDecoder.getId().equals(engineKey.cacheDecoder
                 .getId())) {
             return false;
         }
-        if (!id.equals(engineKey.id)) {
-            return false;
-        }
-        if (!transformation.getId().equals(engineKey.transformation
+        if (!encoder.getId().equals(engineKey.encoder
                 .getId())) {
             return false;
         }
