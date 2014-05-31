@@ -445,7 +445,8 @@ public class GenericRequestBuilder<ModelType, ImageResourceType, VideoResourceTy
             LoadProvider<ModelType, Z, Bitmap> loadProvider, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
 
-        return new BitmapRequestBuilder<ModelType, Z>()
+        final BitmapRequestBuilder<ModelType, Z> builder = BitmapRequestBuilder.get();
+        return builder
                 .setContext(context)
                 .setLoadProvider(loadProvider)
                 .setPriority(priority)

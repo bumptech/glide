@@ -4,12 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
-import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.target.Target;
 
 /**
@@ -19,6 +18,14 @@ import com.bumptech.glide.request.target.Target;
  * @param <Z> The resource type the {@link BitmapRequest} will load an {@link Bitmap} from.
  */
 public class BitmapRequestBuilder<T, Z> {
+    private static final BitmapRequestBuilder requestBuilder = new BitmapRequestBuilder();
+
+    // Type erasure makes the types irrelevant at runtime.
+    @SuppressWarnings("unchecked")
+    public static <T, Z> BitmapRequestBuilder<T, Z> get() {
+        return requestBuilder;
+    }
+
     T model;
     Target target;
     Priority priority;
@@ -32,10 +39,32 @@ public class BitmapRequestBuilder<T, Z> {
     Context context;
     RequestCoordinator requestCoordinator;
     int animationId;
-    DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     Engine engine;
     Transformation<Bitmap> transformation;
     LoadProvider<T, Z, Bitmap> loadProvider;
+
+    private void reset() {
+        model = null;
+        target = null;
+        priority = null;
+        sizeMultiplier = 0f;
+        placeholderDrawable = null;
+        placeholderResourceId = 0;
+        requestListener = null;
+        animation = null;
+        placeholderResourceId = 0;
+        errorResourceId = 0;
+        context = null;
+        requestCoordinator = null;
+        animationId = 0;
+        engine = null;
+        transformation = null;
+        loadProvider = null;
+    }
+
+    private BitmapRequestBuilder() {
+
+    }
 
     public BitmapRequestBuilder<T, Z> setModel(T model) {
         this.model = model;
@@ -118,6 +147,8 @@ public class BitmapRequestBuilder<T, Z> {
     }
 
     public BitmapRequest<T, Z> build() {
-        return new BitmapRequest<T, Z>(this);
+        final BitmapRequest<T, Z> result = new BitmapRequest<T, Z>(this);
+        reset();
+        return result;
     }
 }

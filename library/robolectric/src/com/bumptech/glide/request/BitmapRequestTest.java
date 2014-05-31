@@ -57,7 +57,7 @@ public class BitmapRequestTest {
         }
 
         public BitmapRequestBuilder<Object, Object> getBuilder() {
-            return new BitmapRequestBuilder<Object, Object>()
+            return BitmapRequestBuilder.get()
                     .setContext(context)
                     .setLoadProvider(loadProvider)
                     .setEngine(engine)
