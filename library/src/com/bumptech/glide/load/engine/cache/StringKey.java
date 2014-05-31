@@ -2,6 +2,9 @@ package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+
 public class StringKey implements Key {
     private String key;
 
@@ -35,5 +38,10 @@ public class StringKey implements Key {
     @Override
     public String toString() {
         return key;
+    }
+
+    @Override
+    public void update(MessageDigest messageDigest) throws UnsupportedEncodingException {
+        messageDigest.update(key.getBytes("UTF-8"));
     }
 }

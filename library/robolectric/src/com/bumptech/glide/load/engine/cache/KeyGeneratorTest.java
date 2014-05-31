@@ -29,7 +29,7 @@ public class KeyGeneratorTest {
     }
 
     private String getRandomKeyFromGenerator() {
-        return keyGenerator.getSafeKey(getRandomId());
+        return keyGenerator.getSafeKey(new StringKey(getRandomId()));
     }
 
     private static String getRandomId() {

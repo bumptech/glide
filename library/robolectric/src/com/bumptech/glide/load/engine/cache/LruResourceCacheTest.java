@@ -5,6 +5,9 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.Resource;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+
 import static com.bumptech.glide.load.engine.cache.MemoryCache.ResourceRemovedListener;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -104,6 +107,9 @@ public class LruResourceCacheTest {
     }
 
     private static class MockKey implements Key {
-
+        @Override
+        public void update(MessageDigest messageDigest) throws UnsupportedEncodingException {
+            messageDigest.update(toString().getBytes("UTF-8"));
+        }
     }
 }

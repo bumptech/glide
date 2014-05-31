@@ -5,7 +5,13 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+
 public class EngineKey implements Key {
+    private static final String FORMAT = "UTF-8";
+
     private final String id;
     private final int width;
     private final int height;
@@ -92,5 +98,19 @@ public class EngineKey implements Key {
                 .toString();
         }
         return stringKey;
+    }
+
+    @Override
+    public void update(MessageDigest messageDigest) throws UnsupportedEncodingException {
+        byte[] dimensions = ByteBuffer.allocate(8)
+                .putInt(width)
+                .putInt(height)
+                .array();
+        messageDigest.update(id.getBytes(FORMAT));
+        messageDigest.update(dimensions);
+        messageDigest.update(cacheDecoder.getId().getBytes(FORMAT));
+        messageDigest.update(decoder.getId().getBytes(FORMAT));
+        messageDigest.update(transformation.getId().getBytes(FORMAT));
+        messageDigest.update(encoder.getId().getBytes(FORMAT));
     }
 }
