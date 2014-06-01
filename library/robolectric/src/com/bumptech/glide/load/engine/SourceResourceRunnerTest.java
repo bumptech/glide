@@ -169,7 +169,7 @@ public class SourceResourceRunnerTest {
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         DiskCache diskCache = mock(DiskCache.class);
         Priority priority = Priority.LOW;
-        ResourceCallback<Object> cb = mock(ResourceCallback.class);
+        ResourceCallback cb = mock(ResourceCallback.class);
         Resource<Object> result = mock(Resource.class);
         Transformation<Object> transformation = mock(Transformation.class);
         int width = 150;

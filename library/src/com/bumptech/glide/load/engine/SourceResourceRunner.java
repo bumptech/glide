@@ -28,13 +28,13 @@ public class SourceResourceRunner<T, Z> implements Runnable, DiskCache.Writer, P
     private final ResourceEncoder<Z> encoder;
     private DiskCache diskCache;
     private Priority priority;
-    private ResourceCallback<Z> cb;
+    private ResourceCallback cb;
     private Resource<Z> result;
     private volatile boolean isCancelled;
 
     public SourceResourceRunner(Key key, int width, int height, ResourceFetcher<T> resourceFetcher,
             ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
-            DiskCache diskCache, Priority priority, ResourceCallback<Z> cb) {
+            DiskCache diskCache, Priority priority, ResourceCallback cb) {
         this.key = key;
         this.width = width;
         this.height = height;

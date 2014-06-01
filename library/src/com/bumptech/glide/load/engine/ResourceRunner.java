@@ -22,7 +22,7 @@ public class ResourceRunner<Z> implements Runnable {
     private final Key key;
     private final SourceResourceRunner sourceRunner;
     private final ExecutorService executorService;
-    private final EngineJob<Z> job;
+    private final EngineJob job;
     private final ResourceDecoder<InputStream, Z> cacheDecoder;
     private final int width;
     private final int height;
@@ -32,7 +32,7 @@ public class ResourceRunner<Z> implements Runnable {
     private volatile boolean isCancelled;
 
     public ResourceRunner(Key key, int width, int height, DiskCache diskCache, ResourceDecoder<InputStream, Z> cacheDecoder,
-            SourceResourceRunner sourceRunner, ExecutorService executorService, Handler bgHandler, EngineJob<Z> job) {
+            SourceResourceRunner sourceRunner, ExecutorService executorService, Handler bgHandler, EngineJob job) {
         this.key = key;
         this.width = width;
         this.height = height;
@@ -44,7 +44,7 @@ public class ResourceRunner<Z> implements Runnable {
         this.job = job;
     }
 
-    public EngineJob<Z> getJob() {
+    public EngineJob getJob() {
         return job;
     }
 

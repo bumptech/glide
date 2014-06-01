@@ -9,15 +9,12 @@ import com.bumptech.glide.request.ResourceCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @param <Z> The type of the resource that will be decoded.
- */
-public class EngineJob<Z> implements ResourceCallback<Z> {
+public class EngineJob implements ResourceCallback {
     private final EngineJobListener listener;
     private Key key;
     private MemoryCache cache;
     private Handler mainHandler;
-    private List<ResourceCallback<Z>> cbs = new ArrayList<ResourceCallback<Z>>();
+    private List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
     private boolean isCancelled;
     private boolean isComplete;
 
@@ -28,7 +25,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
         this.mainHandler = mainHandler;
     }
 
-    public void addCallback(ResourceCallback<Z> cb) {
+    public void addCallback(ResourceCallback cb) {
         cbs.add(cb);
     }
 
@@ -54,7 +51,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
     }
 
     @Override
-    public void onResourceReady(final Resource<Z> resource) {
+    public void onResourceReady(final Resource resource) {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -68,7 +65,7 @@ public class EngineJob<Z> implements ResourceCallback<Z> {
                 resource.acquire(cbs.size() + 1);
                 listener.onEngineJobComplete(key);
                 cache.put(key, resource);
-                for (ResourceCallback<Z> cb : cbs) {
+                for (ResourceCallback cb : cbs) {
                     cb.onResourceReady(resource);
                 }
 

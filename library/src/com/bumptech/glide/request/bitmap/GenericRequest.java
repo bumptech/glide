@@ -22,13 +22,13 @@ import com.bumptech.glide.request.target.Target;
 import java.io.InputStream;
 
 /**
- * A {@link com.bumptech.glide.request.Request} that loads a {@link Resource} into a given {@link Target}.
+ * A {@link Request} that loads a {@link Resource} into a given {@link Target}.
  *
  * @param <A> The type of the model that the resource will be loaded from.
  * @param <T> The type of the data that the resource will be loaded from.
  * @param <Z> The type of the resource that will be loaded.
  */
-public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallback, ResourceCallback<Z> {
+public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallback, ResourceCallback {
     private static final String TAG = "Request";
 
     private final int placeholderResourceId;
@@ -39,6 +39,7 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
     private final A model;
+    private final Class<Z> resourceClass;
     private Priority priority;
     private final Target<Z> target;
     private final RequestListener<A> requestListener;
@@ -50,14 +51,14 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
     private boolean isCancelled;
     private boolean isError;
     private boolean loadedFromMemoryCache;
-    private Resource<Z> resource;
+    private Resource resource;
     private Engine.LoadStatus loadStatus;
 
     public GenericRequest(LoadProvider<A, T, Z> loadProvider, A model, Context context, Priority priority,
             Target<Z> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
             Drawable errorDrawable, int errorResourceId, RequestListener<A> requestListener, int animationId,
             Animation animation, RequestCoordinator requestCoordinator, Engine engine,
-            Transformation<Z> transformation) {
+            Transformation<Z> transformation, Class<Z> resourceClass) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -74,6 +75,7 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
         this.requestCoordinator = requestCoordinator;
         this.engine = engine;
         this.transformation = transformation;
+        this.resourceClass = resourceClass;
     }
 
     @Override
@@ -175,12 +177,21 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
     }
 
     @Override
-    public void onResourceReady(Resource<Z> resource) {
+    public void onResourceReady(Resource resource) {
         if (!canSetImage()) {
             resource.release();
             return;
         }
-        target.onResourceReady(resource);
+        if (resource == null || !resourceClass.isAssignableFrom(resource.get().getClass())) {
+            if (resource != null) {
+                resource.release();
+            }
+            onException(new Exception("Expected to receive an object of " + resourceClass + " but instead got " +
+                    (resource != null ? resource.get() : null)));
+            return;
+        }
+        Z result = (Z) resource.get();
+        target.onResourceReady(result);
         if (!loadedFromMemoryCache && !isAnyImageSet()) {
             if (animation == null && animationId > 0) {
                 animation = AnimationUtils.loadAnimation(context, animationId);

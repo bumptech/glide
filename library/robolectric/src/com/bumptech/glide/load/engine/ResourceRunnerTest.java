@@ -2,11 +2,8 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.engine.EngineJob;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.engine.ResourceRunner;
-import com.bumptech.glide.load.engine.SourceResourceRunner;
+import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import org.junit.Before;
 import org.junit.Test;
@@ -185,7 +182,7 @@ public class ResourceRunnerTest {
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         SourceResourceRunner<Object, Object> sourceRunner = mock(SourceResourceRunner.class);
         ExecutorService service = mock(ExecutorService.class);
-        EngineJob<Object> engineJob = mock(EngineJob.class);
+        EngineJob engineJob = mock(EngineJob.class);
         Handler bgHandler = mock(Handler.class);
         int width = 100;
         int height = 100;

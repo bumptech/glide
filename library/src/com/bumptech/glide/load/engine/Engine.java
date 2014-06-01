@@ -61,20 +61,20 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      */
     public <T, Z> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
             ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
-            ResourceEncoder<Z> encoder, Priority priority, ResourceCallback<Z> cb) {
+            ResourceEncoder<Z> encoder, Priority priority, ResourceCallback cb) {
 
         Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder);
 
-        Resource<Z> cached = cache.get(key);
+        Resource cached = cache.get(key);
         if (cached != null) {
             cached.acquire(1);
             cb.onResourceReady(cached);
             return null;
         }
 
-        ResourceRunner<Z> current = runners.get(key);
+        ResourceRunner current = runners.get(key);
         if (current != null) {
-            EngineJob<Z> job = current.getJob();
+            EngineJob job = current.getJob();
             job.addCallback(cb);
             return new LoadStatus(cb, job);
         }

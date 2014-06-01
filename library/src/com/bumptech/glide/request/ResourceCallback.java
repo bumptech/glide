@@ -2,9 +2,9 @@ package com.bumptech.glide.request;
 
 import com.bumptech.glide.Resource;
 
-public interface ResourceCallback<Z> {
+public interface ResourceCallback {
 
-    public void onResourceReady(Resource<Z> resource);
+    public void onResourceReady(Resource resource);
 
     public void onException(Exception e);
 }

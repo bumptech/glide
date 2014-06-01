@@ -64,7 +64,7 @@ public class GenericRequestTest {
         public GenericRequest<Object, Object, Object> getRequest() {
             return new GenericRequest<Object, Object, Object>(loadProvider, model, context, priority, target, 1f,
                     placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, null, 0, null,
-                    requestCoordinator, engine, mock(Transformation.class));
+                    requestCoordinator, engine, mock(Transformation.class), Object.class);
         }
     }
 
@@ -81,9 +81,19 @@ public class GenericRequestTest {
     }
 
     @Test
+    public void testCanHandleNullResources() {
+        GenericRequest request = harness.getRequest();
+
+        request.onResourceReady(null);
+
+        assertTrue(request.isFailed());
+    }
+
+    @Test
     public void testIsCompleteAfterReceivingResource() {
         GenericRequest request = harness.getRequest();
 
+        when(harness.resource.get()).thenReturn(new Object());
         request.onResourceReady(harness.resource);
 
         assertTrue(request.isComplete());
@@ -95,15 +105,16 @@ public class GenericRequestTest {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                com.bumptech.glide.request.Request request = (com.bumptech.glide.request.Request) invocation.getArguments()[0];
+                Request request = (Request) invocation.getArguments()[0];
                 assertFalse(request.isComplete());
                 return true;
             }
-        }).when(requestCoordinator).canSetImage(any(com.bumptech.glide.request.Request.class));
+        }).when(requestCoordinator).canSetImage(any(Request.class));
 
         harness.requestCoordinator = requestCoordinator;
         GenericRequest request = harness.getRequest();
 
+        when(harness.resource.get()).thenReturn(new Object());
         request.onResourceReady(harness.resource);
 
         verify(requestCoordinator).canSetImage(eq(request));
@@ -157,6 +168,7 @@ public class GenericRequestTest {
     public void testResourceIsRecycledOnClear() {
         GenericRequest request = harness.getRequest();
 
+        when(harness.resource.get()).thenReturn(new Object());
         request.onResourceReady(harness.resource);
         request.clear();
 
@@ -272,11 +284,11 @@ public class GenericRequestTest {
         return context;
     }
 
-    private static class MockTarget implements Target<Object> {
+    private static class MockTarget implements Target {
         private Drawable currentPlaceholder;
 
         @Override
-        public void onResourceReady(Resource<Object> resource) {
+        public void onResourceReady(Object resource) {
             currentPlaceholder = null;
         }
 
@@ -294,7 +306,7 @@ public class GenericRequestTest {
         }
 
         @Override
-        public void setRequest(com.bumptech.glide.request.Request request) {
+        public void setRequest(Request request) {
         }
 
         @Override

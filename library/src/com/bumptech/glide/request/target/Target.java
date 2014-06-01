@@ -2,7 +2,6 @@ package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
-import com.bumptech.glide.Resource;
 import com.bumptech.glide.request.Request;
 
 /**
@@ -24,7 +23,7 @@ public interface Target<Z> {
      * The method that will be called when the image load has finished
      * @param resource the loaded resource.
      */
-    public void onResourceReady(Resource<Z> resource);
+    public void onResourceReady(Z resource);
 
     /**
      * A method that can optionally be implemented to set any placeholder that might have been passed to Glide to

@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import com.bumptech.glide.load.MultiTransformation;
@@ -15,10 +16,13 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.MultiTypeRequestCoordinator;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.bitmap.GenericRequest;
 import com.bumptech.glide.request.bitmap.RequestListener;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
@@ -42,6 +46,8 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
     private final ModelType model;
     private final ChildLoadProvider<ModelType, ImageDataType, ResourceType> imageLoadProvider;
     private final ChildLoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider;
+    private final Class<ResourceType> resourceClass;
+    private final ImageViewTargetFactory viewTargetFactory;
     private int animationId;
     private Animation animation;
     private int placeholderId;
@@ -56,7 +62,10 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
 
     public GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageDataType, ResourceType> imageLoadProvider,
-            LoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider) {
+            LoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider,
+            Class<ResourceType> resourceClass, ImageViewTargetFactory viewTargetFactory) {
+        this.resourceClass = resourceClass;
+        this.viewTargetFactory = viewTargetFactory;
         this.imageLoadProvider = imageLoadProvider != null ?
                 new ChildLoadProvider<ModelType, ImageDataType, ResourceType>(imageLoadProvider) : null;
         this.videoLoadProvider = videoLoadProvider != null ?
@@ -313,12 +322,12 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @return The given target.
      */
     public <Y extends Target<ResourceType>> Y into(Y target) {
-        com.bumptech.glide.request.Request previous = target.getRequest();
+        Request previous = target.getRequest();
         if (previous != null) {
             previous.clear();
         }
 
-        com.bumptech.glide.request.Request request = buildRequest(target);
+        Request request = buildRequest(target);
         target.setRequest(request);
         if (request != null) {
             request.run();
@@ -326,22 +335,21 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
         return target;
     }
 
-//TODO:
-//    /**
-//     * Sets the {@link ImageView} the image will be loaded into, cancels any existing loads into the view, and frees
-//     * any resources Glide has loaded into the view so they may be reused.
-//     *
-//     * @see Glide#clear(View)
-//     *
-//     * @param view The view to cancel previous loads for and load the new image into.
-//     * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
-//     */
-//    public BitmapImageViewTarget into(ImageView view) {
-//        return into(new BitmapImageViewTarget(view));
-//    }
+    /**
+     * Sets the {@link ImageView} the image will be loaded into, cancels any existing loads into the view, and frees
+     * any resources Glide has loaded into the view so they may be reused.
+     *
+     * @see Glide#clear(View)
+     *
+     * @param view The view to cancel previous loads for and load the new image into.
+     * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
+     */
+    public Target<ResourceType> into(ImageView view) {
+        return into(viewTargetFactory.buildTarget(view, resourceClass));
+    }
 
-    private com.bumptech.glide.request.Request buildRequest(Target<ResourceType> target) {
-        final com.bumptech.glide.request.Request result;
+    private Request buildRequest(Target<ResourceType> target) {
+        final Request result;
 
         if (priority == null) {
             priority = Priority.NORMAL;
@@ -349,7 +357,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
 
         if (thumbnailRequestBuilder != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
-            com.bumptech.glide.request.Request fullRequest = buildRequest(target, sizeMultiplier, priority, requestCoordinator);
+            Request fullRequest = buildRequest(target, sizeMultiplier, priority, requestCoordinator);
 
             if (thumbnailRequestBuilder.animationId <= 0) {
                 thumbnailRequestBuilder.animationId = animationId;
@@ -367,15 +375,15 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
                 thumbnailRequestBuilder.priority = getThumbnailPriority();
             }
 
-            com.bumptech.glide.request.Request thumbnailRequest = thumbnailRequestBuilder.buildRequest(target,
+            Request thumbnailRequest = thumbnailRequestBuilder.buildRequest(target,
                     thumbnailRequestBuilder.sizeMultiplier, thumbnailRequestBuilder.priority, requestCoordinator);
 
             requestCoordinator.setRequests(fullRequest, thumbnailRequest);
             result = requestCoordinator;
         } else if (thumbSizeMultiplier != null) {
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
-            com.bumptech.glide.request.Request fullRequest = buildRequest(target, sizeMultiplier, priority, requestCoordinator);
-            com.bumptech.glide.request.Request thumbnailRequest = buildRequest(target, thumbSizeMultiplier, getThumbnailPriority(),
+            Request fullRequest = buildRequest(target, sizeMultiplier, priority, requestCoordinator);
+            Request thumbnailRequest = buildRequest(target, thumbSizeMultiplier, getThumbnailPriority(),
                     requestCoordinator);
             requestCoordinator.setRequests(fullRequest, thumbnailRequest);
             result = requestCoordinator;
@@ -397,7 +405,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
         return result;
     }
 
-    private com.bumptech.glide.request.Request buildRequest(Target<ResourceType> target, float sizeMultiplier, Priority priority,
+    private Request buildRequest(Target<ResourceType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         if (model == null) {
             return buildRequestForDataType(target, imageLoadProvider, sizeMultiplier, priority, null);
@@ -408,21 +416,22 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
             return buildRequestForDataType(target, imageLoadProvider, sizeMultiplier, priority, requestCoordinator);
         } else {
             MultiTypeRequestCoordinator typeCoordinator = new MultiTypeRequestCoordinator(requestCoordinator);
-            com.bumptech.glide.request.Request imageRequest =
+            Request imageRequest =
                     buildRequestForDataType(target, imageLoadProvider, sizeMultiplier, priority, typeCoordinator);
-            com.bumptech.glide.request.Request videoRequest =
+            Request videoRequest =
                     buildRequestForDataType(target, videoLoadProvider, sizeMultiplier, priority, typeCoordinator);
             typeCoordinator.setRequests(imageRequest, videoRequest);
             return typeCoordinator;
         }
     }
 
-    private <Z> com.bumptech.glide.request.Request buildRequestForDataType(Target<ResourceType> target,
+    private <Z> Request buildRequestForDataType(Target<ResourceType> target,
             LoadProvider<ModelType, Z, ResourceType> loadProvider, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         return new GenericRequest<ModelType, Z, ResourceType>(loadProvider, model, context, priority, target,
                 sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
-                animationId, animation, requestCoordinator, Glide.get(context).getEngine(), getFinalTransformation());
+                animationId, animation, requestCoordinator, Glide.get(context).getEngine(), getFinalTransformation(),
+                resourceClass);
     }
 
     @SuppressWarnings("unchecked")

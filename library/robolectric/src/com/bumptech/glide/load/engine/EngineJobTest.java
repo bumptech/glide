@@ -174,11 +174,11 @@ public class EngineJobTest {
         Key key = mock(Key.class);
         MemoryCache memoryCache = mock(MemoryCache.class);
         Handler mainHandler = new Handler();
-        ResourceCallback<Object> cb = mock(ResourceCallback.class);
+        ResourceCallback cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         EngineJobListener listener = mock(EngineJobListener.class);
 
-        EngineJob<Object> job = new EngineJob<Object>(key, memoryCache, mainHandler, listener);
+        EngineJob job = new EngineJob(key, memoryCache, mainHandler, listener);
 
         public EngineJobHarness() {
             job.addCallback(cb);

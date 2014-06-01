@@ -218,7 +218,7 @@ public class EngineTest {
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         Priority priority = Priority.NORMAL;
-        ResourceCallback <Object> cb = mock(ResourceCallback.class);
+        ResourceCallback cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         Map<Key, ResourceRunner> runners = new HashMap<Key, ResourceRunner>();
         Transformation transformation = mock(Transformation.class);
@@ -228,7 +228,7 @@ public class EngineTest {
 
         MemoryCache cache = mock(MemoryCache.class);
         ResourceRunner<Object> runner = mock(ResourceRunner.class);
-        EngineJob<Object> job;
+        EngineJob job;
         Engine engine;
 
         public EngineTestHarness() {

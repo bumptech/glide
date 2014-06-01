@@ -8,13 +8,13 @@ import android.os.Looper;
  *     Public methods are non final only to allow for mocking, subclasses must only override abstract methods.
  * </p>
  *
- * @param <T> The type of resource wrapped by this class.
+ * @param <Z> The type of resource wrapped by this class.
  */
-public abstract class Resource<T> {
+public abstract class Resource<Z> {
     private volatile int acquired;
     private volatile boolean isRecycled;
 
-    public abstract T get();
+    public abstract Z get();
 
     public abstract int getSize();
 

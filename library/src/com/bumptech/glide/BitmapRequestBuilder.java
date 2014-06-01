@@ -15,6 +15,7 @@ import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.RequestListener;
+import com.bumptech.glide.request.target.ImageViewTargetFactory;
 
 import java.io.InputStream;
 
@@ -33,8 +34,9 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
 
     BitmapRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, InputStream, Bitmap> streamLoadProvider,
-            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider, BitmapPool bitmapPool) {
-        super(context, model, streamLoadProvider, fileDescriptorLoadProvider);
+            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider,
+            BitmapPool bitmapPool, ImageViewTargetFactory factory) {
+        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, Bitmap.class, factory);
         this.bitmapPool = bitmapPool;
     }
 

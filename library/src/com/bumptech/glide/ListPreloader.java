@@ -169,7 +169,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         private int photoWidth;
 
         @Override
-        public void onResourceReady(Resource resource) {
+        public void onResourceReady(Object resource) {
         }
 
         @Override

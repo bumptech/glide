@@ -35,7 +35,7 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
             Transformation<Z> transformation, ResourceEncoder<Z> encoder, Priority priority,
             EngineJobListener listener) {
 
-        EngineJob<Z> engineJob = new EngineJob<Z>(key, memoryCache, mainHandler, listener);
+        EngineJob engineJob = new EngineJob(key, memoryCache, mainHandler, listener);
 
         SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(key, width, height, fetcher, decoder,
                 transformation, encoder, diskCache, priority, engineJob);
