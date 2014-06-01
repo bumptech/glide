@@ -6,6 +6,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
 import com.bumptech.glide.request.ResourceCallback;
@@ -54,38 +55,38 @@ public class SourceResourceRunnerTest {
     }
 
     @Test
-    public void testCallbackIsCalledIfFetchedAndDecoded() throws Exception {
+    public void testCallbackIsCalledWithTranscodedResourceIfFetchedAndDecoded() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        when(harness.transcoder.transcode(harness.decoded)).thenReturn(harness.transcoded);
 
         harness.runner.run();
 
-        verify(harness.cb).onResourceReady(eq(harness.result));
+        verify(harness.cb).onResourceReady(eq(harness.transcoded));
     }
-
 
     @Test
     public void testResourceIsWrittenToCacheIfFetchedAndDecoded() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
 
         final OutputStream expected = new ByteArrayOutputStream();
 
         harness.runner.run();
         harness.runner.write(expected);
 
-        verify(harness.encoder).encode(eq(harness.result), eq(expected));
+        verify(harness.encoder).encode(eq(harness.decoded), eq(expected));
     }
 
     @Test
     public void testResourceIsTransformedBeforeBeingWrittenToCache() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
         Resource transformed = mock(Resource.class);
-        when(harness.transformation.transform(eq(harness.result), eq(harness.width), eq(harness.height)))
+        when(harness.transformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
                 .thenReturn(transformed);
 
         OutputStream expected = new ByteArrayOutputStream();
@@ -99,25 +100,25 @@ public class SourceResourceRunnerTest {
     public void testDecodedResourceIsRecycledIfTransformedResourceIsDifferent() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
         Resource transformed = mock(Resource.class);
-        when(harness.transformation.transform(eq(harness.result), eq(harness.width), eq(harness.height)))
+        when(harness.transformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
                 .thenReturn(transformed);
 
         harness.runner.run();
 
-        verify(harness.result).recycle();
+        verify(harness.decoded).recycle();
     }
 
     @Test
     public void testDecodedResourceIsNotRecycledIfResourceIsNotTransformed() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
 
         harness.runner.run();
 
-        verify(harness.result, never()).recycle();
+        verify(harness.decoded, never()).recycle();
     }
 
     @Test
@@ -159,7 +160,6 @@ public class SourceResourceRunnerTest {
     public void testPriorityMatchesPriority() {
         harness.priority = Priority.LOW;
         assertEquals(harness.priority.ordinal(), harness.runner.getPriority());
-
     }
 
     @SuppressWarnings("unchecked")
@@ -167,18 +167,21 @@ public class SourceResourceRunnerTest {
         ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
+        ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         DiskCache diskCache = mock(DiskCache.class);
         Priority priority = Priority.LOW;
         ResourceCallback cb = mock(ResourceCallback.class);
-        Resource<Object> result = mock(Resource.class);
+        Resource<Object> decoded = mock(Resource.class);
+        Resource<Object> transcoded = mock(Resource.class);
         Transformation<Object> transformation = mock(Transformation.class);
         int width = 150;
         int height = 200;
-        SourceResourceRunner<Object, Object> runner = new SourceResourceRunner<Object, Object>(mock(Key.class), width,
-                height, fetcher, decoder, transformation, encoder, diskCache, priority, cb);
+        SourceResourceRunner<Object, Object, Object> runner = new SourceResourceRunner<Object, Object, Object>(
+                mock(Key.class), width, height, fetcher, decoder, transformation, encoder, transcoder, diskCache,
+                priority, cb);
 
         public SourceResourceHarness() {
-            when(transformation.transform(eq(result), eq(width), eq(height))).thenReturn(result);
+            when(transformation.transform(eq(decoded), eq(width), eq(height))).thenReturn(decoded);
         }
     }
 }

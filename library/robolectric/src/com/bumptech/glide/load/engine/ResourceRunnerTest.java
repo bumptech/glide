@@ -109,6 +109,19 @@ public class ResourceRunnerTest {
     }
 
     @Test
+    public void testDecodedResourceIsNotRecycledIfTranscoded() throws IOException {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        when(harness.transcoder.transcode(eq(harness.decoded))).thenReturn(harness.transcoded);
+
+        harness.runner.run();
+
+        verify(harness.decoded, never()).recycle();
+        verify(harness.decoded, never()).release();
+    }
+
+    @Test
     public void testCallbackIsNotCalledIfDiskCacheReturnsNull() {
         when(harness.diskCache.get(eq(harness.key))).thenReturn(null);
 
@@ -203,7 +216,7 @@ public class ResourceRunnerTest {
         Key key = mock(Key.class);
         DiskCache diskCache = mock(DiskCache.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
-        SourceResourceRunner<Object, Object> sourceRunner = mock(SourceResourceRunner.class);
+        SourceResourceRunner<Object, Object, Object> sourceRunner = mock(SourceResourceRunner.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         ExecutorService service = mock(ExecutorService.class);
         EngineJob engineJob = mock(EngineJob.class);

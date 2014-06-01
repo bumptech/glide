@@ -9,6 +9,8 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
@@ -53,6 +55,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -69,11 +72,14 @@ import static org.mockito.Mockito.when;
 @Config(shadows = { GlideTest.ShadowFileDescriptorContentResolver.class, GlideTest.ShadowMediaMetadataRetriever.class })
 public class GlideTest {
     private Target target = null;
+    private ImageView imageView;
 
     @Before
     public void setUp() throws Exception {
         // Ensure that target's size ready callback will be called synchronously.
         target = mock(Target.class);
+        imageView = new ImageView(Robolectric.application);
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -222,19 +228,26 @@ public class GlideTest {
         mockUri(Uri.fromFile(file));
 
         Glide.with(getContext()).load(file).into(target);
+        Glide.with(getContext()).load(file).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
+
+        assertNotNull(imageView.getDrawable());
     }
 
     @Test
     public void runTestUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
 
-        Glide.with(getContext()).loadFromImage(url).into(target);
+//        Glide.with(getContext()).loadFromImage(url).into(target);
+//
+//        verify(target).onResourceReady(any(Resource.class));
+//        verify(target).setRequest((Request) notNull());
 
-        verify(target).onResourceReady(any(Resource.class));
-        verify(target).setRequest((Request) notNull());
+        Glide.with(getContext()).loadFromImage(url).into(imageView);
+
+        assertNotNull(imageView.getDrawable());
     }
 
     @Test
@@ -259,9 +272,12 @@ public class GlideTest {
         mockUri(uri);
 
         Glide.with(getContext()).load(uri).into(target);
+        Glide.with(getContext()).load(uri).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
+
+        assertNotNull(imageView.getDrawable());
     }
 
     @Test
@@ -317,9 +333,12 @@ public class GlideTest {
 
     private void runTestStringDefaultLoader(String string) {
         Glide.with(getContext()).load(string).into(target);
+        Glide.with(getContext()).load(string).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
+
+        assertNotNull(imageView.getDrawable());
     }
 
     @Test
@@ -344,28 +363,38 @@ public class GlideTest {
         mockUri("android.resource://" + getContext().getPackageName() + "/" + integer);
 
         Glide.with(getContext()).load(integer).into(target);
+        Glide.with(getContext()).load(integer).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
+
+        assertNotNull(imageView.getDrawable());
     }
 
     @Test
     public void testByteArrayDefaultLoader() {
         byte[] bytes = new byte[10];
         Glide.with(getContext()).loadFromImage(bytes).into(target);
+        Glide.with(getContext()).loadFromImage(bytes).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
+
+        assertNotNull(imageView.getDrawable());
     }
 
     @Test
     public void testByteArrayWithIdDefaultLoader() {
         byte[] bytes = new byte[10];
         String id = "test";
+
         Glide.with(getContext()).loadFromImage(bytes, id).into(target);
+        Glide.with(getContext()).loadFromImage(bytes, id).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class));
         verify(target).setRequest((Request) notNull());
+
+        assertNotNull(imageView.getDrawable());
     }
 
     @Test(expected = Exception.class)

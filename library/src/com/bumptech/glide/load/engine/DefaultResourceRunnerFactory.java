@@ -38,8 +38,8 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
 
         EngineJob engineJob = new EngineJob(key, memoryCache, mainHandler, listener);
 
-        SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(key, width, height, fetcher, decoder,
-                transformation, encoder, diskCache, priority, engineJob);
+        SourceResourceRunner<T, Z, R> sourceRunner = new SourceResourceRunner<T, Z, R>(key, width, height, fetcher,
+                decoder, transformation, encoder, transcoder, diskCache, priority, engineJob);
 
         return new ResourceRunner<Z, R>(key, width, height, diskCache, cacheDecoder, transcoder, sourceRunner, service,
                 bgHandler, engineJob);

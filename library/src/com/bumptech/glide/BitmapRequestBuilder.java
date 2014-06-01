@@ -25,19 +25,20 @@ import java.io.InputStream;
  * options including resizing, animations, and placeholders.
  *
  * @param <ModelType> The type of model that will be loaded into the target.
+ * @param <TranscodeType> The type of the transcoded resource that the target will receive
  */
 @SuppressWarnings("unused") //public api
-public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor,
-        Bitmap, Bitmap> {
+public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericRequestBuilder<ModelType, InputStream,
+        ParcelFileDescriptor, Bitmap, TranscodeType> {
     private final BitmapPool bitmapPool;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
 
     BitmapRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, InputStream, Bitmap, Bitmap> streamLoadProvider,
-            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap, Bitmap> fileDescriptorLoadProvider,
-            BitmapPool bitmapPool, ImageViewTargetFactory factory, Engine engine) {
-        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, Bitmap.class, factory, engine);
+            LoadProvider<ModelType, InputStream, Bitmap, TranscodeType> streamLoadProvider,
+            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap, TranscodeType> fileDescriptorLoadProvider,
+            Class<TranscodeType> transcodeClass, BitmapPool bitmapPool, ImageViewTargetFactory factory, Engine engine) {
+        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, transcodeClass, factory, engine);
         this.bitmapPool = bitmapPool;
     }
 
@@ -48,7 +49,7 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      *
      * @return This RequestBuilder
      */
-    public BitmapRequestBuilder<ModelType> approximate() {
+    public BitmapRequestBuilder<ModelType, TranscodeType> approximate() {
         return downsample(Downsampler.AT_LEAST);
     }
 
@@ -59,7 +60,7 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      *
      * @return This RequestBuilder
      */
-    public BitmapRequestBuilder<ModelType> asIs() {
+    public BitmapRequestBuilder<ModelType, TranscodeType> asIs() {
         return downsample(Downsampler.NONE);
     }
 
@@ -72,37 +73,38 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      * @param downsampler The downsampler
      * @return This RequestBuilder
      */
-    private BitmapRequestBuilder<ModelType> downsample(Downsampler downsampler) {
+    private BitmapRequestBuilder<ModelType, TranscodeType> downsample(Downsampler downsampler) {
         this.downsampler = downsampler;
         super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, decodeFormat));
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> thumbnail(float sizeMultiplier) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(float sizeMultiplier) {
         super.thumbnail(sizeMultiplier);
         return this;
     }
 
-    public BitmapRequestBuilder<ModelType> thumbnail(BitmapRequestBuilder<ModelType> thumbnailRequest) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(BitmapRequestBuilder<ModelType, TranscodeType>
+            thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> sizeMultiplier(float sizeMultiplier) {
         super.sizeMultiplier(sizeMultiplier);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
         super.imageDecoder(decoder);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> videoDecoder(ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> videoDecoder(ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
         super.videoDecoder(decoder);
         return this;
     }
@@ -122,14 +124,14 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      * @param format The format to use.
      * @return This request builder.
      */
-    public BitmapRequestBuilder<ModelType> format(DecodeFormat format) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> format(DecodeFormat format) {
         this.decodeFormat = format;
         super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, format));
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> priority(Priority priority) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> priority(Priority priority) {
         super.priority(priority);
         return this;
     }
@@ -139,7 +141,7 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      *
      * @return This RequestBuilder
      */
-    public BitmapRequestBuilder<ModelType> centerCrop() {
+    public BitmapRequestBuilder<ModelType, TranscodeType> centerCrop() {
         return transform(new CenterCrop(bitmapPool));
     }
 
@@ -148,54 +150,54 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      *
      * @return This RequestBuilder
      */
-    public BitmapRequestBuilder<ModelType> fitCenter() {
+    public BitmapRequestBuilder<ModelType, TranscodeType> fitCenter() {
         return transform(new FitCenter(bitmapPool));
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> transform(Transformation<Bitmap> transformation) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> transform(Transformation<Bitmap> transformation) {
         super.transform(transformation);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> animate(int animationId) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> animate(int animationId) {
         super.animate(animationId);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> animate(Animation animation) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> animate(Animation animation) {
         super.animate(animation);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> placeholder(int resourceId) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> placeholder(int resourceId) {
         super.placeholder(resourceId);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> placeholder(Drawable drawable) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> placeholder(Drawable drawable) {
         super.placeholder(drawable);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> error(int resourceId) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> error(int resourceId) {
         super.error(resourceId);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> error(Drawable drawable) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> error(Drawable drawable) {
         super.error(drawable);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType> listener(RequestListener<ModelType> requestListener) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> listener(RequestListener<ModelType> requestListener) {
         super.listener(requestListener);
         return this;
     }

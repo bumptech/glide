@@ -40,9 +40,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
     private final A model;
-    private final Class<Z> resourceClass;
+    private Class<R> transcodeClass;
     private Priority priority;
-    private final Target<Z> target;
+    private final Target<R> target;
     private final RequestListener<A> requestListener;
     private final float sizeMultiplier;
     private final Engine engine;
@@ -56,10 +56,10 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private Engine.LoadStatus loadStatus;
 
     public GenericRequest(LoadProvider<A, T, Z, R> loadProvider, A model, Context context, Priority priority,
-            Target<Z> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
+            Target<R> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
             Drawable errorDrawable, int errorResourceId, RequestListener<A> requestListener, int animationId,
             Animation animation, RequestCoordinator requestCoordinator, Engine engine,
-            Transformation<Z> transformation, Class<Z> resourceClass) {
+            Transformation<Z> transformation, Class<R> transcodeClass) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -76,7 +76,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         this.requestCoordinator = requestCoordinator;
         this.engine = engine;
         this.transformation = transformation;
-        this.resourceClass = resourceClass;
+        this.transcodeClass = transcodeClass;
     }
 
     @Override
@@ -184,16 +184,15 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             resource.release();
             return;
         }
-        if (resource == null || !resourceClass.isAssignableFrom(resource.get()
-                .getClass())) {
+        if (resource == null || !transcodeClass.isAssignableFrom(resource.get().getClass())) {
             if (resource != null) {
                 resource.release();
             }
-            onException(new Exception("Expected to receive an object of " + resourceClass + " but instead got " +
+            onException(new Exception("Expected to receive an object of " + transcodeClass + " but instead got " +
                     (resource != null ? resource.get() : null)));
             return;
         }
-        Z result = (Z) resource.get();
+        R result = (R) resource.get();
         target.onResourceReady(result);
         if (!loadedFromMemoryCache && !isAnyImageSet()) {
             if (animation == null && animationId > 0) {

@@ -88,6 +88,6 @@ public class GlideBuilder {
                     .build();
         }
 
-        return new Glide(engine, requestQueue, memoryCache, bitmapPool);
+        return new Glide(engine, requestQueue, memoryCache, bitmapPool, context.getResources());
     }
 }

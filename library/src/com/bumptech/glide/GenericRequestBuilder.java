@@ -47,7 +47,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
     private final ModelType model;
     private final ChildLoadProvider<ModelType, ImageDataType, ResourceType, TranscodeType> imageLoadProvider;
     private final ChildLoadProvider<ModelType, VideoDataType, ResourceType, TranscodeType> videoLoadProvider;
-    private final Class<ResourceType> resourceClass;
+    private final Class<TranscodeType> transcodeClass;
     private final ImageViewTargetFactory viewTargetFactory;
     private final Engine engine;
     private int animationId;
@@ -66,9 +66,8 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
     public GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageDataType, ResourceType, TranscodeType> imageLoadProvider,
             LoadProvider<ModelType, VideoDataType, ResourceType, TranscodeType> videoLoadProvider,
-            Class<ResourceType> resourceClass, ImageViewTargetFactory viewTargetFactory,
-            Engine engine) {
-        this.resourceClass = resourceClass;
+            Class<TranscodeType> transcodeClass, ImageViewTargetFactory viewTargetFactory, Engine engine) {
+        this.transcodeClass = transcodeClass;
         this.viewTargetFactory = viewTargetFactory;
         this.engine = engine;
         this.imageLoadProvider = imageLoadProvider != null ?
@@ -110,7 +109,8 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @return This builder object.
      */
     public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> thumbnail(
-            GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> thumbnailRequest) {
+            GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType>
+                    thumbnailRequest) {
         this.thumbnailRequestBuilder = thumbnailRequest;
 
         return this;
@@ -140,7 +140,8 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the thumbnail.
      * @return This builder object.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> thumbnail(float sizeMultiplier) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> thumbnail(
+            float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
         }
@@ -326,7 +327,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param target The target to load te image for
      * @return The given target.
      */
-    public <Y extends Target<ResourceType>> Y into(Y target) {
+    public <Y extends Target<TranscodeType>> Y into(Y target) {
         Request previous = target.getRequest();
         if (previous != null) {
             previous.clear();
@@ -349,11 +350,11 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param view The view to cancel previous loads for and load the new image into.
      * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
      */
-    public Target<ResourceType> into(ImageView view) {
-        return into(viewTargetFactory.buildTarget(view, resourceClass));
+    public Target<TranscodeType> into(ImageView view) {
+        return into(viewTargetFactory.buildTarget(view, transcodeClass));
     }
 
-    private Request buildRequest(Target<ResourceType> target) {
+    private Request buildRequest(Target<TranscodeType> target) {
         final Request result;
 
         if (priority == null) {
@@ -410,7 +411,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
         return result;
     }
 
-    private Request buildRequest(Target<ResourceType> target, float sizeMultiplier, Priority priority,
+    private Request buildRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         if (model == null) {
             return buildRequestForDataType(target, imageLoadProvider, sizeMultiplier, priority, null);
@@ -430,13 +431,13 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
         }
     }
 
-    private <Z> Request buildRequestForDataType(Target<ResourceType> target,
+    private <Z> Request buildRequestForDataType(Target<TranscodeType> target,
             LoadProvider<ModelType, Z, ResourceType, TranscodeType> loadProvider, float sizeMultiplier,
             Priority priority, RequestCoordinator requestCoordinator) {
         return new GenericRequest<ModelType, Z, ResourceType, TranscodeType>(loadProvider, model, context, priority,
                 target, sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
                 animationId, animation, requestCoordinator, engine, getFinalTransformation(),
-                resourceClass);
+                transcodeClass);
     }
 
     @SuppressWarnings("unchecked")
