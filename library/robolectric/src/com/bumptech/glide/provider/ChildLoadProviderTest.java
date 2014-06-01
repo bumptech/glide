@@ -2,6 +2,7 @@ package com.bumptech.glide.provider;
 
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.model.ModelLoader;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,14 +70,23 @@ public class ChildLoadProviderTest {
         assertEquals(harness.encoder, harness.provider.getEncoder());
     }
 
+    @Test
+    public void testReturnsParentTranscoder() {
+        when(harness.parent.getTranscoder()).thenReturn(harness.transcoder);
+
+        assertEquals(harness.transcoder, harness.provider.getTranscoder());
+    }
+
     @SuppressWarnings("unchecked")
     private static class ChildLoadHarness {
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
-        LoadProvider<Object, Object, Object> parent = mock(LoadProvider.class);
-        ChildLoadProvider<Object, Object, Object> provider = new ChildLoadProvider<Object, Object, Object>(parent);
+        LoadProvider<Object, Object, Object, Object> parent = mock(LoadProvider.class);
+        ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
+        ChildLoadProvider<Object, Object, Object, Object> provider =
+                new ChildLoadProvider<Object, Object, Object, Object>(parent);
 
     }
 }

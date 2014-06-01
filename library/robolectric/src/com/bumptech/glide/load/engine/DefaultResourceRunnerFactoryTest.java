@@ -6,6 +6,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
@@ -57,7 +58,7 @@ public class DefaultResourceRunnerFactoryTest {
 
         public ResourceRunner build() {
             return factory.build(mock(Key.class), width, height, cacheDecoder, fetcher, decoder, transformation,
-                    encoder, priority, listener);
+                    encoder, mock(ResourceTranscoder.class), priority, listener);
         }
     }
 }

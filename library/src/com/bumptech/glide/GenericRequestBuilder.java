@@ -41,12 +41,12 @@ import java.util.List;
  *      {@link BitmapDecoder}.
  * @param <ResourceType> The type of the resource that will be loaded.
  */
-public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> {
+public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> {
     protected final Context context;
     private final List<Transformation<ResourceType>> transformations = new ArrayList<Transformation<ResourceType>>();
     private final ModelType model;
-    private final ChildLoadProvider<ModelType, ImageDataType, ResourceType> imageLoadProvider;
-    private final ChildLoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider;
+    private final ChildLoadProvider<ModelType, ImageDataType, ResourceType, TranscodeType> imageLoadProvider;
+    private final ChildLoadProvider<ModelType, VideoDataType, ResourceType, TranscodeType> videoLoadProvider;
     private final Class<ResourceType> resourceClass;
     private final ImageViewTargetFactory viewTargetFactory;
     private final Engine engine;
@@ -56,24 +56,25 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
     private int errorId;
     private RequestListener<ModelType> requestListener;
     private Float thumbSizeMultiplier;
-    private GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnailRequestBuilder;
+    private GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType>
+            thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;
     private Priority priority = null;
 
     public GenericRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, ImageDataType, ResourceType> imageLoadProvider,
-            LoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider,
+            LoadProvider<ModelType, ImageDataType, ResourceType, TranscodeType> imageLoadProvider,
+            LoadProvider<ModelType, VideoDataType, ResourceType, TranscodeType> videoLoadProvider,
             Class<ResourceType> resourceClass, ImageViewTargetFactory viewTargetFactory,
             Engine engine) {
         this.resourceClass = resourceClass;
         this.viewTargetFactory = viewTargetFactory;
         this.engine = engine;
         this.imageLoadProvider = imageLoadProvider != null ?
-                new ChildLoadProvider<ModelType, ImageDataType, ResourceType>(imageLoadProvider) : null;
+                new ChildLoadProvider<ModelType, ImageDataType, ResourceType, TranscodeType>(imageLoadProvider) : null;
         this.videoLoadProvider = videoLoadProvider != null ?
-                new ChildLoadProvider<ModelType, VideoDataType, ResourceType>(videoLoadProvider) : null;
+                new ChildLoadProvider<ModelType, VideoDataType, ResourceType, TranscodeType>(videoLoadProvider) : null;
 
         if (context == null) {
             throw new NullPointerException("Context can't be null");
@@ -108,8 +109,8 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param thumbnailRequest The request to use to load the thumbnail.
      * @return This builder object.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnail(
-            GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnailRequest) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> thumbnail(
+            GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> thumbnailRequest) {
         this.thumbnailRequestBuilder = thumbnailRequest;
 
         return this;
@@ -139,7 +140,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the thumbnail.
      * @return This builder object.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> thumbnail(float sizeMultiplier) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> thumbnail(float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
         }
@@ -155,7 +156,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the image.
      * @return This builder object.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> sizeMultiplier(
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> sizeMultiplier(
             float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
@@ -177,7 +178,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param decoder The {@link BitmapDecoder} to use to decode the image resource.
      * @return This RequestBuilder.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> imageDecoder(
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> imageDecoder(
             ResourceDecoder<ImageDataType, ResourceType> decoder) {
         imageLoadProvider.setSourceDecoder(decoder);
 
@@ -196,7 +197,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param decoder The {@link BitmapDecoder} to use to decode the video resource.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> videoDecoder(
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> videoDecoder(
             ResourceDecoder<VideoDataType, ResourceType> decoder) {
         videoLoadProvider.setSourceDecoder(decoder);
 
@@ -209,7 +210,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param priority A priority.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> priority(Priority priority) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> priority(Priority priority) {
         this.priority = priority;
 
         return this;
@@ -223,7 +224,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param transformation the transformation to apply.
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> transform(
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> transform(
             Transformation<ResourceType> transformation) {
         transformations.add(transformation);
 
@@ -237,7 +238,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param animationId The resource id of the animation to run
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> animate(int animationId) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> animate(int animationId) {
         this.animationId = animationId;
 
         return this;
@@ -250,7 +251,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param animation The animation to run
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> animate(Animation animation) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> animate(Animation animation) {
         this.animation = animation;
 
         return this;
@@ -262,7 +263,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param resourceId The id of the resource to use as a placeholder
      * @return This RequestBuilder
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> placeholder(int resourceId) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> placeholder(int resourceId) {
         this.placeholderId = resourceId;
 
         return this;
@@ -274,7 +275,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param drawable The drawable to display as a placeholder.
      * @return This RequestBuilder.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> placeholder(Drawable drawable) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> placeholder(Drawable drawable) {
         this.placeholderDrawable = drawable;
 
         return this;
@@ -286,7 +287,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param resourceId The id of the resource to use as a placeholder
      * @return This request
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> error(int resourceId) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> error(int resourceId) {
         this.errorId = resourceId;
 
         return this;
@@ -298,7 +299,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param drawable The drawable to display.
      * @return This RequestBuilder.
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> error(Drawable drawable) {
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> error(Drawable drawable) {
         this.errorPlaceholder = drawable;
 
         return this;
@@ -312,7 +313,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
      * @param requestListener The request listener to use
      * @return This request
      */
-    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType> listener(
+    public GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, ResourceType, TranscodeType> listener(
             RequestListener<ModelType> requestListener) {
         this.requestListener = requestListener;
 
@@ -430,10 +431,10 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
     }
 
     private <Z> Request buildRequestForDataType(Target<ResourceType> target,
-            LoadProvider<ModelType, Z, ResourceType> loadProvider, float sizeMultiplier, Priority priority,
-            RequestCoordinator requestCoordinator) {
-        return new GenericRequest<ModelType, Z, ResourceType>(loadProvider, model, context, priority, target,
-                sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
+            LoadProvider<ModelType, Z, ResourceType, TranscodeType> loadProvider, float sizeMultiplier,
+            Priority priority, RequestCoordinator requestCoordinator) {
+        return new GenericRequest<ModelType, Z, ResourceType, TranscodeType>(loadProvider, model, context, priority,
+                target, sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
                 animationId, animation, requestCoordinator, engine, getFinalTransformation(),
                 resourceClass);
     }

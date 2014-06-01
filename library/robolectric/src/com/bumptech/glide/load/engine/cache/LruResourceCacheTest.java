@@ -108,7 +108,7 @@ public class LruResourceCacheTest {
 
     private static class MockKey implements Key {
         @Override
-        public void update(MessageDigest messageDigest) throws UnsupportedEncodingException {
+        public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
             messageDigest.update(toString().getBytes("UTF-8"));
         }
     }

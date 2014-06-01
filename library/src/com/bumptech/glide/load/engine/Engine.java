@@ -6,6 +6,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
 import com.bumptech.glide.request.ResourceCallback;
@@ -55,15 +56,17 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param fetcher
      * @param decoder
      * @param encoder
+     * @param transcoder
      * @param priority
      * @param <T> The type of data the resource will be decoded from.
      * @param <Z> The type of the resource that will be decoded.
+     * @param <R> The type of the resource that will be transcoded from the decoded resource.
      */
-    public <T, Z> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
+    public <T, Z, R> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
             ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
-            ResourceEncoder<Z> encoder, Priority priority, ResourceCallback cb) {
+            ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, Priority priority, ResourceCallback cb) {
 
-        Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder);
+        Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder, transcoder);
 
         Resource cached = cache.get(key);
         if (cached != null) {
@@ -79,8 +82,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             return new LoadStatus(cb, job);
         }
 
-        ResourceRunner<Z> runner = factory.build(key, width, height, cacheDecoder, fetcher, decoder, transformation,
-                encoder, priority, this);
+        ResourceRunner<Z, R> runner = factory.build(key, width, height, cacheDecoder, fetcher, decoder, transformation,
+                encoder, transcoder, priority, this);
         runner.getJob().addCallback(cb);
         runners.put(key, runner);
         runner.queue();

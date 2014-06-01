@@ -10,6 +10,7 @@ import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.ResourceFetcher;
@@ -28,14 +29,14 @@ import java.io.InputStream;
  * @param <T> The type of the data that the resource will be loaded from.
  * @param <Z> The type of the resource that will be loaded.
  */
-public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallback, ResourceCallback {
+public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback, ResourceCallback {
     private static final String TAG = "Request";
 
     private final int placeholderResourceId;
     private final int errorResourceId;
     private final Context context;
     private final Transformation<Z> transformation;
-    private final LoadProvider<A, T, Z> loadProvider;
+    private final LoadProvider<A, T, Z, R> loadProvider;
     private final int animationId;
     private final RequestCoordinator requestCoordinator;
     private final A model;
@@ -54,7 +55,7 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
     private Resource resource;
     private Engine.LoadStatus loadStatus;
 
-    public GenericRequest(LoadProvider<A, T, Z> loadProvider, A model, Context context, Priority priority,
+    public GenericRequest(LoadProvider<A, T, Z, R> loadProvider, A model, Context context, Priority priority,
             Target<Z> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
             Drawable errorDrawable, int errorResourceId, RequestListener<A> requestListener, int animationId,
             Animation animation, RequestCoordinator requestCoordinator, Engine engine,
@@ -153,6 +154,7 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
         ResourceDecoder<InputStream, Z> cacheDecoder = loadProvider.getCacheDecoder();
         ResourceDecoder<T, Z> decoder = loadProvider.getSourceDecoder();
         ResourceEncoder <Z> encoder = loadProvider.getEncoder();
+        ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
         ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
 
         final String id = modelLoader.getId(model);
@@ -160,7 +162,7 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
 
         loadedFromMemoryCache = true;
         loadStatus = engine.load(id, width, height, cacheDecoder, resourceFetcher, decoder, transformation,
-                encoder, priority, this);
+                encoder, transcoder, priority, this);
         loadedFromMemoryCache = resource != null;
     }
 
@@ -182,7 +184,8 @@ public class GenericRequest<A, T, Z> implements Request, Target.SizeReadyCallbac
             resource.release();
             return;
         }
-        if (resource == null || !resourceClass.isAssignableFrom(resource.get().getClass())) {
+        if (resource == null || !resourceClass.isAssignableFrom(resource.get()
+                .getClass())) {
             if (resource != null) {
                 resource.release();
             }

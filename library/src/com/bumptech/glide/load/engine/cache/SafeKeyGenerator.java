@@ -16,7 +16,7 @@ public class SafeKeyGenerator {
         if (safeKey == null) {
             try {
                 MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-                key.update(messageDigest);
+                key.updateDiskCacheKey(messageDigest);
                 safeKey = Util.sha256BytesToHex(messageDigest.digest());
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

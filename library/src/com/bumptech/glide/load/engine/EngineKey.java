@@ -4,6 +4,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -19,11 +20,12 @@ public class EngineKey implements Key {
     private final ResourceDecoder decoder;
     private final Transformation transformation;
     private final ResourceEncoder encoder;
+    private ResourceTranscoder transcoder;
     private String stringKey;
     private int hashCode;
 
     public EngineKey(String id, int width, int height, ResourceDecoder cacheDecoder, ResourceDecoder decoder,
-            Transformation transformation, ResourceEncoder encoder) {
+            Transformation transformation, ResourceEncoder encoder, ResourceTranscoder transcoder) {
         this.id = id;
         this.width = width;
         this.height = height;
@@ -31,6 +33,7 @@ public class EngineKey implements Key {
         this.decoder = decoder;
         this.transformation = transformation;
         this.encoder = encoder;
+        this.transcoder = transcoder;
     }
 
     @Override
@@ -50,17 +53,15 @@ public class EngineKey implements Key {
             return false;
         } else if (width != engineKey.width) {
             return false;
-        } else  if (!transformation.getId().equals(engineKey.transformation
-                .getId())) {
+        } else  if (!transformation.getId().equals(engineKey.transformation.getId())) {
             return false;
-        } else if (!decoder.getId().equals(engineKey.decoder
-                .getId())) {
+        } else if (!decoder.getId().equals(engineKey.decoder.getId())) {
             return false;
-        } else if (!cacheDecoder.getId().equals(engineKey.cacheDecoder
-                .getId())) {
+        } else if (!cacheDecoder.getId().equals(engineKey.cacheDecoder.getId())) {
             return false;
-        } else if (!encoder.getId().equals(engineKey.encoder
-                .getId())) {
+        } else if (!encoder.getId().equals(engineKey.encoder.getId())) {
+            return false;
+        } else if (!transcoder.getId().equals(engineKey.transcoder.getId())) {
             return false;
         } else {
             return true;
@@ -77,6 +78,7 @@ public class EngineKey implements Key {
             hashCode = 31 * hashCode + decoder.getId().hashCode();
             hashCode = 31 * hashCode + transformation.getId().hashCode();
             hashCode = 31 * hashCode + encoder.getId().hashCode();
+            hashCode = 31 * hashCode + transcoder.getId().hashCode();
         }
         return hashCode;
     }
@@ -92,13 +94,14 @@ public class EngineKey implements Key {
                 .append(decoder.getId())
                 .append(transformation.getId())
                 .append(encoder.getId())
+                .append(transcoder.getId())
                 .toString();
         }
         return stringKey;
     }
 
     @Override
-    public void update(MessageDigest messageDigest) throws UnsupportedEncodingException {
+    public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
         byte[] dimensions = ByteBuffer.allocate(8)
                 .putInt(width)
                 .putInt(height)

@@ -11,6 +11,8 @@ import android.view.View;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDataLoadProvider;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDataLoadProvider;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.data.transcode.UnitTranscoder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -557,8 +559,9 @@ public class Glide {
                 }
             };
 
-            LoadProvider<byte[], InputStream, Bitmap> loadProvider =
-                    new FixedLoadProvider<byte[], InputStream, Bitmap>(loader, streamDataProvider);
+            ResourceTranscoder<Bitmap, Bitmap> transcoder = UnitTranscoder.get();
+            LoadProvider <byte[], InputStream, Bitmap, Bitmap> loadProvider =
+                    new FixedLoadProvider<byte[], InputStream, Bitmap, Bitmap>(loader, transcoder, streamDataProvider);
 
             return new BitmapRequestBuilder<byte[]>(context, model, loadProvider, null, bitmapPool, factory, engine);
         }
@@ -605,19 +608,21 @@ public class Glide {
         }
 
         private <T> BitmapRequestBuilder<T> loadGeneric(T model) {
-            LoadProvider<T, InputStream, Bitmap> streamLoadProvider = null;
+            ResourceTranscoder<Bitmap, Bitmap> transcoder = UnitTranscoder.get();
+            LoadProvider<T, InputStream, Bitmap, Bitmap> streamLoadProvider = null;
             ModelLoader<T, InputStream> streamModelLoader = buildStreamModelLoader(model, context);
             if (streamModelLoader != null) {
-                streamLoadProvider = new FixedLoadProvider<T, InputStream, Bitmap>(streamModelLoader, streamDataProvider);
+                streamLoadProvider = new FixedLoadProvider<T, InputStream, Bitmap, Bitmap>(streamModelLoader,
+                        transcoder, streamDataProvider);
             }
 
-            LoadProvider<T, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider = null;
+            LoadProvider<T, ParcelFileDescriptor, Bitmap, Bitmap> fileDescriptorLoadProvider = null;
             ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
                     buildFileDescriptorModelLoader(model, context);
             if (fileDescriptorModelLoader != null) {
                 fileDescriptorLoadProvider =
-                        new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap>(fileDescriptorModelLoader,
-                                fileDescriptorDataProvider);
+                        new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap, Bitmap>(fileDescriptorModelLoader,
+                                transcoder, fileDescriptorDataProvider);
             }
             return new BitmapRequestBuilder<T>(context, model, streamLoadProvider, fileDescriptorLoadProvider,
                     bitmapPool, factory, engine);
@@ -650,9 +655,10 @@ public class Glide {
         }
 
         public BitmapRequestBuilder<T> loadFromVideo(T model) {
+            ResourceTranscoder<Bitmap, Bitmap> transcoder = UnitTranscoder.get();
             return new BitmapRequestBuilder<T>(context, model, null,
-                    new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap>(loader, dataLoadProvider), bitmapPool,
-                    factory, engine);
+                    new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap, Bitmap>(loader, transcoder,
+                            dataLoadProvider), bitmapPool, factory, engine);
         }
     }
 
@@ -682,9 +688,10 @@ public class Glide {
         }
 
         public BitmapRequestBuilder<T> load(T model) {
+            ResourceTranscoder<Bitmap, Bitmap> transcoder = UnitTranscoder.get();
             return new BitmapRequestBuilder<T>(context, model,
-                    new FixedLoadProvider<T, InputStream, Bitmap>(loader, dataLoadProvider), null, bitmapPool, factory,
-                    engine);
+                    new FixedLoadProvider<T, InputStream, Bitmap, Bitmap>(loader, transcoder, dataLoadProvider), null,
+                    bitmapPool, factory, engine);
         }
     }
 

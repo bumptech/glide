@@ -6,6 +6,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
@@ -30,17 +31,17 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     }
 
     @Override
-    public <T, Z> ResourceRunner<Z> build(Key key, int width, int height,
+    public <T, Z, R> ResourceRunner<Z, R> build(Key key, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
-            Transformation<Z> transformation, ResourceEncoder<Z> encoder, Priority priority,
-            EngineJobListener listener) {
+            Transformation<Z> transformation, ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
+            Priority priority, EngineJobListener listener) {
 
         EngineJob engineJob = new EngineJob(key, memoryCache, mainHandler, listener);
 
         SourceResourceRunner<T, Z> sourceRunner = new SourceResourceRunner<T, Z>(key, width, height, fetcher, decoder,
                 transformation, encoder, diskCache, priority, engineJob);
 
-        return new ResourceRunner<Z>(key, width, height, diskCache, cacheDecoder, sourceRunner, service, bgHandler,
-                engineJob);
+        return new ResourceRunner<Z, R>(key, width, height, diskCache, cacheDecoder, transcoder, sourceRunner, service,
+                bgHandler, engineJob);
     }
 }

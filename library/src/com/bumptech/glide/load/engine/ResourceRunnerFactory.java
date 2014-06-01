@@ -2,10 +2,11 @@ package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.resource.ResourceFetcher;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.ResourceFetcher;
 
 import java.io.InputStream;
 
@@ -20,11 +21,12 @@ interface ResourceRunnerFactory {
      * @param encoder
      * @param priority
      * @param <T> The type of data the resource will be decoded from.
-     * @param <Z> The type of the reosurce that will be decoded.
+     * @param <Z> The type of the resource that will be decoded.
+     * @param <R> The type of the resource that will be transcoded to from the decoded resource.
      * @return
      */
-    public <T, Z> ResourceRunner<Z> build(Key key, int width, int height,
+    public <T, Z, R> ResourceRunner<Z, R> build(Key key, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
-            Transformation<Z> transformation,  ResourceEncoder<Z> encoder, Priority priority,
-            EngineJobListener listener);
+            Transformation<Z> transformation,  ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
+            Priority priority, EngineJobListener listener);
 }

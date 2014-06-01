@@ -28,14 +28,14 @@ import java.io.InputStream;
  */
 @SuppressWarnings("unused") //public api
 public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, ParcelFileDescriptor,
-        Bitmap> {
+        Bitmap, Bitmap> {
     private final BitmapPool bitmapPool;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
 
     BitmapRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, InputStream, Bitmap> streamLoadProvider,
-            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider,
+            LoadProvider<ModelType, InputStream, Bitmap, Bitmap> streamLoadProvider,
+            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap, Bitmap> fileDescriptorLoadProvider,
             BitmapPool bitmapPool, ImageViewTargetFactory factory, Engine engine) {
         super(context, model, streamLoadProvider, fileDescriptorLoadProvider, Bitmap.class, factory, engine);
         this.bitmapPool = bitmapPool;

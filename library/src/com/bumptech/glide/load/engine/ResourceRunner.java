@@ -2,9 +2,10 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
 import android.util.Log;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import java.io.IOException;
@@ -15,11 +16,13 @@ import java.util.concurrent.Future;
 /**
  *
  * @param <Z> The type of the resource that will be decoded.
+ * @param <R> the type of the resource the decoded resource will be transcoded to.
  */
-public class ResourceRunner<Z> implements Runnable {
+public class ResourceRunner<Z, R> implements Runnable {
     private static final String TAG = "ResourceRunner";
 
     private final Key key;
+    private ResourceTranscoder<Z, R> transcoder;
     private final SourceResourceRunner sourceRunner;
     private final ExecutorService executorService;
     private final EngineJob job;
@@ -31,13 +34,15 @@ public class ResourceRunner<Z> implements Runnable {
     private volatile Future<?> future;
     private volatile boolean isCancelled;
 
-    public ResourceRunner(Key key, int width, int height, DiskCache diskCache, ResourceDecoder<InputStream, Z> cacheDecoder,
+    public ResourceRunner(Key key, int width, int height, DiskCache diskCache,
+            ResourceDecoder<InputStream, Z> cacheDecoder, ResourceTranscoder<Z, R> transcoder,
             SourceResourceRunner sourceRunner, ExecutorService executorService, Handler bgHandler, EngineJob job) {
         this.key = key;
         this.width = width;
         this.height = height;
         this.diskCache = diskCache;
         this.cacheDecoder = cacheDecoder;
+        this.transcoder = transcoder;
         this.sourceRunner = sourceRunner;
         this.executorService = executorService;
         this.bgHandler = bgHandler;
@@ -69,7 +74,8 @@ public class ResourceRunner<Z> implements Runnable {
 
         Resource<Z> fromCache = loadFromDiskCache();
         if (fromCache != null) {
-            job.onResourceReady(fromCache);
+            Resource<R> transcoded = transcoder.transcode(fromCache);
+            job.onResourceReady(transcoded);
         } else {
             future = executorService.submit(sourceRunner);
         }

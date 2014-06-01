@@ -14,6 +14,6 @@ public interface Key {
     /**
      * Adds all uniquely identifying information to the given digest.
      */
-    public void update(MessageDigest messageDigest) throws UnsupportedEncodingException;
+    public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException;
 
 }

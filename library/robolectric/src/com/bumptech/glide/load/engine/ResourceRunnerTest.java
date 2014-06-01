@@ -4,6 +4,7 @@ import android.os.Handler;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,14 +86,26 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testCallbackIsCalledIfCacheDecodeSucceeds() throws IOException {
+    public void testTranscoderIsCalledIfCacheDecodeSucceeds() throws IOException {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.result);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
 
         harness.runner.run();
 
-        verify(harness.engineJob).onResourceReady(eq(harness.result));
+        verify(harness.transcoder).transcode(eq(harness.decoded));
+    }
+
+    @Test
+    public void testCallbackIsCalledIfCacheDecodeSucceeds() throws IOException {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        when(harness.transcoder.transcode(eq(harness.decoded))).thenReturn(harness.transcoded);
+
+        harness.runner.run();
+
+        verify(harness.engineJob).onResourceReady(eq(harness.transcoded));
     }
 
     @Test
@@ -127,6 +140,16 @@ public class ResourceRunnerTest {
     public void testSourceRunnerIsQueuedIfCacheDecodeFails() throws IOException {
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
+
+        harness.runner.run();
+
+        verify(harness.service).submit(eq(harness.sourceRunner));
+    }
+
+    @Test
+    public void testSourceRunnerIsQueuedIfCacheDecodeThrows() throws IOException {
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("test"));
 
         harness.runner.run();
 
@@ -181,16 +204,18 @@ public class ResourceRunnerTest {
         DiskCache diskCache = mock(DiskCache.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         SourceResourceRunner<Object, Object> sourceRunner = mock(SourceResourceRunner.class);
+        ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         ExecutorService service = mock(ExecutorService.class);
         EngineJob engineJob = mock(EngineJob.class);
         Handler bgHandler = mock(Handler.class);
         int width = 100;
         int height = 100;
-        ResourceRunner<Object> runner = new ResourceRunner(key, width, height, diskCache, decoder,
-                sourceRunner, service, bgHandler, engineJob);
+        ResourceRunner<Object, Object> runner = new ResourceRunner(key, width, height, diskCache, decoder,
+                transcoder, sourceRunner, service, bgHandler, engineJob);
         Future future = mock(Future.class);
         Future sourceFuture = mock(Future.class);
-        Resource<Object> result = mock(Resource.class);
+        Resource<Object> decoded = mock(Resource.class);
+        Resource<Object> transcoded = mock(Resource.class);
 
         public ResourceRunnerHarness() {
             when(key.toString()).thenReturn(ID);

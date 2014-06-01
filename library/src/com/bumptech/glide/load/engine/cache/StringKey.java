@@ -41,7 +41,7 @@ public class StringKey implements Key {
     }
 
     @Override
-    public void update(MessageDigest messageDigest) throws UnsupportedEncodingException {
+    public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
         messageDigest.update(key.getBytes("UTF-8"));
     }
 }

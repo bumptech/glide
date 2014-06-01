@@ -11,6 +11,7 @@ import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.ResourceFetcher;
@@ -54,16 +55,16 @@ public class GenericRequestTest {
         Drawable placeholderDrawable = null;
         int errorResourceId = 0;
         Drawable errorDrawable = null;
-        LoadProvider<Object, Object, Object> loadProvider = mock(LoadProvider.class);
+        LoadProvider<Object, Object, Object, Object> loadProvider = mock(LoadProvider.class);
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
             when(loadProvider.getModelLoader()).thenReturn(modelLoader);
         }
 
-        public GenericRequest<Object, Object, Object> getRequest() {
-            return new GenericRequest<Object, Object, Object>(loadProvider, model, context, priority, target, 1f,
-                    placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, null, 0, null,
+        public GenericRequest<Object, Object, Object, Object> getRequest() {
+            return new GenericRequest<Object, Object, Object, Object>(loadProvider, model, context, priority, target,
+                    1f, placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, null, 0, null,
                     requestCoordinator, engine, mock(Transformation.class), Object.class);
         }
     }
@@ -146,7 +147,7 @@ public class GenericRequestTest {
 
         verify(harness.engine).load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), eq(expected), any(ResourceCallback.class));
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), eq(expected), any(ResourceCallback.class));
     }
 
     @Test
@@ -154,7 +155,8 @@ public class GenericRequestTest {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
         when(harness.engine.load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(Priority.class), any(ResourceCallback.class))).thenReturn(loadStatus);
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class),
+                any(ResourceCallback.class))).thenReturn(loadStatus);
 
         GenericRequest request = harness.getRequest();
 

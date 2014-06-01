@@ -6,6 +6,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.ResourceFetcher;
 import com.bumptech.glide.request.ResourceCallback;
@@ -188,7 +189,8 @@ public class EngineTest {
     public void testRunnerIsPutInRunnersWithCacheKeyWithRelevantIds() {
         harness.doLoad();
 
-        assertNotNull(harness.runners.get(harness.cacheKey));
+        assertNotNull(harness.runners
+                .get(harness.cacheKey));
     }
 
     @Test
@@ -196,7 +198,7 @@ public class EngineTest {
         harness.doLoad();
 
         verify(harness.keyFactory).buildKey(eq(ID), eq(harness.width), eq(harness.height), eq(harness.cacheDecoder),
-                eq(harness.decoder), eq(harness.transformation), eq(harness.encoder));
+                eq(harness.decoder), eq(harness.transformation), eq(harness.encoder), eq(harness.transcoder));
     }
 
     @Test
@@ -205,7 +207,8 @@ public class EngineTest {
 
         verify(harness.factory).build(eq(harness.cacheKey), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(Priority.class), any(EngineJobListener.class));
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class),
+                any(EngineJobListener.class));
     }
 
 
@@ -217,6 +220,7 @@ public class EngineTest {
         ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
+        ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         Priority priority = Priority.NORMAL;
         ResourceCallback cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
@@ -227,14 +231,14 @@ public class EngineTest {
         int height = 100;
 
         MemoryCache cache = mock(MemoryCache.class);
-        ResourceRunner<Object> runner = mock(ResourceRunner.class);
+        ResourceRunner<Object, Object> runner = mock(ResourceRunner.class);
         EngineJob job;
         Engine engine;
 
         public EngineTestHarness() {
             when(keyFactory.buildKey(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
-                    any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class)))
-                    .thenReturn(cacheKey);
+                    any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
+                    any(ResourceTranscoder.class))).thenReturn(cacheKey);
 
             job = mock(EngineJob.class);
             when(runner.getJob()).thenReturn(job);
@@ -242,12 +246,12 @@ public class EngineTest {
             engine = new Engine(factory, cache, runners, keyFactory);
 
             when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
-                    eq(transformation), eq(encoder), eq(priority), eq(engine))).thenReturn(runner);
+                    eq(transformation), eq(encoder), eq(transcoder), eq(priority), eq(engine))).thenReturn(runner);
         }
 
         public Engine.LoadStatus doLoad() {
-            return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, priority,
-                    cb);
+            return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, transcoder,
+                    priority, cb);
         }
     }
 }
