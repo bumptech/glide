@@ -3,7 +3,7 @@ package com.bumptech.glide.load.data.transcode;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TranscoderFactories {
+public class TranscoderFactory {
     private static final MultiClassKey GET_KEY = new MultiClassKey();
 
     private static class MultiClassKey {

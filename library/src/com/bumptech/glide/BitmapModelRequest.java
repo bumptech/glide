@@ -1,13 +1,9 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import com.bumptech.glide.load.data.transcode.BitmapDrawableTranscoder;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.data.transcode.TranscoderFactories;
+import com.bumptech.glide.load.data.transcode.TranscoderFactory;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -19,8 +15,7 @@ import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.load.model.stream.StreamResourceLoader;
 import com.bumptech.glide.load.model.stream.StreamStringLoader;
 import com.bumptech.glide.load.model.stream.StreamUriLoader;
-import com.bumptech.glide.provider.FixedLoadProvider;
-import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.provider.DataLoadProviderFactory;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 
@@ -29,28 +24,24 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.UUID;
 
- /**
+/**
  * A {@link BitmapRequestBuilder} builder that returns a request for a model that represents an image.
  */
-public class ModelRequest {
+public class BitmapModelRequest {
     private final Context context;
-    private final DataLoadProvider<InputStream, Bitmap> streamDataProvider;
-    private final DataLoadProvider<ParcelFileDescriptor, Bitmap> fileDescriptorDataProvider;
+    private DataLoadProviderFactory dataLoadProviderFactory;
     private BitmapPool bitmapPool;
-    private ImageViewTargetFactory factory;
-    private TranscoderFactories transcoderFactories;
+    private ImageViewTargetFactory imageViewTargetFactory;
+    private TranscoderFactory transcoderFactory;
     private Engine engine;
 
-    ModelRequest(Context context, DataLoadProvider<InputStream, Bitmap> streamDataProvider,
-            DataLoadProvider<ParcelFileDescriptor, Bitmap> fileDescriptorDataProvider,
-            BitmapPool bitmapPool, ImageViewTargetFactory factory, TranscoderFactories transcoderFactories,
-            Engine engine) {
+    BitmapModelRequest(Context context, DataLoadProviderFactory dataLoadProviderFactory, BitmapPool bitmapPool,
+            ImageViewTargetFactory imageViewTargetFactory, TranscoderFactory transcoderFactory, Engine engine) {
         this.context = context;
-        this.streamDataProvider = streamDataProvider;
-        this.fileDescriptorDataProvider = fileDescriptorDataProvider;
+        this.dataLoadProviderFactory = dataLoadProviderFactory;
         this.bitmapPool = bitmapPool;
-        this.factory = factory;
-        this.transcoderFactories = transcoderFactories;
+        this.imageViewTargetFactory = imageViewTargetFactory;
+        this.transcoderFactory = transcoderFactory;
         this.engine = engine;
     }
 
@@ -63,8 +54,9 @@ public class ModelRequest {
      * @return A new {@link ImageModelRequest}.
      */
     public <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
-        return new ImageModelRequest<T>(context, modelLoader, streamDataProvider, bitmapPool, factory,
-                transcoderFactories, engine);
+        return new ImageModelRequest<T>(context, modelLoader, dataLoadProviderFactory, bitmapPool,
+                imageViewTargetFactory,
+                transcoderFactory, engine);
     }
 
     /**
@@ -74,8 +66,9 @@ public class ModelRequest {
      * @return A new {@link ImageModelRequest}.
      */
     public ImageModelRequest<byte[]> using(StreamByteArrayLoader modelLoader) {
-        return new ImageModelRequest<byte[]>(context, modelLoader, streamDataProvider, bitmapPool, factory,
-                transcoderFactories, engine);
+        return new ImageModelRequest<byte[]>(context, modelLoader, dataLoadProviderFactory, bitmapPool,
+                imageViewTargetFactory,
+                transcoderFactory, engine);
     }
 
     /**
@@ -87,8 +80,9 @@ public class ModelRequest {
      * @return A new {@link VideoModelRequest}.
      */
     public <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
-        return new VideoModelRequest<T>(context, modelLoader, fileDescriptorDataProvider, bitmapPool, factory,
-                transcoderFactories, engine);
+        return new VideoModelRequest<T>(context, modelLoader, dataLoadProviderFactory, bitmapPool,
+                imageViewTargetFactory,
+                transcoderFactory, engine);
     }
 
     /**
@@ -103,8 +97,8 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapRequestBuilder<String, BitmapDrawable> load(String string) {
-        return loadGeneric(string, BitmapDrawable.class);
+    public TypeRequest<String> load(String string) {
+        return loadGeneric(string);
     }
 
     /**
@@ -117,8 +111,8 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapRequestBuilder<Uri, BitmapDrawable> load(Uri uri) {
-        return loadGeneric(uri, BitmapDrawable.class);
+    public TypeRequest<Uri> load(Uri uri) {
+        return loadGeneric(uri);
     }
 
     /**
@@ -132,8 +126,8 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapRequestBuilder<File, BitmapDrawable> load(File file) {
-        return loadGeneric(file, BitmapDrawable.class);
+    public TypeRequest<File> load(File file) {
+        return loadGeneric(file);
     }
 
     /**
@@ -147,8 +141,8 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapRequestBuilder<Integer, BitmapDrawable> load(Integer resourceId) {
-        return loadGeneric(resourceId, BitmapDrawable.class);
+    public TypeRequest<Integer> load(Integer resourceId) {
+        return loadGeneric(resourceId);
     }
 
     /**
@@ -161,8 +155,8 @@ public class ModelRequest {
      * into.
      */
     @SuppressWarnings("unused")
-    public <T> BitmapRequestBuilder<T, BitmapDrawable> loadFromImage(T model) {
-        return loadGeneric(model, BitmapDrawable.class);
+    public <T> TypeRequest<T> loadFromImage(T model) {
+        return loadGeneric(model);
     }
 
     /**
@@ -176,8 +170,8 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapRequestBuilder<URL, BitmapDrawable> loadFromImage(URL url) {
-        return loadGeneric(url, BitmapDrawable.class);
+    public TypeRequest<URL> loadFromImage(URL url) {
+        return loadGeneric(url);
     }
 
     /**
@@ -191,22 +185,15 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public BitmapRequestBuilder<byte[], BitmapDrawable> loadFromImage(byte[] model, final String id) {
+    public TypeRequest<byte[]> loadFromImage(byte[] model, final String id) {
         StreamByteArrayLoader loader = new StreamByteArrayLoader() {
             @Override
             public String getId(byte[] model) {
                 return id;
             }
         };
-
-        ResourceTranscoder<Bitmap, BitmapDrawable> transcoder = new BitmapDrawableTranscoder(context.getResources(),
-                bitmapPool);
-        LoadProvider<byte[], InputStream, Bitmap, BitmapDrawable> loadProvider =
-                new FixedLoadProvider<byte[], InputStream, Bitmap, BitmapDrawable>(loader, transcoder,
-                        streamDataProvider);
-
-        return new BitmapRequestBuilder<byte[], BitmapDrawable>(context, model, loadProvider, null,
-                BitmapDrawable.class, bitmapPool, factory, engine);
+        return new TypeRequest<byte[]>(model, loader, null, context, dataLoadProviderFactory, bitmapPool,
+                imageViewTargetFactory, transcoderFactory, engine);
     }
 
     /**
@@ -217,9 +204,8 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public BitmapRequestBuilder<byte[], BitmapDrawable> loadFromImage(byte[] model) {
-        return loadFromImage(model, UUID.randomUUID()
-                .toString());
+    public TypeRequest<byte[]> loadFromImage(byte[] model) {
+        return loadFromImage(model, UUID.randomUUID().toString());
     }
 
     /**
@@ -232,8 +218,8 @@ public class ModelRequest {
      * into.
      */
     @SuppressWarnings("unused")
-    public <T> BitmapRequestBuilder<T, BitmapDrawable> loadFromVideo(T model) {
-        return loadGeneric(model, BitmapDrawable.class);
+    public <T> TypeRequest<T> loadFromVideo(T model) {
+        return loadGeneric(model);
     }
 
     /**
@@ -246,28 +232,33 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public <T> BitmapRequestBuilder<T, BitmapDrawable> load(T model) {
-        return loadGeneric(model, BitmapDrawable.class);
+    public <T> TypeRequest<T> load(T model) {
+        return loadGeneric(model);
     }
 
-    private <T, R> BitmapRequestBuilder<T, R> loadGeneric(T model, Class<R> transcodeClass) {
-        ResourceTranscoder<Bitmap, R> transcoder = transcoderFactories.get(Bitmap.class, transcodeClass);
-        LoadProvider<T, InputStream, Bitmap, R> streamLoadProvider = null;
+    private <T> TypeRequest<T> loadGeneric(T model) {
         ModelLoader<T, InputStream> streamModelLoader = Glide.buildStreamModelLoader(model, context);
-        if (streamModelLoader != null) {
-            streamLoadProvider = new FixedLoadProvider<T, InputStream, Bitmap, R>(streamModelLoader,
-                    transcoder, streamDataProvider);
-        }
-
-        LoadProvider<T, ParcelFileDescriptor, Bitmap, R> fileDescriptorLoadProvider = null;
         ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
                 Glide.buildFileDescriptorModelLoader(model, context);
-        if (fileDescriptorModelLoader != null) {
-            fileDescriptorLoadProvider = new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap, R>(
-                    fileDescriptorModelLoader, transcoder, fileDescriptorDataProvider);
-        }
-        return new BitmapRequestBuilder<T, R>(context, model, streamLoadProvider, fileDescriptorLoadProvider,
-                transcodeClass, bitmapPool, factory, engine);
+        return new TypeRequest<T>(model, streamModelLoader, fileDescriptorModelLoader, context, dataLoadProviderFactory,
+                bitmapPool, imageViewTargetFactory, transcoderFactory, engine);
+//        ResourceTranscoder<Bitmap, R> transcoder = transcoderFactory.get(Bitmap.class, transcodeClass);
+//        LoadProvider<T, InputStream, Bitmap, R> streamLoadProvider = null;
+//        ModelLoader<T, InputStream> streamModelLoader = Glide.buildStreamModelLoader(model, context);
+//        if (streamModelLoader != null) {
+//            streamLoadProvider = new FixedLoadProvider<T, InputStream, Bitmap, R>(streamModelLoader,
+//                    transcoder, streamDataProvider);
+//        }
+//
+//        LoadProvider<T, ParcelFileDescriptor, Bitmap, R> fileDescriptorLoadProvider = null;
+//        ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
+//                Glide.buildFileDescriptorModelLoader(model, context);
+//        if (fileDescriptorModelLoader != null) {
+//            fileDescriptorLoadProvider = new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap, R>(
+//                    fileDescriptorModelLoader, transcoder, fileDescriptorDataProvider);
+//        }
+//        return new BitmapRequestBuilder<T, R>(context, model, streamLoadProvider, fileDescriptorLoadProvider,
+//                transcodeClass, bitmapPool, imageViewTargetFactory, engine);
     }
 
     /**
@@ -279,30 +270,27 @@ public class ModelRequest {
     public static class VideoModelRequest<T> {
         private final Context context;
         private final ModelLoader<T, ParcelFileDescriptor> loader;
-        private DataLoadProvider<ParcelFileDescriptor, Bitmap> dataLoadProvider;
+        private DataLoadProviderFactory dataLoadProviderFactory;
         private BitmapPool bitmapPool;
-        private ImageViewTargetFactory factory;
-        private TranscoderFactories transcoderFactories;
+        private ImageViewTargetFactory imageViewTargetFactory;
+        private TranscoderFactory transcoderFactory;
         private Engine engine;
 
         private VideoModelRequest(Context context, ModelLoader<T, ParcelFileDescriptor> loader,
-                DataLoadProvider<ParcelFileDescriptor, Bitmap> dataLoadProvider,  BitmapPool bitmapPool,
-                ImageViewTargetFactory factory, TranscoderFactories transcoderFactories, Engine engine) {
+                DataLoadProviderFactory dataLoadProviderFactory,  BitmapPool bitmapPool,
+                ImageViewTargetFactory imageViewTargetFactory, TranscoderFactory transcoderFactory, Engine engine) {
             this.context = context;
             this.loader = loader;
-            this.dataLoadProvider = dataLoadProvider;
+            this.dataLoadProviderFactory = dataLoadProviderFactory;
             this.bitmapPool = bitmapPool;
-            this.factory = factory;
-            this.transcoderFactories = transcoderFactories;
+            this.imageViewTargetFactory = imageViewTargetFactory;
+            this.transcoderFactory = transcoderFactory;
             this.engine = engine;
         }
 
-        public BitmapRequestBuilder<T, BitmapDrawable> loadFromVideo(T model) {
-            ResourceTranscoder<Bitmap, BitmapDrawable> transcoder = transcoderFactories.get(Bitmap.class,
-                    BitmapDrawable.class);
-            return new BitmapRequestBuilder<T, BitmapDrawable>(context, model, null,
-                    new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap, BitmapDrawable>(loader, transcoder,
-                            dataLoadProvider), BitmapDrawable.class, bitmapPool, factory, engine);
+        public TypeRequest<T> loadFromVideo(T model) {
+            return new TypeRequest<T>(model, null, loader, context, dataLoadProviderFactory, bitmapPool,
+                    imageViewTargetFactory, transcoderFactory, engine);
         }
     }
 
@@ -315,30 +303,27 @@ public class ModelRequest {
     public static class ImageModelRequest<T> {
         private final Context context;
         private final ModelLoader<T, InputStream> loader;
-        private DataLoadProvider<InputStream, Bitmap> dataLoadProvider;
+        private DataLoadProviderFactory dataLoadProviderFactory;
         private BitmapPool bitmapPool;
-        private ImageViewTargetFactory factory;
-        private TranscoderFactories factories;
+        private ImageViewTargetFactory imageViewTargetFactory;
+        private TranscoderFactory transcoderFactory;
         private Engine engine;
 
         private ImageModelRequest(Context context, ModelLoader<T, InputStream> loader,
-                DataLoadProvider<InputStream, Bitmap> dataLoadProvider, BitmapPool bitmapPool,
-                ImageViewTargetFactory factory, TranscoderFactories factories, Engine engine) {
+                DataLoadProviderFactory dataLoadProviderFactory, BitmapPool bitmapPool,
+                ImageViewTargetFactory imageViewTargetFactory, TranscoderFactory transcoderFactory, Engine engine) {
             this.context = context;
             this.loader = loader;
-            this.dataLoadProvider = dataLoadProvider;
+            this.dataLoadProviderFactory = dataLoadProviderFactory;
             this.bitmapPool = bitmapPool;
-            this.factory = factory;
-            this.factories = factories;
+            this.imageViewTargetFactory = imageViewTargetFactory;
+            this.transcoderFactory = transcoderFactory;
             this.engine = engine;
         }
 
-        public BitmapRequestBuilder<T, BitmapDrawable> load(T model) {
-            ResourceTranscoder<Bitmap, BitmapDrawable> transcoder = factories.get(Bitmap.class, BitmapDrawable.class);
-
-            return new BitmapRequestBuilder<T, BitmapDrawable>(context, model,
-                    new FixedLoadProvider<T, InputStream, Bitmap, BitmapDrawable>(loader, transcoder, dataLoadProvider),
-                    null, BitmapDrawable.class, bitmapPool, factory, engine);
+        public TypeRequest<T> load(T model) {
+            return new TypeRequest<T>(model, loader, null, context, dataLoadProviderFactory, bitmapPool,
+                    imageViewTargetFactory, transcoderFactory, engine);
         }
     }
 }

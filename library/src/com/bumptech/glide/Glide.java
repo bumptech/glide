@@ -14,7 +14,7 @@ import com.android.volley.RequestQueue;
 import com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDataLoadProvider;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDataLoadProvider;
 import com.bumptech.glide.load.data.transcode.BitmapDrawableTranscoder;
-import com.bumptech.glide.load.data.transcode.TranscoderFactories;
+import com.bumptech.glide.load.data.transcode.TranscoderFactory;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -34,6 +34,7 @@ import com.bumptech.glide.load.model.stream.StreamResourceLoader;
 import com.bumptech.glide.load.model.stream.StreamStringLoader;
 import com.bumptech.glide.load.model.stream.StreamUriLoader;
 import com.bumptech.glide.load.model.stream.StreamUrlLoader;
+import com.bumptech.glide.provider.DataLoadProviderFactory;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -65,10 +66,9 @@ public class Glide {
     private final Engine engine;
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
-    private final DataLoadProvider<InputStream, Bitmap> defaultStreamProvider;
-    private final DataLoadProvider<ParcelFileDescriptor, Bitmap> defaultFileDescriptorProvider;
-    private final ImageViewTargetFactory factory = new ImageViewTargetFactory();
-    private final TranscoderFactories transcoderFactories = new TranscoderFactories();
+    private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
+    private final TranscoderFactory transcoderFactory = new TranscoderFactory();
+    private final DataLoadProviderFactory dataLoadProviderFactory;
 
     /**
      * Try to get the external cache directory if available and default to the internal. Use a default name for the
@@ -154,8 +154,10 @@ public class Glide {
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
 
-        defaultStreamProvider = new StreamBitmapDataLoadProvider(bitmapPool);
-        defaultFileDescriptorProvider = new FileDescriptorBitmapDataLoadProvider(bitmapPool);
+        dataLoadProviderFactory = new DataLoadProviderFactory();
+        dataLoadProviderFactory.register(InputStream.class, Bitmap.class, new StreamBitmapDataLoadProvider(bitmapPool));
+        dataLoadProviderFactory.register(ParcelFileDescriptor.class, Bitmap.class,
+                new FileDescriptorBitmapDataLoadProvider(bitmapPool));
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
@@ -168,7 +170,7 @@ public class Glide {
         register(URL.class, InputStream.class, new StreamUrlLoader.Factory());
         register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
 
-        transcoderFactories.register(Bitmap.class, BitmapDrawable.class,
+        transcoderFactory.register(Bitmap.class, BitmapDrawable.class,
                 new BitmapDrawableTranscoder(resources, bitmapPool));
     }
 
@@ -253,8 +255,8 @@ public class Glide {
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
      * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Typically the {@link ModelRequest#using(StreamModelLoader)} or
-     * {@link ModelRequest#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
+     * models. Typically the {@link BitmapModelRequest#using(StreamModelLoader)} or
+     * {@link BitmapModelRequest#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
      * with the ModelLoader being used to load it. Any factory replaced by the given factory will have its
      * {@link ModelLoaderFactory#teardown()}} method called.
      *
@@ -269,8 +271,8 @@ public class Glide {
      *     retained statically.
      * </p>
      *
-     * @see ModelRequest#using(FileDescriptorModelLoader)
-     * @see ModelRequest#using(StreamModelLoader)
+     * @see BitmapModelRequest#using(FileDescriptorModelLoader)
+     * @see BitmapModelRequest#using(StreamModelLoader)
      *
      * @param modelClass The model class.
      * @param resourceClass The resource class the model loader will translate the model type into.
@@ -391,10 +393,10 @@ public class Glide {
      * @param context Any context, will not be retained.
      * @return A model request to pass in the object representing the image to be loaded.
      */
-    public static ModelRequest with(Context context) {
+    public static BitmapModelRequest with(Context context) {
         Glide glide = Glide.get(context);
-        return new ModelRequest(context, glide.defaultStreamProvider, glide.defaultFileDescriptorProvider,
-                glide.bitmapPool, glide.factory, glide.transcoderFactories, glide.engine);
+        return new BitmapModelRequest(context, glide.dataLoadProviderFactory, glide.bitmapPool, glide.imageViewTargetFactory,
+                glide.transcoderFactory, glide.engine);
     }
 
     private static class ClearTarget extends ViewTarget<View, Object> {

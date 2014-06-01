@@ -15,16 +15,18 @@ import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
-import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
-import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.model.ModelLoaderFactory;
-import com.bumptech.glide.load.model.stream.StreamModelLoader;
+import com.bumptech.glide.load.data.bytes.BytesResource;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.EngineBuilder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.model.GenericLoaderFactory;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.stream.StreamModelLoader;
+import com.bumptech.glide.load.resource.ResourceFetcher;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.volley.VolleyRequestFuture;
@@ -58,6 +60,7 @@ import java.util.concurrent.Future;
 import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
@@ -240,14 +243,54 @@ public class GlideTest {
     public void runTestUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
 
-//        Glide.with(getContext()).loadFromImage(url).into(target);
-//
-//        verify(target).onResourceReady(any(Resource.class));
-//        verify(target).setRequest((Request) notNull());
-
+        Glide.with(getContext()).loadFromImage(url).into(target);
         Glide.with(getContext()).loadFromImage(url).into(imageView);
 
+        verify(target).onResourceReady(any(Resource.class));
+        verify(target).setRequest((Request) notNull());
+
         assertNotNull(imageView.getDrawable());
+    }
+
+    @Test
+    public void testAsBitmapOption() {
+        Uri uri = Uri.parse("content://something/else");
+        mockUri(uri);
+
+        Glide.with(getContext()).load(uri).asBitmap().into(target);
+
+        verify(target).onResourceReady(any(Bitmap.class));
+    }
+
+    @Test
+    public void testTranscodeOption() {
+        Uri uri = Uri.parse("content://something/else");
+        mockUri(uri);
+        final byte[] bytes = new byte[0];
+
+        Glide.with(getContext()).load(uri).transcode(byte[].class, new ResourceTranscoder<Bitmap, byte[]>() {
+            @Override
+            public Resource<byte[]> transcode(Resource<Bitmap> toTranscode) {
+                return new BytesResource(bytes);
+            }
+
+            @Override
+            public String getId() {
+                return "bytes";
+            }
+        }).into(target);
+
+        verify(target).onResourceReady(eq(bytes));
+    }
+
+    @Test
+    public void testToBytesOption() {
+        Uri uri = Uri.parse("content://something/else");
+        mockUri(uri);
+
+        Glide.with(getContext()).load(uri).toBytes().into(target);
+
+        verify(target).onResourceReady(any(byte[].class));
     }
 
     @Test
@@ -274,7 +317,7 @@ public class GlideTest {
         Glide.with(getContext()).load(uri).into(target);
         Glide.with(getContext()).load(uri).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class));
+        verify(target).onResourceReady(anyObject());
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
