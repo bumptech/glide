@@ -12,6 +12,7 @@ import com.bumptech.glide.load.data.bitmap.CenterCrop;
 import com.bumptech.glide.load.data.bitmap.Downsampler;
 import com.bumptech.glide.load.data.bitmap.FitCenter;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.RequestListener;
@@ -35,8 +36,8 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
     BitmapRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, InputStream, Bitmap> streamLoadProvider,
             LoadProvider<ModelType, ParcelFileDescriptor, Bitmap> fileDescriptorLoadProvider,
-            BitmapPool bitmapPool, ImageViewTargetFactory factory) {
-        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, Bitmap.class, factory);
+            BitmapPool bitmapPool, ImageViewTargetFactory factory, Engine engine) {
+        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, Bitmap.class, factory, engine);
         this.bitmapPool = bitmapPool;
     }
 
@@ -139,7 +140,7 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      * @return This RequestBuilder
      */
     public BitmapRequestBuilder<ModelType> centerCrop() {
-        return transform(new CenterCrop(Glide.get(context).getBitmapPool()));
+        return transform(new CenterCrop(bitmapPool));
     }
 
     /**
@@ -148,7 +149,7 @@ public class BitmapRequestBuilder<ModelType> extends GenericRequestBuilder<Model
      * @return This RequestBuilder
      */
     public BitmapRequestBuilder<ModelType> fitCenter() {
-        return transform(new FitCenter(Glide.get(context).getBitmapPool()));
+        return transform(new FitCenter(bitmapPool));
     }
 
     @Override

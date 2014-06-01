@@ -12,6 +12,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.data.bitmap.Downsampler;
 import com.bumptech.glide.load.data.bitmap.VideoBitmapDecoder;
+import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
@@ -48,6 +49,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
     private final ChildLoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider;
     private final Class<ResourceType> resourceClass;
     private final ImageViewTargetFactory viewTargetFactory;
+    private final Engine engine;
     private int animationId;
     private Animation animation;
     private int placeholderId;
@@ -63,9 +65,11 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
     public GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageDataType, ResourceType> imageLoadProvider,
             LoadProvider<ModelType, VideoDataType, ResourceType> videoLoadProvider,
-            Class<ResourceType> resourceClass, ImageViewTargetFactory viewTargetFactory) {
+            Class<ResourceType> resourceClass, ImageViewTargetFactory viewTargetFactory,
+            Engine engine) {
         this.resourceClass = resourceClass;
         this.viewTargetFactory = viewTargetFactory;
+        this.engine = engine;
         this.imageLoadProvider = imageLoadProvider != null ?
                 new ChildLoadProvider<ModelType, ImageDataType, ResourceType>(imageLoadProvider) : null;
         this.videoLoadProvider = videoLoadProvider != null ?
@@ -430,7 +434,7 @@ public class GenericRequestBuilder<ModelType, ImageDataType, VideoDataType, Reso
             RequestCoordinator requestCoordinator) {
         return new GenericRequest<ModelType, Z, ResourceType>(loadProvider, model, context, priority, target,
                 sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
-                animationId, animation, requestCoordinator, Glide.get(context).getEngine(), getFinalTransformation(),
+                animationId, animation, requestCoordinator, engine, getFinalTransformation(),
                 resourceClass);
     }
 

@@ -167,14 +167,6 @@ public class Glide {
         register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
     }
 
-    Engine getEngine() {
-        return engine;
-    }
-
-    BitmapPool getBitmapPool() {
-        return bitmapPool;
-    }
-
     private GenericLoaderFactory getLoaderFactory() {
         return loaderFactory;
     }
@@ -396,8 +388,8 @@ public class Glide {
      */
     public static ModelRequest with(Context context) {
         Glide glide = Glide.get(context);
-        return new ModelRequest(context, glide.defaultStreamProvider,
-                glide.defaultFileDescriptorProvider, glide.bitmapPool, glide.factory);
+        return new ModelRequest(context, glide.defaultStreamProvider, glide.defaultFileDescriptorProvider,
+                glide.bitmapPool, glide.factory, glide.engine);
     }
 
     /**
@@ -409,15 +401,17 @@ public class Glide {
         private final DataLoadProvider<ParcelFileDescriptor, Bitmap> fileDescriptorDataProvider;
         private BitmapPool bitmapPool;
         private ImageViewTargetFactory factory;
+        private Engine engine;
 
         private ModelRequest(Context context, DataLoadProvider<InputStream, Bitmap> streamDataProvider,
                 DataLoadProvider<ParcelFileDescriptor, Bitmap> fileDescriptorDataProvider,
-                BitmapPool bitmapPool, ImageViewTargetFactory factory) {
+                BitmapPool bitmapPool, ImageViewTargetFactory factory, Engine engine) {
             this.context = context;
             this.streamDataProvider = streamDataProvider;
             this.fileDescriptorDataProvider = fileDescriptorDataProvider;
             this.bitmapPool = bitmapPool;
             this.factory = factory;
+            this.engine = engine;
         }
 
         /**
@@ -429,7 +423,7 @@ public class Glide {
          * @return A new {@link ImageModelRequest}.
          */
         public <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
-            return new ImageModelRequest<T>(context, modelLoader, streamDataProvider, bitmapPool, factory);
+            return new ImageModelRequest<T>(context, modelLoader, streamDataProvider, bitmapPool, factory, engine);
         }
 
         /**
@@ -439,7 +433,7 @@ public class Glide {
          * @return A new {@link ImageModelRequest}.
          */
         public ImageModelRequest<byte[]> using(StreamByteArrayLoader modelLoader) {
-            return new ImageModelRequest<byte[]>(context, modelLoader, streamDataProvider, bitmapPool, factory);
+            return new ImageModelRequest<byte[]>(context, modelLoader, streamDataProvider, bitmapPool, factory, engine);
         }
 
         /**
@@ -451,7 +445,8 @@ public class Glide {
          * @return A new {@link VideoModelRequest}.
          */
         public <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
-            return new VideoModelRequest<T>(context, modelLoader, fileDescriptorDataProvider, bitmapPool, factory);
+            return new VideoModelRequest<T>(context, modelLoader, fileDescriptorDataProvider, bitmapPool, factory,
+                    engine);
         }
 
         /**
@@ -565,7 +560,7 @@ public class Glide {
             LoadProvider<byte[], InputStream, Bitmap> loadProvider =
                     new FixedLoadProvider<byte[], InputStream, Bitmap>(loader, streamDataProvider);
 
-            return new BitmapRequestBuilder<byte[]>(context, model, loadProvider, null, bitmapPool, factory);
+            return new BitmapRequestBuilder<byte[]>(context, model, loadProvider, null, bitmapPool, factory, engine);
         }
 
         /**
@@ -625,7 +620,7 @@ public class Glide {
                                 fileDescriptorDataProvider);
             }
             return new BitmapRequestBuilder<T>(context, model, streamLoadProvider, fileDescriptorLoadProvider,
-                    bitmapPool, factory);
+                    bitmapPool, factory, engine);
         }
     }
 
@@ -641,21 +636,23 @@ public class Glide {
         private DataLoadProvider<ParcelFileDescriptor, Bitmap> dataLoadProvider;
         private BitmapPool bitmapPool;
         private ImageViewTargetFactory factory;
+        private Engine engine;
 
         private VideoModelRequest(Context context, ModelLoader<T, ParcelFileDescriptor> loader,
                 DataLoadProvider<ParcelFileDescriptor, Bitmap> dataLoadProvider,  BitmapPool bitmapPool,
-                ImageViewTargetFactory factory) {
+                ImageViewTargetFactory factory, Engine engine) {
             this.context = context;
             this.loader = loader;
             this.dataLoadProvider = dataLoadProvider;
             this.bitmapPool = bitmapPool;
             this.factory = factory;
+            this.engine = engine;
         }
 
         public BitmapRequestBuilder<T> loadFromVideo(T model) {
             return new BitmapRequestBuilder<T>(context, model, null,
                     new FixedLoadProvider<T, ParcelFileDescriptor, Bitmap>(loader, dataLoadProvider), bitmapPool,
-                    factory);
+                    factory, engine);
         }
     }
 
@@ -671,20 +668,23 @@ public class Glide {
         private DataLoadProvider<InputStream, Bitmap> dataLoadProvider;
         private BitmapPool bitmapPool;
         private ImageViewTargetFactory factory;
+        private Engine engine;
 
         private ImageModelRequest(Context context, ModelLoader<T, InputStream> loader,
                 DataLoadProvider<InputStream, Bitmap> dataLoadProvider, BitmapPool bitmapPool,
-                ImageViewTargetFactory factory) {
+                ImageViewTargetFactory factory, Engine engine) {
             this.context = context;
             this.loader = loader;
             this.dataLoadProvider = dataLoadProvider;
             this.bitmapPool = bitmapPool;
             this.factory = factory;
+            this.engine = engine;
         }
 
         public BitmapRequestBuilder<T> load(T model) {
             return new BitmapRequestBuilder<T>(context, model,
-                    new FixedLoadProvider<T, InputStream, Bitmap>(loader, dataLoadProvider), null, bitmapPool, factory);
+                    new FixedLoadProvider<T, InputStream, Bitmap>(loader, dataLoadProvider), null, bitmapPool, factory,
+                    engine);
         }
     }
 
