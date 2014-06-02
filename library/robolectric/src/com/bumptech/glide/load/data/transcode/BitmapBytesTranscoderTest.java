@@ -10,6 +10,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -41,6 +42,13 @@ public class BitmapBytesTranscoderTest {
             String transcodedDescription = harness.getTranscodedDescription();
             assertTrue(transcodedDescription, transcodedDescription.contains(format.name()));
         }
+    }
+
+    @Test
+    public void testBitampResourceIsRecycled() {
+        harness.getTranscodedDescription();
+
+        verify(harness.bitmapResource).recycle();
     }
 
     @SuppressWarnings("unchecked")

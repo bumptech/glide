@@ -23,6 +23,7 @@ public class BitmapBytesTranscoder implements ResourceTranscoder<Bitmap, byte[]>
     public Resource<byte[]> transcode(Resource<Bitmap> toTranscode) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         toTranscode.get().compress(compressFormat, quality, os);
+        toTranscode.recycle();
         return new BytesResource(os.toByteArray());
     }
 

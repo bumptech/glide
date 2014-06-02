@@ -23,7 +23,11 @@ public class FitCenter implements Transformation<Bitmap> {
                     + outHeight);
         }
         Bitmap transformed = TransformationUtils.fitCenter(resource.get(), pool, outWidth, outHeight);
-        return new BitmapResource(transformed, pool);
+        if (transformed == resource.get()) {
+            return resource;
+        } else {
+            return new BitmapResource(transformed, pool);
+        }
     }
 
     @Override

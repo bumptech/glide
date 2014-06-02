@@ -78,6 +78,9 @@ public class TransformationUtils {
      * given dimensions and toFit fits within the given dimensions
      */
     public static Bitmap fitCenter(Bitmap toFit, BitmapPool pool, int width, int height) {
+        if (toFit.getWidth() == width && toFit.getHeight() == height) {
+            return toFit;
+        }
         final float widthPercentage = width / (float) toFit.getWidth();
         final float heightPercentage = height / (float) toFit.getHeight();
         final float minPercentage = Math.min(widthPercentage, heightPercentage);
