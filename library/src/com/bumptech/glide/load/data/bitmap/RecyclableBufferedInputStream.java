@@ -130,11 +130,12 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             }
             return result;
         }
-        //Added count != 0 so that we do not immediately double the buffer size before reading any data when
-        //marklimit > localBuf.length. Instead, we will double the buffer size only after reading the initial localBuf
-        //worth of data without finding what we're looking for in the stream. This allows us to set a relatively small
-        //initial buffer size and a large marklimit for safety without causing an allocation each time read is called.
-        if (markpos == 0 && marklimit > localBuf.length && count != 0) {
+        //Added count == localBuf.length so that we do not immediately double the buffer size before reading any data
+        // when marklimit > localBuf.length. Instead, we will double the buffer size only after reading the initial
+        // localBuf worth of data without finding what we're looking for in the stream. This allows us to set a
+        // relatively small initial buffer size and a large marklimit for safety without causing an allocation each time
+        // read is called.
+        if (markpos == 0 && marklimit > localBuf.length && count == localBuf.length) {
             /* Increase buffer size to accommodate the readlimit */
             int newLength = localBuf.length * 2;
             if (newLength > marklimit) {

@@ -7,8 +7,8 @@ import java.util.Queue;
 
 public class ByteArrayPool {
     private static final String TAG = "ByteArrayPool";
-    // 16 KB.
-    private static final int TEMP_BYTES_SIZE = 16 * 1024;
+    // 64 KB.
+    private static final int TEMP_BYTES_SIZE = 64 * 1024;
     // 512 KB.
     private static final int MAX_SIZE = 512 * 1024;
     private static final int MAX_BYTE_ARRAY_COUNT = MAX_SIZE / TEMP_BYTES_SIZE;
