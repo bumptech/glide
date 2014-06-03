@@ -29,6 +29,6 @@ public class BitmapBytesTranscoder implements ResourceTranscoder<Bitmap, byte[]>
 
     @Override
     public String getId() {
-        return "com.bumptech.glide.load.data.transcode.BitmapBytesTranscoder";
+        return "BitmapBytesTranscoder.com.bumptech.glide.load.data.transcode";
     }
 }

@@ -37,6 +37,6 @@ public class FileDescriptorBitmapDecoder implements ResourceDecoder<ParcelFileDe
 
     @Override
     public String getId() {
-        return "com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDecoder";
+        return "FileDescriptorBitmapDecoder.com.bumptech.glide.load.data.bitmap";
     }
 }

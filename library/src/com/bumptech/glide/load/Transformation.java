@@ -19,7 +19,7 @@ public interface Transformation<T> {
 
         @Override
         public String getId() {
-            return "com.bumptech.glide.load.Transformation.NONE";
+            return "NONE.com.bumptech.glide.load.Transformation";
         }
     };
 

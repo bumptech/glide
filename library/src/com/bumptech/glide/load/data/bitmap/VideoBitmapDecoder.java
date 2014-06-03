@@ -9,7 +9,6 @@ import com.bumptech.glide.load.DecodeFormat;
 import java.io.IOException;
 
 public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
-    private static final String ID = "VideoBitmapDecoder";
     @Override
     public Bitmap decode(ParcelFileDescriptor resource, BitmapPool bitmapPool, int outWidth, int outHeight,
             DecodeFormat decodeFormat)
@@ -24,6 +23,6 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
 
     @Override
     public String getId() {
-        return ID;
+        return "VideoBitmapDecoder.com.bumptech.glide.load.data.bitmap";
     }
 }

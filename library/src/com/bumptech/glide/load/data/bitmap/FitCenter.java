@@ -32,7 +32,7 @@ public class FitCenter implements Transformation<Bitmap> {
 
     @Override
     public String getId() {
-        return "com.bumptech.glide.load.Transformation.FitCenter";
+        return "FitCenter.com.bumptech.glide.load.Transformation";
     }
 }
 

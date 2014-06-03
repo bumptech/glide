@@ -36,8 +36,6 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
        return decodeBitmapOptions;
     }
 
-    private final String id = getClass().toString();
-
     /**
      * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image
      * will be greater than or equal to the given width and height.
@@ -47,6 +45,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return Math.min(inHeight / outHeight, inWidth / outWidth);
+        }
+
+        @Override
+        public String getId() {
+            return "AT_LEAST.com.bumptech.glide.load.data.bitmap";
         }
     };
 
@@ -60,6 +63,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return Math.max(inHeight / outHeight, inWidth / outWidth);
         }
+
+        @Override
+        public String getId() {
+            return "AT_MOST.com.bumptech.glide.load.data.bitmap";
+        }
     };
 
     /**
@@ -70,6 +78,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return 0;
+        }
+
+        @Override
+        public String getId() {
+            return "NONE.com.bumptech.glide.load.data.bitmap";
         }
     };
 
@@ -201,14 +214,6 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         }
 
         return hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-    }
-
-    /**
-     * Get some id that uniquely identifies the downsample for use as part of a cache key
-     * @return A unique String
-     */
-    public String getId() {
-        return id;
     }
 
     /**
