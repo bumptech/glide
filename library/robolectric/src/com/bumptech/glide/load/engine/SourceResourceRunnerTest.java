@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -108,6 +109,23 @@ public class SourceResourceRunnerTest {
         harness.runner.run();
 
         verify(harness.decoded).recycle();
+    }
+
+    @Test
+    public void testFetcherIsCleanedUp() {
+        harness.runner.run();
+
+        verify(harness.fetcher).cleanup();
+    }
+
+    @Test
+    public void testFetcherIsCleanedUpIfDecodeThrows() throws Exception {
+        when(harness.fetcher.loadResource(any(Priority.class))).thenReturn(new Object());
+        when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("test"));
+
+        harness.runner.run();
+
+        verify(harness.fetcher).cleanup();
     }
 
     @Test

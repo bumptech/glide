@@ -22,6 +22,11 @@ public class ByteArrayFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
+    public void cleanup() {
+        // Do nothing.
+    }
+
+    @Override
     public void cancel() {
         // Do nothing.
     }

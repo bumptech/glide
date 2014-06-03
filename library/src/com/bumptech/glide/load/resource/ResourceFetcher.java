@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ModelLoader;
 
 /**
@@ -24,6 +25,12 @@ public interface ResourceFetcher<T> {
      * @param priority The priority with which the request should be completed.
      */
     public T loadResource(Priority priority) throws Exception;
+
+    /**
+     * Cleanup or recycle any resources used by this resource fetcher. This method will be called in a finally block
+     * after the data returned by {@link #loadResource(Priority)} has been decoded by the {@link ResourceDecoder}.
+     */
+    public void cleanup();
 
     /**
      * A method that will be called when a load is no longer relevant and has been cancelled. This method does not need

@@ -63,17 +63,15 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
         }
 
         try {
-            T toDecode = fetcher.loadResource(priority);
-            if (toDecode != null) {
-                Resource<Z> decoded = decoder.decode(toDecode, width, height);
-                if (decoded != null) {
-                    Resource<Z> transformed = transformation.transform(decoded, width, height);
-                    if (decoded != transformed) {
-                        decoded.recycle();
-                    }
-                    result = transformed;
+            final Resource<Z> decoded = decode();
+            if (decoded != null) {
+                Resource<Z> transformed = transformation.transform(decoded, width, height);
+                if (decoded != transformed) {
+                    decoded.recycle();
                 }
+                result = transformed;
             }
+
             if (result != null) {
                 diskCache.put(key, this);
                 Resource<R> transcoded = transcoder.transcode(result);
@@ -85,6 +83,19 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
         } catch (Exception e) {
             cb.onException(e);
         }
+    }
+
+    private Resource<Z> decode() throws Exception {
+        T toDecode = fetcher.loadResource(priority);
+        try {
+            if (toDecode != null) {
+                return decoder.decode(toDecode, width, height);
+            }
+        } finally {
+            fetcher.cleanup();
+        }
+
+        return null;
     }
 
     @Override

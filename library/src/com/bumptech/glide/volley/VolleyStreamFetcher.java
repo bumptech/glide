@@ -43,6 +43,11 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
+    public void cleanup() {
+        // Do nothing.
+    }
+
+    @Override
     public void cancel() {
         VolleyRequestFuture<InputStream> localFuture = requestFuture;
         if (localFuture != null) {
