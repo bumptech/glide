@@ -65,7 +65,6 @@ public class DataLoadProviderFactory {
 
     public <T, Z> void register(Class<T> dataClass, Class<Z> resourceClass, DataLoadProvider provider) {
         providers.put(new MultiClassKey(dataClass, resourceClass), provider);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -73,8 +72,7 @@ public class DataLoadProviderFactory {
         GET_KEY.set(dataClass, resourceClass);
         DataLoadProvider<T, Z> result = providers.get(GET_KEY);
         if (result == null) {
-            throw new IllegalArgumentException("No registered DataLoadProvider for data " + dataClass + " and resource "
-                    + resourceClass);
+            result = EmptyDataLoadProvider.get();
         }
         return result;
     }

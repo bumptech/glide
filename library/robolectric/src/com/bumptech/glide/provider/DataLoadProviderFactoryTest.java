@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 public class DataLoadProviderFactoryTest {
@@ -23,8 +25,13 @@ public class DataLoadProviderFactoryTest {
         assertEquals(provider, factory.get(Object.class, Object.class));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testThrowsIfNoProviderRegistered() {
-        factory.get(Object.class, Object.class);
+    @Test
+    public void testReturnsEmptyProviderIfNoneIsRegistered() {
+        DataLoadProvider<Object, Object> loadProvider = factory.get(Object.class, Object.class);
+        assertNotNull(loadProvider);
+
+        assertNull(loadProvider.getCacheDecoder());
+        assertNull(loadProvider.getSourceDecoder());
+        assertNull(loadProvider.getEncoder());
     }
 }

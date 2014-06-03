@@ -15,6 +15,8 @@ import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
+import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.bytes.BytesResource;
 import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.EngineBuilder;
@@ -210,6 +212,40 @@ public class GlideTest {
     }
 
     @Test
+    public void testGenericLoader() throws Exception {
+        File expected = new File("test");
+
+        GlideUrl glideUrl =  mock(GlideUrl.class);
+        ResourceFetcher<File> resourceFetcher = mock(ResourceFetcher.class);
+        when(resourceFetcher.loadResource(any(Priority.class))).thenReturn(expected);
+        ModelLoader<GlideUrl, File> modelLoader = mock(ModelLoader.class);
+        when(modelLoader.getId(eq(glideUrl))).thenReturn("id");
+        when(modelLoader.getResourceFetcher(eq(glideUrl), anyInt(), anyInt()))
+                .thenReturn(resourceFetcher);
+
+        Resource<File> expectedResource = mock(Resource.class);
+        when(expectedResource.get()).thenReturn(expected);
+        ResourceDecoder<File, File> sourceDecoder = mock(ResourceDecoder.class);
+        when(sourceDecoder.decode(eq(expected), anyInt(), anyInt())).thenReturn(expectedResource);
+        when(sourceDecoder.getId()).thenReturn("sourceDecoderId");
+        ResourceDecoder<InputStream, File> cacheDecoder = mock(ResourceDecoder.class);
+        when(cacheDecoder.getId()).thenReturn("cacheDecoderId");
+        ResourceEncoder<File> encoder = mock(ResourceEncoder.class);
+        when(encoder.getId()).thenReturn("encoderId");
+
+        Glide.with(getContext())
+                .using(modelLoader, File.class)
+                .load(glideUrl)
+                .as(File.class)
+                .imageDecoder(sourceDecoder)
+                .cacheDecoder(cacheDecoder)
+                .encoder(encoder)
+                .into(target);
+
+        verify(target).onResourceReady(eq(expected));
+    }
+
+    @Test
     public void testFileDefaultLoaderWithInputStream() throws Exception {
         registerFailFactory(File.class, ParcelFileDescriptor.class);
         runTestFileDefaultLoader();
@@ -268,17 +304,14 @@ public class GlideTest {
         mockUri(uri);
         final byte[] bytes = new byte[0];
 
-        Glide.with(getContext()).load(uri).transcode(byte[].class, new ResourceTranscoder<Bitmap, byte[]>() {
-            @Override
-            public Resource<byte[]> transcode(Resource<Bitmap> toTranscode) {
-                return new BytesResource(bytes);
-            }
+        ResourceTranscoder<Bitmap, byte[]> transcoder = mock(ResourceTranscoder.class);
+        when(transcoder.getId()).thenReturn("bytes");
+        when(transcoder.transcode(any(Resource.class))).thenReturn(new BytesResource(bytes));
 
-            @Override
-            public String getId() {
-                return "bytes";
-            }
-        }).into(target);
+        Glide.with(getContext())
+                .load(uri)
+                .transcode(transcoder, byte[].class)
+                .into(target);
 
         verify(target).onResourceReady(eq(bytes));
     }

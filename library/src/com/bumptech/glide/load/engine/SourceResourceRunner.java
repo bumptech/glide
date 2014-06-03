@@ -65,12 +65,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
         try {
             T toDecode = fetcher.loadResource(priority);
             if (toDecode != null) {
-                Resource<Z> decoded = null;
-                try {
-                    decoded = decoder.decode(toDecode, width, height);
-                } finally {
-                    fetcher.cleanup();
-                }
+                Resource<Z> decoded = decoder.decode(toDecode, width, height);
                 if (decoded != null) {
                     Resource<Z> transformed = transformation.transform(decoded, width, height);
                     if (decoded != transformed) {

@@ -77,6 +77,27 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         this.engine = engine;
         this.transformation = transformation;
         this.transcodeClass = transcodeClass;
+
+        // We allow null models by just setting an error drawable. Null models will always have empty providers, we
+        // simply skip our sanity checks in that unusual case.
+        if (model != null) {
+            if (loadProvider.getCacheDecoder() == null) {
+                throw new NullPointerException("CacheDecoder must not be null, try .cacheDecoder(ResouceDecoder)");
+            }
+            if (loadProvider.getSourceDecoder() == null) {
+                throw new NullPointerException("SourceDecoder must not be null, try .imageDecoder(ResourceDecoder) " +
+                        "and/or .videoDecoder()");
+            }
+            if (loadProvider.getEncoder() == null) {
+                throw new NullPointerException("Encoder must not be null, try .encode(ResourceEncoder)");
+            }
+            if (loadProvider.getTranscoder() == null) {
+                throw new NullPointerException("Transcoder must not be null, try .as(Class, ResourceTranscoder)");
+            }
+            if (loadProvider.getModelLoader() == null) {
+                throw new NullPointerException("ModelLoader must not be null, try .using(ModelLoader)");
+            }
+        }
     }
 
     @Override

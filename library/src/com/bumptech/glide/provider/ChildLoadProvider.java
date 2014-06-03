@@ -12,6 +12,7 @@ public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
     private ResourceDecoder<InputStream, Z> cacheDecoder;
     private ResourceDecoder<T, Z> sourceDecoder;
     private ResourceEncoder<Z> encoder;
+    private ResourceTranscoder<Z, R> transcoder;
 
     public ChildLoadProvider(LoadProvider<A, T, Z, R> parent) {
         this.parent = parent;
@@ -32,6 +33,10 @@ public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
 
     public void setEncoder(ResourceEncoder<Z> encoder) {
         this.encoder = encoder;
+    }
+
+    public void setTranscoder(ResourceTranscoder<Z, R> transcoder) {
+        this.transcoder = transcoder;
     }
 
     @Override
@@ -63,6 +68,11 @@ public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
 
     @Override
     public ResourceTranscoder<Z, R> getTranscoder() {
-        return parent.getTranscoder();
+        if (transcoder != null) {
+            return transcoder;
+        } else {
+            return parent.getTranscoder();
+        }
     }
+
 }

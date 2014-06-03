@@ -26,6 +26,8 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.InputStream;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -56,10 +58,18 @@ public class GenericRequestTest {
         int errorResourceId = 0;
         Drawable errorDrawable = null;
         LoadProvider<Object, Object, Object, Object> loadProvider = mock(LoadProvider.class);
+        ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
+        ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
+        ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
+        ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
             when(loadProvider.getModelLoader()).thenReturn(modelLoader);
+            when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
+            when(loadProvider.getSourceDecoder()).thenReturn(sourceDecoder);
+            when(loadProvider.getEncoder()).thenReturn(encoder);
+            when(loadProvider.getTranscoder()).thenReturn(transcoder);
         }
 
         public GenericRequest<Object, Object, Object, Object> getRequest() {
@@ -72,6 +82,41 @@ public class GenericRequestTest {
     @Before
     public void setUp() {
         harness = new RequestHarness();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenMissingCacheDecoder() {
+        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenMissingSourceDecoder() {
+        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test(expected =  NullPointerException.class)
+    public void testThrowsWhenMissingEncoder() {
+        when(harness.loadProvider.getEncoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test(expected =  NullPointerException.class)
+    public void testThrowsWhenMissingTranscoder() {
+        when(harness.loadProvider.getTranscoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenMissingModelLoader() {
+        when(harness.loadProvider.getModelLoader()).thenReturn(null);
+
+        harness.getRequest();
     }
 
     @Test

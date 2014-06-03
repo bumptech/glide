@@ -71,8 +71,15 @@ public class ChildLoadProviderTest {
     }
 
     @Test
-    public void testReturnsParentTranscoder() {
+    public void testReturnsParentTranscoderIfNoneIsSet() {
         when(harness.parent.getTranscoder()).thenReturn(harness.transcoder);
+
+        assertEquals(harness.transcoder, harness.provider.getTranscoder());
+    }
+
+    @Test
+    public void testReturnsChildTranscoderIfSet() {
+        harness.provider.setTranscoder(harness.transcoder);
 
         assertEquals(harness.transcoder, harness.provider.getTranscoder());
     }

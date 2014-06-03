@@ -10,10 +10,12 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDataLoadProvider;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDataLoadProvider;
 import com.bumptech.glide.load.data.transcode.BitmapDrawableTranscoder;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.data.transcode.TranscoderFactory;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -174,6 +176,26 @@ public class Glide {
                 new BitmapDrawableTranscoder(resources, bitmapPool));
     }
 
+    BitmapPool getBitmapPool() {
+        return bitmapPool;
+    }
+
+    <Z, R> ResourceTranscoder<Z, R> buildTranscoder(Class<Z> decodedClass, Class<R> transcodedClass) {
+        return transcoderFactory.get(decodedClass, transcodedClass);
+    }
+
+    <T, Z> DataLoadProvider<T, Z> buildDataProvider(Class<T> dataClass, Class<Z> decodedClass) {
+        return dataLoadProviderFactory.get(dataClass, decodedClass);
+    }
+
+    <R> Target<R> buildImageViewTarget(ImageView imageView, Class<R> transcodedClass) {
+        return imageViewTargetFactory.buildTarget(imageView, transcodedClass);
+    }
+
+    Engine getEngine() {
+        return engine;
+    }
+
     private GenericLoaderFactory getLoaderFactory() {
         return loaderFactory;
     }
@@ -255,8 +277,8 @@ public class Glide {
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
      * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Typically the {@link BitmapModelRequest#using(StreamModelLoader)} or
-     * {@link BitmapModelRequest#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
+     * models. Typically the {@link ModelRequest#using(StreamModelLoader)} or
+     * {@link ModelRequest#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
      * with the ModelLoader being used to load it. Any factory replaced by the given factory will have its
      * {@link ModelLoaderFactory#teardown()}} method called.
      *
@@ -271,8 +293,8 @@ public class Glide {
      *     retained statically.
      * </p>
      *
-     * @see BitmapModelRequest#using(FileDescriptorModelLoader)
-     * @see BitmapModelRequest#using(StreamModelLoader)
+     * @see ModelRequest#using(FileDescriptorModelLoader)
+     * @see ModelRequest#using(StreamModelLoader)
      *
      * @param modelClass The model class.
      * @param resourceClass The resource class the model loader will translate the model type into.
@@ -393,10 +415,8 @@ public class Glide {
      * @param context Any context, will not be retained.
      * @return A model request to pass in the object representing the image to be loaded.
      */
-    public static BitmapModelRequest with(Context context) {
-        Glide glide = Glide.get(context);
-        return new BitmapModelRequest(context, glide.dataLoadProviderFactory, glide.bitmapPool, glide.imageViewTargetFactory,
-                glide.transcoderFactory, glide.engine);
+    public static ModelRequest with(Context context) {
+        return new ModelRequest(context, Glide.get(context));
     }
 
     private static class ClearTarget extends ViewTarget<View, Object> {

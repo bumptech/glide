@@ -15,8 +15,17 @@ public class FixedLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R>  
 
     public FixedLoadProvider(ModelLoader<A, T> modelLoader, ResourceTranscoder<Z, R> transcoder,
             DataLoadProvider<T, Z> dataLoadProvider) {
+        if (modelLoader == null) {
+            throw new NullPointerException("ModelLoader must not be null");
+        }
         this.modelLoader = modelLoader;
+        if (transcoder == null) {
+            throw new NullPointerException("Transcoder must not be null");
+        }
         this.transcoder = transcoder;
+        if (dataLoadProvider == null) {
+            throw new NullPointerException("DataLoadProvider must not be null");
+        }
         this.dataLoadProvider = dataLoadProvider;
     }
 

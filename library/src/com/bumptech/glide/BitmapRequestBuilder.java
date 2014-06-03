@@ -12,11 +12,10 @@ import com.bumptech.glide.load.data.bitmap.CenterCrop;
 import com.bumptech.glide.load.data.bitmap.Downsampler;
 import com.bumptech.glide.load.data.bitmap.FitCenter;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
-import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.RequestListener;
-import com.bumptech.glide.request.target.ImageViewTargetFactory;
 
 import java.io.InputStream;
 
@@ -37,9 +36,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     BitmapRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, InputStream, Bitmap, TranscodeType> streamLoadProvider,
             LoadProvider<ModelType, ParcelFileDescriptor, Bitmap, TranscodeType> fileDescriptorLoadProvider,
-            Class<TranscodeType> transcodeClass, BitmapPool bitmapPool, ImageViewTargetFactory factory, Engine engine) {
-        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, transcodeClass, factory, engine);
-        this.bitmapPool = bitmapPool;
+            Class<TranscodeType> transcodeClass, Glide glide) {
+        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, transcodeClass, glide);
+        this.bitmapPool = glide.getBitmapPool();
     }
 
     /**
@@ -157,6 +156,13 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> transform(Transformation<Bitmap> transformation) {
         super.transform(transformation);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> transcoder(
+            ResourceTranscoder<Bitmap, TranscodeType> transcoder) {
+        super.transcoder(transcoder);
         return this;
     }
 
