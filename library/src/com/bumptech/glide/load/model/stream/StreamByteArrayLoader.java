@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model.stream;
 
-import com.bumptech.glide.load.resource.ByteArrayFetcher;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.ByteArrayFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.InputStream;
 import java.util.UUID;
@@ -13,7 +13,7 @@ import java.util.UUID;
 public class StreamByteArrayLoader implements StreamModelLoader<byte[]> {
 
     @Override
-    public ResourceFetcher<InputStream> getResourceFetcher(byte[] model, int width, int height) {
+    public DataFetcher<InputStream> getResourceFetcher(byte[] model, int width, int height) {
         return new ByteArrayFetcher(model);
     }
 

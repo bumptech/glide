@@ -6,10 +6,10 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.executor.Prioritized;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.request.ResourceCallback;
 
 import java.io.OutputStream;
@@ -24,7 +24,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
     private final Key key;
     private final int width;
     private final int height;
-    private final ResourceFetcher<T> fetcher;
+    private final DataFetcher<T> fetcher;
     private final ResourceDecoder<T, Z> decoder;
     private Transformation<Z> transformation;
     private final ResourceEncoder<Z> encoder;
@@ -35,13 +35,13 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
     private Resource<Z> result;
     private volatile boolean isCancelled;
 
-    public SourceResourceRunner(Key key, int width, int height, ResourceFetcher<T> resourceFetcher,
+    public SourceResourceRunner(Key key, int width, int height, DataFetcher<T> dataFetcher,
             ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
             ResourceTranscoder<Z, R> transcoder, DiskCache diskCache, Priority priority, ResourceCallback cb) {
         this.key = key;
         this.width = width;
         this.height = height;
-        this.fetcher = resourceFetcher;
+        this.fetcher = dataFetcher;
         this.decoder = decoder;
         this.transformation = transformation;
         this.encoder = encoder;
@@ -87,7 +87,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
 
     private Resource<Z> decode() throws Exception {
         try {
-            T toDecode = fetcher.loadResource(priority);
+            T toDecode = fetcher.loadData(priority);
             if (toDecode != null) {
                 return decoder.decode(toDecode, width, height);
             }

@@ -6,7 +6,7 @@ import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.InputStream;
 
@@ -50,7 +50,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     }
 
     @Override
-    public ResourceFetcher<InputStream> getResourceFetcher(GlideUrl url, int width, int height) {
+    public DataFetcher<InputStream> getResourceFetcher(GlideUrl url, int width, int height) {
         return new VolleyStreamFetcher(requestQueue, url.toString(), futureFactory.build());
     }
 

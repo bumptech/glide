@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.File;
 
@@ -17,7 +17,7 @@ public class StringLoader<T> implements ModelLoader<String, T> {
     }
 
     @Override
-    public ResourceFetcher<T> getResourceFetcher(String model, int width, int height) {
+    public DataFetcher<T> getResourceFetcher(String model, int width, int height) {
         Uri uri = Uri.parse(model);
 
         final String scheme = uri.getScheme();

@@ -1,6 +1,6 @@
 package com.bumptech.glide.resize.load;
 
-import com.bumptech.glide.load.data.bitmap.ImageHeaderParser;
+import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;

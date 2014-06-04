@@ -6,9 +6,9 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
@@ -206,7 +206,7 @@ public class EngineTest {
         harness.doLoad();
 
         verify(harness.factory).build(eq(harness.cacheKey), anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
                 any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class),
                 any(EngineJobListener.class));
     }
@@ -217,7 +217,7 @@ public class EngineTest {
         Key cacheKey = mock(Key.class);
         KeyFactory keyFactory = mock(KeyFactory.class);
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
-        ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);
+        DataFetcher<Object> fetcher = mock(DataFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);

@@ -5,7 +5,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.InputStream;
 
@@ -38,7 +38,7 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
     }
 
     @Override
-    public ResourceFetcher<InputStream> getResourceFetcher(T model, int width, int height) {
+    public DataFetcher<InputStream> getResourceFetcher(T model, int width, int height) {
         final String id = getId(model);
         GlideUrl result = null;
         if (modelCache != null) {

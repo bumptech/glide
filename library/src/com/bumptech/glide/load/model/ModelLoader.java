@@ -1,12 +1,12 @@
 package com.bumptech.glide.load.model;
 
 import com.bumptech.glide.load.model.stream.StreamStringLoader;
-import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.load.data.bitmap.BitmapDecoder;
+import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 
 /**
  * An interface for translating an arbitrarily complex data model into a concrete data type that can be used by an
- * {@link ResourceFetcher} to obtain the data for an image represented by the model.
+ * {@link DataFetcher} to obtain the data for an image represented by the model.
  *
  * This interface has two objectives:
  *   1. To translate a specific data model into something that can be used by a decoder to load a Bitmap.
@@ -28,8 +28,8 @@ import com.bumptech.glide.load.data.bitmap.BitmapDecoder;
 public interface ModelLoader<T, Y> {
 
     /**
-     * Obtain an {@link ResourceFetcher} that can load the data required to decode the
-     * image represented by this model. The {@link ResourceFetcher} will not be used if
+     * Obtain an {@link DataFetcher} that can load the data required to decode the
+     * image represented by this model. The {@link DataFetcher} will not be used if
      * the image is already cached.
      *
      * <p>
@@ -42,10 +42,10 @@ public interface ModelLoader<T, Y> {
      * @param model The model representing the image
      * @param width The width of the view the image will be loaded into
      * @param height The height of the view the image will be loaded into
-     * @return A {@link ResourceFetcher} that can obtain the data for the image if the
+     * @return A {@link DataFetcher} that can obtain the data for the image if the
      *          image is not cached.
      */
-    public ResourceFetcher<Y> getResourceFetcher(T model, int width, int height);
+    public DataFetcher<Y> getResourceFetcher(T model, int width, int height);
 
     /**
      * Get a unique id for a given model

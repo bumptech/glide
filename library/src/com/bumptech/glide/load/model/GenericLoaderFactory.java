@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.content.Context;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class GenericLoaderFactory {
 
     private static final ModelLoader NULL_MODEL_LOADER = new ModelLoader() {
         @Override
-        public ResourceFetcher getResourceFetcher(Object model, int width, int height) {
+        public DataFetcher getResourceFetcher(Object model, int width, int height) {
             throw new NoSuchMethodError("This should never be called!");
         }
 

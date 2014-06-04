@@ -1,7 +1,7 @@
 package com.bumptech.glide.load;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.load.data.bitmap.BitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 
 /**
  * Options for setting the value of {@link Bitmap#getConfig()} for {@link Bitmap}s returned by a {@link BitmapDecoder}.

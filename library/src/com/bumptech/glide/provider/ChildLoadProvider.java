@@ -2,7 +2,7 @@ package com.bumptech.glide.provider;
 
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.model.ModelLoader;
 
 import java.io.InputStream;

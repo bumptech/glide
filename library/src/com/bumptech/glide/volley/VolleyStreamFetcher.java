@@ -6,15 +6,15 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /**
- * A ResourceFetcher backed by volley for fetching images via http.
+ * A DataFetcher backed by volley for fetching images via http.
  */
-public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
+public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     private final RequestQueue requestQueue;
     private final String url;
     private VolleyRequestFuture<InputStream> requestFuture;
@@ -34,7 +34,7 @@ public class VolleyStreamFetcher implements ResourceFetcher<InputStream> {
     }
 
     @Override
-    public InputStream loadResource(Priority priority) throws Exception {
+    public InputStream loadData(Priority priority) throws Exception {
         GlideRequest request = new GlideRequest(url, requestFuture, glideToVolleyPriority(priority));
 
         requestFuture.setRequest(requestQueue.add(request));

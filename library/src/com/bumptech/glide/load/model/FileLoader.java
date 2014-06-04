@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.File;
 
@@ -17,7 +17,7 @@ public class FileLoader<T> implements ModelLoader<File, T> {
     }
 
     @Override
-    public ResourceFetcher<T> getResourceFetcher(File model, int width, int height) {
+    public DataFetcher<T> getResourceFetcher(File model, int width, int height) {
         return uriLoader.getResourceFetcher(Uri.fromFile(model), width, height);
     }
 

@@ -2,7 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.UriLoader;
@@ -31,17 +31,17 @@ public class UriLoaderTest {
     private static final int IMAGE_SIDE = 120;
 
     private UriLoader loader;
-    private ResourceFetcher<InputStream> localUriFetcher;
+    private DataFetcher<InputStream> localUriFetcher;
     private ModelLoader<GlideUrl, InputStream> urlLoader;
 
     @Before
     public void setUp() throws Exception {
         urlLoader = mock(ModelLoader.class);
-        localUriFetcher = mock(ResourceFetcher.class);
+        localUriFetcher = mock(DataFetcher.class);
 
         loader = new UriLoader<InputStream>(Robolectric.application, urlLoader) {
             @Override
-            protected ResourceFetcher<InputStream> getLocalUriFetcher(Context context, Uri uri) {
+            protected DataFetcher<InputStream> getLocalUriFetcher(Context context, Uri uri) {
                 return localUriFetcher;
             }
         };
@@ -50,22 +50,22 @@ public class UriLoaderTest {
     @Test
     public void testHandlesFileUris() throws IOException {
         Uri fileUri = Uri.fromFile(new File("f"));
-        ResourceFetcher resourceFetcher = loader.getResourceFetcher(fileUri, IMAGE_SIDE, IMAGE_SIDE);
-        assertEquals(localUriFetcher, resourceFetcher);
+        DataFetcher dataFetcher = loader.getResourceFetcher(fileUri, IMAGE_SIDE, IMAGE_SIDE);
+        assertEquals(localUriFetcher, dataFetcher);
     }
 
     @Test
     public void testHandlesResourceUris() throws IOException {
         Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
-        ResourceFetcher resourceFetcher = loader.getResourceFetcher(resourceUri, IMAGE_SIDE, IMAGE_SIDE);
-        assertEquals(localUriFetcher, resourceFetcher);
+        DataFetcher dataFetcher = loader.getResourceFetcher(resourceUri, IMAGE_SIDE, IMAGE_SIDE);
+        assertEquals(localUriFetcher, dataFetcher);
     }
 
     @Test
     public void testHandlesContentUris() {
         Uri contentUri = Uri.parse("content://com.bumptech.glide");
-        ResourceFetcher resourceFetcher = loader.getResourceFetcher(contentUri, IMAGE_SIDE, IMAGE_SIDE);
-        assertEquals(localUriFetcher, resourceFetcher);
+        DataFetcher dataFetcher = loader.getResourceFetcher(contentUri, IMAGE_SIDE, IMAGE_SIDE);
+        assertEquals(localUriFetcher, dataFetcher);
     }
 
     @Test

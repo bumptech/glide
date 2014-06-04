@@ -17,8 +17,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.data.bytes.BytesResource;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.bytes.BytesResource;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.EngineBuilder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -28,12 +28,11 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.volley.VolleyRequestFuture;
 import com.bumptech.glide.volley.VolleyUrlLoader;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +59,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -85,14 +85,7 @@ public class GlideTest {
         target = mock(Target.class);
         imageView = new ImageView(Robolectric.application);
         imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Target.SizeReadyCallback cb = (Target.SizeReadyCallback) invocation.getArguments()[0];
-                cb.onSizeReady(100, 100);
-                return null;
-            }
-        }).when(target).getSize(any(Target.SizeReadyCallback.class));
+        doAnswer(new CallCallback()).when(target).getSize(any(Target.SizeReadyCallback.class));
 
         Handler bgHandler = mock(Handler.class);
         when(bgHandler.post(any(Runnable.class))).thenAnswer(new Answer<Object>() {
@@ -146,7 +139,7 @@ public class GlideTest {
                     Robolectric.runUiThreadTasks();
                 }
                 if (!isDone()) {
-                    Assert.fail("Failed to get response from Volley in time");
+                    fail("Failed to get response from Volley in time");
                 }
                 return super.get();
             }
@@ -211,17 +204,21 @@ public class GlideTest {
         verify(memoryCache).trimMemory(eq(level));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testGenericLoader() throws Exception {
         File expected = new File("test");
 
+        Target<File> target = mock(Target.class);
+        doAnswer(new CallCallback()).when(target).getSize(any(Target.SizeReadyCallback.class));
+
         GlideUrl glideUrl =  mock(GlideUrl.class);
-        ResourceFetcher<File> resourceFetcher = mock(ResourceFetcher.class);
-        when(resourceFetcher.loadResource(any(Priority.class))).thenReturn(expected);
+        DataFetcher<File> dataFetcher = mock(DataFetcher.class);
+        when(dataFetcher.loadData(any(Priority.class))).thenReturn(expected);
         ModelLoader<GlideUrl, File> modelLoader = mock(ModelLoader.class);
         when(modelLoader.getId(eq(glideUrl))).thenReturn("id");
         when(modelLoader.getResourceFetcher(eq(glideUrl), anyInt(), anyInt()))
-                .thenReturn(resourceFetcher);
+                .thenReturn(dataFetcher);
 
         Resource<File> expectedResource = mock(Resource.class);
         when(expectedResource.get()).thenReturn(expected);
@@ -516,8 +513,8 @@ public class GlideTest {
 
     @SuppressWarnings("unchecked")
     private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) throws Exception {
-        ResourceFetcher<Z> failFetcher = mock(ResourceFetcher.class);
-        when(failFetcher.loadResource(any(Priority.class))).thenThrow(new IOException("test"));
+        DataFetcher<Z> failFetcher = mock(DataFetcher.class);
+        when(failFetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
         ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
         when(failLoader.getId(any(failModel))).thenReturn("fakeId");
         when(failLoader.getResourceFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
@@ -555,9 +552,9 @@ public class GlideTest {
     @SuppressWarnings("unchecked")
     private <T> StreamModelLoader<T> mockStreamModelLoader(final Class<T> modelClass) {
         StreamModelLoader<T> modelLoader = mock(StreamModelLoader.class);
-        ResourceFetcher<InputStream> fetcher = mock(ResourceFetcher.class);
+        DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
         try {
-            when(fetcher.loadResource(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
+            when(fetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
         } catch (Exception e) { }
         when(modelLoader.getId(any(modelClass))).thenAnswer(new Answer<Object>() {
             @Override
@@ -570,6 +567,27 @@ public class GlideTest {
                 .thenReturn(fetcher);
 
         return modelLoader;
+    }
+
+    private static class CallCallback implements Answer<Void> {
+        private int width;
+        private int height;
+
+        public CallCallback() {
+            this(100, 100);
+        }
+
+        public CallCallback(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public Void answer(InvocationOnMock invocation) throws Throwable {
+            Target.SizeReadyCallback cb = (Target.SizeReadyCallback) invocation.getArguments()[0];
+            cb.onSizeReady(width, height);
+            return null;
+        }
     }
 
     @Implements(ContentResolver.class)

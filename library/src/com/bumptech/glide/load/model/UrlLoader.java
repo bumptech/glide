@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.model;
 
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.net.URL;
 
@@ -12,7 +12,7 @@ public class UrlLoader<T> implements ModelLoader<URL, T> {
     }
 
     @Override
-    public ResourceFetcher<T> getResourceFetcher(URL model, int width, int height) {
+    public DataFetcher<T> getResourceFetcher(URL model, int width, int height) {
         return glideUrlLoader.getResourceFetcher(new GlideUrl(model), width, height);
     }
 

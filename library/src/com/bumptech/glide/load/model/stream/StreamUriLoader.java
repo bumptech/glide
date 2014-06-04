@@ -8,8 +8,8 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.UriLoader;
-import com.bumptech.glide.load.resource.ResourceFetcher;
-import com.bumptech.glide.load.resource.StreamLocalUriFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.StreamLocalUriFetcher;
 
 import java.io.InputStream;
 
@@ -40,7 +40,7 @@ public class StreamUriLoader extends UriLoader<InputStream> implements StreamMod
     }
 
     @Override
-    protected ResourceFetcher<InputStream> getLocalUriFetcher(Context context, Uri uri) {
+    protected DataFetcher<InputStream> getLocalUriFetcher(Context context, Uri uri) {
         return new StreamLocalUriFetcher(context, uri);
     }
 }

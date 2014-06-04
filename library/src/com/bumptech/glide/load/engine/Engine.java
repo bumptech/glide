@@ -6,9 +6,9 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.request.ResourceCallback;
 
 import java.io.InputStream;
@@ -63,7 +63,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param <R> The type of the resource that will be transcoded from the decoded resource.
      */
     public <T, Z, R> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
-            ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
+            DataFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
             ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, Priority priority, ResourceCallback cb) {
 
         Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder, transcoder);

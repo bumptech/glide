@@ -5,8 +5,8 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.InputStream;
 
@@ -26,7 +26,7 @@ interface ResourceRunnerFactory {
      * @return
      */
     public <T, Z, R> ResourceRunner<Z, R> build(Key key, int width, int height,
-            ResourceDecoder<InputStream, Z> cacheDecoder, ResourceFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
+            ResourceDecoder<InputStream, Z> cacheDecoder, DataFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
             Transformation<Z> transformation,  ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
             Priority priority, EngineJobListener listener);
 }

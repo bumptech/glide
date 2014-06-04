@@ -6,9 +6,9 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,13 +42,13 @@ public class SourceResourceRunnerTest {
     public void testResourceFetcherIsCalled() throws Exception {
         harness.runner.run();
 
-        verify(harness.fetcher).loadResource(eq(harness.priority));
+        verify(harness.fetcher).loadData(eq(harness.priority));
     }
 
     @Test
     public void testDecoderIsCalledIfFetched() throws Exception {
         Object fetched = new Object();
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(fetched);
+        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(fetched);
 
         harness.runner.run();
 
@@ -58,7 +58,7 @@ public class SourceResourceRunnerTest {
     @Test
     public void testCallbackIsCalledWithTranscodedResourceIfFetchedAndDecoded() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
+        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
         when(harness.transcoder.transcode(harness.decoded)).thenReturn(harness.transcoded);
 
@@ -70,7 +70,7 @@ public class SourceResourceRunnerTest {
     @Test
     public void testResourceIsWrittenToCacheIfFetchedAndDecoded() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
+        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
 
         final OutputStream expected = new ByteArrayOutputStream();
@@ -84,7 +84,7 @@ public class SourceResourceRunnerTest {
     @Test
     public void testResourceIsTransformedBeforeBeingWrittenToCache() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
+        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
         Resource transformed = mock(Resource.class);
         when(harness.transformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
@@ -100,7 +100,7 @@ public class SourceResourceRunnerTest {
     @Test
     public void testDecodedResourceIsRecycledIfTransformedResourceIsDifferent() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
+        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
         Resource transformed = mock(Resource.class);
         when(harness.transformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
@@ -120,7 +120,7 @@ public class SourceResourceRunnerTest {
 
     @Test
     public void testFetcherIsCleanedUpIfDecodeThrows() throws Exception {
-        when(harness.fetcher.loadResource(any(Priority.class))).thenReturn(new Object());
+        when(harness.fetcher.loadData(any(Priority.class))).thenReturn(new Object());
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("test"));
 
         harness.runner.run();
@@ -130,7 +130,7 @@ public class SourceResourceRunnerTest {
 
     @Test
     public void testFetcherIsCleanedUpIfFetcherThrows() throws Exception {
-        when(harness.fetcher.loadResource(any(Priority.class))).thenThrow(new IOException("test"));
+        when(harness.fetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
 
         harness.runner.run();
 
@@ -140,7 +140,7 @@ public class SourceResourceRunnerTest {
     @Test
     public void testDecodedResourceIsNotRecycledIfResourceIsNotTransformed() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);
+        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
 
         harness.runner.run();
@@ -151,7 +151,7 @@ public class SourceResourceRunnerTest {
     @Test
     public void testCallbackIsCalledIfFetchFails() throws Exception {
         Exception expected = new Exception("Test");
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenThrow(expected);
+        when(harness.fetcher.loadData(eq(harness.priority))).thenThrow(expected);
 
         harness.runner.run();
 
@@ -160,7 +160,7 @@ public class SourceResourceRunnerTest {
 
     @Test
     public void testCallbackIsCalledIfDecodeFails() throws Exception {
-        when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(new Object());
+        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(new Object());
         when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenReturn(null);
 
         harness.runner.run();
@@ -180,7 +180,7 @@ public class SourceResourceRunnerTest {
         harness.runner.cancel();
         harness.runner.run();
 
-        verify(harness.fetcher, never()).loadResource(any(Priority.class));
+        verify(harness.fetcher, never()).loadData(any(Priority.class));
     }
 
     @Test
@@ -191,7 +191,7 @@ public class SourceResourceRunnerTest {
 
     @SuppressWarnings("unchecked")
     private static class SourceResourceHarness {
-        ResourceFetcher<Object> fetcher = mock(ResourceFetcher.class);
+        DataFetcher<Object> fetcher = mock(DataFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);

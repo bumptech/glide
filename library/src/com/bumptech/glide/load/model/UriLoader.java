@@ -3,7 +3,7 @@ package com.bumptech.glide.load.model;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
     private final Context context;
@@ -15,10 +15,10 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
     }
 
     @Override
-    public final ResourceFetcher<T> getResourceFetcher(Uri model, int width, int height) {
+    public final DataFetcher<T> getResourceFetcher(Uri model, int width, int height) {
         final String scheme = model.getScheme();
 
-        ResourceFetcher<T> result = null;
+        DataFetcher<T> result = null;
         if (isLocalUri(scheme)) {
             result = getLocalUriFetcher(context, model);
         } else if (urlLoader != null && ("http".equals(scheme) || "https".equals(scheme))) {
@@ -33,7 +33,7 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
         return model.toString();
     }
 
-    protected abstract ResourceFetcher<T> getLocalUriFetcher(Context context, Uri uri);
+    protected abstract DataFetcher<T> getLocalUriFetcher(Context context, Uri uri);
 
     private boolean isLocalUri(String scheme) {
         return ContentResolver.SCHEME_FILE.equals(scheme)

@@ -11,10 +11,10 @@ import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.GenericRequest;
 import com.bumptech.glide.request.target.Target;
@@ -191,7 +191,7 @@ public class GenericRequestTest {
         request.onSizeReady(100, 100);
 
         verify(harness.engine).load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
                 any(ResourceEncoder.class), any(ResourceTranscoder.class), eq(expected), any(ResourceCallback.class));
     }
 
@@ -199,7 +199,7 @@ public class GenericRequestTest {
     public void testEngineLoadCancelledOnCancel() {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
         when(harness.engine.load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(ResourceFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
                 any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class),
                 any(ResourceCallback.class))).thenReturn(loadStatus);
 

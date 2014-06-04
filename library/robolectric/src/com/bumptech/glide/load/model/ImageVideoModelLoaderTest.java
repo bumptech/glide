@@ -3,7 +3,7 @@ package com.bumptech.glide.load.model;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,18 +58,18 @@ public class ImageVideoModelLoaderTest {
         InputStream stream = new ByteArrayInputStream(new byte[0]);
         ParcelFileDescriptor fileDescriptor = mock(ParcelFileDescriptor.class);
 
-        when(harness.streamFetcher.loadResource(any(Priority.class))).thenReturn(stream);
+        when(harness.streamFetcher.loadData(any(Priority.class))).thenReturn(stream);
         when(harness.streamModelLoader
                 .getResourceFetcher(any(Uri.class), anyInt(), anyInt()))
                 .thenReturn(harness.streamFetcher);
-        when(harness.fileDescriptorFetcher.loadResource(any(Priority.class))).thenReturn(fileDescriptor);
+        when(harness.fileDescriptorFetcher.loadData(any(Priority.class))).thenReturn(fileDescriptor);
         when(harness.fileDescriptorModelLoader
                 .getResourceFetcher(any(Uri.class), anyInt(), anyInt()))
                 .thenReturn(harness.fileDescriptorFetcher);
 
         ImageVideoWrapper wrapper = harness.getLoader()
                 .getResourceFetcher(new Object(), 100, 100)
-                .loadResource(Priority.LOW);
+                .loadData(Priority.LOW);
 
         assertEquals(stream, wrapper.getStream());
         assertEquals(fileDescriptor, wrapper.getFileDescriptor());
@@ -129,7 +129,7 @@ public class ImageVideoModelLoaderTest {
     public void testFetcherHandlesNullStreamFetcherInLoadResource() throws Exception {
         harness.streamFetcher = null;
 
-        assertNotNull(harness.getFetcher().loadResource(Priority.NORMAL));
+        assertNotNull(harness.getFetcher().loadData(Priority.NORMAL));
     }
 
     @Test
@@ -150,62 +150,62 @@ public class ImageVideoModelLoaderTest {
     public void testFetcherHandlesNullFileDesciprtorInLoadResource() throws Exception {
         harness.fileDescriptorFetcher = null;
 
-        assertNotNull(harness.getFetcher().loadResource(Priority.NORMAL));
+        assertNotNull(harness.getFetcher().loadData(Priority.NORMAL));
     }
 
     @Test
     public void testFetcherHandlesExceptionInStreamFetcher() throws Exception {
-        when(harness.streamFetcher.loadResource(any(Priority.class)))
+        when(harness.streamFetcher.loadData(any(Priority.class)))
                 .thenThrow(new IOException("test"));
 
-        assertNotNull(harness.getFetcher().loadResource(Priority.NORMAL));
+        assertNotNull(harness.getFetcher().loadData(Priority.NORMAL));
     }
 
     @Test
     public void testFetcherHandlesExceptionInFileDescriptorFetcher() throws Exception {
-        when(harness.streamFetcher.loadResource(any(Priority.class)))
+        when(harness.streamFetcher.loadData(any(Priority.class)))
                 .thenReturn(new ByteArrayInputStream(new byte[0]));
         when(harness.fileDescriptorFetcher
-                .loadResource(any(Priority.class)))
+                .loadData(any(Priority.class)))
                 .thenThrow(new IOException("test"));
 
-        assertNotNull(harness.getFetcher().loadResource(Priority.LOW));
+        assertNotNull(harness.getFetcher().loadData(Priority.LOW));
     }
 
     @Test(expected = IOException.class)
     public void testFetcherThrowsIfBothFileDescriptorAndStreamFetchersThrows() throws Exception {
-        when(harness.fileDescriptorFetcher.loadResource(any(Priority.class)))
+        when(harness.fileDescriptorFetcher.loadData(any(Priority.class)))
                 .thenThrow(new IOException("test"));
-        when(harness.streamFetcher.loadResource(any(Priority.class)))
+        when(harness.streamFetcher.loadData(any(Priority.class)))
                 .thenThrow(new IOException("test"));
 
-        harness.getFetcher().loadResource(Priority.LOW);
+        harness.getFetcher().loadData(Priority.LOW);
     }
 
     @Test(expected = IOException.class)
     public void testFetcherThrowsIfStreamFetcherIsNullAndFileDescriptorThrows() throws Exception {
         harness.streamFetcher = null;
-        when(harness.fileDescriptorFetcher.loadResource(any(Priority.class)))
+        when(harness.fileDescriptorFetcher.loadData(any(Priority.class)))
                 .thenThrow(new IOException("test"));
 
-        harness.getFetcher().loadResource(Priority.LOW);
+        harness.getFetcher().loadData(Priority.LOW);
     }
 
     @Test(expected = IOException.class)
     public void testFetcherThrowsIfFileDescriptorFetcherIsNullAndStreamLoaderThrows() throws Exception {
         harness.fileDescriptorFetcher = null;
-        when(harness.streamFetcher.loadResource(any(Priority.class)))
+        when(harness.streamFetcher.loadData(any(Priority.class)))
                 .thenThrow(new IOException("test"));
 
-        harness.getFetcher().loadResource(Priority.LOW);
+        harness.getFetcher().loadData(Priority.LOW);
     }
 
     @SuppressWarnings("unchecked")
     private static class ImageVideoLoaderHarness {
         ModelLoader<Object, InputStream> streamModelLoader = mock(ModelLoader.class);
         ModelLoader<Object, ParcelFileDescriptor> fileDescriptorModelLoader = mock(ModelLoader.class);
-        ResourceFetcher<InputStream> streamFetcher = mock(ResourceFetcher.class);
-        ResourceFetcher<ParcelFileDescriptor> fileDescriptorFetcher = mock(ResourceFetcher.class);
+        DataFetcher<InputStream> streamFetcher = mock(DataFetcher.class);
+        DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher = mock(DataFetcher.class);
 
         private ImageVideoModelLoader<Object> getLoader() {
             return new ImageVideoModelLoader<Object>(streamModelLoader, fileDescriptorModelLoader);

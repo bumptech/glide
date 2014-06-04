@@ -10,10 +10,10 @@ import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
@@ -179,10 +179,10 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
 
         final String id = modelLoader.getId(model);
-        final ResourceFetcher<T> resourceFetcher = modelLoader.getResourceFetcher(model, width, height);
+        final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
 
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(id, width, height, cacheDecoder, resourceFetcher, decoder, transformation,
+        loadStatus = engine.load(id, width, height, cacheDecoder, dataFetcher, decoder, transformation,
                 encoder, transcoder, priority, this);
         loadedFromMemoryCache = resource != null;
     }

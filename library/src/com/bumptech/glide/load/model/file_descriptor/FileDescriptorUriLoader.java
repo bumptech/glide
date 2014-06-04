@@ -9,8 +9,8 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.UriLoader;
-import com.bumptech.glide.load.resource.FileDescriptorLocalUriFetcher;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 
 /**
  * A {@link ModelLoader} For translating {@link Uri} models for local uris into {@link ParcelFileDescriptor} resources.
@@ -37,7 +37,7 @@ public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> imp
     }
 
     @Override
-    protected ResourceFetcher<ParcelFileDescriptor> getLocalUriFetcher(Context context, Uri uri) {
+    protected DataFetcher<ParcelFileDescriptor> getLocalUriFetcher(Context context, Uri uri) {
         return new FileDescriptorLocalUriFetcher(context, uri);
     }
 }

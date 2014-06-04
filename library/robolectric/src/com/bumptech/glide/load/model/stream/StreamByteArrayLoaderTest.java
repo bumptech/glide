@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.model.stream;
 
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -20,7 +20,7 @@ public class StreamByteArrayLoaderTest {
         };
 
         byte[] data = new byte[10];
-        ResourceFetcher<InputStream> fetcher = loader.getResourceFetcher(data, -1, -1);
+        DataFetcher<InputStream> fetcher = loader.getResourceFetcher(data, -1, -1);
         assertNotNull(fetcher);
     }
 

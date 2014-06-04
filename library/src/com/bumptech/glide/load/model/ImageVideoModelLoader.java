@@ -3,7 +3,7 @@ package com.bumptech.glide.load.model;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.resource.ResourceFetcher;
+import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.InputStream;
 
@@ -24,12 +24,12 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
     }
 
     @Override
-    public ResourceFetcher<ImageVideoWrapper> getResourceFetcher(A model, int width, int height) {
-        ResourceFetcher<InputStream> streamFetcher = null;
+    public DataFetcher<ImageVideoWrapper> getResourceFetcher(A model, int width, int height) {
+        DataFetcher<InputStream> streamFetcher = null;
         if (streamLoader != null) {
             streamFetcher = streamLoader.getResourceFetcher(model, width, height);
         }
-        ResourceFetcher<ParcelFileDescriptor> fileDescriptorFetcher = null;
+        DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher = null;
         if (fileDescriptorLoader != null) {
             fileDescriptorFetcher = fileDescriptorLoader.getResourceFetcher(model, width, height);
         }
@@ -51,21 +51,21 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
         return id;
     }
 
-    public static class ImageVideoFetcher implements ResourceFetcher<ImageVideoWrapper> {
-        private final ResourceFetcher<InputStream> streamFetcher;
-        private final ResourceFetcher<ParcelFileDescriptor> fileDescriptorFetcher;
+    public static class ImageVideoFetcher implements DataFetcher<ImageVideoWrapper> {
+        private final DataFetcher<InputStream> streamFetcher;
+        private final DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher;
 
-        public ImageVideoFetcher(ResourceFetcher<InputStream> streamFetcher,
-                ResourceFetcher<ParcelFileDescriptor> fileDescriptorFetcher) {
+        public ImageVideoFetcher(DataFetcher<InputStream> streamFetcher,
+                DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher) {
             this.streamFetcher = streamFetcher;
             this.fileDescriptorFetcher = fileDescriptorFetcher;
         }
         @Override
-        public ImageVideoWrapper loadResource(Priority priority) throws Exception {
+        public ImageVideoWrapper loadData(Priority priority) throws Exception {
             InputStream is = null;
             if (streamFetcher != null) {
                 try {
-                    is = streamFetcher.loadResource(priority);
+                    is = streamFetcher.loadData(priority);
                 } catch (Exception e) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG, "Exception fetching input stream, trying ParcelFileDescriptor", e);
@@ -78,7 +78,7 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
             ParcelFileDescriptor fileDescriptor = null;
             if (fileDescriptorFetcher != null) {
                 try {
-                    fileDescriptor = fileDescriptorFetcher.loadResource(priority);
+                    fileDescriptor = fileDescriptorFetcher.loadData(priority);
                 } catch (Exception e) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG, "Exception fetching ParcelFileDescriptor", e);
