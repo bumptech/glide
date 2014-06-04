@@ -129,6 +129,15 @@ public class SourceResourceRunnerTest {
     }
 
     @Test
+    public void testFetcherIsCleanedUpIfFetcherThrows() throws Exception {
+        when(harness.fetcher.loadResource(any(Priority.class))).thenThrow(new IOException("test"));
+
+        harness.runner.run();
+
+        verify(harness.fetcher).cleanup();
+    }
+
+    @Test
     public void testDecodedResourceIsNotRecycledIfResourceIsNotTransformed() throws Exception {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.fetcher.loadResource(eq(harness.priority))).thenReturn(is);

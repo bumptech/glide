@@ -86,8 +86,8 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
     }
 
     private Resource<Z> decode() throws Exception {
-        T toDecode = fetcher.loadResource(priority);
         try {
+            T toDecode = fetcher.loadResource(priority);
             if (toDecode != null) {
                 return decoder.decode(toDecode, width, height);
             }
