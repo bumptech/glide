@@ -3,17 +3,22 @@ package com.bumptech.glide.load.resource;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 import com.bumptech.glide.Priority;
 
+import java.io.Closeable;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
  *
  */
-public abstract class LocalUriFetcher<T> implements ResourceFetcher<T> {
+public abstract class LocalUriFetcher<T extends Closeable> implements ResourceFetcher<T> {
+    private static final String TAG = "LocalUriFetcher";
     private final WeakReference<Context> contextRef;
     private final Uri uri;
+    private T data;
 
     /**
      * Opens an input stream for a uri pointing to a local asset. Only certain uris are supported
@@ -37,14 +42,23 @@ public abstract class LocalUriFetcher<T> implements ResourceFetcher<T> {
             throw new NullPointerException("Context has been cleared in LocalUriFetcher uri: " + uri);
         }
         ContentResolver contentResolver = context.getContentResolver();
-        return loadResource(uri, contentResolver);
+        data = loadResource(uri, contentResolver);
+        return data;
     }
 
     @Override
     public void cleanup() {
-        // Do nothing.
-    }
+        if (data != null) {
+            try {
+                data.close();
+            } catch (IOException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "failed to close data", e);
+                }
+            }
 
+        }
+    }
 
     @Override
     public void cancel() {
