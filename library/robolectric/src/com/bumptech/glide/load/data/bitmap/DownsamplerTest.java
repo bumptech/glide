@@ -2,7 +2,6 @@ package com.bumptech.glide.load.data.bitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.data.bitmap.Downsampler;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import org.junit.After;
 import org.junit.Before;

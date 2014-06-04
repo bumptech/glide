@@ -7,13 +7,18 @@ import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.bitmap.CenterCrop;
 import com.bumptech.glide.load.data.bitmap.Downsampler;
+import com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.data.bitmap.FitCenter;
+import com.bumptech.glide.load.data.bitmap.ImageVideoBitmapDecoder;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.data.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.RequestListener;
 
@@ -27,18 +32,22 @@ import java.io.InputStream;
  * @param <TranscodeType> The type of the transcoded resource that the target will receive
  */
 @SuppressWarnings("unused") //public api
-public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericRequestBuilder<ModelType, InputStream,
-        ParcelFileDescriptor, Bitmap, TranscodeType> {
+public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericRequestBuilder<ModelType, ImageVideoWrapper,
+        Bitmap, TranscodeType> {
     private final BitmapPool bitmapPool;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
+    private ResourceDecoder<InputStream, Bitmap> imageDecoder;
+    private ResourceDecoder<ParcelFileDescriptor, Bitmap> videoDecoder;
 
     BitmapRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, InputStream, Bitmap, TranscodeType> streamLoadProvider,
-            LoadProvider<ModelType, ParcelFileDescriptor, Bitmap, TranscodeType> fileDescriptorLoadProvider,
+            LoadProvider<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> streamLoadProvider,
             Class<TranscodeType> transcodeClass, Glide glide) {
-        super(context, model, streamLoadProvider, fileDescriptorLoadProvider, transcodeClass, glide);
+        super(context, model, streamLoadProvider, transcodeClass, glide);
         this.bitmapPool = glide.getBitmapPool();
+
+        imageDecoder = new StreamBitmapDecoder(bitmapPool);
+        videoDecoder = new FileDescriptorBitmapDecoder(bitmapPool);
     }
 
     /**
@@ -65,7 +74,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
 
     /**
      * Load images using the given {@link Downsampler}. Replaces any existing image decoder. Defaults to
-     * {@link Downsampler#AT_LEAST}. Will be ignored if the data represented by the model is a video.
+     * {@link Downsampler#AT_LEAST}. Will be ignored if the data represented by the model is a video. This replaces any
+     * previous calls to {@link #imageDecoder(ResourceDecoder)}  and {@link #decoder(ResourceDecoder)} with default
+     * decoders with the appropriate options set.
      *
      * @see #imageDecoder
      *
@@ -74,7 +85,8 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
      */
     private BitmapRequestBuilder<ModelType, TranscodeType> downsample(Downsampler downsampler) {
         this.downsampler = downsampler;
-        super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, decodeFormat));
+        imageDecoder = new StreamBitmapDecoder(downsampler, bitmapPool, decodeFormat);
+        super.decoder(new ImageVideoBitmapDecoder(imageDecoder, videoDecoder));
         return this;
     }
 
@@ -97,20 +109,42 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
-        super.imageDecoder(decoder);
+    public BitmapRequestBuilder<ModelType, TranscodeType> decoder(ResourceDecoder<ImageVideoWrapper, Bitmap> decoder) {
+        super.decoder(decoder);
         return this;
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> videoDecoder(ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
-        super.videoDecoder(decoder);
+    public BitmapRequestBuilder<ModelType, TranscodeType> cacheDecoder(
+            ResourceDecoder<InputStream, Bitmap> cacheDecoder) {
+        super.cacheDecoder(cacheDecoder);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> encoder(ResourceEncoder<Bitmap> encoder) {
+        super.encoder(encoder);
+        return this;
+    }
+
+    public BitmapRequestBuilder<ModelType, TranscodeType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
+        imageDecoder = decoder;
+        super.decoder(new ImageVideoBitmapDecoder(decoder, videoDecoder));
+        return this;
+    }
+
+    public BitmapRequestBuilder<ModelType, TranscodeType> videoDecoder(
+            ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
+        videoDecoder = decoder;
+        super.decoder(new ImageVideoBitmapDecoder(imageDecoder, decoder));
         return this;
     }
 
     /**
      * Sets the preferred format for {@link Bitmap}s decoded in this request. Defaults to
-     * {@link DecodeFormat#PREFER_RGB_565}.
+     * {@link DecodeFormat#PREFER_RGB_565}. This replaces any previous calls to {@link #imageDecoder(ResourceDecoder)},
+     * {@link #videoDecoder(ResourceDecoder)} and {@link #decoder(ResourceDecoder)} with default decoders with the
+     * appropriate options set.
      *
      * <p>
      *     Note - If using a {@link Transformation} that expect bitmaps to support transparency, this should always be
@@ -125,7 +159,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> format(DecodeFormat format) {
         this.decodeFormat = format;
-        super.imageDecoder(new StreamBitmapDecoder(downsampler, bitmapPool, format));
+        imageDecoder = new StreamBitmapDecoder(downsampler, bitmapPool, format);
+        videoDecoder = new FileDescriptorBitmapDecoder(new VideoBitmapDecoder(), bitmapPool, format);
+        super.decoder(new ImageVideoBitmapDecoder(imageDecoder, videoDecoder));
         return this;
     }
 

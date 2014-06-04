@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.load.data.bitmap.FileDescriptorBitmapDataLoadProvider;
+import com.bumptech.glide.load.data.bitmap.ImageVideoDataLoadProvider;
 import com.bumptech.glide.load.data.bitmap.StreamBitmapDataLoadProvider;
 import com.bumptech.glide.load.data.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.data.transcode.ResourceTranscoder;
@@ -23,6 +24,7 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorFileLoader;
@@ -160,6 +162,8 @@ public class Glide {
         dataLoadProviderFactory.register(InputStream.class, Bitmap.class, new StreamBitmapDataLoadProvider(bitmapPool));
         dataLoadProviderFactory.register(ParcelFileDescriptor.class, Bitmap.class,
                 new FileDescriptorBitmapDataLoadProvider(bitmapPool));
+        dataLoadProviderFactory.register(ImageVideoWrapper.class, Bitmap.class,
+                new ImageVideoDataLoadProvider(bitmapPool));
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());

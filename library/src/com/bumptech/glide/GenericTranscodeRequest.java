@@ -9,12 +9,11 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.provider.FixedLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 
-public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T, T, Z, Z>{
+public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T, Z, Z>{
     public GenericTranscodeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
             Class<T> dataClass, Class<Z> resourceClass) {
         super(context, model,
                 build(glide, modelLoader, dataClass, resourceClass),
-                null,
                 resourceClass, glide);
     }
 

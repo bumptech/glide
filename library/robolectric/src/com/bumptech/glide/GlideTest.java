@@ -237,7 +237,7 @@ public class GlideTest {
                 .using(modelLoader, File.class)
                 .load(glideUrl)
                 .as(File.class)
-                .imageDecoder(sourceDecoder)
+                .decoder(sourceDecoder)
                 .cacheDecoder(cacheDecoder)
                 .encoder(encoder)
                 .into(target);

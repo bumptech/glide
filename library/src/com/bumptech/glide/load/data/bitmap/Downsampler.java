@@ -141,14 +141,14 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         }
 
         final Bitmap downsampled = downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize, decodeFormat);
-        if (downsampled == null) {
-            throw new IllegalArgumentException("Unable to decode image sample size: " + sampleSize + " inWidth: "
-                    + inWidth + " inHeight: " + inHeight);
-        }
-        final Bitmap rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
 
-        if (downsampled != rotated && !pool.put(downsampled)) {
-            downsampled.recycle();
+        Bitmap rotated = null;
+        if (downsampled != null) {
+            rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
+
+            if (downsampled != rotated && !pool.put(downsampled)) {
+                downsampled.recycle();
+            }
         }
 
         byteArrayPool.releaseBytes(bytesForOptions);
