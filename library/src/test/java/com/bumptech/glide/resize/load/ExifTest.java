@@ -15,7 +15,7 @@ import static junit.framework.TestCase.assertNull;
 public class ExifTest {
 
     private InputStream open(String imageName) throws IOException {
-        return getClass().getResourceAsStream("exif-orientation-examples/" + imageName);
+        return getClass().getResourceAsStream("/exif-orientation-examples/" + imageName);
     }
 
     private void assertOrientation(String filePrefix, int expectedOrientation) {

@@ -4,6 +4,6 @@
 [submodule "library/volley"]
 	path = library/volley
 	url = https://android.googlesource.com/platform/frameworks/volley
-[submodule "library/robolectric/src/com/bumptech/glide/resize/load/exif-orientation-examples"]
-	path = library/robolectric/src/com/bumptech/glide/resize/load/exif-orientation-examples
+[submodule "library/src/test/resources/exif-orientation-examples"]
+	path = library/src/test/resources/exif-orientation-examples
 	url = https://github.com/recurser/exif-orientation-examples.git
