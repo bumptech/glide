@@ -24,28 +24,19 @@
       <groupId>org.roboguice</groupId>
       <artifactId>roboguice</artifactId>
       <version>2.0</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.0.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>android</groupId>
-      <artifactId>android</artifactId>
-      <version>4.4.2_r3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.mcxiaoke.volley</groupId>
-      <artifactId>library</artifactId>
-      <version>1.0.4</version>
     </dependency>
     <dependency>
       <groupId>com.jakewharton</groupId>
@@ -68,6 +59,7 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>1.9.5</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

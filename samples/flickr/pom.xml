@@ -21,17 +21,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>android</groupId>
-      <artifactId>android</artifactId>
-      <version>4.4.2_r3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.mcxiaoke.volley</groupId>
-      <artifactId>library</artifactId>
-      <version>1.0.4</version>
-    </dependency>
-    <dependency>
       <groupId>com.actionbarsherlock</groupId>
       <artifactId>actionbarsherlock</artifactId>
       <version>4.4.0</version>

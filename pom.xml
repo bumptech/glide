@@ -20,6 +20,20 @@
     <module>samples</module>
   </modules>
 
+  <dependencies>
+    <dependency>
+      <groupId>android</groupId>
+      <artifactId>android</artifactId>
+      <version>4.4.2_r3</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.mcxiaoke.volley</groupId>
+      <artifactId>library</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
