@@ -13,10 +13,13 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.gif.GifDecoder;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -74,6 +77,16 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 .detectAll()
                 .penaltyLog()
                 .build());
+
+        InputStream inputStream = getResources().openRawResource(R.raw.test_animated);
+        GifDecoder gifDecoder = new GifDecoder();
+        gifDecoder.read(inputStream, 0);
+        GifDrawable drawable = new GifDrawable(gifDecoder);
+
+        ImageView testView = (ImageView) findViewById(R.id.test);
+        drawable.setCallback(testView);
+        testView.setImageDrawable(drawable);
+        drawable.start();
 
         Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
 
