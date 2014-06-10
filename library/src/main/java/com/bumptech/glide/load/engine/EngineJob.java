@@ -61,13 +61,15 @@ public class EngineJob implements ResourceCallback {
                 }
                 isComplete = true;
 
-                // 1 for memory cache.
-                resource.acquire(cbs.size() + 1);
+                // 1 to hold on for duration of request.
+                resource.acquire(cbs.size() + 2);
                 listener.onEngineJobComplete(key);
                 cache.put(key, resource);
                 for (ResourceCallback cb : cbs) {
                     cb.onResourceReady(resource);
                 }
+                // Our request is complete, so we can release the resource.
+                resource.release();
 
             }
         });
