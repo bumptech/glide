@@ -41,6 +41,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private final RequestCoordinator requestCoordinator;
     private final A model;
     private Class<R> transcodeClass;
+    private boolean isMemoryCacheable;
     private Priority priority;
     private final Target<R> target;
     private final RequestListener<A> requestListener;
@@ -59,7 +60,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             Target<R> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
             Drawable errorDrawable, int errorResourceId, RequestListener<A> requestListener, int animationId,
             Animation animation, RequestCoordinator requestCoordinator, Engine engine,
-            Transformation<Z> transformation, Class<R> transcodeClass) {
+            Transformation<Z> transformation, Class<R> transcodeClass, boolean isMemoryCacheable) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -77,6 +78,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         this.engine = engine;
         this.transformation = transformation;
         this.transcodeClass = transcodeClass;
+        this.isMemoryCacheable = isMemoryCacheable;
 
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
         // simply skip our sanity checks in that unusual case.
@@ -183,7 +185,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
         loadedFromMemoryCache = true;
         loadStatus = engine.load(id, width, height, cacheDecoder, dataFetcher, decoder, transformation,
-                encoder, transcoder, priority, this);
+                encoder, transcoder, priority, isMemoryCacheable, this);
         loadedFromMemoryCache = resource != null;
     }
 

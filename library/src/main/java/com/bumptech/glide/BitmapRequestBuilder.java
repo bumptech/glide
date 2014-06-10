@@ -243,4 +243,22 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
         super.listener(requestListener);
         return this;
     }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> skipMemoryCache(boolean skip) {
+        super.skipMemoryCache(skip);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> skipDiskCache(boolean skip) {
+        super.skipDiskCache(skip);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> skipCache(boolean skip) {
+        super.skipCache(skip);
+        return this;
+    }
 }

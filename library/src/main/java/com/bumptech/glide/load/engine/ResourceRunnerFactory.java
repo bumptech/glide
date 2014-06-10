@@ -28,5 +28,5 @@ interface ResourceRunnerFactory {
     public <T, Z, R> ResourceRunner<Z, R> build(Key key, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, DataFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
             Transformation<Z> transformation,  ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
-            Priority priority, EngineJobListener listener);
+            Priority priority, boolean isMemoryCacheable, EngineJobListener listener);
 }

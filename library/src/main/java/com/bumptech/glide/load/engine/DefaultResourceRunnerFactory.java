@@ -34,9 +34,9 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
     public <T, Z, R> ResourceRunner<Z, R> build(Key key, int width, int height,
             ResourceDecoder<InputStream, Z> cacheDecoder, DataFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,
             Transformation<Z> transformation, ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
-            Priority priority, EngineJobListener listener) {
+            Priority priority, boolean isMemoryCacheable, EngineJobListener listener) {
 
-        EngineJob engineJob = new EngineJob(key, memoryCache, mainHandler, listener);
+        EngineJob engineJob = new EngineJob(key, memoryCache, mainHandler, isMemoryCacheable, listener);
 
         SourceResourceRunner<T, Z, R> sourceRunner = new SourceResourceRunner<T, Z, R>(key, width, height, fetcher,
                 decoder, transformation, encoder, transcoder, diskCache, priority, engineJob);

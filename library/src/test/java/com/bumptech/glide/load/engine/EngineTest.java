@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -207,8 +208,18 @@ public class EngineTest {
 
         verify(harness.factory).build(eq(harness.cacheKey), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class),
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
                 any(EngineJobListener.class));
+    }
+
+    @Test
+    public void testFactoryIsGivenNecessaryArguments() {
+        harness.doLoad();
+
+        verify(harness.factory).build(eq(harness.cacheKey), eq(harness.width), eq(harness.height),
+                eq(harness.cacheDecoder), eq(harness.fetcher), eq(harness.decoder), eq(harness.transformation),
+                eq(harness.encoder), eq(harness.transcoder), eq(harness.priority), eq(harness.isMemoryCacheable),
+                eq(harness.engine));
     }
 
 
@@ -234,6 +245,8 @@ public class EngineTest {
         ResourceRunner<Object, Object> runner = mock(ResourceRunner.class);
         EngineJob job;
         Engine engine;
+        boolean isMemoryCacheable;
+
 
         public EngineTestHarness() {
             when(keyFactory.buildKey(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
@@ -246,12 +259,13 @@ public class EngineTest {
             engine = new Engine(factory, cache, runners, keyFactory);
 
             when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
-                    eq(transformation), eq(encoder), eq(transcoder), eq(priority), eq(engine))).thenReturn(runner);
+                    eq(transformation), eq(encoder), eq(transcoder), eq(priority), eq(isMemoryCacheable), eq(engine)))
+                    .thenReturn(runner);
         }
 
         public Engine.LoadStatus doLoad() {
             return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, transcoder,
-                    priority, cb);
+                    priority, isMemoryCacheable, cb);
         }
     }
 }

@@ -74,6 +74,12 @@ public class BitmapEncoderTest {
         assertContains(fakeBytes, Bitmap.CompressFormat.PNG.toString());
     }
 
+    @Test
+    public void testReturnsTrueFromWrite() {
+        BitmapEncoder encoder = new BitmapEncoder(harness.compressFormat, harness.quality);
+        assertTrue(encoder.encode(harness.resource, harness.os));
+    }
+
     private static void assertContains(String string, String expected) {
         assertTrue("Expected '" + string + "' to contain '" + expected + "'",
                 string.contains(expected));

@@ -14,7 +14,13 @@ public interface DiskCache {
      * the disk cache
      */
     public interface Writer {
-        public void write(OutputStream os);
+        /**
+         * Writes data to the output stream and returns true if the write was successful and should be committed, and
+         * false if the write should be aborted.
+         *
+         * @param os The output stream the Writer should write to.
+         */
+        public boolean write(OutputStream os);
     }
 
     /**

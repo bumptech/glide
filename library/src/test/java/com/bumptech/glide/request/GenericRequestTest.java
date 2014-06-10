@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -62,6 +63,7 @@ public class GenericRequestTest {
         ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
+        boolean skipMemoryCache;
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
@@ -75,7 +77,7 @@ public class GenericRequestTest {
         public GenericRequest<Object, Object, Object, Object> getRequest() {
             return new GenericRequest<Object, Object, Object, Object>(loadProvider, model, context, priority, target,
                     1f, placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, null, 0, null,
-                    requestCoordinator, engine, mock(Transformation.class), Object.class);
+                    requestCoordinator, engine, mock(Transformation.class), Object.class, skipMemoryCache);
         }
     }
 
@@ -182,7 +184,7 @@ public class GenericRequestTest {
     }
 
     @Test
-    public void testEngineLoadPassedCorrectMetadata() {
+    public void testEngineLoadPassedCorrectPriority() {
         Priority expected = Priority.HIGH;
         harness.priority = expected;
         GenericRequest request = harness.getRequest();
@@ -192,7 +194,8 @@ public class GenericRequestTest {
 
         verify(harness.engine).load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(ResourceTranscoder.class), eq(expected), any(ResourceCallback.class));
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), eq(expected), anyBoolean(),
+                any(ResourceCallback.class));
     }
 
     @Test
@@ -201,7 +204,7 @@ public class GenericRequestTest {
         when(harness.engine.load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
                 any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class),
-                any(ResourceCallback.class))).thenReturn(loadStatus);
+                anyBoolean(), any(ResourceCallback.class))).thenReturn(loadStatus);
 
         GenericRequest request = harness.getRequest();
 

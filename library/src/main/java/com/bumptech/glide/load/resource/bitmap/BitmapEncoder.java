@@ -20,9 +20,10 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
     }
 
     @Override
-    public void encode(Resource<Bitmap> resource, OutputStream os) {
+    public boolean encode(Resource<Bitmap> resource, OutputStream os) {
         final Bitmap bitmap = resource.get();
         bitmap.compress(getFormat(bitmap), quality, os);
+        return true;
     }
 
     @Override

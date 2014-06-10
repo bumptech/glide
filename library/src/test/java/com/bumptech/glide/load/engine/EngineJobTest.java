@@ -35,7 +35,7 @@ public class EngineJobTest {
 
     @Test
     public void testOnResourceReadyPassedToCallbacks() throws Exception {
-        harness.job.onResourceReady(harness.resource);
+        harness.getJob().onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
         verify(harness.cb).onResourceReady(eq(harness.resource));
@@ -43,7 +43,7 @@ public class EngineJobTest {
 
     @Test
     public void testListenerNotifiedJobCompleteOnOnResourceReady() {
-        harness.job.onResourceReady(harness.resource);
+        harness.getJob().onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
 
@@ -52,7 +52,7 @@ public class EngineJobTest {
 
     @Test
     public void testResourceAddedToCacheOnResourceReady() {
-        harness.job.onResourceReady(harness.resource);
+        harness.getJob().onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
         verify(harness.memoryCache).put(eq(harness.key), eq(harness.resource));
@@ -62,7 +62,7 @@ public class EngineJobTest {
     public void testOnExceptionPassedToCallbacks() throws Exception {
         Exception exception = new Exception("Test");
 
-        harness.job.onException(exception);
+        harness.getJob().onException(exception);
 
         Robolectric.runUiThreadTasks();
         verify(harness.cb).onException(eq(exception));
@@ -70,7 +70,7 @@ public class EngineJobTest {
 
     @Test
     public void testListenerNotifiedJobCompleteOnException() {
-        harness.job.onException(new Exception("test"));
+        harness.getJob().onException(new Exception("test"));
 
         Robolectric.runUiThreadTasks();
         verify(harness.listener).onEngineJobComplete(eq(harness.key));
@@ -78,16 +78,17 @@ public class EngineJobTest {
 
     @Test
     public void testListenerNotifiedOfCancelOnCancel() {
-        harness.job.cancel();
+        harness.getJob().cancel();
 
         verify(harness.listener).onEngineJobCancelled(eq(harness.key));
     }
 
     @Test
     public void testOnResourceReadyNotDeliveredAfterCancel() {
-        harness.job.cancel();
+        EngineJob job = harness.getJob();
+        job.cancel();
 
-        harness.job.onResourceReady(harness.resource);
+        job.onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
         verify(harness.cb, never()).onResourceReady(eq(harness.resource));
@@ -95,9 +96,10 @@ public class EngineJobTest {
 
     @Test
     public void testOnExceptionNotDeliveredAfterCancel() {
-        harness.job.cancel();
+        EngineJob job = harness.getJob();
+        job.cancel();
 
-        harness.job.onException(new Exception("test"));
+        job.onException(new Exception("test"));
 
         Robolectric.runUiThreadTasks();
         verify(harness.cb, never()).onException(any(Exception.class));
@@ -105,23 +107,25 @@ public class EngineJobTest {
 
     @Test
     public void testRemovingAllCallbacksCancelsRunner() {
-        harness.job.removeCallback(harness.cb);
+        EngineJob job = harness.getJob();
+        job.removeCallback(harness.cb);
 
-        assertTrue(harness.job.isCancelled());
+        assertTrue(job.isCancelled());
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void removingSomeCallbacksDoesNotCancelRunner() {
-        harness.job.addCallback(mock(ResourceCallback.class));
-        harness.job.removeCallback(harness.cb);
+        EngineJob job = harness.getJob();
+        job.addCallback(mock(ResourceCallback.class));
+        job.removeCallback(harness.cb);
 
-        assertFalse(harness.job.isCancelled());
+        assertFalse(job.isCancelled());
     }
 
     @Test
     public void testResourceIsAcquiredOncePerConsumerAndOnceForCache() {
-        harness.job.onResourceReady(harness.resource);
+        harness.getJob().onResourceReady(harness.resource);
 
         // Once while notifying, once for memory cache, and once for resource.
         verify(harness.resource).acquire(eq(3));
@@ -137,7 +141,7 @@ public class EngineJobTest {
             }
         }).when(harness.memoryCache).put(eq(harness.key), eq(harness.resource));
 
-        harness.job.onResourceReady(harness.resource);
+        harness.getJob().onResourceReady(harness.resource);
         // Once while notifying, once for memory cache, and once for resource.
         verify(harness.resource).acquire(eq(3));
         // Once for notifying, and once for resource.
@@ -146,16 +150,18 @@ public class EngineJobTest {
 
     @Test
     public void testDoesNotNotifyCancelledIfCompletesBeforeCancel() {
-        harness.job.onResourceReady(harness.resource);
-        harness.job.cancel();
+        EngineJob job = harness.getJob();
+        job.onResourceReady(harness.resource);
+        job.cancel();
 
         verify(harness.listener, never()).onEngineJobCancelled(eq(harness.key));
     }
 
     @Test
     public void testDoesNotNotifyCancelledIfAlreadyCancelled() {
-        harness.job.cancel();
-        harness.job.cancel();
+        EngineJob job = harness.getJob();
+        job.cancel();
+        job.cancel();
 
         verify(harness.listener, times(1)).onEngineJobCancelled(eq(harness.key));
     }
@@ -165,11 +171,28 @@ public class EngineJobTest {
         ShadowLooper shadowLooper = Robolectric.shadowOf(harness.mainHandler.getLooper());
         shadowLooper.pause();
 
-        harness.job.onResourceReady(harness.resource);
-        harness.job.cancel();
+        EngineJob job = harness.getJob();
+        job.onResourceReady(harness.resource);
+        job.cancel();
         shadowLooper.runOneTask();
 
         verify(harness.resource).recycle();
+    }
+
+    @Test
+    public void testDoesNotPutInMemoryCacheIfNotCacheable() {
+        harness.isCacheable = false;
+        harness.getJob().onResourceReady(harness.resource);
+
+        verify(harness.memoryCache, never()).put(eq(harness.key), any(Resource.class));
+    }
+
+    @Test
+    public void testReleasesResourceIfNotCacheable() {
+        harness.isCacheable = false;
+        harness.getJob().onResourceReady(harness.resource);
+
+        verify(harness.resource, times(2)).release();
     }
 
     @SuppressWarnings("unchecked")
@@ -180,11 +203,12 @@ public class EngineJobTest {
         ResourceCallback cb = mock(ResourceCallback.class);
         Resource<Object> resource = mock(Resource.class);
         EngineJobListener listener = mock(EngineJobListener.class);
+        boolean isCacheable = true;
 
-        EngineJob job = new EngineJob(key, memoryCache, mainHandler, listener);
-
-        public EngineJobHarness() {
-            job.addCallback(cb);
+        public EngineJob getJob() {
+            EngineJob result = new EngineJob(key, memoryCache, mainHandler, isCacheable, listener);
+            result.addCallback(cb);
+            return result;
         }
     }
 }

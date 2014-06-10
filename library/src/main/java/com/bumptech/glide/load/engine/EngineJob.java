@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EngineJob implements ResourceCallback {
+    private boolean isCacheable;
     private final EngineJobListener listener;
     private Key key;
     private MemoryCache cache;
@@ -18,9 +19,10 @@ public class EngineJob implements ResourceCallback {
     private boolean isCancelled;
     private boolean isComplete;
 
-    public EngineJob(Key key, MemoryCache cache, Handler mainHandler, EngineJobListener listener) {
+    public EngineJob(Key key, MemoryCache cache, Handler mainHandler, boolean isCacheable, EngineJobListener listener) {
         this.key = key;
         this.cache = cache;
+        this.isCacheable = isCacheable;
         this.listener = listener;
         this.mainHandler = mainHandler;
     }
@@ -64,7 +66,11 @@ public class EngineJob implements ResourceCallback {
                 // 1 to hold on for duration of request.
                 resource.acquire(cbs.size() + 2);
                 listener.onEngineJobComplete(key);
-                cache.put(key, resource);
+                if (isCacheable) {
+                    cache.put(key, resource);
+                } else {
+                    resource.release();
+                }
                 for (ResourceCallback cb : cbs) {
                     cb.onResourceReady(resource);
                 }

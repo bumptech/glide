@@ -6,9 +6,9 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -187,6 +189,15 @@ public class SourceResourceRunnerTest {
     public void testPriorityMatchesPriority() {
         harness.priority = Priority.LOW;
         assertEquals(harness.priority.ordinal(), harness.runner.getPriority());
+    }
+
+    @Test
+    public void testReturnsEncodersWriteResultFromWrite() {
+        when(harness.encoder.encode(any(Resource.class), any(OutputStream.class))).thenReturn(true);
+        assertTrue(harness.runner.write(new ByteArrayOutputStream()));
+
+        when(harness.encoder.encode(any(Resource.class), any(OutputStream.class))).thenReturn(false);
+        assertFalse(harness.runner.write(new ByteArrayOutputStream()));
     }
 
     @SuppressWarnings("unchecked")

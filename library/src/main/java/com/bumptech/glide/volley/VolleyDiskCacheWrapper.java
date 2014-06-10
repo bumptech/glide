@@ -63,16 +63,20 @@ public class VolleyDiskCacheWrapper implements Cache {
     public void put(final String key, final Entry entry) {
         diskCache.put(new StringKey(key), new DiskCache.Writer() {
             @Override
-            public void write(OutputStream os) {
+            public boolean write(OutputStream os) {
                 CacheHeader header = new CacheHeader(key, entry);
-                header.writeHeader(os);
-                try {
-                    os.write(entry.data);
-                } catch (IOException e) {
-                    if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, "Unable to write data", e);
+                boolean success = header.writeHeader(os);
+                if (success) {
+                    try {
+                        os.write(entry.data);
+                    } catch (IOException e) {
+                        success = false;
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "Unable to write data", e);
+                        }
                     }
                 }
+                return success;
             }
         });
     }

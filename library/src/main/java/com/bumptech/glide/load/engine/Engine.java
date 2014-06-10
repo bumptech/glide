@@ -64,7 +64,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      */
     public <T, Z, R> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
             DataFetcher<T> fetcher, ResourceDecoder<T, Z> decoder,  Transformation<Z> transformation,
-            ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, Priority priority, ResourceCallback cb) {
+            ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, Priority priority,
+            boolean isMemoryCacheable, ResourceCallback cb) {
 
         Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder, transcoder);
 
@@ -83,7 +84,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
 
         ResourceRunner<Z, R> runner = factory.build(key, width, height, cacheDecoder, fetcher, decoder, transformation,
-                encoder, transcoder, priority, this);
+                encoder, transcoder, priority, isMemoryCacheable, this);
         runner.getJob().addCallback(cb);
         runners.put(key, runner);
         runner.queue();

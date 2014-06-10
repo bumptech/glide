@@ -99,8 +99,8 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
     }
 
     @Override
-    public void write(OutputStream os) {
-        encoder.encode(result, os);
+    public boolean write(OutputStream os) {
+        return encoder.encode(result, os);
     }
 
     @Override

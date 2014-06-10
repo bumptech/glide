@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -55,6 +56,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;
     private Priority priority = null;
+    private boolean isCacheable = true;
+    private ResourceEncoder<ResourceType> preSkipEncoder;
 
     public GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
@@ -63,6 +66,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         this.glide = glide;
         this.loadProvider = loadProvider != null ?
                 new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
+        preSkipEncoder = loadProvider != null ? loadProvider.getEncoder() : null;
 
         if (context == null) {
             throw new NullPointerException("Context can't be null");
@@ -182,6 +186,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> encoder(
             ResourceEncoder<ResourceType> encoder) {
         loadProvider.setEncoder(encoder);
+        preSkipEncoder = encoder;
 
         return this;
     }
@@ -307,12 +312,66 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * exception handler per type of request (usually activity/fragment) rather than pass one in per request to
      * avoid some redundant object allocation.
      *
-     * @param requestListener The request listener to use
-     * @return This request
+     * @param requestListener The request listener to use.
+     * @return This RequestBuilder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> listener(
             RequestListener<ModelType> requestListener) {
         this.requestListener = requestListener;
+
+        return this;
+    }
+
+    /**
+     * Allows the loaded resource to skip the memory cache.
+     *
+     * <p>
+     *     Note - this is not a guarantee. If a request is already pending for this resource and that request is not
+     *     also skipping the memory cache, the resource will be cached in memory.
+     * </p>
+     *
+     * @param skip True to allow the resource to skip the memory cache.
+     * @return This RequestBuilder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipMemoryCache(boolean skip) {
+        this.isCacheable = !skip;
+
+        return this;
+    }
+
+    /**
+     * Allows the loaded resource to skip the disk cache.
+     *
+     * <p>
+     *     Note - this is not a guarantee. If a request is already pending for this resource and that request is not
+     *     also skipping the disk cache, the resource will be cached on disk.
+     * </p>
+     *
+     * @param skip True to allow the resource to skip the disk cache.
+     * @return This RequestBuilder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipDiskCache(boolean skip) {
+        if (skip) {
+            preSkipEncoder = loadProvider.getEncoder();
+            final SkipCache<ResourceType> skipCache = SkipCache.get();
+            return encoder(skipCache);
+        } else {
+            return encoder(preSkipEncoder);
+        }
+    }
+
+    /**
+     * Allows the resource to skip both the memory and the disk cache.
+     *
+     * @see #skipDiskCache(boolean)
+     * @see #skipMemoryCache(boolean)
+     *
+     * @param skip True to allow the resource to skip both the memory and the disk cache.
+     * @return This RequestBuilder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipCache(boolean skip) {
+        skipMemoryCache(skip);
+        skipDiskCache(skip);
 
         return this;
     }
@@ -422,7 +481,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         return new GenericRequest<ModelType, Z, ResourceType, TranscodeType>(loadProvider, model, context, priority,
                 target, sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
                 animationId, animation, requestCoordinator, glide.getEngine(), getFinalTransformation(),
-                transcodeClass);
+                transcodeClass, isCacheable);
     }
 
     @SuppressWarnings("unchecked")

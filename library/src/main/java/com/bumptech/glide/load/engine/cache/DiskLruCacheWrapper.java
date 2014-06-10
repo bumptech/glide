@@ -89,16 +89,19 @@ public class DiskLruCacheWrapper implements DiskCache {
             //editor will be null if there are two concurrent puts
             //worst case just silently fail
             if (editor != null) {
+                boolean success = false;
                 OutputStream os = null;
                 try {
                     os = editor.newOutputStream(0);
-                    writer.write(os);
+                    success = writer.write(os);
                 } finally {
                     if (os != null) {
                         os.close();
                     }
                 }
-                editor.commit();
+                if (success) {
+                    editor.commit();
+                }
             }
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.WARN)) {
