@@ -19,7 +19,7 @@ import com.bumptech.glide.request.Request;
  *     For loading {@link Bitmap}s into {@link View}s, {@link ViewTarget} is preferable to this class.
  * </p>
  */
-public abstract class BaseTarget implements Target {
+public abstract class BaseTarget<Z> implements Target<Z> {
 
     private Request request;
 

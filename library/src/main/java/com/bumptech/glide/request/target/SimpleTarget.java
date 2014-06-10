@@ -5,7 +5,7 @@ package com.bumptech.glide.request.target;
  * caller to specify an exact width/height.
  */
 @SuppressWarnings("unused")
-public abstract class SimpleTarget extends BaseTarget {
+public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
     private final int width;
     private final int height;
 
