@@ -123,7 +123,8 @@ public class EngineJobTest {
     public void testResourceIsAcquiredOncePerConsumerAndOnceForCache() {
         harness.job.onResourceReady(harness.resource);
 
-        verify(harness.resource).acquire(eq(2));
+        // Once while notifying, once for memory cache, and once for resource.
+        verify(harness.resource).acquire(eq(3));
     }
 
     @Test
@@ -137,8 +138,10 @@ public class EngineJobTest {
         }).when(harness.memoryCache).put(eq(harness.key), eq(harness.resource));
 
         harness.job.onResourceReady(harness.resource);
-        verify(harness.resource).acquire(eq(2));
-        verify(harness.resource, times(1)).release();
+        // Once while notifying, once for memory cache, and once for resource.
+        verify(harness.resource).acquire(eq(3));
+        // Once for notifying, and once for resource.
+        verify(harness.resource, times(2)).release();
     }
 
     @Test
