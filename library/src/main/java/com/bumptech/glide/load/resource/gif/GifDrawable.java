@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import com.bumptech.glide.load.Transformation;
 
 public class GifDrawable extends Drawable implements Animatable, GifFrameManager.FrameCallback {
 
@@ -26,6 +27,11 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     GifDecoder getDecoder() {
         return decoder;
     }
+
+    Transformation<Bitmap> getTransformation() {
+        return frameManager.getTransformation();
+    }
+
 
     @Override
     public void start() {

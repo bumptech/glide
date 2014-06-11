@@ -7,13 +7,13 @@ import com.bumptech.glide.load.ResourceEncoder;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
+public class GifResourceEncoder implements ResourceEncoder<GifData> {
     private static final String TAG = "GifEncoder";
     @Override
-    public boolean encode(Resource<GifDrawable> resource, OutputStream os) {
+    public boolean encode(Resource<GifData> resource, OutputStream os) {
         boolean result = true;
         try {
-            os.write(resource.get().getDecoder().getData());
+            os.write(resource.get().getData());
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Failed to encode gif", e);

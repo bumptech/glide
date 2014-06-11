@@ -18,20 +18,19 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class GifResourceEncoderTest {
-    private Resource<GifDrawable> resource;
+    private Resource<GifData> resource;
     private byte[] data;
     private GifResourceEncoder encoder;
+    private GifData gifData;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         resource = mock(Resource.class);
         data = new byte[]{ 2, 3, 5, 8 };
-        GifDecoder decoder = mock(GifDecoder.class);
-        GifDrawable drawable = mock(GifDrawable.class);
-        when(drawable.getDecoder()).thenReturn(decoder);
-        when(resource.get()).thenReturn(drawable);
-        when(decoder.getData()).thenReturn(data);
+        gifData = mock(GifData.class);
+        when(gifData.getData()).thenReturn(data);
+        when(resource.get()).thenReturn(gifData);
         encoder = new GifResourceEncoder();
     }
 

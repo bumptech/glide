@@ -1,17 +1,18 @@
-package com.bumptech.glide.load.resource.drawable;
+package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.load.resource.gif.GifData;
 
 import java.io.OutputStream;
 
 public class GifBitmapResourceEncoder implements ResourceEncoder<GifBitmap> {
     private final ResourceEncoder<Bitmap> bitmapEncoder;
-    private final ResourceEncoder<GifDrawable> gifEncoder;
+    private final ResourceEncoder<GifData> gifEncoder;
+    private String id;
 
-    public GifBitmapResourceEncoder(ResourceEncoder<Bitmap> bitmapEncoder, ResourceEncoder<GifDrawable> gifEncoder) {
+    public GifBitmapResourceEncoder(ResourceEncoder<Bitmap> bitmapEncoder, ResourceEncoder<GifData> gifEncoder) {
         this.bitmapEncoder = bitmapEncoder;
         this.gifEncoder = gifEncoder;
     }
@@ -30,6 +31,9 @@ public class GifBitmapResourceEncoder implements ResourceEncoder<GifBitmap> {
 
     @Override
     public String getId() {
-        return "GifBitmapResourceEncoder.com.bumptech.glide.load.resource.drawable";
+        if (id == null) {
+            id = bitmapEncoder.getId() + gifEncoder.getId();
+        }
+        return id;
     }
 }

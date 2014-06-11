@@ -18,8 +18,6 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.gif.GifDecoder;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -78,15 +76,18 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 .penaltyLog()
                 .build());
 
-        InputStream inputStream = getResources().openRawResource(R.raw.test_animated);
-        GifDecoder gifDecoder = new GifDecoder();
-        gifDecoder.read(inputStream, 0);
-        GifDrawable drawable = new GifDrawable(gifDecoder);
-
         ImageView testView = (ImageView) findViewById(R.id.test);
-        drawable.setCallback(testView);
-        testView.setImageDrawable(drawable);
-        drawable.start();
+//        GifResourceDecoder decoder = new GifResourceDecoder(this);
+//        Glide.with(this)
+//                .using(Glide.buildStreamModelLoader(Integer.class, this), InputStream.class)
+//                .load(R.raw.cat)
+//                .as(GifData.class)
+//                .transcode(new GifDataDrawableTranscoder(), GifDrawable.class)
+//                .decoder(decoder)
+//                .cacheDecoder(decoder)
+//                .encoder(new GifResourceEncoder())
+//                .into(testView);
+        testView.setVisibility(View.GONE);
 
         Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
 

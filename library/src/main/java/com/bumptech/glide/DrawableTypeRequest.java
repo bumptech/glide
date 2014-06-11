@@ -2,18 +2,19 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
-import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.model.ImageVideoModelLoader;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
+import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.FixedLoadProvider;
 
 import java.io.InputStream;
 
-public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, BitmapDrawable> {
+public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
     private final ModelLoader<A, InputStream> streamModelLoader;
     private final ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Context context;
@@ -33,12 +34,11 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, BitmapDrawable
     }
 
 
-    BitmapTypeRequest(A model, ModelLoader<A, InputStream> streamModelLoader,
+    DrawableTypeRequest(A model, ModelLoader<A, InputStream> streamModelLoader,
             ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide) {
         super(context, model,
-                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, BitmapDrawable.class,
-                        null),
-                BitmapDrawable.class, glide);
+                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmap.class, Drawable.class,
+                        null), glide);
         this.model = model;
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;

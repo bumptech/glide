@@ -1,7 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +9,9 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.BitmapRequestBuilder;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.util.ArrayList;
@@ -80,7 +79,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         }
 
         @Override
-        protected BitmapRequestBuilder<Photo, BitmapDrawable> getRequestBuilder(Photo item) {
+        protected GenericRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(context)
                     .loadFromImage(item)
                     .centerCrop();

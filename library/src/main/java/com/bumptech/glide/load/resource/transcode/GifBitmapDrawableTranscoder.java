@@ -7,7 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
-import com.bumptech.glide.load.resource.drawable.GifBitmap;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
 
 public class GifBitmapDrawableTranscoder implements ResourceTranscoder<GifBitmap, Drawable> {
     private final Resources resources;
@@ -28,7 +28,7 @@ public class GifBitmapDrawableTranscoder implements ResourceTranscoder<GifBitmap
             drawable = new BitmapDrawable(resources, bitmapResource.get());
         } else {
             resource = gifBitmap.getGifResource();
-            drawable = gifBitmap.getGifResource().get();
+            drawable = gifBitmap.getGifResource().get().getDrawable();
         }
         return new DrawableResource(drawable, resource);
     }

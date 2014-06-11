@@ -13,41 +13,32 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class GifResourceTest {
-    private GifDecoder decoder;
-    private GifDrawable gifDrawable;
     private GifResource resource;
+    private GifData gifData;
 
     @Before
     public void setUp() {
-        decoder = mock(GifDecoder.class);
-        gifDrawable = mock(GifDrawable.class);
-        resource = new GifResource(decoder, gifDrawable);
+        gifData = mock(GifData.class);
+        resource = new GifResource(gifData);
     }
 
     @Test
     public void testSizeReturnsGifDecoderGifByteSize() {
         int size = 1234;
-        when(decoder.getGifByteSize()).thenReturn(size);
+        when(gifData.getByteSize()).thenReturn(size);
 
         assertEquals(size, resource.getSize());
     }
 
     @Test
-    public void testReturnsNonNullDrawable() {
+    public void testReturnsNonNullData() {
         assertNotNull(resource.get());
     }
 
     @Test
-    public void testStopsGifDrawableOnRecycle() {
+    public void testRecyclesGifDataOnRecycle() {
         resource.recycle();
 
-        verify(gifDrawable).stop();
-    }
-
-    @Test
-    public void testRecyclesGifDrawableOnRecycle() {
-        resource.recycle();
-
-        verify(gifDrawable).recycle();
+        verify(gifData).recycle();
     }
 }

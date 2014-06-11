@@ -3,12 +3,13 @@ package com.bumptech.glide.load.resource.gif;
 import android.content.Context;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawable> {
+public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData> {
     private Context context;
     private BitmapPool bitmapPool;
 
@@ -25,8 +26,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     public GifResource decode(InputStream source, int width, int height) throws IOException {
         GifDecoder gifDecoder = new GifDecoder(bitmapPool);
         gifDecoder.read(source, 0);
-        GifFrameManager frameManager = new GifFrameManager(context, bitmapPool);
-        return new GifResource(gifDecoder, frameManager);
+        return new GifResource(new GifData(context, gifDecoder, Transformation.NONE));
     }
 
     @Override

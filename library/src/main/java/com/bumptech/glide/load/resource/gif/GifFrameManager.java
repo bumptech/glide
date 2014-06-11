@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
@@ -19,6 +20,7 @@ class GifFrameManager {
     private final MemorySizeCalculator calculator;
     private BitmapPool bitmapPool;
     private final Handler mainHandler;
+    private Transformation<Bitmap> transformation;
     private Context context;
     private DelayTarget current;
     private DelayTarget next;
@@ -27,16 +29,23 @@ class GifFrameManager {
         public void onFrameRead(Bitmap frame);
     }
 
-    public GifFrameManager(Context context, BitmapPool bitmapPool) {
-        this(context, UUID.randomUUID().toString(), bitmapPool, new Handler(Looper.getMainLooper()));
+    public GifFrameManager(Context context, Transformation<Bitmap> transformation) {
+        this(context, UUID.randomUUID().toString(), Glide.get(context).getBitmapPool(),
+                new Handler(Looper.getMainLooper()), transformation);
     }
 
-    public GifFrameManager(Context context, String id, BitmapPool bitmapPool, Handler mainHandler) {
+    public GifFrameManager(Context context, String id, BitmapPool bitmapPool, Handler mainHandler,
+            Transformation<Bitmap> transformation) {
         this.context = context;
         this.id = id;
         this.bitmapPool = bitmapPool;
         this.mainHandler = mainHandler;
+        this.transformation = transformation;
         calculator = new MemorySizeCalculator(context);
+    }
+
+    Transformation<Bitmap> getTransformation() {
+        return transformation;
     }
 
     public void getNextFrame(final GifDecoder decoder, FrameCallback cb) {
@@ -51,6 +60,7 @@ class GifFrameManager {
                 .as(Bitmap.class)
                 .decoder(new GifFrameResourceDecoder())
                 .cacheDecoder(new StreamBitmapDecoder(bitmapPool))
+                .transform(transformation)
                 .skipMemoryCache(skipCache)
                 .skipDiskCache(true)
                 .into(next);

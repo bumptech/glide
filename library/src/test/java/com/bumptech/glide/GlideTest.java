@@ -273,7 +273,7 @@ public class GlideTest {
     }
 
     @Test
-    public void runTestUrlDefaultLoader() throws MalformedURLException {
+    public void testUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
 
         Glide.with(getContext()).loadFromImage(url).into(target);
@@ -493,6 +493,10 @@ public class GlideTest {
         registerMockStreamModelLoader(Float.class);
 
         Glide.with(getContext()).load(0.5f).into(target);
+    }
+
+    @Test
+    public void testSomething() {
     }
 
     @Test

@@ -3,6 +3,8 @@ package com.bumptech.glide.load.resource.drawable;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapStreamResourceDecoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -13,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -57,7 +58,10 @@ public class GifBitmapStreamResourceDecoderTest {
     }
 
     @Test
-    public void testReturnsNonNullId() {
-        assertNotNull(decoder.getId());
+    public void testReturnsWrappedId() {
+        String id = "fakeTestId";
+        when(gifBitmapDecoder.getId()).thenReturn(id);
+
+        assertEquals(id, decoder.getId());
     }
 }

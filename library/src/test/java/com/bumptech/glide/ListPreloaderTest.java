@@ -221,7 +221,7 @@ public class ListPreloaderTest {
             }
 
             @Override
-            protected BitmapRequestBuilder getRequestBuilder(Object item) {
+            protected GenericRequestBuilder getRequestBuilder(Object item) {
                 loadedObjects.add(item);
                 return super.getRequestBuilder(item);
             }
@@ -254,7 +254,7 @@ public class ListPreloaderTest {
         }
 
         @Override
-        protected BitmapRequestBuilder getRequestBuilder(Object item) {
+        protected GenericRequestBuilder getRequestBuilder(Object item) {
             return mock(BitmapRequestBuilder.class);
         }
     }

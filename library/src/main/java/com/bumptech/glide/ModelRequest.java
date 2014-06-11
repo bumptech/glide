@@ -121,7 +121,7 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapTypeRequest<String> load(String string) {
+    public DrawableTypeRequest<String> load(String string) {
         return loadGeneric(string);
     }
 
@@ -135,7 +135,7 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapTypeRequest<Uri> load(Uri uri) {
+    public DrawableTypeRequest<Uri> load(Uri uri) {
         return loadGeneric(uri);
     }
 
@@ -150,7 +150,7 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapTypeRequest<File> load(File file) {
+    public DrawableTypeRequest<File> load(File file) {
         return loadGeneric(file);
     }
 
@@ -165,7 +165,7 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapTypeRequest<Integer> load(Integer resourceId) {
+    public DrawableTypeRequest<Integer> load(Integer resourceId) {
         return loadGeneric(resourceId);
     }
 
@@ -179,7 +179,7 @@ public class ModelRequest {
      * into.
      */
     @SuppressWarnings("unused")
-    public <T> BitmapTypeRequest<T> loadFromImage(T model) {
+    public <T> DrawableTypeRequest<T> loadFromImage(T model) {
         return loadGeneric(model);
     }
 
@@ -194,7 +194,7 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public BitmapTypeRequest<URL> loadFromImage(URL url) {
+    public DrawableTypeRequest<URL> loadFromImage(URL url) {
         return loadGeneric(url);
     }
 
@@ -209,14 +209,14 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public BitmapTypeRequest<byte[]> loadFromImage(byte[] model, final String id) {
+    public DrawableTypeRequest<byte[]> loadFromImage(byte[] model, final String id) {
         StreamByteArrayLoader loader = new StreamByteArrayLoader() {
             @Override
             public String getId(byte[] model) {
                 return id;
             }
         };
-        return new BitmapTypeRequest<byte[]>(model, loader, null, context, glide);
+        return new DrawableTypeRequest<byte[]>(model, loader, null, context, glide);
     }
 
     /**
@@ -227,7 +227,7 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public BitmapTypeRequest<byte[]> loadFromImage(byte[] model) {
+    public DrawableTypeRequest<byte[]> loadFromImage(byte[] model) {
         return loadFromImage(model, UUID.randomUUID().toString());
     }
 
@@ -241,7 +241,7 @@ public class ModelRequest {
      * into.
      */
     @SuppressWarnings("unused")
-    public <T> BitmapTypeRequest<T> loadFromVideo(T model) {
+    public <T> DrawableTypeRequest<T> loadFromVideo(T model) {
         return loadGeneric(model);
     }
 
@@ -255,15 +255,15 @@ public class ModelRequest {
      * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public <T> BitmapTypeRequest<T> load(T model) {
+    public <T> DrawableTypeRequest<T> load(T model) {
         return loadGeneric(model);
     }
 
-    private <T> BitmapTypeRequest<T> loadGeneric(T model) {
+    private <T> DrawableTypeRequest<T> loadGeneric(T model) {
         ModelLoader<T, InputStream> streamModelLoader = Glide.buildStreamModelLoader(model, context);
         ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
                 Glide.buildFileDescriptorModelLoader(model, context);
-        return new BitmapTypeRequest<T>(model, streamModelLoader, fileDescriptorModelLoader, context, glide);
+        return new DrawableTypeRequest<T>(model, streamModelLoader, fileDescriptorModelLoader, context, glide);
     }
 
     /**
@@ -283,8 +283,8 @@ public class ModelRequest {
             this.glide = glide;
         }
 
-        public BitmapTypeRequest<T> loadFromVideo(T model) {
-            return new BitmapTypeRequest<T>(model, null, loader, context, glide);
+        public DrawableTypeRequest<T> loadFromVideo(T model) {
+            return new DrawableTypeRequest<T>(model, null, loader, context, glide);
         }
     }
 
@@ -305,8 +305,8 @@ public class ModelRequest {
             this.glide = glide;
         }
 
-        public BitmapTypeRequest<T> load(T model) {
-            return new BitmapTypeRequest<T>(model, loader, null, context, glide);
+        public DrawableTypeRequest<T> load(T model) {
+            return new DrawableTypeRequest<T>(model, loader, null, context, glide);
         }
     }
 }

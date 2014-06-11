@@ -1,16 +1,17 @@
 package com.bumptech.glide.load.resource.drawable;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
+import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapResourceDecoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class GifBitmapResourceDecoderTest {
     private ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
-    private ResourceDecoder<InputStream, GifDrawable> gifDecoder;
+    private ResourceDecoder<InputStream, GifData> gifDecoder;
     private GifBitmapResourceDecoder decoder;
 
     @SuppressWarnings("unchecked")
@@ -34,14 +35,16 @@ public class GifBitmapResourceDecoderTest {
     public void setUp() {
         bitmapDecoder = mock(ResourceDecoder.class);
         gifDecoder = mock(ResourceDecoder.class);
-        decoder = new GifBitmapResourceDecoder(Robolectric.application, bitmapDecoder, gifDecoder);
+        decoder = new GifBitmapResourceDecoder(bitmapDecoder, gifDecoder);
     }
 
     @Test
     public void testDecoderUsesGifDecoderResultIfGif() throws IOException {
         GifDrawable expected = mock(GifDrawable.class);
-        Resource<GifDrawable> gifDrawableResource = mock(Resource.class);
-        when(gifDrawableResource.get()).thenReturn(expected);
+        GifData gifData = mock(GifData.class);
+        when(gifData.getDrawable()).thenReturn(expected);
+        Resource<GifData> gifDrawableResource = mock(Resource.class);
+        when(gifDrawableResource.get()).thenReturn(gifData);
         when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifDrawableResource);
 
         byte[] data = new byte[] { 'G', 'I', 'F'};
@@ -49,7 +52,7 @@ public class GifBitmapResourceDecoderTest {
 
         Resource<GifBitmap> result = decoder.decode(wrapper, 100, 100);
 
-        assertEquals(expected, result.get().getDrawable());
+        assertEquals(expected, result.get().getGifResource().get().getDrawable());
     }
 
     @Test
@@ -64,9 +67,9 @@ public class GifBitmapResourceDecoderTest {
 
         Resource<GifBitmap> result = decoder.decode(wrapper, 100, 100);
 
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) result.get().getDrawable();
+        Bitmap bitmap = result.get().getBitmapResource().get();
 
-        assertEquals(expected, bitmapDrawable.getBitmap());
+        assertEquals(expected, bitmap);
     }
 
     @Test
@@ -80,8 +83,8 @@ public class GifBitmapResourceDecoderTest {
 
         Resource<GifBitmap> result = decoder.decode(wrapper, 100, 100);
 
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) result.get().getDrawable();
+        Bitmap bitmap = result.get().getBitmapResource().get();
 
-        assertEquals(expected, bitmapDrawable.getBitmap());
+        assertEquals(expected, bitmap);
     }
 }
