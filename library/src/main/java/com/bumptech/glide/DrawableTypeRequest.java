@@ -7,7 +7,7 @@ import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.model.ImageVideoModelLoader;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.FixedLoadProvider;
@@ -37,7 +37,7 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
     DrawableTypeRequest(A model, ModelLoader<A, InputStream> streamModelLoader,
             ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide) {
         super(context, model,
-                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmap.class, Drawable.class,
+                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class, Drawable.class,
                         null), glide);
         this.model = model;
         this.streamModelLoader = streamModelLoader;

@@ -12,24 +12,24 @@ import com.bumptech.glide.util.ByteArrayPool;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class GifBitmapResourceDecoder implements ResourceDecoder<ImageVideoWrapper, GifBitmap> {
+public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> {
     private final ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
     private final ResourceDecoder<InputStream, GifData> gifDecoder;
     private String id;
 
-    public GifBitmapResourceDecoder(ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder,
+    public GifBitmapWrapperResourceDecoder(ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder,
             ResourceDecoder<InputStream, GifData> gifDecoder) {
         this.bitmapDecoder = bitmapDecoder;
         this.gifDecoder = gifDecoder;
     }
 
     @Override
-    public Resource<GifBitmap> decode(ImageVideoWrapper source, int width, int height) throws IOException {
+    public Resource<GifBitmapWrapper> decode(ImageVideoWrapper source, int width, int height) throws IOException {
         ByteArrayPool pool = ByteArrayPool.get();
         InputStream is = source.getStream();
         byte[] tempBytes = pool.getBytes();
         RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, tempBytes);
-        GifBitmap result = null;
+        GifBitmapWrapper result = null;
         if (is != null) {
             source = new ImageVideoWrapper(bis, source.getFileDescriptor());
             bis.mark(2048);
@@ -38,16 +38,16 @@ public class GifBitmapResourceDecoder implements ResourceDecoder<ImageVideoWrapp
 
             if (type == ImageHeaderParser.ImageType.GIF) {
                 Resource<GifData> gifResource = gifDecoder.decode(bis, width, height);
-                result = new GifBitmap(null, gifResource);
+                result = new GifBitmapWrapper(null, gifResource);
             }
         }
 
         if (result == null) {
             Resource<Bitmap> bitmapResource = bitmapDecoder.decode(source, width, height);
-            result = new GifBitmap(bitmapResource, null);
+            result = new GifBitmapWrapper(bitmapResource, null);
         }
         pool.releaseBytes(tempBytes);
-        return new GifBitmapResource(result);
+        return new GifBitmapWrapperResource(result);
     }
 
     @Override

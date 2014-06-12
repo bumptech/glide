@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.resource.gif.GifData;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapResourceEncoder;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperResourceEncoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,18 +27,18 @@ import static org.mockito.Mockito.when;
 public class GifBitmapResourceEncoderTest {
     private ResourceEncoder<Bitmap> bitmapEncoder;
     private ResourceEncoder<GifData> gifEncoder;
-    private GifBitmapResourceEncoder encoder;
-    private Resource<GifBitmap> resource;
-    private GifBitmap gifBitmap;
+    private GifBitmapWrapperResourceEncoder encoder;
+    private Resource<GifBitmapWrapper> resource;
+    private GifBitmapWrapper gifBitmap;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         bitmapEncoder = mock(ResourceEncoder.class);
         gifEncoder = mock(ResourceEncoder.class);
-        encoder = new GifBitmapResourceEncoder(bitmapEncoder, gifEncoder);
+        encoder = new GifBitmapWrapperResourceEncoder(bitmapEncoder, gifEncoder);
         resource = mock(Resource.class);
-        gifBitmap = mock(GifBitmap.class);
+        gifBitmap = mock(GifBitmapWrapper.class);
         when(resource.get()).thenReturn(gifBitmap);
     }
 

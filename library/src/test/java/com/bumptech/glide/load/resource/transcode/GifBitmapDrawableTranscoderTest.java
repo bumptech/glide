@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,8 +73,8 @@ public class GifBitmapDrawableTranscoderTest {
     }
 
     private static class TranscoderHarness {
-        Resource<GifBitmap> gifBitmapResource = mock(Resource.class);
-        GifBitmap gifBitmap = mock(GifBitmap.class);
+        Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
+        GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
 
         public TranscoderHarness() {
             when(gifBitmapResource.get()).thenReturn(gifBitmap);

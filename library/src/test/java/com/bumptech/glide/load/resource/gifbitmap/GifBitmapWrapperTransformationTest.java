@@ -17,15 +17,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class GifBitmapTransformationTest {
+public class GifBitmapWrapperTransformationTest {
     private Transformation<Bitmap> bitmapTransformation;
-    private GifBitmapTransformation transformation;
+    private GifBitmapWrapperTransformation transformation;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         bitmapTransformation = mock(Transformation.class);
-        transformation = new GifBitmapTransformation(Robolectric.application, bitmapTransformation);
+        transformation = new GifBitmapWrapperTransformation(Robolectric.application, bitmapTransformation);
     }
 
     @Test
@@ -44,9 +44,9 @@ public class GifBitmapTransformationTest {
         Resource<Bitmap> transformed = mock(Resource.class);
         when(bitmapTransformation.transform(eq(initial), eq(dimens), eq(dimens))).thenReturn(transformed);
 
-        GifBitmap gifBitmap = mock(GifBitmap.class);
+        GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
         when(gifBitmap.getBitmapResource()).thenReturn(initial);
-        Resource<GifBitmap> gifBitmapResource = mock(Resource.class);
+        Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
         when(gifBitmapResource.get()).thenReturn(gifBitmap);
 
         assertEquals(transformed, transformation.transform(gifBitmapResource, dimens, dimens).get()
@@ -55,8 +55,8 @@ public class GifBitmapTransformationTest {
 
     @Test
     public void testReturnsNewGifBitmapResourceIfNoBitmapResource() {
-        GifBitmap gifBitmap = mock(GifBitmap.class);
-        Resource<GifBitmap> gifBitmapResource = mock(Resource.class);
+        GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
+        Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
         when(gifBitmapResource.get()).thenReturn(gifBitmap);
 
         GifData gifData = mock(GifData.class);
@@ -71,9 +71,9 @@ public class GifBitmapTransformationTest {
     public void testReturnsGivenResourceIfWrappedTransformationDoesNotTransformBitmapResource() {
         int dimens = 321;
         Resource<Bitmap> initial = mock(Resource.class);
-        GifBitmap gifBitmap = mock(GifBitmap.class);
+        GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
         when(gifBitmap.getBitmapResource()).thenReturn(initial);
-        Resource<GifBitmap> gifBitmapResource = mock(Resource.class);
+        Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
         when(gifBitmapResource.get()).thenReturn(gifBitmap);
 
         when(bitmapTransformation.transform(eq(initial), eq(dimens), eq(dimens))).thenReturn(initial);

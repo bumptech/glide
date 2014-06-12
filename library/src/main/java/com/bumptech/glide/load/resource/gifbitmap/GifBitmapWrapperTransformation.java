@@ -8,23 +8,23 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifResource;
 
-public class GifBitmapTransformation implements Transformation<GifBitmap> {
+public class GifBitmapWrapperTransformation implements Transformation<GifBitmapWrapper> {
     private Context context;
     private Transformation<Bitmap> wrapped;
 
-    public GifBitmapTransformation(Context context, Transformation<Bitmap> wrapped) {
+    public GifBitmapWrapperTransformation(Context context, Transformation<Bitmap> wrapped) {
         this.context = context;
         this.wrapped = wrapped;
     }
 
     @Override
-    public Resource<GifBitmap> transform(Resource<GifBitmap> resource, int outWidth, int outHeight) {
+    public Resource<GifBitmapWrapper> transform(Resource<GifBitmapWrapper> resource, int outWidth, int outHeight) {
         Resource<Bitmap> bitmapResource = resource.get().getBitmapResource();
         if (bitmapResource != null) {
             Resource<Bitmap> transformed = wrapped.transform(bitmapResource, outWidth, outHeight);
             if (transformed != bitmapResource) {
-                GifBitmap gifBitmap = new GifBitmap(transformed, null);
-                return new GifBitmapResource(gifBitmap);
+                GifBitmapWrapper gifBitmap = new GifBitmapWrapper(transformed, null);
+                return new GifBitmapWrapperResource(gifBitmap);
             }
         } else {
             //TODO: this should be pushed down into a GifData transformation?
@@ -33,7 +33,7 @@ public class GifBitmapTransformation implements Transformation<GifBitmap> {
             Transformation<Bitmap> newTransformation =
                     new MultiTransformation<Bitmap>(gifData.getFrameTransformation(), wrapped);
             gifData.setFrameTransformation(newTransformation);
-            return new GifBitmapResource(new GifBitmap(null, new GifResource(gifData)));
+            return new GifBitmapWrapperResource(new GifBitmapWrapper(null, new GifResource(gifData)));
         }
         return resource;
     }

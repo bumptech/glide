@@ -10,8 +10,8 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapTransformation;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.bitmap.RequestListener;
@@ -19,12 +19,12 @@ import com.bumptech.glide.request.bitmap.RequestListener;
 import java.io.InputStream;
 
 public class DrawableRequestBuilder<ModelType> extends
-        GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmap, Drawable> {
+        GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> {
     private final Context context;
     private final Glide glide;
 
     public DrawableRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, ImageVideoWrapper, GifBitmap, Drawable> loadProvider, Glide glide) {
+            LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> loadProvider, Glide glide) {
         super(context, model, loadProvider, Drawable.class, glide);
         this.context = context;
         this.glide = glide;
@@ -38,7 +38,7 @@ public class DrawableRequestBuilder<ModelType> extends
 
     @Override
     public DrawableRequestBuilder<ModelType> thumbnail(
-            GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmap, Drawable> thumbnailRequest) {
+            GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -58,21 +58,21 @@ public class DrawableRequestBuilder<ModelType> extends
 
     @Override
     public DrawableRequestBuilder<ModelType> decoder(
-            ResourceDecoder<ImageVideoWrapper, GifBitmap> decoder) {
+            ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> decoder) {
         super.decoder(decoder);
         return this;
     }
 
     @Override
     public DrawableRequestBuilder<ModelType> cacheDecoder(
-            ResourceDecoder<InputStream, GifBitmap> cacheDecoder) {
+            ResourceDecoder<InputStream, GifBitmapWrapper> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
     }
 
     @Override
     public DrawableRequestBuilder<ModelType> encoder(
-            ResourceEncoder<GifBitmap> encoder) {
+            ResourceEncoder<GifBitmapWrapper> encoder) {
         super.encoder(encoder);
         return this;
     }
@@ -92,19 +92,19 @@ public class DrawableRequestBuilder<ModelType> extends
     }
 
     public DrawableRequestBuilder<ModelType> bitmapTransform(Transformation<Bitmap> bitmapTransformation) {
-        return transform(new GifBitmapTransformation(context, bitmapTransformation));
+        return transform(new GifBitmapWrapperTransformation(context, bitmapTransformation));
     }
 
     @Override
     public DrawableRequestBuilder<ModelType> transform(
-            Transformation<GifBitmap> transformation) {
+            Transformation<GifBitmapWrapper> transformation) {
         super.transform(transformation);
         return this;
     }
 
     @Override
     public DrawableRequestBuilder<ModelType> transcoder(
-            ResourceTranscoder<GifBitmap, Drawable> transcoder) {
+            ResourceTranscoder<GifBitmapWrapper, Drawable> transcoder) {
         super.transcoder(transcoder);
         return this;
     }

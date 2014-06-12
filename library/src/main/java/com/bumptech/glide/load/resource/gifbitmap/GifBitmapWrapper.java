@@ -4,11 +4,11 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.gif.GifData;
 
-public class GifBitmap {
+public class GifBitmapWrapper {
     private final Resource<GifData> gifResource;
     private final Resource<Bitmap> bitmapResource;
 
-    public GifBitmap(Resource<Bitmap> bitmapResource, Resource<GifData> gifResource) {
+    public GifBitmapWrapper(Resource<Bitmap> bitmapResource, Resource<GifData> gifResource) {
         this.bitmapResource = bitmapResource;
         this.gifResource = gifResource;
     }

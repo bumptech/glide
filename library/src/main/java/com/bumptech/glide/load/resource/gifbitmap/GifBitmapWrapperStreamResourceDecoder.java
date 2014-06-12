@@ -7,15 +7,15 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class GifBitmapStreamResourceDecoder implements ResourceDecoder<InputStream, GifBitmap>{
-    private ResourceDecoder<ImageVideoWrapper, GifBitmap> gifBitmapDecoder;
+public class GifBitmapWrapperStreamResourceDecoder implements ResourceDecoder<InputStream, GifBitmapWrapper>{
+    private ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder;
 
-    public GifBitmapStreamResourceDecoder(ResourceDecoder<ImageVideoWrapper, GifBitmap> gifBitmapDecoder) {
+    public GifBitmapWrapperStreamResourceDecoder(ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder) {
         this.gifBitmapDecoder = gifBitmapDecoder;
     }
 
     @Override
-    public Resource<GifBitmap> decode(InputStream source, int width, int height) throws IOException {
+    public Resource<GifBitmapWrapper> decode(InputStream source, int width, int height) throws IOException {
         return gifBitmapDecoder.decode(new ImageVideoWrapper(source, null), width, height);
     }
 

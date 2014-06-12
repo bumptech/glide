@@ -2,15 +2,15 @@ package com.bumptech.glide.load.resource.gifbitmap;
 
 import com.bumptech.glide.Resource;
 
-public class GifBitmapResource extends Resource<GifBitmap> {
-    private GifBitmap data;
+public class GifBitmapWrapperResource extends Resource<GifBitmapWrapper> {
+    private GifBitmapWrapper data;
 
-    public GifBitmapResource(GifBitmap data) {
+    public GifBitmapWrapperResource(GifBitmapWrapper data) {
         this.data = data;
     }
 
     @Override
-    public GifBitmap get() {
+    public GifBitmapWrapper get() {
         return data;
     }
 

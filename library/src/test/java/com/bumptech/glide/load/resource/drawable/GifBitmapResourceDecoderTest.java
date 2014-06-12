@@ -7,8 +7,8 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapResourceDecoder;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperResourceDecoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
 public class GifBitmapResourceDecoderTest {
     private ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
     private ResourceDecoder<InputStream, GifData> gifDecoder;
-    private GifBitmapResourceDecoder decoder;
+    private GifBitmapWrapperResourceDecoder decoder;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         bitmapDecoder = mock(ResourceDecoder.class);
         gifDecoder = mock(ResourceDecoder.class);
-        decoder = new GifBitmapResourceDecoder(bitmapDecoder, gifDecoder);
+        decoder = new GifBitmapWrapperResourceDecoder(bitmapDecoder, gifDecoder);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class GifBitmapResourceDecoderTest {
         byte[] data = new byte[] { 'G', 'I', 'F'};
         ImageVideoWrapper wrapper = new ImageVideoWrapper(new ByteArrayInputStream(data), null);
 
-        Resource<GifBitmap> result = decoder.decode(wrapper, 100, 100);
+        Resource<GifBitmapWrapper> result = decoder.decode(wrapper, 100, 100);
 
         assertEquals(expected, result.get().getGifResource().get().getDrawable());
     }
@@ -65,7 +65,7 @@ public class GifBitmapResourceDecoderTest {
         byte[] data = new byte[] { 'A', 'I', 'F'};
         ImageVideoWrapper wrapper = new ImageVideoWrapper(new ByteArrayInputStream(data), null);
 
-        Resource<GifBitmap> result = decoder.decode(wrapper, 100, 100);
+        Resource<GifBitmapWrapper> result = decoder.decode(wrapper, 100, 100);
 
         Bitmap bitmap = result.get().getBitmapResource().get();
 
@@ -81,7 +81,7 @@ public class GifBitmapResourceDecoderTest {
 
         ImageVideoWrapper wrapper = new ImageVideoWrapper(null, mock(ParcelFileDescriptor.class));
 
-        Resource<GifBitmap> result = decoder.decode(wrapper, 100, 100);
+        Resource<GifBitmapWrapper> result = decoder.decode(wrapper, 100, 100);
 
         Bitmap bitmap = result.get().getBitmapResource().get();
 

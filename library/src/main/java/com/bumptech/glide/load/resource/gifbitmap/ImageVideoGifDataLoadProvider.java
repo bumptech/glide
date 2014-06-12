@@ -9,34 +9,34 @@ import com.bumptech.glide.load.resource.gif.GifData;
 
 import java.io.InputStream;
 
-public class ImageVideoGifDataLoadProvider implements DataLoadProvider<ImageVideoWrapper, GifBitmap> {
-    private final GifBitmapStreamResourceDecoder cacheDecoder;
-    private final GifBitmapResourceDecoder sourceDecoder;
-    private final GifBitmapResourceEncoder encoder;
+public class ImageVideoGifDataLoadProvider implements DataLoadProvider<ImageVideoWrapper, GifBitmapWrapper> {
+    private final GifBitmapWrapperStreamResourceDecoder cacheDecoder;
+    private final GifBitmapWrapperResourceDecoder sourceDecoder;
+    private final GifBitmapWrapperResourceEncoder encoder;
 
     public ImageVideoGifDataLoadProvider(DataLoadProvider<ImageVideoWrapper, Bitmap> bitmapProvider,
             DataLoadProvider<InputStream, GifData> gifProvider) {
-        cacheDecoder = new GifBitmapStreamResourceDecoder(new GifBitmapResourceDecoder(
+        cacheDecoder = new GifBitmapWrapperStreamResourceDecoder(new GifBitmapWrapperResourceDecoder(
                 bitmapProvider.getSourceDecoder(),
                 gifProvider.getCacheDecoder()));
-        sourceDecoder = new GifBitmapResourceDecoder(
+        sourceDecoder = new GifBitmapWrapperResourceDecoder(
                 bitmapProvider.getSourceDecoder(),
                 gifProvider.getSourceDecoder());
-        encoder = new GifBitmapResourceEncoder(bitmapProvider.getEncoder(), gifProvider.getEncoder());
+        encoder = new GifBitmapWrapperResourceEncoder(bitmapProvider.getEncoder(), gifProvider.getEncoder());
     }
 
     @Override
-    public ResourceDecoder<InputStream, GifBitmap> getCacheDecoder() {
+    public ResourceDecoder<InputStream, GifBitmapWrapper> getCacheDecoder() {
         return cacheDecoder;
     }
 
     @Override
-    public ResourceDecoder<ImageVideoWrapper, GifBitmap> getSourceDecoder() {
+    public ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> getSourceDecoder() {
         return sourceDecoder;
     }
 
     @Override
-    public ResourceEncoder<GifBitmap> getEncoder() {
+    public ResourceEncoder<GifBitmapWrapper> getEncoder() {
         return encoder;
     }
 }

@@ -7,9 +7,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 
-public class GifBitmapDrawableTranscoder implements ResourceTranscoder<GifBitmap, Drawable> {
+public class GifBitmapDrawableTranscoder implements ResourceTranscoder<GifBitmapWrapper, Drawable> {
     private final Resources resources;
 
     public GifBitmapDrawableTranscoder(Context context) {
@@ -17,8 +17,8 @@ public class GifBitmapDrawableTranscoder implements ResourceTranscoder<GifBitmap
     }
 
     @Override
-    public Resource<Drawable> transcode(Resource<GifBitmap> toTranscode) {
-        GifBitmap gifBitmap = toTranscode.get();
+    public Resource<Drawable> transcode(Resource<GifBitmapWrapper> toTranscode) {
+        GifBitmapWrapper gifBitmap = toTranscode.get();
         Resource<Bitmap> bitmapResource = gifBitmap.getBitmapResource();
 
         final Resource resource;

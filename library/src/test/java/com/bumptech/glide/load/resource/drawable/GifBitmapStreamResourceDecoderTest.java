@@ -3,8 +3,8 @@ package com.bumptech.glide.load.resource.drawable;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmap;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapStreamResourceDecoder;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperStreamResourceDecoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -22,21 +22,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class GifBitmapStreamResourceDecoderTest {
-    ResourceDecoder<ImageVideoWrapper, GifBitmap> gifBitmapDecoder;
-    private GifBitmapStreamResourceDecoder decoder;
+    ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder;
+    private GifBitmapWrapperStreamResourceDecoder decoder;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         gifBitmapDecoder = mock(ResourceDecoder.class);
-        decoder = new GifBitmapStreamResourceDecoder(gifBitmapDecoder);
+        decoder = new GifBitmapWrapperStreamResourceDecoder(gifBitmapDecoder);
     }
 
     @Test
     public void testReturnsWrappedDecoderResult() throws IOException {
         int width = 100;
         int height = 110;
-        Resource<GifBitmap> expected = mock(Resource.class);
+        Resource<GifBitmapWrapper> expected = mock(Resource.class);
         when(gifBitmapDecoder.decode(any(ImageVideoWrapper.class), eq(width), eq(height))).thenReturn(expected);
 
         assertEquals(expected, decoder.decode(new ByteArrayInputStream(new byte[0]), width, height));

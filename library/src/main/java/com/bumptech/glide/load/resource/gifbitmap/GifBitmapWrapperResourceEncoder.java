@@ -7,19 +7,19 @@ import com.bumptech.glide.load.resource.gif.GifData;
 
 import java.io.OutputStream;
 
-public class GifBitmapResourceEncoder implements ResourceEncoder<GifBitmap> {
+public class GifBitmapWrapperResourceEncoder implements ResourceEncoder<GifBitmapWrapper> {
     private final ResourceEncoder<Bitmap> bitmapEncoder;
     private final ResourceEncoder<GifData> gifEncoder;
     private String id;
 
-    public GifBitmapResourceEncoder(ResourceEncoder<Bitmap> bitmapEncoder, ResourceEncoder<GifData> gifEncoder) {
+    public GifBitmapWrapperResourceEncoder(ResourceEncoder<Bitmap> bitmapEncoder, ResourceEncoder<GifData> gifEncoder) {
         this.bitmapEncoder = bitmapEncoder;
         this.gifEncoder = gifEncoder;
     }
 
     @Override
-    public boolean encode(Resource<GifBitmap> resource, OutputStream os) {
-        final GifBitmap gifBitmap = resource.get();
+    public boolean encode(Resource<GifBitmapWrapper> resource, OutputStream os) {
+        final GifBitmapWrapper gifBitmap = resource.get();
         final Resource<Bitmap> bitmapResource = gifBitmap.getBitmapResource();
 
         if (bitmapResource != null) {
