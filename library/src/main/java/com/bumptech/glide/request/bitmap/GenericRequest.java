@@ -234,9 +234,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
     @Override
     public void onException(Exception e) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
+//        if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "load failed", e);
-        }
+//        }
 
         isError = true;
         setErrorPlaceholder();

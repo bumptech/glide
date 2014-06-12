@@ -32,8 +32,8 @@ public class GifBitmapTransformation implements Transformation<GifBitmap> {
             GifData gifData = gifResource.get();
             Transformation<Bitmap> newTransformation =
                     new MultiTransformation<Bitmap>(gifData.getFrameTransformation(), wrapped);
-            GifData newData = new GifData(context, gifData.getGifDecoder(), newTransformation);
-            return new GifBitmapResource(new GifBitmap(null, new GifResource(newData)));
+            gifData.setFrameTransformation(newTransformation);
+            return new GifBitmapResource(new GifBitmap(null, new GifResource(gifData)));
         }
         return resource;
     }

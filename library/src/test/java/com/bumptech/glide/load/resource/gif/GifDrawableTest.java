@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -162,5 +163,17 @@ public class GifDrawableTest {
         drawable.recycle();
 
         verify(frameManager).clear();
+    }
+
+    @Test
+    public void testIsNotRecycledIfNotRecycled() {
+        assertFalse(drawable.isRecycled());
+    }
+
+    @Test
+    public void testIsRecycledAfterRecycled() {
+        drawable.recycle();
+
+        assertTrue(drawable.isRecycled());
     }
 }

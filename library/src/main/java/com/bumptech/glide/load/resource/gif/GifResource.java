@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.gif;
 
 import com.bumptech.glide.Resource;
 
-//TODO: make this safe for multiple consumers.
 public class GifResource extends Resource<GifData> {
     private GifData gifData;
 

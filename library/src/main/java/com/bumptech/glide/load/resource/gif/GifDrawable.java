@@ -7,7 +7,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
 
 public class GifDrawable extends Drawable implements Animatable, GifFrameManager.FrameCallback {
 
@@ -16,6 +16,7 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     private GifDecoder decoder;
     private boolean isRunning;
     private Bitmap currentFrame;
+    private boolean isRecycled;
 
     public GifDrawable(GifDecoder decoder, GifFrameManager frameManager) {
         this.decoder = decoder;
@@ -23,15 +24,6 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
         paint = new Paint();
     }
-
-    GifDecoder getDecoder() {
-        return decoder;
-    }
-
-    Transformation<Bitmap> getTransformation() {
-        return frameManager.getTransformation();
-    }
-
 
     @Override
     public void start() {
@@ -114,6 +106,11 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     }
 
     public void recycle() {
+        isRecycled = true;
         frameManager.clear();
+    }
+
+    public boolean isRecycled() {
+        return isRecycled;
     }
 }

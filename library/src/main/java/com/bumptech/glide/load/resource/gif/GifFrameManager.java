@@ -7,18 +7,17 @@ import android.os.Looper;
 import android.os.SystemClock;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
-import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.resource.NullCacheDecoder;
+import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
 import com.bumptech.glide.request.target.SimpleTarget;
-
-import java.util.UUID;
 
 class GifFrameManager {
     static final long MIN_FRAME_DELAY = 16;
-    private final String id;
     private final MemorySizeCalculator calculator;
-    private BitmapPool bitmapPool;
+    private final GifFrameLoader frameLoader;
+    private final GifFrameResourceDecoder frameResourceDecoder;
+    private final NullCacheDecoder<Bitmap> cacheDecoder;
     private final Handler mainHandler;
     private Transformation<Bitmap> transformation;
     private Context context;
@@ -30,18 +29,18 @@ class GifFrameManager {
     }
 
     public GifFrameManager(Context context, Transformation<Bitmap> transformation) {
-        this(context, UUID.randomUUID().toString(), Glide.get(context).getBitmapPool(),
-                new Handler(Looper.getMainLooper()), transformation);
+        this(context, new Handler(Looper.getMainLooper()), transformation);
     }
 
-    public GifFrameManager(Context context, String id, BitmapPool bitmapPool, Handler mainHandler,
+    public GifFrameManager(Context context, Handler mainHandler,
             Transformation<Bitmap> transformation) {
         this.context = context;
-        this.id = id;
-        this.bitmapPool = bitmapPool;
         this.mainHandler = mainHandler;
         this.transformation = transformation;
         calculator = new MemorySizeCalculator(context);
+        frameLoader = new GifFrameLoader();
+        frameResourceDecoder = new GifFrameResourceDecoder();
+        cacheDecoder = NullCacheDecoder.get();
     }
 
     Transformation<Bitmap> getTransformation() {
@@ -55,11 +54,11 @@ class GifFrameManager {
         long targetTime = SystemClock.uptimeMillis() + (Math.min(MIN_FRAME_DELAY, decoder.getNextDelay()));
         next = new DelayTarget(decoder, cb, targetTime, mainHandler);
         Glide.with(context)
-                .using(new GifFrameLoader(id), GifDecoder.class)
+                .using(frameLoader, GifDecoder.class)
                 .load(decoder)
                 .as(Bitmap.class)
-                .decoder(new GifFrameResourceDecoder())
-                .cacheDecoder(new StreamBitmapDecoder(bitmapPool))
+                .decoder(frameResourceDecoder)
+                .cacheDecoder(cacheDecoder)
                 .transform(transformation)
                 .skipMemoryCache(skipCache)
                 .skipDiskCache(true)
