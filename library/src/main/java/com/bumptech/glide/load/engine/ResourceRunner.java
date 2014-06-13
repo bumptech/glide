@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
@@ -72,7 +73,11 @@ public class ResourceRunner<Z, R> implements Runnable {
             return;
         }
 
+        long start = SystemClock.currentThreadTimeMillis();
         Resource<Z> fromCache = loadFromDiskCache();
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "loaded from disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
+        }
         if (fromCache != null) {
             Resource<R> transcoded = transcoder.transcode(fromCache);
             job.onResourceReady(transcoded);
@@ -94,7 +99,7 @@ public class ResourceRunner<Z, R> implements Runnable {
             }
             if (result == null) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Failed to decode image from cache");
+                    Log.d(TAG, "Failed to decode image from cache or not present in cache");
                 }
                 diskCache.delete(key);
             }
