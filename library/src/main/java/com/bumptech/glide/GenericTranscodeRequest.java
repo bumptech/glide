@@ -15,7 +15,7 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
     private final Class<T> dataClass;
     private final Class<Z> resourceClass;
 
-    public GenericTranscodeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
+    GenericTranscodeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
             Class<T> dataClass, Class<Z> resourceClass) {
         super(context, model,
                 build(glide, modelLoader, dataClass, resourceClass, (ResourceTranscoder<Z, Z>) null),

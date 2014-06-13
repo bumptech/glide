@@ -195,10 +195,6 @@ public class Glide {
         return bitmapPool;
     }
 
-    public MemoryCache getMemoryCache() {
-        return memoryCache;
-    }
-
     <Z, R> ResourceTranscoder<Z, R> buildTranscoder(Class<Z> decodedClass, Class<R> transcodedClass) {
         return transcoderFactory.get(decodedClass, transcodedClass);
     }

@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -17,8 +19,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.resource.bytes.BytesResource;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.EngineBuilder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -28,7 +29,9 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
-import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.load.resource.bytes.BytesResource;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.volley.VolleyRequestFuture;
@@ -307,6 +310,7 @@ public class GlideTest {
 
         Glide.with(getContext())
                 .load(uri)
+                .asBitmap()
                 .transcode(transcoder, byte[].class)
                 .into(target);
 
@@ -318,7 +322,7 @@ public class GlideTest {
         Uri uri = Uri.parse("content://something/else");
         mockUri(uri);
 
-        Glide.with(getContext()).load(uri).toBytes().into(target);
+        Glide.with(getContext()).load(uri).asBitmap().toBytes().into(target);
 
         verify(target).onResourceReady(any(byte[].class));
     }
@@ -496,15 +500,83 @@ public class GlideTest {
     }
 
     @Test
+    public void testReceivesBytes() {
+        String fakeUri = "content://fake";
+        mockUri(fakeUri);
+        Glide.with(getContext())
+                .load(fakeUri)
+                .asBitmap()
+                .toBytes()
+                .into(target);
+
+        verify(target).onResourceReady(any(byte[].class));
+    }
+
+    @Test
+    public void testReceivesTranscodedData() {
+        String fakeUri = "content://fake";
+        mockUri(fakeUri);
+        final Bitmap expected = Bitmap.createBitmap(1234, 6432, Bitmap.Config.ALPHA_8);
+        Glide.with(getContext())
+                .load(fakeUri)
+                .asBitmap()
+                .transcode(new ResourceTranscoder<Bitmap, Bitmap>() {
+                    @Override
+                    public Resource<Bitmap> transcode(Resource<Bitmap> toTranscode) {
+                        return new BitmapResource(expected, mock(BitmapPool.class));
+                    }
+
+                    @Override
+                    public String getId() {
+                        return "id";
+                    }
+                }, Bitmap.class)
+                .into(target);
+
+        verify(target).onResourceReady(eq(expected));
+    }
+
+    @Test
     public void testNullModelDoesNotThrow() {
         String nullString = null;
-        Drawable drawable = mock(Drawable.class);
+
+        Drawable drawable = new ColorDrawable(Color.RED);
         Glide.with(getContext())
                 .load(nullString)
                 .placeholder(drawable)
                 .into(target);
 
-        verify(target).setPlaceholder(drawable);
+        verify(target).setPlaceholder(eq(drawable));
+    }
+
+    @Test
+    public void testNullModelPrefersErrorDrawable() {
+        String nullString = null;
+
+        Drawable placeholder = new ColorDrawable(Color.GREEN);
+        Drawable error = new ColorDrawable(Color.RED);
+
+        Glide.with(getContext())
+                .load(nullString)
+                .placeholder(placeholder)
+                .error(error)
+                .into(target);
+
+        verify(target).setPlaceholder(eq(error));
+    }
+
+    @Test
+    public void testNullModelWithModelLoaderDoesNotThrow() {
+        String nullString = null;
+        Drawable drawable = new ColorDrawable(Color.RED);
+        StreamModelLoader<String> modelLoader = mock(StreamModelLoader.class);
+        Glide.with(getContext())
+                .using(modelLoader)
+                .load(nullString)
+                .placeholder(drawable)
+                .into(target);
+
+        verify(target).setPlaceholder(eq(drawable));
     }
 
     private void mockUri(String uriString) {

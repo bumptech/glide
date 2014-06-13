@@ -1,14 +1,12 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.model.ImageVideoModelLoader;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
-import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.FixedLoadProvider;
 
@@ -46,25 +44,7 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
         this.glide = glide;
     }
 
-    public BitmapRequestBuilder<A, Bitmap> asBitmap() {
-        return new BitmapRequestBuilder<A, Bitmap>(context, model,
-                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, Bitmap.class, null),
-                Bitmap.class, glide);
-    }
-
-    public BitmapRequestBuilder<A, byte[]> toBytes() {
-        return transcode(new BitmapBytesTranscoder(), byte[].class);
-    }
-
-    public BitmapRequestBuilder<A, byte[]> toBytes(Bitmap.CompressFormat compressFormat, int quality) {
-        return transcode(new BitmapBytesTranscoder(compressFormat, quality), byte[].class);
-    }
-
-    public <R> BitmapRequestBuilder<A, R> transcode(ResourceTranscoder<Bitmap, R> transcoder, Class<R> transcodeClass) {
-        FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R> loadProvider = buildProvider(glide,
-                streamModelLoader, fileDescriptorModelLoader, Bitmap.class, transcodeClass, transcoder);
-
-        return new BitmapRequestBuilder<A, R>(context, model, loadProvider,
-                transcodeClass, glide).transcoder(transcoder);
+    public BitmapTypeRequest<A> asBitmap() {
+        return new BitmapTypeRequest<A>(context, model, streamModelLoader, fileDescriptorModelLoader, glide);
     }
 }

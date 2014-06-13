@@ -10,9 +10,9 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.Request;
@@ -43,7 +43,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private final ModelType model;
     private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
     private final Class<TranscodeType> transcodeClass;
-    private Glide glide;
+    private final Glide glide;
     private int animationId;
     private Animation animation;
     private int placeholderId;
@@ -59,7 +59,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private boolean isCacheable = true;
     private ResourceEncoder<ResourceType> preSkipEncoder;
 
-    public GenericRequestBuilder(Context context, ModelType model,
+    GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
             Class<TranscodeType> transcodeClass, Glide glide) {
         this.transcodeClass = transcodeClass;
@@ -171,22 +171,34 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> decoder(
             ResourceDecoder<DataType, ResourceType> decoder) {
-        loadProvider.setSourceDecoder(decoder);
+        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
+        // ignore the decoder.
+        if (loadProvider != null) {
+            loadProvider.setSourceDecoder(decoder);
+        }
 
         return this;
     }
 
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> cacheDecoder(
-            ResourceDecoder<InputStream, ResourceType> cacheDecoder) {
-        loadProvider.setCacheDecoder(cacheDecoder);
+            ResourceDecoder <InputStream, ResourceType> cacheDecoder) {
+        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
+        // ignore the decoder.
+        if (loadProvider != null) {
+            loadProvider.setCacheDecoder(cacheDecoder);
+        }
 
         return this;
     }
 
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> encoder(
             ResourceEncoder<ResourceType> encoder) {
-        loadProvider.setEncoder(encoder);
-        preSkipEncoder = encoder;
+        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
+        // ignore the encoder.
+        if (loadProvider != null) {
+            loadProvider.setEncoder(encoder);
+            preSkipEncoder = encoder;
+        }
 
         return this;
     }
@@ -352,7 +364,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipDiskCache(boolean skip) {
         if (skip) {
-            preSkipEncoder = loadProvider.getEncoder();
+            if (loadProvider != null) {
+                preSkipEncoder = loadProvider.getEncoder();
+            }
             final SkipCache<ResourceType> skipCache = SkipCache.get();
             return encoder(skipCache);
         } else {

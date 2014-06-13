@@ -23,7 +23,7 @@ public class DrawableRequestBuilder<ModelType> extends
     private final Context context;
     private final Glide glide;
 
-    public DrawableRequestBuilder(Context context, ModelType model,
+    DrawableRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> loadProvider, Glide glide) {
         super(context, model, loadProvider, Drawable.class, glide);
         this.context = context;
