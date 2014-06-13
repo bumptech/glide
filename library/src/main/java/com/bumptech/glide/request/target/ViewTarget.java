@@ -124,7 +124,7 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
                 // current view tree observer and should succeed.
                 ViewTreeObserver observer = view.getViewTreeObserver();
                 if (observer.isAlive()) {
-                    observer.removeGlobalOnLayoutListener(layoutListener);
+                    observer.removeOnPreDrawListener(layoutListener);
                 }
             }
         }
@@ -151,7 +151,7 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
                 cbs.add(cb);
                 final ViewTreeObserver observer = view.getViewTreeObserver();
                 layoutListener = new SizeDeterminerLayoutListener(this);
-                observer.addOnGlobalLayoutListener(layoutListener);
+                observer.addOnPreDrawListener(layoutListener);
             }
         }
 
@@ -170,7 +170,7 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
             return layoutParams != null && (layoutParams.width > 0 && layoutParams.height > 0);
         }
 
-        private static class SizeDeterminerLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
+        private static class SizeDeterminerLayoutListener implements ViewTreeObserver.OnPreDrawListener {
             private final WeakReference<SizeDeterminer> sizeDeterminerRef;
 
             public SizeDeterminerLayoutListener(SizeDeterminer sizeDeterminer) {
@@ -178,7 +178,7 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
             }
 
             @Override
-            public void onGlobalLayout() {
+            public boolean onPreDraw() {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "OnGlobalLayoutListener called listener=" + this);
                 }
@@ -186,6 +186,7 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
                 if (sizeDeterminer != null) {
                     sizeDeterminer.checkCurrentDimens();
                 }
+                return true;
             }
         }
     }
