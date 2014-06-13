@@ -5,7 +5,7 @@
     <target name="jar" depends="-compile">
         <jar destfile="bin/glide-${mymanifest.manifest.android:versionName}.jar"
             basedir="bin/classes" >
-            <zipgroupfileset dir="libs" includes="*.jar" />
+            <zipgroupfileset dir="libs" includes="disklrucache*.jar,volley.jar" />
         </jar>
     </target>
 </project>
