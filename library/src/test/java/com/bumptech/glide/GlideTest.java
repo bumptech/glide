@@ -496,10 +496,6 @@ public class GlideTest {
     }
 
     @Test
-    public void testSomething() {
-    }
-
-    @Test
     public void testNullModelDoesNotThrow() {
         String nullString = null;
         Drawable drawable = mock(Drawable.class);

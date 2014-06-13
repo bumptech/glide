@@ -6,7 +6,7 @@ import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.gif.GifData;
-import com.bumptech.glide.load.resource.gif.GifResource;
+import com.bumptech.glide.load.resource.gif.GifDataResource;
 
 public class GifBitmapWrapperTransformation implements Transformation<GifBitmapWrapper> {
     private Context context;
@@ -33,7 +33,7 @@ public class GifBitmapWrapperTransformation implements Transformation<GifBitmapW
             Transformation<Bitmap> newTransformation =
                     new MultiTransformation<Bitmap>(gifData.getFrameTransformation(), wrapped);
             gifData.setFrameTransformation(newTransformation);
-            return new GifBitmapWrapperResource(new GifBitmapWrapper(null, new GifResource(gifData)));
+            return new GifBitmapWrapperResource(new GifBitmapWrapper(null, new GifDataResource(gifData)));
         }
         return resource;
     }

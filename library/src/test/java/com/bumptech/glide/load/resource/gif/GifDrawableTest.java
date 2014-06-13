@@ -66,7 +66,7 @@ public class GifDrawableTest {
     public void testRequestsNextFrameOnStart() {
         drawable.start();
 
-        verify(frameManager).getNextFrame(eq(gifDecoder), eq(drawable));
+        verify(frameManager).getNextFrame(eq(drawable));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class GifDrawableTest {
         drawable.start();
         drawable.start();
 
-        verify(frameManager, times(1)).getNextFrame(eq(gifDecoder), eq(drawable));
+        verify(frameManager, times(1)).getNextFrame(eq(drawable));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class GifDrawableTest {
         drawable.setIsRunning(true);
         drawable.onFrameRead(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
 
-        verify(frameManager).getNextFrame(eq(gifDecoder), eq(drawable));
+        verify(frameManager).getNextFrame(eq(drawable));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class GifDrawableTest {
         drawable.setIsRunning(false);
         drawable.onFrameRead(Bitmap.createBitmap(10, 100, Bitmap.Config.ARGB_8888));
 
-        verify(frameManager, never()).getNextFrame(eq(gifDecoder), eq(drawable));
+        verify(frameManager, never()).getNextFrame(eq(drawable));
     }
 
     @Test

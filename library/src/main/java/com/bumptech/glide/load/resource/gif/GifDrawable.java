@@ -29,7 +29,7 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     public void start() {
         if (!isRunning) {
             isRunning = true;
-            frameManager.getNextFrame(decoder, this);
+            frameManager.getNextFrame(this);
             invalidateSelf();
         }
     }
@@ -102,7 +102,7 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
             invalidateSelf();
         }
 
-        frameManager.getNextFrame(decoder, this);
+        frameManager.getNextFrame(this);
     }
 
     public void recycle() {

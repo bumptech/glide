@@ -5,7 +5,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
 
-public class GifFrameLoader implements ModelLoader<GifDecoder, GifDecoder> {
+public class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
 
     @Override
     public DataFetcher<GifDecoder> getResourceFetcher(GifDecoder model, int width, int height) {

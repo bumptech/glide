@@ -137,7 +137,7 @@ public class GifDecoder {
         return data;
     }
 
-    public int getDecodedFrameByteSize() {
+    public int getDecodedFramesByteSizeSum() {
         // 4 == ARGB_8888, 2 == RGB_565
         return header.frameCount * header.width * header.height * (header.isTransparent ? 4 : 2);
     }

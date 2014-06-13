@@ -47,7 +47,7 @@ public class GifData {
     public GifDrawable getDrawable() {
         GifDecoder gifDecoder = new GifDecoder(bitmapPool);
         gifDecoder.setData(gifId, header, data);
-        GifFrameManager frameManager = new GifFrameManager(context, getFrameTransformation());
+        GifFrameManager frameManager = new GifFrameManager(context, gifDecoder, getFrameTransformation());
 
         GifDrawable result = new GifDrawable(gifDecoder, frameManager);
         drawables.add(result);

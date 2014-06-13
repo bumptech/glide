@@ -7,6 +7,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.gif.decoder.GifHeader;
 import com.bumptech.glide.load.resource.gif.decoder.GifHeaderParser;
+import com.bumptech.glide.util.Util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,11 +31,11 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
     }
 
     @Override
-    public GifResource decode(InputStream source, int width, int height) throws IOException {
+    public GifDataResource decode(InputStream source, int width, int height) throws IOException {
         byte[] data = inputStreamToBytes(source);
         GifHeader header = new GifHeaderParser(data).parseHeader();
         String id = getGifId(data);
-        return new GifResource(new GifData(context, bitmapPool, id, header, data));
+        return new GifDataResource(new GifData(context, bitmapPool, id, header, data));
     }
 
     @Override
@@ -46,7 +47,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
             digest.update(data);
-            return new String(digest.digest());
+            return Util.sha256BytesToHex(digest.digest());
         } catch (NoSuchAlgorithmException e) {
             if (Log.isLoggable(TAG, Log.WARN)) {
                 Log.w(TAG, "Missing sha1 algorithm?", e);

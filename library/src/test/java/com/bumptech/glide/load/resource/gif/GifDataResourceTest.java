@@ -12,14 +12,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class GifResourceTest {
-    private GifResource resource;
+public class GifDataResourceTest {
+    private GifDataResource resource;
     private GifData gifData;
 
     @Before
     public void setUp() {
         gifData = mock(GifData.class);
-        resource = new GifResource(gifData);
+        resource = new GifDataResource(gifData);
     }
 
     @Test
