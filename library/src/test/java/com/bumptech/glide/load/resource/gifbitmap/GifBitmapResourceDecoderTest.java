@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.drawable;
+package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
@@ -7,8 +7,6 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperResourceDecoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

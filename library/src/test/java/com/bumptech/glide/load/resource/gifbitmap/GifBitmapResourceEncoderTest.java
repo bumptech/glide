@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.drawable;
+package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;

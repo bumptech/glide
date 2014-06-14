@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.drawable;
+package com.bumptech.glide.load.resource.gifbitmap;
 
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
