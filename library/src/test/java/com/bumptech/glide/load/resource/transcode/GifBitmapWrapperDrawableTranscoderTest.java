@@ -1,70 +1,48 @@
 package com.bumptech.glide.load.resource.transcode;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.gif.GifData;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class GifBitmapDrawableTranscoderTest {
-    private GifBitmapDrawableTranscoder transcoder;
+public class GifBitmapWrapperDrawableTranscoderTest {
+    private GifBitmapWrapperDrawableTranscoder transcoder;
+    private ResourceTranscoder<Bitmap, Drawable> bitmapTranscoder;
+    private ResourceTranscoder<GifData, Drawable> gifDataTranscoder;
 
     @Before
     public void setUp() {
-        transcoder = new GifBitmapDrawableTranscoder(Robolectric.application);
+        bitmapTranscoder = mock(ResourceTranscoder.class);
+        gifDataTranscoder = mock(ResourceTranscoder.class);
+        transcoder = new GifBitmapWrapperDrawableTranscoder(bitmapTranscoder, gifDataTranscoder);
     }
 
     @Test
-    public void testReturnsBitmapDrawableIfGifBitmapHasBitmap() {
+    public void testReturnsDrawableFromBitmapTranscoderIfGifBitmapHasBitmap() {
         GifBitmapWithBitmapHarness harness = new GifBitmapWithBitmapHarness();
+        when(bitmapTranscoder.transcode(eq(harness.bitmapResource))).thenReturn(harness.expected);
 
-        BitmapDrawable transcoded = (BitmapDrawable) transcoder.transcode(harness.gifBitmapResource).get();
-
-        assertEquals(harness.expected, transcoded.getBitmap());
+        assertEquals(harness.expected, transcoder.transcode(harness.gifBitmapResource));
     }
 
     @Test
-    public void testReturnedResourceHasBitmapSizeIfGifBitmapHasBitmap() {
-        final int size = 100;
-        GifBitmapWithBitmapHarness harness = new GifBitmapWithBitmapHarness();
-        when(harness.bitmapResource.getSize()).thenReturn(size);
-
-        Resource<Drawable> transcoded = transcoder.transcode(harness.gifBitmapResource);
-
-        assertEquals(size, transcoded.getSize());
-    }
-
-    @Test
-    public void testReturnsGifDrawableIfGifBitmapHasGif() {
+    public void testReturnsDrawableFromGifTranscoderIfGifBitmapHasGif() {
         GifBitmapWithGifHarness harness = new GifBitmapWithGifHarness();
+        when(gifDataTranscoder.transcode(eq(harness.gifResource))).thenReturn(harness.expected);
 
-        Drawable transcoded = transcoder.transcode(harness.gifBitmapResource).get();
-
-        assertEquals(harness.expected, transcoded);
-    }
-
-    @Test
-    public void testReturnedResourceHasGifDrawableSizeIfGifBitmapHasGif() {
-        final int size = 200;
-        GifBitmapWithGifHarness harness = new GifBitmapWithGifHarness();
-        when(harness.gifResource.getSize()).thenReturn(size);
-
-        Resource<Drawable> transcoded = transcoder.transcode(harness.gifBitmapResource);
-
-        assertEquals(size, transcoded.getSize());
+        assertEquals(harness.expected, transcoder.transcode(harness.gifBitmapResource));
     }
 
     @Test
@@ -75,6 +53,7 @@ public class GifBitmapDrawableTranscoderTest {
     private static class TranscoderHarness {
         Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
         GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
+        Resource<Drawable> expected = mock(Resource.class);
 
         public TranscoderHarness() {
             when(gifBitmapResource.get()).thenReturn(gifBitmap);
@@ -82,24 +61,20 @@ public class GifBitmapDrawableTranscoderTest {
     }
 
     private static class GifBitmapWithBitmapHarness extends TranscoderHarness {
-        Bitmap expected = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
         Resource<Bitmap> bitmapResource = mock(Resource.class);
 
         public GifBitmapWithBitmapHarness() {
             super();
-            when(bitmapResource.get()).thenReturn(expected);
             when(gifBitmap.getBitmapResource()).thenReturn(bitmapResource);
         }
     }
 
     private static class GifBitmapWithGifHarness extends TranscoderHarness {
-        GifDrawable expected = mock(GifDrawable.class);
         GifData gifData = mock(GifData.class);
         Resource<GifData> gifResource = mock(Resource.class);
 
         public GifBitmapWithGifHarness() {
             super();
-            when(gifData.getDrawable()).thenReturn(expected);
             when(gifResource.get()).thenReturn(gifData);
             when(gifBitmap.getGifResource()).thenReturn(gifResource);
         }

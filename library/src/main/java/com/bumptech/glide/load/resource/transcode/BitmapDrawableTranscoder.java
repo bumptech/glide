@@ -4,7 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.load.resource.drawable.BitmapDrawableResource;
+import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, BitmapDrawable> {
