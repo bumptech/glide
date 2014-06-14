@@ -18,8 +18,8 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
-import com.bumptech.glide.request.bitmap.GenericRequest;
-import com.bumptech.glide.request.bitmap.RequestListener;
+import com.bumptech.glide.request.GenericRequest;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 

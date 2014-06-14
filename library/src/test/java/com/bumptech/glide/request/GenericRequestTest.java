@@ -16,7 +16,6 @@ import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.request.bitmap.GenericRequest;
 import com.bumptech.glide.request.target.Target;
 import org.junit.Before;
 import org.junit.Test;

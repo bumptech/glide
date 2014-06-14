@@ -1,4 +1,4 @@
-package com.bumptech.glide.request.bitmap;
+package com.bumptech.glide.request;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -15,9 +15,6 @@ import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.RequestCoordinator;
-import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.request.target.Target;
 
 import java.io.InputStream;

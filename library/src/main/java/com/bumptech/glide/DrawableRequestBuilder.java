@@ -14,7 +14,7 @@ import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.request.bitmap.RequestListener;
+import com.bumptech.glide.request.RequestListener;
 
 import java.io.InputStream;
 

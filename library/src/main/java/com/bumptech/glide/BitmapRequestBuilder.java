@@ -20,7 +20,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.provider.LoadProvider;
-import com.bumptech.glide.request.bitmap.RequestListener;
+import com.bumptech.glide.request.RequestListener;
 
 import java.io.InputStream;
 

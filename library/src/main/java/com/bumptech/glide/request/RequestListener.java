@@ -1,4 +1,4 @@
-package com.bumptech.glide.request.bitmap;
+package com.bumptech.glide.request;
 
 import com.bumptech.glide.request.target.Target;
 
@@ -39,8 +39,7 @@ public interface RequestListener<T> {
     public abstract void onException(Exception e, T model, Target target);
 
     /**
-     * Called when a load completes successfully, immediately after
-     * {@link Target#onImageReady(android.graphics.Bitmap)}.
+     * Called when a load completes successfully, immediately after {@link Target#onResourceReady(Object)}.
      *
      * @param model The specific model that was used to load the image.
      * @param target The target the model was loaded into.
