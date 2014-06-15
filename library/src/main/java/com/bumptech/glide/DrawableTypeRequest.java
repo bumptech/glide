@@ -47,4 +47,8 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
     public BitmapTypeRequest<A> asBitmap() {
         return new BitmapTypeRequest<A>(context, model, streamModelLoader, fileDescriptorModelLoader, glide);
     }
+
+    public GifTypeRequest<A> asGif() {
+        return new GifTypeRequest<A>(context, model, streamModelLoader, glide);
+    }
 }

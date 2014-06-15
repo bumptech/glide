@@ -34,7 +34,9 @@ import com.bumptech.glide.load.model.stream.StreamUrlLoader;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDataLoadProvider;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoDataLoadProvider;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDataLoadProvider;
+import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataLoadProvider;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.ImageVideoGifDataLoadProvider;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
@@ -163,8 +165,8 @@ public class Glide {
         this.memoryCache = memoryCache;
 
         dataLoadProviderFactory = new DataLoadProviderFactory();
-        dataLoadProviderFactory.register(InputStream.class, Bitmap.class, new StreamBitmapDataLoadProvider(bitmapPool));
 
+        dataLoadProviderFactory.register(InputStream.class, Bitmap.class, new StreamBitmapDataLoadProvider(bitmapPool));
         dataLoadProviderFactory.register(ParcelFileDescriptor.class, Bitmap.class,
                 new FileDescriptorBitmapDataLoadProvider(bitmapPool));
 
@@ -172,6 +174,8 @@ public class Glide {
         dataLoadProviderFactory.register(ImageVideoWrapper.class, Bitmap.class, imageVideoDataLoadProvider);
 
         GifDataLoadProvider gifDataLoadProvider = new GifDataLoadProvider(context, bitmapPool);
+        dataLoadProviderFactory.register(InputStream.class, GifData.class, gifDataLoadProvider);
+
         dataLoadProviderFactory.register(ImageVideoWrapper.class, GifBitmapWrapper.class,
                 new ImageVideoGifDataLoadProvider(imageVideoDataLoadProvider, gifDataLoadProvider));
 
@@ -191,6 +195,7 @@ public class Glide {
         transcoderFactory.register(GifBitmapWrapper.class, Drawable.class,
                 new GifBitmapWrapperDrawableTranscoder(new BitmapDrawableTranscoder(context.getResources(), bitmapPool),
                         new GifDataDrawableTranscoder()));
+        transcoderFactory.register(GifData.class, GifDrawable.class, new GifDataDrawableTranscoder());
     }
 
     public BitmapPool getBitmapPool() {

@@ -31,6 +31,7 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
@@ -500,7 +501,31 @@ public class GlideTest {
     }
 
     @Test
-    public void testReceivesBytes() {
+    public void testReceivesGif() {
+        String fakeUri = "content://fake";
+        mockUri(fakeUri);
+        Glide.with(getContext())
+                .load(fakeUri)
+                .asGif()
+                .into(target);
+        verify(target).onResourceReady(any(GifDrawable.class));
+    }
+
+    @Test
+    public void testReceivesGifBytes() {
+        String fakeUri = "content://fake";
+        mockUri(fakeUri);
+        Glide.with(getContext())
+                .load(fakeUri)
+                .asGif()
+                .toBytes()
+                .into(target);
+
+        verify(target).onResourceReady(any(byte[].class));
+    }
+
+    @Test
+    public void testReceivesBitmapBytes() {
         String fakeUri = "content://fake";
         mockUri(fakeUri);
         Glide.with(getContext())
