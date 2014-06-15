@@ -5,6 +5,7 @@ import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -68,7 +68,7 @@ public class ImageVideoBitmapDecoderTest {
 
     @Test
     public void testReturnsValidId() {
-        assertNotNull(harness.decoder.getId());
+        Util.assertClassHasValidId(ImageVideoBitmapDecoder.class, harness.decoder.getId());
     }
 
     @Test
@@ -80,6 +80,11 @@ public class ImageVideoBitmapDecoderTest {
 
         assertEquals(harness.result, harness.decoder.decode(harness.wrapper, 100, 100));
         verify(harness.streamDecoder, never()).decode(any(InputStream.class), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testHasValidId() {
+        Util.assertClassHasValidId(ImageVideoBitmapDecoder.class, harness.decoder.getId());
     }
 
     @SuppressWarnings("unchecked")

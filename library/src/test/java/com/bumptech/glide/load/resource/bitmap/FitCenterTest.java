@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +56,11 @@ public class FitCenterTest {
         harness.fitCenter.transform(harness.resource, 50, 50);
 
         verify(harness.resource, never()).recycle();
+    }
+
+    @Test
+    public void testHasValidId() {
+        Util.assertClassHasValidId(FitCenter.class, harness.fitCenter.getId());
     }
 
 

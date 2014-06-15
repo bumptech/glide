@@ -2,8 +2,9 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -41,6 +43,16 @@ public class StreamBitmapDecoderTest {
         assertNull(harness.decode());
     }
 
+    @Test
+    public void testHasValidId() {
+        String downsamplerId = "downsamplerId";
+        when(harness.downsampler.getId()).thenReturn(downsamplerId);
+
+        String actualId = harness.decoder.getId();
+        assertTrue(actualId.contains(downsamplerId));
+        assertTrue(actualId.contains(harness.decodeFormat.toString()));
+        assertTrue(actualId.contains(Util.getExpectedClassId(StreamBitmapDecoder.class)));
+    }
 
     private static class DecoderHarness {
         Downsampler downsampler = mock(Downsampler.class);

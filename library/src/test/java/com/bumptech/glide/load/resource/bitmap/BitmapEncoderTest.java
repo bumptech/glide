@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,6 +79,12 @@ public class BitmapEncoderTest {
     public void testReturnsTrueFromWrite() {
         BitmapEncoder encoder = new BitmapEncoder(harness.compressFormat, harness.quality);
         assertTrue(encoder.encode(harness.resource, harness.os));
+    }
+
+    @Test
+    public void testReturnsValidId() {
+        Util.assertClassHasValidId(BitmapEncoder.class,
+                new BitmapEncoder(harness.compressFormat, harness.quality).getId());
     }
 
     private static void assertContains(String string, String expected) {

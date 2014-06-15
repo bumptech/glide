@@ -3,13 +3,13 @@ package com.bumptech.glide.load.resource.transcode;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +34,7 @@ public class GifDataDrawableTranscoderTest {
     }
 
     @Test
-    public void testReturnsNonNullId() {
-        assertNotNull(transcoder.getId());
+    public void testReturnsValidId() {
+        Util.assertClassHasValidId(GifDataDrawableTranscoder.class, transcoder.getId());
     }
 }

@@ -40,6 +40,6 @@ public class CenterCrop implements Transformation<Bitmap> {
 
     @Override
     public String getId() {
-        return "CenterCrop.com.bumptech.glide.load.Transformation";
+        return "CenterCrop.com.bumptech.glide.load.resource.bitmap";
     }
 }

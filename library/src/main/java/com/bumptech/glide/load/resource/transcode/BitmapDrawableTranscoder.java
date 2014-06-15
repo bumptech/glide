@@ -24,6 +24,6 @@ public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, Bitm
 
     @Override
     public String getId() {
-        return "BitmapDrawableTranscoder.com.bumptech.glide.load.data.transcode";
+        return "BitmapDrawableTranscoder.com.bumptech.glide.load.resource.transcode";
     }
 }

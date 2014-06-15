@@ -13,6 +13,6 @@ public class GifDataDrawableTranscoder implements ResourceTranscoder<GifData, Gi
 
     @Override
     public String getId() {
-        return "GifDataDrawableTranscoder.com.bumotech.glide.load.resource.transcode";
+        return "GifDataDrawableTranscoder.com.bumptech.glide.load.resource.transcode";
     }
 }

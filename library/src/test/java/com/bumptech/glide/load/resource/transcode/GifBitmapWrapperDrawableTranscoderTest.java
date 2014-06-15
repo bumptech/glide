@@ -5,13 +5,13 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -46,8 +46,8 @@ public class GifBitmapWrapperDrawableTranscoderTest {
     }
 
     @Test
-    public void testHasNonNullId() {
-        assertNotNull(transcoder.getId());
+    public void testHasValid() {
+        Util.assertClassHasValidId(GifBitmapWrapperDrawableTranscoder.class, transcoder.getId());
     }
 
     private static class TranscoderHarness {

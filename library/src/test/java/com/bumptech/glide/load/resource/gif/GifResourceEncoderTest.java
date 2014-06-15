@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
 import com.bumptech.glide.Resource;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,4 +61,10 @@ public class GifResourceEncoderTest {
 
         assertFalse(encoder.encode(resource, os));
     }
+
+    @Test
+    public void testHasValidId() {
+        Util.assertClassHasValidId(GifResourceEncoder.class, encoder.getId());
+    }
+
 }

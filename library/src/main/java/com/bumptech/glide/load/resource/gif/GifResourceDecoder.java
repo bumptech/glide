@@ -40,7 +40,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
 
     @Override
     public String getId() {
-        return "GifResourceDecoder.com.bumptech.glide.load.gif";
+        return "GifResourceDecoder.com.bumptech.glide.load.resource.gif";
     }
 
     private String getGifId(byte[] data) {

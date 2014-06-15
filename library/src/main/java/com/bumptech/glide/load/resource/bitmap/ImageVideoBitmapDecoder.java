@@ -43,6 +43,6 @@ public class ImageVideoBitmapDecoder implements ResourceDecoder<ImageVideoWrappe
 
     @Override
     public String getId() {
-        return "ImageVideoBitmapDecoder.com.bumptech.glide.load.data.bitmap";
+        return "ImageVideoBitmapDecoder.com.bumptech.glide.load.resource.bitmap";
     }
 }

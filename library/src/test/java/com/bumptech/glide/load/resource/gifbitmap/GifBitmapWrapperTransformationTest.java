@@ -59,7 +59,7 @@ public class GifBitmapWrapperTransformationTest {
     }
 
     @Test
-    public void testReturnsWrappedTransformationId() {
+    public void testHasValidId() {
         String expectedId = "asdfas";
         when(bitmapTransformation.getId()).thenReturn(expectedId);
 

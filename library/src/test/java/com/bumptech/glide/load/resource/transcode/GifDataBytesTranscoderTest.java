@@ -2,12 +2,12 @@ package com.bumptech.glide.load.resource.transcode;
 
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,8 +40,6 @@ public class GifDataBytesTranscoderTest {
 
     @Test
     public void testReturnsValidId() {
-        String expectedId = GifDataBytesTranscoder.class.getSimpleName() + "."
-                + GifDataBytesTranscoder.class.getPackage().getName();
-        assertEquals(expectedId, transcoder.getId());
+        Util.assertClassHasValidId(GifDataBytesTranscoder.class, transcoder.getId());
     }
 }

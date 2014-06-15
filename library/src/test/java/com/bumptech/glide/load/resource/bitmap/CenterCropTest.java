@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,6 +68,11 @@ public class CenterCropTest {
         harness.centerCrop.transform(harness.resource, 50, 50);
 
         verify(harness.resource, never()).recycle();
+    }
+
+    @Test
+    public void testHasValidId() {
+        Util.assertClassHasValidId(CenterCrop.class, harness.centerCrop.getId());
     }
 
     private static class CenterCropHarness {

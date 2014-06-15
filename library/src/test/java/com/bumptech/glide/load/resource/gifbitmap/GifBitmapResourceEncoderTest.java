@@ -4,8 +4,6 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.resource.gif.GifData;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperResourceEncoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +13,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -89,7 +86,13 @@ public class GifBitmapResourceEncoderTest {
     }
 
     @Test
-    public void testReturnsNonNullId() {
-        assertNotNull(encoder.getId());
+    public void testReturnsValidId() {
+        String gifId = "gifId";
+        when(gifEncoder.getId()).thenReturn(gifId);
+        String bitmapId = "bitmapId";
+        when(bitmapEncoder.getId()).thenReturn(bitmapId);
+        String id = encoder.getId();
+        assertTrue(id.contains(gifId));
+        assertTrue(id.contains(bitmapId));
     }
 }

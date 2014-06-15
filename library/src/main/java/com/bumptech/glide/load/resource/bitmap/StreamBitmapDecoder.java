@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 //TODO(actually fill out this stub)
 public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap> {
-    private static final String ID = "StreamBitmapDecoder.com.bumptech.glide.load.data.bitmap";
+    private static final String ID = "StreamBitmapDecoder.com.bumptech.glide.load.resource.bitmap";
     private final Downsampler downsampler;
     private BitmapPool bitmapPool;
     private DecodeFormat decodeFormat;
