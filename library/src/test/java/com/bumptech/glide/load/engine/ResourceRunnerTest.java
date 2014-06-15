@@ -4,8 +4,9 @@ import android.os.Handler;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,14 +87,27 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testTranscoderIsCalledIfCacheDecodeSucceeds() throws IOException {
+    public void testTransformationIsCalledIfCacheDecodeSucceeds() throws IOException {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
 
         harness.runner.run();
 
-        verify(harness.transcoder).transcode(eq(harness.decoded));
+        verify(harness.tranformation).transform(eq(harness.decoded), eq(harness.width), eq(harness.height));
+    }
+
+    @Test
+    public void testTranscoderIsCalledIfCacheDecodeSucceeds() throws IOException {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
+                .thenReturn(harness.transformed);
+
+        harness.runner.run();
+
+        verify(harness.transcoder).transcode(eq(harness.transformed));
     }
 
     @Test
@@ -101,7 +115,10 @@ public class ResourceRunnerTest {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
-        when(harness.transcoder.transcode(eq(harness.decoded))).thenReturn(harness.transcoded);
+        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
+                .thenReturn(harness.transformed);
+        when(harness.transcoder
+                .transcode(eq(harness.transformed))).thenReturn(harness.transcoded);
 
         harness.runner.run();
 
@@ -113,12 +130,15 @@ public class ResourceRunnerTest {
         InputStream is = new ByteArrayInputStream(new byte[0]);
         when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
         when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
-        when(harness.transcoder.transcode(eq(harness.decoded))).thenReturn(harness.transcoded);
+        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
+                .thenReturn(harness.transformed);
+        when(harness.transcoder
+                .transcode(eq(harness.transformed))).thenReturn(harness.transcoded);
 
         harness.runner.run();
 
-        verify(harness.decoded, never()).recycle();
-        verify(harness.decoded, never()).release();
+        verify(harness.transformed, never()).recycle();
+        verify(harness.transformed, never()).release();
     }
 
     @Test
@@ -211,6 +231,32 @@ public class ResourceRunnerTest {
         verify(harness.sourceFuture).cancel(anyBoolean());
     }
 
+    @Test
+    public void testDecodedResourceIsRecycledIfTransformedResourceIsDifferent() throws IOException {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
+                .thenReturn(harness.transformed);
+
+        harness.runner.run();
+
+        verify(harness.decoded).recycle();
+    }
+
+    @Test
+    public void testDecodedResourceIsNotRecycledIfTransformedResourceIsDecodedResource() throws IOException {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        when(harness.diskCache.get(eq(harness.key))).thenReturn(is);
+        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
+                .thenReturn(harness.decoded);
+
+        harness.runner.run();
+
+        verify(harness.decoded, never()).recycle();
+    }
+
     @SuppressWarnings("unchecked")
     private static class ResourceRunnerHarness {
         Key key = mock(Key.class);
@@ -221,13 +267,15 @@ public class ResourceRunnerTest {
         ExecutorService service = mock(ExecutorService.class);
         EngineJob engineJob = mock(EngineJob.class);
         Handler bgHandler = mock(Handler.class);
+        Transformation<Object> tranformation = mock(Transformation.class);
         int width = 100;
         int height = 100;
         ResourceRunner<Object, Object> runner = new ResourceRunner(key, width, height, diskCache, decoder,
-                transcoder, sourceRunner, service, bgHandler, engineJob);
+                tranformation, transcoder, sourceRunner, service, bgHandler, engineJob);
         Future future = mock(Future.class);
         Future sourceFuture = mock(Future.class);
         Resource<Object> decoded = mock(Resource.class);
+        Resource<Object> transformed = mock(Resource.class);
         Resource<Object> transcoded = mock(Resource.class);
 
         public ResourceRunnerHarness() {

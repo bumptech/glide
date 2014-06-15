@@ -6,8 +6,9 @@ import android.util.Log;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,7 @@ public class ResourceRunner<Z, R> implements Runnable {
     private static final String TAG = "ResourceRunner";
 
     private final Key key;
+    private Transformation<Z> transformation;
     private ResourceTranscoder<Z, R> transcoder;
     private final SourceResourceRunner sourceRunner;
     private final ExecutorService executorService;
@@ -36,13 +38,15 @@ public class ResourceRunner<Z, R> implements Runnable {
     private volatile boolean isCancelled;
 
     public ResourceRunner(Key key, int width, int height, DiskCache diskCache,
-            ResourceDecoder<InputStream, Z> cacheDecoder, ResourceTranscoder<Z, R> transcoder,
-            SourceResourceRunner sourceRunner, ExecutorService executorService, Handler bgHandler, EngineJob job) {
+            ResourceDecoder<InputStream, Z> cacheDecoder, Transformation<Z> transformation,
+            ResourceTranscoder<Z, R> transcoder, SourceResourceRunner sourceRunner, ExecutorService executorService,
+            Handler bgHandler, EngineJob job) {
         this.key = key;
         this.width = width;
         this.height = height;
         this.diskCache = diskCache;
         this.cacheDecoder = cacheDecoder;
+        this.transformation = transformation;
         this.transcoder = transcoder;
         this.sourceRunner = sourceRunner;
         this.executorService = executorService;
@@ -79,7 +83,11 @@ public class ResourceRunner<Z, R> implements Runnable {
             Log.v(TAG, "loaded from disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
         }
         if (fromCache != null) {
-            Resource<R> transcoded = transcoder.transcode(fromCache);
+            Resource<Z> transformed = transformation.transform(fromCache, width, height);
+            if (transformed != fromCache) {
+                fromCache.recycle();
+            }
+            Resource<R> transcoded = transcoder.transcode(transformed);
             job.onResourceReady(transcoded);
         } else {
             future = executorService.submit(sourceRunner);
