@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.Resource;
-import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
+import com.bumptech.glide.gifdecoder.GifDecoder;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class GifFrameResourceDecoderTest {
     @Before
     public void setUp() {
         gifDecoder = mock(GifDecoder.class);
-        resourceDecoder = new GifFrameResourceDecoder();
+        resourceDecoder = new GifFrameResourceDecoder(mock(BitmapPool.class));
     }
 
     @Test
@@ -33,9 +33,9 @@ public class GifFrameResourceDecoderTest {
 
     @Test
     public void testReturnsFrameFromGifDecoder() throws IOException {
-        Resource<Bitmap> resource = mock(Resource.class);
-        when(gifDecoder.getNextFrame()).thenReturn(resource);
+        Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+        when(gifDecoder.getNextFrame()).thenReturn(expected);
 
-        assertEquals(resource, resourceDecoder.decode(gifDecoder, 100, 100));
+        assertEquals(expected, resourceDecoder.decode(gifDecoder, 100, 100).get());
     }
 }

@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.resource.gif;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
 
 public class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
 

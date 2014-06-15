@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
+import com.bumptech.glide.gifdecoder.GifDecoder;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -7,7 +7,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
+import com.bumptech.glide.gifdecoder.GifDecoder;
 
 public class GifDrawable extends Drawable implements Animatable, GifFrameManager.FrameCallback {
 

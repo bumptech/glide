@@ -61,6 +61,11 @@
       <version>1.9.5</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.bumptech.glide</groupId>
+      <artifactId>glide-gif-decoder</artifactId>
+      <version>3.3.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

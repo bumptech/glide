@@ -3,10 +3,10 @@ package com.bumptech.glide.load.resource.gif;
 import android.content.Context;
 import android.util.Log;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.gifdecoder.GifHeader;
+import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.gif.decoder.GifHeader;
-import com.bumptech.glide.load.resource.gif.decoder.GifHeaderParser;
 import com.bumptech.glide.util.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -71,5 +71,4 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
         }
         return buffer.toByteArray();
     }
-
 }

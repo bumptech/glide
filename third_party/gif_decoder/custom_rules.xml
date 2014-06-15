@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="glide-rules" default="help">
+    <xmlproperty file="AndroidManifest.xml" prefix="mymanifest" collapseAttributes="true"/>
+
+    <target name="jar" depends="-compile">
+        <jar destfile="bin/gifdecoder-${mymanifest.manifest.android:versionName}.jar"
+            basedir="bin/classes" >
+        </jar>
+    </target>
+</project>

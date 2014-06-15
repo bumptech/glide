@@ -3,4 +3,5 @@ tests/local.properties
 tests/gen/**/*
 tests/bin
 libs/volley.jar
+libs/gifdecoder*.jar
 

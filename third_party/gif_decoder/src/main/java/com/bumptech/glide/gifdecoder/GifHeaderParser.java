@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.gif.decoder;
+package com.bumptech.glide.gifdecoder;
 
 import android.util.Log;
 
@@ -6,7 +6,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import static com.bumptech.glide.load.resource.gif.decoder.GifDecoder.STATUS_FORMAT_ERROR;
+import static com.bumptech.glide.gifdecoder.GifDecoder.STATUS_FORMAT_ERROR;
 
 public class GifHeaderParser {
     public static final String TAG = "GifHeaderParser";

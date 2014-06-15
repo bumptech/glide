@@ -3,37 +3,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <groupId>com.bumptech.glide</groupId>
+    <artifactId>glide-third-party</artifactId>
+    <version>3.3.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.bumptech.glide</groupId>
-  <artifactId>glide-parent</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-
-  <name>Glide (Parent)</name>
-  
-  <modules>
-    <module>library</module>
-    <module>third_party</module>
-    <module>samples</module>
-  </modules>
-
-  <dependencies>
-    <dependency>
-      <groupId>android</groupId>
-      <artifactId>android</artifactId>
-      <version>4.4.2_r3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.mcxiaoke.volley</groupId>
-      <artifactId>library</artifactId>
-      <version>1.0.4</version>
-    </dependency>
-  </dependencies>
+  <artifactId>glide-gif-decoder</artifactId>
+  <packaging>apk</packaging>
+  <name>Glide Gif Decoder</name>
 
   <build>
     <plugins>

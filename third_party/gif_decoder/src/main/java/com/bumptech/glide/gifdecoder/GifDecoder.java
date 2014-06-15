@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.gif.decoder;
+package com.bumptech.glide.gifdecoder;
 
 
 /**
@@ -26,9 +26,6 @@ package com.bumptech.glide.load.resource.gif.decoder;
 
 import android.graphics.Bitmap;
 import android.util.Log;
-import com.bumptech.glide.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -106,14 +103,18 @@ public class GifDecoder {
     private int[] mainScratch;
 
     private int framePointer = -1;
-    private BitmapPool bitmapPool;
     private Bitmap currentImage;
     private byte[] data;
     private GifHeader header;
     private String id;
+    private BitmapProvider bitmapProvider;
 
-    public GifDecoder(BitmapPool bitmapPool) {
-        this.bitmapPool = bitmapPool;
+    public interface BitmapProvider {
+        public Bitmap obtain(int width, int height, Bitmap.Config config);
+    }
+
+    public GifDecoder(BitmapProvider provider) {
+        this.bitmapProvider = provider;
         header = new GifHeader();
     }
 
@@ -210,7 +211,7 @@ public class GifDecoder {
      *
      * @return Bitmap representation of frame
      */
-    public Resource<Bitmap> getNextFrame() {
+    public Bitmap getNextFrame() {
         if (header.frameCount <= 0 || framePointer < 0 ) {
             return null;
         }
@@ -246,7 +247,7 @@ public class GifDecoder {
             act[frame.transIndex] = save;
         }
 
-        return new BitmapResource(result, bitmapPool);
+        return result;
     }
 
     /**
@@ -581,7 +582,7 @@ public class GifDecoder {
 
     private Bitmap getNextBitmap() {
         Bitmap.Config targetConfig = header.isTransparent ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-        Bitmap result = bitmapPool.get(header.width, header.height, targetConfig);
+        Bitmap result = bitmapProvider.obtain(header.width, header.height, targetConfig);
         if (result == null) {
             result = Bitmap.createBitmap(header.width, header.height, targetConfig);
         }

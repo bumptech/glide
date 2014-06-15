@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.gif.decoder;
+package com.bumptech.glide.gifdecoder;
 
 /**
  * Inner model class housing metadata for each frame

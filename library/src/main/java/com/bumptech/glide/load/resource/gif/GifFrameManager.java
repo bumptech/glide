@@ -6,15 +6,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.resource.NullCacheDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
-import com.bumptech.glide.load.resource.gif.decoder.GifDecoder;
 import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.io.InputStream;
@@ -44,10 +45,11 @@ class GifFrameManager {
 
     public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation, int targetWidth,
             int targetHeight) {
-        this(context, decoder, new Handler(Looper.getMainLooper()), transformation, targetWidth, targetHeight);
+        this(context, Glide.get(context).getBitmapPool(), decoder, new Handler(Looper.getMainLooper()), transformation,
+                targetWidth, targetHeight);
     }
 
-    public GifFrameManager(Context context, GifDecoder decoder, Handler mainHandler,
+    public GifFrameManager(Context context, BitmapPool bitmapPool, GifDecoder decoder, Handler mainHandler,
             Transformation<Bitmap> transformation, int targetWidth, int targetHeight) {
         this.context = context;
         this.decoder = decoder;
@@ -57,7 +59,7 @@ class GifFrameManager {
         this.targetHeight = targetHeight;
         calculator = new MemorySizeCalculator(context);
         frameLoader = new GifFrameModelLoader();
-        frameResourceDecoder = new GifFrameResourceDecoder();
+        frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
 
         if (!decoder.isTransparent()) {
             // For non transparent gifs, we can beat the performance of our gif decoder for each frame by decoding jpegs
