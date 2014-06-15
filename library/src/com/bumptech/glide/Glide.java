@@ -480,9 +480,6 @@ public class Glide {
         }
 
         private Request(T model, ModelLoaderFactory<T> factory) {
-             if (model == null ) {
-                throw new IllegalArgumentException("Model can't be null");
-            }
             this.model = model;
 
             if (factory == null) {
@@ -823,7 +820,7 @@ public class Glide {
         private final Class requestListenerClass;
 
         public Metadata(Request request) {
-            modelClass = request.model.getClass();
+            modelClass = request.model != null ? request.model.getClass() : null;
             modelLoaderClass = request.modelLoaderFactory.loaderClass();
             downsamplerId = request.downsampler.getId();
             transformationId = request.getFinalTransformationId();
@@ -836,16 +833,34 @@ public class Glide {
 
         //we don't want to change behavior in sets/maps, just be able to compare properties
         public boolean isIdenticalTo(Metadata metadata) {
-            if (metadata == null) return false;
-            if (animationId != metadata.animationId) return false;
-            if (errorId != metadata.errorId) return false;
-            if (placeholderId != metadata.placeholderId) return false;
-            if (!downsamplerId.equals(metadata.downsamplerId)) return false;
-            if (!modelClass.equals(metadata.modelClass)) return false;
-            if (!modelLoaderClass.equals(metadata.modelLoaderClass)) return false;
-            if (!transformationId.equals(metadata.transformationId)) return false;
+            if (metadata == null) {
+                return false;
+            }
+            if (animationId != metadata.animationId) {
+                return false;
+            }
+            if (errorId != metadata.errorId) {
+                return false;
+            }
+            if (placeholderId != metadata.placeholderId) {
+                return false;
+            }
+            if (!downsamplerId.equals(metadata.downsamplerId)) {
+                return false;
+            }
+            if (modelClass != null ? !modelClass.equals(metadata.modelClass) : metadata.modelClass != null) {
+                return false;
+            }
+            if (!modelLoaderClass.equals(metadata.modelLoaderClass)) {
+                return false;
+            }
+            if (!transformationId.equals(metadata.transformationId)) {
+                return false;
+            }
             if (requestListenerClass == null ? metadata.requestListenerClass != null :
-                    !requestListenerClass.equals(metadata.requestListenerClass)) return false;
+                    !requestListenerClass.equals(metadata.requestListenerClass)) {
+                return false;
+            }
 
             return true;
         }
