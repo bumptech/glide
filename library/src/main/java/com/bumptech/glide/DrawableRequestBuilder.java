@@ -92,7 +92,7 @@ public class DrawableRequestBuilder<ModelType> extends
     }
 
     public DrawableRequestBuilder<ModelType> bitmapTransform(Transformation<Bitmap> bitmapTransformation) {
-        return transform(new GifBitmapWrapperTransformation(context, bitmapTransformation));
+        return transform(new GifBitmapWrapperTransformation(bitmapTransformation));
     }
 
     @Override

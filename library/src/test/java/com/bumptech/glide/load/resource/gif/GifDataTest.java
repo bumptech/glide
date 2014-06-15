@@ -29,7 +29,7 @@ public class GifDataTest {
         BitmapPool bitmapPool = mock(BitmapPool.class);
         GifHeader header = mock(GifHeader.class);
         bytes = new byte[] { 'G', 'I', 'F' };
-        data = new GifData(Robolectric.application, bitmapPool, "gifId", header, bytes);
+        data = new GifData(Robolectric.application, bitmapPool, "gifId", header, bytes, 123, 456);
     }
 
     @Test

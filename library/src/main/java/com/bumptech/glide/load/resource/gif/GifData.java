@@ -16,15 +16,20 @@ public class GifData {
     private final GifHeader header;
     private final byte[] data;
     private String gifId;
+    private final int targetWidth;
+    private final int targetHeight;
     private final List<GifDrawable> drawables = new ArrayList<GifDrawable>();
     private Transformation<Bitmap> frameTransformation;
 
-    public GifData(Context context, BitmapPool bitmapPool, String gifId, GifHeader header, byte[] data) {
+    public GifData(Context context, BitmapPool bitmapPool, String gifId, GifHeader header, byte[] data,
+            int targetWidth, int targetHeight) {
         this.context = context;
         this.bitmapPool = bitmapPool;
         this.header = header;
         this.data = data;
         this.gifId = gifId;
+        this.targetWidth = targetWidth;
+        this.targetHeight = targetHeight;
     }
 
     @SuppressWarnings("unchecked")
@@ -47,7 +52,8 @@ public class GifData {
     public GifDrawable getDrawable() {
         GifDecoder gifDecoder = new GifDecoder(bitmapPool);
         gifDecoder.setData(gifId, header, data);
-        GifFrameManager frameManager = new GifFrameManager(context, gifDecoder, getFrameTransformation());
+        GifFrameManager frameManager = new GifFrameManager(context, gifDecoder, getFrameTransformation(),
+                targetWidth, targetHeight);
 
         GifDrawable result = new GifDrawable(gifDecoder, frameManager);
         drawables.add(result);

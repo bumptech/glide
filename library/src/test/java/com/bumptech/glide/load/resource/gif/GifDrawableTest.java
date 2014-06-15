@@ -39,17 +39,33 @@ public class GifDrawableTest {
     }
 
     @Test
-    public void testReturnsDecoderWidth() {
+    public void testReturnsInvalidWidthBeforeFirstFrame() {
+        assertEquals(-1, drawable.getIntrinsicWidth());
+    }
+
+    @Test
+    public void testReturnsInvalidHeightBeforeFirstFrame() {
+        assertEquals(-1, drawable.getIntrinsicHeight());
+    }
+
+    @Test
+    public void testReturnsFrameWidthAfterFirstFrame() {
         int width = 123;
-        when(gifDecoder.getWidth()).thenReturn(width);
+        Bitmap bitmap = Bitmap.createBitmap(width, 1231, Bitmap.Config.ARGB_8888);
+
+        drawable.setIsRunning(true);
+        drawable.onFrameRead(bitmap);
 
         assertEquals(width, drawable.getIntrinsicWidth());
     }
 
     @Test
-    public void testReturnsDecoderHeight() {
-        int height = 321;
-        when(gifDecoder.getHeight()).thenReturn(height);
+    public void testReturnsFrameHeightAfterFirstFrame() {
+        int height = 456;
+        Bitmap bitmap = Bitmap.createBitmap(1, height, Bitmap.Config.RGB_565);
+
+        drawable.setIsRunning(true);
+        drawable.onFrameRead(bitmap);
 
         assertEquals(height, drawable.getIntrinsicHeight());
     }

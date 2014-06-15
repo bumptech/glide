@@ -32,23 +32,29 @@ class GifFrameManager {
     private final Context context;
 
     private Transformation<Bitmap> transformation;
+    private final int targetWidth;
+    private final int targetHeight;
     private DelayTarget current;
     private DelayTarget next;
+    private int frameSize = -1;
 
     public interface FrameCallback {
         public void onFrameRead(Bitmap frame);
     }
 
-    public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation) {
-        this(context, decoder, new Handler(Looper.getMainLooper()), transformation);
+    public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation, int targetWidth,
+            int targetHeight) {
+        this(context, decoder, new Handler(Looper.getMainLooper()), transformation, targetWidth, targetHeight);
     }
 
     public GifFrameManager(Context context, GifDecoder decoder, Handler mainHandler,
-            Transformation<Bitmap> transformation) {
+            Transformation<Bitmap> transformation, int targetWidth, int targetHeight) {
         this.context = context;
         this.decoder = decoder;
         this.mainHandler = mainHandler;
         this.transformation = transformation;
+        this.targetWidth = targetWidth;
+        this.targetHeight = targetHeight;
         calculator = new MemorySizeCalculator(context);
         frameLoader = new GifFrameModelLoader();
         frameResourceDecoder = new GifFrameResourceDecoder();
@@ -70,14 +76,22 @@ class GifFrameManager {
         return transformation;
     }
 
+    private int getEstimatedTotalFrameSize() {
+        if (frameSize == -1) {
+            return decoder.getDecodedFramesByteSizeSum();
+        } else {
+            return frameSize * decoder.getFrameCount();
+        }
+    }
+
     public void getNextFrame(FrameCallback cb) {
         decoder.advance();
         // We don't want to blow out the entire memory cache with frames of gifs, so try to set some
         // maximum size beyond which we will always just decode one frame at a time.
-        boolean skipCache = decoder.getDecodedFramesByteSizeSum() > calculator.getMemoryCacheSize() / 2;
+        boolean skipCache = getEstimatedTotalFrameSize() > calculator.getMemoryCacheSize() / 2;
 
         long targetTime = SystemClock.uptimeMillis() + (Math.min(MIN_FRAME_DELAY, decoder.getNextDelay()));
-        next = new DelayTarget(decoder, cb, targetTime, mainHandler);
+        next = new DelayTarget(cb, targetTime);
 
         Glide.with(context)
                 .using(frameLoader, GifDecoder.class)
@@ -105,18 +119,18 @@ class GifFrameManager {
     class DelayTarget extends SimpleTarget<Bitmap> implements Runnable {
         private FrameCallback cb;
         private long targetTime;
-        private Handler mainHandler;
         private Bitmap resource;
 
-        public DelayTarget(GifDecoder decoder, FrameCallback cb, long targetTime, Handler mainHandler) {
-            super(decoder.getWidth(), decoder.getHeight());
+        public DelayTarget(FrameCallback cb, long targetTime) {
+            super(targetWidth, targetHeight);
             this.cb = cb;
             this.targetTime = targetTime;
-            this.mainHandler = mainHandler;
         }
 
         @Override
         public void onResourceReady(final Bitmap resource) {
+            // Ignore allocationByteSize, we only want the minimum frame size.
+            frameSize = resource.getHeight() * resource.getRowBytes();
             this.resource = resource;
             mainHandler.postAtTime(this, targetTime);
             if (current != null) {

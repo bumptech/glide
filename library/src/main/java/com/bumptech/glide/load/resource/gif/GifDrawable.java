@@ -13,6 +13,8 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
     private final Paint paint;
     private final GifFrameManager frameManager;
+    private int width;
+    private int height;
     private GifDecoder decoder;
     private boolean isRunning;
     private Bitmap currentFrame;
@@ -21,6 +23,8 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     public GifDrawable(GifDecoder decoder, GifFrameManager frameManager) {
         this.decoder = decoder;
         this.frameManager = frameManager;
+        width = -1;
+        height = -1;
 
         paint = new Paint();
     }
@@ -44,14 +48,15 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         return super.setVisible(visible, restart);
     }
 
+
     @Override
     public int getIntrinsicWidth() {
-        return decoder.getWidth();
+        return width;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return decoder.getHeight();
+        return height;
     }
 
     @Override
@@ -95,6 +100,12 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     public void onFrameRead(Bitmap frame) {
         if (!isRunning) {
             return;
+        }
+        if (width == -1) {
+            width = frame.getWidth();
+        }
+        if (height == -1) {
+            height = frame.getHeight();
         }
 
         if (frame != null) {

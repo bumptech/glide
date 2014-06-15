@@ -35,7 +35,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
         byte[] data = inputStreamToBytes(source);
         GifHeader header = new GifHeaderParser(data).parseHeader();
         String id = getGifId(data);
-        return new GifDataResource(new GifData(context, bitmapPool, id, header, data));
+        return new GifDataResource(new GifData(context, bitmapPool, id, header, data, width, height));
     }
 
     @Override

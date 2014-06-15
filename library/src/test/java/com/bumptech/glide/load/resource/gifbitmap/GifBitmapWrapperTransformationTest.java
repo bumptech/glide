@@ -7,11 +7,11 @@ import com.bumptech.glide.load.resource.gif.GifData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertSame;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,13 +19,43 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class GifBitmapWrapperTransformationTest {
     private Transformation<Bitmap> bitmapTransformation;
-    private GifBitmapWrapperTransformation transformation;
+    private Transformation<GifData> gifTransformation;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         bitmapTransformation = mock(Transformation.class);
-        transformation = new GifBitmapWrapperTransformation(Robolectric.application, bitmapTransformation);
+        gifTransformation = mock(Transformation.class);
+    }
+
+    private class BitmapResourceHarness {
+        Resource<Bitmap> bitmapResource = mock(Resource.class);
+        GifBitmapWrapper gifBitmapWrapper = mock(GifBitmapWrapper.class);
+        Resource<GifBitmapWrapper> resource = mock(Resource.class);
+        GifBitmapWrapperTransformation transformation = new GifBitmapWrapperTransformation(bitmapTransformation);
+        int width = 123;
+        int height = 456;
+
+        public BitmapResourceHarness() {
+            when(gifBitmapWrapper.getBitmapResource()).thenReturn(bitmapResource);
+            when(resource.get()).thenReturn(gifBitmapWrapper);
+        }
+    }
+
+    private class GifResourceHarness {
+        GifData gifData = mock(GifData.class);
+        Resource<GifData> gifResource = mock(Resource.class);
+        GifBitmapWrapper gifBitmapWrapper = mock(GifBitmapWrapper.class);
+        Resource<GifBitmapWrapper> resource = mock(Resource.class);
+        GifBitmapWrapperTransformation transformation = new GifBitmapWrapperTransformation(null, gifTransformation);
+        int width = 123;
+        int height = 456;
+
+        public GifResourceHarness() {
+            when(gifResource.get()).thenReturn(gifData);
+            when(gifBitmapWrapper.getGifResource()).thenReturn(gifResource);
+            when(resource.get()).thenReturn(gifBitmapWrapper);
+        }
     }
 
     @Test
@@ -33,51 +63,80 @@ public class GifBitmapWrapperTransformationTest {
         String expectedId = "asdfas";
         when(bitmapTransformation.getId()).thenReturn(expectedId);
 
-        assertEquals(expectedId, transformation.getId());
+        assertEquals(expectedId, new GifBitmapWrapperTransformation(bitmapTransformation).getId());
     }
 
     @Test
-    public void testAppliesTransformationToBitmapResourceAndReturnsNewGifBitmapResource() {
-        int dimens = 123;
-        Resource<Bitmap> initial = mock(Resource.class);
+    public void testAppliesBitmapTransformationIfBitmapTransformationIsGivenAndResourceHasBitmapResource() {
+        BitmapResourceHarness harness = new BitmapResourceHarness();
 
-        Resource<Bitmap> transformed = mock(Resource.class);
-        when(bitmapTransformation.transform(eq(initial), eq(dimens), eq(dimens))).thenReturn(transformed);
+        Resource<Bitmap> transformedBitmapResource = mock(Resource.class);
+        when(bitmapTransformation.transform(eq(harness.bitmapResource), eq(harness.width), eq(harness.height)))
+                .thenReturn(transformedBitmapResource);
+        Resource<GifBitmapWrapper> transformed = harness.transformation.transform(harness.resource, harness.width,
+                harness.height);
 
-        GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
-        when(gifBitmap.getBitmapResource()).thenReturn(initial);
-        Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
-        when(gifBitmapResource.get()).thenReturn(gifBitmap);
-
-        assertEquals(transformed, transformation.transform(gifBitmapResource, dimens, dimens).get()
-                .getBitmapResource());
+        assertNotSame(harness.resource, transformed);
+        assertEquals(transformedBitmapResource, transformed.get().getBitmapResource());
     }
 
     @Test
-    public void testReturnsNewGifBitmapResourceIfNoBitmapResource() {
-        GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
-        Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
-        when(gifBitmapResource.get()).thenReturn(gifBitmap);
+    public void testReturnsOriginalResourceIfTransformationDoesNotTransformGivenBitmapResource() {
+        BitmapResourceHarness harness = new BitmapResourceHarness();
 
-        GifData gifData = mock(GifData.class);
-        Resource<GifData> gifDataResource = mock(Resource.class);
-        when(gifDataResource.get()).thenReturn(gifData);
-        when(gifBitmap.getGifResource()).thenReturn(gifDataResource);
+        when(bitmapTransformation.transform(eq(harness.bitmapResource), eq(harness.width), eq(harness.height)))
+                .thenReturn(harness.bitmapResource);
+        Resource<GifBitmapWrapper> transformed = harness.transformation.transform(harness.resource, harness.width,
+                harness.height);
 
-        assertNotSame(gifBitmapResource, transformation.transform(gifBitmapResource, 100, 100));
+        assertSame(harness.resource, transformed);
     }
 
     @Test
-    public void testReturnsGivenResourceIfWrappedTransformationDoesNotTransformBitmapResource() {
-        int dimens = 321;
-        Resource<Bitmap> initial = mock(Resource.class);
-        GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
-        when(gifBitmap.getBitmapResource()).thenReturn(initial);
-        Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
-        when(gifBitmapResource.get()).thenReturn(gifBitmap);
+    public void testReturnsOriginalResourceIfBitmapTransformationIsGivenButResourceHasNoBitmapResource() {
+        BitmapResourceHarness harness = new BitmapResourceHarness();
+        when(harness.gifBitmapWrapper.getBitmapResource()).thenReturn(null);
 
-        when(bitmapTransformation.transform(eq(initial), eq(dimens), eq(dimens))).thenReturn(initial);
+        Resource<GifBitmapWrapper> transformed = harness.transformation.transform(harness.resource, harness.width,
+                harness.height);
 
-        assertEquals(gifBitmapResource, transformation.transform(gifBitmapResource, dimens, dimens));
+        assertSame(harness.resource, transformed);
+    }
+
+    @Test
+    public void testAppliesGifTransformationIfGifTransformationGivenAndResourceHasGifResource() {
+        GifResourceHarness harness = new GifResourceHarness();
+        Resource<GifData> transformedGifResource = mock(Resource.class);
+        when(gifTransformation.transform(eq(harness.gifResource), eq(harness.width), eq(harness.height)))
+                .thenReturn(transformedGifResource);
+        Resource<GifBitmapWrapper> transformed = harness.transformation.transform(harness.resource, harness.width,
+                harness.height);
+
+        assertNotSame(harness.resource, transformed);
+        assertEquals(transformedGifResource, transformed.get().getGifResource());
+    }
+
+    @Test
+    public void testReturnsOriginalresourceIfTransformationDoesNotTransformGivenGifResource() {
+        GifResourceHarness harness = new GifResourceHarness();
+        when(gifTransformation.transform(eq(harness.gifResource), eq(harness.width), eq(harness.height)))
+                .thenReturn(harness.gifResource);
+
+        Resource<GifBitmapWrapper> transformed = harness.transformation.transform(harness.resource, harness.width,
+                harness.height);
+
+        assertSame(harness.resource, transformed);
+    }
+
+    @Test
+    public void testReturnsOriginalResourceIfGifTransformationIsGivenButResourceHasNoGifResource() {
+        GifResourceHarness harness = new GifResourceHarness();
+        when(harness.gifBitmapWrapper.getGifResource()).thenReturn(null);
+
+        Resource<GifBitmapWrapper> transformed = harness.transformation.transform(harness.resource, harness.width,
+                harness.height);
+
+        assertSame(harness.resource, transformed);
     }
 }
+
