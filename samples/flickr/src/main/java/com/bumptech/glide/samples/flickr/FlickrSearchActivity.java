@@ -53,10 +53,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
-        if (!(fragment instanceof PhotoViewer)) {
-            throw new IllegalStateException("Fragment class " + fragment.getClass() +
-                    " does not implement PhotoViewer");
-        } else {
+        if (fragment instanceof PhotoViewer) {
             PhotoViewer photoViewer = (PhotoViewer) fragment;
             photoViewer.onPhotosUpdated(currentPhotos);
             if (!photoViewers.contains(photoViewer)) {
@@ -69,14 +66,13 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
+
         setContentView(R.layout.flickr_search_activity);
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
                 .build());
-
-        Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
-
         searching = findViewById(R.id.searching);
         searchLoading = findViewById(R.id.search_loading);
         searchTerm = (TextView) findViewById(R.id.search_term);

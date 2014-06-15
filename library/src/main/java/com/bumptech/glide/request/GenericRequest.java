@@ -52,6 +52,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private boolean loadedFromMemoryCache;
     private Resource resource;
     private Engine.LoadStatus loadStatus;
+    private boolean isRunning;
 
     public GenericRequest(LoadProvider<A, T, Z, R> loadProvider, A model, Context context, Priority priority,
             Target<R> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
@@ -110,10 +111,12 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
         if (!isComplete() && !isFailed()) {
             setPlaceHolder();
+            isRunning = true;
         }
     }
 
     public void cancel() {
+        isRunning = false;
         isCancelled = true;
         if (loadStatus != null) {
             loadStatus.cancel();
@@ -129,6 +132,11 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             resource.release();
             resource = null;
         }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning;
     }
 
     @Override
@@ -200,6 +208,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
     @Override
     public void onResourceReady(Resource resource) {
+        isRunning = false;
         if (!canSetImage()) {
             resource.release();
             return;
@@ -231,10 +240,11 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
     @Override
     public void onException(Exception e) {
-//        if (Log.isLoggable(TAG, Log.DEBUG)) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "load failed", e);
-//        }
+        }
 
+        isRunning = false;
         isError = true;
         setErrorPlaceholder();
 

@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -7,6 +8,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -44,6 +47,9 @@ import com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTransc
 import com.bumptech.glide.load.resource.transcode.GifDataDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderFactory;
+import com.bumptech.glide.manager.NullRequestManager;
+import com.bumptech.glide.manager.RequestManager;
+import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.provider.DataLoadProviderFactory;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
@@ -79,6 +85,7 @@ public class Glide {
     private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     private final TranscoderFactory transcoderFactory = new TranscoderFactory();
     private final DataLoadProviderFactory dataLoadProviderFactory;
+    private final NullRequestManager requestManager = new NullRequestManager();
 
     /**
      * Try to get the external cache directory if available and default to the internal. Use a default name for the
@@ -438,7 +445,29 @@ public class Glide {
      * @return A model request to pass in the object representing the image to be loaded.
      */
     public static ModelRequest with(Context context) {
-        return new ModelRequest(context, Glide.get(context));
+        return new ModelRequest(context, Glide.get(context), Glide.get(context).requestManager);
+    }
+
+    public static ModelRequest with(Activity activity) {
+        RequestManager requestManager = RequestManagerRetriever.get(activity);
+        return new ModelRequest(activity, Glide.get(activity), requestManager);
+    }
+
+    public static ModelRequest with(FragmentActivity activity) {
+        RequestManager requestManager = RequestManagerRetriever.get(activity);
+        return new ModelRequest(activity, Glide.get(activity), requestManager);
+    }
+
+    public static ModelRequest with(android.app.Fragment fragment) {
+        RequestManager requestManager = RequestManagerRetriever.get(fragment);
+        Context context = fragment.getActivity();
+        return new ModelRequest(context, Glide.get(context), requestManager);
+    }
+
+    public static ModelRequest with(Fragment fragment) {
+        RequestManager requestManager = RequestManagerRetriever.get(fragment);
+        Context context = fragment.getActivity();
+        return new ModelRequest(context, Glide.get(context), requestManager);
     }
 
     private static class ClearTarget extends ViewTarget<View, Object> {

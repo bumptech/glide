@@ -18,7 +18,6 @@
       <groupId>android.support</groupId>
       <artifactId>compatibility-v4</artifactId>
       <version>19.1.0</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.roboguice</groupId>

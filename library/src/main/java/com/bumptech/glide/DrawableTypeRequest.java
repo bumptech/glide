@@ -8,6 +8,7 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.FixedLoadProvider;
 
 import java.io.InputStream;
@@ -17,6 +18,7 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
     private final ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Context context;
     private final Glide glide;
+    private RequestManager requestManager;
     private final A model;
 
     private static <A, Z, R> FixedLoadProvider<A, ImageVideoWrapper, Z, R> buildProvider(Glide glide,
@@ -33,22 +35,26 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
 
 
     DrawableTypeRequest(A model, ModelLoader<A, InputStream> streamModelLoader,
-            ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide) {
+            ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide,
+            RequestManager requestManager) {
         super(context, model,
-                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class, Drawable.class,
-                        null), glide);
+                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class,
+                        Drawable.class, null),
+                glide, requestManager);
         this.model = model;
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
         this.context = context;
         this.glide = glide;
+        this.requestManager = requestManager;
     }
 
     public BitmapTypeRequest<A> asBitmap() {
-        return new BitmapTypeRequest<A>(context, model, streamModelLoader, fileDescriptorModelLoader, glide);
+        return new BitmapTypeRequest<A>(context, model, streamModelLoader, fileDescriptorModelLoader, glide,
+                requestManager);
     }
 
     public GifTypeRequest<A> asGif() {
-        return new GifTypeRequest<A>(context, model, streamModelLoader, glide);
+        return new GifTypeRequest<A>(context, model, streamModelLoader, glide, requestManager);
     }
 }

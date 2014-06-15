@@ -19,6 +19,11 @@ public interface Request {
     public void clear();
 
     /**
+     * Returns true if this request is running and has not completed or failed.
+     */
+    public boolean isRunning();
+
+    /**
      * Returns true if the request has successfully completed.
      */
     public boolean isComplete();

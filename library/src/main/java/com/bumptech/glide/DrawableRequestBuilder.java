@@ -13,6 +13,7 @@ import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 
@@ -20,13 +21,12 @@ import java.io.InputStream;
 
 public class DrawableRequestBuilder<ModelType> extends
         GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> {
-    private final Context context;
     private final Glide glide;
 
     DrawableRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> loadProvider, Glide glide) {
-        super(context, model, loadProvider, Drawable.class, glide);
-        this.context = context;
+            LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> loadProvider, Glide glide,
+            RequestManager requestManager) {
+        super(context, model, loadProvider, Drawable.class, glide, requestManager);
         this.glide = glide;
     }
 

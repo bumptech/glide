@@ -127,7 +127,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                 imageView = (ImageView) view;
             }
 
-            Glide.with(getActivity())
+            Glide.with(FlickrPhotoGrid.this)
                     .loadFromImage(current)
                     .animate(R.anim.fade_in)
                     .centerCrop()

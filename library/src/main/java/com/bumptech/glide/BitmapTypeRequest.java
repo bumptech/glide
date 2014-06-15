@@ -8,6 +8,7 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.FixedLoadProvider;
 
 import java.io.InputStream;
@@ -18,6 +19,7 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
     private final ModelLoader<A, InputStream> streamModelLoader;
     private ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Glide glide;
+    private RequestManager requestManager;
 
     private static <A, R> FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader,
@@ -34,22 +36,23 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
     BitmapTypeRequest(Context context, A model,
             ModelLoader<A, InputStream> streamModelLoader,
             ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader,
-            Glide glide) {
+            Glide glide, RequestManager requestManager) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, null),
                 Bitmap.class,
-                glide);
+                glide, requestManager);
         this.context = context;
         this.model = model;
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
         this.glide = glide;
+        this.requestManager = requestManager;
     }
 
     public <R> BitmapRequestBuilder<A, R> transcode(ResourceTranscoder<Bitmap, R> transcoder, Class<R> transcodeClass) {
         return new BitmapRequestBuilder<A, R>(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, transcodeClass, transcoder),
-                transcodeClass, glide);
+                transcodeClass, glide, requestManager);
     }
 
     public BitmapRequestBuilder<A, byte[]> toBytes() {

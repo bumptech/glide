@@ -30,8 +30,10 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
 
     @Override
     public void run() {
-        full.run();
-        if (!full.isComplete()) {
+        if (!full.isRunning()) {
+            full.run();
+        }
+        if (!full.isComplete() && !thumb.isRunning()) {
             thumb.run();
         }
     }
@@ -40,6 +42,11 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     public void clear() {
         full.clear();
         thumb.clear();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return full.isRunning();
     }
 
     @Override

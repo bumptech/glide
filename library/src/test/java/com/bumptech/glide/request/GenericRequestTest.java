@@ -11,10 +11,10 @@ import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.target.Target;
 import org.junit.Before;
@@ -71,6 +71,8 @@ public class GenericRequestTest {
             when(loadProvider.getSourceDecoder()).thenReturn(sourceDecoder);
             when(loadProvider.getEncoder()).thenReturn(encoder);
             when(loadProvider.getTranscoder()).thenReturn(transcoder);
+
+            when(resource.get()).thenReturn(new Object());
         }
 
         public GenericRequest<Object, Object, Object, Object> getRequest() {
@@ -320,6 +322,45 @@ public class GenericRequestTest {
         request.run();
 
         assertEquals(errorPlaceholder, target.currentPlaceholder);
+    }
+
+    @Test
+    public void testIsNotRunningBeforeRunCalled() {
+        assertFalse(harness.getRequest().isRunning());
+    }
+
+    @Test
+    public void testIsRunningAfterRunCalled() {
+        Request request = harness.getRequest();
+        request.run();
+        assertTrue(request.isRunning());
+    }
+
+    @Test
+    public void testIsNotRunningAfterComplete() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.run();
+        request.onResourceReady(harness.resource);
+
+        assertFalse(request.isRunning());
+    }
+
+    @Test
+    public void testIsNotRunningAfterFailing() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.run();
+        request.onException(new RuntimeException("Test"));
+
+        assertFalse(request.isRunning());
+    }
+
+    @Test
+    public void testIsNotRunningAfterClear() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.run();
+        request.clear();
+
+        assertFalse(request.isRunning());
     }
 
     private Context mockContextToReturn(int resourceId, Drawable drawable) {

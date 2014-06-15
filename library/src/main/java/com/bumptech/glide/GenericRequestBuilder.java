@@ -13,6 +13,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.Request;
@@ -44,6 +45,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
     private final Class<TranscodeType> transcodeClass;
     private final Glide glide;
+    private final RequestManager requestManager;
     private int animationId;
     private Animation animation;
     private int placeholderId;
@@ -61,9 +63,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
-            Class<TranscodeType> transcodeClass, Glide glide) {
+            Class<TranscodeType> transcodeClass, Glide glide, RequestManager requestManager) {
         this.transcodeClass = transcodeClass;
         this.glide = glide;
+        this.requestManager = requestManager;
         this.loadProvider = loadProvider != null ?
                 new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
         preSkipEncoder = loadProvider != null ? loadProvider.getEncoder() : null;
@@ -398,12 +401,15 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public <Y extends Target<TranscodeType>> Y into(Y target) {
         Request previous = target.getRequest();
+
         if (previous != null) {
             previous.clear();
+            requestManager.removeRequest(previous);
         }
 
         Request request = buildRequest(target);
         target.setRequest(request);
+        requestManager.addRequest(request);
         if (request != null) {
             request.run();
         }

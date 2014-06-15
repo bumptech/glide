@@ -12,6 +12,7 @@ import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 
@@ -23,8 +24,8 @@ public class GifRequestBuilder<ModelType, TranscodeType>
 
     GifRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, InputStream, GifData, TranscodeType> loadProvider,
-            Class<TranscodeType> transcodeClass, Glide glide) {
-        super(context, model, loadProvider, transcodeClass, glide);
+            Class<TranscodeType> transcodeClass, Glide glide, RequestManager requestManager) {
+        super(context, model, loadProvider, transcodeClass, glide, requestManager);
         this.glide = glide;
     }
 
