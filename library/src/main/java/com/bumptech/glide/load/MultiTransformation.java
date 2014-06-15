@@ -28,31 +28,27 @@ public class MultiTransformation<T> implements Transformation<T> {
 
     @Override
     public Resource<T> transform(Resource<T> resource, int outWidth, int outHeight) {
-        // Set current to null so we don't recycle our original bitmap. Instead rely on the caller of this method to do
-        // so.
-        Resource<T> current = null;
+        Resource<T> previous = resource;
 
         if (transformations != null) {
             for (Transformation<T> transformation : transformations) {
-                current = transform(current, transformation, outWidth, outHeight);
+                Resource<T> transformed = transformation.transform(previous, outWidth, outHeight);
+                if (transformed != previous && previous != resource && previous != null) {
+                    previous.recycle();
+                }
+                previous = transformed;
             }
         } else {
             for (Transformation<T> transformation : transformationList) {
-                current = transform(current, transformation, outWidth, outHeight);
+                 Resource<T> transformed = transformation.transform(previous, outWidth, outHeight);
+                if (transformed != previous && previous != resource && previous != null) {
+                    previous.recycle();
+                }
+                previous = transformed;
             }
 
         }
-        return current;
-    }
-
-    private Resource<T> transform(Resource<T> current, Transformation<T> transformation, int outWidth,
-            int outHeight) {
-        Resource<T> transformed = transformation.transform(current, outWidth, outHeight);
-        if (current != null && current != transformed) {
-            current.recycle();
-        }
-
-        return transformed;
+        return previous;
     }
 
     @Override
