@@ -1,0 +1,10 @@
+URL: https://android.googlesource.com/platform/frameworks/volley/+archive/527f964cc7df8e807deb21469a537a6f6800e0fb.tar.gz
+Version: 527f964cc7df8e807deb21469a537a6f6800e0fb
+License: Apache 2.0
+License File: LICENSE
+
+Description:
+A networking library for Android.
+
+Local Modifications:
+No local modifications.
