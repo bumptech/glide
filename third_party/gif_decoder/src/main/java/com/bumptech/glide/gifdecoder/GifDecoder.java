@@ -25,6 +25,7 @@ package com.bumptech.glide.gifdecoder;
  */
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -585,6 +586,9 @@ public class GifDecoder {
         Bitmap result = bitmapProvider.obtain(header.width, header.height, targetConfig);
         if (result == null) {
             result = Bitmap.createBitmap(header.width, header.height, targetConfig);
+        } else {
+            // If we're reusing a bitmap it may have other things drawn in it which we need to remove.
+            result.eraseColor(Color.TRANSPARENT);
         }
         return result;
     }
