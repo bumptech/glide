@@ -104,7 +104,6 @@ public class GifDecoder {
     private int[] mainScratch;
 
     private int framePointer = -1;
-    private Bitmap currentImage;
     private byte[] data;
     private GifHeader header;
     private String id;
@@ -241,7 +240,6 @@ public class GifDecoder {
         }
 
         Bitmap result = setPixels(framePointer); // transfer pixel data to image
-        currentImage = result;
 
         // Reset the transparent pixel in the color table
         if (frame.transparency) {
@@ -341,10 +339,11 @@ public class GifDecoder {
 
         // fill in starting image contents based on last image's dispose code
         if (previousFrame != null && previousFrame.dispose > DISPOSAL_UNSPECIFIED) {
-            if (previousFrame.dispose == DISPOSAL_NONE && currentImage != null) {
-                // Start with the current image
-                currentImage.getPixels(dest, 0, header.width, 0, 0, header.width, header.height);
-            }
+//            if (previousFrame.dispose == DISPOSAL_NONE) {
+//                We don't need to do anything for this case, mainScratch should already have the pixels of the
+//                previous image.
+//                currentImage.getPixels(dest, 0, header.width, 0, 0, header.width, header.height);
+//            }
             if (previousFrame.dispose == DISPOSAL_BACKGROUND) {
                 // Start with a canvas filled with the background color
                 int c = 0;
@@ -369,7 +368,7 @@ public class GifDecoder {
             }
         }
 
-        //Decode pixels for this frame  into the global pixels[] scratch
+        // Decode pixels for this frame  into the global pixels[] scratch
         decodeBitmapData(currentFrame, mainPixels); // decode pixel data
 
         // copy each source line to the appropriate place in the destination
