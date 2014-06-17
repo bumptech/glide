@@ -92,7 +92,7 @@ class GifFrameManager {
         // maximum size beyond which we will always just decode one frame at a time.
         boolean skipCache = getEstimatedTotalFrameSize() > calculator.getMemoryCacheSize() / 2;
 
-        long targetTime = SystemClock.uptimeMillis() + (Math.min(MIN_FRAME_DELAY, decoder.getNextDelay()));
+        long targetTime = SystemClock.uptimeMillis() + (Math.max(MIN_FRAME_DELAY, decoder.getNextDelay()));
         next = new DelayTarget(cb, targetTime);
 
         Glide.with(context)

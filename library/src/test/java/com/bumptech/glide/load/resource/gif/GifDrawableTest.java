@@ -129,11 +129,29 @@ public class GifDrawableTest {
     }
 
     @Test
-    public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfNotRunn() {
+    public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfNotRunning() {
         drawable.setIsRunning(false);
         drawable.onFrameRead(Bitmap.createBitmap(10, 100, Bitmap.Config.ARGB_8888));
 
         verify(frameManager, never()).getNextFrame(eq(drawable));
+    }
+
+    @Test
+    public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfHasNoCallback() {
+        drawable.setIsRunning(true);
+        drawable.setCallback(null);
+        drawable.onFrameRead(Bitmap.createBitmap(1, 2, Bitmap.Config.ARGB_8888));
+
+        verify(frameManager, never()).getNextFrame(eq(drawable));
+    }
+
+    @Test
+    public void testStopsWhenCurrentFrameFinishesIfHasNoCallback() {
+        drawable.setIsRunning(true);
+        drawable.setCallback(null);
+        drawable.onFrameRead(Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888));
+
+        assertFalse(drawable.isRunning());
     }
 
     @Test

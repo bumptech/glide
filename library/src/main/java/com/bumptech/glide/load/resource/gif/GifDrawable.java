@@ -98,9 +98,13 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
     @Override
     public void onFrameRead(Bitmap frame) {
-        if (!isRunning) {
+        if (getCallback() == null) {
+            stop();
+            return;
+        } if (!isRunning) {
             return;
         }
+
         if (width == -1) {
             width = frame.getWidth();
         }
