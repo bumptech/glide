@@ -21,7 +21,6 @@
         android:singleLine="true"
         android:inputType="text"
         android:imeOptions="actionSearch" />
-        <!-- android:background="@drawable/stretch_field_comments" /> -->
       <Button
         android:id="@+id/search"
         android:layout_width="wrap_content"

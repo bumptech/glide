@@ -18,12 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
+    private static final String STATE_POSITION_INDEX = "state_position_index";
+
     private static final String IMAGE_SIZE_KEY = "image_size";
     private static final String PRELOAD_KEY = "preload";
 
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
     private int photoSize;
+    private GridView grid;
 
     public static FlickrPhotoGrid newInstance(int size, int preloadCount) {
         FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
@@ -40,16 +43,31 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         photoSize = args.getInt(IMAGE_SIZE_KEY);
 
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
-        final GridView grid = (GridView) result.findViewById(R.id.images);
+        grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
         final FlickrPreloader preloader = new FlickrPreloader(getActivity(), args.getInt(PRELOAD_KEY));
         grid.setOnScrollListener(preloader);
         adapter = new PhotoAdapter();
         grid.setAdapter(adapter);
-        if (currentPhotos != null)
+        if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
+        }
+
+        if (savedInstanceState != null) {
+            int index = savedInstanceState.getInt(STATE_POSITION_INDEX);
+            grid.setSelection(index);
+        }
 
         return result;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (grid != null) {
+            int index = grid.getFirstVisiblePosition();
+            outState.putInt(STATE_POSITION_INDEX, index);
+        }
     }
 
     @Override

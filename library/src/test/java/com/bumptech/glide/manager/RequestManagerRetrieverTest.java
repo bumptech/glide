@@ -141,7 +141,7 @@ public class RequestManagerRetrieverTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testDoesNotThrowIfActivityDestroyed() {
+    public void testThrowsIfActivityDestroyed() {
         DefaultRetrieverHarness harness = new DefaultRetrieverHarness();
         harness.getController().pause().stop().destroy();
         harness.doGet();

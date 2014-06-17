@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,14 +31,17 @@ import java.util.Set;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
     private static final String TAG = "FlickrSearchActivity";
+    private static final String STATE_SEARCH_STRING = "state_search_string";
 
-    private int searchCount = 0;
     private EditText searchText;
     private View searching;
     private TextView searchTerm;
     private Set<PhotoViewer> photoViewers = new HashSet<PhotoViewer>();
     private List<Photo> currentPhotos = new ArrayList<Photo>();
     private View searchLoading;
+    private String currentSearchString;
+    private final SearchListener searchListener = new SearchListener();
+
     private enum Page {
         SMALL,
         MEDIUM,
@@ -122,6 +126,28 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         }
 
         pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager()));
+
+        Api.get(Glide.get(this).getRequestQueue()).registerSearchListener(searchListener);
+        if (savedInstanceState != null) {
+            String savedSearchString = savedInstanceState.getString(STATE_SEARCH_STRING);
+            if (!TextUtils.isEmpty(savedSearchString)) {
+                executeSearch(savedSearchString);
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (!TextUtils.isEmpty(currentSearchString)) {
+            outState.putString(STATE_SEARCH_STRING, currentSearchString);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Api.get(Glide.get(this).getRequestQueue()).unregisterSearchListener(searchListener);
     }
 
     @Override
@@ -137,46 +163,23 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     }
 
     private void executeSearch() {
-        final String searchString = searchText.getText().toString();
+        String searchString = searchText.getText().toString();
         searchText.getText().clear();
+        executeSearch(searchString);
+    }
 
-        if ("".equals(searchString.trim())) return;
+    private void executeSearch(String searchString) {
+        currentSearchString = searchString;
 
-        final int currentSearch = ++searchCount;
+        if (TextUtils.isEmpty(searchString)) {
+            return;
+        }
 
         searching.setVisibility(View.VISIBLE);
         searchLoading.setVisibility(View.VISIBLE);
-        searchTerm.setText(getString(R.string.searching_for, searchString));
+        searchTerm.setText(getString(R.string.searching_for, currentSearchString));
 
-        Api.get(Glide.get(this).getRequestQueue()).search(searchString, new Api.SearchCallback() {
-            @Override
-            public void onSearchCompleted(List<Photo> photos) {
-                if (currentSearch != searchCount) return;
-
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Search completed, got " + photos.size() + " results");
-                }
-                searching.setVisibility(View.INVISIBLE);
-
-                for (PhotoViewer viewer : photoViewers) {
-                    viewer.onPhotosUpdated(photos);
-                }
-
-                currentPhotos = photos;
-            }
-
-            @Override
-            public void onSearchFailed(Exception e) {
-                if (currentSearch != searchCount) return;
-
-                if (Log.isLoggable(TAG, Log.ERROR)) {
-                    Log.e(TAG, "Search failed", e);
-                }
-                searching.setVisibility(View.VISIBLE);
-                searchLoading.setVisibility(View.INVISIBLE);
-                searchTerm.setText(getString(R.string.search_failed, searchString));
-            }
-        });
+        Api.get(Glide.get(this).getRequestQueue()).search(currentSearchString);
     }
 
     private static class TabListener implements ActionBar.TabListener {
@@ -196,6 +199,40 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
         @Override
         public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) { }
+    }
+
+    private class SearchListener implements Api.SearchListener {
+        @Override
+        public void onSearchCompleted(String searchString, List<Photo> photos) {
+            if (!TextUtils.equals(currentSearchString, searchString)) {
+                return;
+            }
+
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Search completed, got " + photos.size() + " results");
+            }
+            searching.setVisibility(View.INVISIBLE);
+
+            for (PhotoViewer viewer : photoViewers) {
+                viewer.onPhotosUpdated(photos);
+            }
+
+            currentPhotos = photos;
+        }
+
+        @Override
+        public void onSearchFailed(String searchString, Exception e) {
+            if (!TextUtils.equals(currentSearchString, searchString)) {
+                return;
+            }
+
+            if (Log.isLoggable(TAG, Log.ERROR)) {
+                Log.e(TAG, "Search failed", e);
+            }
+            searching.setVisibility(View.VISIBLE);
+            searchLoading.setVisibility(View.INVISIBLE);
+            searchTerm.setText(getString(R.string.search_failed, currentSearchString));
+        }
     }
 
     private class FlickrPagerAdapter extends FragmentPagerAdapter {

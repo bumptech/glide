@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.flickr.api;
 
+import android.text.TextUtils;
 import android.util.Log;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -14,8 +15,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Api {
     private static Api API;
@@ -41,8 +44,6 @@ public class Api {
         Collections.sort(SORTED_SIZE_KEYS);
     }
 
-    private final RequestQueue requestQueue;
-
     private static String getSizeKey(int width, int height) {
         final int largestEdge = Math.max(width, height);
 
@@ -56,28 +57,12 @@ public class Api {
         return result;
     }
 
-    public interface SearchCallback {
-        public void onSearchCompleted(List<Photo> photos);
-        public void onSearchFailed(Exception e);
-    }
-
-    public static Api get(RequestQueue requestQueue) {
-        if (API == null) {
-            API = new Api(requestQueue);
-        }
-        return API;
-    }
-
-    protected Api(RequestQueue requestQueue) {
-        this.requestQueue = requestQueue;
+    public static String getCacheableUrl(Photo photo) {
+        return String.format(CACHEABLE_PHOTO_URL, photo.farm, photo.server, photo.id, photo.secret);
     }
 
     public static String getPhotoURL(Photo photo, int width, int height) {
         return getPhotoUrl(photo, getSizeKey(width, height));
-    }
-
-    public static String getCacheableUrl(Photo photo) {
-        return String.format(CACHEABLE_PHOTO_URL, photo.farm, photo.server, photo.id, photo.secret);
     }
 
     private static String getUrlForMethod(String method) {
@@ -92,7 +77,42 @@ public class Api {
         return photo.getPartialUrl() + sizeKey + ".jpg";
     }
 
-    public void search(String text, final SearchCallback cb) {
+    public interface SearchListener {
+        public void onSearchCompleted(String searchString, List<Photo> photos);
+        public void onSearchFailed(String searchString, Exception e);
+    }
+
+    public static Api get(RequestQueue requestQueue) {
+        if (API == null) {
+            API = new Api(requestQueue);
+        }
+        return API;
+    }
+
+    private final RequestQueue requestQueue;
+    private final Set<SearchListener> searchListeners = new HashSet<SearchListener>();
+    private SearchResult lastSearchResult;
+
+    protected Api(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
+    }
+
+    public void registerSearchListener(SearchListener searchListener) {
+        searchListeners.add(searchListener);
+    }
+
+    public void unregisterSearchListener(SearchListener searchListener) {
+        searchListeners.remove(searchListener);
+    }
+
+    public void search(final String text) {
+        if (lastSearchResult != null && TextUtils.equals(lastSearchResult.searchString, text)) {
+            for (SearchListener listener : searchListeners) {
+                listener.onSearchCompleted(lastSearchResult.searchString, lastSearchResult.results);
+            }
+            return;
+        }
+
         StringRequest request = new StringRequest(Request.Method.GET, getSearchUrl(text),
                 new Response.Listener<String>() {
             @Override
@@ -105,9 +125,14 @@ public class Api {
                     for (int i = 0; i < photos.length(); i++) {
                         results.add(new Photo(photos.getJSONObject(i)));
                     }
-                    cb.onSearchCompleted(results);
+                    lastSearchResult = new SearchResult(text, results);
+                    for (SearchListener listener : searchListeners) {
+                        listener.onSearchCompleted(text, results);
+                    }
                 } catch (JSONException e) {
-                    cb.onSearchFailed(e);
+                    for (SearchListener listener : searchListeners) {
+                        listener.onSearchFailed(text, e);
+                    }
                     if (Log.isLoggable(TAG, Log.ERROR)) {
                         Log.e(TAG, "Search failed response=" + response, e);
                     }
@@ -116,11 +141,25 @@ public class Api {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                cb.onSearchFailed(error);
+                for (SearchListener listener : searchListeners) {
+                    listener.onSearchFailed(text, error);
+                }
             }
         });
         request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 3,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(request);
+    }
+
+    private static class SearchResult {
+        public final String searchString;
+        public final List<Photo> results;
+
+        public SearchResult(String searchString, List<Photo> results) {
+
+            this.searchString = searchString;
+            this.results = results;
+        }
+
     }
 }

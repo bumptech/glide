@@ -19,9 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
+    private static final String STATE_POSITION_INDEX = "state_position_index";
+    private static final String STATE_POSITION_OFFSET = "state_position_offset";
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
     private FlickrListPreloader preloader;
+    private ListView list;
 
     public static FlickrPhotoList newInstance() {
         return new FlickrPhotoList();
@@ -38,7 +41,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View result = inflater.inflate(R.layout.flickr_photo_list, container, false);
-        ListView list = (ListView) result.findViewById(R.id.flickr_photo_list);
+        list = (ListView) result.findViewById(R.id.flickr_photo_list);
         adapter = new FlickrPhotoListAdapter();
         list.setAdapter(adapter);
         preloader = new FlickrListPreloader(getActivity(), 5);
@@ -46,7 +49,26 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
         }
+
+        if (savedInstanceState != null) {
+            int index = savedInstanceState.getInt(STATE_POSITION_INDEX);
+            int offset = savedInstanceState.getInt(STATE_POSITION_OFFSET);
+            list.setSelectionFromTop(index, offset);
+        }
+
         return result;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (list != null) {
+            int index = list.getFirstVisiblePosition();
+            View topView = list.getChildAt(0);
+            int offset = topView != null ? topView.getTop() : 0;
+            outState.putInt(STATE_POSITION_INDEX, index);
+            outState.putInt(STATE_POSITION_OFFSET, offset);
+        }
     }
 
     private static class ViewHolder {
