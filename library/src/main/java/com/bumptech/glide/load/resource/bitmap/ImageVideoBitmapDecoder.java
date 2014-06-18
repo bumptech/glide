@@ -36,7 +36,10 @@ public class ImageVideoBitmapDecoder implements ResourceDecoder<ImageVideoWrappe
         }
 
         if (result == null) {
-            result = fileDescriptorDecoder.decode(source.getFileDescriptor(), width, height);
+            ParcelFileDescriptor fileDescriptor = source.getFileDescriptor();
+            if (fileDescriptor != null) {
+                result = fileDescriptorDecoder.decode(source.getFileDescriptor(), width, height);
+            }
         }
         return result;
     }

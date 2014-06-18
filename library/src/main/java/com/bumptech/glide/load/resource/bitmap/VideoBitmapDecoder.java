@@ -9,11 +9,27 @@ import com.bumptech.glide.load.DecodeFormat;
 import java.io.IOException;
 
 public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
+    private static final DefaultFactory DEFAULT_FACTORY = new DefaultFactory();
+    private MediaMetadataRetrieverFactory factory;
+
+    interface MediaMetadataRetrieverFactory {
+        public MediaMetadataRetriever build();
+    }
+
+    public VideoBitmapDecoder() {
+        this(DEFAULT_FACTORY);
+    }
+
+
+    VideoBitmapDecoder(MediaMetadataRetrieverFactory factory) {
+        this.factory = factory;
+    }
+
     @Override
     public Bitmap decode(ParcelFileDescriptor resource, BitmapPool bitmapPool, int outWidth, int outHeight,
             DecodeFormat decodeFormat)
             throws IOException {
-        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+        MediaMetadataRetriever mediaMetadataRetriever = factory.build();
         mediaMetadataRetriever.setDataSource(resource.getFileDescriptor());
         Bitmap result = mediaMetadataRetriever.getFrameAtTime();
         mediaMetadataRetriever.release();
@@ -23,6 +39,13 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
 
     @Override
     public String getId() {
-        return "VideoBitmapDecoder.com.bumptech.glide.load.data.bitmap";
+        return "VideoBitmapDecoder.com.bumptech.glide.load.resource.bitmap";
+    }
+
+    private static class DefaultFactory implements MediaMetadataRetrieverFactory {
+        @Override
+        public MediaMetadataRetriever build() {
+            return new MediaMetadataRetriever();
+        }
     }
 }

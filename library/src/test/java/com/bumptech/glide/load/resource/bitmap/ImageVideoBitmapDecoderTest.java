@@ -83,6 +83,16 @@ public class ImageVideoBitmapDecoderTest {
     }
 
     @Test
+    public void testDoesNotTryToDecodeNullFileDescriptor() throws IOException {
+        when(harness.wrapper.getStream()).thenReturn(null);
+        when(harness.wrapper.getFileDescriptor()).thenReturn(null);
+
+        harness.decoder.decode(harness.wrapper, 100, 102);
+
+        verify(harness.fileDescriptorDecoder, never()).decode(any(ParcelFileDescriptor.class), anyInt(), anyInt());
+    }
+
+    @Test
     public void testHasValidId() {
         Util.assertClassHasValidId(ImageVideoBitmapDecoder.class, harness.decoder.getId());
     }
@@ -94,6 +104,5 @@ public class ImageVideoBitmapDecoderTest {
         ResourceDecoder<ParcelFileDescriptor, Bitmap> fileDescriptorDecoder = mock(ResourceDecoder.class);
         ImageVideoBitmapDecoder decoder = new ImageVideoBitmapDecoder(streamDecoder, fileDescriptorDecoder);
         ImageVideoWrapper wrapper = mock(ImageVideoWrapper.class);
-
     }
 }
