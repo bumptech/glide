@@ -41,7 +41,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private boolean isMemoryCacheable;
     private Priority priority;
     private final Target<R> target;
-    private final RequestListener<A> requestListener;
+    private final RequestListener<A, R> requestListener;
     private final float sizeMultiplier;
     private final Engine engine;
     private Animation animation;
@@ -56,7 +56,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
     public GenericRequest(LoadProvider<A, T, Z, R> loadProvider, A model, Context context, Priority priority,
             Target<R> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
-            Drawable errorDrawable, int errorResourceId, RequestListener<A> requestListener, int animationId,
+            Drawable errorDrawable, int errorResourceId, RequestListener<A, R> requestListener, int animationId,
             Animation animation, RequestCoordinator requestCoordinator, Engine engine,
             Transformation<Z> transformation, Class<R> transcodeClass, boolean isMemoryCacheable) {
         this.loadProvider = loadProvider;
@@ -222,17 +222,18 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             return;
         }
         R result = (R) resource.get();
-        target.onResourceReady(result);
-        if (!loadedFromMemoryCache && !isAnyImageSet()) {
-            if (animation == null && animationId > 0) {
-                animation = AnimationUtils.loadAnimation(context, animationId);
+
+        if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
+                !isAnyImageSet())) {
+            target.onResourceReady(result);
+            if (!loadedFromMemoryCache && !isAnyImageSet()) {
+                if (animation == null && animationId > 0) {
+                    animation = AnimationUtils.loadAnimation(context, animationId);
+                }
+                if (animation != null) {
+                    target.startAnimation(animation);
+                }
             }
-            if (animation != null) {
-                target.startAnimation(animation);
-            }
-        }
-        if (requestListener != null) {
-            requestListener.onImageReady(model, target, loadedFromMemoryCache, isAnyImageSet());
         }
 
         this.resource = resource;
@@ -246,11 +247,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
         isRunning = false;
         isError = true;
-        setErrorPlaceholder();
-
         //TODO: what if this is a thumbnail request?
-        if (requestListener != null) {
-            requestListener.onException(e, model, target);
+        if (requestListener == null || !requestListener.onException(e, model, target, !isAnyImageSet())) {
+            setErrorPlaceholder();
         }
     }
 }

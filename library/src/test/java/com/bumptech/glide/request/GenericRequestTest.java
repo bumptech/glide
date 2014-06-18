@@ -25,6 +25,7 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
@@ -33,10 +34,12 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,10 +51,10 @@ public class GenericRequestTest {
     private static class RequestHarness {
         Engine engine = mock(Engine.class);
         Object model = new Object();
-        Target target = mock(Target.class);
+        Target<Object> target = mock(Target.class);
         Context context = Robolectric.application;
         Resource<Object> resource = mock(Resource.class);
-        RequestCoordinator requestCoordinator = null;
+        RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
         Priority priority = Priority.NORMAL;
         int placeholderResourceId = 0;
         Drawable placeholderDrawable = null;
@@ -62,6 +65,7 @@ public class GenericRequestTest {
         ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
+        RequestListener<Object, Object> requestListener = mock(RequestListener.class);
         boolean skipMemoryCache;
 
         public RequestHarness() {
@@ -72,13 +76,16 @@ public class GenericRequestTest {
             when(loadProvider.getEncoder()).thenReturn(encoder);
             when(loadProvider.getTranscoder()).thenReturn(transcoder);
 
+            when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
+            when(requestCoordinator.canSetPlaceholder(any(Request.class))).thenReturn(true);
+
             when(resource.get()).thenReturn(new Object());
         }
 
         public GenericRequest<Object, Object, Object, Object> getRequest() {
             return new GenericRequest<Object, Object, Object, Object>(loadProvider, model, context, priority, target,
-                    1f, placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, null, 0, null,
-                    requestCoordinator, engine, mock(Transformation.class), Object.class, skipMemoryCache);
+                    1f, placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, requestListener, 0,
+                    null, requestCoordinator, engine, mock(Transformation.class), Object.class, skipMemoryCache);
         }
     }
 
@@ -361,6 +368,149 @@ public class GenericRequestTest {
         request.clear();
 
         assertFalse(request.isRunning());
+    }
+
+    @Test
+    public void testCallsTargetOnResourceReadyIfNoRequestListener() {
+        harness.requestListener = null;
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onResourceReady(harness.resource);
+
+        verify(harness.target).onResourceReady(eq(harness.resource.get()));
+    }
+
+    @Test
+    public void testCallsTargetOnResourceReadyIfRequestListenerReturnsFalse() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.requestListener.onResourceReady(anyObject(), anyObject(), eq(harness.target),
+                anyBoolean(), anyBoolean())).thenReturn(false);
+        request.onResourceReady(harness.resource);
+
+        verify(harness.target).onResourceReady(eq(harness.resource.get()));
+    }
+
+    @Test
+    public void testDoesNotCallTargetOnResourceReadyIfRequestListenerReturnsTrue() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.requestListener.onResourceReady(anyObject(), anyObject(), eq(harness.target),
+                anyBoolean(), anyBoolean())).thenReturn(true);
+        request.onResourceReady(harness.resource);
+
+        verify(harness.target, never()).onResourceReady(anyObject());
+    }
+
+    @Test
+    public void testCallsTargetOnExceptionIfNoRequestListener() {
+        harness.requestListener = null;
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onException(new IOException("test"));
+
+        verify(harness.target).setPlaceholder(eq(harness.errorDrawable));
+    }
+
+    @Test
+    public void testCallsTargetOnExceptionIfRequestListenerReturnsFalse() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.requestListener.onException(any(Exception.class), anyObject(), eq(harness.target), anyBoolean()))
+                .thenReturn(false);
+        request.onException(new IOException("test"));
+
+        verify(harness.target).setPlaceholder(eq(harness.errorDrawable));
+    }
+
+    @Test
+    public void testDoesNotCallTargetOnExceptionIfRequestListenerReturnsTrue() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.requestListener.onException(any(Exception.class), anyObject(), eq(harness.target), anyBoolean()))
+                .thenReturn(true);
+        request.onException(new IllegalArgumentException("test"));
+
+        verify(harness.target, never()).setPlaceholder(any(Drawable.class));
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithResourceResult() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onResourceReady(harness.resource);
+
+        verify(harness.requestListener).onResourceReady(eq(harness.resource.get()), anyObject(), any(Target.class),
+                anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithModel() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onResourceReady(harness.resource);
+
+        verify(harness.requestListener).onResourceReady(anyObject(), eq(harness.model), any(Target.class),
+                anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithTarget() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onResourceReady(harness.resource);
+
+        verify(harness.requestListener).onResourceReady(anyObject(), anyObject(), eq(harness.target), anyBoolean(),
+                anyBoolean());
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithLoadedFromMemoryIfLoadCompletesSynchronously() {
+        final GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.engine.load(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class), any(DataFetcher.class),
+                any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(ResourceCallback.class)))
+                .thenAnswer(new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        request.onResourceReady(harness.resource);
+                        return null;
+                    }
+                });
+        request.onSizeReady(100, 100);
+        verify(harness.requestListener).onResourceReady(anyObject(), anyObject(), any(Target.class), eq(true),
+                anyBoolean());
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithNotLoadedFromMemoryCacheIfLoadCompletesAsynchronously() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onSizeReady(100, 100);
+        request.onResourceReady(harness.resource);
+
+        verify(harness.requestListener).onResourceReady(anyObject(), anyObject(), any(Target.class), eq(false),
+                anyBoolean());
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithIsFirstResourceIfNoRequestCoordinator() {
+        harness.requestCoordinator = null;
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onResourceReady(harness.resource);
+
+        verify(harness.requestListener).onResourceReady(anyObject(), anyObject(), any(Target.class), anyBoolean(),
+                eq(true));
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithIsFirstImageIfRequestCoordinatorReturnsNoRequestComplete() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.requestCoordinator.isAnyRequestComplete()).thenReturn(false);
+        request.onResourceReady(harness.resource);
+
+        verify(harness.requestListener).onResourceReady(anyObject(), anyObject(), any(Target.class), anyBoolean(),
+                eq(true));
+    }
+
+    @Test
+    public void testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsARequestComplete() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.requestCoordinator.isAnyRequestComplete()).thenReturn(true);
+        request.onResourceReady(harness.resource);
+
+        verify(harness.requestListener).onResourceReady(anyObject(), anyObject(), any(Target.class), anyBoolean(),
+                eq(false));
     }
 
     private Context mockContextToReturn(int resourceId, Drawable drawable) {

@@ -50,7 +50,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private Animation animation;
     private int placeholderId;
     private int errorId;
-    private RequestListener<ModelType> requestListener;
+    private RequestListener<ModelType, TranscodeType> requestListener;
     private Float thumbSizeMultiplier;
     private GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>
             thumbnailRequestBuilder;
@@ -331,7 +331,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This RequestBuilder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> listener(
-            RequestListener<ModelType> requestListener) {
+            RequestListener<ModelType, TranscodeType> requestListener) {
         this.requestListener = requestListener;
 
         return this;

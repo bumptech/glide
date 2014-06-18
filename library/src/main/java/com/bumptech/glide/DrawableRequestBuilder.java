@@ -147,7 +147,7 @@ public class DrawableRequestBuilder<ModelType> extends
 
     @Override
     public DrawableRequestBuilder<ModelType> listener(
-            RequestListener<ModelType> requestListener) {
+            RequestListener<ModelType, Drawable> requestListener) {
         super.listener(requestListener);
         return this;
     }

@@ -144,7 +144,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
 
     @Override
     public GifRequestBuilder<ModelType, TranscodeType> listener(
-            RequestListener<ModelType> requestListener) {
+            RequestListener<ModelType, TranscodeType> requestListener) {
         super.listener(requestListener);
         return this;
     }

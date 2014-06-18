@@ -240,7 +240,8 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> listener(RequestListener<ModelType> requestListener) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> listener(
+            RequestListener<ModelType, TranscodeType> requestListener) {
         super.listener(requestListener);
         return this;
     }
