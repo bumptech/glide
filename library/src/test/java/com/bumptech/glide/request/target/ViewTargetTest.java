@@ -5,8 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
+import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import junit.framework.TestCase;
 import org.junit.Before;
@@ -46,8 +45,9 @@ public class ViewTargetTest {
     public void setUp() {
         view = new View(Robolectric.application);
         target = new ViewTarget<View, Object>(view) {
+
             @Override
-            public void onResourceReady(Object resource) {
+            public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
             }
 
             @Override
@@ -59,14 +59,6 @@ public class ViewTargetTest {
     @Test
     public void testReturnsWrappedView() {
         assertEquals(view, target.getView());
-    }
-
-    @Test
-    public void testStartsAnimationOnView() {
-        Animation animation = new AlphaAnimation(0f, 1f);
-        target.startAnimation(animation);
-
-        assertEquals(animation, view.getAnimation());
     }
 
     @Test
@@ -97,7 +89,7 @@ public class ViewTargetTest {
 
         ViewTarget<View, Object> second = new ViewTarget<View, Object>(view) {
             @Override
-            public void onResourceReady(Object resource) {
+            public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
             }
 
             @Override
@@ -178,7 +170,8 @@ public class ViewTargetTest {
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb, never()).onSizeReady(anyInt(), anyInt());
-        TestCase.assertEquals(1, shadowObserver.getPreDrawListeners().size());
+        TestCase.assertEquals(1, shadowObserver.getPreDrawListeners()
+                .size());
     }
 
     @Test

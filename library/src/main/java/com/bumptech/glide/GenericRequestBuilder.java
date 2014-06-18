@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import com.bumptech.glide.load.MultiTransformation;
@@ -16,11 +17,15 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.GenericRequest;
+import com.bumptech.glide.request.GlideAnimationFactory;
+import com.bumptech.glide.request.NoAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
-import com.bumptech.glide.request.ThumbnailRequestCoordinator;
-import com.bumptech.glide.request.GenericRequest;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.ThumbnailRequestCoordinator;
+import com.bumptech.glide.request.ViewAnimation;
+import com.bumptech.glide.request.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
@@ -46,8 +51,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private final Class<TranscodeType> transcodeClass;
     private final Glide glide;
     private final RequestManager requestManager;
-    private int animationId;
-    private Animation animation;
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType, TranscodeType> requestListener;
@@ -60,6 +63,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private Priority priority = null;
     private boolean isCacheable = true;
     private ResourceEncoder<ResourceType> preSkipEncoder;
+    private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
@@ -249,11 +253,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param animationId The resource id of the animation to run
      * @return This RequestBuilder
      */
+    // This is safe because the view animation doesn't care about the resource type it receives.
+    @SuppressWarnings("unchecked")
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             int animationId) {
-        this.animationId = animationId;
-
-        return this;
+        return animate(new ViewAnimation.ViewAnimationFactory(context, animationId));
     }
 
     /**
@@ -263,9 +267,33 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param animation The animation to run
      * @return This RequestBuilder
      */
+    // This is safe because the view animation doesn't care about the resource type it receives.
+    @SuppressWarnings("unchecked")
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             Animation animation) {
-        this.animation = animation;
+        return animate(new ViewAnimation.ViewAnimationFactory(animation));
+    }
+
+    /**
+     * Sets an animator to run a {@link ViewPropertyAnimator} on a view that the target may be wrapping when a resource
+     * load finishes. Will only be run if the load was loaded asynchronously (ie was not in the memory cache).
+     *
+     * @param animator The {@link ViewPropertyAnimation.Animator} to run.
+     * @return This RequestBuilder.
+     */
+    // This is safe because the view property animation doesn't care about the resource type it receives.
+    @SuppressWarnings("unchecked")
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
+            ViewPropertyAnimation.Animator animator) {
+        return animate(new ViewPropertyAnimation.ViewPropertyAnimationFactory(animator));
+    }
+
+    GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
+            GlideAnimationFactory<TranscodeType> animationFactory) {
+        if (animationFactory == null) {
+            throw new NullPointerException("Animation factory must not be null!");
+        }
+        this.animationFactory = animationFactory;
 
         return this;
     }
@@ -440,12 +468,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             ThumbnailRequestCoordinator requestCoordinator = new ThumbnailRequestCoordinator();
             Request fullRequest = buildRequest(target, sizeMultiplier, priority, requestCoordinator);
 
-            if (thumbnailRequestBuilder.animationId <= 0) {
-                thumbnailRequestBuilder.animationId = animationId;
-            }
-
-            if (thumbnailRequestBuilder.animation == null) {
-                thumbnailRequestBuilder.animation = animation;
+            if (thumbnailRequestBuilder.animationFactory.equals(NoAnimation.getFactory())) {
+                thumbnailRequestBuilder.animationFactory = animationFactory;
             }
 
             if (thumbnailRequestBuilder.requestListener == null && requestListener != null) {
@@ -498,10 +522,24 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private <Z> Request buildRequestForDataType(Target<TranscodeType> target,
             LoadProvider<ModelType, Z, ResourceType, TranscodeType> loadProvider, float sizeMultiplier,
             Priority priority, RequestCoordinator requestCoordinator) {
-        return new GenericRequest<ModelType, Z, ResourceType, TranscodeType>(loadProvider, model, context, priority,
-                target, sizeMultiplier, placeholderDrawable, placeholderId, errorPlaceholder, errorId, requestListener,
-                animationId, animation, requestCoordinator, glide.getEngine(), getFinalTransformation(),
-                transcodeClass, isCacheable);
+        return new GenericRequest<ModelType, Z, ResourceType, TranscodeType>(
+                loadProvider,
+                model,
+                context,
+                priority,
+                target,
+                sizeMultiplier,
+                placeholderDrawable,
+                placeholderId,
+                errorPlaceholder,
+                errorId,
+                requestListener,
+                requestCoordinator,
+                glide.getEngine(),
+                getFinalTransformation(),
+                transcodeClass,
+                isCacheable,
+                animationFactory);
     }
 
     @SuppressWarnings("unchecked")

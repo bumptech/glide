@@ -15,18 +15,22 @@ import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.DrawableCrossFadeViewAnimation;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.ViewPropertyAnimation;
 
 import java.io.InputStream;
 
 public class DrawableRequestBuilder<ModelType> extends
         GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> {
     private final Glide glide;
+    private final Context context;
 
     DrawableRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> loadProvider, Glide glide,
             RequestManager requestManager) {
         super(context, model, loadProvider, Drawable.class, glide, requestManager);
+        this.context = context;
         this.glide = glide;
     }
 
@@ -106,6 +110,32 @@ public class DrawableRequestBuilder<ModelType> extends
     public DrawableRequestBuilder<ModelType> transcoder(
             ResourceTranscoder<GifBitmapWrapper, Drawable> transcoder) {
         super.transcoder(transcoder);
+        return this;
+    }
+
+    public DrawableRequestBuilder<ModelType> crossFade() {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory());
+        return this;
+    }
+
+    public DrawableRequestBuilder<ModelType> crossFade(int duration) {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory(duration));
+        return this;
+    }
+
+    public DrawableRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory(animation, duration));
+        return this;
+    }
+
+    public DrawableRequestBuilder<ModelType> crossFade(int animationId, int duration) {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory(context, animationId, duration));
+        return this;
+    }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> animate(ViewPropertyAnimation.Animator animator) {
+        super.animate(animator);
         return this;
     }
 

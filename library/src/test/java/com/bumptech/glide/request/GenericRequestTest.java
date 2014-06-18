@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.animation.Animation;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -67,6 +66,7 @@ public class GenericRequestTest {
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
         RequestListener<Object, Object> requestListener = mock(RequestListener.class);
         boolean skipMemoryCache;
+        GlideAnimationFactory<Object> factory = mock(GlideAnimationFactory.class);
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
@@ -84,8 +84,8 @@ public class GenericRequestTest {
 
         public GenericRequest<Object, Object, Object, Object> getRequest() {
             return new GenericRequest<Object, Object, Object, Object>(loadProvider, model, context, priority, target,
-                    1f, placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, requestListener, 0,
-                    null, requestCoordinator, engine, mock(Transformation.class), Object.class, skipMemoryCache);
+                    1f, placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, requestListener,
+                    requestCoordinator, engine, mock(Transformation.class), Object.class, skipMemoryCache, factory);
         }
     }
 
@@ -376,7 +376,7 @@ public class GenericRequestTest {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
-        verify(harness.target).onResourceReady(eq(harness.resource.get()));
+        verify(harness.target).onResourceReady(eq(harness.resource.get()), any(GlideAnimation.class));
     }
 
     @Test
@@ -386,7 +386,7 @@ public class GenericRequestTest {
                 anyBoolean(), anyBoolean())).thenReturn(false);
         request.onResourceReady(harness.resource);
 
-        verify(harness.target).onResourceReady(eq(harness.resource.get()));
+        verify(harness.target).onResourceReady(eq(harness.resource.get()), any(GlideAnimation.class));
     }
 
     @Test
@@ -396,7 +396,7 @@ public class GenericRequestTest {
                 anyBoolean(), anyBoolean())).thenReturn(true);
         request.onResourceReady(harness.resource);
 
-        verify(harness.target, never()).onResourceReady(anyObject());
+        verify(harness.target, never()).onResourceReady(anyObject(), any(GlideAnimation.class));
     }
 
     @Test
@@ -513,6 +513,16 @@ public class GenericRequestTest {
                 eq(false));
     }
 
+    @Test
+    public void testTargetIsCalledWithAnimationFromFactory() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        GlideAnimation<Object> glideAnimation = mock(GlideAnimation.class);
+        when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(glideAnimation);
+        request.onResourceReady(harness.resource);
+
+        verify(harness.target).onResourceReady(eq(harness.resource.get()), eq(glideAnimation));
+    }
+
     private Context mockContextToReturn(int resourceId, Drawable drawable) {
         Resources resources = mock(Resources.class);
         Context context = mock(Context.class);
@@ -528,7 +538,7 @@ public class GenericRequestTest {
         private Drawable currentPlaceholder;
 
         @Override
-        public void onResourceReady(Object resource) {
+        public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
             currentPlaceholder = null;
         }
 
@@ -539,10 +549,6 @@ public class GenericRequestTest {
 
         @Override
         public void getSize(SizeReadyCallback cb) {
-        }
-
-        @Override
-        public void startAnimation(Animation animation) {
         }
 
         @Override

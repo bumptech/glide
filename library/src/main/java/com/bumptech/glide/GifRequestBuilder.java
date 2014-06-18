@@ -15,6 +15,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.ViewPropertyAnimation;
 
 import java.io.InputStream;
 
@@ -115,6 +116,12 @@ public class GifRequestBuilder<ModelType, TranscodeType>
     @Override
     public GifRequestBuilder<ModelType, TranscodeType> animate(Animation animation) {
         super.animate(animation);
+        return this;
+    }
+
+    @Override
+    public GifRequestBuilder<ModelType, TranscodeType> animate(ViewPropertyAnimation.Animator animator) {
+        super.animate(animator);
         return this;
     }
 

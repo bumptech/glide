@@ -3,7 +3,6 @@ package com.bumptech.glide.request.target;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.view.animation.Animation;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.Request;
 
@@ -35,7 +34,4 @@ public abstract class BaseTarget<Z> implements Target<Z> {
 
     @Override
     public void setPlaceholder(Drawable placeholder) { }
-
-    @Override
-    public void startAnimation(Animation animation) { }
 }

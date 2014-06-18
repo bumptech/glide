@@ -1,7 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
-import android.view.animation.Animation;
+import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
 
 /**
@@ -9,7 +9,7 @@ import com.bumptech.glide.request.Request;
  *
  * @param <Z> The type of resource the target can display.
  */
-public interface Target<Z> {
+public interface Target<R> {
 
     /**
      * A callback that must be called when the target has determined its size. For fixed size targets it can
@@ -23,7 +23,7 @@ public interface Target<Z> {
      * The method that will be called when the image load has finished
      * @param resource the loaded resource.
      */
-    public void onResourceReady(Z resource);
+    public void onResourceReady(R resource, GlideAnimation<R> glideAnimation);
 
     /**
      * A method that can optionally be implemented to set any placeholder that might have been passed to Glide to
@@ -38,14 +38,6 @@ public interface Target<Z> {
      * @param cb The callback that must be called when the size of the target has been determined
      */
     public void getSize(SizeReadyCallback cb);
-
-    /**
-     * A method that can be optionally implemented to start any animation that might have been passed to Glide for this
-     * target.
-     *
-     * @param animation The animation to display
-     */
-    public void startAnimation(Animation animation);
 
     public void setRequest(Request request);
 

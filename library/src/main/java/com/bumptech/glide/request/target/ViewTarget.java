@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.widget.ListView;
 import com.bumptech.glide.request.Request;
 
@@ -51,13 +50,6 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
     @Override
     public void getSize(SizeReadyCallback cb) {
         sizeDeterminer.getSize(cb);
-    }
-
-    @Override
-    public void startAnimation(Animation animation) {
-        view.clearAnimation();
-
-        view.startAnimation(animation);
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.resource.NullCacheDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.io.InputStream;
@@ -130,7 +131,7 @@ class GifFrameManager {
         }
 
         @Override
-        public void onResourceReady(final Bitmap resource) {
+        public void onResourceReady(final Bitmap resource, GlideAnimation<Bitmap> glideAnimation) {
             // Ignore allocationByteSize, we only want the minimum frame size.
             frameSize = resource.getHeight() * resource.getRowBytes();
             this.resource = resource;

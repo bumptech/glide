@@ -4,6 +4,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.GlideAnimationFactory;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
 import org.junit.Before;
@@ -38,6 +39,11 @@ public class GenericRequestBuilderTest {
     public void testThrowsIfNonNullModelAndNullLoadProvider() {
         new GenericRequestBuilder(Robolectric.application, new Object(), null, Object.class, mock(Glide.class),
                 requestManager);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenGlideAnimationFactoryIsNull() {
+        getNullModelRequest().animate((GlideAnimationFactory) null);
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.widget.AbsListView;
+import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 
 import java.util.ArrayDeque;
@@ -169,7 +170,8 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         private int photoWidth;
 
         @Override
-        public void onResourceReady(Object resource) {
+        public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
+            // Do nothing.
         }
 
         @Override

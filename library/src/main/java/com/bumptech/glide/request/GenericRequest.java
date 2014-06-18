@@ -3,17 +3,15 @@ package com.bumptech.glide.request;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.target.Target;
 
@@ -34,17 +32,17 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private final Context context;
     private final Transformation<Z> transformation;
     private final LoadProvider<A, T, Z, R> loadProvider;
-    private final int animationId;
     private final RequestCoordinator requestCoordinator;
     private final A model;
-    private Class<R> transcodeClass;
-    private boolean isMemoryCacheable;
-    private Priority priority;
+    private final Class<R> transcodeClass;
+    private final boolean isMemoryCacheable;
+    private final Priority priority;
     private final Target<R> target;
     private final RequestListener<A, R> requestListener;
     private final float sizeMultiplier;
     private final Engine engine;
-    private Animation animation;
+    private final GlideAnimationFactory<R> animationFactory;
+
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
     private boolean isCancelled;
@@ -54,11 +52,24 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private Engine.LoadStatus loadStatus;
     private boolean isRunning;
 
-    public GenericRequest(LoadProvider<A, T, Z, R> loadProvider, A model, Context context, Priority priority,
-            Target<R> target, float sizeMultiplier, Drawable placeholderDrawable, int placeholderResourceId,
-            Drawable errorDrawable, int errorResourceId, RequestListener<A, R> requestListener, int animationId,
-            Animation animation, RequestCoordinator requestCoordinator, Engine engine,
-            Transformation<Z> transformation, Class<R> transcodeClass, boolean isMemoryCacheable) {
+    public GenericRequest(
+            LoadProvider<A, T, Z, R> loadProvider,
+            A model,
+            Context context,
+            Priority priority,
+            Target<R> target,
+            float sizeMultiplier,
+            Drawable placeholderDrawable,
+            int placeholderResourceId,
+            Drawable errorDrawable,
+            int errorResourceId,
+            RequestListener<A, R> requestListener,
+            RequestCoordinator requestCoordinator,
+            Engine engine,
+            Transformation<Z> transformation,
+            Class<R> transcodeClass,
+            boolean isMemoryCacheable,
+            GlideAnimationFactory<R> animationFactory) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -70,13 +81,12 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         this.errorDrawable = errorDrawable;
         this.errorResourceId = errorResourceId;
         this.requestListener = requestListener;
-        this.animationId = animationId;
-        this.animation = animation;
         this.requestCoordinator = requestCoordinator;
         this.engine = engine;
         this.transformation = transformation;
         this.transcodeClass = transcodeClass;
         this.isMemoryCacheable = isMemoryCacheable;
+        this.animationFactory = animationFactory;
 
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
         // simply skip our sanity checks in that unusual case.
@@ -152,23 +162,32 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private void setPlaceHolder() {
         if (!canSetPlaceholder()) return;
 
-        if (placeholderDrawable == null && placeholderResourceId > 0) {
-            placeholderDrawable = context.getResources().getDrawable(placeholderResourceId);
-        }
-        target.setPlaceholder(placeholderDrawable);
+        target.setPlaceholder(getPlaceholderDrawable());
     }
 
     private void setErrorPlaceholder() {
         if (!canSetPlaceholder()) return;
 
+        Drawable error = getErrorDrawable();
+        if (error != null) {
+            target.setPlaceholder(error);
+        } else {
+            setPlaceHolder();
+        }
+    }
+
+    private Drawable getErrorDrawable() {
         if (errorDrawable == null && errorResourceId > 0) {
             errorDrawable = context.getResources().getDrawable(errorResourceId);
         }
-        if (errorDrawable == null) {
-            setPlaceHolder();
-        } else {
-            target.setPlaceholder(errorDrawable);
+        return errorDrawable;
+    }
+
+    private Drawable getPlaceholderDrawable() {
+        if (placeholderDrawable == null && placeholderResourceId > 0) {
+            placeholderDrawable = context.getResources().getDrawable(placeholderResourceId);
         }
+        return placeholderDrawable;
     }
 
     @Override
@@ -202,8 +221,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         return requestCoordinator == null || requestCoordinator.canSetPlaceholder(this);
     }
 
-    private boolean isAnyImageSet() {
-        return requestCoordinator != null && requestCoordinator.isAnyRequestComplete();
+    private boolean isFirstImage() {
+        return requestCoordinator == null || !requestCoordinator.isAnyRequestComplete();
     }
 
     @Override
@@ -224,16 +243,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         R result = (R) resource.get();
 
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
-                !isAnyImageSet())) {
-            target.onResourceReady(result);
-            if (!loadedFromMemoryCache && !isAnyImageSet()) {
-                if (animation == null && animationId > 0) {
-                    animation = AnimationUtils.loadAnimation(context, animationId);
-                }
-                if (animation != null) {
-                    target.startAnimation(animation);
-                }
-            }
+                isFirstImage())) {
+            GlideAnimation<R> animation = animationFactory.build(loadedFromMemoryCache, isFirstImage());
+            target.onResourceReady(result, animation);
         }
 
         this.resource = resource;
@@ -248,7 +260,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         isRunning = false;
         isError = true;
         //TODO: what if this is a thumbnail request?
-        if (requestListener == null || !requestListener.onException(e, model, target, !isAnyImageSet())) {
+        if (requestListener == null || !requestListener.onException(e, model, target, isFirstImage())) {
             setErrorPlaceholder();
         }
     }

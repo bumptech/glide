@@ -33,6 +33,7 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.volley.VolleyRequestFuture;
@@ -243,7 +244,7 @@ public class GlideTest {
                 .encoder(encoder)
                 .into(target);
 
-        verify(target).onResourceReady(eq(expected));
+        verify(target).onResourceReady(eq(expected), any(GlideAnimation.class));
     }
 
     @Test
@@ -270,7 +271,7 @@ public class GlideTest {
         Glide.with(getContext()).load(file).into(target);
         Glide.with(getContext()).load(file).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class));
+        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -283,7 +284,7 @@ public class GlideTest {
         Glide.with(getContext()).loadFromImage(url).into(target);
         Glide.with(getContext()).loadFromImage(url).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class));
+        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -296,7 +297,7 @@ public class GlideTest {
 
         Glide.with(getContext()).load(uri).asBitmap().into(target);
 
-        verify(target).onResourceReady(any(Bitmap.class));
+        verify(target).onResourceReady(any(Bitmap.class), any(GlideAnimation.class));
     }
 
     @Test
@@ -315,7 +316,7 @@ public class GlideTest {
                 .transcode(transcoder, byte[].class)
                 .into(target);
 
-        verify(target).onResourceReady(eq(bytes));
+        verify(target).onResourceReady(eq(bytes), any(GlideAnimation.class));
     }
 
     @Test
@@ -325,7 +326,7 @@ public class GlideTest {
 
         Glide.with(getContext()).load(uri).asBitmap().toBytes().into(target);
 
-        verify(target).onResourceReady(any(byte[].class));
+        verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
     }
 
     @Test
@@ -352,7 +353,7 @@ public class GlideTest {
         Glide.with(getContext()).load(uri).into(target);
         Glide.with(getContext()).load(uri).into(imageView);
 
-        verify(target).onResourceReady(anyObject());
+        verify(target).onResourceReady(anyObject(), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -413,7 +414,7 @@ public class GlideTest {
         Glide.with(getContext()).load(string).into(target);
         Glide.with(getContext()).load(string).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class));
+        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -443,7 +444,7 @@ public class GlideTest {
         Glide.with(getContext()).load(integer).into(target);
         Glide.with(getContext()).load(integer).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class));
+        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -455,7 +456,7 @@ public class GlideTest {
         Glide.with(getContext()).loadFromImage(bytes).into(target);
         Glide.with(getContext()).loadFromImage(bytes).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class));
+        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -469,7 +470,7 @@ public class GlideTest {
         Glide.with(getContext()).loadFromImage(bytes, id).into(target);
         Glide.with(getContext()).loadFromImage(bytes, id).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class));
+        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -508,7 +509,7 @@ public class GlideTest {
                 .load(fakeUri)
                 .asGif()
                 .into(target);
-        verify(target).onResourceReady(any(GifDrawable.class));
+        verify(target).onResourceReady(any(GifDrawable.class), any(GlideAnimation.class));
     }
 
     @Test
@@ -521,7 +522,7 @@ public class GlideTest {
                 .toBytes()
                 .into(target);
 
-        verify(target).onResourceReady(any(byte[].class));
+        verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
     }
 
     @Test
@@ -534,7 +535,7 @@ public class GlideTest {
                 .toBytes()
                 .into(target);
 
-        verify(target).onResourceReady(any(byte[].class));
+        verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
     }
 
     @Test
@@ -558,7 +559,7 @@ public class GlideTest {
                 }, Bitmap.class)
                 .into(target);
 
-        verify(target).onResourceReady(eq(expected));
+        verify(target).onResourceReady(eq(expected), any(GlideAnimation.class));
     }
 
     @Test

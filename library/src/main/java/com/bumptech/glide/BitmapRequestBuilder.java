@@ -9,6 +9,8 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
@@ -17,11 +19,10 @@ import com.bumptech.glide.load.resource.bitmap.ImageVideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.ViewPropertyAnimation;
 
 import java.io.InputStream;
 
@@ -212,6 +213,12 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> animate(Animation animation) {
         super.animate(animation);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> animate(ViewPropertyAnimation.Animator animator) {
+        super.animate(animator);
         return this;
     }
 

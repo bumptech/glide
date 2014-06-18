@@ -51,6 +51,7 @@ import com.bumptech.glide.manager.NullRequestManager;
 import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.provider.DataLoadProviderFactory;
+import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -476,7 +477,7 @@ public class Glide {
         }
 
         @Override
-        public void onResourceReady(Object resource) { }
+        public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) { }
 
         @Override
         public void setPlaceholder(Drawable placeholder) { }

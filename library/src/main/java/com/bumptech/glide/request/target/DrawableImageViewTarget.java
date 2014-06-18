@@ -2,6 +2,7 @@ package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+import com.bumptech.glide.request.GlideAnimation;
 
 public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
     private final ImageView view;
@@ -12,8 +13,10 @@ public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
     }
 
     @Override
-    public void onResourceReady(Drawable resource) {
-        view.setImageDrawable(resource);
+    public void onResourceReady(Drawable resource, GlideAnimation<Drawable> animation) {
+        if (animation == null || !animation.animate(view.getDrawable(), resource, view, this)) {
+            view.setImageDrawable(resource);
+        }
     }
 
     @Override

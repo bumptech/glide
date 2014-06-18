@@ -1,6 +1,8 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -171,9 +173,10 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
             Glide.with(FlickrPhotoList.this)
                     .loadFromImage(current)
+                    .placeholder(new ColorDrawable(Color.GRAY))
                     .thumbnail(0.1f)
                     .centerCrop()
-                    .animate(R.anim.fade_in)
+                    .crossFade(R.anim.fade_in, 150)
                     .into(viewHolder.imageView);
 
             viewHolder.titleText.setText(current.title);
