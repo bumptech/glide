@@ -19,7 +19,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     private final Map<Key, ResourceRunner> runners;
     private final ResourceRunnerFactory factory;
-    private KeyFactory keyFactory;
+    private final KeyFactory keyFactory;
     private final MemoryCache cache;
 
     public static class LoadStatus {

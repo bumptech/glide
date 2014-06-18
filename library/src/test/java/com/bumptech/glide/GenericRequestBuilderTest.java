@@ -46,6 +46,26 @@ public class GenericRequestBuilderTest {
         getNullModelRequest().animate((GlideAnimationFactory) null);
     }
 
+    @Test(expected =  IllegalArgumentException.class)
+    public void testThrowsWhenOverrideWidthLessThanZero() {
+        getNullModelRequest().override(-1, 100);
+    }
+
+    @Test(expected =  IllegalArgumentException.class)
+    public void testThrowsWhenOverrideWidthEqualToZero() {
+        getNullModelRequest().override(0, 100);
+    }
+
+    @Test(expected =  IllegalArgumentException.class)
+    public void testThrowsWhenOverrideHeightLessThanZero() {
+        getNullModelRequest().override(100, -5);
+    }
+
+    @Test(expected =  IllegalArgumentException.class)
+    public void testThrowsWhenOverrideHeightEqualToZero() {
+        getNullModelRequest().override(100, 0);
+    }
+
     @Test
     public void testDoesNotThrowWhenModelAndLoaderNull() {
         new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class),

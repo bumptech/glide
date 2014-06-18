@@ -64,6 +64,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private boolean isCacheable = true;
     private ResourceEncoder<ResourceType> preSkipEncoder;
     private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
+    private int overrideHeight = -1;
+    private int overrideWidth = -1;
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
@@ -422,6 +424,28 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
+     * Overrides the {@link Target}'s width and height with the given values. This is useful almost exclusively for
+     * thumbnails, and should only be used when you both need a very specific sized image and when it is impossible or
+     * impractical to return that size from {@link Target#getSize(Target.SizeReadyCallback)}.
+     *
+     * @param width The width to use to load the resource.
+     * @param height The height to use to load the resource.
+     * @return This RequestBuilder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> override(int width, int height) {
+        if (width <= 0) {
+            throw new IllegalArgumentException("Width must be >= 0");
+        }
+        if (height <= 0) {
+            throw new IllegalArgumentException("Height must be >= 0");
+        }
+        this.overrideWidth = width;
+        this.overrideHeight = height;
+
+        return this;
+    }
+
+    /**
      * Set the target the image will be loaded into.
      *
      * @param target The target to load te image for
@@ -539,7 +563,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 getFinalTransformation(),
                 transcodeClass,
                 isCacheable,
-                animationFactory);
+                animationFactory,
+                overrideWidth,
+                overrideHeight);
     }
 
     @SuppressWarnings("unchecked")

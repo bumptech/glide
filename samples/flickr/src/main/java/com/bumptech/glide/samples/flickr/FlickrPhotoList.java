@@ -15,6 +15,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.util.ArrayList;
@@ -114,9 +115,11 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
 
         @Override
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
-            return Glide.with(context)
+            return Glide.with(FlickrPhotoList.this)
                     .loadFromImage(item)
-                    .thumbnail(0.1f)
+                    .thumbnail(Glide.with(FlickrPhotoList.this)
+                            .loadFromImage(item)
+                            .override(Api.THUMB_SIZE, Api.THUMB_SIZE))
                     .centerCrop();
         }
     }
@@ -174,7 +177,9 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             Glide.with(FlickrPhotoList.this)
                     .loadFromImage(current)
                     .placeholder(new ColorDrawable(Color.GRAY))
-                    .thumbnail(0.1f)
+                    .thumbnail(Glide.with(FlickrPhotoList.this)
+                        .loadFromImage(current)
+                        .override(Api.THUMB_SIZE, Api.THUMB_SIZE))
                     .centerCrop()
                     .crossFade(R.anim.fade_in, 150)
                     .into(viewHolder.imageView);

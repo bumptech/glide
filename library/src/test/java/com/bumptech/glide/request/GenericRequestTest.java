@@ -67,6 +67,8 @@ public class GenericRequestTest {
         RequestListener<Object, Object> requestListener = mock(RequestListener.class);
         boolean skipMemoryCache;
         GlideAnimationFactory<Object> factory = mock(GlideAnimationFactory.class);
+        int overrideWidth = -1;
+        int overrideHeight = -1;
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
@@ -83,9 +85,25 @@ public class GenericRequestTest {
         }
 
         public GenericRequest<Object, Object, Object, Object> getRequest() {
-            return new GenericRequest<Object, Object, Object, Object>(loadProvider, model, context, priority, target,
-                    1f, placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, requestListener,
-                    requestCoordinator, engine, mock(Transformation.class), Object.class, skipMemoryCache, factory);
+            return new GenericRequest<Object, Object, Object, Object>(loadProvider,
+                    model,
+                    context,
+                    priority,
+                    target,
+                    1f,
+                    placeholderDrawable,
+                    placeholderResourceId,
+                    errorDrawable,
+                    errorResourceId,
+                    requestListener,
+                    requestCoordinator,
+                    engine,
+                    mock(Transformation.class),
+                    Object.class,
+                    skipMemoryCache,
+                    factory,
+                    overrideWidth,
+                    overrideHeight);
         }
     }
 
@@ -521,6 +539,49 @@ public class GenericRequestTest {
         request.onResourceReady(harness.resource);
 
         verify(harness.target).onResourceReady(eq(harness.resource.get()), eq(glideAnimation));
+    }
+
+    @Test
+    public void testCallsGetSizeIfOverrideWidthIsLessThanZero() {
+        harness.overrideWidth = -1;
+        harness.overrideHeight = 100;
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.run();
+
+        verify(harness.target).getSize(any(Target.SizeReadyCallback.class));
+    }
+
+    @Test
+    public void testCallsGetSizeIfOverrideHeightIsLessThanZero() {
+        harness.overrideHeight = -1;
+        harness.overrideWidth = 100;
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.run();
+
+        verify(harness.target).getSize(any(Target.SizeReadyCallback.class));
+    }
+
+    @Test
+    public void testDoesNotCallGetSizeIfOverrideWidthAndHeightAreSet() {
+        harness.overrideWidth = 100;
+        harness.overrideHeight = 100;
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.run();
+
+        verify(harness.target, never()).getSize(any(Target.SizeReadyCallback.class));
+    }
+
+    @Test
+    public void testCallsEngingWithOverrideWidthAndHeightIfSet() {
+        harness.overrideWidth = 1;
+        harness.overrideHeight = 2;
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.run();
+
+        verify(harness.engine).load(anyString(), eq(harness.overrideWidth), eq(harness.overrideHeight),
+                any(ResourceDecoder.class), any(DataFetcher.class), any(ResourceDecoder.class),
+                any(Transformation.class), any(ResourceEncoder.class), any(ResourceTranscoder.class),
+                any(Priority.class), anyBoolean(), any(ResourceCallback.class));
     }
 
     private Context mockContextToReturn(int resourceId, Drawable drawable) {

@@ -29,6 +29,7 @@ public class Api {
     //incomplete size independent url for photos that can be cached per photo
     private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
 
+
     private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() {{
         put(75, "s");
         put(100, "t");
@@ -43,6 +44,8 @@ public class Api {
         SORTED_SIZE_KEYS.addAll(EDGE_TO_SIZE_KEY.keySet());
         Collections.sort(SORTED_SIZE_KEYS);
     }
+
+    public static final int THUMB_SIZE = SORTED_SIZE_KEYS.get(0);
 
     private static String getSizeKey(int width, int height) {
         final int largestEdge = Math.max(width, height);

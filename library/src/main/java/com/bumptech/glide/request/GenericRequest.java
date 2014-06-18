@@ -42,6 +42,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private final float sizeMultiplier;
     private final Engine engine;
     private final GlideAnimationFactory<R> animationFactory;
+    private final int overrideWidth;
+    private final int overrideHeight;
 
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
@@ -69,7 +71,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             Transformation<Z> transformation,
             Class<R> transcodeClass,
             boolean isMemoryCacheable,
-            GlideAnimationFactory<R> animationFactory) {
+            GlideAnimationFactory<R> animationFactory,
+            int overrideWidth,
+            int overrideHeight) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -87,6 +91,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         this.transcodeClass = transcodeClass;
         this.isMemoryCacheable = isMemoryCacheable;
         this.animationFactory = animationFactory;
+        this.overrideWidth = overrideWidth;
+        this.overrideHeight = overrideHeight;
 
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
         // simply skip our sanity checks in that unusual case.
@@ -117,7 +123,11 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             return;
         }
 
-        target.getSize(this);
+        if (overrideWidth > 0 && overrideHeight > 0) {
+            onSizeReady(overrideWidth, overrideHeight);
+        } else {
+            target.getSize(this);
+        }
 
         if (!isComplete() && !isFailed()) {
             setPlaceHolder();
