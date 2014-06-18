@@ -106,7 +106,7 @@ public class ImageViewTarget implements Target {
                 // current view tree observer and should succeed.
                 ViewTreeObserver observer = view.getViewTreeObserver();
                 if (observer.isAlive()) {
-                    observer.removeGlobalOnLayoutListener(layoutListener);
+                    observer.removeOnPreDrawListener(layoutListener);
                 }
             }
         }
@@ -138,7 +138,7 @@ public class ImageViewTarget implements Target {
                 this.cb = cb;
                 final ViewTreeObserver observer = view.getViewTreeObserver();
                 layoutListener = new SizeDeterminerLayoutListener(this);
-                observer.addOnGlobalLayoutListener(layoutListener);
+                observer.addOnPreDrawListener(layoutListener);
             }
         }
 
@@ -157,7 +157,7 @@ public class ImageViewTarget implements Target {
             return layoutParams != null && (layoutParams.width > 0 && layoutParams.height > 0);
         }
 
-        private static class SizeDeterminerLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
+        private static class SizeDeterminerLayoutListener implements ViewTreeObserver.OnPreDrawListener {
             private final WeakReference<SizeDeterminer> sizeDeterminerRef;
 
             public SizeDeterminerLayoutListener(SizeDeterminer sizeDeterminer) {
@@ -165,7 +165,7 @@ public class ImageViewTarget implements Target {
             }
 
             @Override
-            public void onGlobalLayout() {
+            public boolean onPreDraw() {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "OnGlobalLayoutListener called listener=" + this);
                 }
@@ -173,6 +173,7 @@ public class ImageViewTarget implements Target {
                 if (sizeDeterminer != null) {
                     sizeDeterminer.checkCurrentDimens();
                 }
+                return true;
             }
         }
     }
