@@ -1,19 +1,33 @@
 package com.bumptech.glide.manager;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 public class RequestManagerRetriever {
     static final String TAG = "com.bumptech.glide.manager";
+    private static final RequestManager NULL_MANAGER = new NullRequestManager();
+
+    public static RequestManager get(Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("You cannot start a load on a null Context");
+        } else if (context instanceof FragmentActivity) {
+            return get((FragmentActivity) context);
+        } else if (context instanceof Activity) {
+            return get((Activity) context);
+        } else {
+            return NULL_MANAGER;
+        }
+    }
 
     public static RequestManager get(FragmentActivity activity) {
         if (activity.isDestroyed()) {
             throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
         }
         FragmentManager fm = activity.getSupportFragmentManager();
-        return supportFragmentGet(fm);
+        return supportFragmentGet(activity, fm);
     }
 
     public static RequestManager get(Fragment fragment) {
@@ -24,7 +38,7 @@ public class RequestManagerRetriever {
             throw new IllegalArgumentException("You cannot start a load on a detached fragment");
         }
         FragmentManager fm = fragment.getChildFragmentManager();
-        return supportFragmentGet(fm);
+        return supportFragmentGet(fragment.getActivity(), fm);
     }
 
     public static RequestManager get(Activity activity) {
@@ -32,7 +46,7 @@ public class RequestManagerRetriever {
             throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
         }
         android.app.FragmentManager fm = activity.getFragmentManager();
-        return fragmentGet(fm);
+        return fragmentGet(activity, fm);
     }
 
     public static RequestManager get(android.app.Fragment fragment) {
@@ -43,10 +57,10 @@ public class RequestManagerRetriever {
             throw new IllegalArgumentException("You cannot start a load on a detached fragment");
         }
         android.app.FragmentManager fm = fragment.getChildFragmentManager();
-        return fragmentGet(fm);
+        return fragmentGet(fragment.getActivity(), fm);
     }
 
-    static RequestManager fragmentGet(android.app.FragmentManager fm) {
+    static RequestManager fragmentGet(Context context, android.app.FragmentManager fm) {
         RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {
             current = new RequestManagerFragment();
@@ -59,14 +73,14 @@ public class RequestManagerRetriever {
         }
         LifecycleRequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new LifecycleRequestManager();
+            requestManager = new LifecycleRequestManager(context);
             current.setRequestManager(requestManager);
         }
         return requestManager;
 
     }
 
-    static RequestManager supportFragmentGet(FragmentManager fm) {
+    static RequestManager supportFragmentGet(Context context, FragmentManager fm) {
         SupportRequestManagerFragment current = (SupportRequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {
             current = new SupportRequestManagerFragment();
@@ -79,7 +93,7 @@ public class RequestManagerRetriever {
         }
         LifecycleRequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new LifecycleRequestManager();
+            requestManager = new LifecycleRequestManager(context);
             current.setRequestManager(requestManager);
         }
         return requestManager;

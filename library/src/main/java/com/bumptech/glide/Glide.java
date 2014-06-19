@@ -47,7 +47,6 @@ import com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTransc
 import com.bumptech.glide.load.resource.transcode.GifDataDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderFactory;
-import com.bumptech.glide.manager.NullRequestManager;
 import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.provider.DataLoadProviderFactory;
@@ -86,7 +85,6 @@ public class Glide {
     private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     private final TranscoderFactory transcoderFactory = new TranscoderFactory();
     private final DataLoadProviderFactory dataLoadProviderFactory;
-    private final NullRequestManager requestManager = new NullRequestManager();
 
     /**
      * Try to get the external cache directory if available and default to the internal. Use a default name for the
@@ -446,7 +444,8 @@ public class Glide {
      * @return A model request to pass in the object representing the image to be loaded.
      */
     public static ModelRequest with(Context context) {
-        return new ModelRequest(context, Glide.get(context), Glide.get(context).requestManager);
+        RequestManager requestManager = RequestManagerRetriever.get(context);
+        return new ModelRequest(context, Glide.get(context), requestManager);
     }
 
     public static ModelRequest with(Activity activity) {

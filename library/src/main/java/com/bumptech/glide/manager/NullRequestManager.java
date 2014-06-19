@@ -2,7 +2,7 @@ package com.bumptech.glide.manager;
 
 import com.bumptech.glide.request.Request;
 
-public class NullRequestManager implements RequestManager {
+class NullRequestManager implements RequestManager {
     @Override
     public void addRequest(Request request) {
     }

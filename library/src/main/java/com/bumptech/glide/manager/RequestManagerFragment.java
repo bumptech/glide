@@ -2,7 +2,7 @@ package com.bumptech.glide.manager;
 
 import android.app.Fragment;
 
-public class RequestManagerFragment extends Fragment {
+class RequestManagerFragment extends Fragment {
     private LifecycleRequestManager requestManager;
 
     public void setRequestManager(LifecycleRequestManager requestManager) {

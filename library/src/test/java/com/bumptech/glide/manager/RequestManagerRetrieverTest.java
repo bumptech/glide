@@ -1,6 +1,7 @@
 package com.bumptech.glide.manager;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -152,6 +153,32 @@ public class RequestManagerRetrieverTest {
         SupportRetrieverHarness harness = new SupportRetrieverHarness();
         harness.getController().pause().stop().destroy();
         harness.doGet();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsIfGivenNullContext() {
+        RequestManagerRetriever.get((Context) null);
+    }
+
+    @Test
+    public void testChecksIfContextIsFragmentActivity() {
+        SupportRetrieverHarness harness = new SupportRetrieverHarness();
+        RequestManager requestManager = harness.doGet();
+
+        assertEquals(requestManager, RequestManagerRetriever.get((Context) harness.getController().get()));
+    }
+
+    @Test
+    public void testChecksIfContextIsActivity() {
+        DefaultRetrieverHarness harness = new DefaultRetrieverHarness();
+        RequestManager requestManager = harness.doGet();
+
+        assertEquals(requestManager, RequestManagerRetriever.get((Context) harness.getController().get()));
+    }
+
+    @Test
+    public void testReturnsNonNullManagerIfGivenApplicationContext() {
+        assertNotNull(RequestManagerRetriever.get(Robolectric.application));
     }
 
     private interface RetrieverHarness {
