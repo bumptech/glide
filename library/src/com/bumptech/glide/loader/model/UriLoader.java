@@ -58,10 +58,6 @@ public class UriLoader implements ModelLoader<Uri> {
             }
         }
 
-        if (result == null) {
-            throw new IllegalArgumentException("No stream loader for uri=" + model);
-        }
-
         return result;
     }
 
