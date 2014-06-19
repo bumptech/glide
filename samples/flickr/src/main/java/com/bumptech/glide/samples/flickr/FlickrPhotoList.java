@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.flickr;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -47,7 +46,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         list = (ListView) result.findViewById(R.id.flickr_photo_list);
         adapter = new FlickrPhotoListAdapter();
         list.setAdapter(adapter);
-        preloader = new FlickrListPreloader(getActivity(), 5);
+        preloader = new FlickrListPreloader(5);
         list.setOnScrollListener(preloader);
         if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
@@ -85,12 +84,10 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     }
 
     private class FlickrListPreloader extends ListPreloader<Photo> {
-        private final Context context;
         private int[] photoDimens = null;
 
-        public FlickrListPreloader(Context context, int maxPreload) {
+        public FlickrListPreloader(int maxPreload) {
             super(maxPreload);
-            this.context = context;
         }
 
         public boolean isDimensSet() {

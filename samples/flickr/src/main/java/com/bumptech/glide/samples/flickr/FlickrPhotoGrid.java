@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.flickr;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +45,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
         grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
-        final FlickrPreloader preloader = new FlickrPreloader(getActivity(), args.getInt(PRELOAD_KEY));
+        final FlickrPreloader preloader = new FlickrPreloader(args.getInt(PRELOAD_KEY));
         grid.setOnScrollListener(preloader);
         adapter = new PhotoAdapter();
         grid.setAdapter(adapter);
@@ -80,11 +79,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
 
     private class FlickrPreloader extends ListPreloader<Photo> {
         private final int[] dimens = new int[] { photoSize, photoSize };
-        private final Context context;
 
-        public FlickrPreloader(Context context, int toPreload) {
+        public FlickrPreloader(int toPreload) {
             super(toPreload);
-            this.context = context;
         }
 
         @Override

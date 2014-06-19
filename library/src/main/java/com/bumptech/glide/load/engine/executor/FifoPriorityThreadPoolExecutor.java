@@ -8,8 +8,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-
 /**
  * A FIFO priority {@link ThreadPoolExecutor} that prioritizes submitted {@link Runnable}s by assuming they implement
  * {@link Prioritized}. {@link Prioritized} runnables that return lower values for {@link Prioritized#getPriority()}
@@ -41,10 +39,15 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         int threadNum = 0;
         @Override
         public Thread newThread(Runnable runnable) {
-              final Thread result = new Thread(runnable, "image-manager-resize-" + threadNum);
-                        threadNum++;
-                        result.setPriority(THREAD_PRIORITY_BACKGROUND);
-                        return result;
+            final Thread result = new Thread(runnable, "image-manager-resize-" + threadNum) {
+                @Override
+                public void run() {
+                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                    super.run();
+                }
+            };
+            threadNum++;
+            return result;
         }
     }
 

@@ -41,8 +41,13 @@ public class EngineBuilder {
         }
 
         if (bgHandler == null) {
-            HandlerThread handlerThread = new HandlerThread("EngineThread");
-            handlerThread.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            HandlerThread handlerThread = new HandlerThread("EngineThread") {
+                @Override
+                public void run() {
+                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                    super.run();
+                }
+            };
             handlerThread.start();
             bgHandler = new Handler(handlerThread.getLooper());
         }

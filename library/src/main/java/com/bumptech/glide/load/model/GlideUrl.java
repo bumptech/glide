@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.model;
 
+import android.text.TextUtils;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -10,8 +12,8 @@ import java.net.URL;
  * Users wishing to replace the class for handling urls must register a factory using GlideUrl.
  */
 public class GlideUrl {
-    private final String stringUrl;
-    private final URL url;
+    private String stringUrl;
+    private URL url;
 
     public GlideUrl(URL url) {
         this.url = url;
@@ -24,12 +26,18 @@ public class GlideUrl {
     }
 
     public URL toURL() throws MalformedURLException {
-        return url != null ? url : new URL(stringUrl);
+        if (url == null) {
+            url = new URL(stringUrl);
+        }
+        return url;
     }
 
     @Override
     public String toString() {
-        return url != null ? url.toString() : stringUrl;
+        if (TextUtils.isEmpty(stringUrl)) {
+            stringUrl = url.toString();
+        }
+        return stringUrl;
     }
 
     @Override

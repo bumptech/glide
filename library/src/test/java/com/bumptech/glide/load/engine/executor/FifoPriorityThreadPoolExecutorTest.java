@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.engine.executor;
 
-import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor;
-import com.bumptech.glide.load.engine.executor.Prioritized;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 
+@RunWith(RobolectricTestRunner.class)
 public class FifoPriorityThreadPoolExecutorTest {
 
     @Test

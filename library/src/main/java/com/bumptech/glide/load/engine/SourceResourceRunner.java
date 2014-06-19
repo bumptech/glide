@@ -56,7 +56,9 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
 
     public void cancel() {
         isCancelled = true;
-        fetcher.cancel();
+        if (fetcher != null) {
+            fetcher.cancel();
+        }
     }
 
     @Override
