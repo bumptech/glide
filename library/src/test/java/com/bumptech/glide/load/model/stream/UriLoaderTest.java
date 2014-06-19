@@ -83,4 +83,15 @@ public class UriLoaderTest {
 
         verify(urlLoader).getResourceFetcher(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
+
+    // Test for https://github.com/bumptech/glide/issues/71.
+    @Test
+    public void testHandlesMostlyInvalidHttpUris() {
+        Uri mostlyInvalidHttpUri =
+                Uri.parse("http://myserver_url.com:80http://myserver_url.com/webapp/images/no_image.png?size=100");
+
+        loader.getResourceFetcher(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE);
+        verify(urlLoader).getResourceFetcher(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE),
+                eq(IMAGE_SIDE));
+    }
 }
