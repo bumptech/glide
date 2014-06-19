@@ -20,7 +20,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
 
     @Override
     public boolean canSetPlaceholder(Request request) {
-        return request == full;
+        return request == full && !isAnyRequestComplete();
     }
 
     @Override

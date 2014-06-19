@@ -572,7 +572,7 @@ public class GenericRequestTest {
     }
 
     @Test
-    public void testCallsEngingWithOverrideWidthAndHeightIfSet() {
+    public void testCallsEngineWithOverrideWidthAndHeightIfSet() {
         harness.overrideWidth = 1;
         harness.overrideHeight = 2;
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
@@ -582,6 +582,16 @@ public class GenericRequestTest {
                 any(ResourceDecoder.class), any(DataFetcher.class), any(ResourceDecoder.class),
                 any(Transformation.class), any(ResourceEncoder.class), any(ResourceTranscoder.class),
                 any(Priority.class), anyBoolean(), any(ResourceCallback.class));
+    }
+
+    @Test
+    public void testDoesNotSetErrorDrawableIfRequestCoordinatorDoesntAllowIt() {
+        harness.errorDrawable = new ColorDrawable(Color.RED);
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.requestCoordinator.canSetPlaceholder(any(Request.class))).thenReturn(false);
+        request.onException(new IOException("Test"));
+
+        verify(harness.target, never()).setPlaceholder(any(Drawable.class));
     }
 
     private Context mockContextToReturn(int resourceId, Drawable drawable) {
