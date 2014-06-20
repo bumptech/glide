@@ -270,4 +270,10 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
         super.skipCache(skip);
         return this;
     }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> override(int width, int height) {
+        super.override(width, height);
+        return this;
+    }
 }

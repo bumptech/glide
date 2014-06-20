@@ -199,4 +199,10 @@ public class DrawableRequestBuilder<ModelType> extends
         super.skipCache(skip);
         return this;
     }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> override(int width, int height) {
+        super.override(width, height);
+        return this;
+    }
 }

@@ -173,4 +173,10 @@ public class GifRequestBuilder<ModelType, TranscodeType>
         super.skipCache(skip);
         return this;
     }
+
+    @Override
+    public GifRequestBuilder<ModelType, TranscodeType> override(int width, int height) {
+        super.override(width, height);
+        return this;
+    }
 }
