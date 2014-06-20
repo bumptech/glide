@@ -3,6 +3,8 @@ package com.bumptech.glide.load;
 import com.bumptech.glide.Resource;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -27,7 +29,17 @@ public class MultiTransformationTest {
 
         MultiTransformation transformation = new MultiTransformation(first, second, third);
 
-        assertEquals(firstId + secondId + thirdId, transformation.getId());
+        final String expected = firstId + secondId + thirdId;
+        assertEquals(expected, transformation.getId());
+
+        ArrayList<Transformation> transformations = new ArrayList<Transformation>();
+        transformations.add(first);
+        transformations.add(second);
+        transformations.add(third);
+
+        transformation = new MultiTransformation(transformations);
+
+        assertEquals(expected, transformation.getId());
     }
 
     @Test

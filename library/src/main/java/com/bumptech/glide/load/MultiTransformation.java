@@ -10,6 +10,7 @@ import java.util.List;
 public class MultiTransformation<T> implements Transformation<T> {
     private Transformation<T>[] transformations;
     private List<Transformation<T>> transformationList;
+    private String id;
 
     public MultiTransformation(Transformation<T>... transformations) {
         if (transformations.length < 1) {
@@ -53,10 +54,19 @@ public class MultiTransformation<T> implements Transformation<T> {
 
     @Override
     public String getId() {
-        StringBuilder sb = new StringBuilder();
-        for (Transformation transformation : transformations) {
-            sb.append(transformation.getId());
+        if (id == null) {
+            StringBuilder sb = new StringBuilder();
+            if (transformations != null) {
+                for (Transformation transformation : transformations) {
+                    sb.append(transformation.getId());
+                }
+            } else {
+                for (Transformation transformation : transformationList) {
+                    sb.append(transformation.getId());
+                }
+            }
+            id = sb.toString();
         }
-        return sb.toString();
+        return id;
     }
 }
