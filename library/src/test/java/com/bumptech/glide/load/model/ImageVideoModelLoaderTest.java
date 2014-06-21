@@ -200,6 +200,29 @@ public class ImageVideoModelLoaderTest {
         harness.getFetcher().loadData(Priority.LOW);
     }
 
+    @Test
+    public void testReturnsDifferentIdsForDifferentObjects() {
+        Object first = new Object();
+        String firstStreamId = "firstStream";
+        when(harness.streamModelLoader.getId(eq(first))).thenReturn(firstStreamId);
+        String firstFileDescriptorId = "firstFileDescriptor";
+        when(harness.fileDescriptorModelLoader.getId(eq(first))).thenReturn(firstFileDescriptorId);
+
+        String firstId = harness.getLoader().getId(first);
+        assertTrue(firstId.contains(firstStreamId));
+        assertTrue(firstId.contains(firstFileDescriptorId));
+
+        Object second = new Object();
+        String secondStreamId = "secondStream";
+        when(harness.streamModelLoader.getId(eq(second))).thenReturn(secondStreamId);
+        String secondFileDescriptorId = "secondFileDescriptor";
+        when(harness.fileDescriptorModelLoader.getId(eq(second))).thenReturn(secondFileDescriptorId);
+
+        String secondId = harness.getLoader().getId(second);
+        assertTrue(secondId.contains(secondStreamId));
+        assertTrue(secondId.contains(secondFileDescriptorId));
+    }
+
     @SuppressWarnings("unchecked")
     private static class ImageVideoLoaderHarness {
         ModelLoader<Object, InputStream> streamModelLoader = mock(ModelLoader.class);
