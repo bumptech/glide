@@ -126,6 +126,17 @@ public class LruCacheTest {
     }
 
     @Test
+    public void testCanPutSameItemMultipleTimes() {
+        String key = getKey();
+        Object value = new Object();
+        for (int i = 0; i < SIZE * 2; i++) {
+            cache.put(key, value);
+        }
+
+        verify(listener, never()).onItemRemoved(anyObject());
+    }
+
+    @Test
     public void testCanIncreaseSizeDynamically() {
         int sizeMultiplier = 2;
         cache.setSizeMultiplier(sizeMultiplier);

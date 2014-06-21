@@ -54,9 +54,11 @@ public class LruCache<T, Y> {
             return null;
         }
 
-        currentSize += getSize(item);
         final Y result = cache.put(key, item);
-        evict();
+        if (result != item) {
+            currentSize += getSize(item);
+            evict();
+        }
         return result;
     }
 
