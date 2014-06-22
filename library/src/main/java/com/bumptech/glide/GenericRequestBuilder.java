@@ -45,7 +45,8 @@ import java.util.List;
  */
 public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> {
     private final Context context;
-    private final List<Transformation<ResourceType>> transformations = new ArrayList<Transformation<ResourceType>>();
+    private List<Transformation<ResourceType>> transformations = null;
+    private Transformation<ResourceType> singleTransformation = Transformation.NONE;
     private final ModelType model;
     private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
     private final Class<TranscodeType> transcodeClass;
@@ -234,7 +235,13 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transform(
             Transformation<ResourceType> transformation) {
-        transformations.add(transformation);
+        if (singleTransformation == Transformation.NONE) {
+            singleTransformation = transformation;
+        } else {
+            transformations = new ArrayList<Transformation<ResourceType>>();
+            transformations.add(singleTransformation);
+            transformations.add(transformation);
+        }
 
         return this;
     }
@@ -571,13 +578,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     @SuppressWarnings("unchecked")
     private Transformation<ResourceType> getFinalTransformation() {
-        switch (transformations.size()) {
-            case 0:
-                return Transformation.NONE;
-            case 1:
-                return transformations.get(0);
-            default:
-                return new MultiTransformation<ResourceType>(transformations);
+        if (transformations == null) {
+            return singleTransformation;
+        } else {
+            return new MultiTransformation<ResourceType>(transformations);
         }
     }
 }
