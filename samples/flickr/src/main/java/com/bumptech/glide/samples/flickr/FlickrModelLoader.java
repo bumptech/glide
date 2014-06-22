@@ -18,15 +18,13 @@ import java.io.InputStream;
  * directly to the disk cache.
  */
 public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
-    private final ModelCache<String> stringCache;
 
     public static class Factory implements ModelLoaderFactory<Photo, InputStream> {
-        private final ModelCache<GlideUrl> modelCache = new ModelCache<GlideUrl>();
-        private final ModelCache<String> stringCache = new ModelCache<String>();
+        private final ModelCache<GlideUrl> modelCache = new ModelCache<GlideUrl>(500);
 
         @Override
         public ModelLoader<Photo, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new FlickrModelLoader(context, modelCache, stringCache);
+            return new FlickrModelLoader(context, modelCache);
         }
 
         @Override
@@ -34,20 +32,13 @@ public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
         }
     }
 
-    public FlickrModelLoader(Context context, ModelCache<GlideUrl> modelCache, ModelCache<String> stringCache) {
+    public FlickrModelLoader(Context context, ModelCache<GlideUrl> modelCache) {
         super(context, modelCache);
-        this.stringCache = stringCache;
     }
 
     @Override
     protected String getUrl(Photo model, int width, int height) {
-        final String id = getId(model);
-        String result = stringCache.get(id, width, height);
-        if (result == null) {
-            result = Api.getPhotoURL(model, width, height);
-            stringCache.put(id, width, height, result);
-        }
-        return result;
+        return Api.getPhotoURL(model, width, height);
     }
 
     @Override
