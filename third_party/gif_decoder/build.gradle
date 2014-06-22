@@ -14,9 +14,7 @@ android {
     buildToolsVersion = '19.1.0'
     sourceSets {
         main {
-            aidl.srcDirs         = ['src']
-            resources.srcDirs    = ['src']
-            java.srcDirs         = ['src']
+            java.srcDirs         = ['src/main/java']
             manifest.srcFile 'AndroidManifest.xml'
         }
     }

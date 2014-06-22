@@ -25,7 +25,7 @@ repositories {
 dependencies {
     compile project(':third_party:gif_decoder')
 
-    compile 'com.android.support:support-v4:19.0.+'
+    compile 'com.android.support:support-v4:19.1.+'
     compile 'com.mcxiaoke.volley:library:1.0.+'
     compile 'com.jakewharton:disklrucache:2.0.+'
 
@@ -35,18 +35,35 @@ dependencies {
     androidTestCompile 'org.robolectric:robolectric:2.3'
 }
 
+ext {
+    versionMajor = 3
+    versionMinor = 2
+    versionPatch = 0
+    versionBuild = 5
+}
+
+def getVersionName() {
+    return "${versionMajor}.${versionMinor}.${versionPatch}a"
+}
+
 android {
     compileSdkVersion 19
     buildToolsVersion = '19.1.0'
 
+    defaultConfig {
+      versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+      versionName getVersionName()
+    }
+
     sourceSets {
         main {
-            resources.srcDirs    = ['src/main']
-            java.srcDirs         = ['src/main']
+            java.srcDirs         = ['src/main/java']
             manifest.srcFile 'AndroidManifest.xml'
         }
 
-        instrumentTest.setRoot('src/test')
+        androidTest {
+            java.srcDirs = ['src/test/java']
+        }
     }
 
     lintOptions {
@@ -57,3 +74,21 @@ android {
 task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
 }
+
+def getJarName() {
+    return "glide-${getVersionName()}.jar"
+}
+
+// Build a jar, from http://stackoverflow.com/a/19037807/1002054
+task clearJar(type: Delete) {
+    delete "build/libs/${getJarName()}"
+}
+
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/libs/')
+    include('classes.jar')
+    rename ('classes.jar', getJarName())
+}
+
+makeJar.dependsOn(clearJar, build)
