@@ -2,9 +2,9 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
 import com.bumptech.glide.Resource;
-import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +13,10 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLooper;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -66,6 +70,31 @@ public class EngineJobTest {
 
         Robolectric.runUiThreadTasks();
         verify(harness.cb).onException(eq(exception));
+    }
+     @Test
+    public void testNotifiesAllCallbacksOnReady() {
+         MultiCbHarness harness = new MultiCbHarness();
+        harness.job.onResourceReady(harness.resource);
+        for (ResourceCallback cb : harness.cbs) {
+            verify(cb).onResourceReady(eq(harness.resource));
+        }
+    }
+
+    @Test
+    public void testNotifiesAllCallbacksOnException() {
+        MultiCbHarness harness = new MultiCbHarness();
+        Exception exception = new IOException("test");
+        harness.job.onException(exception);
+        for (ResourceCallback cb : harness.cbs) {
+            verify(cb).onException(eq(exception));
+        }
+    }
+
+    @Test
+    public void testAcquiresResourceOncePerCallback() {
+        MultiCbHarness harness = new MultiCbHarness();
+        harness.job.onResourceReady(harness.resource);
+        verify(harness.resource).acquire(eq(harness.numCbs));
     }
 
     @Test
@@ -128,7 +157,7 @@ public class EngineJobTest {
         harness.getJob().onResourceReady(harness.resource);
 
         // Once while notifying, once for memory cache, and once for resource.
-        verify(harness.resource).acquire(eq(3));
+        verify(harness.resource, times(3)).acquire(eq(1));
     }
 
     @Test
@@ -143,7 +172,7 @@ public class EngineJobTest {
 
         harness.getJob().onResourceReady(harness.resource);
         // Once while notifying, once for memory cache, and once for resource.
-        verify(harness.resource).acquire(eq(3));
+        verify(harness.resource, times(3)).acquire(eq(1));
         // Once for notifying, and once for resource.
         verify(harness.resource, times(2)).release();
     }
@@ -188,11 +217,33 @@ public class EngineJobTest {
     }
 
     @Test
-    public void testReleasesResourceIfNotCacheable() {
+    public void testDoesNotAcquireOnceForMemoryCacheIfNotCacheable() {
         harness.isCacheable = false;
         harness.getJob().onResourceReady(harness.resource);
 
-        verify(harness.resource, times(2)).release();
+        verify(harness.resource, times(2)).acquire(eq(1));
+    }
+
+    private static class MultiCbHarness {
+        Key key = mock(Key.class);
+        MemoryCache memoryCache = mock(MemoryCache.class);
+        Handler mainHandler = new Handler();
+        Resource<Object> resource = mock(Resource.class);
+        EngineJobListener listener = mock(EngineJobListener.class);
+        boolean isCacheable = true;
+        int numCbs = 10;
+        List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
+        EngineJob job = new EngineJob(key, memoryCache, mainHandler, isCacheable, listener);
+
+        public MultiCbHarness() {
+            for (int i = 0; i < numCbs; i++) {
+                cbs.add(mock(ResourceCallback.class));
+            }
+            for (ResourceCallback cb : cbs) {
+                job.addCallback(cb);
+            }
+        }
+
     }
 
     @SuppressWarnings("unchecked")

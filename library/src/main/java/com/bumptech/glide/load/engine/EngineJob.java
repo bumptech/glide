@@ -15,7 +15,8 @@ public class EngineJob implements ResourceCallback {
     private Key key;
     private MemoryCache cache;
     private Handler mainHandler;
-    private List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
+    private List<ResourceCallback> cbs;
+    private ResourceCallback cb;
     private boolean isCancelled;
     private boolean isComplete;
 
@@ -28,12 +29,25 @@ public class EngineJob implements ResourceCallback {
     }
 
     public void addCallback(ResourceCallback cb) {
-        cbs.add(cb);
+        if (this.cb == null) {
+            this.cb = cb;
+        } else {
+            if (cbs == null) {
+                cbs = new ArrayList<ResourceCallback>(2);
+                cbs.add(this.cb);
+            }
+            cbs.add(cb);
+        }
     }
 
     public void removeCallback(ResourceCallback cb) {
-        cbs.remove(cb);
-        if (cbs.size() == 0) {
+        if (cbs != null) {
+            cbs.remove(cb);
+            if (cbs.size() == 0) {
+                cancel();
+            }
+        } else if (this.cb == cb) {
+            this.cb = null;
             cancel();
         }
     }
@@ -63,20 +77,25 @@ public class EngineJob implements ResourceCallback {
                 }
                 isComplete = true;
 
-                // 1 to hold on for duration of request.
-                resource.acquire(cbs.size() + 2);
+                // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
+                // synchronously released by one of the callbacks.
+                resource.acquire(1);
                 listener.onEngineJobComplete(key);
                 if (isCacheable) {
+                    resource.acquire(1);
                     cache.put(key, resource);
-                } else {
-                    resource.release();
                 }
-                for (ResourceCallback cb : cbs) {
+                if (cbs != null) {
+                    resource.acquire(cbs.size());
+                    for (ResourceCallback cb : cbs) {
+                        cb.onResourceReady(resource);
+                    }
+                } else {
+                    resource.acquire(1);
                     cb.onResourceReady(resource);
                 }
                 // Our request is complete, so we can release the resource.
                 resource.release();
-
             }
         });
     }
@@ -92,7 +111,11 @@ public class EngineJob implements ResourceCallback {
                 isComplete = true;
 
                 listener.onEngineJobComplete(key);
-                for (ResourceCallback cb : cbs) {
+                if (cbs != null) {
+                    for (ResourceCallback cb : cbs) {
+                        cb.onException(e);
+                    }
+                } else {
                     cb.onException(e);
                 }
             }
