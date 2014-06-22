@@ -23,6 +23,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>android.support</groupId>
+      <artifactId>compatibility-v4</artifactId>
+      <version>19.1.0</version>
+    </dependency>
+    <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
       <version>4.4.2_r3</version>
@@ -40,12 +45,11 @@
       <plugin>
         <groupId>com.jayway.maven.plugins.android.generation2</groupId>
         <artifactId>android-maven-plugin</artifactId>
-        <version>3.9.0-rc.1</version>
+        <version>3.9.0-rc.2</version>
         <configuration>
           <sdk>
             <platform>19</platform>
           </sdk>
-          <deleteConflictingFiles>true</deleteConflictingFiles>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
         </configuration>
         <extensions>true</extensions>

@@ -24,3 +24,5 @@ samples/flickr/target
 /library/.classpath
 /library/.project
 docs/**/*
+**/out/**
+**/gen-external-apklibs/**

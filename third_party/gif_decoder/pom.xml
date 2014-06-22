@@ -10,32 +10,7 @@
   </parent>
 
   <artifactId>glide-gif-decoder</artifactId>
-  <packaging>apk</packaging>
+  <packaging>aar</packaging>
   <name>Glide Gif Decoder</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-        <artifactId>android-maven-plugin</artifactId>
-        <version>3.9.0-rc.1</version>
-        <configuration>
-          <sdk>
-            <platform>19</platform>
-          </sdk>
-          <deleteConflictingFiles>true</deleteConflictingFiles>
-          <undeployBeforeDeploy>true</undeployBeforeDeploy>
-        </configuration>
-        <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
