@@ -15,19 +15,19 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 
 class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
-    private final Handler bgHandler;
     private MemoryCache memoryCache;
     private DiskCache diskCache;
     private Handler mainHandler;
+    private ExecutorService diskCacheService;
     private ExecutorService service;
 
     public DefaultResourceRunnerFactory(MemoryCache memoryCache, DiskCache diskCache, Handler mainHandler,
-            ExecutorService service, Handler bgHandler ) {
+            ExecutorService diskCacheService, ExecutorService resizeService) {
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.mainHandler = mainHandler;
-        this.service = service;
-        this.bgHandler = bgHandler;
+        this.diskCacheService = diskCacheService;
+        this.service = resizeService;
     }
 
     @Override
@@ -42,6 +42,6 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
                 decoder, transformation, encoder, transcoder, diskCache, priority, engineJob);
 
         return new ResourceRunner<Z, R>(key, width, height, diskCache, cacheDecoder, transformation, transcoder,
-                sourceRunner, service, bgHandler, engineJob);
+                sourceRunner, diskCacheService, service, engineJob, priority);
     }
 }

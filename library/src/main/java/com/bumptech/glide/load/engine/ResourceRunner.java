@@ -1,13 +1,14 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 import java.io.IOException;
@@ -20,27 +21,28 @@ import java.util.concurrent.Future;
  * @param <Z> The type of the resource that will be decoded.
  * @param <R> the type of the resource the decoded resource will be transcoded to.
  */
-public class ResourceRunner<Z, R> implements Runnable {
+public class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private static final String TAG = "ResourceRunner";
 
     private final Key key;
-    private Transformation<Z> transformation;
-    private ResourceTranscoder<Z, R> transcoder;
+    private final Transformation<Z> transformation;
+    private final ResourceTranscoder<Z, R> transcoder;
     private final SourceResourceRunner sourceRunner;
-    private final ExecutorService executorService;
     private final EngineJob job;
+    private final Priority priority;
     private final ResourceDecoder<InputStream, Z> cacheDecoder;
     private final int width;
     private final int height;
     private final DiskCache diskCache;
-    private final Handler bgHandler;
+    private final ExecutorService diskCacheService;
+    private final ExecutorService resizeService;
     private volatile Future<?> future;
     private volatile boolean isCancelled;
 
     public ResourceRunner(Key key, int width, int height, DiskCache diskCache,
             ResourceDecoder<InputStream, Z> cacheDecoder, Transformation<Z> transformation,
-            ResourceTranscoder<Z, R> transcoder, SourceResourceRunner sourceRunner, ExecutorService executorService,
-            Handler bgHandler, EngineJob job) {
+            ResourceTranscoder<Z, R> transcoder, SourceResourceRunner sourceRunner, ExecutorService diskCacheService,
+            ExecutorService resizeService, EngineJob job, Priority priority) {
         this.key = key;
         this.width = width;
         this.height = height;
@@ -49,9 +51,10 @@ public class ResourceRunner<Z, R> implements Runnable {
         this.transformation = transformation;
         this.transcoder = transcoder;
         this.sourceRunner = sourceRunner;
-        this.executorService = executorService;
-        this.bgHandler = bgHandler;
+        this.diskCacheService = diskCacheService;
+        this.resizeService = resizeService;
         this.job = job;
+        this.priority = priority;
     }
 
     public EngineJob getJob() {
@@ -60,7 +63,6 @@ public class ResourceRunner<Z, R> implements Runnable {
 
     public void cancel() {
         isCancelled = true;
-        bgHandler.removeCallbacks(this);
         if (future != null) {
             future.cancel(false);
         }
@@ -68,7 +70,7 @@ public class ResourceRunner<Z, R> implements Runnable {
     }
 
     public void queue() {
-        bgHandler.post(this);
+        future = diskCacheService.submit(this);
     }
 
     @Override
@@ -90,7 +92,7 @@ public class ResourceRunner<Z, R> implements Runnable {
             Resource<R> transcoded = transcoder.transcode(transformed);
             job.onResourceReady(transcoded);
         } else {
-            future = executorService.submit(sourceRunner);
+            future = resizeService.submit(sourceRunner);
         }
     }
 
@@ -113,5 +115,10 @@ public class ResourceRunner<Z, R> implements Runnable {
             }
         }
         return result;
+    }
+
+    @Override
+    public int getPriority() {
+        return priority.ordinal();
     }
 }

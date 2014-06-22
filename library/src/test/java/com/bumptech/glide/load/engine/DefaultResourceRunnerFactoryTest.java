@@ -41,14 +41,14 @@ public class DefaultResourceRunnerFactoryTest {
         EngineJobListener listener = mock(EngineJobListener.class);
         DiskCache diskCache = mock(DiskCache.class);
         Handler mainHandler = new Handler();
-        Handler bgHandler = mock(Handler.class);
-        ExecutorService service = mock(ExecutorService.class);
+        ExecutorService diskCacheService = mock(ExecutorService.class);
+        ExecutorService resizeService = mock(ExecutorService.class);
         Transformation<Object> transformation = mock(Transformation.class);
         int width = 100;
         int height = 100;
 
         DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(memoryCache, diskCache,
-                mainHandler, service, bgHandler);
+                mainHandler, diskCacheService, resizeService);
 
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
         DataFetcher<Object> fetcher = mock(DataFetcher.class);

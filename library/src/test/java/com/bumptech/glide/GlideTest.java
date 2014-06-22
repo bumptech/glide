@@ -127,7 +127,8 @@ public class GlideTest {
         requestQueue.start();
         Glide.setup(new GlideBuilder(Robolectric.application)
                 .setEngine(new EngineBuilder(mock(MemoryCache.class), mock(DiskCache.class))
-                        .setExecutorService(service)
+                        .setDiskCacheService(service)
+                        .setResizeService(service)
                         .setBackgroundHandler(bgHandler)
                         .build())
                 .setRequestQueue(requestQueue));

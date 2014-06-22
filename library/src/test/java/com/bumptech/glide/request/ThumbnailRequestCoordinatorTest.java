@@ -58,14 +58,6 @@ public class ThumbnailRequestCoordinatorTest {
     }
 
     @Test
-    public void testDoesNotStartThumbOnRunIfFullCompletesSynchronously() {
-        when(full.isComplete()).thenReturn(true);
-        coordinator.run();
-
-        verify(thumb, never()).run();
-    }
-
-    @Test
     public void testDoesNotStartFullOnRunIfRunning() {
         when(full.isRunning()).thenReturn(true);
         coordinator.run();

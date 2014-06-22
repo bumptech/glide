@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.Handler;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -46,7 +47,7 @@ public class ResourceRunnerTest {
 
         harness.runner.run();
 
-        verify(harness.service).submit(eq(harness.sourceRunner));
+        verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
     @Test
@@ -166,7 +167,7 @@ public class ResourceRunnerTest {
 
         harness.runner.run();
 
-        verify(harness.service).submit(eq(harness.sourceRunner));
+        verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
     @Test
@@ -176,7 +177,7 @@ public class ResourceRunnerTest {
 
         harness.runner.run();
 
-        verify(harness.service).submit(eq(harness.sourceRunner));
+        verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
     @Test
@@ -186,22 +187,24 @@ public class ResourceRunnerTest {
 
         harness.runner.run();
 
-        verify(harness.service).submit(eq(harness.sourceRunner));
+        verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
     @Test
-    public void testPostedToBackgroundHandlerWhenQueued() {
+    public void testPostedToDiskCacheSerciceWhenQueued() {
         harness.runner.queue();
 
-        verify(harness.bgHandler).post(eq(harness.runner));
+        verify(harness.diskCacheService).submit(eq(harness.runner));
     }
 
     @Test
-    public void testRemovedFromBackgroundHandlerWhenCancelled() {
+    public void testCancelsFutureFromDiskCacheServiceWhenCancelledIfNotYetQueuedToResizeService() {
+        Future future = mock(Future.class);
+        when(harness.diskCacheService.submit(eq(harness.runner))).thenReturn(future);
         harness.runner.queue();
         harness.runner.cancel();
 
-        verify(harness.bgHandler).removeCallbacks(eq(harness.runner));
+        verify(future).cancel(eq(false));
     }
 
     @Test
@@ -257,6 +260,11 @@ public class ResourceRunnerTest {
         verify(harness.decoded, never()).recycle();
     }
 
+    @Test
+    public void testReturnsGivenPriority() {
+        assertEquals(harness.priority.ordinal(), harness.runner.getPriority());
+    }
+
     @SuppressWarnings("unchecked")
     private static class ResourceRunnerHarness {
         Key key = mock(Key.class);
@@ -264,14 +272,15 @@ public class ResourceRunnerTest {
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         SourceResourceRunner<Object, Object, Object> sourceRunner = mock(SourceResourceRunner.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
-        ExecutorService service = mock(ExecutorService.class);
+        ExecutorService resizeService = mock(ExecutorService.class);
+        ExecutorService diskCacheService = mock(ExecutorService.class);
         EngineJob engineJob = mock(EngineJob.class);
-        Handler bgHandler = mock(Handler.class);
         Transformation<Object> tranformation = mock(Transformation.class);
         int width = 100;
         int height = 100;
+        Priority priority = Priority.HIGH;
         ResourceRunner<Object, Object> runner = new ResourceRunner(key, width, height, diskCache, decoder,
-                tranformation, transcoder, sourceRunner, service, bgHandler, engineJob);
+                tranformation, transcoder, sourceRunner, diskCacheService, resizeService,engineJob, priority);
         Future future = mock(Future.class);
         Future sourceFuture = mock(Future.class);
         Resource<Object> decoded = mock(Resource.class);
@@ -280,8 +289,8 @@ public class ResourceRunnerTest {
 
         public ResourceRunnerHarness() {
             when(key.toString()).thenReturn(ID);
-            when(service.submit(eq(runner))).thenReturn(future);
-            when(service.submit(eq(sourceRunner))).thenReturn(sourceFuture);
+            when(resizeService.submit(eq(runner))).thenReturn(future);
+            when(resizeService.submit(eq(sourceRunner))).thenReturn(sourceFuture);
         }
     }
 }
