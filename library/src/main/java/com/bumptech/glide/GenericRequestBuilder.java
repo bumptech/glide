@@ -457,6 +457,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         if (previous != null) {
             previous.clear();
             requestManager.removeRequest(previous);
+            previous.recycle();
         }
 
         Request request = buildRequest(target);
@@ -546,7 +547,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private <Z> Request buildRequestForDataType(Target<TranscodeType> target,
             LoadProvider<ModelType, Z, ResourceType, TranscodeType> loadProvider, float sizeMultiplier,
             Priority priority, RequestCoordinator requestCoordinator) {
-        return new GenericRequest<ModelType, Z, ResourceType, TranscodeType>(
+        return GenericRequest.obtain(
                 loadProvider,
                 model,
                 context,

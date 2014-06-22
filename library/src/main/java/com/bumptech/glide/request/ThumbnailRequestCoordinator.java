@@ -58,4 +58,10 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     public boolean isFailed() {
         return full.isFailed();
     }
+
+    @Override
+    public void recycle() {
+        full.recycle();
+        thumb.recycle();
+    }
 }

@@ -32,4 +32,6 @@ public interface Request {
      * Returns true if the request has failed.
      */
     public boolean isFailed();
+
+    public void recycle();
 }

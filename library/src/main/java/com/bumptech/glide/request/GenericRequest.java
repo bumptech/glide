@@ -16,6 +16,8 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.target.Target;
 
 import java.io.InputStream;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * A {@link Request} that loads a {@link Resource} into a given {@link Target}.
@@ -25,25 +27,26 @@ import java.io.InputStream;
  * @param <Z> The type of the resource that will be loaded.
  */
 public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback, ResourceCallback {
-    private static final String TAG = "Request";
+    private static final String TAG = "GenericRequest";
 
-    private final int placeholderResourceId;
-    private final int errorResourceId;
-    private final Context context;
-    private final Transformation<Z> transformation;
-    private final LoadProvider<A, T, Z, R> loadProvider;
-    private final RequestCoordinator requestCoordinator;
-    private final A model;
-    private final Class<R> transcodeClass;
-    private final boolean isMemoryCacheable;
-    private final Priority priority;
-    private final Target<R> target;
-    private final RequestListener<A, R> requestListener;
-    private final float sizeMultiplier;
-    private final Engine engine;
-    private final GlideAnimationFactory<R> animationFactory;
-    private final int overrideWidth;
-    private final int overrideHeight;
+    private int placeholderResourceId;
+    private int errorResourceId;
+    private Context context;
+    private Transformation<Z> transformation;
+    private LoadProvider<A, T, Z, R> loadProvider;
+    private RequestCoordinator requestCoordinator;
+    private A model;
+    private Class<R> transcodeClass;
+    private boolean isMemoryCacheable;
+    private Priority priority;
+    private Target<R> target;
+    private RequestListener<A, R> requestListener;
+    private float sizeMultiplier;
+    private Engine engine;
+    private GlideAnimationFactory<R> animationFactory;
+    private int overrideWidth;
+    private int overrideHeight;
+    private String tag = String.valueOf(hashCode());
 
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
@@ -54,7 +57,82 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private Engine.LoadStatus loadStatus;
     private boolean isRunning;
 
-    public GenericRequest(
+    private static final Queue<GenericRequest> queue = new ArrayDeque<GenericRequest>();
+
+    @SuppressWarnings("unchecked")
+    public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
+            LoadProvider<A, T, Z, R> loadProvider,
+            A model,
+            Context context,
+            Priority priority,
+            Target<R> target,
+            float sizeMultiplier,
+            Drawable placeholderDrawable,
+            int placeholderResourceId,
+            Drawable errorDrawable,
+            int errorResourceId,
+            RequestListener<A, R> requestListener,
+            RequestCoordinator requestCoordinator,
+            Engine engine,
+            Transformation<Z> transformation,
+            Class<R> transcodeClass,
+            boolean isMemoryCacheable,
+            GlideAnimationFactory<R> animationFactory,
+            int overrideWidth,
+            int overrideHeight) {
+        GenericRequest request = queue.poll();
+        if (request == null) {
+            request = new GenericRequest();
+        }
+        request.init(loadProvider,
+                model,
+                context,
+                priority,
+                target,
+                sizeMultiplier,
+                placeholderDrawable,
+                placeholderResourceId,
+                errorDrawable,
+                errorResourceId,
+                requestListener,
+                requestCoordinator,
+                engine,
+                transformation,
+                transcodeClass,
+                isMemoryCacheable,
+                animationFactory,
+                overrideWidth,
+                overrideHeight);
+        return request;
+    }
+
+    private GenericRequest() {
+
+    }
+
+    @Override
+    public void recycle() {
+        loadProvider = null;
+        model = null;
+        context = null;
+        target = null;
+        placeholderDrawable = null;
+        errorDrawable = null;
+        requestListener = null;
+        requestCoordinator = null;
+        engine = null;
+        transformation = null;
+        animationFactory = null;
+        isCancelled = false;
+        isError = false;
+        loadedFromMemoryCache = false;
+        loadStatus = null;
+        isRunning = false;
+        queue.offer(this);
+    }
+
+
+    private void init(
             LoadProvider<A, T, Z, R> loadProvider,
             A model,
             Context context,

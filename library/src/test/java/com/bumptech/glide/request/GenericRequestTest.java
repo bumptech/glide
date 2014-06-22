@@ -85,7 +85,7 @@ public class GenericRequestTest {
         }
 
         public GenericRequest<Object, Object, Object, Object> getRequest() {
-            return new GenericRequest<Object, Object, Object, Object>(loadProvider,
+            return GenericRequest.obtain(loadProvider,
                     model,
                     context,
                     priority,
