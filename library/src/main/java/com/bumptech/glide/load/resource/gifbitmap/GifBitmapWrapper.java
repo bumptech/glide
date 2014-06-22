@@ -9,12 +9,22 @@ public class GifBitmapWrapper {
     private final Resource<Bitmap> bitmapResource;
 
     public GifBitmapWrapper(Resource<Bitmap> bitmapResource, Resource<GifData> gifResource) {
+        if (bitmapResource != null && gifResource != null) {
+            throw new IllegalArgumentException("Can only contain either a bitmap resource or a gif resource, not both");
+        }
+        if (bitmapResource == null && gifResource == null) {
+            throw new IllegalArgumentException("Must contain either a bitmap resource or a gif resource");
+        }
         this.bitmapResource = bitmapResource;
         this.gifResource = gifResource;
     }
 
     public int getSize() {
-        return 0;
+        if (bitmapResource != null) {
+            return bitmapResource.getSize();
+        } else {
+            return gifResource.getSize();
+        }
     }
 
     public Resource<Bitmap> getBitmapResource() {
