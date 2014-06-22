@@ -11,6 +11,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -98,9 +99,8 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(FlickrPhotoGrid.this)
                     .loadFromImage(item)
-                    .thumbnail(Glide.with(FlickrPhotoGrid.this)
-                            .loadFromImage(item)
-                            .override(Api.THUMB_SIZE, Api.THUMB_SIZE))
+                    .override(Api.THUMB_SIZE, Api.THUMB_SIZE)
+                    .priority(Priority.HIGH)
                     .centerCrop();
         }
     }
@@ -149,8 +149,10 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
             Glide.with(FlickrPhotoGrid.this)
                     .loadFromImage(current)
                     .thumbnail(Glide.with(FlickrPhotoGrid.this)
-                        .loadFromImage(current)
-                        .override(Api.THUMB_SIZE, Api.THUMB_SIZE))
+                            .loadFromImage(current)
+                            .override(Api.THUMB_SIZE, Api.THUMB_SIZE)
+                            .centerCrop()
+                    )
                     .animate(R.anim.fade_in)
                     .centerCrop()
                     .into(imageView);
