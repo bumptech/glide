@@ -1,15 +1,18 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
+import android.util.Log;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.util.LogTime;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EngineJob implements ResourceCallback {
+    private static final String TAG = "EngineJob";
     private boolean isCacheable;
     private final EngineJobListener listener;
     private Key key;
@@ -68,9 +71,14 @@ public class EngineJob implements ResourceCallback {
 
     @Override
     public void onResourceReady(final Resource resource) {
+        final long start = LogTime.getLogTime();
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Posted to main thread in onResourceReady in " + LogTime.getElapsedMillis(start)
+                            + " cancelled: " + isCancelled);
+                }
                 if (isCancelled) {
                     resource.recycle();
                     return;
@@ -96,15 +104,23 @@ public class EngineJob implements ResourceCallback {
                 }
                 // Our request is complete, so we can release the resource.
                 resource.release();
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Finished resource ready in " + LogTime.getElapsedMillis(start));
+                }
             }
         });
     }
 
     @Override
     public void onException(final Exception e) {
+        final long start = LogTime.getLogTime();
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "posted to main thread in onException in " + LogTime.getElapsedMillis(start)
+                            + " cancelled: " + isCancelled);
+                }
                 if (isCancelled) {
                     return;
                 }
@@ -117,6 +133,9 @@ public class EngineJob implements ResourceCallback {
                     }
                 } else {
                     cb.onException(e);
+                }
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "finished onException in " + LogTime.getElapsedMillis(start));
                 }
             }
         });

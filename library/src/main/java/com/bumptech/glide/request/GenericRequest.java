@@ -14,6 +14,7 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.LogTime;
 
 import java.io.InputStream;
 import java.util.ArrayDeque;
@@ -56,6 +57,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private Resource resource;
     private Engine.LoadStatus loadStatus;
     private boolean isRunning;
+    private long startTime;
 
     private static final Queue<GenericRequest> queue = new ArrayDeque<GenericRequest>();
 
@@ -196,6 +198,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
     @Override
     public void run() {
+        startTime = LogTime.getLogTime();
         if (model == null) {
             onException(null);
             return;
@@ -210,6 +213,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         if (!isComplete() && !isFailed()) {
             setPlaceHolder();
             isRunning = true;
+        }
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logV("finished run method in " + LogTime.getElapsedMillis(startTime));
         }
     }
 
@@ -280,6 +286,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
     @Override
     public void onSizeReady(int width, int height) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logV("Got onSizeReady in " + LogTime.getElapsedMillis(startTime));
+        }
         if (isCancelled) {
             return;
         }
@@ -295,10 +304,16 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         final String id = modelLoader.getId(model);
         final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
 
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
+        }
         loadedFromMemoryCache = true;
         loadStatus = engine.load(id, width, height, cacheDecoder, dataFetcher, decoder, transformation,
                 encoder, transcoder, priority, isMemoryCacheable, this);
         loadedFromMemoryCache = resource != null;
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
+        }
     }
 
     private boolean canSetImage() {
@@ -313,6 +328,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         return requestCoordinator == null || !requestCoordinator.isAnyRequestComplete();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onResourceReady(Resource resource) {
         isRunning = false;
@@ -337,6 +353,11 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         }
 
         this.resource = resource;
+
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logV("Resource ready in " + LogTime.getElapsedMillis(startTime) + " size: "
+                    + (resource.getSize() / (1024d * 1024d)) + " fromCache: " + loadedFromMemoryCache);
+        }
     }
 
     @Override
@@ -351,5 +372,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         if (requestListener == null || !requestListener.onException(e, model, target, isFirstImage())) {
             setErrorPlaceholder();
         }
+    }
+
+    private void logV(String message) {
+        Log.v(TAG, message + " this: " + tag);
     }
 }
