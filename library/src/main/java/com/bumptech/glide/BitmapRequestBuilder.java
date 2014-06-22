@@ -41,11 +41,13 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     private ResourceDecoder<InputStream, Bitmap> imageDecoder;
     private ResourceDecoder<ParcelFileDescriptor, Bitmap> videoDecoder;
+    private Glide glide;
 
     BitmapRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> streamLoadProvider,
             Class<TranscodeType> transcodeClass, Glide glide, RequestManager requestManager) {
         super(context, model, streamLoadProvider, transcodeClass, glide, requestManager);
+        this.glide = glide;
         this.bitmapPool = glide.getBitmapPool();
 
         imageDecoder = new StreamBitmapDecoder(bitmapPool);
@@ -179,7 +181,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
      * @return This RequestBuilder
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> centerCrop() {
-        return transform(new CenterCrop(bitmapPool));
+        return transform(glide.getBitmapCenterCrop());
     }
 
     /**
@@ -188,7 +190,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
      * @return This RequestBuilder
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> fitCenter() {
-        return transform(new FitCenter(bitmapPool));
+        return transform(glide.getBitmapFitCenter());
     }
 
     @Override

@@ -35,13 +35,16 @@ import com.bumptech.glide.load.model.stream.StreamResourceLoader;
 import com.bumptech.glide.load.model.stream.StreamStringLoader;
 import com.bumptech.glide.load.model.stream.StreamUriLoader;
 import com.bumptech.glide.load.model.stream.StreamUrlLoader;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDataLoadProvider;
+import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoDataLoadProvider;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDataLoadProvider;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataLoadProvider;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.gifbitmap.ImageVideoGifDataLoadProvider;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTranscoder;
@@ -86,6 +89,10 @@ public class Glide {
     private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     private final TranscoderFactory transcoderFactory = new TranscoderFactory();
     private final DataLoadProviderFactory dataLoadProviderFactory;
+    private final CenterCrop bitmapCenterCrop;
+    private final GifBitmapWrapperTransformation drawableCenterCrop;
+    private final FitCenter bitmapFitCenter;
+    private final GifBitmapWrapperTransformation drawableFitCenter;
 
     /**
      * Try to get the external cache directory if available and default to the internal. Use a default name for the
@@ -203,6 +210,12 @@ public class Glide {
                 new GifBitmapWrapperDrawableTranscoder(new BitmapDrawableTranscoder(context.getResources(), bitmapPool),
                         new GifDataDrawableTranscoder()));
         transcoderFactory.register(GifData.class, GifDrawable.class, new GifDataDrawableTranscoder());
+
+        bitmapCenterCrop = new CenterCrop(bitmapPool);
+        drawableCenterCrop = new GifBitmapWrapperTransformation(bitmapCenterCrop);
+
+        bitmapFitCenter = new FitCenter(bitmapPool);
+        drawableFitCenter = new GifBitmapWrapperTransformation(bitmapFitCenter);
     }
 
     public BitmapPool getBitmapPool() {
@@ -223,6 +236,22 @@ public class Glide {
 
     Engine getEngine() {
         return engine;
+    }
+
+    CenterCrop getBitmapCenterCrop() {
+        return bitmapCenterCrop;
+    }
+
+    FitCenter getBitmapFitCenter() {
+        return bitmapFitCenter;
+    }
+
+    GifBitmapWrapperTransformation getDrawableCenterCrop() {
+        return drawableCenterCrop;
+    }
+
+    GifBitmapWrapperTransformation getDrawableFitCenter() {
+        return drawableFitCenter;
     }
 
     private GenericLoaderFactory getLoaderFactory() {

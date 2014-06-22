@@ -8,8 +8,6 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -88,11 +86,11 @@ public class DrawableRequestBuilder<ModelType> extends
     }
 
     public DrawableRequestBuilder<ModelType> centerCrop() {
-        return bitmapTransform(new CenterCrop(glide.getBitmapPool()));
+        return transform(glide.getDrawableCenterCrop());
     }
 
     public DrawableRequestBuilder<ModelType> fitCenter() {
-        return bitmapTransform(new FitCenter(glide.getBitmapPool()));
+        return transform(glide.getDrawableFitCenter());
     }
 
     public DrawableRequestBuilder<ModelType> bitmapTransform(Transformation<Bitmap> bitmapTransformation) {
@@ -100,8 +98,7 @@ public class DrawableRequestBuilder<ModelType> extends
     }
 
     @Override
-    public DrawableRequestBuilder<ModelType> transform(
-            Transformation<GifBitmapWrapper> transformation) {
+    public DrawableRequestBuilder<ModelType> transform(Transformation<GifBitmapWrapper> transformation) {
         super.transform(transformation);
         return this;
     }
