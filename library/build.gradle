@@ -1,37 +1,59 @@
 buildscript {
     repositories {
         mavenCentral()
+        // TODO: Remove this repository as soon as fix
+        // https://github.com/robolectric/robolectric-gradle-plugin/pull/33 is released.
+        maven { url 'https://github.com/rockerhieu/mvn-repo/raw/master/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.+'
+        classpath 'com.android.tools.build:gradle:0.11.2'
+        // TODO: Remove the snapshot dependency below and replace with
+        // classpath 'org.robolectric.gradle:gradle-android-test-plugin:0.10.+'
+        // as soon as fix https://github.com/robolectric/robolectric-gradle-plugin/pull/33
+        // is released.
+        classpath 'org.robolectric.gradle:gradle-android-test-plugin:0.10.1-SNAPSHOT'
     }
 }
 
 apply plugin: 'android-library'
+apply plugin: 'android-test'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile files('libs/disklrucache-2.0.2.jar')
-    compile files('libs/volley.jar')
+    compile project(':third_party:gif_decoder')
+
+    compile 'com.android.support:support-v4:19.0.+'
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+    compile 'com.jakewharton:disklrucache:2.0.+'
+
+    androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
+    androidTestCompile 'junit:junit:4.11'
+    androidTestCompile 'org.mockito:mockito-all:1.9.5'
+    androidTestCompile 'org.robolectric:robolectric:2.3'
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion = "19.0.0"
+    buildToolsVersion = '19.1.0'
 
     sourceSets {
         main {
-            assets.srcDirs       = ['assets']
-            res.srcDirs          = ['res']
-            aidl.srcDirs         = ['src']
-            resources.srcDirs    = ['src']
-            renderscript.srcDirs = ['src']
-            java.srcDirs         = ['src']
+            resources.srcDirs    = ['src/main']
+            java.srcDirs         = ['src/main']
             manifest.srcFile 'AndroidManifest.xml'
-
         }
+
+        instrumentTest.setRoot('src/test')
     }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.10'
 }

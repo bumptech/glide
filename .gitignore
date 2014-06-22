@@ -1,6 +1,7 @@
+.gradle
+build
 library/bin/*
 library/gen/*
-library/build/*
 library/local.properties
 library/.gradle
 library/.settings

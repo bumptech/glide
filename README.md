@@ -50,6 +50,17 @@ Status
 ------
 Glide has been in use at Bump for about six months in two of our Android apps at version 1.0. Version 2.0 is the first public release with a stable api. Comments/bugs/questions/pull requests welcome!
 
+Build
+------
+Building Glide with gradle is fairly straight forward:
+
+```
+cd glide/library
+./gradlew build
+```
+
+Note: Make sure your Android SDK has the Android Support Repository installed, and that your `$ANDROID_HOME` environment variable is pointing at the SDK.
+
 Thanks
 ------
 Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) included with Glide. Thanks also to the Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/).

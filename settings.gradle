@@ -1,0 +1,2 @@
+include ':library'
+include ':third_party:gif_decoder'
