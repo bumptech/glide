@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -458,6 +459,7 @@ public class Glide {
         return new ModelRequest(activity, Glide.get(activity), requestManager);
     }
 
+    @TargetApi(11)
     public static ModelRequest with(android.app.Fragment fragment) {
         RequestManager requestManager = RequestManagerRetriever.get(fragment);
         Context context = fragment.getActivity();

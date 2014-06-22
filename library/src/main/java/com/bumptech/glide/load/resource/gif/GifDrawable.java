@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -7,6 +8,8 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+
 import com.bumptech.glide.gifdecoder.GifDecoder;
 
 public class GifDrawable extends Drawable implements Animatable, GifFrameManager.FrameCallback {
@@ -96,9 +99,10 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         return decoder.isTransparent() ? PixelFormat.TRANSPARENT : PixelFormat.OPAQUE;
     }
 
+    @TargetApi(11)
     @Override
     public void onFrameRead(Bitmap frame) {
-        if (getCallback() == null) {
+        if (Build.VERSION.SDK_INT >= 11 && getCallback() == null) {
             stop();
             return;
         } if (!isRunning) {

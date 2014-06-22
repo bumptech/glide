@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
-    <issue id="MissingApplicationIcon" severity="ignore" />
     <issue id="AllowBackup" severity="ignore" />
     <issue id="InlinedApi">
-        <ignore path="src/com/bumptech/glide/resize/cache/LruMemoryCache.java" />
-        <ignore path="src/com/bumptech/glide/resize/bitmap_recycle/LruBitmapPool.java" />
+        <ignore path="src/main/java/com/bumptech/glide/load/engine/cache/LruResourceCache.java" />
+        <ignore path="src/main/java/com/bumptech/glide/load/engine/bitmap_recycle/LruBitmapPool.java" />
     </issue>
 </lint>

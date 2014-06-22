@@ -1,7 +1,9 @@
 package com.bumptech.glide.manager;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -22,8 +24,9 @@ public class RequestManagerRetriever {
         }
     }
 
+    @TargetApi(17)
     public static RequestManager get(FragmentActivity activity) {
-        if (activity.isDestroyed()) {
+        if (Build.VERSION.SDK_INT >= 11 && activity.isDestroyed()) {
             throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
         }
         FragmentManager fm = activity.getSupportFragmentManager();
@@ -41,25 +44,32 @@ public class RequestManagerRetriever {
         return supportFragmentGet(fragment.getActivity(), fm);
     }
 
+    @TargetApi(17)
     public static RequestManager get(Activity activity) {
-        if (activity.isDestroyed()) {
+        if (Build.VERSION.SDK_INT >= 17 && activity.isDestroyed()) {
             throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
         }
         android.app.FragmentManager fm = activity.getFragmentManager();
         return fragmentGet(activity, fm);
     }
 
+    @TargetApi(17)
     public static RequestManager get(android.app.Fragment fragment) {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
         }
-        if (fragment.isDetached()) {
+        if (Build.VERSION.SDK_INT >= 13 && fragment.isDetached()) {
             throw new IllegalArgumentException("You cannot start a load on a detached fragment");
         }
-        android.app.FragmentManager fm = fragment.getChildFragmentManager();
-        return fragmentGet(fragment.getActivity(), fm);
+        if (Build.VERSION.SDK_INT >= 17) {
+            android.app.FragmentManager fm = fragment.getChildFragmentManager();
+            return fragmentGet(fragment.getActivity(), fm);
+        } else {
+            return new NullRequestManager();
+        }
     }
 
+    @TargetApi(11)
     static RequestManager fragmentGet(Context context, android.app.FragmentManager fm) {
         RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {

@@ -1,0 +1,53 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.11.2'
+    }
+}
+
+apply plugin: 'android'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':library')
+
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.android.support:support-v4:19.1.+'
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+}
+
+ext {
+    versionMajor = 1
+    versionMinor = 0
+    versionPatch = 0
+    versionBuild = 1
+}
+
+def getVersionName() {
+    return "${versionMajor}.${versionMinor}.${versionPatch}a"
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion = '19.1.0'
+
+    defaultConfig {
+        minSdkVersion 10
+        targetSdkVersion 19
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName getVersionName()
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs         = ['src/main/java']
+            res.srcDirs          = ['res']
+            manifest.srcFile 'AndroidManifest.xml'
+        }
+    }
+}

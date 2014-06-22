@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 
@@ -26,6 +27,7 @@ public class Util {
     /**
      * Returns the in memory size of the given {@link Bitmap}.
      */
+    @TargetApi(19)
     public static int getSize(Bitmap bitmap) {
         if (Build.VERSION.SDK_INT >= 19) {
             return bitmap.getAllocationByteCount();

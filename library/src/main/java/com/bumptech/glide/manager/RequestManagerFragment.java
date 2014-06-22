@@ -1,8 +1,10 @@
 package com.bumptech.glide.manager;
 
+import android.annotation.TargetApi;
 import android.app.Fragment;
 
-class RequestManagerFragment extends Fragment {
+@TargetApi(11)
+public class RequestManagerFragment extends Fragment {
     private LifecycleRequestManager requestManager;
 
     public void setRequestManager(LifecycleRequestManager requestManager) {
