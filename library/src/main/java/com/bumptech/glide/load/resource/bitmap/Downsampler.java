@@ -5,13 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.ByteArrayPool;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayDeque;
 import java.util.EnumSet;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -24,16 +26,37 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     private static final Set<ImageHeaderParser.ImageType> TYPES_THAT_USE_POOL = EnumSet.of(
             ImageHeaderParser.ImageType.JPEG, ImageHeaderParser.ImageType.PNG_A, ImageHeaderParser.ImageType.PNG);
 
+    private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = new ArrayDeque<BitmapFactory.Options>();
+
     @TargetApi(11)
-    private static BitmapFactory.Options getDefaultOptions() {
-       BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
-       decodeBitmapOptions.inDither = false;
-       decodeBitmapOptions.inScaled = false;
-       decodeBitmapOptions.inSampleSize = 1;
-       if (CAN_RECYCLE)  {
-           decodeBitmapOptions.inMutable = true;
-       }
-       return decodeBitmapOptions;
+    private static synchronized BitmapFactory.Options getDefaultOptions() {
+        BitmapFactory.Options decodeBitmapOptions = OPTIONS_QUEUE.poll();
+        if (decodeBitmapOptions == null) {
+            decodeBitmapOptions = new BitmapFactory.Options();
+            resetOptions(decodeBitmapOptions);
+        }
+
+        return decodeBitmapOptions;
+    }
+
+    private static void releaseOptions(BitmapFactory.Options decodeBitmapOptions) {
+        resetOptions(decodeBitmapOptions);
+        OPTIONS_QUEUE.offer(decodeBitmapOptions);
+    }
+
+    @TargetApi(11)
+    private static void resetOptions(BitmapFactory.Options decodeBitmapOptions) {
+        decodeBitmapOptions.inTempStorage = null;
+        decodeBitmapOptions.inDither = false;
+        decodeBitmapOptions.inScaled = false;
+        decodeBitmapOptions.inSampleSize = 1;
+        decodeBitmapOptions.inPreferredConfig = null;
+        decodeBitmapOptions.inJustDecodeBounds = false;
+
+        if (CAN_RECYCLE)  {
+            decodeBitmapOptions.inBitmap = null;
+            decodeBitmapOptions.inMutable = true;
+        }
     }
 
     /**
@@ -153,6 +176,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
         byteArrayPool.releaseBytes(bytesForOptions);
         byteArrayPool.releaseBytes(bytesForStream);
+        releaseOptions(options);
         return rotated;
     }
 
