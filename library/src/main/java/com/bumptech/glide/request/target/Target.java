@@ -7,7 +7,7 @@ import com.bumptech.glide.request.Request;
 /**
  * An interface that Glide can load an image into
  *
- * @param <Z> The type of resource the target can display.
+ * @param <R> The type of resource the target can display.
  */
 public interface Target<R> {
 

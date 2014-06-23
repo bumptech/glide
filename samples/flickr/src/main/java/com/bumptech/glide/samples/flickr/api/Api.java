@@ -45,7 +45,7 @@ public class Api {
         Collections.sort(SORTED_SIZE_KEYS);
     }
 
-    public static final int THUMB_SIZE = SORTED_SIZE_KEYS.get(0);
+    public static final int SQUARE_THUMB_SIZE = SORTED_SIZE_KEYS.get(0);
 
     private static String getSizeKey(int width, int height) {
         final int largestEdge = Math.max(width, height);

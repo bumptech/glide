@@ -115,8 +115,9 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             return Glide.with(FlickrPhotoList.this)
                     .loadFromImage(item)
                     .thumbnail(Glide.with(FlickrPhotoList.this)
-                            .loadFromImage(item)
-                            .override(Api.THUMB_SIZE, Api.THUMB_SIZE))
+                        .loadFromImage(item)
+                        .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
+                    )
                     .centerCrop();
         }
     }
@@ -176,7 +177,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                     .placeholder(new ColorDrawable(Color.GRAY))
                     .thumbnail(Glide.with(FlickrPhotoList.this)
                         .loadFromImage(current)
-                        .override(Api.THUMB_SIZE, Api.THUMB_SIZE))
+                        .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
                     .centerCrop()
                     .crossFade(R.anim.fade_in, 150)
                     .into(viewHolder.imageView);
