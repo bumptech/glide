@@ -3,9 +3,13 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
+import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
+import com.bumptech.glide.load.model.stream.MediaStoreStreamLoader;
 import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
 import com.bumptech.glide.load.model.stream.StreamFileLoader;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
@@ -34,53 +38,21 @@ public class ModelRequest {
         this.requestManager = requestManager;
     }
 
+    /**
+     * Use the given generic model loader to load the given generic data class.
+     * <p>
+     *     Note that in most cases you will also need to specify an {@link ResourceDecoder} and an
+     *     {@link ResourceEncoder} for the load to complete successfully.
+     * </p>
+     * @param modelLoader The {@link ModelLoader} class to use to load the model.
+     * @param dataClass The type of data the {@link ModelLoader} will load.
+     * @param <A> The type of the model to be loaded.
+     * @param <T> The type of the data to be loaded from the mode.
+     * @return A {@link GenericModelRequest} to set options for the load and ultimately the target to load the model
+     * into.
+     */
     public <A, T> GenericModelRequest<A, T> using(ModelLoader<A, T> modelLoader, Class<T> dataClass) {
         return new GenericModelRequest<A, T>(context, glide, modelLoader, dataClass, requestManager);
-    }
-
-    public static class GenericModelRequest<A, T> {
-        private final Context context;
-        private final Glide glide;
-        private final ModelLoader<A, T> modelLoader;
-        private final Class<T> dataClass;
-        private RequestManager requestManager;
-
-        private GenericModelRequest(Context context, Glide glide, ModelLoader<A, T> modelLoader, Class<T> dataClass,
-                RequestManager requestManager) {
-            this.context = context;
-            this.glide = glide;
-            this.modelLoader = modelLoader;
-            this.dataClass = dataClass;
-            this.requestManager = requestManager;
-        }
-
-        public GenericTypeRequest<A, T> load(A model) {
-            return new GenericTypeRequest<A, T>(context, glide, model, modelLoader, dataClass, requestManager);
-        }
-
-        public static class GenericTypeRequest<A, T> {
-            private final Context context;
-            private final Glide glide;
-            private final A model;
-            private final ModelLoader<A, T> modelLoader;
-            private final Class<T> dataClass;
-            private RequestManager requestManager;
-
-            private GenericTypeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
-                    Class<T> dataClass, RequestManager requestManager) {
-                this.context = context;
-                this.glide = glide;
-                this.model = model;
-                this.modelLoader = modelLoader;
-                this.dataClass = dataClass;
-                this.requestManager = requestManager;
-            }
-
-            public <Z> GenericTranscodeRequest<A, T, Z> as(Class<Z> resourceClass) {
-                return new GenericTranscodeRequest<A, T, Z>(context, glide, model, modelLoader, dataClass,
-                        resourceClass, requestManager);
-            }
-        }
     }
 
     /**
@@ -126,7 +98,7 @@ public class ModelRequest {
      *
      * @param string The string representing the image. Must be either a path, or a uri handled by
      *      {@link StreamUriLoader}
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
     public DrawableTypeRequest<String> load(String string) {
@@ -140,11 +112,38 @@ public class ModelRequest {
      * @see #using(StreamModelLoader)
      *
      * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
     public DrawableTypeRequest<Uri> load(Uri uri) {
         return loadGeneric(uri);
+    }
+
+    /**
+     * Use {@link MediaStore.Images.Thumbnails} and {@link MediaStore.Video.Thumbnails} to retrieve pre-generated
+     * thumbnails for the given uri. Falls back to the registered {@link ModelLoaderFactory} registered for {@link Uri}s
+     * if the given uri is not a media store uri or if no pre-generated thumbnail exists for the given uri. In addition,
+     * mixes the given mimeType, dateModified, and orientation into the cache key to detect and invalidate thumbnails
+     * if content is changed locally.
+     *
+     * @param uri The uri representing the media.
+     * @param mimeType The mime type of the media store media. Ok to default to empty string "". See
+     *      {@link MediaStore.Images.ImageColumns#MIME_TYPE} or {@link MediaStore.Video.VideoColumns#MIME_TYPE}.
+     * @param dateModified The date modified time of the media store media. Ok to default to 0. See
+     *      {@link MediaStore.Images.ImageColumns#DATE_MODIFIED} or {@link MediaStore.Video.VideoColumns#DATE_MODIFIED}.
+     * @param orientation The orientation of the media store media. Ok to default to 0. See
+     *      {@link MediaStore.Images.ImageColumns#ORIENTATION}.
+     * @return A new {@link DrawableRequestBuilder} to set options for the load and ultimately the target to load the
+     *      uri into.
+     */
+    public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri, String mimeType, long dateModified, int orientation) {
+        ModelLoader<Uri, InputStream> genericStreamLoader = Glide.buildStreamModelLoader(uri, context);
+        ModelLoader<Uri, InputStream> mediaStoreLoader = new MediaStoreStreamLoader(context, genericStreamLoader,
+                mimeType, dateModified, orientation);
+        ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader = Glide.buildFileDescriptorModelLoader(uri,
+                context);
+        return new DrawableTypeRequest<Uri>(uri, mediaStoreLoader, fileDescriptorModelLoader, context, glide,
+                requestManager);
     }
 
     /**
@@ -155,7 +154,7 @@ public class ModelRequest {
      * @see #using(StreamModelLoader)
      *
      * @param file The File containing the image
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
     public DrawableTypeRequest<File> load(File file) {
@@ -170,7 +169,7 @@ public class ModelRequest {
      * @see #using(StreamModelLoader)
      *
      * @param resourceId the id of the resource containing the image
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
     public DrawableTypeRequest<Integer> load(Integer resourceId) {
@@ -183,7 +182,7 @@ public class ModelRequest {
      *
      * @param model The model to load.
      * @param <T> The type of the model to load.
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
     @SuppressWarnings("unused")
@@ -199,7 +198,7 @@ public class ModelRequest {
      * @see #using(StreamModelLoader)
      *
      * @param url The URL representing the image.
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the model
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
     public DrawableTypeRequest<URL> loadFromImage(URL url) {
@@ -214,7 +213,7 @@ public class ModelRequest {
      * @param model The data to load.
      * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
      *           (url, filepath etc). If there is no suitable id, use {@link #loadFromImage(byte[])} instaed.
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
     public DrawableTypeRequest<byte[]> loadFromImage(byte[] model, final String id) {
@@ -232,7 +231,7 @@ public class ModelRequest {
      * simple id that represents the given data.
      *
      * @param model the data to load.
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
     public DrawableTypeRequest<byte[]> loadFromImage(byte[] model) {
@@ -245,7 +244,7 @@ public class ModelRequest {
      *
      * @param model The model to load.
      * @param <T> The type of the model to load.
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
     @SuppressWarnings("unused")
@@ -260,7 +259,7 @@ public class ModelRequest {
      *
      * @param model The model the load.
      * @param <T> The type of the model to load.
-     * @return A {@link BitmapRequestBuilder} to set options for the load and ultimately the target to load the image
+     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
     public <T> DrawableTypeRequest<T> load(T model) {
@@ -322,6 +321,57 @@ public class ModelRequest {
 
         public DrawableTypeRequest<T> load(T model) {
             return new DrawableTypeRequest<T>(model, loader, null, context, glide, requestManager);
+        }
+    }
+
+    /**
+     * A helper class for building requests with custom {@link ModelLoader}s that translate models to
+     * {@link InputStream} resources for loading images.
+     *
+     * @param <T> The type of the model.
+     */
+    public static class GenericModelRequest<A, T> {
+        private final Context context;
+        private final Glide glide;
+        private final ModelLoader<A, T> modelLoader;
+        private final Class<T> dataClass;
+        private RequestManager requestManager;
+
+        private GenericModelRequest(Context context, Glide glide, ModelLoader<A, T> modelLoader, Class<T> dataClass,
+                RequestManager requestManager) {
+            this.context = context;
+            this.glide = glide;
+            this.modelLoader = modelLoader;
+            this.dataClass = dataClass;
+            this.requestManager = requestManager;
+        }
+
+        public GenericTypeRequest<A, T> load(A model) {
+            return new GenericTypeRequest<A, T>(context, glide, model, modelLoader, dataClass, requestManager);
+        }
+
+        public static class GenericTypeRequest<A, T> {
+            private final Context context;
+            private final Glide glide;
+            private final A model;
+            private final ModelLoader<A, T> modelLoader;
+            private final Class<T> dataClass;
+            private RequestManager requestManager;
+
+            private GenericTypeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
+                    Class<T> dataClass, RequestManager requestManager) {
+                this.context = context;
+                this.glide = glide;
+                this.model = model;
+                this.modelLoader = modelLoader;
+                this.dataClass = dataClass;
+                this.requestManager = requestManager;
+            }
+
+            public <Z> GenericTranscodeRequest<A, T, Z> as(Class<Z> resourceClass) {
+                return new GenericTranscodeRequest<A, T, Z>(context, glide, model, modelLoader, dataClass,
+                        resourceClass, requestManager);
+            }
         }
     }
 }
