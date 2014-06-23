@@ -6,3 +6,8 @@ buildscript {
         classpath 'com.android.tools.build:gradle:0.11.+'
     }
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.10'
+}
+

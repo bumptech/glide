@@ -62,10 +62,6 @@ android {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.10'
-}
-
 def getJarName() {
     return "glide-${getVersionName()}.jar"
 }
