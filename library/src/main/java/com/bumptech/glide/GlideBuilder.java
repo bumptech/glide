@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Build;
 import com.android.volley.RequestQueue;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.EngineBuilder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
@@ -14,9 +13,11 @@ import com.bumptech.glide.load.engine.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
+import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor;
 import com.bumptech.glide.volley.RequestQueueWrapper;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 
 public class GlideBuilder {
     private RequestQueue requestQueue;
@@ -25,6 +26,8 @@ public class GlideBuilder {
     private BitmapPool bitmapPool;
     private MemoryCache memoryCache;
     private DiskCache diskCache;
+    private ExecutorService resizeService;
+    private ExecutorService diskCacheService;
 
     public GlideBuilder(Context context) {
         this.context = context.getApplicationContext();
@@ -50,12 +53,30 @@ public class GlideBuilder {
         return this;
     }
 
+    public GlideBuilder setResizeService(ExecutorService service) {
+        this.resizeService = service;
+        return this;
+    }
+
+    public GlideBuilder setDiskCacheService(ExecutorService service) {
+        this.diskCacheService = service;
+        return this;
+    }
+
     GlideBuilder setEngine(Engine engine) {
         this.engine = engine;
         return this;
     }
 
     Glide createGlide() {
+        if (resizeService == null) {
+            final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
+            resizeService = new FifoPriorityThreadPoolExecutor(cores);
+        }
+        if (diskCacheService == null) {
+            diskCacheService = new FifoPriorityThreadPoolExecutor(1);
+        }
+
         if (requestQueue == null) {
             requestQueue = RequestQueueWrapper.getRequestQueue(context);
         }
@@ -84,8 +105,7 @@ public class GlideBuilder {
         }
 
         if (engine == null) {
-            engine = new EngineBuilder(memoryCache, diskCache)
-                    .build();
+            engine = new Engine(memoryCache, diskCache, resizeService, diskCacheService);
         }
 
         return new Glide(engine, requestQueue, memoryCache, bitmapPool, context);

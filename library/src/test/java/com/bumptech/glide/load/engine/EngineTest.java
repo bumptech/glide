@@ -6,6 +6,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -18,6 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -259,7 +261,8 @@ public class EngineTest {
             job = mock(EngineJob.class);
             when(runner.getJob()).thenReturn(job);
 
-            engine = new Engine(factory, cache, runners, keyFactory);
+            engine = new Engine(factory, cache, mock(DiskCache.class), mock(ExecutorService.class),
+                    mock(ExecutorService.class), runners, keyFactory);
 
             when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
                     eq(transformation), eq(encoder), eq(transcoder), eq(priority), eq(isMemoryCacheable), eq(engine)))

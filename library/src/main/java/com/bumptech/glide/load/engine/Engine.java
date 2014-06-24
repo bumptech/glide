@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Resource;
@@ -8,6 +10,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
@@ -16,6 +19,7 @@ import com.bumptech.glide.util.LogTime;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener {
     private static final String TAG = "Engine";
@@ -39,15 +43,28 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
     }
 
-    public Engine(EngineBuilder builder) {
-        this(builder.factory, builder.memoryCache, new HashMap<Key, ResourceRunner>(), builder.keyFactory);
+    public Engine(MemoryCache memoryCache, DiskCache diskCache, ExecutorService resizeService,
+            ExecutorService diskCacheService) {
+        this(null, memoryCache, diskCache, resizeService, diskCacheService, null, null);
     }
 
-    Engine(ResourceRunnerFactory factory, MemoryCache cache, Map<Key, ResourceRunner> runners, KeyFactory keyFactory) {
-        this.factory = factory;
+    Engine(ResourceRunnerFactory factory, MemoryCache cache, DiskCache diskCache, ExecutorService resizeService,
+            ExecutorService diskCacheService, Map<Key, ResourceRunner> runners, KeyFactory keyFactory) {
         this.cache = cache;
-        this.runners = runners;
+
+        if (keyFactory == null) {
+            keyFactory = new EngineKeyFactory();
+        }
         this.keyFactory = keyFactory;
+        if (runners == null) {
+            runners = new HashMap<Key, ResourceRunner>();
+        }
+        this.runners = runners;
+        if (factory == null) {
+            factory = new DefaultResourceRunnerFactory(cache, diskCache, new Handler(Looper.getMainLooper()),
+                    diskCacheService, resizeService);
+        }
+        this.factory = factory;
 
         cache.setResourceRemovedListener(this);
     }

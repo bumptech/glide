@@ -20,7 +20,6 @@ import com.android.volley.toolbox.NoCache;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.engine.EngineBuilder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
@@ -126,11 +125,10 @@ public class GlideTest {
         RequestQueue requestQueue = new RequestQueue(new NoCache(), network);
         requestQueue.start();
         Glide.setup(new GlideBuilder(Robolectric.application)
-                .setEngine(new EngineBuilder(mock(MemoryCache.class), mock(DiskCache.class))
-                        .setDiskCacheService(service)
-                        .setResizeService(service)
-                        .setBackgroundHandler(bgHandler)
-                        .build())
+                .setMemoryCache(mock(MemoryCache.class))
+                .setDiskCache(mock(DiskCache.class))
+                .setResizeService(service)
+                .setDiskCacheService(service)
                 .setRequestQueue(requestQueue));
 
         // Sleep to avoid blocking the main thread while waiting for Volley's background thread to complete
