@@ -35,6 +35,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.volley.VolleyRequestFuture;
 import com.bumptech.glide.volley.VolleyUrlLoader;
 import org.junit.After;
@@ -78,7 +79,8 @@ import static org.mockito.Mockito.when;
  * Tests for the {@link Glide} interface and singleton.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = { GlideTest.ShadowFileDescriptorContentResolver.class, GlideTest.ShadowMediaMetadataRetriever.class })
+@Config(shadows = { GlideTest.ShadowFileDescriptorContentResolver.class, GlideTest.ShadowMediaMetadataRetriever.class,
+        GlideShadowLooper.class })
 public class GlideTest {
     private Target target = null;
     private ImageView imageView;

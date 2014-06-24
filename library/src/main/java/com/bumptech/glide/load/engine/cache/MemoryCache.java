@@ -28,18 +28,10 @@ public interface MemoryCache {
     public void setSizeMultiplier(float multiplier);
 
     /**
-     * Tell if cache contains key
-     * @param key The key
-     * @return true iff the key has a non null value in the cache
+     * Removes the value for the given key and returns it if present or null otherwise.
+     * @param key The key.
      */
-    public boolean contains(Key key);
-
-    /**
-     * Get a value from the cache
-     * @param key The key
-     * @return The bitmap at key or null if the key is not present
-     */
-    public Resource get(Key key);
+    public Resource remove(Key key);
 
     /**
      * Add bitmap to the cache with the given key

@@ -9,15 +9,11 @@ public class MemoryCacheAdapter implements MemoryCache {
 
     @Override
     public void setSizeMultiplier(float multiplier) {
+        // Do nothing.
     }
 
     @Override
-    public boolean contains(Key key) {
-        return false;
-    }
-
-    @Override
-    public Resource get(Key key) {
+    public Resource remove(Key key) {
         return null;
     }
 
@@ -33,8 +29,12 @@ public class MemoryCacheAdapter implements MemoryCache {
     }
 
     @Override
-    public void clearMemory() {}
+    public void clearMemory() {
+        // Do nothing.
+    }
 
     @Override
-    public void trimMemory(int level) {}
+    public void trimMemory(int level) {
+        // Do nothing.
+    }
 }

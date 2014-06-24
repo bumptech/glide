@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
@@ -185,6 +186,40 @@ public class LruCacheTest {
         cache.setSizeMultiplier(0);
 
         verify(listener, times(SIZE)).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testCanRemoveKeys() {
+        String key = getKey();
+        Object value = new Object();
+        cache.put(key, value);
+        cache.remove(key);
+
+        assertNull(cache.get(key));
+        assertFalse(cache.contains(key));
+    }
+
+    @Test
+    public void testDecreasesSizeWhenRemovesKey() {
+        String key = getKey();
+        Object value = new Object();
+        cache.put(key, value);
+        for (int i = 0; i < SIZE - 1; i++) {
+            cache.put(key, value);
+        }
+        cache.remove(key);
+        cache.put(key, value);
+
+        verify(listener, never()).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testDoesNotCallListenerWhenRemovesKey() {
+        String key = getKey();
+        cache.put(key, new Object());
+        cache.remove(key);
+
+        verify(listener, never()).onItemRemoved(anyObject());
     }
 
     private String getKey() {

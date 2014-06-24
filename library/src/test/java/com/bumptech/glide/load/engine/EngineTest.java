@@ -6,21 +6,25 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -30,6 +34,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -37,6 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = { GlideShadowLooper.class })
 public class EngineTest {
     private static final String ID = "asdf";
     private EngineTestHarness harness;
@@ -109,8 +115,8 @@ public class EngineTest {
     }
 
     @Test
-    public void testResourceIsReturnedFromCacheIfPresent() {
-        when(harness.cache.get(eq(harness.cacheKey))).thenReturn(harness.resource);
+    public void testResourceIsReturnedFromActiveResourcesIfPresent() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
 
         harness.doLoad();
 
@@ -118,8 +124,91 @@ public class EngineTest {
     }
 
     @Test
+    public void testResourceIsNotReturnedFromActiveResourcesIfRefIsCleared() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(null));
+
+        harness.doLoad();
+
+        verify(harness.cb, never()).onResourceReady((Resource) isNull());
+    }
+
+    @Test
+    public void testKeyIsRemovedFromActiveResourcesIfRefIsCleared() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(null));
+
+        harness.doLoad();
+
+        assertFalse(harness.activeResources.containsKey(harness.cacheKey));
+    }
+
+    @Test
+    public void testResourceIsAcquiredIfReturnedFromActiveResources() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+
+        harness.doLoad();
+
+        verify(harness.resource).acquire(eq(1));
+    }
+
+    @Test
+    public void testNewLoadIsNotStartedIfResourceIsActive() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+
+        harness.doLoad();
+
+        verify(harness.runner, never()).queue();
+    }
+
+    @Test
+    public void testNullLoadStatusIsReturnedIfResourceIsActive() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+
+        assertNull(harness.doLoad());
+    }
+
+    @Test
+    public void testActiveResourcesIsNotCheckedIfReturnedFromCache() {
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
+        Resource other = mock(Resource.class);
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(other));
+
+        harness.doLoad();
+
+        verify(harness.cb).onResourceReady(eq(harness.resource));
+        verify(harness.cb, never()).onResourceReady(eq(other));
+    }
+
+    @Test
+    public void testCacheIsChecked() {
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
+
+        harness.doLoad();
+
+        verify(harness.cb).onResourceReady(eq(harness.resource));
+    }
+
+    @Test
+    public void testResourceIsReturnedFromCacheIfPresent() {
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
+
+        harness.doLoad();
+
+        verify(harness.cb).onResourceReady(eq(harness.resource));
+    }
+
+    @Test
+    public void testResourceIsAddedToActiveResourceIfReturnedFromCache() {
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
+
+        harness.doLoad();
+
+        assertEquals(harness.resource, harness.activeResources.get(harness.cacheKey)
+                .get());
+    }
+
+    @Test
     public void testResourceIsAcquiredIfReturnedFromCache() {
-        when(harness.cache.get(eq(harness.cacheKey))).thenReturn(harness.resource);
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
 
         harness.doLoad();
 
@@ -128,7 +217,7 @@ public class EngineTest {
 
     @Test
     public void testNewLoadIsNotStartedIfResourceIsCached() {
-        when(harness.cache.get(eq(harness.cacheKey))).thenReturn(mock(Resource.class));
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(mock(Resource.class));
 
         harness.doLoad();
 
@@ -137,7 +226,7 @@ public class EngineTest {
 
     @Test
     public void testNullLoadStatusIsReturnedForCachedResource() {
-        when(harness.cache.get(eq(harness.cacheKey))).thenReturn(mock(Resource.class));
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(mock(Resource.class));
 
         Engine.LoadStatus loadStatus = harness.doLoad();
         assertNull(loadStatus);
@@ -147,7 +236,7 @@ public class EngineTest {
     public void testRunnerIsRemovedFromRunnersOnEngineNotifiedJobComplete() {
         harness.doLoad();
 
-        harness.engine.onEngineJobComplete(harness.cacheKey);
+        harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
 
         assertFalse(harness.runners.containsKey(harness.cacheKey));
     }
@@ -156,9 +245,39 @@ public class EngineTest {
     public void testRunnerIsNotCancelledOnEngineNotifiedJobComplete() {
         harness.doLoad();
 
-        harness.engine.onEngineJobComplete(harness.cacheKey);
+        harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
 
         verify(harness.runner, never()).cancel();
+    }
+
+    @Test
+    public void testEngineIsSetAsResourceListenerOnJobComplete() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
+
+        verify(harness.resource).setResourceListener(eq(harness.cacheKey), eq(harness.engine));
+    }
+
+    @Test
+    public void testEngineIsNotSetAsResourceListenerIfResourceIsNullOnJobComplete() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobComplete(harness.cacheKey, null);
+    }
+
+    @Test
+    public void testResourceIsAddedToActiveResourcesOnEngineComplete() {
+        harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
+
+        WeakReference<Resource> resourceRef = harness.activeResources.get(harness.cacheKey);
+        assertEquals(harness.resource, resourceRef.get());
+    }
+
+    @Test
+    public void testDoesNotPutNullResourceInActiveResourcesOnEngineComplete() {
+        harness.engine.onEngineJobComplete(harness.cacheKey, null);
+        assertFalse(harness.activeResources.containsKey(harness.cacheKey));
     }
 
     @Test
@@ -180,23 +299,54 @@ public class EngineTest {
     }
 
     @Test
+    public void testResourceIsAddedToCacheOnReleased() {
+        harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
+
+        verify(harness.cache).put(eq(harness.cacheKey), eq(harness.resource));
+    }
+
+    @Test
+    public void testResourceIsNotAddedToCacheOnReleasedIfNotCacheable() {
+        when(harness.resource.isCacheable()).thenReturn(false);
+        harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
+
+        verify(harness.cache, never()).put(eq(harness.cacheKey), eq(harness.resource));
+    }
+
+    @Test
+    public void testResourceIsRecycledIfNotCacheableWhenReleased() {
+        when(harness.resource.isCacheable()).thenReturn(false);
+        harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
+
+        verify(harness.resource).recycle();
+    }
+
+    @Test
+    public void testResourceIsRemovedFromActiveResourcesWhenReleased() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+
+        harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
+
+        assertFalse(harness.activeResources.containsKey(harness.cacheKey));
+    }
+
+    @Test
     public void testEngineAddedAsListenerToMemoryCache() {
         verify(harness.cache).setResourceRemovedListener(eq(harness.engine));
     }
 
     @Test
-    public void testResourceIsReleasedWhenRemovedFromCache() {
+    public void testResourceIsRecycledWhenRemovedFromCache() {
         harness.engine.onResourceRemoved(harness.resource);
 
-        verify(harness.resource).release();
+        verify(harness.resource).recycle();
     }
 
     @Test
     public void testRunnerIsPutInRunnersWithCacheKeyWithRelevantIds() {
         harness.doLoad();
 
-        assertNotNull(harness.runners
-                .get(harness.cacheKey));
+        assertNotNull(harness.runners.get(harness.cacheKey));
     }
 
     @Test
@@ -227,7 +377,6 @@ public class EngineTest {
                 eq(harness.engine));
     }
 
-
     @SuppressWarnings("unchecked")
     private static class EngineTestHarness {
         Key cacheKey = mock(Key.class);
@@ -243,6 +392,8 @@ public class EngineTest {
         Map<Key, ResourceRunner> runners = new HashMap<Key, ResourceRunner>();
         Transformation transformation = mock(Transformation.class);
         ResourceRunnerFactory factory = mock(ResourceRunnerFactory.class);
+        Map<Key, WeakReference<Resource>> activeResources = new HashMap<Key, WeakReference<Resource>>();
+
         int width = 100;
         int height = 100;
 
@@ -254,6 +405,7 @@ public class EngineTest {
 
 
         public EngineTestHarness() {
+            when(resource.isCacheable()).thenReturn(true);
             when(keyFactory.buildKey(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                     any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
                     any(ResourceTranscoder.class))).thenReturn(cacheKey);
@@ -262,7 +414,7 @@ public class EngineTest {
             when(runner.getJob()).thenReturn(job);
 
             engine = new Engine(factory, cache, mock(DiskCache.class), mock(ExecutorService.class),
-                    mock(ExecutorService.class), runners, keyFactory);
+                    mock(ExecutorService.class), runners, keyFactory, activeResources);
 
             when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
                     eq(transformation), eq(encoder), eq(transcoder), eq(priority), eq(isMemoryCacheable), eq(engine)))

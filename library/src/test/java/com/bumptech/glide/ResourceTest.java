@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import com.bumptech.glide.load.Key;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,14 +8,21 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
 public class ResourceTest {
     private MockResource resource;
+    private Resource.ResourceListener listener;
+    private Key cacheKey = mock(Key.class);
 
     @Before
     public void setUp() {
         resource = new MockResource();
+        listener = mock(Resource.ResourceListener.class);
+        resource.setResourceListener(cacheKey, listener);
     }
 
     @Test
@@ -22,7 +30,7 @@ public class ResourceTest {
         resource.acquire(1);
         resource.release();
 
-        assertEquals(1, resource.recycled);
+        verify(listener).onResourceReleased(cacheKey, resource);
     }
 
     @Test
@@ -31,7 +39,7 @@ public class ResourceTest {
         resource.release();
         resource.release();
 
-        assertEquals(1, resource.recycled);
+        verify(listener).onResourceReleased(eq(cacheKey), eq(resource));
     }
 
     @Test(expected = IllegalStateException.class)

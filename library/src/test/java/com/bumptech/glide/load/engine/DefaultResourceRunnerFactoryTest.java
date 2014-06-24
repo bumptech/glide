@@ -6,10 +6,9 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +36,6 @@ public class DefaultResourceRunnerFactoryTest {
 
     @SuppressWarnings("unchecked")
     private class DefaultFactoryHarness {
-        MemoryCache memoryCache = mock(MemoryCache.class);
         EngineJobListener listener = mock(EngineJobListener.class);
         DiskCache diskCache = mock(DiskCache.class);
         Handler mainHandler = new Handler();
@@ -47,7 +45,7 @@ public class DefaultResourceRunnerFactoryTest {
         int width = 100;
         int height = 100;
 
-        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(memoryCache, diskCache,
+        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(diskCache,
                 mainHandler, diskCacheService, resizeService);
 
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);

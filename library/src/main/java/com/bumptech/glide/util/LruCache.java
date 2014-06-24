@@ -62,6 +62,14 @@ public class LruCache<T, Y> {
         return result;
     }
 
+    public Y remove(T key) {
+        final Y value = cache.remove(key);
+        if (value != null) {
+            currentSize -= getSize(value);
+        }
+        return value;
+    }
+
     public void clearMemory() {
         trimToSize(0);
     }

@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.util.Log;
 import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
 
@@ -16,16 +15,14 @@ public class EngineJob implements ResourceCallback {
     private boolean isCacheable;
     private final EngineJobListener listener;
     private Key key;
-    private MemoryCache cache;
     private Handler mainHandler;
     private List<ResourceCallback> cbs;
     private ResourceCallback cb;
     private boolean isCancelled;
     private boolean isComplete;
 
-    public EngineJob(Key key, MemoryCache cache, Handler mainHandler, boolean isCacheable, EngineJobListener listener) {
+    public EngineJob(Key key, Handler mainHandler, boolean isCacheable, EngineJobListener listener) {
         this.key = key;
-        this.cache = cache;
         this.isCacheable = isCacheable;
         this.listener = listener;
         this.mainHandler = mainHandler;
@@ -83,16 +80,13 @@ public class EngineJob implements ResourceCallback {
                     resource.recycle();
                     return;
                 }
+                resource.setCacheable(isCacheable);
                 isComplete = true;
 
                 // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
                 // synchronously released by one of the callbacks.
                 resource.acquire(1);
-                listener.onEngineJobComplete(key);
-                if (isCacheable) {
-                    resource.acquire(1);
-                    cache.put(key, resource);
-                }
+                listener.onEngineJobComplete(key, resource);
                 if (cbs != null) {
                     resource.acquire(cbs.size());
                     for (ResourceCallback cb : cbs) {
@@ -126,7 +120,7 @@ public class EngineJob implements ResourceCallback {
                 }
                 isComplete = true;
 
-                listener.onEngineJobComplete(key);
+                listener.onEngineJobComplete(key, null);
                 if (cbs != null) {
                     for (ResourceCallback cb : cbs) {
                         cb.onException(e);

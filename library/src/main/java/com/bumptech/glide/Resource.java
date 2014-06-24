@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.os.Looper;
+import com.bumptech.glide.load.Key;
 
 /**
  * A generic resource that handles reference counting so resources can safely be reused.
@@ -13,12 +14,32 @@ import android.os.Looper;
 public abstract class Resource<Z> {
     private volatile int acquired;
     private volatile boolean isRecycled;
+    private ResourceListener listener;
+    private Key key;
+    private boolean isCacheable;
+
+    public interface ResourceListener {
+        public void onResourceReleased(Key key, Resource resource);
+    }
 
     public abstract Z get();
 
     public abstract int getSize();
 
     protected abstract void recycleInternal();
+
+    public void setResourceListener(Key key, ResourceListener listener) {
+        this.key = key;
+        this.listener = listener;
+    }
+
+    public void setCacheable(boolean isCacheable) {
+        this.isCacheable = isCacheable;
+    }
+
+    public boolean isCacheable() {
+        return isCacheable;
+    }
 
     public void recycle() {
         if (acquired > 0) {
@@ -38,7 +59,7 @@ public abstract class Resource<Z> {
         if (times <= 0) {
             throw new IllegalArgumentException("Must acquire a number of times >= 0");
         }
-        if (!Looper.getMainLooper().getThread().equals(Thread.currentThread())) {
+        if (!Looper.getMainLooper().equals(Looper.myLooper())) {
             throw new IllegalThreadStateException("Must call acquire on the main thread");
         }
         acquired += times;
@@ -48,11 +69,11 @@ public abstract class Resource<Z> {
         if (acquired <= 0) {
             throw new IllegalStateException("Cannot release a recycled or not yet acquired resource");
         }
-        if (!Looper.getMainLooper().getThread().equals(Thread.currentThread())) {
+        if (!Looper.getMainLooper().equals(Looper.myLooper())) {
             throw new IllegalThreadStateException("Must call release on the main thread");
         }
         if (--acquired == 0) {
-            recycle();
+            listener.onResourceReleased(key, this);
         }
     }
 }
