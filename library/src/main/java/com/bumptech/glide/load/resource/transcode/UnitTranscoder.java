@@ -17,6 +17,6 @@ public class UnitTranscoder implements ResourceTranscoder {
 
     @Override
     public String getId() {
-        return "UnitTranscoder.com.bumptech.glide.load.resource.transcode";
+        return "";
     }
 }

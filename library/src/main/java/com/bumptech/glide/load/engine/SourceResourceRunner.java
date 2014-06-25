@@ -2,8 +2,8 @@ package com.bumptech.glide.load.engine;
 
 import android.os.SystemClock;
 import android.util.Log;
+import com.bumptech.glide.CacheLoader;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -23,26 +24,32 @@ import java.io.OutputStream;
  */
 public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer, Prioritized {
     private static final String TAG = "SourceRunner";
-    private final Key key;
+    private final EngineKey key;
     private final int width;
     private final int height;
+    private CacheLoader cacheLoader;
+    private ResourceDecoder<InputStream, Z> cacheDecoder;
     private final DataFetcher<T> fetcher;
     private final ResourceDecoder<T, Z> decoder;
-    private Transformation<Z> transformation;
+    private final Transformation<Z> transformation;
     private final ResourceEncoder<Z> encoder;
-    private ResourceTranscoder<Z, R> transcoder;
-    private DiskCache diskCache;
-    private Priority priority;
-    private ResourceCallback cb;
+    private final ResourceTranscoder<Z, R> transcoder;
+    private final DiskCache diskCache;
+    private final Priority priority;
+    private final ResourceCallback cb;
+
     private Resource<Z> result;
     private volatile boolean isCancelled;
 
-    public SourceResourceRunner(Key key, int width, int height, DataFetcher<T> dataFetcher,
-            ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
-            ResourceTranscoder<Z, R> transcoder, DiskCache diskCache, Priority priority, ResourceCallback cb) {
+    public SourceResourceRunner(EngineKey key, int width, int height, CacheLoader cacheLoader,
+            ResourceDecoder<InputStream, Z> cacheDecoder, DataFetcher<T> dataFetcher, ResourceDecoder<T, Z> decoder,
+            Transformation<Z> transformation, ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
+            DiskCache diskCache, Priority priority, ResourceCallback cb) {
         this.key = key;
         this.width = width;
         this.height = height;
+        this.cacheLoader = cacheLoader;
+        this.cacheDecoder = cacheDecoder;
         this.fetcher = dataFetcher;
         this.decoder = decoder;
         this.transformation = transformation;
@@ -68,11 +75,16 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
 
         try {
             long start = SystemClock.currentThreadTimeMillis();
-            final Resource<Z> decoded = decode();
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Decoded from source in " + (SystemClock.currentThreadTimeMillis() - start));
-                start = SystemClock.currentThreadTimeMillis();
+            Resource<Z> decoded = cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
+
+            if (decoded == null) {
+                decoded = decodeFromSource();
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Decoded from source in " + (SystemClock.currentThreadTimeMillis() - start));
+                    start = SystemClock.currentThreadTimeMillis();
+                }
             }
+
             if (decoded != null) {
                 Resource<Z> transformed = transformation.transform(decoded, width, height);
                 if (decoded != transformed) {
@@ -101,7 +113,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
         }
     }
 
-    private Resource<Z> decode() throws Exception {
+    private Resource<Z> decodeFromSource() throws Exception {
         try {
             T toDecode = fetcher.loadData(priority);
             if (toDecode != null) {

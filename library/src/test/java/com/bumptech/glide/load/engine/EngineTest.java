@@ -378,8 +378,8 @@ public class EngineTest {
 
     @SuppressWarnings("unchecked")
     private static class EngineTestHarness {
-        Key cacheKey = mock(Key.class);
-        KeyFactory keyFactory = mock(KeyFactory.class);
+        EngineKey cacheKey = mock(EngineKey.class);
+        EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
         DataFetcher<Object> fetcher = mock(DataFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);

@@ -27,7 +27,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     private static final String TAG = "Engine";
     private final Map<Key, ResourceRunner> runners;
     private final ResourceRunnerFactory factory;
-    private final KeyFactory keyFactory;
+    private final EngineKeyFactory keyFactory;
     private final MemoryCache cache;
     private final Map<Key, WeakReference<Resource>> activeResources;
     private final ReferenceQueue<Resource> resourceReferenceQueue;
@@ -52,7 +52,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     Engine(ResourceRunnerFactory factory, MemoryCache cache, DiskCache diskCache, ExecutorService resizeService,
-            ExecutorService diskCacheService, Map<Key, ResourceRunner> runners, KeyFactory keyFactory,
+            ExecutorService diskCacheService, Map<Key, ResourceRunner> runners, EngineKeyFactory keyFactory,
             Map<Key, WeakReference<Resource>> activeResources) {
         this.cache = cache;
 
@@ -101,7 +101,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         long startTime = LogTime.getLogTime();
 
         final String id = fetcher.getId();
-        Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder, transcoder);
+        EngineKey key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder,
+                transcoder);
 
         Resource cached = cache.remove(key);
         if (cached != null) {

@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.transcode;
 
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.tests.Util;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
@@ -18,8 +17,7 @@ public class UnitTranscoderTest {
     }
 
     @Test
-    public void testHasValidId() {
-        Util.assertClassHasValidId(UnitTranscoder.class, UnitTranscoder.get().getId());
+    public void testHasEmptyId() {
+        assertEquals("", UnitTranscoder.get().getId());
     }
-
 }

@@ -178,7 +178,8 @@ public class ResourceRunnerTest {
 
     @SuppressWarnings("unchecked")
     private static class ResourceRunnerHarness {
-        Key key = mock(Key.class);
+        EngineKey key = mock(EngineKey.class);
+        Key originalKey = mock(Key.class);
         ResourceDecoder<InputStream, Object> decoder = mock(ResourceDecoder.class);
         SourceResourceRunner<Object, Object, Object> sourceRunner = mock(SourceResourceRunner.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
@@ -200,6 +201,7 @@ public class ResourceRunnerTest {
 
         public ResourceRunnerHarness() {
             when(key.toString()).thenReturn(ID);
+            when(key.getOriginalKey()).thenReturn(originalKey);
             when(resizeService.submit(eq(runner))).thenReturn(future);
             when(resizeService.submit(eq(sourceRunner))).thenReturn(sourceFuture);
             when(cacheLoader.load(eq(key), eq(decoder), eq(width), eq(height))).thenReturn(decoded);

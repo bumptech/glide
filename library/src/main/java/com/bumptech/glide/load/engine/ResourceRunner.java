@@ -4,7 +4,6 @@ import android.os.SystemClock;
 import android.util.Log;
 import com.bumptech.glide.CacheLoader;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.executor.Prioritized;
@@ -22,7 +21,7 @@ import java.util.concurrent.Future;
 public class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private static final String TAG = "ResourceRunner";
 
-    private final Key key;
+    private final EngineKey key;
     private final Transformation<Z> transformation;
     private final ResourceTranscoder<Z, R> transcoder;
     private final SourceResourceRunner sourceRunner;
@@ -37,7 +36,7 @@ public class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private volatile Future<?> future;
     private volatile boolean isCancelled;
 
-    public ResourceRunner(Key key, int width, int height, CacheLoader cacheLoader,
+    public ResourceRunner(EngineKey key, int width, int height, CacheLoader cacheLoader,
             ResourceDecoder<InputStream, Z> cacheDecoder, Transformation<Z> transformation,
             ResourceTranscoder<Z, R> transcoder, SourceResourceRunner sourceRunner, ExecutorService diskCacheService,
             ExecutorService resizeService, EngineJob job, Priority priority) {

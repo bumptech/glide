@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import com.bumptech.glide.OriginalEngineKey;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -23,6 +24,7 @@ public class EngineKey implements Key {
     private ResourceTranscoder transcoder;
     private String stringKey;
     private int hashCode;
+    private OriginalEngineKey originalKey;
 
     public EngineKey(String id, int width, int height, ResourceDecoder cacheDecoder, ResourceDecoder decoder,
             Transformation transformation, ResourceEncoder encoder, ResourceTranscoder transcoder) {
@@ -34,6 +36,13 @@ public class EngineKey implements Key {
         this.transformation = transformation;
         this.encoder = encoder;
         this.transcoder = transcoder;
+    }
+
+    public Key getOriginalKey() {
+        if (originalKey == null) {
+            originalKey = new OriginalEngineKey(id);
+        }
+        return originalKey;
     }
 
     @Override
