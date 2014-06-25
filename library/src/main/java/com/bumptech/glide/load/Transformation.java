@@ -1,6 +1,6 @@
 package com.bumptech.glide.load;
 
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 
 /**
  * A class for performing an arbitrary transformation on a bitmap

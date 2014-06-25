@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import android.os.SystemClock;
 import android.util.Log;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;

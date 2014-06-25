@@ -3,7 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 

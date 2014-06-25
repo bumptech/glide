@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LruCache;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;

@@ -1,4 +1,4 @@
-package com.bumptech.glide;
+package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.Key;
 import junit.framework.Assert;
@@ -8,6 +8,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -117,6 +119,14 @@ public class ResourceTest {
         resource.acquire(1);
         resource.release();
         resource.release();
+    }
+
+    @Test
+    public void testCanSetAndGetIsCacheable() {
+        resource.setCacheable(true);
+        assertTrue(resource.isCacheable());
+        resource.setCacheable(false);
+        assertFalse(resource.isCacheable());
     }
 
     private static class MockResource extends Resource<Object> {

@@ -1,4 +1,4 @@
-package com.bumptech.glide;
+package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
 import com.bumptech.glide.load.Key;
@@ -18,7 +18,7 @@ public abstract class Resource<Z> {
     private Key key;
     private boolean isCacheable;
 
-    public interface ResourceListener {
+    interface ResourceListener {
         public void onResourceReleased(Key key, Resource resource);
     }
 
@@ -28,16 +28,16 @@ public abstract class Resource<Z> {
 
     protected abstract void recycleInternal();
 
-    public void setResourceListener(Key key, ResourceListener listener) {
+    void setResourceListener(Key key, ResourceListener listener) {
         this.key = key;
         this.listener = listener;
     }
 
-    public void setCacheable(boolean isCacheable) {
+    void setCacheable(boolean isCacheable) {
         this.isCacheable = isCacheable;
     }
 
-    public boolean isCacheable() {
+    boolean isCacheable() {
         return isCacheable;
     }
 

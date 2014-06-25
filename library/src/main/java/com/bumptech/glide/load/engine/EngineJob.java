@@ -2,7 +2,6 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
 import android.util.Log;
-import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;

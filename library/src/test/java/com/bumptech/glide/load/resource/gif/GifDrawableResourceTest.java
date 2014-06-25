@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

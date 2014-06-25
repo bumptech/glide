@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 
 public interface EngineJobListener {

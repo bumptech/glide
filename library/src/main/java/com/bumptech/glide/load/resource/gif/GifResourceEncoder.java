@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.util.Log;
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.ResourceEncoder;
 
 import java.io.IOException;

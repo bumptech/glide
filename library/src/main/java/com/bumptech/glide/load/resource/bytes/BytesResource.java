@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.bytes;
 
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 
 public class BytesResource extends Resource<byte[]> {
     private byte[] bytes;

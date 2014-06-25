@@ -5,7 +5,6 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;

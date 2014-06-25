@@ -3,7 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;

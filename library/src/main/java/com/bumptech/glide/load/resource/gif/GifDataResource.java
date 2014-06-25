@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 
 public class GifDataResource extends Resource<GifData> {
     private GifData gifData;

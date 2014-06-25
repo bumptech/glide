@@ -2,7 +2,7 @@ package com.bumptech.glide.load.engine.cache;
 
 import android.content.ComponentCallbacks2;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 
 /**
  * An interface for adding and removing resources from an in memory cache

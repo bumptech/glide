@@ -2,7 +2,7 @@ package com.bumptech.glide.load.resource.transcode;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
 import org.junit.Test;

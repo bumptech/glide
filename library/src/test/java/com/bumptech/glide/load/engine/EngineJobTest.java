@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
-import com.bumptech.glide.Resource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.request.ResourceCallback;

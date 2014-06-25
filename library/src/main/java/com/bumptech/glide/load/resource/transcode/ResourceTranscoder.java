@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.transcode;
 
-import com.bumptech.glide.Resource;
+import com.bumptech.glide.load.engine.Resource;
 
 /**
  * Transcodes a resource of one type to a resource of another type.
