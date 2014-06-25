@@ -11,6 +11,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.UnitTransformation;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -46,7 +47,7 @@ import java.util.List;
 public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> {
     private final Context context;
     private List<Transformation<ResourceType>> transformations = null;
-    private Transformation<ResourceType> singleTransformation = Transformation.NONE;
+    private Transformation<ResourceType> singleTransformation = UnitTransformation.get();
     private final ModelType model;
     private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
     private final Class<TranscodeType> transcodeClass;
@@ -235,7 +236,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transform(
             Transformation<ResourceType> transformation) {
-        if (singleTransformation == Transformation.NONE) {
+        if (singleTransformation == UnitTransformation.get()) {
             singleTransformation = transformation;
         } else {
             transformations = new ArrayList<Transformation<ResourceType>>();

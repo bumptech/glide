@@ -9,22 +9,6 @@ import com.bumptech.glide.load.engine.Resource;
 public interface Transformation<T> {
 
     /**
-     * A noop Transformation that simply returns the given bitmap
-     */
-    public static Transformation NONE = new Transformation() {
-        @Override
-        public Resource transform(Resource resource, int outWidth, int outHeight) {
-            return resource;
-        }
-
-        @Override
-        public String getId() {
-            return "NONE.com.bumptech.glide.load.Transformation";
-        }
-    };
-
-
-    /**
      * Transform the given bitmap. It is also acceptable to simply return the given bitmap if no transformation is
      * required.
      *

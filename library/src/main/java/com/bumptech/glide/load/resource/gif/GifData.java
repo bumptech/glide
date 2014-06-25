@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.UnitTransformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.util.ArrayList;
@@ -34,7 +35,11 @@ public class GifData {
 
     @SuppressWarnings("unchecked")
     public Transformation<Bitmap> getFrameTransformation() {
-        return frameTransformation != null ? frameTransformation : Transformation.NONE;
+        if (frameTransformation != null) {
+            return frameTransformation;
+        } else {
+            return UnitTransformation.get();
+        }
     }
 
     public void setFrameTransformation(Transformation<Bitmap> transformation) {

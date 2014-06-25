@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.graphics.Bitmap;
+import com.bumptech.glide.load.UnitTransformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.Transformation;
 import org.junit.Before;
@@ -42,7 +43,8 @@ public class GifDataTransformationTest {
     public void testSetsTransformationAsFrameTransformation() {
         Resource<GifData> resource = mock(Resource.class);
         GifData gifData = mock(GifData.class);
-        when(gifData.getFrameTransformation()).thenReturn(Transformation.NONE);
+        Transformation<Bitmap> unitTransformation = UnitTransformation.get();
+        when(gifData.getFrameTransformation()).thenReturn(unitTransformation);
         when(resource.get()).thenReturn(gifData);
 
         final Resource<Bitmap> toTransform = mock(Resource.class);
