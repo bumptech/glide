@@ -2,15 +2,14 @@ package com.bumptech.glide.load.engine;
 
 import android.os.SystemClock;
 import android.util.Log;
+import com.bumptech.glide.CacheLoader;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -32,20 +31,20 @@ public class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private final ResourceDecoder<InputStream, Z> cacheDecoder;
     private final int width;
     private final int height;
-    private final DiskCache diskCache;
+    private final CacheLoader cacheLoader;
     private final ExecutorService diskCacheService;
     private final ExecutorService resizeService;
     private volatile Future<?> future;
     private volatile boolean isCancelled;
 
-    public ResourceRunner(Key key, int width, int height, DiskCache diskCache,
+    public ResourceRunner(Key key, int width, int height, CacheLoader cacheLoader,
             ResourceDecoder<InputStream, Z> cacheDecoder, Transformation<Z> transformation,
             ResourceTranscoder<Z, R> transcoder, SourceResourceRunner sourceRunner, ExecutorService diskCacheService,
             ExecutorService resizeService, EngineJob job, Priority priority) {
         this.key = key;
         this.width = width;
         this.height = height;
-        this.diskCache = diskCache;
+        this.cacheLoader = cacheLoader;
         this.cacheDecoder = cacheDecoder;
         this.transformation = transformation;
         this.transcoder = transcoder;
@@ -79,7 +78,7 @@ public class ResourceRunner<Z, R> implements Runnable, Prioritized {
         }
 
         long start = SystemClock.currentThreadTimeMillis();
-        Resource<Z> fromCache = loadFromDiskCache();
+        Resource<Z> fromCache = cacheLoader.load(key, cacheDecoder, width, height);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "loaded from disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
         }
@@ -93,27 +92,6 @@ public class ResourceRunner<Z, R> implements Runnable, Prioritized {
         } else {
             future = resizeService.submit(sourceRunner);
         }
-    }
-
-    private Resource<Z> loadFromDiskCache() {
-        Resource<Z> result = null;
-        InputStream fromCache = diskCache.get(key);
-        if (fromCache != null) {
-            try {
-                result = cacheDecoder.decode(fromCache, width, height);
-            } catch (IOException e) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Exception decoding image from cache", e);
-                }
-            }
-            if (result == null) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Failed to decode image from cache or not present in cache");
-                }
-                diskCache.delete(key);
-            }
-        }
-        return result;
     }
 
     @Override

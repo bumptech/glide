@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
+import com.bumptech.glide.CacheLoader;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 
 class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
+    private final CacheLoader cacheLoader;
     private DiskCache diskCache;
     private Handler mainHandler;
     private ExecutorService diskCacheService;
@@ -25,6 +26,7 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
         this.mainHandler = mainHandler;
         this.diskCacheService = diskCacheService;
         this.service = resizeService;
+        cacheLoader = new CacheLoader(diskCache);
     }
 
     @Override
@@ -38,7 +40,7 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
         SourceResourceRunner<T, Z, R> sourceRunner = new SourceResourceRunner<T, Z, R>(key, width, height, fetcher,
                 decoder, transformation, encoder, transcoder, diskCache, priority, engineJob);
 
-        return new ResourceRunner<Z, R>(key, width, height, diskCache, cacheDecoder, transformation, transcoder,
-                sourceRunner, diskCacheService, service, engineJob, priority);
+        return new ResourceRunner<Z, R>(key, width, height, cacheLoader, cacheDecoder, transformation,
+                transcoder, sourceRunner, diskCacheService, service, engineJob, priority);
     }
 }
