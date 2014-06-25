@@ -17,13 +17,13 @@ import java.io.InputStream;
  */
 public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
     private final ModelLoader<GlideUrl, InputStream> concreteLoader;
-    private final ModelCache<GlideUrl> modelCache;
+    private final ModelCache<T, GlideUrl> modelCache;
 
     public BaseGlideUrlLoader(Context context) {
         this(context, null);
     }
 
-    public BaseGlideUrlLoader(Context context, ModelCache<GlideUrl> modelCache) {
+    public BaseGlideUrlLoader(Context context, ModelCache<T, GlideUrl> modelCache) {
         this(Glide.buildModelLoader(GlideUrl.class, InputStream.class, context), modelCache);
     }
 
@@ -32,17 +32,16 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
         this(concreteLoader, null);
     }
 
-    public BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader, ModelCache<GlideUrl> modelCache) {
+    public BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader, ModelCache<T, GlideUrl> modelCache) {
         this.concreteLoader = concreteLoader;
         this.modelCache = modelCache;
     }
 
     @Override
     public DataFetcher<InputStream> getResourceFetcher(T model, int width, int height) {
-        final String id = getId(model);
         GlideUrl result = null;
         if (modelCache != null) {
-            result = modelCache.get(id, width, height);
+            result = modelCache.get(model, width, height);
         }
 
         if (result == null) {
@@ -50,7 +49,7 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
             result = new GlideUrl(stringURL);
 
             if (modelCache != null) {
-                modelCache.put(id, width, height, result);
+                modelCache.put(model, width, height, result);
             }
         }
 

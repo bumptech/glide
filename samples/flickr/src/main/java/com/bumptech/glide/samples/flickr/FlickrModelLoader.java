@@ -20,7 +20,7 @@ import java.io.InputStream;
 public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
 
     public static class Factory implements ModelLoaderFactory<Photo, InputStream> {
-        private final ModelCache<GlideUrl> modelCache = new ModelCache<GlideUrl>(500);
+        private final ModelCache<Photo, GlideUrl> modelCache = new ModelCache<Photo, GlideUrl>(500);
 
         @Override
         public ModelLoader<Photo, InputStream> build(Context context, GenericLoaderFactory factories) {
@@ -32,17 +32,12 @@ public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
         }
     }
 
-    public FlickrModelLoader(Context context, ModelCache<GlideUrl> modelCache) {
+    public FlickrModelLoader(Context context, ModelCache<Photo, GlideUrl> modelCache) {
         super(context, modelCache);
     }
 
     @Override
     protected String getUrl(Photo model, int width, int height) {
         return Api.getPhotoURL(model, width, height);
-    }
-
-    @Override
-    public String getId(Photo model) {
-        return model.id;
     }
 }

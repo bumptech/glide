@@ -11,9 +11,11 @@ import java.io.InputStream;
  */
 public class ByteArrayFetcher implements DataFetcher<InputStream> {
     private final byte[] bytes;
+    private final String id;
 
-    public ByteArrayFetcher(byte[] bytes) {
+    public ByteArrayFetcher(byte[] bytes, String id) {
         this.bytes = bytes;
+        this.id = id;
     }
 
     @Override
@@ -24,6 +26,11 @@ public class ByteArrayFetcher implements DataFetcher<InputStream> {
     @Override
     public void cleanup() {
         // Do nothing.
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

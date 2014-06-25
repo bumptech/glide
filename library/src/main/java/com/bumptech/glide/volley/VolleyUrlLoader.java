@@ -54,11 +54,6 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         return new VolleyStreamFetcher(requestQueue, url.toString(), futureFactory.build());
     }
 
-    @Override
-    public String getId(GlideUrl url) {
-        return url.toString();
-    }
-
     private static class DefaultFutureFactory implements FutureFactory {
         @Override
         public VolleyRequestFuture<InputStream> build() {

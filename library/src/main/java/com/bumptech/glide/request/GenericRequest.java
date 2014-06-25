@@ -301,14 +301,13 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
         ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
 
-        final String id = modelLoader.getId(model);
         final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(id, width, height, cacheDecoder, dataFetcher, decoder, transformation,
+        loadStatus = engine.load(width, height, cacheDecoder, dataFetcher, decoder, transformation,
                 encoder, transcoder, priority, isMemoryCacheable, this);
         loadedFromMemoryCache = resource != null;
         if (Log.isLoggable(TAG, Log.VERBOSE)) {

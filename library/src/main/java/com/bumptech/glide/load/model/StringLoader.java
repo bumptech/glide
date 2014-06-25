@@ -26,9 +26,4 @@ public class StringLoader<T> implements ModelLoader<String, T> {
         }
         return uriLoader.getResourceFetcher(uri, width, height);
     }
-
-    @Override
-    public final String getId(String model) {
-        return model;
-    }
 }

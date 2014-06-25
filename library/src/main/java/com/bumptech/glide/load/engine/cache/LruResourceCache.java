@@ -20,7 +20,7 @@ public class LruResourceCache extends LruCache<Key, Resource> implements MemoryC
     }
 
     @Override
-    protected void onItemRemoved(Resource item) {
+    protected void onItemRemoved(Key key, Resource item) {
         if (listener != null) {
             listener.onResourceRemoved(item);
         }

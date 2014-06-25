@@ -3,13 +3,6 @@ package com.bumptech.glide.samples.flickr.api;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created with IntelliJ IDEA.
- * User: sam
- * Date: 1/6/13
- * Time: 10:55 AM
- * To change this template use File | Settings | File Templates.
- */
 public class Photo {
     public final String id;
     public final String owner;
@@ -38,5 +31,49 @@ public class Photo {
     @Override
     public String toString() {
         return getPartialUrl();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Photo photo = (Photo) o;
+
+        if (!farm.equals(photo.farm)) {
+            return false;
+        }
+        if (!id.equals(photo.id)) {
+            return false;
+        }
+        if (!owner.equals(photo.owner)) {
+            return false;
+        }
+        if (!secret.equals(photo.secret)) {
+            return false;
+        }
+        if (!server.equals(photo.server)) {
+            return false;
+        }
+        if (!title.equals(photo.title)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + owner.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + server.hashCode();
+        result = 31 * result + farm.hashCode();
+        result = 31 * result + secret.hashCode();
+        return result;
     }
 }

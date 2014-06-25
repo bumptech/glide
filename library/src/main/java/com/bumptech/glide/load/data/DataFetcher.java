@@ -33,6 +33,16 @@ public interface DataFetcher<T> {
     public void cleanup();
 
     /**
+     * Returns a string uniquely identifying the data that this fetcher will fetch including the specific size.
+     *
+     * <p>
+     *     A hash of the bytes of the data that will be fetched is the ideal id but since that is in many cases
+     *     impractical and not performant, urls, file paths, and uris are normally sufficient.
+     * </p>
+     */
+    public String getId();
+
+    /**
      * A method that will be called when a load is no longer relevant and has been cancelled. This method does not need
      * to guarantee that any in process loads do not finish. It also may be called before a load starts or after it
      * finishes.

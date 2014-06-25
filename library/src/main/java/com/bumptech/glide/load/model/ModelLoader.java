@@ -46,13 +46,4 @@ public interface ModelLoader<T, Y> {
      *          image is not cached.
      */
     public DataFetcher<Y> getResourceFetcher(T model, int width, int height);
-
-    /**
-     * Get a unique id for a given model
-     *
-     * @param model The model
-     * @return A String that consistently and uniquely identifies this model. It can include width and height, but it
-     *          does not have to.
-     */
-    public String getId(T model);
 }

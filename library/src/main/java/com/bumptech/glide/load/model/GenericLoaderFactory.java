@@ -23,11 +23,6 @@ public class GenericLoaderFactory {
         }
 
         @Override
-        public String getId(Object model) {
-            throw new NoSuchMethodError("This should never be called!");
-        }
-
-        @Override
         public String toString() {
             return "NULL_MODEL_LOADER";
         }

@@ -60,6 +60,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -222,8 +223,8 @@ public class GlideTest {
         GlideUrl glideUrl =  mock(GlideUrl.class);
         DataFetcher<File> dataFetcher = mock(DataFetcher.class);
         when(dataFetcher.loadData(any(Priority.class))).thenReturn(expected);
+        when(dataFetcher.getId()).thenReturn("id");
         ModelLoader<GlideUrl, File> modelLoader = mock(ModelLoader.class);
-        when(modelLoader.getId(eq(glideUrl))).thenReturn("id");
         when(modelLoader.getResourceFetcher(eq(glideUrl), anyInt(), anyInt()))
                 .thenReturn(dataFetcher);
 
@@ -615,8 +616,8 @@ public class GlideTest {
     private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) throws Exception {
         DataFetcher<Z> failFetcher = mock(DataFetcher.class);
         when(failFetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
+        when(failFetcher.getId()).thenReturn("fakeId");
         ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
-        when(failLoader.getId(any(failModel))).thenReturn("fakeId");
         when(failLoader.getResourceFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
         ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
         when(failFactory.build(any(Context.class), any(GenericLoaderFactory.class))).thenReturn(failLoader);
@@ -656,13 +657,7 @@ public class GlideTest {
         try {
             when(fetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
         } catch (Exception e) { }
-        when(modelLoader.getId(any(modelClass))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                T model = (T) invocation.getArguments()[0];
-                return model.toString();
-            }
-        });
+        when(fetcher.getId()).thenReturn(UUID.randomUUID().toString());
         when(modelLoader.getResourceFetcher(any(modelClass), anyInt(), anyInt()))
                 .thenReturn(fetcher);
 

@@ -21,16 +21,16 @@ public class GifFrameModelLoaderTest {
     }
 
     @Test
-    public void testIdIncludesGifDecoderIdAndFrameIndex() {
+    public void testFetcherIdIncludesGifDecoderIdAndFrameIndex() {
         String id = "asdfasd";
         int frameIndex = 124;
         when(decoder.getId()).thenReturn(id);
         when(decoder.getCurrentFrameIndex()).thenReturn(frameIndex);
 
-        String loaderId = loader.getId(decoder);
+        String fetcherId = loader.getResourceFetcher(decoder, 1, 2).getId();
 
-        assertTrue(loaderId.contains(id));
-        assertTrue(loaderId.contains(String.valueOf(frameIndex)));
+        assertTrue(fetcherId.contains(id));
+        assertTrue(fetcherId.contains(String.valueOf(frameIndex)));
     }
 
     @Test

@@ -84,7 +84,6 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     /**
-     * @param id           A unique id for the model, dimensions, cache decoder, decoder, and encoder
      * @param cacheDecoder
      * @param fetcher
      * @param decoder
@@ -95,12 +94,13 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param <Z>          The type of the resource that will be decoded.
      * @param <R>          The type of the resource that will be transcoded from the decoded resource.
      */
-    public <T, Z, R> LoadStatus load(String id, int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
+    public <T, Z, R> LoadStatus load(int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
             DataFetcher<T> fetcher, ResourceDecoder<T, Z> decoder, Transformation<Z> transformation,
             ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, Priority priority,
             boolean isMemoryCacheable, ResourceCallback cb) {
         long startTime = LogTime.getLogTime();
 
+        final String id = fetcher.getId();
         Key key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder, transcoder);
 
         Resource cached = cache.remove(key);

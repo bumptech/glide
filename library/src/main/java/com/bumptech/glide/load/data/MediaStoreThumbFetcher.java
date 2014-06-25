@@ -23,21 +23,28 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
     private final DataFetcher<InputStream> defaultFetcher;
     private final int width;
     private final int height;
+    private final long dateModified;
+    private final int orientation;
     private final ThumbnailStreamOpenerFactory factory;
     private InputStream inputStream;
+    private String mimeType;
 
     public MediaStoreThumbFetcher(Context context, Uri mediaStoreUri, DataFetcher<InputStream> defaultFetcher,
-            int width, int height) {
-        this(context, mediaStoreUri, defaultFetcher, width, height, DEFAULT_FACTORY);
+            int width, int height, String mimeType, long dateModified, int orientation) {
+        this(context, mediaStoreUri, defaultFetcher, width, height, mimeType, dateModified, orientation,
+                DEFAULT_FACTORY);
     }
 
     MediaStoreThumbFetcher(Context context, Uri mediaStoreUri, DataFetcher<InputStream> defaultFetcher, int width,
-            int height, ThumbnailStreamOpenerFactory factory) {
+            int height, String mimeType, long dateModified, int orientation, ThumbnailStreamOpenerFactory factory) {
         this.context = context;
         this.mediaStoreUri = mediaStoreUri;
         this.defaultFetcher = defaultFetcher;
         this.width = width;
         this.height = height;
+        this.mimeType = mimeType;
+        this.dateModified = dateModified;
+        this.orientation = orientation;
         this.factory = factory;
     }
 
@@ -66,6 +73,11 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
             }
         }
         defaultFetcher.cleanup();
+    }
+
+    @Override
+    public String getId() {
+        return mediaStoreUri + mimeType + String.valueOf(dateModified) + String.valueOf(orientation);
     }
 
     @Override

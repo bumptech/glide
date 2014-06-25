@@ -17,7 +17,7 @@ public class ByteArrayFetcherTest {
             bytes[i] = (byte) i;
         }
 
-        ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes);
+        ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes, "testId");
         InputStream is = fetcher.loadData(Priority.NORMAL);
 
         int read = 0;
@@ -27,5 +27,12 @@ public class ByteArrayFetcherTest {
             read++;
         }
         assertEquals(bytes.length, read);
+    }
+
+    @Test
+    public void testReturnsGivenId() {
+        String expected = "fakeId";
+        ByteArrayFetcher fetcher = new ByteArrayFetcher(new byte[0], expected);
+        assertEquals(expected, fetcher.getId());
     }
 }

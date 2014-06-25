@@ -48,6 +48,11 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     }
 
     @Override
+    public String getId() {
+        return url;
+    }
+
+    @Override
     public void cancel() {
         VolleyRequestFuture<InputStream> localFuture = requestFuture;
         if (localFuture != null) {

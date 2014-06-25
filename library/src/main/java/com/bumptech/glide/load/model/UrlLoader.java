@@ -15,9 +15,4 @@ public class UrlLoader<T> implements ModelLoader<URL, T> {
     public DataFetcher<T> getResourceFetcher(URL model, int width, int height) {
         return glideUrlLoader.getResourceFetcher(new GlideUrl(model), width, height);
     }
-
-    @Override
-    public String getId(URL model) {
-        return model.toString();
-    }
 }

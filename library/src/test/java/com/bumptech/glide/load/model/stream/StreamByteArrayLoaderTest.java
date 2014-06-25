@@ -12,12 +12,7 @@ public class StreamByteArrayLoaderTest {
 
     @Test
     public void testCanHandleByteArray() {
-        StreamByteArrayLoader loader = new StreamByteArrayLoader() {
-            @Override
-            public String getId(byte[] model) {
-                return "id";
-            }
-        };
+        StreamByteArrayLoader loader = new StreamByteArrayLoader();
 
         byte[] data = new byte[10];
         DataFetcher<InputStream> fetcher = loader.getResourceFetcher(data, -1, -1);
@@ -25,14 +20,10 @@ public class StreamByteArrayLoaderTest {
     }
 
     @Test
-    public void testReturnsGivenId() {
-        final String id = "testId";
-        StreamByteArrayLoader loader = new StreamByteArrayLoader() {
-            @Override
-            public String getId(byte[] model) {
-                return id;
-            }
-        };
-        assertEquals(id, loader.getId(new byte[10]));
+    public void testFetcherReturnsGivenId() {
+        String id = "testId";
+        StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
+
+        assertEquals(id, loader.getResourceFetcher(new byte[0], 1, 1).getId());
     }
 }

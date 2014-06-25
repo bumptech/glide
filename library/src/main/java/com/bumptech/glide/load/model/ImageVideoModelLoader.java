@@ -35,18 +35,6 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
         return new ImageVideoFetcher(streamFetcher, fileDescriptorFetcher);
     }
 
-    @Override
-    public String getId(A model) {
-        StringBuilder builder = new StringBuilder();
-        if (streamLoader != null) {
-            builder.append(streamLoader.getId(model));
-        }
-        if (fileDescriptorLoader != null) {
-            builder.append(fileDescriptorLoader.getId(model));
-        }
-        return builder.toString();
-    }
-
     public static class ImageVideoFetcher implements DataFetcher<ImageVideoWrapper> {
         private final DataFetcher<InputStream> streamFetcher;
         private final DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher;
@@ -95,6 +83,16 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
             }
             if (fileDescriptorFetcher != null) {
                 fileDescriptorFetcher.cleanup();
+            }
+        }
+
+        @Override
+        public String getId() {
+            // Both the stream fetcher and the file descriptor fetcher should return the same id.
+            if (streamFetcher != null) {
+                return streamFetcher.getId();
+            } else {
+                return fileDescriptorFetcher.getId();
             }
         }
 

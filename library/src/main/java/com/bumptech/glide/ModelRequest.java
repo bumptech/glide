@@ -217,12 +217,7 @@ public class ModelRequest {
      * into.
      */
     public DrawableTypeRequest<byte[]> loadFromImage(byte[] model, final String id) {
-        StreamByteArrayLoader loader = new StreamByteArrayLoader() {
-            @Override
-            public String getId(byte[] model) {
-                return id;
-            }
-        };
+        final StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
         return new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestManager);
     }
 

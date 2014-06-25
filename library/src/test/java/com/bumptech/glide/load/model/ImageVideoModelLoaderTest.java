@@ -15,10 +15,9 @@ import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,17 +39,39 @@ public class ImageVideoModelLoaderTest {
     }
 
     @Test
-    public void testIdIncludesStreamAndFileIds() {
+    public void testIdIsStreamOrFetcherId() {
         Object model = new Object();
-        String streamId = "stream";
-        String fileId = "file";
-        when(harness.streamModelLoader.getId(eq(model))).thenReturn(streamId);
-        when(harness.fileDescriptorModelLoader.getId(eq(model))).thenReturn(fileId);
+        String expected = "stream";
+        when(harness.streamFetcher.getId()).thenReturn(expected);
+        when(harness.fileDescriptorFetcher.getId()).thenReturn(expected);
 
-        String id = harness.getLoader().getId(model);
+        String id = harness.getLoader().getResourceFetcher(model, 1, 2).getId();
 
-        assertTrue(id, id.contains(streamId));
-        assertTrue(id, id.contains(fileId));
+        assertEquals(expected, id);
+    }
+
+    @Test
+    public void testReturnsFileDescriptorIdIfStreamFetcherNull() {
+        Object model = new Object();
+        String expected = "fakeId";
+        when(harness.fileDescriptorFetcher.getId()).thenReturn(expected);
+        harness.streamModelLoader = null;
+
+        String id = harness.getLoader().getResourceFetcher(model, 1, 2).getId();
+
+        assertEquals(expected, id);
+    }
+
+    @Test
+    public void testReturnsStreamFetcherIdIfFileDescriptorFetcherNull() {
+        Object model = new Object();
+        String expected = "fakeId";
+        when(harness.streamFetcher.getId()).thenReturn(expected);
+        harness.fileDescriptorModelLoader = null;
+
+        String id = harness.getLoader().getResourceFetcher(model, 1, 2).getId();
+
+        assertEquals(expected, id);
     }
 
     @Test
@@ -73,28 +94,6 @@ public class ImageVideoModelLoaderTest {
 
         assertEquals(stream, wrapper.getStream());
         assertEquals(fileDescriptor, wrapper.getFileDescriptor());
-    }
-
-    @Test
-    public void testHandlesNullStreamModelLoaderInGetId() {
-        Object model = new Object();
-        harness.streamModelLoader = null;
-        when(harness.fileDescriptorModelLoader.getId(eq(model))).thenReturn(model.toString());
-
-        String id = harness.getLoader().getId(model);
-
-        assertEquals(model.toString(), id);
-    }
-
-    @Test
-    public void testHandlesNullFileDescriptorModelLoaderInGetId() {
-        Object model = new Object();
-        harness.fileDescriptorModelLoader = null;
-        when(harness.streamModelLoader.getId(eq(model))).thenReturn(model.toString());
-
-        String id = harness.getLoader().getId(model);
-
-        assertEquals(model.toString(), id);
     }
 
     @Test
@@ -204,23 +203,17 @@ public class ImageVideoModelLoaderTest {
     public void testReturnsDifferentIdsForDifferentObjects() {
         Object first = new Object();
         String firstStreamId = "firstStream";
-        when(harness.streamModelLoader.getId(eq(first))).thenReturn(firstStreamId);
-        String firstFileDescriptorId = "firstFileDescriptor";
-        when(harness.fileDescriptorModelLoader.getId(eq(first))).thenReturn(firstFileDescriptorId);
+        when(harness.streamFetcher.getId()).thenReturn(firstStreamId);
 
-        String firstId = harness.getLoader().getId(first);
-        assertTrue(firstId.contains(firstStreamId));
-        assertTrue(firstId.contains(firstFileDescriptorId));
+        String firstId = harness.getLoader().getResourceFetcher(first, 1, 2).getId();
+        assertEquals(firstStreamId, firstId);
 
         Object second = new Object();
-        String secondStreamId = "secondStream";
-        when(harness.streamModelLoader.getId(eq(second))).thenReturn(secondStreamId);
-        String secondFileDescriptorId = "secondFileDescriptor";
-        when(harness.fileDescriptorModelLoader.getId(eq(second))).thenReturn(secondFileDescriptorId);
+        String secondFileDescriptorId = "secondStream";
+        when(harness.streamFetcher.getId()).thenReturn(secondFileDescriptorId);
 
-        String secondId = harness.getLoader().getId(second);
-        assertTrue(secondId.contains(secondStreamId));
-        assertTrue(secondId.contains(secondFileDescriptorId));
+        String secondId = harness.getLoader().getResourceFetcher(second, 1, 2).getId();
+        assertEquals(secondFileDescriptorId, secondId);
     }
 
     @SuppressWarnings("unchecked")
@@ -229,6 +222,12 @@ public class ImageVideoModelLoaderTest {
         ModelLoader<Object, ParcelFileDescriptor> fileDescriptorModelLoader = mock(ModelLoader.class);
         DataFetcher<InputStream> streamFetcher = mock(DataFetcher.class);
         DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher = mock(DataFetcher.class);
+
+        public ImageVideoLoaderHarness() {
+            when(streamModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(streamFetcher);
+            when(fileDescriptorModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt()))
+                    .thenReturn(fileDescriptorFetcher);
+        }
 
         private ImageVideoModelLoader<Object> getLoader() {
             return new ImageVideoModelLoader<Object>(streamModelLoader, fileDescriptorModelLoader);

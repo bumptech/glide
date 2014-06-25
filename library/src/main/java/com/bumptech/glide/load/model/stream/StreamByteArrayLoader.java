@@ -11,14 +11,18 @@ import java.util.UUID;
  * no simple/quick way to generate an id from the bytes themselves, so subclass must include an id.
  */
 public class StreamByteArrayLoader implements StreamModelLoader<byte[]> {
+    private String id;
 
-    @Override
-    public DataFetcher<InputStream> getResourceFetcher(byte[] model, int width, int height) {
-        return new ByteArrayFetcher(model);
+    public StreamByteArrayLoader() {
+        this(UUID.randomUUID().toString());
+    }
+
+    public StreamByteArrayLoader(String id) {
+        this.id = id;
     }
 
     @Override
-    public String getId(byte[] model) {
-        return UUID.randomUUID().toString();
+    public DataFetcher<InputStream> getResourceFetcher(byte[] model, int width, int height) {
+        return new ByteArrayFetcher(model, id);
     }
 }

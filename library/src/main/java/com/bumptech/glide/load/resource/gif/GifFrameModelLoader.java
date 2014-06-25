@@ -12,11 +12,6 @@ public class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> 
         return new GifFrameDataFetcher(model);
     }
 
-    @Override
-    public String getId(GifDecoder model) {
-        return model.getId() + model.getCurrentFrameIndex();
-    }
-
     private static class GifFrameDataFetcher implements DataFetcher<GifDecoder> {
         private GifDecoder decoder;
 
@@ -31,6 +26,11 @@ public class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> 
 
         @Override
         public void cleanup() { }
+
+        @Override
+        public String getId() {
+            return decoder.getId() + decoder.getCurrentFrameIndex();
+        }
 
         @Override
         public void cancel() { }

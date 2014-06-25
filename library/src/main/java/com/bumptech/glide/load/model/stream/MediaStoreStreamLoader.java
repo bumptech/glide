@@ -27,11 +27,6 @@ public class MediaStoreStreamLoader implements ModelLoader<Uri, InputStream> {
     @Override
     public DataFetcher<InputStream> getResourceFetcher(Uri model, int width, int height) {
         return new MediaStoreThumbFetcher(context, model, uriLoader.getResourceFetcher(model, width, height), width,
-                height);
-    }
-
-    @Override
-    public String getId(Uri model) {
-        return uriLoader.getId(model) + "." + mimeType + "." + dateModified + "." + orientation;
+                height, mimeType, dateModified, orientation);
     }
 }

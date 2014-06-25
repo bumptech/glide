@@ -20,9 +20,4 @@ public class FileLoader<T> implements ModelLoader<File, T> {
     public DataFetcher<T> getResourceFetcher(File model, int width, int height) {
         return uriLoader.getResourceFetcher(Uri.fromFile(model), width, height);
     }
-
-    @Override
-    public String getId(File model) {
-        return model.getAbsolutePath();
-    }
 }

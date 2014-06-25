@@ -65,6 +65,11 @@ public abstract class LocalUriFetcher<T extends Closeable> implements DataFetche
         // Do nothing.
     }
 
+    @Override
+    public String getId() {
+        return uri.toString();
+    }
+
     protected abstract T loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException;
 }
 

@@ -22,9 +22,4 @@ public class ResourceLoader<T> implements ModelLoader<Integer, T> {
         Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/" + model.toString());
         return uriLoader.getResourceFetcher(uri, width, height);
     }
-
-    @Override
-    public String getId(Integer model) {
-        return model.toString();
-    }
 }

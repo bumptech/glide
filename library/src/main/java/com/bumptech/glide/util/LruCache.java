@@ -33,7 +33,7 @@ public class LruCache<T, Y> {
         return 1;
     }
 
-    protected void onItemRemoved(Y item) {  }
+    protected void onItemRemoved(T key, Y item) {  }
 
     public int getCurrentSize() {
         return currentSize;
@@ -50,7 +50,7 @@ public class LruCache<T, Y> {
     public Y put(T key, Y item) {
         final int itemSize = getSize(item);
         if (itemSize >= maxSize) {
-            onItemRemoved(item);
+            onItemRemoved(key, item);
             return null;
         }
 
@@ -80,8 +80,9 @@ public class LruCache<T, Y> {
             last = cache.entrySet().iterator().next();
             final Y toRemove = last.getValue();
             currentSize -= getSize(toRemove);
-            cache.remove(last.getKey());
-            onItemRemoved(toRemove);
+            final T key = last.getKey();
+            cache.remove(key);
+            onItemRemoved(key, toRemove);
         }
     }
 

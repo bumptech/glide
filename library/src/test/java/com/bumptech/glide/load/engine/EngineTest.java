@@ -408,6 +408,7 @@ public class EngineTest {
             when(keyFactory.buildKey(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                     any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
                     any(ResourceTranscoder.class))).thenReturn(cacheKey);
+            when(fetcher.getId()).thenReturn(ID);
 
             job = mock(EngineJob.class);
             when(runner.getJob()).thenReturn(job);
@@ -421,7 +422,7 @@ public class EngineTest {
         }
 
         public Engine.LoadStatus doLoad() {
-            return engine.load(ID, width, height, cacheDecoder, fetcher, decoder, transformation, encoder, transcoder,
+            return engine.load(width, height, cacheDecoder, fetcher, decoder, transformation, encoder, transcoder,
                     priority, isMemoryCacheable, cb);
         }
     }

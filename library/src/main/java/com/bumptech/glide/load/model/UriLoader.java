@@ -28,11 +28,6 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
         return result;
     }
 
-    @Override
-    public final String getId(Uri model) {
-        return model.toString();
-    }
-
     protected abstract DataFetcher<T> getLocalUriFetcher(Context context, Uri uri);
 
     private boolean isLocalUri(String scheme) {

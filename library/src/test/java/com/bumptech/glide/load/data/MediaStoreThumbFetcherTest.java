@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -84,12 +85,25 @@ public class MediaStoreThumbFetcherTest {
         harness.get().cleanup();
     }
 
+    @Test
+    public void testContainsAllRelevantPartsInId() {
+        String id = harness.get().getId();
+        assertTrue(id.contains(harness.uri.toString()));
+        assertTrue(id.contains(harness.mimeType));
+        assertTrue(id.contains(String.valueOf(harness.dateModified)));
+        assertTrue(id.contains(String.valueOf(harness.orientation)));
+    }
+
     @SuppressWarnings("unchecked")
     private static class Harness {
         Uri uri = Uri.withAppendedPath(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "123");
         DataFetcher<InputStream> defaultFetcher = mock(DataFetcher.class);
         int width = 123;
         int height = 222;
+        String mimeType = "image/jpeg";
+        long dateModified = 1234123;
+        int orientation = 9;
+
         MediaStoreThumbFetcher.ThumbnailStreamOpenerFactory factory = mock(
                 MediaStoreThumbFetcher.ThumbnailStreamOpenerFactory.class);
         MediaStoreThumbFetcher.ThumbnailStreamOpener
@@ -100,7 +114,8 @@ public class MediaStoreThumbFetcherTest {
         }
 
         public MediaStoreThumbFetcher get() {
-            return new MediaStoreThumbFetcher(Robolectric.application, uri, defaultFetcher, width, height, factory);
+            return new MediaStoreThumbFetcher(Robolectric.application, uri, defaultFetcher, width, height, mimeType,
+                    dateModified, orientation, factory);
         }
     }
 }
