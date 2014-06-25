@@ -1,6 +1,7 @@
 package com.bumptech.glide.provider;
 
 import com.bumptech.glide.DataLoadProvider;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 
@@ -19,6 +20,11 @@ public class EmptyDataLoadProvider implements DataLoadProvider {
 
     @Override
     public ResourceDecoder getSourceDecoder() {
+        return null;
+    }
+
+    @Override
+    public Encoder getSourceEncoder() {
         return null;
     }
 

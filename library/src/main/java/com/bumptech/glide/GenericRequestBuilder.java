@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -13,6 +14,7 @@ import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.UnitTransformation;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.NullEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestManager;
@@ -46,13 +48,13 @@ import java.util.List;
  */
 public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> {
     private final Context context;
-    private List<Transformation<ResourceType>> transformations = null;
-    private Transformation<ResourceType> singleTransformation = UnitTransformation.get();
     private final ModelType model;
     private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
     private final Class<TranscodeType> transcodeClass;
     private final Glide glide;
     private final RequestManager requestManager;
+    private List<Transformation<ResourceType>> transformations = null;
+    private Transformation<ResourceType> singleTransformation = UnitTransformation.get();
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType, TranscodeType> requestListener;
@@ -68,6 +70,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
     private int overrideHeight = -1;
     private int overrideWidth = -1;
+    private boolean cacheSource = false;
+    private Encoder<DataType> preSkipSourceEncoder;
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
@@ -200,6 +204,62 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         }
 
         return this;
+    }
+
+    /**
+     * Sets the source encoder to use to encode the data retrieved by this request directly into cache. The returned
+     * resouce will then be decoded from the cached data.
+     *
+     * <p>
+     *     Note - This encoder will not be used unless
+     * </p>
+     *
+     * @param sourceEncoder The encoder to use.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> sourceEncoder(
+            Encoder<DataType> sourceEncoder) {
+        if (loadProvider != null) {
+            loadProvider.setSourceEncoder(sourceEncoder);
+            preSkipSourceEncoder = sourceEncoder;
+        }
+
+        return this;
+    }
+
+    /**
+     * Attempts to write the data retrieved by this request to cache first and then decodes the resource from the cached
+     * source data. Only makes sense for remote or transient data as a means of either avoiding downloading the same
+     * data repeatedly or preserving some content you expect to be removed.
+     *
+     * <p>
+     *     Note that if this is set to true the {@link ResourceDecoder} set as the decoder will not be used, instead the
+     *     cache decoder will be used.
+     * </p>
+     *
+     * <p>
+     *     If no {@link Encoder} is set or available for the given data type, this may cause the load to fail.
+     * </p>
+     *
+     * @see #sourceEncoder(Encoder)
+     * @see #decoder(ResourceDecoder)
+     * @see #cacheDecoder(ResourceDecoder)
+     * @see #skipCache(boolean)
+     *
+     * @param cacheSource True to write the data directly to cache .
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> cacheSource(boolean cacheSource) {
+        this.cacheSource = cacheSource;
+        if (!cacheSource) {
+            if (loadProvider != null) {
+                preSkipSourceEncoder = loadProvider.getSourceEncoder();
+            }
+            final Encoder<DataType> skipCache = NullEncoder.get();
+            return sourceEncoder(skipCache);
+        } else {
+            return sourceEncoder(preSkipSourceEncoder);
+        }
     }
 
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> encoder(
@@ -427,6 +487,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipCache(boolean skip) {
         skipMemoryCache(skip);
         skipDiskCache(skip);
+        cacheSource(false);
 
         return this;
     }
@@ -574,7 +635,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 isCacheable,
                 animationFactory,
                 overrideWidth,
-                overrideHeight);
+                overrideHeight,
+                cacheSource);
     }
 
     @SuppressWarnings("unchecked")

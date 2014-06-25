@@ -13,7 +13,7 @@ import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
-import com.bumptech.glide.load.resource.NullCacheDecoder;
+import com.bumptech.glide.load.resource.NullDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.request.GlideAnimation;
@@ -70,7 +70,7 @@ class GifFrameManager {
         } else {
             // For transparent gifs, we would have to encode as pngs which is actually slower than our gif decoder so we
             // avoid writing frames to the disk cache entirely.
-            cacheDecoder = NullCacheDecoder.get();
+            cacheDecoder = NullDecoder.get();
             encoder = SkipCache.get();
         }
     }

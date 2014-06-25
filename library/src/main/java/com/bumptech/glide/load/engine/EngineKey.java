@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.OriginalEngineKey;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -22,12 +23,14 @@ public class EngineKey implements Key {
     private final Transformation transformation;
     private final ResourceEncoder encoder;
     private ResourceTranscoder transcoder;
+    private Encoder sourceEncoder;
     private String stringKey;
     private int hashCode;
     private OriginalEngineKey originalKey;
 
     public EngineKey(String id, int width, int height, ResourceDecoder cacheDecoder, ResourceDecoder decoder,
-            Transformation transformation, ResourceEncoder encoder, ResourceTranscoder transcoder) {
+            Transformation transformation, ResourceEncoder encoder, ResourceTranscoder transcoder,
+            Encoder sourceEncoder) {
         this.id = id;
         this.width = width;
         this.height = height;
@@ -36,6 +39,7 @@ public class EngineKey implements Key {
         this.transformation = transformation;
         this.encoder = encoder;
         this.transcoder = transcoder;
+        this.sourceEncoder = sourceEncoder;
     }
 
     public Key getOriginalKey() {
@@ -72,6 +76,8 @@ public class EngineKey implements Key {
             return false;
         } else if (!transcoder.getId().equals(engineKey.transcoder.getId())) {
             return false;
+        } else if (!sourceEncoder.getId().equals(engineKey.sourceEncoder.getId())) {
+            return false;
         } else {
             return true;
         }
@@ -88,6 +94,7 @@ public class EngineKey implements Key {
             hashCode = 31 * hashCode + transformation.getId().hashCode();
             hashCode = 31 * hashCode + encoder.getId().hashCode();
             hashCode = 31 * hashCode + transcoder.getId().hashCode();
+            hashCode = 31 * hashCode + sourceEncoder.getId().hashCode();
         }
         return hashCode;
     }
@@ -104,6 +111,7 @@ public class EngineKey implements Key {
                 .append(transformation.getId())
                 .append(encoder.getId())
                 .append(transcoder.getId())
+                .append(sourceEncoder)
                 .toString();
         }
         return stringKey;
@@ -121,5 +129,6 @@ public class EngineKey implements Key {
         messageDigest.update(decoder.getId().getBytes(FORMAT));
         messageDigest.update(transformation.getId().getBytes(FORMAT));
         messageDigest.update(encoder.getId().getBytes(FORMAT));
+        messageDigest.update(sourceEncoder.getId().getBytes(FORMAT));
     }
 }

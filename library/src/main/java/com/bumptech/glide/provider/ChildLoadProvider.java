@@ -1,5 +1,6 @@
 package com.bumptech.glide.provider;
 
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -13,6 +14,7 @@ public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
     private ResourceDecoder<T, Z> sourceDecoder;
     private ResourceEncoder<Z> encoder;
     private ResourceTranscoder<Z, R> transcoder;
+    private Encoder<T> sourceEncoder;
 
     public ChildLoadProvider(LoadProvider<A, T, Z, R> parent) {
         this.parent = parent;
@@ -39,6 +41,10 @@ public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
         this.transcoder = transcoder;
     }
 
+    public void setSourceEncoder(Encoder<T> sourceEncoder) {
+        this.sourceEncoder = sourceEncoder;
+    }
+
     @Override
     public ResourceDecoder<InputStream, Z> getCacheDecoder() {
         if (cacheDecoder != null) {
@@ -54,6 +60,15 @@ public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
             return sourceDecoder;
         } else {
             return parent.getSourceDecoder();
+        }
+    }
+
+    @Override
+    public Encoder<T> getSourceEncoder() {
+        if (sourceEncoder != null) {
+            return sourceEncoder;
+        } else {
+            return parent.getSourceEncoder();
         }
     }
 

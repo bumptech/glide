@@ -9,12 +9,12 @@ import java.io.IOException;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
-public class NullCacheDecoderTest {
-    private NullCacheDecoder decoder;
+public class NullDecoderTest {
+    private NullDecoder decoder;
 
     @Before
     public void setUp() {
-        decoder = new NullCacheDecoder();
+        decoder = new NullDecoder();
     }
 
     //TODO: do we really want an empty id here?

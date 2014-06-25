@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 
@@ -14,6 +15,8 @@ public interface DataLoadProvider<T, Z> {
     public ResourceDecoder<InputStream, Z> getCacheDecoder();
 
     public ResourceDecoder<T, Z> getSourceDecoder();
+
+    public Encoder<T> getSourceEncoder();
 
     public ResourceEncoder<Z> getEncoder();
 }

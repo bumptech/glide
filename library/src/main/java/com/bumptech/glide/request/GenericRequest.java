@@ -4,12 +4,13 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
@@ -48,6 +49,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private int overrideWidth;
     private int overrideHeight;
     private String tag = String.valueOf(hashCode());
+    private boolean cacheSource;
 
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
@@ -81,7 +83,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             boolean isMemoryCacheable,
             GlideAnimationFactory<R> animationFactory,
             int overrideWidth,
-            int overrideHeight) {
+            int overrideHeight,
+            boolean cacheSource) {
         GenericRequest request = queue.poll();
         if (request == null) {
             request = new GenericRequest();
@@ -104,7 +107,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
                 isMemoryCacheable,
                 animationFactory,
                 overrideWidth,
-                overrideHeight);
+                overrideHeight,
+                cacheSource);
         return request;
     }
 
@@ -130,6 +134,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         loadedFromMemoryCache = false;
         loadStatus = null;
         isRunning = false;
+        cacheSource = false;
         queue.offer(this);
     }
 
@@ -153,7 +158,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             boolean isMemoryCacheable,
             GlideAnimationFactory<R> animationFactory,
             int overrideWidth,
-            int overrideHeight) {
+            int overrideHeight,
+            boolean cacheSource) {
         this.loadProvider = loadProvider;
         this.model = model;
         this.context = context;
@@ -173,6 +179,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         this.animationFactory = animationFactory;
         this.overrideWidth = overrideWidth;
         this.overrideHeight = overrideHeight;
+        this.cacheSource = cacheSource;
 
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
         // simply skip our sanity checks in that unusual case.
@@ -192,6 +199,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             }
             if (loadProvider.getModelLoader() == null) {
                 throw new NullPointerException("ModelLoader must not be null, try .using(ModelLoader)");
+            }
+            if (loadProvider.getSourceEncoder() == null) {
+                throw new NullPointerException("SourceEncoder must not be null, try .sourceEncoder(Encoder)");
             }
         }
     }
@@ -296,6 +306,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
         ResourceDecoder<InputStream, Z> cacheDecoder = loadProvider.getCacheDecoder();
+        Encoder<T> sourceEncoder = loadProvider.getSourceEncoder();
         ResourceDecoder<T, Z> decoder = loadProvider.getSourceDecoder();
         ResourceEncoder <Z> encoder = loadProvider.getEncoder();
         ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
@@ -307,8 +318,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(width, height, cacheDecoder, dataFetcher, decoder, transformation,
-                encoder, transcoder, priority, isMemoryCacheable, this);
+        loadStatus = engine.load(width, height, cacheDecoder, dataFetcher, cacheSource, sourceEncoder, decoder,
+                transformation, encoder, transcoder, priority, isMemoryCacheable, this);
         loadedFromMemoryCache = resource != null;
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));

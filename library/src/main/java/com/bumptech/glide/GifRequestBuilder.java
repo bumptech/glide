@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -177,6 +178,18 @@ public class GifRequestBuilder<ModelType, TranscodeType>
     @Override
     public GifRequestBuilder<ModelType, TranscodeType> override(int width, int height) {
         super.override(width, height);
+        return this;
+    }
+
+    @Override
+    public GifRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
+        super.sourceEncoder(sourceEncoder);
+        return this;
+    }
+
+    @Override
+    public GifRequestBuilder<ModelType, TranscodeType> cacheSource(boolean cacheSource) {
+        super.cacheSource(cacheSource);
         return this;
     }
 }

@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -55,8 +56,9 @@ public class DefaultResourceRunnerFactoryTest {
         boolean isMemoryCacheable;
 
         public ResourceRunner build() {
-            return factory.build(mock(EngineKey.class), width, height, cacheDecoder, fetcher, decoder, transformation,
-                    encoder, mock(ResourceTranscoder.class), priority, isMemoryCacheable, listener);
+            return factory.build(mock(EngineKey.class), width, height, cacheDecoder, fetcher, true, mock(Encoder.class),
+                    decoder, transformation, encoder, mock(ResourceTranscoder.class), priority, isMemoryCacheable,
+                    listener);
         }
     }
 }

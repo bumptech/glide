@@ -1,5 +1,6 @@
 package com.bumptech.glide.provider;
 
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -84,11 +85,26 @@ public class ChildLoadProviderTest {
         assertEquals(harness.transcoder, harness.provider.getTranscoder());
     }
 
+    @Test
+    public void testReturnsParentSourceEncoderIfNoneIsSet() {
+        when(harness.parent.getSourceEncoder()).thenReturn(harness.sourceEncoder);
+
+        assertEquals(harness.sourceEncoder, harness.provider.getSourceEncoder());
+    }
+
+    @Test
+    public void testReturnsChildSourceEncoderIfSet() {
+        harness.provider.setSourceEncoder(harness.sourceEncoder);
+
+        assertEquals(harness.sourceEncoder, harness.provider.getSourceEncoder());
+    }
+
     @SuppressWarnings("unchecked")
     private static class ChildLoadHarness {
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
+        Encoder<Object> sourceEncoder = mock(Encoder.class);
         ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
         LoadProvider<Object, Object, Object, Object> parent = mock(LoadProvider.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);

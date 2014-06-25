@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -353,7 +354,8 @@ public class EngineTest {
         harness.doLoad();
 
         verify(harness.keyFactory).buildKey(eq(ID), eq(harness.width), eq(harness.height), eq(harness.cacheDecoder),
-                eq(harness.decoder), eq(harness.transformation), eq(harness.encoder), eq(harness.transcoder));
+                eq(harness.decoder), eq(harness.transformation), eq(harness.encoder), eq(harness.transcoder),
+                eq(harness.sourceEncoder));
     }
 
     @Test
@@ -361,9 +363,9 @@ public class EngineTest {
         harness.doLoad();
 
         verify(harness.factory).build(eq(harness.cacheKey), anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
-                any(EngineJobListener.class));
+                any(DataFetcher.class), anyBoolean(), any(Encoder.class), any(ResourceDecoder.class),
+                any(Transformation.class), any(ResourceEncoder.class), any(ResourceTranscoder.class),
+                any(Priority.class), anyBoolean(), any(EngineJobListener.class));
     }
 
     @Test
@@ -371,9 +373,9 @@ public class EngineTest {
         harness.doLoad();
 
         verify(harness.factory).build(eq(harness.cacheKey), eq(harness.width), eq(harness.height),
-                eq(harness.cacheDecoder), eq(harness.fetcher), eq(harness.decoder), eq(harness.transformation),
-                eq(harness.encoder), eq(harness.transcoder), eq(harness.priority), eq(harness.isMemoryCacheable),
-                eq(harness.engine));
+                eq(harness.cacheDecoder), eq(harness.fetcher), eq(harness.cacheSource), eq(harness.sourceEncoder),
+                eq(harness.decoder), eq(harness.transformation), eq(harness.encoder), eq(harness.transcoder),
+                eq(harness.priority), eq(harness.isMemoryCacheable), eq(harness.engine));
     }
 
     @SuppressWarnings("unchecked")
@@ -392,6 +394,8 @@ public class EngineTest {
         Transformation transformation = mock(Transformation.class);
         ResourceRunnerFactory factory = mock(ResourceRunnerFactory.class);
         Map<Key, WeakReference<Resource>> activeResources = new HashMap<Key, WeakReference<Resource>>();
+        boolean cacheSource = true;
+        Encoder<Object> sourceEncoder = mock(Encoder.class);
 
         int width = 100;
         int height = 100;
@@ -407,7 +411,7 @@ public class EngineTest {
             when(resource.isCacheable()).thenReturn(true);
             when(keyFactory.buildKey(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
                     any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
-                    any(ResourceTranscoder.class))).thenReturn(cacheKey);
+                    any(ResourceTranscoder.class), any(Encoder.class))).thenReturn(cacheKey);
             when(fetcher.getId()).thenReturn(ID);
 
             job = mock(EngineJob.class);
@@ -416,14 +420,14 @@ public class EngineTest {
             engine = new Engine(factory, cache, mock(DiskCache.class), mock(ExecutorService.class),
                     mock(ExecutorService.class), runners, keyFactory, activeResources);
 
-            when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(decoder),
-                    eq(transformation), eq(encoder), eq(transcoder), eq(priority), eq(isMemoryCacheable), eq(engine)))
-                    .thenReturn(runner);
+            when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(cacheSource),
+                    eq(sourceEncoder), eq(decoder), eq(transformation), eq(encoder), eq(transcoder), eq(priority),
+                    eq(isMemoryCacheable), eq(engine))).thenReturn(runner);
         }
 
         public Engine.LoadStatus doLoad() {
-            return engine.load(width, height, cacheDecoder, fetcher, decoder, transformation, encoder, transcoder,
-                    priority, isMemoryCacheable, cb);
+            return engine.load(width, height, cacheDecoder, fetcher, cacheSource, sourceEncoder, decoder,
+                    transformation, encoder, transcoder, priority, isMemoryCacheable, cb);
         }
     }
 }

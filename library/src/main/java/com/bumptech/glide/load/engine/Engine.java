@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -95,14 +96,14 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param <R>          The type of the resource that will be transcoded from the decoded resource.
      */
     public <T, Z, R> LoadStatus load(int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
-            DataFetcher<T> fetcher, ResourceDecoder<T, Z> decoder, Transformation<Z> transformation,
-            ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, Priority priority,
-            boolean isMemoryCacheable, ResourceCallback cb) {
+            DataFetcher<T> fetcher, boolean cacheSource, Encoder<T> sourceEncoder,
+            ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
+            ResourceTranscoder<Z, R> transcoder, Priority priority, boolean isMemoryCacheable, ResourceCallback cb) {
         long startTime = LogTime.getLogTime();
 
         final String id = fetcher.getId();
         EngineKey key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder,
-                transcoder);
+                transcoder, sourceEncoder);
 
         Resource cached = cache.remove(key);
         if (cached != null) {
@@ -141,8 +142,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
 
         long start = LogTime.getLogTime();
-        ResourceRunner<Z, R> runner = factory.build(key, width, height, cacheDecoder, fetcher, decoder, transformation,
-                encoder, transcoder, priority, isMemoryCacheable, this);
+        ResourceRunner<Z, R> runner = factory.build(key, width, height, cacheDecoder, fetcher, cacheSource,
+                sourceEncoder, decoder, transformation, encoder, transcoder, priority, isMemoryCacheable, this);
         runner.getJob().addCallback(cb);
         runners.put(key, runner);
         runner.queue();

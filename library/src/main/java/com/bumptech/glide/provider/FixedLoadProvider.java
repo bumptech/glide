@@ -1,6 +1,7 @@
 package com.bumptech.glide.provider;
 
 import com.bumptech.glide.DataLoadProvider;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -47,6 +48,11 @@ public class FixedLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R>  
     @Override
     public ResourceDecoder<T, Z> getSourceDecoder() {
         return dataLoadProvider.getSourceDecoder();
+    }
+
+    @Override
+    public Encoder<T> getSourceEncoder() {
+        return dataLoadProvider.getSourceEncoder();
     }
 
     @Override

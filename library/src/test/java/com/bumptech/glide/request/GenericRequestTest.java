@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -63,20 +64,22 @@ public class GenericRequestTest {
         ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
+        Encoder<Object> sourceEncoder = mock(Encoder.class);
         RequestListener<Object, Object> requestListener = mock(RequestListener.class);
         boolean skipMemoryCache;
         GlideAnimationFactory<Object> factory = mock(GlideAnimationFactory.class);
         int overrideWidth = -1;
         int overrideHeight = -1;
+        boolean cacheSource = false;
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
             when(loadProvider.getModelLoader()).thenReturn(modelLoader);
             when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
             when(loadProvider.getSourceDecoder()).thenReturn(sourceDecoder);
+            when(loadProvider.getSourceEncoder()).thenReturn(sourceEncoder);
             when(loadProvider.getEncoder()).thenReturn(encoder);
             when(loadProvider.getTranscoder()).thenReturn(transcoder);
-
             when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
             when(requestCoordinator.canSetPlaceholder(any(Request.class))).thenReturn(true);
 
@@ -102,7 +105,8 @@ public class GenericRequestTest {
                     skipMemoryCache,
                     factory,
                     overrideWidth,
-                    overrideHeight);
+                    overrideHeight,
+                    cacheSource);
         }
     }
 
@@ -142,6 +146,13 @@ public class GenericRequestTest {
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenMissingModelLoader() {
         when(harness.loadProvider.getModelLoader()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenMissingSourceEncoder() {
+        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
 
         harness.getRequest();
     }
@@ -218,18 +229,18 @@ public class GenericRequestTest {
         request.onSizeReady(100, 100);
 
         verify(harness.engine).load(anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(ResourceTranscoder.class), eq(expected), anyBoolean(),
-                any(ResourceCallback.class));
+                any(DataFetcher.class), anyBoolean(), any(Encoder.class), any(ResourceDecoder.class),
+                any(Transformation.class), any(ResourceEncoder.class), any(ResourceTranscoder.class), eq(expected),
+                anyBoolean(), any(ResourceCallback.class));
     }
 
     @Test
     public void testEngineLoadCancelledOnCancel() {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
-        when(harness.engine.load( anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(DataFetcher.class), any(ResourceDecoder.class), any(Transformation.class),
-                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class),
-                anyBoolean(), any(ResourceCallback.class))).thenReturn(loadStatus);
+        when(harness.engine.load(anyInt(), anyInt(), any(ResourceDecoder.class),
+                any(DataFetcher.class), anyBoolean(), any(Encoder.class), any(ResourceDecoder.class),
+                any(Transformation.class), any(ResourceEncoder.class), any(ResourceTranscoder.class),
+                any(Priority.class), anyBoolean(), any(ResourceCallback.class))).thenReturn(loadStatus);
 
         GenericRequest request = harness.getRequest();
 
@@ -476,9 +487,9 @@ public class GenericRequestTest {
     public void testRequestListenerIsCalledWithLoadedFromMemoryIfLoadCompletesSynchronously() {
         final GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         when(harness.engine.load(anyInt(), anyInt(), any(ResourceDecoder.class), any(DataFetcher.class),
-                any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
-                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(ResourceCallback.class)))
-                .thenAnswer(new Answer<Object>() {
+                anyBoolean(), any(Encoder.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
+                any(ResourceCallback.class))).thenAnswer(new Answer<Object>() {
                     @Override
                     public Object answer(InvocationOnMock invocation) throws Throwable {
                         request.onResourceReady(harness.resource);
@@ -578,9 +589,9 @@ public class GenericRequestTest {
         request.run();
 
         verify(harness.engine).load(eq(harness.overrideWidth), eq(harness.overrideHeight),
-                any(ResourceDecoder.class), any(DataFetcher.class), any(ResourceDecoder.class),
-                any(Transformation.class), any(ResourceEncoder.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(), any(ResourceCallback.class));
+                any(ResourceDecoder.class), any(DataFetcher.class), anyBoolean(), any(Encoder.class),
+                any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(ResourceCallback.class));
     }
 
     @Test

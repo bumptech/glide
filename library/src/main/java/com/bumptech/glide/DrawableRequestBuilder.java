@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -200,6 +201,18 @@ public class DrawableRequestBuilder<ModelType> extends
     @Override
     public DrawableRequestBuilder<ModelType> override(int width, int height) {
         super.override(width, height);
+        return this;
+    }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> cacheSource(boolean cacheSource) {
+        super.cacheSource(cacheSource);
+        return this;
+    }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
+        super.sourceEncoder(sourceEncoder);
         return this;
     }
 }

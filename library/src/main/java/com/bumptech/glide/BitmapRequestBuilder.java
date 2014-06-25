@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -276,6 +277,25 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> override(int width, int height) {
         super.override(width, height);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(
+            GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> thumbnailRequest) {
+        super.thumbnail(thumbnailRequest);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
+        super.sourceEncoder(sourceEncoder);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> cacheSource(boolean cacheSource) {
+        super.cacheSource(cacheSource);
         return this;
     }
 }

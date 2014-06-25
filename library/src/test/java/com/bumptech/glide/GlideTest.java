@@ -17,6 +17,7 @@ import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -237,6 +238,8 @@ public class GlideTest {
         when(cacheDecoder.getId()).thenReturn("cacheDecoderId");
         ResourceEncoder<File> encoder = mock(ResourceEncoder.class);
         when(encoder.getId()).thenReturn("encoderId");
+        Encoder<File> sourceEncoder = mock(Encoder.class);
+        when(sourceEncoder.getId()).thenReturn("sourceEncoderId");
 
         Glide.with(getContext())
                 .using(modelLoader, File.class)
@@ -245,6 +248,7 @@ public class GlideTest {
                 .decoder(sourceDecoder)
                 .cacheDecoder(cacheDecoder)
                 .encoder(encoder)
+                .sourceEncoder(sourceEncoder)
                 .into(target);
 
         verify(target).onResourceReady(eq(expected), any(GlideAnimation.class));
