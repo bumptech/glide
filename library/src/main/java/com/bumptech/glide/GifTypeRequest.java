@@ -17,6 +17,7 @@ public class GifTypeRequest<A> extends GifRequestBuilder<A, GifDrawable> {
     private final ModelLoader<A, InputStream> streamModelLoader;
     private final Glide glide;
     private final RequestTracker requestTracker;
+    private RequestManager.OptionsApplier optionsApplier;
 
     private static <A, R> FixedLoadProvider<A, InputStream, GifData, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader, Class<R> transcodeClass,
@@ -31,7 +32,7 @@ public class GifTypeRequest<A> extends GifRequestBuilder<A, GifDrawable> {
     }
 
     GifTypeRequest(Context context, A model, ModelLoader<A, InputStream> streamModelLoader, Glide glide,
-            RequestTracker requestTracker){
+            RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier){
         super(context, model, buildProvider(glide, streamModelLoader, GifDrawable.class, null), GifDrawable.class,
                 glide, requestTracker);
         this.context = context;
@@ -39,12 +40,13 @@ public class GifTypeRequest<A> extends GifRequestBuilder<A, GifDrawable> {
         this.streamModelLoader = streamModelLoader;
         this.glide = glide;
         this.requestTracker = requestTracker;
+        this.optionsApplier = optionsApplier;
     }
 
     public <R> GifRequestBuilder<A, R> transcode(ResourceTranscoder<GifData, R> transcoder, Class<R> transcodeClass) {
-        return new GifRequestBuilder<A, R>(context, model,
+        return optionsApplier.apply(model, new GifRequestBuilder<A, R>(context, model,
                 buildProvider(glide, streamModelLoader, transcodeClass, transcoder), transcodeClass, glide,
-                requestTracker);
+                requestTracker));
     }
 
     /**

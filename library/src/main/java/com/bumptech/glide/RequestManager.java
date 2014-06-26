@@ -45,6 +45,8 @@ public class RequestManager {
     private final Context context;
     private final RequestTracker requestTracker;
     private final Glide glide;
+    private final OptionsApplier optionsApplier;
+    private DefaultOptions options;
 
     public RequestManager(Context context) {
         this(context, new RequestTracker(), new ConnectivityMonitorFactory());
@@ -56,6 +58,29 @@ public class RequestManager {
         this.connectivityMonitor = factory.build(context, new RequestManagerConnectivityListener(requestTracker));
         connectivityMonitor.register();
         this.glide = Glide.get(context);
+        this.optionsApplier = new OptionsApplier();
+    }
+
+    public interface DefaultOptions {
+        public <T> void apply(T model, GenericRequestBuilder<T, ?, ?, ?> requestBuilder);
+    }
+
+    public void setDefaultOptions(DefaultOptions options) {
+        this.options = options;
+    }
+
+    /**
+     * Cancels any in progress loads, but does not clear resources of completed loads.
+     */
+    public void pauseRequests() {
+        requestTracker.pauseRequests();
+    }
+
+    /**
+     * Restarts any loads that have not yet completed.
+     */
+    public void resumeRequests() {
+        requestTracker.resumeRequests();
     }
 
     /**
@@ -100,7 +125,7 @@ public class RequestManager {
      * into.
      */
     public <A, T> GenericModelRequest<A, T> using(ModelLoader<A, T> modelLoader, Class<T> dataClass) {
-        return new GenericModelRequest<A, T>(context, glide, modelLoader, dataClass, requestTracker);
+        return new GenericModelRequest<A, T>(modelLoader, dataClass);
     }
 
     /**
@@ -112,7 +137,7 @@ public class RequestManager {
      * @return A new {@link ImageModelRequest}.
      */
     public <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
-        return new ImageModelRequest<T>(context, modelLoader, glide, requestTracker);
+        return new ImageModelRequest<T>(modelLoader);
     }
 
     /**
@@ -122,7 +147,7 @@ public class RequestManager {
      * @return A new {@link ImageModelRequest}.
      */
     public ImageModelRequest<byte[]> using(StreamByteArrayLoader modelLoader) {
-        return new ImageModelRequest<byte[]>(context, modelLoader, glide, requestTracker);
+        return new ImageModelRequest<byte[]>(modelLoader);
     }
 
     /**
@@ -134,7 +159,7 @@ public class RequestManager {
      * @return A new {@link VideoModelRequest}.
      */
     public <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
-        return new VideoModelRequest<T>(context, modelLoader, glide, requestTracker);
+        return new VideoModelRequest<T>(modelLoader);
     }
 
     /**
@@ -190,8 +215,8 @@ public class RequestManager {
                 mimeType, dateModified, orientation);
         ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader = Glide.buildFileDescriptorModelLoader(uri,
                 context);
-        return new DrawableTypeRequest<Uri>(uri, mediaStoreLoader, fileDescriptorModelLoader, context, glide,
-                requestTracker);
+        return optionsApplier.apply(uri, new DrawableTypeRequest<Uri>(uri, mediaStoreLoader, fileDescriptorModelLoader,
+                context, glide, requestTracker, optionsApplier));
     }
 
     /**
@@ -266,7 +291,8 @@ public class RequestManager {
      */
     public DrawableTypeRequest<byte[]> loadFromImage(byte[] model, final String id) {
         final StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
-        return new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker);
+        return optionsApplier.apply(model,
+                new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker, optionsApplier));
     }
 
     /**
@@ -278,7 +304,8 @@ public class RequestManager {
      * into.
      */
     public DrawableTypeRequest<byte[]> loadFromImage(byte[] model) {
-        return loadFromImage(model, UUID.randomUUID().toString());
+        return loadFromImage(model, UUID.randomUUID()
+                .toString());
     }
 
     /**
@@ -313,8 +340,13 @@ public class RequestManager {
         ModelLoader<T, InputStream> streamModelLoader = Glide.buildStreamModelLoader(model, context);
         ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
                 Glide.buildFileDescriptorModelLoader(model, context);
-        return new DrawableTypeRequest<T>(model, streamModelLoader, fileDescriptorModelLoader, context, glide,
-                requestTracker);
+        if (model != null && streamModelLoader == null && fileDescriptorModelLoader == null) {
+            throw new IllegalArgumentException("Unknown type " + model + ". You must provide a Model of a type for"
+                    + " which there is a registered ModelLoader, if you are using a custom model, you must first call"
+                    + " Glide#register with a ModelLoaderFactory for your custom model class");
+        }
+        return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, streamModelLoader,
+                fileDescriptorModelLoader, context, glide, requestTracker, optionsApplier));
     }
 
     /**
@@ -323,22 +355,16 @@ public class RequestManager {
      *
      * @param <T> The type of the model.
      */
-    public static class VideoModelRequest<T> {
-        private final Context context;
+    public class VideoModelRequest<T> {
         private final ModelLoader<T, ParcelFileDescriptor> loader;
-        private Glide glide;
-        private RequestTracker requestTracker;
 
-        private VideoModelRequest(Context context, ModelLoader<T, ParcelFileDescriptor> loader, Glide glide,
-                RequestTracker requestTracker) {
-            this.context = context;
+        private VideoModelRequest(ModelLoader<T, ParcelFileDescriptor> loader) {
             this.loader = loader;
-            this.glide = glide;
-            this.requestTracker = requestTracker;
         }
 
         public BitmapTypeRequest<T> loadFromVideo(T model) {
-            return new BitmapTypeRequest<T>(context, model, null, loader, glide, requestTracker);
+            return optionsApplier.apply(model, new BitmapTypeRequest<T>(context, model, null, loader, glide,
+                    requestTracker, optionsApplier));
         }
     }
 
@@ -348,23 +374,28 @@ public class RequestManager {
      *
      * @param <T> The type of the model.
      */
-    public static class ImageModelRequest<T> {
-        private final Context context;
+    public class ImageModelRequest<T> {
         private final ModelLoader<T, InputStream> loader;
-        private Glide glide;
-        private RequestTracker requestTracker;
 
-        private ImageModelRequest(Context context, ModelLoader<T, InputStream> loader, Glide glide,
-                RequestTracker requestTracker) {
-            this.context = context;
+        private ImageModelRequest(ModelLoader<T, InputStream> loader) {
             this.loader = loader;
-            this.glide = glide;
-            this.requestTracker = requestTracker;
         }
 
         public DrawableTypeRequest<T> load(T model) {
-            return new DrawableTypeRequest<T>(model, loader, null, context, glide, requestTracker);
+            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, loader, null, context, glide,
+                    requestTracker, optionsApplier));
         }
+    }
+
+    class OptionsApplier {
+
+        public <A, X extends GenericRequestBuilder<A, ?, ?, ?>> X apply(A model, X builder) {
+            if (options != null) {
+                options.apply(model, builder);
+            }
+            return builder;
+        }
+
     }
 
     /**
@@ -373,47 +404,33 @@ public class RequestManager {
      *
      * @param <T> The type of the model.
      */
-    public static class GenericModelRequest<A, T> {
-        private final Context context;
-        private final Glide glide;
+    public class GenericModelRequest<A, T> {
         private final ModelLoader<A, T> modelLoader;
         private final Class<T> dataClass;
-        private RequestTracker requestTracker;
 
-        private GenericModelRequest(Context context, Glide glide, ModelLoader<A, T> modelLoader, Class<T> dataClass,
-                RequestTracker requestTracker) {
-            this.context = context;
-            this.glide = glide;
+        private GenericModelRequest(ModelLoader<A, T> modelLoader, Class<T> dataClass) {
             this.modelLoader = modelLoader;
             this.dataClass = dataClass;
-            this.requestTracker = requestTracker;
         }
 
-        public GenericTypeRequest<A, T> load(A model) {
-            return new GenericTypeRequest<A, T>(context, glide, model, modelLoader, dataClass, requestTracker);
+        public GenericTypeRequest load(A model) {
+            return new GenericTypeRequest(model, modelLoader, dataClass);
         }
 
-        public static class GenericTypeRequest<A, T> {
-            private final Context context;
-            private final Glide glide;
+        public class GenericTypeRequest {
             private final A model;
             private final ModelLoader<A, T> modelLoader;
             private final Class<T> dataClass;
-            private RequestTracker requestTracker;
 
-            private GenericTypeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
-                    Class<T> dataClass, RequestTracker requestTracker) {
-                this.context = context;
-                this.glide = glide;
+            private GenericTypeRequest(A model, ModelLoader<A, T> modelLoader, Class<T> dataClass) {
                 this.model = model;
                 this.modelLoader = modelLoader;
                 this.dataClass = dataClass;
-                this.requestTracker = requestTracker;
             }
 
             public <Z> GenericTranscodeRequest<A, T, Z> as(Class<Z> resourceClass) {
-                return new GenericTranscodeRequest<A, T, Z>(context, glide, model, modelLoader, dataClass,
-                        resourceClass, requestTracker);
+                return optionsApplier.apply(model, new GenericTranscodeRequest<A, T, Z>(context, glide, model,
+                        modelLoader, dataClass, resourceClass, requestTracker, optionsApplier));
             }
         }
     }

@@ -90,6 +90,7 @@ public class GlideTest {
 
     @Before
     public void setUp() throws Exception {
+        Glide.tearDown();
         // Ensure that target's size ready callback will be called synchronously.
         target = mock(Target.class);
         imageView = new ImageView(Robolectric.application);
@@ -585,6 +586,21 @@ public class GlideTest {
                 .into(target);
 
         verify(target).onResourceReady(eq(expected), any(GlideAnimation.class));
+    }
+
+    @Test
+    public void testNullModelInGenericImageLoadDoesNotThrow() {
+        Glide.with(getContext()).loadFromImage((Double) null).into(target);
+    }
+
+    @Test
+    public void testNullModelInGenericVideoLoadDoesNotThrow() {
+        Glide.with(getContext()).loadFromVideo((Float) null).into(target);
+    }
+
+    @Test
+    public void testNullModelInGenericLoadDoesNotThrow() {
+        Glide.with(getContext()).load((Double) null).into(target);
     }
 
     @Test

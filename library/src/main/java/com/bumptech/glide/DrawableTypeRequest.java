@@ -19,6 +19,7 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
     private final Context context;
     private final Glide glide;
     private RequestTracker requestTracker;
+    private RequestManager.OptionsApplier optionsApplier;
     private final A model;
 
     private static <A, Z, R> FixedLoadProvider<A, ImageVideoWrapper, Z, R> buildProvider(Glide glide,
@@ -36,7 +37,7 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
 
     DrawableTypeRequest(A model, ModelLoader<A, InputStream> streamModelLoader,
             ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide,
-            RequestTracker requestTracker) {
+            RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class,
                         Drawable.class, null),
@@ -47,14 +48,16 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
         this.context = context;
         this.glide = glide;
         this.requestTracker = requestTracker;
+        this.optionsApplier = optionsApplier;
     }
 
     public BitmapTypeRequest<A> asBitmap() {
-        return new BitmapTypeRequest<A>(context, model, streamModelLoader, fileDescriptorModelLoader, glide,
-                requestTracker);
+        return optionsApplier.apply(model, new BitmapTypeRequest<A>(context, model, streamModelLoader,
+                fileDescriptorModelLoader, glide, requestTracker, optionsApplier));
     }
 
     public GifTypeRequest<A> asGif() {
-        return new GifTypeRequest<A>(context, model, streamModelLoader, glide, requestTracker);
+        return optionsApplier.apply(model, new GifTypeRequest<A>(context, model, streamModelLoader, glide,
+                requestTracker, optionsApplier));
     }
 }

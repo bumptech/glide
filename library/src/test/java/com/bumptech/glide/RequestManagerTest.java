@@ -1,6 +1,14 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import com.bumptech.glide.load.model.GenericLoaderFactory;
+import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
+import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
+import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestTracker;
@@ -14,7 +22,12 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,6 +41,7 @@ public class RequestManagerTest {
     private ConnectivityMonitor connectivityMonitor;
     private RequestTracker requestTracker;
     private ConnectivityMonitor.ConnectivityListener connectivityListener;
+    private RequestManager.DefaultOptions options;
 
     @Before
     public void setUp() {
@@ -43,6 +57,141 @@ public class RequestManagerTest {
                 });
         requestTracker = mock(RequestTracker.class);
         manager = new RequestManager(Robolectric.application, requestTracker, factory);
+        options = mock(RequestManager.DefaultOptions.class);
+        manager.setDefaultOptions(options);
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsWhenUsingGenericModelLoaderAndDataClass() {
+        Float model = 1f;
+        ModelLoader<Float, InputStream> modelLoader = mock(ModelLoader.class);
+        GenericTranscodeRequest<Float, InputStream, Bitmap> builder = manager.using(modelLoader, InputStream.class)
+                .load(model)
+                .as(Bitmap.class);
+
+        verify(options).apply(eq(model), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsWhenUsingImageStreamModelLoader() {
+        String model = "fake";
+        StreamModelLoader<String> modelLoader = mock(StreamModelLoader.class);
+        DrawableTypeRequest<String> builder = manager.using(modelLoader)
+                .load(model);
+
+        verify(options).apply(eq(model), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsWhenUsingByteArrayLoader() {
+        byte[] model = new byte[] { 1, 4, 65, 2};
+        StreamByteArrayLoader loader = mock(StreamByteArrayLoader.class);
+        DrawableTypeRequest<byte[]> builder = manager.using(loader)
+                .load(model);
+
+        verify(options).apply(eq(model), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsWhenUsingVideoFileDescriptorModelLoader() {
+        String model = "fake";
+        FileDescriptorModelLoader<String> modelLoader = mock(FileDescriptorModelLoader.class);
+        BitmapTypeRequest<String> builder = manager.using(modelLoader)
+                .loadFromVideo(model);
+
+        verify(options).apply(eq(model), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadString() {
+        String model = "fake";
+        DrawableTypeRequest<String> builder = manager.load(model);
+        verify(options).apply(eq(model), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadUri() {
+        Uri uri = Uri.EMPTY;
+        DrawableTypeRequest<Uri> builder = manager.load(uri);
+        verify(options).apply(eq(uri), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadMediaStoreUri() {
+        Uri uri = Uri.EMPTY;
+        DrawableTypeRequest<Uri> builder = manager.loadFromMediaStore(uri, "image/jpeg", 123L, 0);
+
+        verify(options).apply(eq(uri), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadResourceId() {
+        int id = 123;
+        DrawableTypeRequest<Integer> builder = manager.load(id);
+
+        verify(options).apply(eq(id), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadGenericFromImage() {
+        ModelLoaderFactory<Double, InputStream> factory = mock(ModelLoaderFactory.class);
+        when(factory.build(any(Context.class), any(GenericLoaderFactory.class))).thenReturn(mock(ModelLoader.class));
+        Glide.get(Robolectric.application).register(Double.class, InputStream.class, factory);
+        Double model = 2.2;
+        DrawableTypeRequest<Double> builder = manager.load(model);
+
+        verify(options).apply(eq(model), eq(builder));
+        Glide.get(Robolectric.application).unregister(Double.class, InputStream.class);
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadUrl() throws MalformedURLException {
+        URL url = new URL("http://www.google.com");
+        DrawableTypeRequest<URL> builder = manager.load(url);
+
+        verify(options).apply(eq(url), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadFromImageByteWithId() {
+        byte[] model = new byte[] { 1, 2, 4 };
+        DrawableTypeRequest<byte[]> builder = manager.loadFromImage(model, "fakeId");
+
+        verify(options).apply(eq(model), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadFromImageBytes() {
+        byte[] model = new byte[] { 5, 9, 23 };
+        DrawableTypeRequest<byte[]> builder = manager.loadFromImage(model);
+
+        verify(options).apply(eq(model), eq(builder));
+    }
+
+    @Test
+    public void testAppliesDefaultOptionsToLoadGenericFromVideo() {
+        ModelLoaderFactory<Float, InputStream> factory = mock(ModelLoaderFactory.class);
+        when(factory.build(any(Context.class), any(GenericLoaderFactory.class))).thenReturn(mock(ModelLoader.class));
+        Glide.get(Robolectric.application).register(Float.class, InputStream.class, factory);
+        Float model = 23.2f;
+        DrawableTypeRequest<Float> builder = manager.loadFromVideo(model);
+
+        verify(options).apply(eq(model), eq(builder));
+        Glide.get(Robolectric.application).unregister(Float.class, InputStream.class);
+    }
+
+    @Test
+    public void testPauseRequestsPausesRequests() {
+        manager.pauseRequests();
+
+        verify(requestTracker).pauseRequests();
+    }
+
+    @Test
+    public void testResumeRequestsResumesRequests() {
+        manager.resumeRequests();
+
+        verify(requestTracker).resumeRequests();
     }
 
     @Test

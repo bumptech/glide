@@ -20,6 +20,7 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
     private ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Glide glide;
     private RequestTracker requestTracker;
+    private RequestManager.OptionsApplier optionsApplier;
 
     private static <A, R> FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader,
@@ -36,7 +37,7 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
     BitmapTypeRequest(Context context, A model,
             ModelLoader<A, InputStream> streamModelLoader,
             ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader,
-            Glide glide, RequestTracker requestTracker) {
+            Glide glide, RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, null),
                 Bitmap.class,
@@ -47,12 +48,13 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
         this.glide = glide;
         this.requestTracker= requestTracker;
+        this.optionsApplier = optionsApplier;
     }
 
     public <R> BitmapRequestBuilder<A, R> transcode(ResourceTranscoder<Bitmap, R> transcoder, Class<R> transcodeClass) {
-        return new BitmapRequestBuilder<A, R>(context, model,
+        return optionsApplier.apply(model, new BitmapRequestBuilder<A, R>(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, transcodeClass, transcoder),
-                transcodeClass, glide, requestTracker);
+                transcodeClass, glide, requestTracker));
     }
 
     public BitmapRequestBuilder<A, byte[]> toBytes() {

@@ -16,9 +16,11 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
     private final Class<T> dataClass;
     private final Class<Z> resourceClass;
     private final RequestTracker requestTracker;
+    private final RequestManager.OptionsApplier optionsApplier;
 
     GenericTranscodeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
-            Class<T> dataClass, Class<Z> resourceClass, RequestTracker requestTracker) {
+            Class<T> dataClass, Class<Z> resourceClass, RequestTracker requestTracker,
+            RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 build(glide, modelLoader, dataClass, resourceClass, (ResourceTranscoder<Z, Z>) null),
                 resourceClass, glide, requestTracker);
@@ -29,12 +31,14 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
         this.dataClass = dataClass;
         this.resourceClass = resourceClass;
         this.requestTracker = requestTracker;
+        this.optionsApplier = optionsApplier;
     }
 
     public <R> GenericRequestBuilder<A, T, Z, R> transcode(ResourceTranscoder<Z, R> transcoder,
             Class<R> transcodeClass) {
-        return new GenericRequestBuilder<A, T, Z, R>(context, model, build(glide, modelLoader, dataClass,
-                resourceClass, transcoder), transcodeClass, glide, requestTracker);
+        return optionsApplier.apply(model, new GenericRequestBuilder<A, T, Z, R>(context, model,
+                build(glide, modelLoader, dataClass, resourceClass, transcoder), transcodeClass, glide,
+                requestTracker));
     }
 
     private static <A, T, Z, R> LoadProvider<A, T, Z, R> build(Glide glide, ModelLoader<A, T> modelLoader,
