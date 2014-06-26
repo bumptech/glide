@@ -1,6 +1,9 @@
-package com.bumptech.glide.manager;
+package com.bumptech.glide;
 
 import android.content.Context;
+import com.bumptech.glide.manager.ConnectivityMonitor;
+import com.bumptech.glide.manager.ConnectivityMonitorFactory;
+import com.bumptech.glide.manager.RequestTracker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

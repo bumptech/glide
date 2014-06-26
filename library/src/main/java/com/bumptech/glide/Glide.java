@@ -51,7 +51,6 @@ import com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTransc
 import com.bumptech.glide.load.resource.transcode.GifDataDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderFactory;
-import com.bumptech.glide.manager.RequestManager;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.provider.DataLoadProviderFactory;
 import com.bumptech.glide.request.GlideAnimation;

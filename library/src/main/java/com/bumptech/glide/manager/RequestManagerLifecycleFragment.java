@@ -1,5 +1,7 @@
 package com.bumptech.glide.manager;
 
+import com.bumptech.glide.RequestManager;
+
 public interface RequestManagerLifecycleFragment {
 
     public void setRequestManager(RequestManager requestManager);

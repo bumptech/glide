@@ -1,13 +1,16 @@
-package com.bumptech.glide.manager;
+package com.bumptech.glide;
 
 import android.content.Context;
+import com.bumptech.glide.manager.ConnectivityMonitor;
+import com.bumptech.glide.manager.ConnectivityMonitorFactory;
+import com.bumptech.glide.manager.RequestTracker;
 
 public class RequestManager {
 
     private final ConnectivityMonitor connectivityMonitor;
     private final RequestTracker requestTracker;
 
-    RequestManager(Context context) {
+    public RequestManager(Context context) {
         this(context, new RequestTracker(), new ConnectivityMonitorFactory());
     }
 
@@ -21,19 +24,19 @@ public class RequestManager {
         return requestTracker;
     }
 
-    void onStart() {
+    public void onStart() {
         // onStart might not be called because this object may be created after the fragment/activity's onStart method.
         connectivityMonitor.register();
 
         requestTracker.resumeRequests();
     }
 
-    void onStop() {
+    public void onStop() {
         connectivityMonitor.unregister();
         requestTracker.pauseRequests();
     }
 
-    void onDestroy() {
+    public void onDestroy() {
         requestTracker.clearRequests();
     }
 

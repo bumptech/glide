@@ -1,6 +1,7 @@
 package com.bumptech.glide.manager;
 
 import android.support.v4.app.Fragment;
+import com.bumptech.glide.RequestManager;
 
 public class SupportRequestManagerFragment extends Fragment {
     private RequestManager requestManager;

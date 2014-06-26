@@ -2,6 +2,7 @@ package com.bumptech.glide.manager;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
+import com.bumptech.glide.RequestManager;
 
 @TargetApi(11)
 public class RequestManagerFragment extends Fragment {

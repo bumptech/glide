@@ -7,6 +7,7 @@ import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import com.bumptech.glide.RequestManager;
 
 public class RequestManagerRetriever {
     static final String TAG = "com.bumptech.glide.manager";

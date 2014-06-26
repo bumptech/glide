@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import com.bumptech.glide.RequestManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
