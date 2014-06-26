@@ -334,8 +334,8 @@ public class Glide {
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
      * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Typically the {@link ModelRequest#using(StreamModelLoader)} or
-     * {@link ModelRequest#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
+     * models. Typically the {@link RequestManager#using(StreamModelLoader)} or
+     * {@link RequestManager#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
      * with the ModelLoader being used to load it. Any factory replaced by the given factory will have its
      * {@link ModelLoaderFactory#teardown()}} method called.
      *
@@ -350,8 +350,8 @@ public class Glide {
      *     retained statically.
      * </p>
      *
-     * @see ModelRequest#using(FileDescriptorModelLoader)
-     * @see ModelRequest#using(StreamModelLoader)
+     * @see RequestManager#using(FileDescriptorModelLoader)
+     * @see RequestManager#using(StreamModelLoader)
      *
      * @param modelClass The model class.
      * @param resourceClass The resource class the model loader will translate the model type into.
@@ -472,32 +472,25 @@ public class Glide {
      * @param context Any context, will not be retained.
      * @return A model request to pass in the object representing the image to be loaded.
      */
-    public static ModelRequest with(Context context) {
-        RequestManager requestManager = RequestManagerRetriever.get(context);
-        return new ModelRequest(context, Glide.get(context), requestManager.getRequestTracker());
+    public static RequestManager with(Context context) {
+        return RequestManagerRetriever.get(context);
     }
 
-    public static ModelRequest with(Activity activity) {
-        RequestManager requestManager = RequestManagerRetriever.get(activity);
-        return new ModelRequest(activity, Glide.get(activity), requestManager.getRequestTracker());
+    public static RequestManager with(Activity activity) {
+        return RequestManagerRetriever.get(activity);
     }
 
-    public static ModelRequest with(FragmentActivity activity) {
-        RequestManager requestManager = RequestManagerRetriever.get(activity);
-        return new ModelRequest(activity, Glide.get(activity), requestManager.getRequestTracker());
+    public static RequestManager with(FragmentActivity activity) {
+        return RequestManagerRetriever.get(activity);
     }
 
     @TargetApi(11)
-    public static ModelRequest with(android.app.Fragment fragment) {
-        RequestManager requestManager = RequestManagerRetriever.get(fragment);
-        Context context = fragment.getActivity();
-        return new ModelRequest(context, Glide.get(context), requestManager.getRequestTracker());
+    public static RequestManager with(android.app.Fragment fragment) {
+        return RequestManagerRetriever.get(fragment);
     }
 
-    public static ModelRequest with(Fragment fragment) {
-        RequestManager requestManager = RequestManagerRetriever.get(fragment);
-        Context context = fragment.getActivity();
-        return new ModelRequest(context, Glide.get(context), requestManager.getRequestTracker());
+    public static RequestManager with(Fragment fragment) {
+        return RequestManagerRetriever.get(fragment);
     }
 
     private static class ClearTarget extends ViewTarget<View, Object> {

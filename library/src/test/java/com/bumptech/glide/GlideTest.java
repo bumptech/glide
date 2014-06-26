@@ -36,6 +36,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.volley.VolleyRequestFuture;
@@ -51,7 +52,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowContentResolver;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -401,7 +401,7 @@ public class GlideTest {
     }
 
     @Test
-    public void testUriStringDefaultLoaerWithFileDescriptor() throws Exception {
+    public void testUriStringDefaultLoaderWithFileDescriptor() throws Exception {
         registerFailFactory(String.class, InputStream.class);
         runTestUriStringDefaultLoader();
     }
@@ -418,7 +418,25 @@ public class GlideTest {
     }
 
     private void runTestStringDefaultLoader(String string) {
-        Glide.with(getContext()).load(string).into(target);
+        Glide.with(getContext())
+                .load(string)
+                .listener(new RequestListener<String, Drawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target target, boolean isFirstImage) {
+                        if (!(e instanceof IOException)) {
+                            throw new RuntimeException(e);
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, String model, Target target,
+                            boolean isFromMemoryCache,
+                            boolean isFirstResource) {
+                        return false;
+                    }
+                })
+                .into(target);
         Glide.with(getContext()).load(string).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
@@ -634,9 +652,11 @@ public class GlideTest {
         ContentResolver contentResolver = Robolectric.application.getContentResolver();
         ShadowFileDescriptorContentResolver shadowContentResolver = Robolectric.shadowOf_(contentResolver);
         shadowContentResolver.registerInputStream(uri, new ByteArrayInputStream(new byte[0]));
+
         AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
         ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
         when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(parcelFileDescriptor);
+
         shadowContentResolver.registerAssetFileDescriptor(uri, assetFileDescriptor);
     }
 
@@ -689,21 +709,42 @@ public class GlideTest {
         }
     }
 
-    @Implements(ContentResolver.class)
-    public static class ShadowFileDescriptorContentResolver extends ShadowContentResolver {
-        private final Map<Uri, AssetFileDescriptor> uriToFileDescriptors = new HashMap<Uri, AssetFileDescriptor>();
+    // TODO: Extending ShadowContentResolver results in exceptions because of some state issues where we seem to get
+    // one content resolver shadow in one part of the test and a different one in a different part of the test. Each
+    // one ends up with different registered uris, which causes tests to fail. We shouldn't need to do this, but
+    // using static maps seems to fix the issue.
+    @Implements(value = ContentResolver.class, resetStaticState = true)
+    public static class ShadowFileDescriptorContentResolver {
+        private static final Map<Uri, AssetFileDescriptor> uriToFileDescriptors = new HashMap<Uri, AssetFileDescriptor>();
+        private static final Map<Uri, InputStream> uriToInputStreams = new HashMap<Uri, InputStream>();
+
+        public void registerInputStream(Uri uri, InputStream inputStream) {
+            uriToInputStreams.put(uri, inputStream);
+        }
 
         public void registerAssetFileDescriptor(Uri uri, AssetFileDescriptor assetFileDescriptor) {
             uriToFileDescriptors.put(uri, assetFileDescriptor);
         }
 
         @Implementation
-        @SuppressWarnings("unused")
+        public InputStream openInputStream(Uri uri) {
+            if (!uriToInputStreams.containsKey(uri)) {
+                throw new IllegalArgumentException("You must first register an InputStream for uri: " + uri);
+            }
+            return uriToInputStreams.get(uri);
+        }
+
+        @Implementation
         public AssetFileDescriptor openAssetFileDescriptor(Uri uri, String type) {
             if (!uriToFileDescriptors.containsKey(uri)) {
                 throw new IllegalArgumentException("You must first register an AssetFileDescriptor for uri: " + uri);
             }
             return uriToFileDescriptors.get(uri);
+        }
+
+        public static void reset() {
+            uriToInputStreams.clear();
+            uriToFileDescriptors.clear();
         }
     }
 
