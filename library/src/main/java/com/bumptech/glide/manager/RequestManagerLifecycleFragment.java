@@ -2,9 +2,9 @@ package com.bumptech.glide.manager;
 
 public interface RequestManagerLifecycleFragment {
 
-    public void setRequestManager(LifecycleRequestManager requestManager);
+    public void setRequestManager(RequestManager requestManager);
 
-    public LifecycleRequestManager getRequestManager();
+    public RequestManager getRequestManager();
 
     public void onStart();
 

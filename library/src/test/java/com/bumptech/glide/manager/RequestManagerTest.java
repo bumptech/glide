@@ -17,8 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class LifecycleRequestManagerTest {
-    private LifecycleRequestManager manager;
+public class RequestManagerTest {
+    private RequestManager manager;
     private ConnectivityMonitor connectivityMonitor;
     private RequestTracker requestTracker;
     private ConnectivityMonitor.ConnectivityListener connectivityListener;
@@ -36,7 +36,7 @@ public class LifecycleRequestManagerTest {
                     }
                 });
         requestTracker = mock(RequestTracker.class);
-        manager = new LifecycleRequestManager(Robolectric.application, requestTracker, factory);
+        manager = new RequestManager(Robolectric.application, requestTracker, factory);
     }
 
     @Test

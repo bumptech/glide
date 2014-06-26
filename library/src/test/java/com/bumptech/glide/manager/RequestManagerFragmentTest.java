@@ -31,7 +31,7 @@ public class RequestManagerFragmentTest {
     @Test
     public void testSupportCanSetAndGetRequestManager() {
         for (Harness harness : harnesses) {
-            LifecycleRequestManager manager = mock(LifecycleRequestManager.class);
+            RequestManager manager = mock(RequestManager.class);
             harness.setRequestManager(manager);
             assertEquals(manager, harness.getManager());
         }
@@ -89,9 +89,9 @@ public class RequestManagerFragmentTest {
     }
 
     private interface Harness {
-        public LifecycleRequestManager getManager();
+        public RequestManager getManager();
 
-        public void setRequestManager(LifecycleRequestManager manager);
+        public void setRequestManager(RequestManager manager);
 
         public ActivityController getController();
     }
@@ -99,7 +99,7 @@ public class RequestManagerFragmentTest {
     private static class RequestManagerHarness implements Harness {
         private final ActivityController<Activity> controller;
         private final RequestManagerFragment fragment;
-        private final LifecycleRequestManager manager;
+        private final RequestManager manager;
 
         public RequestManagerHarness() {
             fragment = new RequestManagerFragment();
@@ -111,17 +111,17 @@ public class RequestManagerFragmentTest {
                 .commit();
             controller.get().getFragmentManager().executePendingTransactions();
 
-            this.manager = mock(LifecycleRequestManager.class);
+            this.manager = mock(RequestManager.class);
             fragment.setRequestManager(manager);
         }
 
         @Override
-        public LifecycleRequestManager getManager() {
+        public RequestManager getManager() {
             return fragment.getRequestManager();
         }
 
         @Override
-        public void setRequestManager(LifecycleRequestManager requestManager) {
+        public void setRequestManager(RequestManager requestManager) {
             fragment.setRequestManager(requestManager);
         }
 
@@ -134,7 +134,7 @@ public class RequestManagerFragmentTest {
     private static class SupportRequestManagerHarness implements Harness {
         private final SupportRequestManagerFragment supportFragment;
         private final ActivityController<FragmentActivity> supportController;
-        private final LifecycleRequestManager manager;
+        private final RequestManager manager;
 
         public SupportRequestManagerHarness() {
             supportFragment = new SupportRequestManagerFragment();
@@ -147,18 +147,18 @@ public class RequestManagerFragmentTest {
                 .commit();
             supportController.get().getSupportFragmentManager().executePendingTransactions();
 
-            this.manager = mock(LifecycleRequestManager.class);
+            this.manager = mock(RequestManager.class);
             supportFragment.setRequestManager(manager);
 
         }
 
         @Override
-        public LifecycleRequestManager getManager() {
+        public RequestManager getManager() {
             return supportFragment.getRequestManager();
         }
 
         @Override
-        public void setRequestManager(LifecycleRequestManager manager) {
+        public void setRequestManager(RequestManager manager) {
             supportFragment.setRequestManager(manager);
         }
 

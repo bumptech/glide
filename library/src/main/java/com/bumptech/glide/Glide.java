@@ -475,30 +475,30 @@ public class Glide {
      */
     public static ModelRequest with(Context context) {
         RequestManager requestManager = RequestManagerRetriever.get(context);
-        return new ModelRequest(context, Glide.get(context), requestManager);
+        return new ModelRequest(context, Glide.get(context), requestManager.getRequestTracker());
     }
 
     public static ModelRequest with(Activity activity) {
         RequestManager requestManager = RequestManagerRetriever.get(activity);
-        return new ModelRequest(activity, Glide.get(activity), requestManager);
+        return new ModelRequest(activity, Glide.get(activity), requestManager.getRequestTracker());
     }
 
     public static ModelRequest with(FragmentActivity activity) {
         RequestManager requestManager = RequestManagerRetriever.get(activity);
-        return new ModelRequest(activity, Glide.get(activity), requestManager);
+        return new ModelRequest(activity, Glide.get(activity), requestManager.getRequestTracker());
     }
 
     @TargetApi(11)
     public static ModelRequest with(android.app.Fragment fragment) {
         RequestManager requestManager = RequestManagerRetriever.get(fragment);
         Context context = fragment.getActivity();
-        return new ModelRequest(context, Glide.get(context), requestManager);
+        return new ModelRequest(context, Glide.get(context), requestManager.getRequestTracker());
     }
 
     public static ModelRequest with(Fragment fragment) {
         RequestManager requestManager = RequestManagerRetriever.get(fragment);
         Context context = fragment.getActivity();
-        return new ModelRequest(context, Glide.get(context), requestManager);
+        return new ModelRequest(context, Glide.get(context), requestManager.getRequestTracker());
     }
 
     private static class ClearTarget extends ViewTarget<View, Object> {

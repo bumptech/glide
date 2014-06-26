@@ -54,7 +54,7 @@ public class RequestManagerRetrieverTest {
     @Test
     public void testReturnsExistingRequestManagerIfExists() {
         for (RetrieverHarness harness : harnesses) {
-            LifecycleRequestManager requestManager = mock(LifecycleRequestManager.class);
+            RequestManager requestManager = mock(RequestManager.class);
 
             harness.addFragmentWithTag(RequestManagerRetriever.TAG, requestManager);
 
@@ -189,7 +189,7 @@ public class RequestManagerRetrieverTest {
 
         public boolean hasFragmentWithTag(String tag);
 
-        public void addFragmentWithTag(String tag, LifecycleRequestManager manager);
+        public void addFragmentWithTag(String tag, RequestManager manager);
     }
 
     public class DefaultRetrieverHarness implements RetrieverHarness {
@@ -224,7 +224,7 @@ public class RequestManagerRetrieverTest {
         }
 
         @Override
-        public void addFragmentWithTag(String tag, LifecycleRequestManager requestManager) {
+        public void addFragmentWithTag(String tag, RequestManager requestManager) {
             RequestManagerFragment fragment = new RequestManagerFragment();
             fragment.setRequestManager(requestManager);
             controller.get().getFragmentManager()
@@ -269,7 +269,7 @@ public class RequestManagerRetrieverTest {
         }
 
         @Override
-        public void addFragmentWithTag(String tag, LifecycleRequestManager manager) {
+        public void addFragmentWithTag(String tag, RequestManager manager) {
             SupportRequestManagerFragment fragment = new SupportRequestManagerFragment();
             fragment.setRequestManager(manager);
             controller.get().getSupportFragmentManager()

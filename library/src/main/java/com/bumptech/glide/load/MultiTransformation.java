@@ -24,7 +24,6 @@ public class MultiTransformation<T> implements Transformation<T> {
             throw new IllegalArgumentException("MultiTransformation must contain at least one Transformation");
         }
         this.transformationList = transformationList;
-
     }
 
     @Override

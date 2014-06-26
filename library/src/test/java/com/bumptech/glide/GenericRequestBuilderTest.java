@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.manager.RequestManager;
+import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.GlideAnimationFactory;
 import com.bumptech.glide.request.Request;
@@ -22,23 +22,23 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("unchecked")
 @RunWith(RobolectricTestRunner.class)
 public class GenericRequestBuilderTest {
-    private RequestManager requestManager;
+    private RequestTracker requestTracker;
 
     @Before
     public void setUp() {
-        requestManager = mock(RequestManager.class);
+        requestTracker = mock(RequestTracker.class);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
         new GenericRequestBuilder(null,
-                new Object(), mock(LoadProvider.class), Object.class, mock(Glide.class), requestManager);
+                new Object(), mock(LoadProvider.class), Object.class, mock(Glide.class), requestTracker);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfNonNullModelAndNullLoadProvider() {
         new GenericRequestBuilder(Robolectric.application, new Object(), null, Object.class, mock(Glide.class),
-                requestManager);
+                requestTracker);
     }
 
     @Test(expected = NullPointerException.class)
@@ -69,7 +69,7 @@ public class GenericRequestBuilderTest {
     @Test
     public void testDoesNotThrowWhenModelAndLoaderNull() {
         new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class),
-                requestManager);
+                requestTracker);
     }
 
     @Test
@@ -98,24 +98,24 @@ public class GenericRequestBuilderTest {
     }
 
     @Test
-    public void testAddsNewRequestToRequestManager() {
+    public void testAddsNewRequestToRequestTracker() {
         getNullModelRequest().into(mock(Target.class));
-        verify(requestManager).addRequest(any(Request.class));
+        verify(requestTracker).addRequest(any(Request.class));
     }
 
     @Test
-    public void testRemovesPreviousRequestFromRequestManager() {
+    public void testRemovesPreviousRequestFromRequestTracker() {
         Request previous = mock(Request.class);
         Target target = mock(Target.class);
         when(target.getRequest()).thenReturn(previous);
 
         getNullModelRequest().into(target);
 
-        verify(requestManager).removeRequest(eq(previous));
+        verify(requestTracker).removeRequest(eq(previous));
     }
 
     private GenericRequestBuilder getNullModelRequest() {
         return new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class),
-                requestManager);
+                requestTracker);
     }
 }

@@ -5,13 +5,13 @@ import android.app.Fragment;
 
 @TargetApi(11)
 public class RequestManagerFragment extends Fragment {
-    private LifecycleRequestManager requestManager;
+    private RequestManager requestManager;
 
-    public void setRequestManager(LifecycleRequestManager requestManager) {
+    public void setRequestManager(RequestManager requestManager) {
         this.requestManager = requestManager;
     }
 
-    public LifecycleRequestManager getRequestManager() {
+    public RequestManager getRequestManager() {
         return requestManager;
     }
 

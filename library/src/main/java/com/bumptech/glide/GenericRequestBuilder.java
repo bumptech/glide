@@ -17,7 +17,7 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.NullEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.RequestManager;
+import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.GenericRequest;
@@ -52,7 +52,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
     private final Class<TranscodeType> transcodeClass;
     private final Glide glide;
-    private final RequestManager requestManager;
+    private final RequestTracker requestTracker;
     private List<Transformation<ResourceType>> transformations = null;
     private Transformation<ResourceType> singleTransformation = UnitTransformation.get();
     private int placeholderId;
@@ -75,10 +75,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
-            Class<TranscodeType> transcodeClass, Glide glide, RequestManager requestManager) {
+            Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker) {
         this.transcodeClass = transcodeClass;
         this.glide = glide;
-        this.requestManager = requestManager;
+        this.requestTracker = requestTracker;
         this.loadProvider = loadProvider != null ?
                 new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
         preSkipEncoder = loadProvider != null ? loadProvider.getEncoder() : null;
@@ -525,16 +525,15 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
         if (previous != null) {
             previous.clear();
-            requestManager.removeRequest(previous);
+            requestTracker.removeRequest(previous);
             previous.recycle();
         }
 
         Request request = buildRequest(target);
         target.setRequest(request);
-        requestManager.addRequest(request);
-        if (request != null) {
-            request.run();
-        }
+        requestTracker.addRequest(request);
+        request.run();
+
         return target;
     }
 

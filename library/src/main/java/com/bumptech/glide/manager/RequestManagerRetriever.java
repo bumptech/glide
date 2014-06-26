@@ -10,7 +10,7 @@ import android.support.v4.app.FragmentManager;
 
 public class RequestManagerRetriever {
     static final String TAG = "com.bumptech.glide.manager";
-    private static final RequestManager NULL_MANAGER = new NullRequestManager();
+    private static RequestManager applicationManager;
 
     public static RequestManager get(Context context) {
         if (context == null) {
@@ -20,7 +20,10 @@ public class RequestManagerRetriever {
         } else if (context instanceof Activity) {
             return get((Activity) context);
         } else {
-            return NULL_MANAGER;
+            if (applicationManager == null) {
+                applicationManager = new RequestManager(context.getApplicationContext());
+            }
+            return applicationManager;
         }
     }
 
@@ -65,7 +68,7 @@ public class RequestManagerRetriever {
             android.app.FragmentManager fm = fragment.getChildFragmentManager();
             return fragmentGet(fragment.getActivity(), fm);
         } else {
-            return new NullRequestManager();
+            return get(fragment.getActivity().getApplicationContext());
         }
     }
 
@@ -81,9 +84,9 @@ public class RequestManagerRetriever {
             // the next synchronous request will retrieve it rather than creating a new one.
             fm.executePendingTransactions();
         }
-        LifecycleRequestManager requestManager = current.getRequestManager();
+        RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new LifecycleRequestManager(context);
+            requestManager = new RequestManager(context);
             current.setRequestManager(requestManager);
         }
         return requestManager;
@@ -101,9 +104,9 @@ public class RequestManagerRetriever {
             // the next synchronous request will retrieve it rather than creating a new one.
             fm.executePendingTransactions();
         }
-        LifecycleRequestManager requestManager = current.getRequestManager();
+        RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new LifecycleRequestManager(context);
+            requestManager = new RequestManager(context);
             current.setRequestManager(requestManager);
         }
         return requestManager;

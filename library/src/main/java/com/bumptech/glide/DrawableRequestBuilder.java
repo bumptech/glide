@@ -12,7 +12,7 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.RequestManager;
+import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.DrawableCrossFadeViewAnimation;
 import com.bumptech.glide.request.RequestListener;
@@ -27,8 +27,8 @@ public class DrawableRequestBuilder<ModelType> extends
 
     DrawableRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> loadProvider, Glide glide,
-            RequestManager requestManager) {
-        super(context, model, loadProvider, Drawable.class, glide, requestManager);
+            RequestTracker requestTracker) {
+        super(context, model, loadProvider, Drawable.class, glide, requestTracker);
         this.context = context;
         this.glide = glide;
     }
