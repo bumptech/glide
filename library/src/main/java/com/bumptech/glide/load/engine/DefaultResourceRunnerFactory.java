@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
-import com.bumptech.glide.CacheLoader;
+import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;

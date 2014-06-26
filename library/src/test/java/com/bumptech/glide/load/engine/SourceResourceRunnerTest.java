@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.CacheLoader;
+import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;

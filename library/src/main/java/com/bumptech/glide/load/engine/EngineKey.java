@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.OriginalEngineKey;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;

@@ -1,7 +1,5 @@
-package com.bumptech.glide;
+package com.bumptech.glide.load;
 
-import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import org.junit.Before;
