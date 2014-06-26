@@ -2,5 +2,7 @@ language: android
 android:
   components:
     - build-tools-19.1.0
+  licenses: 
+    - 'android-sdk-license.*'
 
 script: 'travis_retry ./gradlew clean build'
