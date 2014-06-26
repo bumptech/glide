@@ -3,74 +3,53 @@ package com.bumptech.glide.manager;
 import android.content.Context;
 import com.bumptech.glide.request.Request;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.WeakHashMap;
+class LifecycleRequestManager implements RequestManager {
 
-class LifecycleRequestManager implements RequestManager, ConnectivityMonitor.ConnectivityListener {
-    // Most requests will be for views and will therefore be held strongly (and safely) by the view via the tag.
-    // However, a user can always pass in a different type of target which may end up not being strongly referenced even
-    // though the user still would like the request to finish. Weak references are therefore only really functional in
-    // this context for view targets. Despite the side affects, WeakReferences are still essentially required. A user
-    // can always make repeated requests into targets other than views, or use an activity manager in a fragment pager
-    // where holding strong references would steadily leak bitmaps and/or views.
-    private final Set<Request> requests = Collections.newSetFromMap(new WeakHashMap<Request, Boolean>());
     private final ConnectivityMonitor connectivityMonitor;
+    private final RequestTracker requestTracker;
 
     LifecycleRequestManager(Context context) {
-        this(context, new ConnectivityMonitorFactory());
+        this(context, new RequestTracker(), new ConnectivityMonitorFactory());
     }
 
-    LifecycleRequestManager(Context context, ConnectivityMonitorFactory factory) {
-        this.connectivityMonitor = factory.build(context, this);
+    LifecycleRequestManager(Context context, RequestTracker requestTracker, ConnectivityMonitorFactory factory) {
+        this.requestTracker = requestTracker;
+        this.connectivityMonitor = factory.build(context, new RequestManagerConnectivityListener());
         connectivityMonitor.register();
     }
 
     @Override
     public void addRequest(Request request) {
-        requests.add(request);
+        requestTracker.addRequest(request);
     }
 
     @Override
     public void removeRequest(Request request) {
-        requests.remove(request);
+        requestTracker.removeRequest(request);
     }
 
-    public void onStart() {
+    void onStart() {
         // onStart might not be called because this object may be created after the fragment/activity's onStart method.
         connectivityMonitor.register();
 
-        for (Request request : requests) {
-            if (!request.isComplete() && !request.isRunning()) {
-                request.run();
-            }
-        }
-
+        requestTracker.resumeRequests();
     }
 
-    public void onStop() {
+    void onStop() {
         connectivityMonitor.unregister();
-        for (Request request : requests) {
-            if (!request.isComplete() && !request.isFailed()) {
-                request.clear();
-            }
-        }
+        requestTracker.pauseRequests();
     }
 
-    public void onDestroy() {
-        for (Request request : requests) {
-            request.clear();
-        }
+    void onDestroy() {
+        requestTracker.clearRequests();
     }
 
-    @Override
-    public void onConnectivityChanged(boolean isConnected) {
-        for (Request request : requests) {
-            if (request.isFailed()) {
-                request.run();
-            } else if (!request.isComplete()) {
-                request.clear();
-                request.run();
+    private class RequestManagerConnectivityListener implements ConnectivityMonitor.ConnectivityListener {
+
+        @Override
+        public void onConnectivityChanged(boolean isConnected) {
+            if (isConnected) {
+                requestTracker.restartRequests();
             }
         }
     }

@@ -1,10 +1,11 @@
 package com.bumptech.glide.manager;
 
 import android.content.Context;
-import com.bumptech.glide.request.Request;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
@@ -19,135 +20,45 @@ import static org.mockito.Mockito.when;
 public class LifecycleRequestManagerTest {
     private LifecycleRequestManager manager;
     private ConnectivityMonitor connectivityMonitor;
+    private RequestTracker requestTracker;
+    private ConnectivityMonitor.ConnectivityListener connectivityListener;
 
     @Before
     public void setUp() {
         connectivityMonitor = mock(ConnectivityMonitor.class);
         ConnectivityMonitorFactory factory = mock(ConnectivityMonitorFactory.class);
         when(factory.build(any(Context.class), any(ConnectivityMonitor.ConnectivityListener.class)))
-                .thenReturn(connectivityMonitor);
-        manager = new LifecycleRequestManager(Robolectric.application, factory);
+                .thenAnswer(new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        connectivityListener = (ConnectivityMonitor.ConnectivityListener) invocation.getArguments()[1];
+                        return connectivityMonitor;
+                    }
+                });
+        requestTracker = mock(RequestTracker.class);
+        manager = new LifecycleRequestManager(Robolectric.application, requestTracker, factory);
     }
 
     @Test
-    public void testCancelsRequestsOnStop() {
+    public void testPausesRequestsOnStop() {
         manager.onStart();
-        Request request = mock(Request.class);
-        manager.addRequest(request);
         manager.onStop();
 
-        verify(request).clear();
+        verify(requestTracker).pauseRequests();
     }
 
     @Test
-    public void testCanAddAndRemoveRequest() {
-        manager.onStart();
-        Request request = mock(Request.class);
-        manager.addRequest(request);
-        manager.removeRequest(request);
-
-        manager.onStop();
-
-        verify(request, never()).clear();
-    }
-
-    @Test
-    public void testCanAddMultipleRequests() {
-        manager.onStart();
-        Request first = mock(Request.class);
-        Request second = mock(Request.class);
-        manager.addRequest(first);
-        manager.addRequest(second);
-
-        manager.onStop();
-
-        verify(first).clear();
-        verify(second).clear();
-    }
-
-    @Test
-    public void testDoesNotClearCompleteRequestsOnStop() {
-        manager.onStart();
-        Request request = mock(Request.class);
-        when(request.isComplete()).thenReturn(true);
-        manager.addRequest(request);
-
-        manager.onStop();
-
-        verify(request, never()).clear();
-    }
-
-    @Test
-    public void testDoesNotClearFailedRequestsOnStop() {
-        manager.onStart();
-        Request request = mock(Request.class);
-        when(request.isFailed()).thenReturn(true);
-        manager.addRequest(request);
-
-        manager.onStop();
-
-        verify(request, never()).clear();
-    }
-
-    @Test
-    public void testRestartsStoppedRequestOnStart() {
-        Request request = mock(Request.class);
-        manager.addRequest(request);
-
+    public void testResumesRequestsOnStart() {
         manager.onStart();
 
-        verify(request).run();
+        verify(requestTracker).resumeRequests();
     }
 
     @Test
-    public void testDoesNotRestartCompletedRequestsOnStart() {
-        Request request = mock(Request.class);
-        when(request.isComplete()).thenReturn(true);
-        manager.addRequest(request);
-
-        manager.onStart();
-
-        verify(request, never()).run();
-    }
-
-    @Test
-    public void testDoesRestartFailedRequestsOnStart() {
-        Request request = mock(Request.class);
-        when(request.isFailed()).thenReturn(true);
-        manager.addRequest(request);
-
-        manager.onStart();
-
-        verify(request).run();
-    }
-
-    @Test
-    public void testDoesNotStartStartedRequestsOnStart() {
-        Request request = mock(Request.class);
-        when(request.isRunning()).thenReturn(true);
-        manager.addRequest(request);
-
-        manager.onStart();
-
-        verify(request, never()).run();
-    }
-
-    @Test
-    public void testClearsAllRequestsOnDestroy() {
-        Request first = mock(Request.class);
-        Request second = mock(Request.class);
-        when(second.isComplete()).thenReturn(true);
-        Request third = mock(Request.class);
-        when(third.isFailed()).thenReturn(true);
-        manager.addRequest(first);
-        manager.addRequest(second);
-        manager.addRequest(third);
-
+    public void testClearsRequestsOnDestroy() {
         manager.onDestroy();
 
-        verify(first).clear();
-        verify(second).clear();
-        verify(third).clear();
+        verify(requestTracker).clearRequests();
     }
 
     @Test
@@ -170,25 +81,16 @@ public class LifecycleRequestManagerTest {
     }
 
     @Test
-    public void testRestartsFailedRequestOnConnected() {
-        Request request = mock(Request.class);
-        when(request.isFailed()).thenReturn(true);
-        manager.addRequest(request);
+    public void testRestartsRequestOnConnected() {
+        connectivityListener.onConnectivityChanged(true);
 
-        manager.onConnectivityChanged(true);
-
-        verify(request).run();
+        verify(requestTracker).restartRequests();
     }
 
     @Test
-    public void testCancelsAndRestartsNotYetFinishedRequestsWhenBecomesConnected() {
-        Request request = mock(Request.class);
-        when(request.isComplete()).thenReturn(false);
-        manager.addRequest(request);
+    public void testDoesNotRestartRequestsOnDisconnected() {
+        connectivityListener.onConnectivityChanged(false);
 
-        manager.onConnectivityChanged(true);
-
-        verify(request).clear();
-        verify(request).run();
+        verify(requestTracker, never()).restartRequests();
     }
 }
