@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.widget.ImageView;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.manager.RequestTracker;
@@ -112,6 +113,16 @@ public class GenericRequestBuilderTest {
         getNullModelRequest().into(target);
 
         verify(requestTracker).removeRequest(eq(previous));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsIfGivenNullTarget() {
+        getNullModelRequest().into((Target) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsIfGivenNullView() {
+        getNullModelRequest().into((ImageView) null);
     }
 
     private GenericRequestBuilder getNullModelRequest() {

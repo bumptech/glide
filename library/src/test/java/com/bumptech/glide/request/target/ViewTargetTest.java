@@ -242,6 +242,20 @@ public class ViewTargetTest {
         verify(cb).onSizeReady(eq(width), eq(height));
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfGivenNullView() {
+        ViewTarget viewTarget = new ViewTarget(null) {
+            @Override
+            public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
+
+            }
+
+            @Override
+            public void setPlaceholder(Drawable placeholder) {
+
+            }
+        };
+    }
 
     @Implements(ViewTreeObserver.class)
     public static class PreDrawShadowViewTreeObserver extends ShadowViewTreeObserver {

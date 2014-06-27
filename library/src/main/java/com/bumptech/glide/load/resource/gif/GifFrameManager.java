@@ -13,6 +13,7 @@ import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
+import com.bumptech.glide.load.model.NullEncoder;
 import com.bumptech.glide.load.resource.NullDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
@@ -32,7 +33,7 @@ class GifFrameManager {
     private final Handler mainHandler;
     private final ResourceEncoder<Bitmap> encoder;
     private final Context context;
-
+    private final NullEncoder<GifDecoder> sourceEncoder;
     private Transformation<Bitmap> transformation;
     private final int targetWidth;
     private final int targetHeight;
@@ -61,6 +62,7 @@ class GifFrameManager {
         calculator = new MemorySizeCalculator(context);
         frameLoader = new GifFrameModelLoader();
         frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
+        sourceEncoder = NullEncoder.get();
 
         if (!decoder.isTransparent()) {
             // For non transparent gifs, we can beat the performance of our gif decoder for each frame by decoding jpegs
@@ -100,10 +102,11 @@ class GifFrameManager {
                 .using(frameLoader, GifDecoder.class)
                 .load(decoder)
                 .as(Bitmap.class)
+                .sourceEncoder(sourceEncoder)
                 .decoder(frameResourceDecoder)
                 .cacheDecoder(cacheDecoder)
-                .transform(transformation)
                 .encoder(encoder)
+                .transform(transformation)
                 .skipMemoryCache(skipCache)
                 .into(next);
     }

@@ -40,6 +40,9 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
     private final SizeDeterminer sizeDeterminer;
 
     public ViewTarget(T view) {
+        if (view == null) {
+            throw new NullPointerException("View must not be null!");
+        }
         this.view = view;
         sizeDeterminer = new SizeDeterminer(view);
     }

@@ -521,6 +521,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return The given target.
      */
     public <Y extends Target<TranscodeType>> Y into(Y target) {
+        if (target == null) {
+            throw new IllegalArgumentException("You must pass in a non null Target");
+        }
+
         Request previous = target.getRequest();
 
         if (previous != null) {
@@ -547,6 +551,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
      */
     public Target<TranscodeType> into(ImageView view) {
+        if (view == null) {
+            throw new IllegalArgumentException("You must pass in a non null View");
+        }
         return into(glide.buildImageViewTarget(view, transcodeClass));
     }
 
