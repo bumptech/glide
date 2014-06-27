@@ -42,7 +42,8 @@ public interface RequestListener<T, R> {
     public abstract boolean onException(Exception e, T model, Target target, boolean isFirstImage);
 
     /**
-     * Called when a load completes successfully, immediately after {@link Target#onResourceReady(Object)}.
+     * Called when a load completes successfully, immediately after
+     * {@link Target#onResourceReady(Object, GlideAnimation)}
      *
      * @param resource The resource that was loaded for the target.
      * @param model The specific model that was used to load the image.

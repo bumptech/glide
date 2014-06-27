@@ -17,7 +17,8 @@ import java.util.Set;
 
 /**
  * A base {@link Target} for loading {@link Bitmap}s into {@link View}s that provides default implementations for most
- * most methods and can determine the size of views using a {@link ViewTreeObserver.OnGlobalLayoutListener}.
+ * most methods and can determine the size of views using a
+ * {@link android.view.ViewTreeObserver.OnDrawListener}.
  *
  * <p>
  *     To detect {@link View} reuse in {@link ListView} or any {@link ViewGroup} that reuses views, this class uses the

@@ -1,5 +1,6 @@
 .gradle
 build
+doc/**
 library/bin/*
 library/gen/*
 library/local.properties
@@ -11,6 +12,7 @@ library/install_dependencies/maven-android-sdk-deployer
 .idea/*
 *.DS_Store
 *.swp
+*.swo
 proguard-project.txt
 samples/flickr/.idea/*
 samples/flickr/gen

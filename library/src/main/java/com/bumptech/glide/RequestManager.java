@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -164,8 +163,8 @@ public class RequestManager {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link String} to load the image represented by
-     * the given {@link String}. Defaults to {@link StreamStringLoader.Factory} and {@link StreamStringLoader} to
-     * load the given model.
+     * the given {@link String}. Defaults to {@link com.bumptech.glide.load.model.stream.StreamStringLoader.Factory}
+     * and {@link StreamStringLoader} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *
@@ -180,7 +179,7 @@ public class RequestManager {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link Uri} to load the image at the given uri.
-     * Defaults to {@link StreamUriLoader.Factory} and {@link StreamUriLoader}.
+     * Defaults to {@link com.bumptech.glide.load.model.stream.StreamUriLoader.Factory} and {@link StreamUriLoader}.
      *
      * @see #using(StreamModelLoader)
      *
@@ -193,19 +192,22 @@ public class RequestManager {
     }
 
     /**
-     * Use {@link MediaStore.Images.Thumbnails} and {@link MediaStore.Video.Thumbnails} to retrieve pre-generated
-     * thumbnails for the given uri. Falls back to the registered {@link ModelLoaderFactory} registered for {@link Uri}s
-     * if the given uri is not a media store uri or if no pre-generated thumbnail exists for the given uri. In addition,
-     * mixes the given mimeType, dateModified, and orientation into the cache key to detect and invalidate thumbnails
-     * if content is changed locally.
+     * Use {@link android.provider.MediaStore.Images.Thumbnails} and
+     * {@link android.provider.MediaStore.Video.Thumbnails} to retrieve pre-generated thumbnails for the given uri.
+     * Falls back to the registered {@link ModelLoaderFactory} registered for {@link Uri}s if the given uri is not a
+     * media store uri or if no pre-generated thumbnail exists for the given uri. In addition, mixes the given mimeType,
+     * dateModified, and orientation into the cache key to detect and invalidate thumbnails if content is changed
+     * locally.
      *
      * @param uri The uri representing the media.
      * @param mimeType The mime type of the media store media. Ok to default to empty string "". See
-     *      {@link MediaStore.Images.ImageColumns#MIME_TYPE} or {@link MediaStore.Video.VideoColumns#MIME_TYPE}.
+     *      {@link android.provider.MediaStore.Images.ImageColumns#MIME_TYPE} or
+     *      {@link android.provider.MediaStore.Video.VideoColumns#MIME_TYPE}.
      * @param dateModified The date modified time of the media store media. Ok to default to 0. See
-     *      {@link MediaStore.Images.ImageColumns#DATE_MODIFIED} or {@link MediaStore.Video.VideoColumns#DATE_MODIFIED}.
+     *      {@link android.provider.MediaStore.Images.ImageColumns#DATE_MODIFIED} or
+     *      {@link android.provider.MediaStore.Video.VideoColumns#DATE_MODIFIED}.
      * @param orientation The orientation of the media store media. Ok to default to 0. See
-     *      {@link MediaStore.Images.ImageColumns#ORIENTATION}.
+     *      {@link android.provider.MediaStore.Images.ImageColumns#ORIENTATION}.
      * @return A new {@link DrawableRequestBuilder} to set options for the load and ultimately the target to load the
      *      uri into.
      */
@@ -221,8 +223,8 @@ public class RequestManager {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link File} to load the image represented by the
-     * given {@link File}. Defaults to {@link StreamFileLoader.Factory} and {@link StreamFileLoader} to load the
-     * given model.
+     * given {@link File}. Defaults to {@link com.bumptech.glide.load.model.stream.StreamFileLoader.Factory} and
+     * {@link StreamFileLoader} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *
@@ -236,8 +238,9 @@ public class RequestManager {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link Integer} to load the image represented by
-     * the given {@link Integer} resource id. Defaults to {@link StreamResourceLoader.Factory} and
-     * {@link StreamResourceLoader} to load the given model.
+     * the given {@link Integer} resource id. Defaults to
+     * {@link com.bumptech.glide.load.model.stream.StreamResourceLoader.Factory} and{@link StreamResourceLoader} to load
+     * the given model.
      *
      * @see #using(StreamModelLoader)
      *
@@ -265,8 +268,8 @@ public class RequestManager {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link URL} to load the image represented by the
-     * given {@link URL}. Defaults to {@link VolleyUrlLoader.Factory} and {@link VolleyUrlLoader} to load the given
-     * model.
+     * given {@link URL}. Defaults to {@link com.bumptech.glide.volley.VolleyUrlLoader.Factory} and
+     * {@link VolleyUrlLoader} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *

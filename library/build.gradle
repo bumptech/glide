@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.Delete
-
 buildscript {
     repositories {
         mavenCentral()
@@ -35,8 +33,9 @@ dependencies {
     androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
     androidTestCompile 'junit:junit:4.11'
     androidTestCompile 'org.mockito:mockito-all:1.9.5'
-    androidTestCompile 'org.robolectric:robolectric:2.3'
-    androidTestCompile group: 'org.robolectric', name: 'robolectric', version: '2.4-SNAPSHOT', changing: true
+    androidTestCompile (group: 'org.robolectric', name: 'robolectric', version: '2.4-SNAPSHOT', changing: true) {
+      exclude group: 'commons-logging:commons-logging:1.1.1'
+    }
 }
 
 ext {
@@ -77,8 +76,9 @@ def getJarName() {
     return "glide-${getVersionName()}.jar"
 }
 
-//Build a jar, from http://stackoverflow.com/a/19037807/1002054
-task clearJar(type: org.gradle.api.tasks.Delete) {
+// Build a jar, from http://stackoverflow.com/a/19037807/1002054.
+// TODO: this needs to be batched to include code from gif_decoder.
+task clearJar(type: Delete) {
     delete "build/libs/${getJarName()}"
 }
 

@@ -130,7 +130,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      *
      * <p>
      *     Note - The thumbnail image will be smaller than the size requested so the target (or {@link ImageView})
-     *     must be able to scale the thumbnail appropriately. See {@link ImageView.ScaleType}.
+     *     must be able to scale the thumbnail appropriately. See {@link android.widget.ImageView.ScaleType}.
      * </p>
      *
      * <p>
@@ -348,7 +348,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets an animator to run a {@link ViewPropertyAnimator} on a view that the target may be wrapping when a resource
      * load finishes. Will only be run if the load was loaded asynchronously (ie was not in the memory cache).
      *
-     * @param animator The {@link ViewPropertyAnimation.Animator} to run.
+     * @param animator The {@link com.bumptech.glide.request.ViewPropertyAnimation.Animator} to run.
      * @return This RequestBuilder.
      */
     // This is safe because the view property animation doesn't care about the resource type it receives.

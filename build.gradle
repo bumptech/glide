@@ -11,3 +11,56 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
 }
 
+evaluationDependsOnChildren();
+
+def getAndroidSdkDirectory() {
+  project("library").android.sdkDirectory
+}
+
+def getAndroidCompileSdkVersion() {
+  project("library").android.compileSdkVersion
+}
+
+def getAndroidChildren() {
+    subprojects.findAll { project -> project.plugins.hasPlugin('android-library') }
+}
+
+// For now this is just [release, debug]
+def getAndroidLibraryVariants() {
+    getAndroidChildren().collect { project ->
+        project.android.libraryVariants
+    }.sum().unique{ it.name }
+}
+
+// Generate javadocs containing batched documentation for all android library subprojects.
+getAndroidLibraryVariants().each { variant ->
+    def androidJar = "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
+    def destinationDirPath = "${getProjectDir()}/doc/${variant.baseName}"
+
+    task("clean${variant.name.capitalize()}Javadoc", type: Delete) {
+        delete destinationDirPath
+    }
+
+    task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+
+        // Get the variant from each subproject that matches our current variant's name.
+        def childEquivalentChildVariants = getAndroidChildren().collect { project ->
+            project.android.libraryVariants.findAll { type -> type.name == variant.name }
+        }.sum()
+
+        source = childEquivalentChildVariants.collect { it.javaCompile.source }
+        classpath = files(childEquivalentChildVariants.collect { files(it.javaCompile.classpath.files, androidJar) })
+
+        options {
+            links("http://docs.oracle.com/javase/7/docs/api/")
+            linksOffline("http://d.android.com/reference", "${getAndroidSdkDirectory()}/docs/reference")
+        }
+
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+
+        destinationDir = new File(destinationDirPath)
+
+        dependsOn("clean${variant.name.capitalize()}Javadoc")
+    }
+}

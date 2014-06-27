@@ -14,15 +14,16 @@ import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
  */
 public enum DecodeFormat {
     /**
-     * All bitmaps returned by the {@link BitmapDecoder} should return {@link Bitmap.Config#ARGB_8888} for
-     * {@link Bitmap#getConfig()}.
+     * All bitmaps returned by the {@link BitmapDecoder} should return {@link android.graphics.Bitmap.Config#ARGB_8888}
+     * for {@link Bitmap#getConfig()}.
      */
     ALWAYS_ARGB_8888,
 
     /**
      * Bitmaps decoded from image formats that support and/or use alpha (some types of PNGs, GIFs etc) should
-     * return {@link Bitmap.Config#ARGB_8888} for {@link Bitmap#getConfig()}. Bitmaps decoded from formats that don't
-     * support or use alpha should return {@link Bitmap.Config#RGB_565} for {@link Bitmap#getConfig()}.
+     * return {@link android.graphics.Bitmap.Config#ARGB_8888} for {@link Bitmap#getConfig()}. Bitmaps decoded from
+     * formats that don't support or use alpha should return {@link android.graphics.Bitmap.Config#RGB_565} for
+     * {@link Bitmap#getConfig()}.
      *
      */
     PREFER_RGB_565,

@@ -244,7 +244,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      * Determine the amount of downsampling to use for a load given the dimensions of the image to be downsampled and
      * the dimensions of the view/target the image will be displayed in.
      *
-     * @see BitmapFactory.Options#inSampleSize
+     * @see android.graphics.BitmapFactory.Options#inSampleSize
      *
      * @param inWidth The width of the image to be downsampled
      * @param inHeight The height of the image to be downsampled
