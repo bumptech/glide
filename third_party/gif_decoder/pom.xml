@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.bumptech.glide</groupId>
+    <groupId>com.github.bumptech.glide</groupId>
     <artifactId>glide-third-party</artifactId>
     <version>3.3.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>

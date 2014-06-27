@@ -8,7 +8,7 @@
     <version>7</version>
   </parent>
 
-  <groupId>com.bumptech.glide</groupId>
+  <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide-parent</artifactId>
   <version>3.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
