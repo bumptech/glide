@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = GlideShadowLooper.class)
 public class RequestManagerRetrieverTest {
     private static final String PARENT_TAG = "parent";
     private RetrieverHarness[] harnesses;
