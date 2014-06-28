@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import com.android.volley.RequestQueue;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -29,6 +28,7 @@ import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorResourceLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorStringLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorUriLoader;
+import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.StreamFileLoader;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.load.model.stream.StreamResourceLoader;
@@ -58,7 +58,6 @@ import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
-import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
 import java.io.InputStream;
@@ -81,7 +80,6 @@ public class Glide {
     private static Glide GLIDE;
 
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
-    private final RequestQueue requestQueue;
     private final Engine engine;
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
@@ -170,10 +168,8 @@ public class Glide {
         GLIDE = null;
     }
 
-    Glide(Engine engine, RequestQueue requestQueue, MemoryCache memoryCache, BitmapPool bitmapPool,
-            Context context) {
+    Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context) {
         this.engine = engine;
-        this.requestQueue = requestQueue;
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
 
@@ -201,7 +197,7 @@ public class Glide {
         register(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
         register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
         register(URL.class, InputStream.class, new StreamUrlLoader.Factory());
-        register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(requestQueue));
+        register(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
 
         transcoderFactory.register(Bitmap.class, BitmapDrawable.class,
                 new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
@@ -255,13 +251,6 @@ public class Glide {
 
     private GenericLoaderFactory getLoaderFactory() {
         return loaderFactory;
-    }
-
-    /**
-     * Returns the {@link RequestQueue} Glide is using to fetch images over http/https.
-     */
-    public RequestQueue getRequestQueue() {
-        return requestQueue;
     }
 
     /**

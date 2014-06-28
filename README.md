@@ -1,12 +1,17 @@
 Glide
 =====
-Glide is fast and efficient image loading library for Android that wraps image downloading, resizing, memory and disk caching, and bitmap recycling into one simple and easy to use interface. By default, Glide includes an implementation for fetching images over http based on Google's Volley project for fast, parallelized network operations on Android.
+Glide is fast and efficient image loading library for Android that wraps image downloading, resizing, memory and disk
+caching, and bitmap recycling into one simple and easy to use interface. Glide includes a flexible api allowing it to
+plug in to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes a
+utility library to plug in to Google's Volley project instead.
 
-Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is also effective for almost any case where you need to fetch, resize, and display a remote image.
+Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
+also effective for almost any case where you need to fetch, resize, and display a remote image.
 
 Download
 --------
-You can download a jar from GitHub's [release page](https://github.com/bumptech/glide/releases) or to use the 3.0 alpha branch, use Gradle:
+You can download a jar from GitHub's [release page](https://github.com/bumptech/glide/releases) or to use the 3.0 alpha
+branch, use Gradle:
 
 ```groovy
 repositories {
@@ -38,9 +43,38 @@ In your module:
 ```xml
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
-  <artifactId>glide</artifactId>
+  <artifactId>library</artifactId>
   <version>3.3.0-SNAPSHOT</version>
   <type>aar</type>
+</dependency>
+```
+
+Volley
+-------
+Volley is now an optional dependency that can be included via a utility library. More utility libraries for other
+projects will hopefully be coming soon. To use the utility library with Gradle, add:
+
+```groovy
+dependencies {
+    compile group: 'com.github.bumptech.glide', name:'volley', version:'3.3.0-SNAPSHOT', changing:true
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+}
+```
+
+Or with maven:
+
+```xml
+<dependency>
+    <groupId>com.github.bumptech.glide</groupId>
+    <artifactId>volley</artifactId>
+    <version>3.3.0-SNAPSHOT</version>
+    <type>aar</type>
+</dependency>
+<dependency>
+    <groupId>com.mcxiaoke.volley</groupId>
+    <artifactId>library</artifactId>
+    <version>1.0.5</version>
+    <type>aar</type>
 </dependency>
 ```
 

@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.11.2'
+    }
+}
+
+apply plugin: 'android-library'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+    compile project(':library')
+
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion = '19.1.0'
+    sourceSets {
+        main {
+            java.srcDirs         = ['src/main/java']
+            manifest.srcFile 'AndroidManifest.xml'
+        }
+    }
+}
+
+apply from: "https://raw.githubusercontent.com/mcxiaoke/gradle-mvn-push/master/gradle-mvn-push.gradle"

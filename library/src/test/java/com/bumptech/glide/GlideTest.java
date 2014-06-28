@@ -13,10 +13,6 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.android.volley.Network;
-import com.android.volley.NetworkResponse;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.NoCache;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -39,8 +35,6 @@ import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.GlideShadowLooper;
-import com.bumptech.glide.volley.VolleyRequestFuture;
-import com.bumptech.glide.volley.VolleyUrlLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,12 +56,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -118,45 +110,21 @@ public class GlideTest {
             }
         });
 
-        // Make sure Volley does not actually perform any network requests.
-        Network network = mock(Network.class);
-        when(network.performRequest(any(com.android.volley.Request.class)))
-                .thenAnswer(new Answer<Object>() {
-                    @Override
-                    public Object answer(InvocationOnMock invocation) throws Throwable {
-                        return new NetworkResponse(new byte[0]);
-                    }
-                });
-
-        RequestQueue requestQueue = new RequestQueue(new NoCache(), network);
-        requestQueue.start();
         Glide.setup(new GlideBuilder(Robolectric.application)
                 .setMemoryCache(mock(MemoryCache.class))
                 .setDiskCache(mock(DiskCache.class))
                 .setResizeService(service)
-                .setDiskCacheService(service)
-                .setRequestQueue(requestQueue));
+                .setDiskCacheService(service));
+        DataFetcher<InputStream> mockStreamFetcher = mock(DataFetcher.class);
+        when(mockStreamFetcher.getId()).thenReturn("fakeId");
+        when(mockStreamFetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
+        ModelLoader<GlideUrl, InputStream> mockUrlLoader = mock(ModelLoader.class);
+        when(mockUrlLoader.getResourceFetcher(any(GlideUrl.class), anyInt(), anyInt())).thenReturn(mockStreamFetcher);
+        ModelLoaderFactory<GlideUrl, InputStream> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
+        when(mockUrlLoaderFactory.build(any(Context.class), any(GenericLoaderFactory.class)))
+                .thenReturn(mockUrlLoader);
 
-        // Sleep to avoid blocking the main thread while waiting for Volley's background thread to complete
-        // and for the result to be posted back to the main thread.
-        VolleyUrlLoader.FutureFactory futureFactory = mock(VolleyUrlLoader.FutureFactory.class);
-        VolleyRequestFuture<InputStream> future = new VolleyRequestFuture<InputStream>() {
-            @Override
-            public InputStream get() throws InterruptedException, ExecutionException {
-                for (int i = 0; i < 10 && !isDone(); i++) {
-                    Thread.sleep(10);
-                    // Make sure the result callback posted on the main thread actually runs.
-                    Robolectric.runUiThreadTasks();
-                }
-                if (!isDone()) {
-                    fail("Failed to get response from Volley in time");
-                }
-                return super.get();
-            }
-        };
-        when(futureFactory.build()).thenReturn(future);
-        Glide.get(getContext()).register(GlideUrl.class, InputStream.class,
-                new VolleyUrlLoader.Factory(Glide.get(getContext()).getRequestQueue(), futureFactory));
+        Glide.get(getContext()).register(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
     }
 
     @After

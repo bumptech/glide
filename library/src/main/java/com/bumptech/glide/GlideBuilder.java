@@ -2,7 +2,6 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.os.Build;
-import com.android.volley.RequestQueue;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
@@ -14,13 +13,11 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor;
-import com.bumptech.glide.volley.RequestQueueWrapper;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 
 public class GlideBuilder {
-    private RequestQueue requestQueue;
     private Context context;
     private Engine engine;
     private BitmapPool bitmapPool;
@@ -31,11 +28,6 @@ public class GlideBuilder {
 
     public GlideBuilder(Context context) {
         this.context = context.getApplicationContext();
-    }
-
-    public GlideBuilder setRequestQueue(RequestQueue requestQueue) {
-        this.requestQueue = requestQueue;
-        return this;
     }
 
     public GlideBuilder setBitmapPool(BitmapPool bitmapPool) {
@@ -77,10 +69,6 @@ public class GlideBuilder {
             diskCacheService = new FifoPriorityThreadPoolExecutor(1);
         }
 
-        if (requestQueue == null) {
-            requestQueue = RequestQueueWrapper.getRequestQueue(context);
-        }
-
         MemorySizeCalculator calculator = new MemorySizeCalculator(context);
         if (bitmapPool == null) {
             if (Build.VERSION.SDK_INT >= 11) {
@@ -108,6 +96,6 @@ public class GlideBuilder {
             engine = new Engine(memoryCache, diskCache, resizeService, diskCacheService);
         }
 
-        return new Glide(engine, requestQueue, memoryCache, bitmapPool, context);
+        return new Glide(engine, memoryCache, bitmapPool, context);
     }
 }

@@ -12,10 +12,15 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.NoCache;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import static android.content.pm.PackageManager.NameNotFoundException;
 
+/**
+ * A clone of the {@link Volley#newRequestQueue(Context)} allowing the user to set a disk cache and defaulting to
+ * no disk cache.
+ */
 public class RequestQueueWrapper {
 
     public static RequestQueue getRequestQueue(Context context) {

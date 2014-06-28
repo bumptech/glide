@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.flickr.api;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 import com.android.volley.DefaultRetryPolicy;
@@ -8,6 +9,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,9 +87,9 @@ public class Api {
         public void onSearchFailed(String searchString, Exception e);
     }
 
-    public static Api get(RequestQueue requestQueue) {
+    public static Api get(Context context) {
         if (API == null) {
-            API = new Api(requestQueue);
+            API = new Api(context);
         }
         return API;
     }
@@ -96,8 +98,8 @@ public class Api {
     private final Set<SearchListener> searchListeners = new HashSet<SearchListener>();
     private SearchResult lastSearchResult;
 
-    protected Api(RequestQueue requestQueue) {
-        this.requestQueue = requestQueue;
+    protected Api(Context context) {
+        this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
     }
 
     public void registerSearchListener(SearchListener searchListener) {

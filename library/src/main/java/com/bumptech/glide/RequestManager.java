@@ -8,9 +8,11 @@ import android.os.ParcelFileDescriptor;
 import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.data.HttpUrlFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
+import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreStreamLoader;
 import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
 import com.bumptech.glide.load.model.stream.StreamFileLoader;
@@ -21,7 +23,6 @@ import com.bumptech.glide.load.model.stream.StreamUriLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.volley.VolleyUrlLoader;
 
 import java.io.File;
 import java.io.InputStream;
@@ -268,8 +269,7 @@ public class RequestManager {
 
     /**
      * Use the {@link ModelLoaderFactory} currently registered for {@link URL} to load the image represented by the
-     * given {@link URL}. Defaults to {@link com.bumptech.glide.volley.VolleyUrlLoader.Factory} and
-     * {@link VolleyUrlLoader} to load the given model.
+     * given {@link URL}. Defaults to {@link HttpUrlGlideUrlLoader} and {@link HttpUrlFetcher} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *

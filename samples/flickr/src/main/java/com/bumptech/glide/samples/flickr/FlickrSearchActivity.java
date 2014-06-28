@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
+import android.annotation.TargetApi;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
@@ -70,6 +71,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
 
         setContentView(R.layout.flickr_search_activity);
@@ -127,7 +129,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
         pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager()));
 
-        Api.get(Glide.get(this).getRequestQueue()).registerSearchListener(searchListener);
+        Api.get(this).registerSearchListener(searchListener);
         if (savedInstanceState != null) {
             String savedSearchString = savedInstanceState.getString(STATE_SEARCH_STRING);
             if (!TextUtils.isEmpty(savedSearchString)) {
@@ -147,9 +149,10 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Api.get(Glide.get(this).getRequestQueue()).unregisterSearchListener(searchListener);
+        Api.get(this).unregisterSearchListener(searchListener);
     }
 
+    @TargetApi(14)
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
@@ -179,7 +182,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         searchLoading.setVisibility(View.VISIBLE);
         searchTerm.setText(getString(R.string.searching_for, currentSearchString));
 
-        Api.get(Glide.get(this).getRequestQueue()).search(currentSearchString);
+        Api.get(this).search(currentSearchString);
     }
 
     private static class TabListener implements ActionBar.TabListener {

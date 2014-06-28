@@ -11,7 +11,9 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
 }
 
-evaluationDependsOnChildren();
+evaluationDependsOn(":integration:volley")
+evaluationDependsOn(":third_party:gif_decoder")
+evaluationDependsOn(":library")
 
 def getAndroidSdkDirectory() {
   project("library").android.sdkDirectory
@@ -44,7 +46,7 @@ getAndroidLibraryVariants().each { variant ->
     task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
 
         // Get the variant from each subproject that matches our current variant's name.
-        def childEquivalentChildVariants = getAndroidChildren().collect { project ->
+        def childEquivalentChildVariants = getAndroidChildren().collect { project -> 
             project.android.libraryVariants.findAll { type -> type.name == variant.name }
         }.sum()
 

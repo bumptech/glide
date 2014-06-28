@@ -20,6 +20,8 @@ samples/flickr/out
 samples/flickr/bin
 samples/flickr/local.properties
 samples/flickr/target
+integration/volley/target/**
+**/local.properties
 *.keystore
 **/.idea/*
 .settings

@@ -9,7 +9,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>glide</artifactId>
+  <artifactId>library</artifactId>
   <packaging>aar</packaging>
   <name>Glide Library</name>
 
@@ -56,9 +56,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.bumptech.glide</groupId>
+      <groupId>com.github.bumptech.glide</groupId>
       <artifactId>glide-gif-decoder</artifactId>
       <version>3.3.0-SNAPSHOT</version>
+      <type>aar</type>
     </dependency>
   </dependencies>
 </project>

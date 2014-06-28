@@ -73,7 +73,7 @@ android {
 }
 
 def getJarName() {
-    return "glide-${getVersionName()}.jar"
+    "glide-${getVersionName()}.jar"
 }
 
 // Build a jar, from http://stackoverflow.com/a/19037807/1002054.
