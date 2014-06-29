@@ -91,7 +91,7 @@ public class RequestTrackerTest {
 
         tracker.resumeRequests();
 
-        verify(request).run();
+        verify(request).begin();
     }
 
     @Test
@@ -102,7 +102,7 @@ public class RequestTrackerTest {
 
         tracker.resumeRequests();
 
-        verify(request, never()).run();
+        verify(request, never()).begin();
     }
 
     @Test
@@ -113,7 +113,7 @@ public class RequestTrackerTest {
 
         tracker.resumeRequests();
 
-        verify(request).run();
+        verify(request).begin();
     }
 
     @Test
@@ -124,7 +124,7 @@ public class RequestTrackerTest {
 
         tracker.resumeRequests();
 
-        verify(request, never()).run();
+        verify(request, never()).begin();
     }
 
     @Test
@@ -135,7 +135,7 @@ public class RequestTrackerTest {
 
         tracker.restartRequests();
 
-        verify(request).run();
+        verify(request).begin();
     }
 
     @Test
@@ -147,6 +147,6 @@ public class RequestTrackerTest {
         tracker.restartRequests();
 
         verify(request).clear();
-        verify(request).run();
+        verify(request).begin();
     }
 }

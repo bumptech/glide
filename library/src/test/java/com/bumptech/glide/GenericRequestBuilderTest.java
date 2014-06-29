@@ -8,12 +8,16 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.GlideAnimationFactory;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.tests.BackgroundUtil;
+
+import org.apache.tools.ant.taskdefs.Tar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -125,8 +129,34 @@ public class GenericRequestBuilderTest {
         getNullModelRequest().into((ImageView) null);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
+        final ImageView imageView = new ImageView(Robolectric.application);
+        testInBackground(new BackgroundUtil.BackgroundTest() {
+            @Override
+            public void runTest() throws Exception {
+                getNullModelRequest().into(imageView);
+
+            }
+        });
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testThrowsIfIntoTargetCalledOnBackgroundThread() throws InterruptedException {
+        final Target target = mock(Target.class);
+        testInBackground(new BackgroundUtil.BackgroundTest() {
+            @Override
+            public void runTest() throws Exception {
+                getNullModelRequest().into(target);
+            }
+        });
+    }
+
     private GenericRequestBuilder getNullModelRequest() {
-        return new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class),
-                requestTracker);
+        Glide glide = mock(Glide.class);
+        when(glide.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(
+                mock(Target.class));
+        return new GenericRequestBuilder(Robolectric.application, null, null, Object.class,
+                glide, requestTracker);
     }
 }

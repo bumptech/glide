@@ -23,6 +23,7 @@ import com.bumptech.glide.load.model.stream.StreamUriLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -73,6 +74,7 @@ public class RequestManager {
      * Cancels any in progress loads, but does not clear resources of completed loads.
      */
     public void pauseRequests() {
+        Util.assertMainThread();
         requestTracker.pauseRequests();
     }
 
@@ -80,6 +82,7 @@ public class RequestManager {
      * Restarts any loads that have not yet completed.
      */
     public void resumeRequests() {
+        Util.assertMainThread();
         requestTracker.resumeRequests();
     }
 
@@ -90,8 +93,7 @@ public class RequestManager {
     public void onStart() {
         // onStart might not be called because this object may be created after the fragment/activity's onStart method.
         connectivityMonitor.register();
-
-        requestTracker.resumeRequests();
+        resumeRequests();
     }
 
     /**
@@ -100,7 +102,7 @@ public class RequestManager {
      */
     public void onStop() {
         connectivityMonitor.unregister();
-        requestTracker.pauseRequests();
+        pauseRequests();
     }
 
     /**

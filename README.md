@@ -78,6 +78,16 @@ Or with maven:
 </dependency>
 ```
 
+Then in your Activity or Application, register the Volley based model loader:
+```java
+public void onCreate() {
+  Glide.get(this).register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(yourRequestQueue));
+  ...
+}
+```
+
+After the call to register any requests using http or https will go through Volley.
+
 How do I use Glide?
 -------------------
 Checkout the GitHub wiki for pages on a variety of topics and links to javadocs.

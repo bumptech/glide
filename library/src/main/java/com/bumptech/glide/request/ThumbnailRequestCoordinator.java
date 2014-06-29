@@ -29,12 +29,12 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     }
 
     @Override
-    public void run() {
+    public void begin() {
         if (!thumb.isRunning()) {
-            thumb.run();
+            thumb.begin();
         }
         if (!full.isRunning()) {
-            full.run();
+            full.begin();
         }
     }
 

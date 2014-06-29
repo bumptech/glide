@@ -31,6 +31,7 @@ import com.bumptech.glide.request.ViewAnimation;
 import com.bumptech.glide.request.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.Util;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -521,6 +522,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return The given target.
      */
     public <Y extends Target<TranscodeType>> Y into(Y target) {
+        Util.assertMainThread();
         if (target == null) {
             throw new IllegalArgumentException("You must pass in a non null Target");
         }
@@ -536,7 +538,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         Request request = buildRequest(target);
         target.setRequest(request);
         requestTracker.addRequest(request);
-        request.run();
+        request.begin();
 
         return target;
     }
@@ -551,6 +553,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
      */
     public Target<TranscodeType> into(ImageView view) {
+        Util.assertMainThread();
         if (view == null) {
             throw new IllegalArgumentException("You must pass in a non null View");
         }

@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -71,7 +73,6 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
 
         setContentView(R.layout.flickr_search_activity);
@@ -103,7 +104,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             }
         });
 
-        ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
+        final ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
         pager.setPageMargin(50);
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -240,6 +241,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
     private class FlickrPagerAdapter extends FragmentPagerAdapter {
 
+        private int mLastPosition = -1;
+        private Fragment mLastFragment;
+
         public FlickrPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -247,6 +251,22 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         @Override
         public Fragment getItem(int position) {
             return pageToFragment(position);
+        }
+
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+            super.setPrimaryItem(container, position, object);
+            if (position != mLastPosition) {
+                if (mLastPosition >= 0) {
+                    Glide.with(mLastFragment).pauseRequests();
+                }
+                Fragment current = (Fragment) object;
+                mLastPosition = position;
+                mLastFragment = current;
+                if (current.isAdded()) {
+                    Glide.with(current).resumeRequests();
+                }
+            }
         }
 
         @Override

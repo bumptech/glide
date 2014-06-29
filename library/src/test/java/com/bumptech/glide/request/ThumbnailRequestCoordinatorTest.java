@@ -44,33 +44,33 @@ public class ThumbnailRequestCoordinatorTest {
     @Test
     public void testStartsFullOnRunIfNotRunning() {
         when(full.isRunning()).thenReturn(false);
-        coordinator.run();
+        coordinator.begin();
 
-        verify(full).run();
+        verify(full).begin();
     }
 
     @Test
     public void testStartsThumbOnRunIfNotRunning() {
         when(thumb.isRunning()).thenReturn(false);
-        coordinator.run();
+        coordinator.begin();
 
-        verify(thumb).run();
+        verify(thumb).begin();
     }
 
     @Test
     public void testDoesNotStartFullOnRunIfRunning() {
         when(full.isRunning()).thenReturn(true);
-        coordinator.run();
+        coordinator.begin();
 
-        verify(full, never()).run();
+        verify(full, never()).begin();
     }
 
     @Test
     public void testDoesNotStartThumbOnRunIfRunning() {
         when(thumb.isRunning()).thenReturn(true);
-        coordinator.run();
+        coordinator.begin();
 
-        verify(thumb,never()).run();
+        verify(thumb,never()).begin();
     }
 
     @Test

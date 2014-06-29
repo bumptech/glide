@@ -12,7 +12,11 @@ import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+
+import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +30,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -247,5 +252,25 @@ public class RequestManagerTest {
         connectivityListener.onConnectivityChanged(false);
 
         verify(requestTracker, never()).restartRequests();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testThrowsIfResumeCalledOnBackgroundThread() throws InterruptedException {
+        testInBackground(new BackgroundUtil.BackgroundTest() {
+            @Override
+            public void runTest() throws Exception {
+                manager.resumeRequests();
+            }
+        });
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testThrowsIfPauseCalledOnBackgroundThread() throws InterruptedException {
+        testInBackground(new BackgroundUtil.BackgroundTest() {
+            @Override
+            public void runTest() throws Exception {
+                manager.pauseRequests();
+            }
+        });
     }
 }

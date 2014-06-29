@@ -28,7 +28,8 @@ import java.util.Queue;
  * @param <T> The type of the data that the resource will be loaded from.
  * @param <Z> The type of the resource that will be loaded.
  */
-public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback, ResourceCallback {
+public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback,
+        ResourceCallback {
     private static final String TAG = "GenericRequest";
 
     private int placeholderResourceId;
@@ -207,8 +208,9 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     }
 
     @Override
-    public void run() {
+    public void begin() {
         startTime = LogTime.getLogTime();
+        isCancelled = false;
         if (model == null) {
             onException(null);
             return;

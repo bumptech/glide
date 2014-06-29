@@ -40,7 +40,7 @@ public class RequestTracker {
     public void resumeRequests() {
         for (Request request : requests) {
             if (!request.isComplete() && !request.isRunning()) {
-                request.run();
+                request.begin();
             }
         }
     }
@@ -60,10 +60,10 @@ public class RequestTracker {
     public void restartRequests() {
         for (Request request : requests) {
             if (request.isFailed()) {
-                request.run();
+                request.begin();
             } else if (!request.isComplete()) {
                 request.clear();
-                request.run();
+                request.begin();
             }
         }
     }

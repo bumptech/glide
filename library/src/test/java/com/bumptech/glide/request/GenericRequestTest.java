@@ -39,6 +39,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,6 +72,7 @@ public class GenericRequestTest {
         int overrideWidth = -1;
         int overrideHeight = -1;
         boolean cacheSource = false;
+        Object result = new Object();
 
         public RequestHarness() {
             ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
@@ -83,7 +85,7 @@ public class GenericRequestTest {
             when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
             when(requestCoordinator.canSetPlaceholder(any(Request.class))).thenReturn(true);
 
-            when(resource.get()).thenReturn(new Object());
+            when(resource.get()).thenReturn(result);
         }
 
         public GenericRequest<Object, Object, Object, Object> getRequest() {
@@ -273,7 +275,7 @@ public class GenericRequestTest {
         harness.placeholderResourceId = expectedId;
         harness.target = target;
         GenericRequest request = harness.getRequest();
-        request.run();
+        request.begin();
 
         assertEquals(expected, target.currentPlaceholder);
     }
@@ -287,7 +289,7 @@ public class GenericRequestTest {
         harness.placeholderDrawable = expected;
         harness.target = target;
         GenericRequest request = harness.getRequest();
-        request.run();
+        request.begin();
 
         assertEquals(expected, target.currentPlaceholder);
     }
@@ -336,7 +338,7 @@ public class GenericRequestTest {
         harness.model = null;
         GenericRequest request = harness.getRequest();
 
-        request.run();
+        request.begin();
 
         assertEquals(placeholder, target.currentPlaceholder);
     }
@@ -354,7 +356,7 @@ public class GenericRequestTest {
         harness.model = null;
         GenericRequest request = harness.getRequest();
 
-        request.run();
+        request.begin();
 
         assertEquals(errorPlaceholder, target.currentPlaceholder);
     }
@@ -367,14 +369,14 @@ public class GenericRequestTest {
     @Test
     public void testIsRunningAfterRunCalled() {
         Request request = harness.getRequest();
-        request.run();
+        request.begin();
         assertTrue(request.isRunning());
     }
 
     @Test
     public void testIsNotRunningAfterComplete() {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.run();
+        request.begin();
         request.onResourceReady(harness.resource);
 
         assertFalse(request.isRunning());
@@ -383,7 +385,7 @@ public class GenericRequestTest {
     @Test
     public void testIsNotRunningAfterFailing() {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.run();
+        request.begin();
         request.onException(new RuntimeException("Test"));
 
         assertFalse(request.isRunning());
@@ -392,7 +394,7 @@ public class GenericRequestTest {
     @Test
     public void testIsNotRunningAfterClear() {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.run();
+        request.begin();
         request.clear();
 
         assertFalse(request.isRunning());
@@ -556,7 +558,7 @@ public class GenericRequestTest {
         harness.overrideWidth = -1;
         harness.overrideHeight = 100;
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.run();
+        request.begin();
 
         verify(harness.target).getSize(any(Target.SizeReadyCallback.class));
     }
@@ -566,7 +568,7 @@ public class GenericRequestTest {
         harness.overrideHeight = -1;
         harness.overrideWidth = 100;
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.run();
+        request.begin();
 
         verify(harness.target).getSize(any(Target.SizeReadyCallback.class));
     }
@@ -576,7 +578,7 @@ public class GenericRequestTest {
         harness.overrideWidth = 100;
         harness.overrideHeight = 100;
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.run();
+        request.begin();
 
         verify(harness.target, never()).getSize(any(Target.SizeReadyCallback.class));
     }
@@ -586,7 +588,7 @@ public class GenericRequestTest {
         harness.overrideWidth = 1;
         harness.overrideHeight = 2;
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.run();
+        request.begin();
 
         verify(harness.engine).load(eq(harness.overrideWidth), eq(harness.overrideHeight),
                 any(ResourceDecoder.class), any(DataFetcher.class), anyBoolean(), any(Encoder.class),
@@ -602,6 +604,62 @@ public class GenericRequestTest {
         request.onException(new IOException("Test"));
 
         verify(harness.target, never()).setPlaceholder(any(Drawable.class));
+    }
+
+    @Test
+    public void testCanReRunCancelledRequests() {
+        doAnswer(new CallSizeReady(100, 100)).when(harness.target)
+                .getSize(any(Target.SizeReadyCallback.class));
+        when(harness.engine.load(anyInt(), anyInt(), any(ResourceDecoder.class),
+                any(DataFetcher.class), anyBoolean(), any(Encoder.class),
+                any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
+                any(ResourceCallback.class)))
+                .thenAnswer(new CallResourceCallback(harness.resource));
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+
+        request.begin();
+        request.cancel();
+        request.begin();
+
+        verify(harness.target, times(2)).onResourceReady(eq(harness.result),
+                any(GlideAnimation.class));
+    }
+
+    private static class CallResourceCallback implements Answer {
+
+        private Resource resource;
+
+        public CallResourceCallback(Resource resource) {
+            this.resource = resource;
+        }
+
+        @Override
+        public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            ResourceCallback cb = (ResourceCallback)
+                    invocationOnMock.getArguments()[invocationOnMock.getArguments().length - 1];
+            cb.onResourceReady(resource);
+            return null;
+        }
+    }
+
+    private static class CallSizeReady implements Answer {
+
+        private int width;
+        private int height;
+
+        public CallSizeReady(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            Target.SizeReadyCallback cb =
+                    (Target.SizeReadyCallback) invocationOnMock.getArguments()[0];
+            cb.onSizeReady(width, height);
+            return null;
+        }
     }
 
     private Context mockContextToReturn(int resourceId, Drawable drawable) {

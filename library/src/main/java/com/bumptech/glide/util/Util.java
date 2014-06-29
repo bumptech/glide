@@ -3,6 +3,7 @@ package com.bumptech.glide.util;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.Looper;
 
 public class Util {
     private static final char[] hexArray = "0123456789abcdef".toCharArray();
@@ -33,6 +34,12 @@ public class Util {
             return bitmap.getAllocationByteCount();
         } else {
             return bitmap.getHeight() * bitmap.getRowBytes();
+        }
+    }
+
+    public static void assertMainThread() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalArgumentException("You must call this method on the main thread");
         }
     }
 

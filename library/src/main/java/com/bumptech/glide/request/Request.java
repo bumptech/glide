@@ -10,7 +10,7 @@ public interface Request {
     /**
      * Starts an asynchronous load.
      */
-    public void run();
+    public void begin();
 
     /**
      * Prevents any bitmaps being loaded from previous requests, releases any resources held by this request and
