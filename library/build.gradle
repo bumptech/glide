@@ -1,27 +1,5 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        // TODO: remove this when robolectric 2.4 is released.
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
-    }
-    dependencies {
-        classpath 'org.robolectric:robolectric-gradle-plugin:0.11.+'
-        classpath 'com.android.tools.build:gradle:0.11.2'
-    }
-}
-
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
-
-repositories {
-    mavenCentral()
-    // TODO: remove this when robolectric 2.4 is released.
-    maven {
-        url "https://oss.sonatype.org/content/repositories/snapshots"
-    }
-}
 
 dependencies {
     compile project(':third_party:gif_decoder')
@@ -33,9 +11,7 @@ dependencies {
     androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
     androidTestCompile 'junit:junit:4.11'
     androidTestCompile 'org.mockito:mockito-all:1.9.5'
-    androidTestCompile (group: 'org.robolectric', name: 'robolectric', version: '2.4-SNAPSHOT', changing: true) {
-      exclude group: 'commons-logging:commons-logging:1.1.1'
-    }
+    androidTestCompile 'org.robolectric:robolectric:2.4-SNAPSHOT'
 }
 
 ext {
