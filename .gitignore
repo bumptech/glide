@@ -1,6 +1,8 @@
 .gradle
 build
+*.iws
 doc/**
+bin/**
 library/bin/*
 library/gen/*
 library/local.properties

@@ -14,17 +14,6 @@ dependencies {
     androidTestCompile 'org.robolectric:robolectric:2.4-SNAPSHOT'
 }
 
-ext {
-    versionMajor = 3
-    versionMinor = 2
-    versionPatch = 0
-    versionBuild = 5
-}
-
-def getVersionName() {
-    return "${versionMajor}.${versionMinor}.${versionPatch}a"
-}
-
 android {
     compileSdkVersion 19
     buildToolsVersion = '19.1.0'
@@ -32,8 +21,8 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 19
-        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
-        versionName getVersionName()
+        versionCode = VERSION_CODE
+        versionName = VERSION_NAME
     }
 
     sourceSets {
@@ -47,24 +36,5 @@ android {
         }
     }
 }
-
-def getJarName() {
-    "glide-${getVersionName()}.jar"
-}
-
-// Build a jar, from http://stackoverflow.com/a/19037807/1002054.
-// TODO: this needs to be batched to include code from gif_decoder.
-task clearJar(type: Delete) {
-    delete "build/libs/${getJarName()}"
-}
-
-task makeJar(type: Copy) {
-    from('build/intermediates/bundles/release/')
-    into('build/libs/')
-    include('classes.jar')
-    rename ('classes.jar', getJarName())
-}
-
-makeJar.dependsOn(clearJar, build)
 
 apply from: "https://raw.githubusercontent.com/mcxiaoke/gradle-mvn-push/master/gradle-mvn-push.gradle"

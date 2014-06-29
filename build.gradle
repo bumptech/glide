@@ -23,6 +23,8 @@ allprojects {
     }
 }
 
+apply plugin: 'java'
+
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
 }
@@ -82,3 +84,51 @@ getAndroidLibraryVariants().each { variant ->
         dependsOn("clean${variant.name.capitalize()}Javadoc")
     }
 }
+
+task addChildJarTasks {
+    configure(getAndroidChildren()) { project ->
+        def copyTask = task("makeJar", type: Copy) {
+            from("${project.buildDir}/intermediates/bundles/release/")
+            into("${project.buildDir}/lib")
+            include('classes.jar')
+            rename('classes.jar', "${project.name}.jar")
+        }
+        copyTask.dependsOn project.build
+    }
+}
+
+task childJars(type: Copy) {
+    destinationDir = file("${buildDir}/lib")
+
+    into("${buildDir}/lib") {
+        getAndroidChildren().each { p ->
+            from(p.tasks.getByName("makeJar")*.outputs)
+        }
+    }
+}
+
+task cleanChildJars(type: Delete) {
+    delete "${buildDir}/lib"
+}
+
+childJars.dependsOn(addChildJarTasks, cleanChildJars)
+
+def binDirName = "bin"
+
+task releaseJar(type: Jar) {
+    from(file("${buildDir}/lib").listFiles().collect { zipTree(it)})
+    into("${buildDir}/lib")
+    destinationDir = file(binDirName)
+    baseName = "glide-${VERSION_NAME}"
+}
+
+task cleanJar(type: Delete) {
+    delete binDirName
+}
+
+releaseJar.dependsOn(cleanJar, childJars)
+
+artifacts {
+    archives releaseJar
+}
+
