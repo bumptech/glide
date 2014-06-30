@@ -15,8 +15,6 @@ import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -256,7 +254,7 @@ public class RequestManagerTest {
 
     @Test(expected = RuntimeException.class)
     public void testThrowsIfResumeCalledOnBackgroundThread() throws InterruptedException {
-        testInBackground(new BackgroundUtil.BackgroundTest() {
+        testInBackground(new BackgroundUtil.BackgroundTester() {
             @Override
             public void runTest() throws Exception {
                 manager.resumeRequests();
@@ -266,7 +264,7 @@ public class RequestManagerTest {
 
     @Test(expected = RuntimeException.class)
     public void testThrowsIfPauseCalledOnBackgroundThread() throws InterruptedException {
-        testInBackground(new BackgroundUtil.BackgroundTest() {
+        testInBackground(new BackgroundUtil.BackgroundTester() {
             @Override
             public void runTest() throws Exception {
                 manager.pauseRequests();

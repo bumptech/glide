@@ -7,7 +7,9 @@ import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.util.Util;
 
 public class RequestManagerRetriever {
     static final String TAG = "com.bumptech.glide.manager";
@@ -16,45 +18,60 @@ public class RequestManagerRetriever {
     public static RequestManager get(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("You cannot start a load on a null Context");
-        } else if (context instanceof FragmentActivity) {
-            return get((FragmentActivity) context);
-        } else if (context instanceof Activity) {
-            return get((Activity) context);
-        } else {
-            if (applicationManager == null) {
-                applicationManager = new RequestManager(context.getApplicationContext());
+        } else if (Util.isOnMainThread()) {
+            if (context instanceof FragmentActivity) {
+                return get((FragmentActivity) context);
+            } else if (context instanceof Activity) {
+                return get((Activity) context);
             }
-            return applicationManager;
         }
+
+        // Either a context or we're on a background thread.
+        if (applicationManager == null) {
+            applicationManager = new RequestManager(context.getApplicationContext());
+        }
+        return applicationManager;
     }
 
     @TargetApi(17)
     public static RequestManager get(FragmentActivity activity) {
-        if (Build.VERSION.SDK_INT >= 11 && activity.isDestroyed()) {
-            throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
+        if (Util.isOnBackgroundThread()) {
+            return get(activity.getApplicationContext());
+        } else {
+            if (Build.VERSION.SDK_INT >= 11 && activity.isDestroyed()) {
+                throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
+            }
+            FragmentManager fm = activity.getSupportFragmentManager();
+            return supportFragmentGet(activity, fm);
         }
-        FragmentManager fm = activity.getSupportFragmentManager();
-        return supportFragmentGet(activity, fm);
     }
 
     public static RequestManager get(Fragment fragment) {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
         }
-        if (fragment.isDetached()) {
-            throw new IllegalArgumentException("You cannot start a load on a detached fragment");
+        if (Util.isOnBackgroundThread()) {
+            return get(fragment.getActivity().getApplicationContext());
+        } else {
+            if (fragment.isDetached()) {
+                throw new IllegalArgumentException("You cannot start a load on a detached fragment");
+            }
+            FragmentManager fm = fragment.getChildFragmentManager();
+            return supportFragmentGet(fragment.getActivity(), fm);
         }
-        FragmentManager fm = fragment.getChildFragmentManager();
-        return supportFragmentGet(fragment.getActivity(), fm);
     }
 
     @TargetApi(17)
     public static RequestManager get(Activity activity) {
-        if (Build.VERSION.SDK_INT >= 17 && activity.isDestroyed()) {
-            throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
+        if (Util.isOnBackgroundThread()) {
+            return get(activity.getApplicationContext());
+        } else {
+            if (Build.VERSION.SDK_INT >= 17 && activity.isDestroyed()) {
+                throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
+            }
+            android.app.FragmentManager fm = activity.getFragmentManager();
+            return fragmentGet(activity, fm);
         }
-        android.app.FragmentManager fm = activity.getFragmentManager();
-        return fragmentGet(activity, fm);
     }
 
     @TargetApi(17)
@@ -62,14 +79,18 @@ public class RequestManagerRetriever {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
         }
-        if (Build.VERSION.SDK_INT >= 13 && fragment.isDetached()) {
-            throw new IllegalArgumentException("You cannot start a load on a detached fragment");
-        }
-        if (Build.VERSION.SDK_INT >= 17) {
-            android.app.FragmentManager fm = fragment.getChildFragmentManager();
-            return fragmentGet(fragment.getActivity(), fm);
-        } else {
+        if (Util.isOnBackgroundThread()) {
             return get(fragment.getActivity().getApplicationContext());
+        } else {
+            if (Build.VERSION.SDK_INT >= 13 && fragment.isDetached()) {
+                throw new IllegalArgumentException("You cannot start a load on a detached fragment");
+            }
+            if (Build.VERSION.SDK_INT >= 17) {
+                android.app.FragmentManager fm = fragment.getChildFragmentManager();
+                return fragmentGet(fragment.getActivity(), fm);
+            } else {
+                return get(fragment.getActivity().getApplicationContext());
+            }
         }
     }
 

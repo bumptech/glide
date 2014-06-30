@@ -10,7 +10,7 @@ public class ByteArrayPool {
     // 64 KB.
     private static final int TEMP_BYTES_SIZE = 64 * 1024;
     // 512 KB.
-    private static final int MAX_SIZE = 512 * 1024;
+    private static final int MAX_SIZE = 2 * 1048 * 1024;
     private static final int MAX_BYTE_ARRAY_COUNT = MAX_SIZE / TEMP_BYTES_SIZE;
 
     private final Queue<byte[]> tempQueue = new LinkedList<byte[]>();

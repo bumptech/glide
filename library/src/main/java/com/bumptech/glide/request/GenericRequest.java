@@ -139,7 +139,6 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         queue.offer(this);
     }
 
-
     private void init(
             LoadProvider<A, T, Z, R> loadProvider,
             A model,

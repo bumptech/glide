@@ -30,7 +30,10 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     @TargetApi(11)
     private static synchronized BitmapFactory.Options getDefaultOptions() {
-        BitmapFactory.Options decodeBitmapOptions = OPTIONS_QUEUE.poll();
+        BitmapFactory.Options decodeBitmapOptions ;
+        synchronized (OPTIONS_QUEUE) {
+            decodeBitmapOptions = OPTIONS_QUEUE.poll();
+        }
         if (decodeBitmapOptions == null) {
             decodeBitmapOptions = new BitmapFactory.Options();
             resetOptions(decodeBitmapOptions);
@@ -41,7 +44,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     private static void releaseOptions(BitmapFactory.Options decodeBitmapOptions) {
         resetOptions(decodeBitmapOptions);
-        OPTIONS_QUEUE.offer(decodeBitmapOptions);
+        synchronized (OPTIONS_QUEUE) {
+            OPTIONS_QUEUE.offer(decodeBitmapOptions);
+        }
     }
 
     @TargetApi(11)

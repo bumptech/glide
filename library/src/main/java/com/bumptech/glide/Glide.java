@@ -8,12 +8,15 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -53,6 +56,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.provider.DataLoadProviderFactory;
+import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
@@ -90,6 +94,7 @@ public class Glide {
     private final GifBitmapWrapperTransformation drawableCenterCrop;
     private final FitCenter bitmapFitCenter;
     private final GifBitmapWrapperTransformation drawableFitCenter;
+    private final Handler mainHandler;
 
     /**
      * Try to get the external cache directory if available and default to the internal. Use a default name for the
@@ -131,7 +136,11 @@ public class Glide {
      */
     public static Glide get(Context context) {
         if (GLIDE == null) {
-            GLIDE = new GlideBuilder(context).createGlide();
+            synchronized (Glide.class) {
+                if (GLIDE == null) {
+                    GLIDE = new GlideBuilder(context).createGlide();
+                }
+            }
         }
 
         return GLIDE;
@@ -172,6 +181,7 @@ public class Glide {
         this.engine = engine;
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
+        mainHandler = new Handler(Looper.getMainLooper());
 
         dataLoadProviderFactory = new DataLoadProviderFactory();
 
@@ -249,6 +259,10 @@ public class Glide {
         return drawableFitCenter;
     }
 
+    Handler getMainHandler() {
+        return mainHandler;
+    }
+
     private GenericLoaderFactory getLoaderFactory() {
         return loaderFactory;
     }
@@ -300,6 +314,16 @@ public class Glide {
         if (request!= null) {
             request.clear();
         }
+    }
+
+    /**
+     * Cancel any pending loads Glide may have for the target and free any resources that mayhave been loaded into
+     * the target so they may be reused.
+     *
+     * @param target The target to cancel loads for.
+     */
+    public static void clear(FutureTarget target) {
+        target.clear();
     }
 
     /**

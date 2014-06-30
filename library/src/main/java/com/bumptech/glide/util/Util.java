@@ -38,9 +38,23 @@ public class Util {
     }
 
     public static void assertMainThread() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
+        if (!isOnMainThread()) {
             throw new IllegalArgumentException("You must call this method on the main thread");
         }
+    }
+
+    public static void assertBackgroundThread() {
+        if (!isOnBackgroundThread()) {
+            throw new IllegalArgumentException("YOu must call this method on a background thread");
+        }
+    }
+
+    public static boolean isOnMainThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+    public static boolean isOnBackgroundThread() {
+        return !isOnMainThread();
     }
 
 }

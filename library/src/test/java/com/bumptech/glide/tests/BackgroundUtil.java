@@ -1,11 +1,11 @@
 package com.bumptech.glide.tests;
 
 public class BackgroundUtil {
-    public interface BackgroundTest {
+    public interface BackgroundTester {
         public void runTest() throws Exception;
     }
 
-    public static void testInBackground(BackgroundTest test) throws InterruptedException {
+    public static void testInBackground(BackgroundTester test) throws InterruptedException {
         TestThread thread = new TestThread(test);
         thread.start();
         thread.join();
@@ -16,9 +16,9 @@ public class BackgroundUtil {
 
     private static class TestThread extends Thread {
         private Exception exception;
-        private BackgroundTest test;
+        private BackgroundTester test;
 
-        public TestThread(BackgroundTest test) {
+        public TestThread(BackgroundTester test) {
             this.test = test;
         }
 

@@ -13,7 +13,6 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     private GlideUrl glideUrl;
     private final HttpUrlConnectionFactory factory;
     private HttpURLConnection urlConnection;
-    private boolean isConnected;
     private volatile boolean isCancelled;
 
     public HttpUrlFetcher(GlideUrl glideUrl) {
@@ -35,9 +34,6 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
         // Connect explicitly to avoid errors in decoders if connection fails.
         urlConnection.connect();
-        synchronized (this) {
-            isConnected = true;
-        }
         if (isCancelled) {
             return null;
         }
@@ -66,11 +62,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void cancel() {
-        synchronized (this) {
-            if (!isConnected && urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
+        // TODO: we should consider disconnecting the url connection here, but we can't do so directly because it
+        // would cause a strict mode violation.
         isCancelled = true;
     }
 

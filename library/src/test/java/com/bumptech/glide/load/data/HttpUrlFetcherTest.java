@@ -2,22 +2,19 @@ package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -120,39 +117,5 @@ public class HttpUrlFetcherTest {
         fetcher.cancel();
 
         verify(urlConnection, never()).disconnect();
-    }
-
-    @Test
-    public void testDisconnectsUrlConnectionOnCancelIfNotYetCancelled() throws IOException, InterruptedException {
-        final CountDownLatch mainThreadLatch = new CountDownLatch(1);
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                mainThreadLatch.countDown();
-                countDownLatch.await();
-                return null;
-            }
-        }).when(urlConnection).connect();
-
-        Thread bg = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    fetcher.loadData(Priority.HIGH);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        bg.start();
-
-        mainThreadLatch.await();
-        fetcher.cancel();
-        countDownLatch.countDown();
-        bg.join();
-
-        verify(urlConnection).connect();
-        verify(urlConnection).disconnect();
     }
 }

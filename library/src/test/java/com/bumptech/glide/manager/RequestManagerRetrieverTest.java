@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.util.ActivityController;
 
+import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -181,6 +183,16 @@ public class RequestManagerRetrieverTest {
     @Test
     public void testReturnsNonNullManagerIfGivenApplicationContext() {
         assertNotNull(RequestManagerRetriever.get(Robolectric.application));
+    }
+
+    @Test
+    public void testDoesNotThrowWhenGetWithContextCalledFromBackgroundThread() throws InterruptedException {
+        testInBackground(new BackgroundUtil.BackgroundTester() {
+            @Override
+            public void runTest() throws Exception {
+                RequestManagerRetriever.get(Robolectric.application);
+            }
+        });
     }
 
     private interface RetrieverHarness {

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -20,11 +21,13 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.GenericRequest;
 import com.bumptech.glide.request.GlideAnimationFactory;
 import com.bumptech.glide.request.NoAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
+import com.bumptech.glide.request.RequestFutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.ViewAnimation;
@@ -558,6 +561,34 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             throw new IllegalArgumentException("You must pass in a non null View");
         }
         return into(glide.buildImageViewTarget(view, transcodeClass));
+    }
+
+    /**
+     * Returns a future that can be used to do a blocking get on a background thread.
+     *
+     * @param width The desired width (note this will be overriden by {@link #override(int, int)} if
+     *              previously called.
+     * @param height The desired height (note this will be overriden by {@link #override(int, int)}}
+     *               if previously called.
+     * @return An {@link com.bumptech.glide.request.FutureTarget} that can be used to obtain the
+     *         resource in a blocking manner.
+     */
+    public FutureTarget<TranscodeType> into(int width, int height) {
+        final RequestFutureTarget<ModelType, TranscodeType> target =
+                new RequestFutureTarget<ModelType, TranscodeType>(glide.getMainHandler(), width, height);
+        listener(target);
+
+        // TODO: Currently all loads must be started on the main thread...
+        glide.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (!target.isCancelled()) {
+                    into(target);
+                }
+            }
+        });
+
+        return target;
     }
 
     private Request buildRequest(Target<TranscodeType> target) {

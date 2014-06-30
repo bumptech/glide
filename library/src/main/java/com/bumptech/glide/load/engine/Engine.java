@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Util;
 
 import java.io.InputStream;
 import java.lang.ref.ReferenceQueue;
@@ -99,6 +100,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             DataFetcher<T> fetcher, boolean cacheSource, Encoder<T> sourceEncoder,
             ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
             ResourceTranscoder<Z, R> transcoder, Priority priority, boolean isMemoryCacheable, ResourceCallback cb) {
+        Util.assertMainThread();
         long startTime = LogTime.getLogTime();
 
         final String id = fetcher.getId();

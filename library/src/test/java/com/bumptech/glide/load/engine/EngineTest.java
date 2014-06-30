@@ -11,6 +11,7 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
@@ -376,6 +377,16 @@ public class EngineTest {
                 eq(harness.cacheDecoder), eq(harness.fetcher), eq(harness.cacheSource), eq(harness.sourceEncoder),
                 eq(harness.decoder), eq(harness.transformation), eq(harness.encoder), eq(harness.transcoder),
                 eq(harness.priority), eq(harness.isMemoryCacheable), eq(harness.engine));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testThrowsIfLoadCalledOnBackgroundThread() throws InterruptedException {
+        BackgroundUtil.testInBackground(new BackgroundUtil.BackgroundTester() {
+            @Override
+            public void runTest() throws Exception {
+                harness.doLoad();
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")

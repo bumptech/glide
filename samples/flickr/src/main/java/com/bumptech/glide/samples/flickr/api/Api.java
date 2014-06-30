@@ -29,7 +29,7 @@ public class Api {
     private static final String SIGNED_API_URL = "https://api.flickr.com/services/rest/?method=%s&format=json&api_key="
             + API_KEY;
     //incomplete size independent url for photos that can be cached per photo
-    private static final String CACHEABLE_PHOTO_URL = "https://farm%s.staticflickr.com/%s/%s_%s_";
+    private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
 
 
     private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() {{

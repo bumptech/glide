@@ -1,7 +1,12 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,10 +22,11 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -31,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class FlickrSearchActivity extends SherlockFragmentActivity {
     private static final String TAG = "FlickrSearchActivity";
@@ -44,6 +51,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     private View searchLoading;
     private String currentSearchString;
     private final SearchListener searchListener = new SearchListener();
+    private BackgroundThumbnailLoader backgroundThumbnailLoader;
+    private HandlerThread backgroundThread;
+    private Handler backgroundHandler;
 
     private enum Page {
         SMALL,
@@ -74,6 +84,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
+        backgroundThread = new HandlerThread("BackgroundThumbnailHandlerThread");
+        backgroundThread.start();
+        backgroundHandler = new Handler(backgroundThread.getLooper());
 
         setContentView(R.layout.flickr_search_activity);
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
@@ -151,6 +164,12 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         Api.get(this).unregisterSearchListener(searchListener);
+        if (backgroundThumbnailLoader != null) {
+            backgroundThumbnailLoader.cancel();
+            backgroundThumbnailLoader = null;
+            backgroundThread.quit();
+            backgroundThread = null;
+        }
     }
 
     @TargetApi(14)
@@ -220,6 +239,13 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
             for (PhotoViewer viewer : photoViewers) {
                 viewer.onPhotosUpdated(photos);
             }
+
+            if (backgroundThumbnailLoader != null) {
+                backgroundThumbnailLoader.cancel();
+            }
+
+            backgroundThumbnailLoader = new BackgroundThumbnailLoader(FlickrSearchActivity.this, photos);
+            backgroundHandler.post(backgroundThumbnailLoader);
 
             currentPhotos = photos;
         }
@@ -291,6 +317,46 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
 
         private int getPageSize(int id) {
             return getResources().getDimensionPixelSize(id);
+        }
+    }
+
+    private static class BackgroundThumbnailLoader implements Runnable {
+        private boolean isCancelled;
+        private Context context;
+        private List<Photo> photos;
+
+        public BackgroundThumbnailLoader(Context context, List<Photo> photos) {
+            this.context = context;
+            this.photos = photos;
+        }
+
+        public void cancel() {
+            isCancelled = true;
+        }
+
+        @Override
+        public void run() {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
+            for (Photo photo : photos) {
+                if (isCancelled) {
+                    return;
+                }
+
+                // TODO: we don't need to decode here, we can just use downloadOnly.
+                FutureTarget<Bitmap> futureTarget = Glide.with(context)
+                        .loadFromImage(photo)
+                        .asBitmap()
+                        .into(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+                try {
+                    futureTarget.get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                Glide.clear(futureTarget);
+            }
+
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.widget.ImageView;
+
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.manager.RequestTracker;
@@ -10,7 +11,6 @@ import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.BackgroundUtil;
 
-import org.apache.tools.ant.taskdefs.Tar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -132,7 +132,7 @@ public class GenericRequestBuilderTest {
     @Test(expected = RuntimeException.class)
     public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
         final ImageView imageView = new ImageView(Robolectric.application);
-        testInBackground(new BackgroundUtil.BackgroundTest() {
+        testInBackground(new BackgroundUtil.BackgroundTester() {
             @Override
             public void runTest() throws Exception {
                 getNullModelRequest().into(imageView);
@@ -144,7 +144,7 @@ public class GenericRequestBuilderTest {
     @Test(expected = RuntimeException.class)
     public void testThrowsIfIntoTargetCalledOnBackgroundThread() throws InterruptedException {
         final Target target = mock(Target.class);
-        testInBackground(new BackgroundUtil.BackgroundTest() {
+        testInBackground(new BackgroundUtil.BackgroundTester() {
             @Override
             public void runTest() throws Exception {
                 getNullModelRequest().into(target);

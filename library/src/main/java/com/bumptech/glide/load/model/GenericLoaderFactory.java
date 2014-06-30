@@ -38,7 +38,7 @@ public class GenericLoaderFactory {
      * @param <Y> The type of the resource class.
      */
     @SuppressWarnings("unchecked")
-    public <T, Y> ModelLoaderFactory<T, Y> unregister(Class<T> modelClass, Class<Y> resourceClass) {
+    public synchronized <T, Y> ModelLoaderFactory<T, Y> unregister(Class<T> modelClass, Class<Y> resourceClass) {
         cachedModelLoaders.clear();
 
         ModelLoaderFactory<T, Y> result = null;
@@ -61,7 +61,7 @@ public class GenericLoaderFactory {
      * @param <Y> The type of the resource.
      */
     @SuppressWarnings("unchecked")
-    public <T, Y> ModelLoaderFactory<T, Y> register(Class<T> modelClass, Class<Y> resourceClass,
+    public synchronized <T, Y> ModelLoaderFactory<T, Y> register(Class<T> modelClass, Class<Y> resourceClass,
             ModelLoaderFactory<T, Y> factory) {
         cachedModelLoaders.clear();
 
@@ -97,7 +97,7 @@ public class GenericLoaderFactory {
      * @param <T> The type of the model.
      * @param <Y> The type of the resource.
      */
-    public <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
+    public synchronized <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
         ModelLoader<T, Y> result = getCachedLoader(modelClass, resourceClass);
         if (result != null) {
             // We've already tried to create a model loader and can't with the currently registered set of factories, but
