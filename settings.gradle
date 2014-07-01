@@ -1,4 +1,5 @@
 include ':library'
 include ':third_party:gif_decoder'
+include ':third_party:disklrucache:disklrucache'
 include ':samples:flickr'
 include ':integration:volley'

@@ -9,6 +9,8 @@ import com.bumptech.glide.load.Key;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,9 +71,9 @@ public class DiskLruCacheWrapper implements DiskCache {
             //It is possible that the there will be a put in between these two gets. If so that shouldn't be a problem
             //because we will always put the same value at the same key so our input streams will still represent
             //the same data
-            final DiskLruCache.Snapshot snapshot = getDiskCache().get(safeKey);
-            if (snapshot != null) {
-                result = snapshot.getInputStream(0);
+            final DiskLruCache.Value value = getDiskCache().get(safeKey);
+            if (value != null) {
+                result = new FileInputStream(value.getFile(0));
             }
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.WARN)) {
@@ -92,7 +94,8 @@ public class DiskLruCacheWrapper implements DiskCache {
                 boolean success = false;
                 OutputStream os = null;
                 try {
-                    os = editor.newOutputStream(0);
+                    File file = editor.getFile(0);
+                    os = new FileOutputStream(file);
                     success = writer.write(os);
                 } finally {
                     if (os != null) {
