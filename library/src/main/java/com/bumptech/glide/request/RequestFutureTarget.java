@@ -134,7 +134,9 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
             wait(timeoutMillis);
         }
 
-        if (exception != null) {
+        if (Thread.interrupted()) {
+            throw new InterruptedException();
+        } else if (exception != null) {
             throw new ExecutionException(exception);
         } else if (isCancelled) {
             throw new CancellationException();

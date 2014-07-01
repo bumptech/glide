@@ -5,7 +5,6 @@ dependencies {
     compile project(':third_party:gif_decoder')
 
     compile 'com.android.support:support-v4:19.1.+'
-    compile 'com.mcxiaoke.volley:library:1.0.+'
     compile 'com.jakewharton:disklrucache:2.0.+'
 
     androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
