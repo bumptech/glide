@@ -8,17 +8,18 @@ import android.os.SystemClock;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.load.NullResourceEncoder;
+import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
-import com.bumptech.glide.load.model.NullEncoder;
-import com.bumptech.glide.load.resource.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.NullDecoder;
+import com.bumptech.glide.load.resource.NullEncoder;
+import com.bumptech.glide.load.resource.NullResourceEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
@@ -35,7 +36,7 @@ class GifFrameManager {
     private final Handler mainHandler;
     private final ResourceEncoder<Bitmap> encoder;
     private final Context context;
-    private final NullEncoder<GifDecoder> sourceEncoder;
+    private final Encoder<GifDecoder> sourceEncoder;
     private Transformation<Bitmap> transformation;
     private final int targetWidth;
     private final int targetHeight;

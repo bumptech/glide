@@ -99,7 +99,7 @@ public class RequestManagerTest {
     public void testAppliesDefaultOptionsWhenUsingVideoFileDescriptorModelLoader() {
         String model = "fake";
         FileDescriptorModelLoader<String> modelLoader = mock(FileDescriptorModelLoader.class);
-        BitmapTypeRequest<String> builder = manager.using(modelLoader)
+        DrawableTypeRequest<String> builder = manager.using(modelLoader)
                 .loadFromVideo(model);
 
         verify(options).apply(eq(model), eq(builder));

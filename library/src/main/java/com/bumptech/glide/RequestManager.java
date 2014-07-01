@@ -367,8 +367,8 @@ public class RequestManager {
             this.loader = loader;
         }
 
-        public BitmapTypeRequest<T> loadFromVideo(T model) {
-            return optionsApplier.apply(model, new BitmapTypeRequest<T>(context, model, null, loader, glide,
+        public DrawableTypeRequest<T> loadFromVideo(T model) {
+            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, null, loader, context, glide,
                     requestTracker, optionsApplier));
         }
     }

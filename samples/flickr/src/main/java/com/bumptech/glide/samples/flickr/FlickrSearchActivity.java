@@ -2,7 +2,6 @@ package com.bumptech.glide.samples.flickr;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -30,6 +29,7 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     private View searchLoading;
     private String currentSearchString;
     private final SearchListener searchListener = new SearchListener();
-    private BackgroundThumbnailLoader backgroundThumbnailLoader;
+    private BackgroundThumbnailFetcher backgroundThumbnailFetcher;
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
 
@@ -164,9 +164,9 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         Api.get(this).unregisterSearchListener(searchListener);
-        if (backgroundThumbnailLoader != null) {
-            backgroundThumbnailLoader.cancel();
-            backgroundThumbnailLoader = null;
+        if (backgroundThumbnailFetcher != null) {
+            backgroundThumbnailFetcher.cancel();
+            backgroundThumbnailFetcher = null;
             backgroundThread.quit();
             backgroundThread = null;
         }
@@ -240,12 +240,12 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                 viewer.onPhotosUpdated(photos);
             }
 
-            if (backgroundThumbnailLoader != null) {
-                backgroundThumbnailLoader.cancel();
+            if (backgroundThumbnailFetcher != null) {
+                backgroundThumbnailFetcher.cancel();
             }
 
-            backgroundThumbnailLoader = new BackgroundThumbnailLoader(FlickrSearchActivity.this, photos);
-            backgroundHandler.post(backgroundThumbnailLoader);
+            backgroundThumbnailFetcher = new BackgroundThumbnailFetcher(FlickrSearchActivity.this, photos);
+            backgroundHandler.post(backgroundThumbnailFetcher);
 
             currentPhotos = photos;
         }
@@ -320,12 +320,12 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         }
     }
 
-    private static class BackgroundThumbnailLoader implements Runnable {
+    private static class BackgroundThumbnailFetcher implements Runnable {
         private boolean isCancelled;
         private Context context;
         private List<Photo> photos;
 
-        public BackgroundThumbnailLoader(Context context, List<Photo> photos) {
+        public BackgroundThumbnailFetcher(Context context, List<Photo> photos) {
             this.context = context;
             this.photos = photos;
         }
@@ -342,17 +342,20 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
                     return;
                 }
 
-                // TODO: we don't need to decode here, we can just use downloadOnly.
-                FutureTarget<Bitmap> futureTarget = Glide.with(context)
-                        .loadFromImage(photo)
-                        .asBitmap()
-                        .into(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+                FutureTarget<File> futureTarget = Glide.with(context)
+                        .load(photo)
+                        .downloadOnly(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+
                 try {
                     futureTarget.get();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Interrupted waiting for background downloadOnly", e);
+                    }
                 } catch (ExecutionException e) {
-                    e.printStackTrace();
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Got ExecutionException waiting for background downloadOnly", e);
+                    }
                 }
                 Glide.clear(futureTarget);
             }

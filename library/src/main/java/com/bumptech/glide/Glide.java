@@ -43,6 +43,7 @@ import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDataLoadProvi
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoDataLoadProvider;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDataLoadProvider;
+import com.bumptech.glide.load.resource.file.StreamFileDataLoadProvider;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataLoadProvider;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -197,6 +198,9 @@ public class Glide {
 
         dataLoadProviderFactory.register(ImageVideoWrapper.class, GifBitmapWrapper.class,
                 new ImageVideoGifDataLoadProvider(imageVideoDataLoadProvider, gifDataLoadProvider));
+
+        dataLoadProviderFactory.register(InputStream.class, File.class,
+                new StreamFileDataLoadProvider());
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());

@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
+
 import com.bumptech.glide.load.model.ImageVideoModelLoader;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -25,13 +26,20 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
     private static <A, R> FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader,
             ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader,
-            Class<R> transcodedClass,
-            ResourceTranscoder<Bitmap, R> transcoder) {
-            return streamModelLoader == null && fileDescriptorModelLoader == null ? null :
-                    new FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R>(
-                            new ImageVideoModelLoader<A>(streamModelLoader, fileDescriptorModelLoader),
-                            transcoder != null ? transcoder : glide.buildTranscoder(Bitmap.class, transcodedClass),
-                            glide.buildDataProvider(ImageVideoWrapper.class, Bitmap.class));
+            Class<R> transcodedClass, ResourceTranscoder<Bitmap, R> transcoder) {
+        if (streamModelLoader == null && fileDescriptorModelLoader == null) {
+            return null;
+        }
+
+        if (transcoder == null) {
+            transcoder = glide.buildTranscoder(Bitmap.class, transcodedClass);
+        }
+        DataLoadProvider<ImageVideoWrapper, Bitmap> loadProvider = glide.buildDataProvider(ImageVideoWrapper.class,
+                Bitmap.class);
+        ImageVideoModelLoader<A> modelLoader = new ImageVideoModelLoader<A>(streamModelLoader,
+                fileDescriptorModelLoader);
+
+        return new FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R>(modelLoader, transcoder, loadProvider);
     }
 
     BitmapTypeRequest(Context context, A model,

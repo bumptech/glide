@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource;
+package com.bumptech.glide.load.resource.file;
 
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;

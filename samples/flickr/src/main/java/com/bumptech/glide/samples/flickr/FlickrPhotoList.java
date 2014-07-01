@@ -116,6 +116,8 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                     .loadFromImage(item)
                     .thumbnail(Glide.with(FlickrPhotoList.this)
                         .loadFromImage(item)
+                        .cacheSource(true)
+                        .skipDiskCache(true)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     )
                     .centerCrop();
@@ -177,6 +179,8 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                     .placeholder(new ColorDrawable(Color.GRAY))
                     .thumbnail(Glide.with(FlickrPhotoList.this)
                         .loadFromImage(current)
+                        .cacheSource(true)
+                        .skipDiskCache(true)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
                     .centerCrop()
                     .crossFade(R.anim.fade_in, 150)

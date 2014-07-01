@@ -1,19 +1,20 @@
-package com.bumptech.glide.load.model;
+package com.bumptech.glide.load.resource;
 
 import com.bumptech.glide.load.Encoder;
 
 import java.io.OutputStream;
 
-public class NullEncoder<T> implements Encoder<T> {
+public class NullEncoder implements Encoder {
     private static final NullEncoder NULL_ENCODER = new NullEncoder();
 
     @SuppressWarnings("unchecked")
-    public static <T> NullEncoder<T> get() {
+    public static <T> Encoder<T> get() {
         return NULL_ENCODER;
+
     }
 
     @Override
-    public boolean encode(T data, OutputStream os) {
+    public boolean encode(Object data, OutputStream os) {
         return false;
     }
 

@@ -9,13 +9,13 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.NullResourceEncoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.UnitTransformation;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.model.NullEncoder;
+import com.bumptech.glide.load.resource.NullEncoder;
+import com.bumptech.glide.load.resource.NullResourceEncoder;
+import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;

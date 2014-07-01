@@ -8,7 +8,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.StreamEncoder;
-import com.bumptech.glide.load.resource.FileToStreamDecoder;
+import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 
 import java.io.File;
 import java.io.InputStream;

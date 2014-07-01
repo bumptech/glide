@@ -99,6 +99,8 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(FlickrPhotoGrid.this)
                     .loadFromImage(item)
+                    .cacheSource(true)
+                    .skipDiskCache(true)
                     .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     .priority(Priority.HIGH);
         }
@@ -149,6 +151,8 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                     .loadFromImage(current)
                     .thumbnail(Glide.with(FlickrPhotoGrid.this)
                             .loadFromImage(current)
+                            .cacheSource(true)
+                            .skipDiskCache(true)
                             .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     )
                     .animate(R.anim.fade_in)

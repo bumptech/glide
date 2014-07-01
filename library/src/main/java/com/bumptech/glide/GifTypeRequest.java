@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -22,12 +23,16 @@ public class GifTypeRequest<A> extends GifRequestBuilder<A, GifDrawable> {
     private static <A, R> FixedLoadProvider<A, InputStream, GifData, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader, Class<R> transcodeClass,
             ResourceTranscoder<GifData, R> transcoder) {
+        if (streamModelLoader == null) {
+            return null;
+        }
+
         if (transcoder == null) {
             transcoder = glide.buildTranscoder(GifData.class, transcodeClass);
         }
-        return streamModelLoader == null ? null :
-                new FixedLoadProvider<A, InputStream, GifData, R>(streamModelLoader, transcoder,
-                        glide.buildDataProvider(InputStream.class, GifData.class));
+        DataLoadProvider<InputStream, GifData> dataLoadProvider = glide.buildDataProvider(InputStream.class,
+                GifData.class);
+        return new FixedLoadProvider<A, InputStream, GifData, R>(streamModelLoader, transcoder, dataLoadProvider);
 
     }
 

@@ -1,6 +1,8 @@
-package com.bumptech.glide.load;
+package com.bumptech.glide.load.resource;
 
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.resource.UnitTransformation;
+
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;

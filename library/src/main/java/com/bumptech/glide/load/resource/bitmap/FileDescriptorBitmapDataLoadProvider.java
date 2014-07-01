@@ -8,8 +8,8 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.model.NullEncoder;
-import com.bumptech.glide.load.resource.FileToStreamDecoder;
+import com.bumptech.glide.load.resource.NullEncoder;
+import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 
 import java.io.File;
 
@@ -17,7 +17,7 @@ public class FileDescriptorBitmapDataLoadProvider implements DataLoadProvider<Pa
     private final ResourceDecoder<File, Bitmap> cacheDecoder;
     private final FileDescriptorBitmapDecoder sourceDecoder;
     private final BitmapEncoder encoder;
-    private final NullEncoder<ParcelFileDescriptor> sourceEncoder;
+    private final Encoder<ParcelFileDescriptor> sourceEncoder;
 
     public FileDescriptorBitmapDataLoadProvider(BitmapPool bitmapPool) {
         cacheDecoder = new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(bitmapPool));
