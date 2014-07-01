@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,9 +9,11 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -34,12 +37,12 @@ public class DiskLruCacheWrapperTest {
     }
 
     @Test
-    public void testCanInsertAndGet() {
+    public void testCanInsertAndGet() throws FileNotFoundException {
         cache.put(key, new DiskCache.Writer() {
             @Override
-            public boolean write(OutputStream os) {
+            public boolean write(File file) {
                 try {
-                    os.write(data);
+                    new FileOutputStream(file).write(data);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -47,7 +50,7 @@ public class DiskLruCacheWrapperTest {
             }
         });
 
-        byte[] received = isToBytes(cache.get(key), data.length);
+        byte[] received = isToBytes(new FileInputStream(cache.get(key)), data.length);
 
         assertTrue(Arrays.equals(data, received));
     }
@@ -56,7 +59,7 @@ public class DiskLruCacheWrapperTest {
     public void testDoesNotCommitIfWriterReturnsFalse() {
         cache.put(key, new DiskCache.Writer() {
             @Override
-            public boolean write(OutputStream os) {
+            public boolean write(File file) {
                 return false;
             }
         });
@@ -68,9 +71,9 @@ public class DiskLruCacheWrapperTest {
     public void testDoesNotCommitIfWriterWritesButReturnsFalse() {
         cache.put(key, new DiskCache.Writer() {
             @Override
-            public boolean write(OutputStream os) {
+            public boolean write(File file) {
                 try {
-                    os.write(data);
+                    new FileOutputStream(file).write(data);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

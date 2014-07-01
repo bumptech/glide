@@ -4,7 +4,7 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 
-import java.io.InputStream;
+import java.io.File;
 
 /**
  * @param <T> The type of data the resource will be decoded from.
@@ -12,7 +12,7 @@ import java.io.InputStream;
  */
 public interface DataLoadProvider<T, Z> {
 
-    public ResourceDecoder<InputStream, Z> getCacheDecoder();
+    public ResourceDecoder<File, Z> getCacheDecoder();
 
     public ResourceDecoder<T, Z> getSourceDecoder();
 

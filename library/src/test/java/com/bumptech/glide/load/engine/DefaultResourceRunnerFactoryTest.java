@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -9,12 +10,13 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.InputStream;
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 
 import static junit.framework.Assert.assertNotNull;
@@ -48,7 +50,7 @@ public class DefaultResourceRunnerFactoryTest {
         DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(diskCache,
                 mainHandler, diskCacheService, resizeService);
 
-        ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
+        ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
         DataFetcher<Object> fetcher = mock(DataFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);

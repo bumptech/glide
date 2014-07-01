@@ -1,11 +1,12 @@
 package com.bumptech.glide.load;
 
 import android.util.Log;
+
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class CacheLoader {
     private static final String TAG = "CacheLoader";
@@ -15,9 +16,9 @@ public class CacheLoader {
         this.diskCache = diskCache;
     }
 
-    public <Z> Resource<Z> load(Key key, ResourceDecoder<InputStream, Z> decoder, int width, int height) {
+    public <Z> Resource<Z> load(Key key, ResourceDecoder<File, Z> decoder, int width, int height) {
         Resource<Z> result = null;
-        InputStream fromCache = diskCache.get(key);
+        File fromCache = diskCache.get(key);
         if (fromCache != null) {
             try {
                 result = decoder.decode(fromCache, width, height);

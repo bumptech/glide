@@ -5,15 +5,12 @@
 package com.bumptech.glide.load.engine.cache;
 
 import android.util.Log;
+
 import com.bumptech.glide.load.Key;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * The default DiskCache implementation. There must be no more than one active instance for a given
@@ -64,16 +61,16 @@ public class DiskLruCacheWrapper implements DiskCache {
     }
 
     @Override
-    public InputStream get(Key key) {
+    public File get(Key key) {
         String safeKey = safeKeyGenerator.getSafeKey(key);
-        InputStream result = null;
+        File result = null;
         try {
             //It is possible that the there will be a put in between these two gets. If so that shouldn't be a problem
             //because we will always put the same value at the same key so our input streams will still represent
             //the same data
             final DiskLruCache.Value value = getDiskCache().get(safeKey);
             if (value != null) {
-                result = new FileInputStream(value.getFile(0));
+                result = value.getFile(0);
             }
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.WARN)) {
@@ -88,21 +85,10 @@ public class DiskLruCacheWrapper implements DiskCache {
         String safeKey = safeKeyGenerator.getSafeKey(key);
         try {
             DiskLruCache.Editor editor = getDiskCache().edit(safeKey);
-            //editor will be null if there are two concurrent puts
-            //worst case just silently fail
+            // Editor will be null if there are two concurrent puts. In the worst case we will just silently fail.
             if (editor != null) {
-                boolean success = false;
-                OutputStream os = null;
-                try {
-                    File file = editor.getFile(0);
-                    os = new FileOutputStream(file);
-                    success = writer.write(os);
-                } finally {
-                    if (os != null) {
-                        os.close();
-                    }
-                }
-                if (success) {
+                File file = editor.getFile(0);
+                if (writer.write(file)) {
                     editor.commit();
                 }
             }

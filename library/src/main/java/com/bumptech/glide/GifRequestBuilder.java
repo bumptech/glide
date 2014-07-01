@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -18,6 +19,7 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ViewPropertyAnimation;
 
+import java.io.File;
 import java.io.InputStream;
 
 public class GifRequestBuilder<ModelType, TranscodeType>
@@ -65,7 +67,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
 
     @Override
     public GifRequestBuilder<ModelType, TranscodeType> cacheDecoder(
-            ResourceDecoder<InputStream, GifData> cacheDecoder) {
+            ResourceDecoder<File, GifData> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
     }

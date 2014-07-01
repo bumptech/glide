@@ -3,12 +3,13 @@ package com.bumptech.glide.provider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.InputStream;
+import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -102,7 +103,7 @@ public class ChildLoadProviderTest {
     @SuppressWarnings("unchecked")
     private static class ChildLoadHarness {
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
-        ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
+        ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         Encoder<Object> sourceEncoder = mock(Encoder.class);
         ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);

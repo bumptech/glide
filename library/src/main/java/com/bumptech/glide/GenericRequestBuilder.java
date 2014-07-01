@@ -9,9 +9,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.NullResourceEncoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.SkipCache;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.UnitTransformation;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -36,7 +36,7 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 
-import java.io.InputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -200,7 +200,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> cacheDecoder(
-            ResourceDecoder <InputStream, ResourceType> cacheDecoder) {
+            ResourceDecoder <File, ResourceType> cacheDecoder) {
         // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
         // ignore the decoder.
         if (loadProvider != null) {
@@ -472,8 +472,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             if (loadProvider != null) {
                 preSkipEncoder = loadProvider.getEncoder();
             }
-            final SkipCache<ResourceType> skipCache = SkipCache.get();
-            return encoder(skipCache);
+            final NullResourceEncoder<ResourceType> nullResourceEncoder = NullResourceEncoder.get();
+            return encoder(nullResourceEncoder);
         } else {
             return encoder(preSkipEncoder);
         }

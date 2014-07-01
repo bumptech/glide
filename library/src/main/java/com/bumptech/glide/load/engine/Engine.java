@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
@@ -18,7 +19,7 @@ import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
-import java.io.InputStream;
+import java.io.File;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -96,7 +97,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param <Z>          The type of the resource that will be decoded.
      * @param <R>          The type of the resource that will be transcoded from the decoded resource.
      */
-    public <T, Z, R> LoadStatus load(int width, int height, ResourceDecoder<InputStream, Z> cacheDecoder,
+    public <T, Z, R> LoadStatus load(int width, int height, ResourceDecoder<File, Z> cacheDecoder,
             DataFetcher<T> fetcher, boolean cacheSource, Encoder<T> sourceEncoder,
             ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
             ResourceTranscoder<Z, R> transcoder, Priority priority, boolean isMemoryCacheable, ResourceCallback cb) {

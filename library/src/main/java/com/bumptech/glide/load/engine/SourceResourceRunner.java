@@ -2,8 +2,9 @@ package com.bumptech.glide.load.engine;
 
 import android.os.SystemClock;
 import android.util.Log;
-import com.bumptech.glide.load.CacheLoader;
+
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -14,7 +15,10 @@ import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
 
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -23,13 +27,15 @@ import java.io.OutputStream;
  * @param <Z> The type of the resource that will be decoded.
  * @param <R> The type of the resource that will be transcoded to from the decoded resource.
  */
-public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer, Prioritized {
+public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
+    private static final WriterFactory DEFAULT_WRITER_FACTORY = new DefaultWriterFactory();
+
     private static final String TAG = "SourceRunner";
     private final EngineKey key;
     private final int width;
     private final int height;
     private final CacheLoader cacheLoader;
-    private final ResourceDecoder<InputStream, Z> cacheDecoder;
+    private final ResourceDecoder<File, Z> cacheDecoder;
     private final DataFetcher<T> fetcher;
     private final boolean cacheSource;
     private final Encoder<T> sourceEncoder;
@@ -40,15 +46,45 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
     private final DiskCache diskCache;
     private final Priority priority;
     private final ResourceCallback cb;
+    private WriterFactory writerFactory;
 
-    private Resource<Z> result;
     private volatile boolean isCancelled;
 
-    public SourceResourceRunner(EngineKey key, int width, int height, CacheLoader cacheLoader,
-            ResourceDecoder<InputStream, Z> cacheDecoder, DataFetcher<T> dataFetcher, boolean cacheSource,
-            Encoder<T> sourceEncoder, ResourceDecoder<T, Z> decoder, Transformation<Z> transformation,
-            ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, DiskCache diskCache, Priority priority,
-            ResourceCallback cb) {
+    public SourceResourceRunner(EngineKey key,
+                         int width,
+                         int height,
+                         CacheLoader cacheLoader,
+                         ResourceDecoder<File, Z> cacheDecoder,
+                         DataFetcher<T> dataFetcher,
+                         boolean cacheSource,
+                         Encoder<T> sourceEncoder,
+                         ResourceDecoder<T, Z> decoder,
+                         Transformation<Z> transformation,
+                         ResourceEncoder<Z> encoder,
+                         ResourceTranscoder<Z, R> transcoder,
+                         DiskCache diskCache,
+                         Priority priority,
+                         ResourceCallback cb) {
+        this(key, width, height, cacheLoader, cacheDecoder, dataFetcher, cacheSource, sourceEncoder, decoder,
+                transformation, encoder, transcoder, diskCache, priority, cb, DEFAULT_WRITER_FACTORY);
+    }
+
+    SourceResourceRunner(EngineKey key,
+                         int width,
+                         int height,
+                         CacheLoader cacheLoader,
+                         ResourceDecoder<File, Z> cacheDecoder,
+                         DataFetcher<T> dataFetcher,
+                         boolean cacheSource,
+                         Encoder<T> sourceEncoder,
+                         ResourceDecoder<T, Z> decoder,
+                         Transformation<Z> transformation,
+                         ResourceEncoder<Z> encoder,
+                         ResourceTranscoder<Z, R> transcoder,
+                         DiskCache diskCache,
+                         Priority priority,
+                         ResourceCallback cb,
+                         WriterFactory writerFactory) {
         this.key = key;
         this.width = width;
         this.height = height;
@@ -64,6 +100,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
         this.diskCache = diskCache;
         this.priority = priority;
         this.cb = cb;
+        this.writerFactory = writerFactory;
     }
 
     public void cancel() {
@@ -91,19 +128,21 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
                 }
             }
 
+            Resource<Z> result = null;
+
             if (decoded != null) {
                 Resource<Z> transformed = transformation.transform(decoded, width, height);
                 if (decoded != transformed) {
                     decoded.recycle();
                 }
                 result = transformed;
-            }
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "transformed in " + (SystemClock.currentThreadTimeMillis() - start));
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "transformed in " + (SystemClock.currentThreadTimeMillis() - start));
+                }
             }
 
             if (result != null) {
-                diskCache.put(key, this);
+                diskCache.put(key, writerFactory.build(encoder, result));
                 start = SystemClock.currentThreadTimeMillis();
                 Resource<R> transcoded = transcoder.transcode(result);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -120,12 +159,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
     }
 
     private Resource<Z> encodeSourceAndDecodeFromCache(final T data) {
-        diskCache.put(key.getOriginalKey(), new DiskCache.Writer() {
-            @Override
-            public boolean write(OutputStream os) {
-                return sourceEncoder.encode(data, os);
-            }
-        });
+        diskCache.put(key.getOriginalKey(), writerFactory.build(sourceEncoder, data));
         return cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
     }
 
@@ -147,17 +181,57 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, DiskCache.Writer
     }
 
     @Override
-    public boolean write(OutputStream os) {
-        long start = SystemClock.currentThreadTimeMillis();
-        boolean success = encoder.encode(result, os);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "wrote to disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
-        }
-        return success;
-    }
-
-    @Override
     public int getPriority() {
         return priority.ordinal();
+    }
+
+    private static class DefaultWriterFactory implements WriterFactory {
+
+        @Override
+        public <T> SourceWriter<T> build(Encoder<T> encoder, T data) {
+            return new SourceWriter<T>(encoder, data);
+        }
+    }
+
+    interface WriterFactory {
+        public <T> SourceWriter<T> build(Encoder<T> encoder, T data);
+    }
+
+    static class SourceWriter<T> implements DiskCache.Writer {
+
+        private final Encoder<T> encoder;
+        private final T data;
+
+        public SourceWriter(Encoder<T> encoder, T data) {
+            this.encoder = encoder;
+            this.data = data;
+        }
+
+        @Override
+        public boolean write(File file) {
+            long start = SystemClock.currentThreadTimeMillis();
+            boolean success = false;
+            OutputStream os = null;
+            try {
+                os = new FileOutputStream(file);
+                success = encoder.encode(data, os);
+            } catch (FileNotFoundException e) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Failed to find file to write to disk cache", e);
+                }
+            } finally {
+                if (os != null) {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        // Do nothing.
+                    }
+                }
+            }
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "wrote to disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
+            }
+            return success;
+        }
     }
 }

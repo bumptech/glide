@@ -2,14 +2,15 @@ package com.bumptech.glide.load.engine;
 
 import android.os.SystemClock;
 import android.util.Log;
-import com.bumptech.glide.load.CacheLoader;
+
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
-import java.io.InputStream;
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -27,7 +28,7 @@ public class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private final SourceResourceRunner sourceRunner;
     private final EngineJob job;
     private final Priority priority;
-    private final ResourceDecoder<InputStream, Z> cacheDecoder;
+    private final ResourceDecoder<File, Z> cacheDecoder;
     private final int width;
     private final int height;
     private final CacheLoader cacheLoader;
@@ -37,7 +38,7 @@ public class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private volatile boolean isCancelled;
 
     public ResourceRunner(EngineKey key, int width, int height, CacheLoader cacheLoader,
-            ResourceDecoder<InputStream, Z> cacheDecoder, Transformation<Z> transformation,
+            ResourceDecoder<File, Z> cacheDecoder, Transformation<Z> transformation,
             ResourceTranscoder<Z, R> transcoder, SourceResourceRunner sourceRunner, ExecutorService diskCacheService,
             ExecutorService resizeService, EngineJob job, Priority priority) {
         this.key = key;

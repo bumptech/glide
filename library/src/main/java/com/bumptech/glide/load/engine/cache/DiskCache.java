@@ -2,8 +2,7 @@ package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.File;
 
 /**
  * An interface for writing to and reading from a disk cache
@@ -15,21 +14,26 @@ public interface DiskCache {
      */
     public interface Writer {
         /**
-         * Writes data to the output stream and returns true if the write was successful and should be committed, and
+         * Writes data to the file and returns true if the write was successful and should be committed, and
          * false if the write should be aborted.
          *
-         * @param os The output stream the Writer should write to.
+         * @param file The File the Writer should write to.
          */
-        public boolean write(OutputStream os);
+        public boolean write(File file);
     }
 
     /**
-     * Get an InputStream for the value at the given key.
+     * Get the cache for the value at the given key.
+     *
+     * <p>
+     *     Note - This is potentially dangerous, someone may write a new value to the file at any point in time
+     *     and we won't know about it.
+     * </p>
      *
      * @param key The key in the cache
      * @return An InputStream representing the data at key at the time get is called
      */
-    public InputStream get(Key key);
+    public File get(Key key);
 
     /**
      * Write to a key in the cache. {@link Writer} is used so that the cache implementation

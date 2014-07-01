@@ -4,11 +4,11 @@ import com.bumptech.glide.load.engine.Resource;
 
 import java.io.OutputStream;
 
-public class SkipCache<T> implements ResourceEncoder<T> {
-    private static final SkipCache SKIP_CACHE = new SkipCache();
+public class NullResourceEncoder<T> implements ResourceEncoder<T> {
+    private static final NullResourceEncoder SKIP_CACHE = new NullResourceEncoder();
 
     @SuppressWarnings("unchecked")
-    public static <T> SkipCache<T> get() {
+    public static <T> NullResourceEncoder<T> get() {
         return SKIP_CACHE;
     }
 

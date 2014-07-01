@@ -1,18 +1,19 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -180,7 +181,7 @@ public class ResourceRunnerTest {
     private static class ResourceRunnerHarness {
         EngineKey key = mock(EngineKey.class);
         Key originalKey = mock(Key.class);
-        ResourceDecoder<InputStream, Object> decoder = mock(ResourceDecoder.class);
+        ResourceDecoder<File, Object> decoder = mock(ResourceDecoder.class);
         SourceResourceRunner<Object, Object, Object> sourceRunner = mock(SourceResourceRunner.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         ExecutorService resizeService = mock(ExecutorService.class);

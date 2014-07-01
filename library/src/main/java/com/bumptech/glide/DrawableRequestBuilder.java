@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -18,7 +19,7 @@ import com.bumptech.glide.request.DrawableCrossFadeViewAnimation;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ViewPropertyAnimation;
 
-import java.io.InputStream;
+import java.io.File;
 
 public class DrawableRequestBuilder<ModelType> extends
         GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable> {
@@ -68,7 +69,7 @@ public class DrawableRequestBuilder<ModelType> extends
 
     @Override
     public DrawableRequestBuilder<ModelType> cacheDecoder(
-            ResourceDecoder<InputStream, GifBitmapWrapper> cacheDecoder) {
+            ResourceDecoder<File, GifBitmapWrapper> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
     }

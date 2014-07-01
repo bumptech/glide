@@ -2,14 +2,14 @@ package com.bumptech.glide.load;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
@@ -25,7 +25,7 @@ public class CacheLoaderTest {
     private DiskCache diskCache;
     private CacheLoader cacheLoader;
     private Key key;
-    private ResourceDecoder<InputStream, Object> decoder;
+    private ResourceDecoder<File, Object> decoder;
     private Resource<Object> expected;
 
     @SuppressWarnings("unchecked")
@@ -40,7 +40,7 @@ public class CacheLoaderTest {
 
     @Test
     public void testCacheDecoderIsCalledIfInCache() throws IOException {
-        InputStream result = new ByteArrayInputStream(new byte[0]);
+        File result = new File("test");
         when(diskCache.get(eq(key))).thenReturn(result);
 
         int width = 100;
@@ -54,9 +54,9 @@ public class CacheLoaderTest {
     public void testReturnsDecodedResourceIfInCache() throws IOException {
         int width = 50;
         int height = 75;
-        InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(diskCache.get(eq(key))).thenReturn(is);
-        when(decoder.decode(eq(is), eq(width), eq(height))).thenReturn(expected);
+        File file = new File("test");
+        when(diskCache.get(eq(key))).thenReturn(file);
+        when(decoder.decode(eq(file), eq(width), eq(height))).thenReturn(expected);
 
         assertEquals(expected, cacheLoader.load(key, decoder, width, height));
     }
@@ -68,8 +68,8 @@ public class CacheLoaderTest {
 
     @Test
     public void testDiskCacheEntryIsDeletedIfCacheDecoderThrows() throws IOException {
-        when(diskCache.get(eq(key))).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(decoder.decode(any(InputStream.class), anyInt(), anyInt())).thenThrow(new IOException("Test"));
+        when(diskCache.get(eq(key))).thenReturn(new File("test"));
+        when(decoder.decode(any(File.class), anyInt(), anyInt())).thenThrow(new IOException("Test"));
 
         cacheLoader.load(key, decoder, 100, 100);
 
@@ -78,8 +78,8 @@ public class CacheLoaderTest {
 
     @Test
     public void testDiskCacheEntryIsDeletedIfDiskCacheContainsIdAndCacheDecoderReturnsNull() throws IOException {
-        when(diskCache.get(eq(key))).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(decoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(null);
+        when(diskCache.get(eq(key))).thenReturn(new File("test"));
+        when(decoder.decode(any(File.class), anyInt(), anyInt())).thenReturn(null);
 
         cacheLoader.load(key, decoder, 100, 101);
 

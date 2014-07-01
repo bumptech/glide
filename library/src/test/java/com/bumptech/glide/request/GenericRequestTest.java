@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -17,6 +18,7 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.target.Target;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,8 +27,8 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -61,7 +63,7 @@ public class GenericRequestTest {
         int errorResourceId = 0;
         Drawable errorDrawable = null;
         LoadProvider<Object, Object, Object, Object> loadProvider = mock(LoadProvider.class);
-        ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
+        ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
         ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);

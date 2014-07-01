@@ -4,10 +4,10 @@ import com.bumptech.glide.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
-import java.io.InputStream;
+import java.io.File;
 
 public class FixedLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R>  {
     private final ModelLoader<A, T> modelLoader;
@@ -41,7 +41,7 @@ public class FixedLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R>  
     }
 
     @Override
-    public ResourceDecoder<InputStream, Z> getCacheDecoder() {
+    public ResourceDecoder<File, Z> getCacheDecoder() {
         return dataLoadProvider.getCacheDecoder();
     }
 

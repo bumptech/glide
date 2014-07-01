@@ -13,13 +13,14 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.InputStream;
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
@@ -393,7 +394,7 @@ public class EngineTest {
     private static class EngineTestHarness {
         EngineKey cacheKey = mock(EngineKey.class);
         EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
-        ResourceDecoder<InputStream, Object> cacheDecoder = mock(ResourceDecoder.class);
+        ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
         DataFetcher<Object> fetcher = mock(DataFetcher.class);
         ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);

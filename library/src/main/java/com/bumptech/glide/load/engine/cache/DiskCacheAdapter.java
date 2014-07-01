@@ -2,11 +2,11 @@ package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
 
-import java.io.InputStream;
+import java.io.File;
 
 public class DiskCacheAdapter implements DiskCache {
     @Override
-    public InputStream get(Key key) {
+    public File get(Key key) {
         return null;
     }
 

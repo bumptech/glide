@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
+
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -25,6 +26,7 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ViewPropertyAnimation;
 
+import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -121,7 +123,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
 
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> cacheDecoder(
-            ResourceDecoder<InputStream, Bitmap> cacheDecoder) {
+            ResourceDecoder<File, Bitmap> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
     }

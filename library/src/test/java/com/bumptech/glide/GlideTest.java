@@ -203,7 +203,7 @@ public class GlideTest {
         ResourceDecoder<File, File> sourceDecoder = mock(ResourceDecoder.class);
         when(sourceDecoder.decode(eq(expected), anyInt(), anyInt())).thenReturn(expectedResource);
         when(sourceDecoder.getId()).thenReturn("sourceDecoderId");
-        ResourceDecoder<InputStream, File> cacheDecoder = mock(ResourceDecoder.class);
+        ResourceDecoder<File, File> cacheDecoder = mock(ResourceDecoder.class);
         when(cacheDecoder.getId()).thenReturn("cacheDecoderId");
         ResourceEncoder<File> encoder = mock(ResourceEncoder.class);
         when(encoder.getId()).thenReturn("encoderId");

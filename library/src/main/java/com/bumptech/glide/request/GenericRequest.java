@@ -3,6 +3,7 @@ package com.bumptech.glide.request;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -17,7 +18,7 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.LogTime;
 
-import java.io.InputStream;
+import java.io.File;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -306,7 +307,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
 
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
-        ResourceDecoder<InputStream, Z> cacheDecoder = loadProvider.getCacheDecoder();
+        ResourceDecoder<File, Z> cacheDecoder = loadProvider.getCacheDecoder();
         Encoder<T> sourceEncoder = loadProvider.getSourceEncoder();
         ResourceDecoder<T, Z> decoder = loadProvider.getSourceDecoder();
         ResourceEncoder <Z> encoder = loadProvider.getEncoder();

@@ -1,14 +1,19 @@
 package com.bumptech.glide.volley;
 
 import android.util.Log;
+
 import com.android.volley.Cache;
 import com.android.volley.toolbox.ByteArrayPool;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.PoolingByteArrayOutputStream;
-import com.bumptech.glide.load.engine.cache.StringKey;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.cache.StringKey;
 
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,13 +43,15 @@ public class VolleyDiskCacheWrapper implements Cache {
 
     @Override
     public Entry get(String key) {
-        InputStream result = diskCache.get(new StringKey(key));
-        if (result == null) {
+        File file = diskCache.get(new StringKey(key));
+        if (file == null) {
             return null;
         }
+        InputStream is = null;
         try {
-            CacheHeader header = readHeader(result);
-            byte[] data = streamToBytes(result);
+            is = new FileInputStream(file);
+            CacheHeader header = readHeader(is);
+            byte[] data = streamToBytes(is);
             return header.toCacheEntry(data);
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -52,9 +59,13 @@ public class VolleyDiskCacheWrapper implements Cache {
             }
             diskCache.delete(new StringKey(key));
         } finally {
-            try {
-                result.close();
-            } catch (IOException e) { }
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // Do nothing.
+                }
+            }
         }
         return null;
     }
@@ -63,18 +74,22 @@ public class VolleyDiskCacheWrapper implements Cache {
     public void put(final String key, final Entry entry) {
         diskCache.put(new StringKey(key), new DiskCache.Writer() {
             @Override
-            public boolean write(OutputStream os) {
-                CacheHeader header = new CacheHeader(key, entry);
-                boolean success = header.writeHeader(os);
-                if (success) {
-                    try {
+            public boolean write(File file) {
+                OutputStream os = null;
+                boolean success = false;
+                try {
+                    os = new FileOutputStream(file);
+                    CacheHeader header = new CacheHeader(key, entry);
+                    success = header.writeHeader(os);
+                    if (success) {
                         os.write(entry.data);
-                    } catch (IOException e) {
-                        success = false;
-                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-                            Log.d(TAG, "Unable to write data", e);
-                        }
                     }
+                } catch (FileNotFoundException e) {
+                    success = false;
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    success = false;
                 }
                 return success;
             }
