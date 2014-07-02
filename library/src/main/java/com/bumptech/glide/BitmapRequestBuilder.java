@@ -11,6 +11,7 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -265,14 +266,8 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     }
 
     @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> skipDiskCache(boolean skip) {
-        super.skipDiskCache(skip);
-        return this;
-    }
-
-    @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> skipCache(boolean skip) {
-        super.skipCache(skip);
+    public BitmapRequestBuilder<ModelType, TranscodeType> diskCacheStrategy(DiskCacheStrategy  strategy) {
+        super.diskCacheStrategy(strategy);
         return this;
     }
 
@@ -292,12 +287,6 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
         super.sourceEncoder(sourceEncoder);
-        return this;
-    }
-
-    @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> cacheSource(boolean cacheSource) {
-        super.cacheSource(cacheSource);
         return this;
     }
 }

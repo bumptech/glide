@@ -56,11 +56,12 @@ public class DefaultResourceRunnerFactoryTest {
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         Priority priority = Priority.LOW;
         boolean isMemoryCacheable;
+        DiskCacheStrategy diskCacheStrategy;
 
         public ResourceRunner build() {
-            return factory.build(mock(EngineKey.class), width, height, cacheDecoder, fetcher, true, mock(Encoder.class),
+            return factory.build(mock(EngineKey.class), width, height, cacheDecoder, fetcher, mock(Encoder.class),
                     decoder, transformation, encoder, mock(ResourceTranscoder.class), priority, isMemoryCacheable,
-                    listener);
+                    diskCacheStrategy, listener);
         }
     }
 }

@@ -12,6 +12,7 @@ import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
@@ -99,8 +100,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(FlickrPhotoGrid.this)
                     .loadFromImage(item)
-                    .cacheSource(true)
-                    .skipDiskCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     .priority(Priority.HIGH);
         }
@@ -151,8 +151,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
                     .loadFromImage(current)
                     .thumbnail(Glide.with(FlickrPhotoGrid.this)
                             .loadFromImage(current)
-                            .cacheSource(true)
-                            .skipDiskCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                             .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     )
                     .animate(R.anim.fade_in)

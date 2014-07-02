@@ -37,7 +37,6 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
     private final CacheLoader cacheLoader;
     private final ResourceDecoder<File, Z> cacheDecoder;
     private final DataFetcher<T> fetcher;
-    private final boolean cacheSource;
     private final Encoder<T> sourceEncoder;
     private final ResourceDecoder<T, Z> decoder;
     private final Transformation<Z> transformation;
@@ -45,6 +44,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
     private final ResourceTranscoder<Z, R> transcoder;
     private final DiskCache diskCache;
     private final Priority priority;
+    private DiskCacheStrategy diskCacheStrategy;
     private final ResourceCallback cb;
     private WriterFactory writerFactory;
 
@@ -56,7 +56,6 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
                          CacheLoader cacheLoader,
                          ResourceDecoder<File, Z> cacheDecoder,
                          DataFetcher<T> dataFetcher,
-                         boolean cacheSource,
                          Encoder<T> sourceEncoder,
                          ResourceDecoder<T, Z> decoder,
                          Transformation<Z> transformation,
@@ -64,9 +63,11 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
                          ResourceTranscoder<Z, R> transcoder,
                          DiskCache diskCache,
                          Priority priority,
+                         DiskCacheStrategy diskCacheStrategy,
                          ResourceCallback cb) {
-        this(key, width, height, cacheLoader, cacheDecoder, dataFetcher, cacheSource, sourceEncoder, decoder,
-                transformation, encoder, transcoder, diskCache, priority, cb, DEFAULT_WRITER_FACTORY);
+        this(key, width, height, cacheLoader, cacheDecoder, dataFetcher, sourceEncoder, decoder,
+                transformation, encoder, transcoder, diskCache, priority, diskCacheStrategy, cb,
+                DEFAULT_WRITER_FACTORY);
     }
 
     SourceResourceRunner(EngineKey key,
@@ -75,7 +76,6 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
                          CacheLoader cacheLoader,
                          ResourceDecoder<File, Z> cacheDecoder,
                          DataFetcher<T> dataFetcher,
-                         boolean cacheSource,
                          Encoder<T> sourceEncoder,
                          ResourceDecoder<T, Z> decoder,
                          Transformation<Z> transformation,
@@ -83,6 +83,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
                          ResourceTranscoder<Z, R> transcoder,
                          DiskCache diskCache,
                          Priority priority,
+                         DiskCacheStrategy diskCacheStrategy,
                          ResourceCallback cb,
                          WriterFactory writerFactory) {
         this.key = key;
@@ -91,7 +92,6 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
         this.cacheLoader = cacheLoader;
         this.cacheDecoder = cacheDecoder;
         this.fetcher = dataFetcher;
-        this.cacheSource = cacheSource;
         this.sourceEncoder = sourceEncoder;
         this.decoder = decoder;
         this.transformation = transformation;
@@ -99,6 +99,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
         this.transcoder = transcoder;
         this.diskCache = diskCache;
         this.priority = priority;
+        this.diskCacheStrategy = diskCacheStrategy;
         this.cb = cb;
         this.writerFactory = writerFactory;
     }
@@ -142,7 +143,9 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
             }
 
             if (result != null) {
-                diskCache.put(key, writerFactory.build(encoder, result));
+                if (diskCacheStrategy.cacheResult()) {
+                    diskCache.put(key, writerFactory.build(encoder, result));
+                }
                 start = SystemClock.currentThreadTimeMillis();
                 Resource<R> transcoded = transcoder.transcode(result);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -167,7 +170,7 @@ public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
         try {
             final T data = fetcher.loadData(priority);
             if (data != null) {
-                if (cacheSource) {
+                if (diskCacheStrategy.cacheSource()) {
                     return encodeSourceAndDecodeFromCache(data);
                 } else {
                     return decoder.decode(data, width, height);

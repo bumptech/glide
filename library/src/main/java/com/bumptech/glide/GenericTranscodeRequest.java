@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.UnitTranscoder;
@@ -86,7 +87,7 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
                 File.class, glide,
                 requestTracker)
                 .priority(Priority.LOW)
-                .cacheSource(true)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .skipMemoryCache(true));
 
     }

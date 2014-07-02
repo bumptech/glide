@@ -12,9 +12,8 @@ import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.NullEncoder;
-import com.bumptech.glide.load.resource.NullResourceEncoder;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -70,12 +69,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private Drawable errorPlaceholder;
     private Priority priority = null;
     private boolean isCacheable = true;
-    private ResourceEncoder<ResourceType> preSkipEncoder;
     private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
     private int overrideHeight = -1;
     private int overrideWidth = -1;
-    private boolean cacheSource = false;
-    private Encoder<DataType> preSkipSourceEncoder;
+    private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
@@ -85,7 +82,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         this.requestTracker = requestTracker;
         this.loadProvider = loadProvider != null ?
                 new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
-        preSkipEncoder = loadProvider != null ? loadProvider.getEncoder() : null;
 
         if (context == null) {
             throw new NullPointerException("Context can't be null");
@@ -225,45 +221,32 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             Encoder<DataType> sourceEncoder) {
         if (loadProvider != null) {
             loadProvider.setSourceEncoder(sourceEncoder);
-            preSkipSourceEncoder = sourceEncoder;
         }
 
         return this;
     }
 
     /**
-     * Attempts to write the data retrieved by this request to cache first and then decodes the resource from the cached
-     * source data. Only makes sense for remote or transient data as a means of either avoiding downloading the same
-     * data repeatedly or preserving some content you expect to be removed.
+     * Sets the {@link com.bumptech.glide.load.engine.DiskCacheStrategy} to use for this load. Defaults to
+     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}.
      *
      * <p>
-     *     Note that if this is set to true the {@link ResourceDecoder} set as the decoder will not be used, instead the
-     *     cache decoder will be used.
+     *     For most applications {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT} is ideal.
+     *     Applications that use the same image multiple times in multiple sizes and are willing to trade off some
+     *     speed and disk space in return for lower bandwidth usage may want to consider using
+     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#SOURCE} or
+     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}. Any download only operations should
+     *     typically use {@link com.bumptech.glide.load.engine.DiskCacheStrategy#SOURCE}.
      * </p>
      *
-     * <p>
-     *     If no {@link Encoder} is set or available for the given data type, this may cause the load to fail.
-     * </p>
-     *
-     * @see #sourceEncoder(Encoder)
-     * @see #decoder(ResourceDecoder)
-     * @see #cacheDecoder(ResourceDecoder)
-     * @see #skipCache(boolean)
-     *
-     * @param cacheSource True to write the data directly to cache .
+     * @param strategy The strategy to use.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> cacheSource(boolean cacheSource) {
-        this.cacheSource = cacheSource;
-        if (!cacheSource) {
-            if (loadProvider != null) {
-                preSkipSourceEncoder = loadProvider.getSourceEncoder();
-            }
-            final Encoder<DataType> skipCache = NullEncoder.get();
-            return sourceEncoder(skipCache);
-        } else {
-            return sourceEncoder(preSkipSourceEncoder);
-        }
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>  diskCacheStrategy(
+            DiskCacheStrategy strategy) {
+        this.diskCacheStrategy = strategy;
+
+        return this;
     }
 
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> encoder(
@@ -272,7 +255,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         // ignore the encoder.
         if (loadProvider != null) {
             loadProvider.setEncoder(encoder);
-            preSkipEncoder = encoder;
         }
 
         return this;
@@ -457,46 +439,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Allows the loaded resource to skip the disk cache.
-     *
-     * <p>
-     *     Note - this is not a guarantee. If a request is already pending for this resource and that request is not
-     *     also skipping the disk cache, the resource will be cached on disk.
-     * </p>
-     *
-     * @param skip True to allow the resource to skip the disk cache.
-     * @return This RequestBuilder.
-     */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipDiskCache(boolean skip) {
-        if (skip) {
-            if (loadProvider != null) {
-                preSkipEncoder = loadProvider.getEncoder();
-            }
-            final NullResourceEncoder<ResourceType> nullResourceEncoder = NullResourceEncoder.get();
-            return encoder(nullResourceEncoder);
-        } else {
-            return encoder(preSkipEncoder);
-        }
-    }
-
-    /**
-     * Allows the resource to skip both the memory and the disk cache.
-     *
-     * @see #skipDiskCache(boolean)
-     * @see #skipMemoryCache(boolean)
-     *
-     * @param skip True to allow the resource to skip both the memory and the disk cache.
-     * @return This RequestBuilder.
-     */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipCache(boolean skip) {
-        skipMemoryCache(skip);
-        skipDiskCache(skip);
-        cacheSource(false);
-
-        return this;
-    }
-
-    /**
      * Overrides the {@link Target}'s width and height with the given values. This is useful almost exclusively for
      * thumbnails, and should only be used when you both need a very specific sized image and when it is impossible or
      * impractical to return that size from {@link Target#getSize(Target.SizeReadyCallback)}.
@@ -676,7 +618,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 animationFactory,
                 overrideWidth,
                 overrideHeight,
-                cacheSource);
+                diskCacheStrategy);
     }
 
     @SuppressWarnings("unchecked")

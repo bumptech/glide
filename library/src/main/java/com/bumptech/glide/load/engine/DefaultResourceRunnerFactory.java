@@ -33,16 +33,16 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
 
     @Override
     public <T, Z, R> ResourceRunner<Z, R> build(EngineKey key, int width, int height,
-            ResourceDecoder<File, Z> cacheDecoder, DataFetcher<T> fetcher, boolean cacheSource,
-            Encoder<T> sourceEncoder, ResourceDecoder<T, Z> decoder, Transformation<Z> transformation,
-            ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder, Priority priority,
-            boolean isMemoryCacheable, EngineJobListener listener) {
+            ResourceDecoder<File, Z> cacheDecoder, DataFetcher<T> fetcher,  Encoder<T> sourceEncoder,
+            ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
+            ResourceTranscoder<Z, R> transcoder, Priority priority, boolean isMemoryCacheable,
+            DiskCacheStrategy diskCacheStrategy, EngineJobListener listener) {
 
         EngineJob engineJob = new EngineJob(key, mainHandler, isMemoryCacheable, listener);
 
         SourceResourceRunner<T, Z, R> sourceRunner = new SourceResourceRunner<T, Z, R>(key, width, height, cacheLoader,
-                cacheDecoder, fetcher, cacheSource, sourceEncoder, decoder, transformation, encoder, transcoder,
-                diskCache, priority, engineJob);
+                cacheDecoder, fetcher, sourceEncoder, decoder, transformation, encoder, transcoder, diskCache,
+                priority, diskCacheStrategy, engineJob);
 
         return new ResourceRunner<Z, R>(key, width, height, cacheLoader, cacheDecoder, transformation,
                 transcoder, sourceRunner, diskCacheService, service, engineJob, priority);

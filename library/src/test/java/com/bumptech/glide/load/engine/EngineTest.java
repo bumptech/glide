@@ -365,9 +365,9 @@ public class EngineTest {
         harness.doLoad();
 
         verify(harness.factory).build(eq(harness.cacheKey), anyInt(), anyInt(), any(ResourceDecoder.class),
-                any(DataFetcher.class), anyBoolean(), any(Encoder.class), any(ResourceDecoder.class),
-                any(Transformation.class), any(ResourceEncoder.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(), any(EngineJobListener.class));
+                any(DataFetcher.class), any(Encoder.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
+                any(DiskCacheStrategy.class), any(EngineJobListener.class));
     }
 
     @Test
@@ -375,9 +375,9 @@ public class EngineTest {
         harness.doLoad();
 
         verify(harness.factory).build(eq(harness.cacheKey), eq(harness.width), eq(harness.height),
-                eq(harness.cacheDecoder), eq(harness.fetcher), eq(harness.cacheSource), eq(harness.sourceEncoder),
+                eq(harness.cacheDecoder), eq(harness.fetcher), eq(harness.sourceEncoder),
                 eq(harness.decoder), eq(harness.transformation), eq(harness.encoder), eq(harness.transcoder),
-                eq(harness.priority), eq(harness.isMemoryCacheable), eq(harness.engine));
+                eq(harness.priority), eq(harness.isMemoryCacheable), eq(harness.diskCacheStrategy), eq(harness.engine));
     }
 
     @Test(expected = RuntimeException.class)
@@ -406,8 +406,8 @@ public class EngineTest {
         Transformation transformation = mock(Transformation.class);
         ResourceRunnerFactory factory = mock(ResourceRunnerFactory.class);
         Map<Key, WeakReference<Resource>> activeResources = new HashMap<Key, WeakReference<Resource>>();
-        boolean cacheSource = true;
         Encoder<Object> sourceEncoder = mock(Encoder.class);
+        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
 
         int width = 100;
         int height = 100;
@@ -432,14 +432,14 @@ public class EngineTest {
             engine = new Engine(factory, cache, mock(DiskCache.class), mock(ExecutorService.class),
                     mock(ExecutorService.class), runners, keyFactory, activeResources);
 
-            when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher), eq(cacheSource),
+            when(factory.build(eq(cacheKey), eq(width), eq(height), eq(cacheDecoder), eq(fetcher),
                     eq(sourceEncoder), eq(decoder), eq(transformation), eq(encoder), eq(transcoder), eq(priority),
-                    eq(isMemoryCacheable), eq(engine))).thenReturn(runner);
+                    eq(isMemoryCacheable), eq(diskCacheStrategy), eq(engine))).thenReturn(runner);
         }
 
         public Engine.LoadStatus doLoad() {
-            return engine.load(width, height, cacheDecoder, fetcher, cacheSource, sourceEncoder, decoder,
-                    transformation, encoder, transcoder, priority, isMemoryCacheable, cb);
+            return engine.load(width, height, cacheDecoder, fetcher, sourceEncoder, decoder, transformation, encoder,
+                    transcoder, priority, isMemoryCacheable, diskCacheStrategy, cb);
         }
     }
 }

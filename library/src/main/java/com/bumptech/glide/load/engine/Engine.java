@@ -98,9 +98,9 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param <R>          The type of the resource that will be transcoded from the decoded resource.
      */
     public <T, Z, R> LoadStatus load(int width, int height, ResourceDecoder<File, Z> cacheDecoder,
-            DataFetcher<T> fetcher, boolean cacheSource, Encoder<T> sourceEncoder,
-            ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,
-            ResourceTranscoder<Z, R> transcoder, Priority priority, boolean isMemoryCacheable, ResourceCallback cb) {
+            DataFetcher<T> fetcher, Encoder<T> sourceEncoder, ResourceDecoder<T, Z> decoder,
+            Transformation<Z> transformation, ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
+            Priority priority, boolean isMemoryCacheable, DiskCacheStrategy diskCacheStrategy, ResourceCallback cb) {
         Util.assertMainThread();
         long startTime = LogTime.getLogTime();
 
@@ -145,8 +145,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
 
         long start = LogTime.getLogTime();
-        ResourceRunner<Z, R> runner = factory.build(key, width, height, cacheDecoder, fetcher, cacheSource,
-                sourceEncoder, decoder, transformation, encoder, transcoder, priority, isMemoryCacheable, this);
+        ResourceRunner<Z, R> runner = factory.build(key, width, height, cacheDecoder, fetcher, sourceEncoder, decoder,
+                transformation, encoder, transcoder, priority, isMemoryCacheable, diskCacheStrategy, this);
         runner.getJob().addCallback(cb);
         runners.put(key, runner);
         runner.queue();

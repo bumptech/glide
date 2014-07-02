@@ -9,6 +9,7 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
@@ -175,9 +176,14 @@ public class DrawableRequestBuilder<ModelType> extends
     }
 
     @Override
-    public DrawableRequestBuilder<ModelType> listener(
-            RequestListener<ModelType, Drawable> requestListener) {
+    public DrawableRequestBuilder<ModelType> listener(RequestListener<ModelType, Drawable> requestListener) {
         super.listener(requestListener);
+        return this;
+    }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> diskCacheStrategy(DiskCacheStrategy strategy) {
+        super.diskCacheStrategy(strategy);
         return this;
     }
 
@@ -188,26 +194,8 @@ public class DrawableRequestBuilder<ModelType> extends
     }
 
     @Override
-    public DrawableRequestBuilder<ModelType> skipDiskCache(boolean skip) {
-        super.skipDiskCache(skip);
-        return this;
-    }
-
-    @Override
-    public DrawableRequestBuilder<ModelType> skipCache(boolean skip) {
-        super.skipCache(skip);
-        return this;
-    }
-
-    @Override
     public DrawableRequestBuilder<ModelType> override(int width, int height) {
         super.override(width, height);
-        return this;
-    }
-
-    @Override
-    public DrawableRequestBuilder<ModelType> cacheSource(boolean cacheSource) {
-        super.cacheSource(cacheSource);
         return this;
     }
 

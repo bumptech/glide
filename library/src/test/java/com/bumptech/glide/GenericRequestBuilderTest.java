@@ -4,6 +4,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.GlideAnimationFactory;
@@ -93,8 +94,8 @@ public class GenericRequestBuilderTest {
     }
 
     @Test
-    public void testDoesNotThrowWithNullModelWhenSkipDiskCacheCalled() {
-        getNullModelRequest().skipDiskCache(true).skipDiskCache(false);
+    public void testDoesNotThrowWithNullModelWhenDiskCacheStrategySet() {
+        getNullModelRequest().diskCacheStrategy(DiskCacheStrategy.ALL);
     }
 
     @Test

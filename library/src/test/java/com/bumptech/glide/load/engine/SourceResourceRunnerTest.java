@@ -105,9 +105,7 @@ public class SourceResourceRunnerTest {
 
     @Test
     public void testCallbackIsCalledWithTranscodedResourceIfFetchedAndDecoded() throws Exception {
-        InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        harness.mockSuccessfulFetchAndDecode();
         when(harness.transcoder.transcode(harness.decoded)).thenReturn(harness.transcoded);
 
         harness.getRunner().run();
@@ -116,24 +114,64 @@ public class SourceResourceRunnerTest {
     }
 
     @Test
-    public void testResourceIsWrittenToCacheIfFetchedAndDecoded() throws Exception {
-        SourceResourceRunner<Object, Object, Object> runner = harness.getRunner();
-        InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+    public void testResultResourceIsWrittenToCacheIfFetchedAndDecoded() throws Exception {
+        harness.mockSuccessfulFetchAndDecode();
         when(harness.factory.build(eq(harness.encoder), eq(harness.transformed))).thenReturn(harness.writer);
 
-        runner.run();
+        harness.getRunner().run();
 
         verify(harness.diskCache).put(eq(harness.key), eq(harness.writer));
     }
 
     @Test
+    public void testResultResourceIsWrittenToCacheIfCacheStrategyIsResult() throws Exception {
+        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.mockSuccessfulFetchAndDecode();
+        when(harness.factory.build(eq(harness.encoder), eq(harness.transformed))).thenReturn(harness.writer);
+
+        harness.getRunner().run();
+
+        verify(harness.diskCache).put(eq(harness.key), eq(harness.writer));
+    }
+
+    @Test
+    public void testResultResourceIsWrittenToCacheIfCacheStrategyIsAll() throws Exception {
+        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.mockSuccessfulFetchAndDecode();
+        when(harness.factory.build(eq(harness.sourceEncoder), eq(harness.decoded))).thenReturn(harness.sourceWriter);
+        when(harness.sourceWriter.write(any(File.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                when(harness.cacheLoader.load(eq(harness.originalKey), eq(harness.cacheDecoder), eq(harness.width),
+                        eq(harness.height))).thenReturn(harness.decoded);
+                return null;
+            }
+        });
+        when(harness.factory.build(eq(harness.encoder), eq(harness.transformed))).thenReturn(harness.writer);
+
+        harness.getRunner().run();
+
+        verify(harness.diskCache).put(eq(harness.key), eq(harness.writer));
+    }
+
+    @Test
+    public void testResultResourceIsNotWrittenToCacheIfCacheStrategyIsNoneOrSource() throws Exception {
+        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.NONE, DiskCacheStrategy.SOURCE}) {
+            harness = new SourceResourceHarness();
+            harness.diskCacheStrategy = strategy;
+            harness.mockSuccessfulFetchAndDecode();
+            when(harness.factory.build(eq(harness.encoder), eq(harness.transformed))).thenReturn(harness.writer);
+
+            harness.getRunner().run();
+
+            verify(harness.diskCache, never()).put(eq(harness.key), any(DiskCache.Writer.class));
+        }
+    }
+
+    @Test
     public void testResourceIsTransformedBeforeBeingWrittenToCache() throws Exception {
         SourceResourceRunner<Object, Object, Object> runner = harness.getRunner();
-        InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        harness.mockSuccessfulFetchAndDecode();
         when(harness.transformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
                 .thenReturn(harness.transformed);
         when(harness.factory.build(eq(harness.encoder), eq(harness.transformed))).thenReturn(harness.writer);
@@ -145,9 +183,7 @@ public class SourceResourceRunnerTest {
 
     @Test
     public void testDecodedResourceIsRecycledIfTransformedResourceIsDifferent() throws Exception {
-        InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        harness.mockSuccessfulFetchAndDecode();
         Resource transformed = mock(Resource.class);
         when(harness.transformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
                 .thenReturn(transformed);
@@ -185,9 +221,7 @@ public class SourceResourceRunnerTest {
 
     @Test
     public void testDecodedResourceIsNotRecycledIfResourceIsNotTransformed() throws Exception {
-        InputStream is = new ByteArrayInputStream(new byte[0]);
-        when(harness.fetcher.loadData(eq(harness.priority))).thenReturn(is);
-        when(harness.decoder.decode(eq(is), eq(harness.width), eq(harness.height))).thenReturn(harness.decoded);
+        harness.mockSuccessfulFetchAndDecode();
         when(harness.transformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
                 .thenReturn(harness.decoded);
 
@@ -250,20 +284,38 @@ public class SourceResourceRunnerTest {
     }
 
     @Test
-    public void testEncodesRetrievedDataIfAskedToCacheSource() throws Exception {
-        harness.cacheSource = true;
-        Object data = new Object();
-        when(harness.fetcher.loadData(any(Priority.class))).thenReturn(data);
-        when(harness.factory.build(eq(harness.sourceEncoder), eq(data))).thenReturn(harness.sourceWriter);
+    public void testEncodesRetrievedDataIfAskedToCacheSourceOrAll() throws Exception {
+        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE}) {
+            harness = new SourceResourceHarness();
+            harness.diskCacheStrategy = strategy;
+            Object data = new Object();
+            when(harness.fetcher.loadData(any(Priority.class))).thenReturn(data);
+            when(harness.factory.build(eq(harness.sourceEncoder), eq(data))).thenReturn(harness.sourceWriter);
 
-        harness.getRunner().run();
+            harness.getRunner().run();
 
-        verify(harness.diskCache).put(eq(harness.originalKey), eq(harness.sourceWriter));
+            verify(harness.diskCache).put(eq(harness.originalKey), eq(harness.sourceWriter));
+        }
+    }
+
+    @Test
+    public void testDoesNotEncodeRetrievedDataIfAskedToCacheResultOrNone() throws Exception {
+        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.NONE, DiskCacheStrategy.RESULT}) {
+            harness = new SourceResourceHarness();
+            harness.diskCacheStrategy = strategy;
+            Object data = new Object();
+            when(harness.fetcher.loadData(any(Priority.class))).thenReturn(data);
+            when(harness.factory.build(eq(harness.sourceEncoder), eq(data))).thenReturn(harness.sourceWriter);
+
+            harness.getRunner().run();
+
+            verify(harness.diskCache, never()).put(eq(harness.originalKey), eq(harness.sourceWriter));
+        }
     }
 
     @Test
     public void testReturnsDecodedDataFromCacheIfAskedToCacheSource() throws Exception {
-        harness.cacheSource = true;
+        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
         Object data = new Object();
         when(harness.fetcher.loadData(any(Priority.class))).thenReturn(data);
         doAnswer(new Answer() {
@@ -299,7 +351,7 @@ public class SourceResourceRunnerTest {
         SourceResourceRunner.SourceWriter<Resource<Object>> writer = mock(SourceResourceRunner.SourceWriter.class);
         SourceResourceRunner.SourceWriter<Object> sourceWriter = mock(SourceResourceRunner.SourceWriter
                 .class);
-        boolean cacheSource = false;
+        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         Encoder<Object> sourceEncoder = mock(Encoder.class);
         int width = 150;
         int height = 200;
@@ -308,14 +360,20 @@ public class SourceResourceRunnerTest {
 
         public SourceResourceRunner<Object, Object, Object> getRunner() {
             return new SourceResourceRunner<Object, Object, Object>(key, width, height, cacheLoader, cacheDecoder,
-                    fetcher, cacheSource, sourceEncoder, decoder, transformation, encoder, transcoder, diskCache,
-                    priority, cb, factory);
+                    fetcher, sourceEncoder, decoder, transformation, encoder, transcoder, diskCache,
+                    priority, diskCacheStrategy, cb, factory);
         }
 
         public SourceResourceHarness() {
             when(key.getOriginalKey()).thenReturn(originalKey);
             when(transformation.transform(eq(decoded), eq(width), eq(height))).thenReturn(transformed);
             when(transcoder.transcode(eq(transformed))).thenReturn(transcoded);
+        }
+
+        public void mockSuccessfulFetchAndDecode() throws Exception {
+            InputStream is = new ByteArrayInputStream(new byte[0]);
+            when(fetcher.loadData(eq(priority))).thenReturn(is);
+            when(decoder.decode(eq(is), eq(width), eq(height))).thenReturn(decoded);
         }
     }
 }

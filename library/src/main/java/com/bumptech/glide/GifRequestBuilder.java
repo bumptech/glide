@@ -9,6 +9,7 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.gif.GifData;
@@ -166,14 +167,8 @@ public class GifRequestBuilder<ModelType, TranscodeType>
     }
 
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> skipDiskCache(boolean skip) {
-        super.skipDiskCache( skip);
-        return this;
-    }
-
-    @Override
-    public GifRequestBuilder<ModelType, TranscodeType> skipCache(boolean skip) {
-        super.skipCache(skip);
+    public GifRequestBuilder<ModelType, TranscodeType> diskCacheStrategy(DiskCacheStrategy strategy) {
+        super.diskCacheStrategy(strategy);
         return this;
     }
 
@@ -186,12 +181,6 @@ public class GifRequestBuilder<ModelType, TranscodeType>
     @Override
     public GifRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
         super.sourceEncoder(sourceEncoder);
-        return this;
-    }
-
-    @Override
-    public GifRequestBuilder<ModelType, TranscodeType> cacheSource(boolean cacheSource) {
-        super.cacheSource(cacheSource);
         return this;
     }
 }
