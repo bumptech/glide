@@ -75,8 +75,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
     @Override
     public void onPhotosUpdated(List<Photo> photos) {
         currentPhotos = photos;
-        if (adapter != null)
+        if (adapter != null) {
             adapter.setPhotos(currentPhotos);
+        }
     }
 
     private class FlickrPreloader extends ListPreloader<Photo> {

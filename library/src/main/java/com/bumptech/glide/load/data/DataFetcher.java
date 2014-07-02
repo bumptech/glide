@@ -1,14 +1,12 @@
 package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.model.ModelLoader;
 
 /**
  * A base class for lazily and retrieving data that can be used to load a resource. A new instance is created per image
- * load by {@link ModelLoader}. {@link #loadData(Priority)} may or may not be called for any given load depending on
- * whether or not the corresponding image is cached. Cancel also may or may not be called. If
- * {@link #loadData(Priority)} is called, then so {@link #cleanup()} will be called.
+ * load by {@link com.bumptech.glide.load.model.ModelLoader}. {@link #loadData(Priority)} may or may not be called for
+ * any given load depending on whether or not the corresponding image is cached. Cancel also may or may not be called.
+ * If {@link #loadData(Priority)} is called, then so {@link #cleanup()} will be called.
  *
  * @param <T> The type of data to be loaded.
  */
@@ -28,7 +26,8 @@ public interface DataFetcher<T> {
 
     /**
      * Cleanup or recycle any resources used by this data fetcher. This method will be called in a finally block
-     * after the data returned by {@link #loadData(Priority)} has been decoded by the {@link ResourceDecoder}.
+     * after the data returned by {@link #loadData(Priority)} has been decoded by the
+     * {@link com.bumptech.glide.load.ResourceDecoder}.
      */
     public void cleanup();
 

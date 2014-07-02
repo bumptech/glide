@@ -14,7 +14,7 @@ import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 
-public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T, Z, Z>{
+public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T, Z, Z> {
     private final Context context;
     private final A model;
     private final Glide glide;
@@ -57,7 +57,8 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
     }
 
     /**
-     * Loads the original unmodified data into the cache and calls the given Target with the cache File
+     * Loads the original unmodified data into the cache and calls the given Target with the cache File.
+     *
      * @param target The Target that will receive the cache File when the load completes
      * @param <Y> The type of Target.
      * @return The given Target.
@@ -69,6 +70,7 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
     /**
      * Loads the original unmodified data into the cache and returns a {@link java.util.concurrent.Future} that can be
      * used to retrieve the cache File containing the data.
+     *
      * @param width The width to use to fetch the data.
      * @param height The height to use to fetch the data.
      * @return A {@link java.util.concurrent.Future} that can be used to retrieve the cache File containing the data.

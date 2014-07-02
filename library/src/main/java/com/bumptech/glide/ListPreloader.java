@@ -140,7 +140,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         }
     }
 
-    private static class PreloadTargetQueue {
+    private static final class PreloadTargetQueue {
         private final Queue<PreloadTarget> queue;
 
         @TargetApi(9)

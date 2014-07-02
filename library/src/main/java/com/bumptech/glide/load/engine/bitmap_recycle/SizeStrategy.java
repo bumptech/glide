@@ -139,7 +139,7 @@ class SizeStrategy implements LruPoolStrategy {
         }
     }
 
-    private static class Key implements Poolable {
+    private static final class Key implements Poolable {
         private final KeyPool pool;
         private int size;
 
@@ -153,8 +153,12 @@ class SizeStrategy implements LruPoolStrategy {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             Key key = (Key) o;
 

@@ -30,7 +30,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     @TargetApi(11)
     private static synchronized BitmapFactory.Options getDefaultOptions() {
-        BitmapFactory.Options decodeBitmapOptions ;
+        BitmapFactory.Options decodeBitmapOptions;
         synchronized (OPTIONS_QUEUE) {
             decodeBitmapOptions = OPTIONS_QUEUE.poll();
         }
@@ -67,9 +67,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     /**
      * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image
      * will be greater than or equal to the given width and height.
-     *
      */
-    public static Downsampler AT_LEAST = new Downsampler() {
+    public static final Downsampler AT_LEAST = new Downsampler() {
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return Math.min(inHeight / outHeight, inWidth / outWidth);
@@ -86,7 +85,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      * will be less than or equal to the given width and height.
      *
      */
-    public static Downsampler AT_MOST = new Downsampler() {
+    public static final Downsampler AT_MOST = new Downsampler() {
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return Math.max(inHeight / outHeight, inWidth / outWidth);
@@ -99,10 +98,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     };
 
     /**
-     * Load the image at its original size
-     *
+     * Load the image at its original size.
      */
-    public static Downsampler NONE = new Downsampler() {
+    public static final Downsampler NONE = new Downsampler() {
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
             return 0;
@@ -229,7 +227,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         }
 
         boolean hasAlpha = false;
-        bis.mark(1024); //we probably only need 25, but this is safer (particularly since the buffer size is > 1024)
+        // We probably only need 25, but this is safer (particularly since the buffer size is > 1024).
+        bis.mark(1024);
         try {
             hasAlpha = new ImageHeaderParser(bis).hasAlpha();
         } catch (IOException e) {
@@ -251,20 +250,23 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      *
      * @see android.graphics.BitmapFactory.Options#inSampleSize
      *
-     * @param inWidth The width of the image to be downsampled
-     * @param inHeight The height of the image to be downsampled
-     * @param outWidth The width of the view/target the image will be displayed in
-     * @param outHeight The height of the view/target the imag will be displayed in
-     * @return An integer to pass in to {@link BitmapFactory#decodeStream(java.io.InputStream, android.graphics.Rect, android.graphics.BitmapFactory.Options)}
+     * @param inWidth The width of the image to be downsampled.
+     * @param inHeight The height of the image to be downsampled.
+     * @param outWidth The width of the view/target the image will be displayed in.
+     * @param outHeight The height of the view/target the imag will be displayed in.
+     * @return An integer to pass in to {@link BitmapFactory#decodeStream(java.io.InputStream, android.graphics.Rect,
+     *          android.graphics.BitmapFactory.Options)}.
      */
     protected abstract int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight);
 
     /**
-     * A method for getting the dimensions of an image from the given InputStream
+     * A method for getting the dimensions of an image from the given InputStream.
      *
-     * @param bis The InputStream representing the image
-     * @param options The options to pass to {@link BitmapFactory#decodeStream(java.io.InputStream, android.graphics.Rect, android.graphics.BitmapFactory.Options)}
-     * @return an array containing the dimensions of the image in the form {width, height}
+     * @param bis The InputStream representing the image.
+     * @param options The options to pass to
+     *          {@link BitmapFactory#decodeStream(java.io.InputStream, android.graphics.Rect,
+     *              android.graphics.BitmapFactory.Options)}.
+     * @return an array containing the dimensions of the image in the form {width, height}.
      */
     public int[] getDimensions(RecyclableBufferedInputStream bis, BitmapFactory.Options options) {
         options.inJustDecodeBounds = true;
@@ -276,13 +278,12 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     private Bitmap decodeStream(RecyclableBufferedInputStream bis, BitmapFactory.Options options) {
          if (options.inJustDecodeBounds) {
-             bis.mark(MARK_POSITION); //this is large, but jpeg headers are not size bounded so we need
-                         //something large enough to minimize the possibility of not being able to fit
-                         //enough of the header in the buffer to get the image size so that we don't fail
-                         //to load images. The BufferedInputStream will create a new buffer of 2x the
-                         //original size each time we use up the buffer space without passing the mark so
-                         //this is a maximum bound on the buffer size, not a default. Most of the time we
-                         //won't go past our pre-allocated 16kb
+             // This is large, but jpeg headers are not size bounded so we need something large enough to minimize
+             // the possibility of not being able to fit enough of the header in the buffer to get the image size so
+             // that we don't fail to load images. The BufferedInputStream will create a new buffer of 2x the
+             // original size each time we use up the buffer space without passing the mark so this is a maximum
+             // bound on the buffer size, not a default. Most of the time we won't go past our pre-allocated 16kb.
+             bis.mark(MARK_POSITION);
          }
 
         final Bitmap result = BitmapFactory.decodeStream(bis, null, options);

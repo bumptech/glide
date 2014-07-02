@@ -1,16 +1,16 @@
 package com.bumptech.glide.load.engine;
 
 /**
- * Set of available caching strategies for media
+ * Set of available caching strategies for media.
  */
 public enum DiskCacheStrategy {
-    /** Caches with both {@link #SOURCE} and {@link #RESULT} */
+    /** Caches with both {@link #SOURCE} and {@link #RESULT}. */
     ALL(true, true),
-    /** Saves no data to cache */
+    /** Saves no data to cache. */
     NONE(false, false),
-    /** Saves just the original data to cache */
+    /** Saves just the original data to cache. */
     SOURCE(true, false),
-    /** Saves the media item after all transformations to cache */
+    /** Saves the media item after all transformations to cache. */
     RESULT(false, true);
 
     private final boolean cacheSource;

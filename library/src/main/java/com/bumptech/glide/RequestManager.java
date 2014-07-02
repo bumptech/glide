@@ -1,25 +1,14 @@
 package com.bumptech.glide;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.app.FragmentActivity;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.data.HttpUrlFetcher;
+
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
-import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreStreamLoader;
 import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
-import com.bumptech.glide.load.model.stream.StreamFileLoader;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
-import com.bumptech.glide.load.model.stream.StreamResourceLoader;
-import com.bumptech.glide.load.model.stream.StreamStringLoader;
-import com.bumptech.glide.load.model.stream.StreamUriLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestTracker;
@@ -35,9 +24,9 @@ import java.util.UUID;
  * intelligently stop, start, and restart requests. Retrieve either by instantiating a new object, or to take advantage
  * built in Activity and Fragment lifecycle handling, use the static Glide.load methods with your Fragment or Activity.
  *
- * @see Glide#with(Activity)
- * @see Glide#with(FragmentActivity)
- * @see Glide#with(Fragment)
+ * @see Glide#with(android.app.Activity)
+ * @see Glide#with(android.support.v4.app.FragmentActivity)
+ * @see Glide#with(android.app.Fragment)
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
@@ -116,8 +105,8 @@ public class RequestManager {
     /**
      * Use the given generic model loader to load the given generic data class.
      * <p>
-     *     Note that in most cases you will also need to specify an {@link ResourceDecoder} and an
-     *     {@link ResourceEncoder} for the load to complete successfully.
+     *     Note that in most cases you will also need to specify an {@link com.bumptech.glide.load.ResourceDecoder} and
+     *     an {@link com.bumptech.glide.load.ResourceEncoder} for the load to complete successfully.
      * </p>
      * @param modelLoader The {@link ModelLoader} class to use to load the model.
      * @param dataClass The type of data the {@link ModelLoader} will load.
@@ -165,14 +154,15 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory} currently registered for {@link String} to load the image represented by
-     * the given {@link String}. Defaults to {@link com.bumptech.glide.load.model.stream.StreamStringLoader.Factory}
-     * and {@link StreamStringLoader} to load the given model.
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link String} to load
+     * the image represented by the given {@link String}. Defaults to
+     * {@link com.bumptech.glide.load.model.stream.StreamStringLoader.Factory} and
+     * {@link com.bumptech.glide.load.model.stream.StreamStringLoader} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *
      * @param string The string representing the image. Must be either a path, or a uri handled by
-     *      {@link StreamUriLoader}
+     *      {@link com.bumptech.glide.load.model.stream.StreamUriLoader}
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
@@ -181,12 +171,14 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory} currently registered for {@link Uri} to load the image at the given uri.
-     * Defaults to {@link com.bumptech.glide.load.model.stream.StreamUriLoader.Factory} and {@link StreamUriLoader}.
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link Uri} to load the
+     * image at the given uri. Defaults to {@link com.bumptech.glide.load.model.stream.StreamUriLoader.Factory} and
+     * {@link com.bumptech.glide.load.model.stream.StreamUriLoader}.
      *
      * @see #using(StreamModelLoader)
      *
-     * @param uri The uri representing the image. Must be a uri handled by {@link StreamUriLoader}
+     * @param uri The uri representing the image. Must be a uri handled by
+     *      {@link com.bumptech.glide.load.model.stream.StreamUriLoader}
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
@@ -197,10 +189,13 @@ public class RequestManager {
     /**
      * Use {@link android.provider.MediaStore.Images.Thumbnails} and
      * {@link android.provider.MediaStore.Video.Thumbnails} to retrieve pre-generated thumbnails for the given uri.
-     * Falls back to the registered {@link ModelLoaderFactory} registered for {@link Uri}s if the given uri is not a
-     * media store uri or if no pre-generated thumbnail exists for the given uri. In addition, mixes the given mimeType,
-     * dateModified, and orientation into the cache key to detect and invalidate thumbnails if content is changed
-     * locally.
+     *
+     * <p>
+     *  Falls back to the registered {@link com.bumptech.glide.load.model.ModelLoaderFactory} registered for
+     *  {@link Uri}s if the given uri is not a media store uri or if no pre-generated thumbnail exists for the given
+     *  uri. In addition, mixes the given mimeType, dateModified, and orientation into the cache key to detect and
+     *  invalidate thumbnails if content is changed locally.
+     * </p>
      *
      * @param uri The uri representing the media.
      * @param mimeType The mime type of the media store media. Ok to default to empty string "". See
@@ -225,9 +220,10 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory} currently registered for {@link File} to load the image represented by the
-     * given {@link File}. Defaults to {@link com.bumptech.glide.load.model.stream.StreamFileLoader.Factory} and
-     * {@link StreamFileLoader} to load the given model.
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link File} to load
+     * the image represented by the given {@link File}. Defaults to
+     * {@link com.bumptech.glide.load.model.stream.StreamFileLoader.Factory} and
+     * {@link com.bumptech.glide.load.model.stream.StreamFileLoader} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *
@@ -240,10 +236,10 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory} currently registered for {@link Integer} to load the image represented by
-     * the given {@link Integer} resource id. Defaults to
-     * {@link com.bumptech.glide.load.model.stream.StreamResourceLoader.Factory} and{@link StreamResourceLoader} to load
-     * the given model.
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link Integer} to load
+     * the image represented by the given {@link Integer} resource id. Defaults to
+     * {@link com.bumptech.glide.load.model.stream.StreamResourceLoader.Factory} and
+     * {@link com.bumptech.glide.load.model.stream.StreamResourceLoader} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *
@@ -256,8 +252,8 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory} currently registered for the given model type to load the image
-     * represented by the given model.
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for the given model type to
+     * load the image represented by the given model.
      *
      * @param model The model to load.
      * @param <T> The type of the model to load.
@@ -270,8 +266,10 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory} currently registered for {@link URL} to load the image represented by the
-     * given {@link URL}. Defaults to {@link HttpUrlGlideUrlLoader} and {@link HttpUrlFetcher} to load the given model.
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link URL} to load the
+     * image represented by the given {@link URL}. Defaults to
+     * {@link com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader} and
+     * {@link com.bumptech.glide.load.data.HttpUrlFetcher} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *
@@ -314,8 +312,8 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory} currently registered for the given model type for
-     * {@link ParcelFileDescriptor}s to load a thumbnail for the video represented by the given model.
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for the given model type
+     * for {@link ParcelFileDescriptor}s to load a thumbnail for the video represented by the given model.
      *
      * @param model The model to load.
      * @param <T> The type of the model to load.
@@ -328,8 +326,8 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link ModelLoaderFactory}s currently registered for the given model type for
-     * {@link InputStream}s and {@link ParcelFileDescriptor}s to load a thumbnail from either the image or the video
+     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory}s currently registered for the given model type
+     * for {@link InputStream}s and {@link ParcelFileDescriptor}s to load a thumbnail from either the image or the video
      * represented by the given model.
      *
      * @param model The model the load.
@@ -360,7 +358,7 @@ public class RequestManager {
      *
      * @param <T> The type of the model.
      */
-    public class VideoModelRequest<T> {
+    public final class VideoModelRequest<T> {
         private final ModelLoader<T, ParcelFileDescriptor> loader;
 
         private VideoModelRequest(ModelLoader<T, ParcelFileDescriptor> loader) {
@@ -379,7 +377,7 @@ public class RequestManager {
      *
      * @param <T> The type of the model.
      */
-    public class ImageModelRequest<T> {
+    public final class ImageModelRequest<T> {
         private final ModelLoader<T, InputStream> loader;
 
         private ImageModelRequest(ModelLoader<T, InputStream> loader) {
@@ -409,7 +407,7 @@ public class RequestManager {
      *
      * @param <T> The type of the model.
      */
-    public class GenericModelRequest<A, T> {
+    public final class GenericModelRequest<A, T> {
         private final ModelLoader<A, T> modelLoader;
         private final Class<T> dataClass;
 
@@ -422,7 +420,7 @@ public class RequestManager {
             return new GenericTypeRequest(model, modelLoader, dataClass);
         }
 
-        public class GenericTypeRequest {
+        public final class GenericTypeRequest {
             private final A model;
             private final ModelLoader<A, T> modelLoader;
             private final Class<T> dataClass;

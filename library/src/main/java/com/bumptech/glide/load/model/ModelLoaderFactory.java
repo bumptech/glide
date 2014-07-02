@@ -21,7 +21,7 @@ public interface ModelLoaderFactory<T, Y> {
     public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories);
 
     /**
-     * A lifecycle method that will be called when this factory is about to replaced
+     * A lifecycle method that will be called when this factory is about to replaced.
      */
     public void teardown();
 }

@@ -189,8 +189,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     private static class ResourceWeakReference extends WeakReference<Resource> {
-        public final Object resource;
-        public final Key key;
+        private final Object resource;
+        private final Key key;
 
         public ResourceWeakReference(Key key, Resource r, ReferenceQueue<? super Resource> q) {
             super(r, q);

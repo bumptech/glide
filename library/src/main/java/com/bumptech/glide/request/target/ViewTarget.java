@@ -1,14 +1,13 @@
 package com.bumptech.glide.request.target;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.ListView;
+
 import com.bumptech.glide.request.Request;
 
 import java.lang.ref.WeakReference;
@@ -16,14 +15,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A base {@link Target} for loading {@link Bitmap}s into {@link View}s that provides default implementations for most
- * most methods and can determine the size of views using a
+ * A base {@link Target} for loading {@link android.graphics.Bitmap}s into {@link View}s that provides default
+ * implementations for most most methods and can determine the size of views using a
  * {@link android.view.ViewTreeObserver.OnDrawListener}.
  *
  * <p>
- *     To detect {@link View} reuse in {@link ListView} or any {@link ViewGroup} that reuses views, this class uses the
- *     {@link View#setTag(Object)} method to store some metadata so that if a view is reused, any previous loads or
- *     resources from previous loads can be cancelled or reused.
+ *     To detect {@link View} reuse in {@link android.widget.ListView} or any {@link ViewGroup} that reuses views, this
+ *     class uses the {@link View#setTag(Object)} method to store some metadata so that if a view is reused, any
+ *     previous loads or resources from previous loads can be cancelled or reused.
  * </p>
  *
  * <p>
@@ -138,9 +137,9 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
                 final int width = display.getWidth();
                 final int height = display.getHeight();
                 if (Log.isLoggable(TAG, Log.WARN)) {
-                    Log.w(TAG, "Trying to load image into ImageView using WRAP_CONTENT, defaulting to screen" +
-                            " dimensions: [" + width + "x" + height + "]. Give the view an actual width and height " +
-                            " for better performance.");
+                    Log.w(TAG, "Trying to load image into ImageView using WRAP_CONTENT, defaulting to screen"
+                            + " dimensions: [" + width + "x" + height + "]. Give the view an actual width and height "
+                            + " for better performance.");
                 }
                 cb.onSizeReady(display.getWidth(), display.getHeight());
             } else {

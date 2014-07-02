@@ -70,7 +70,7 @@ public class ThumbnailRequestCoordinatorTest {
         when(thumb.isRunning()).thenReturn(true);
         coordinator.begin();
 
-        verify(thumb,never()).begin();
+        verify(thumb, never()).begin();
     }
 
     @Test

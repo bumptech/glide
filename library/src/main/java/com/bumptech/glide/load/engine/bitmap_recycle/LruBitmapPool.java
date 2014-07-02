@@ -116,8 +116,8 @@ public class LruBitmapPool implements BitmapPool {
 
     private void dump() {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "Hits=" + hits + " misses=" + misses + " puts=" + puts + " evictions=" + evictions + " currentSize="
-                    + currentSize + " maxSize=" + maxSize + "\nStrategy=" + strategy);
+            Log.v(TAG, "Hits=" + hits + " misses=" + misses + " puts=" + puts + " evictions=" + evictions
+                    + " currentSize=" + currentSize + " maxSize=" + maxSize + "\nStrategy=" + strategy);
         }
     }
 }

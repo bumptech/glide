@@ -14,7 +14,8 @@ import java.io.File;
 /**
  * A {@link ModelLoader} For translating {@link File} models into {@link ParcelFileDescriptor} resources.
  */
-public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor> implements FileDescriptorModelLoader<File> {
+public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor>
+        implements FileDescriptorModelLoader<File> {
 
     public static class Factory implements ModelLoaderFactory<File, ParcelFileDescriptor> {
         @Override

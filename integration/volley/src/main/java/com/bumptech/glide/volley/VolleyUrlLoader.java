@@ -11,7 +11,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.InputStream;
 
 /**
- *  A simple model loader for fetching images for a given url
+ *  A simple model loader for fetching images for a given url.
  */
 public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 

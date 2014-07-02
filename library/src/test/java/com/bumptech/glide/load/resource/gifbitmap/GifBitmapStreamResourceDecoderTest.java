@@ -43,7 +43,8 @@ public class GifBitmapStreamResourceDecoderTest {
     @Test
     public void testPassesGivenInputStreamWrappedAsImageVideoWrapper() throws IOException {
         final InputStream expected = new ByteArrayInputStream(new byte[0]);
-        when(gifBitmapDecoder.decode(any(ImageVideoWrapper.class), anyInt(), anyInt())).thenAnswer(new Answer<Object>() {
+        when(gifBitmapDecoder.decode(any(ImageVideoWrapper.class), anyInt(), anyInt()))
+                .thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 ImageVideoWrapper wrapper = (ImageVideoWrapper) invocation.getArguments()[0];

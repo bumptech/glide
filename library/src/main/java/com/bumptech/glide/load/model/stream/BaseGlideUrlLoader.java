@@ -57,7 +57,7 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
     }
 
     /**
-     * Get a valid url http:// or https:// for the given model and dimensions as a string
+     * Get a valid url http:// or https:// for the given model and dimensions as a string.
      *
      * @param model The model
      * @param width The width of the view/target the image will be loaded into

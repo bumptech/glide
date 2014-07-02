@@ -7,7 +7,7 @@ import com.bumptech.glide.load.Transformation;
 
 /**
  * Scale the image uniformly (maintaining the image's aspect ratio) so that one of the dimensions of the image
- * will be equal to the given dimension and the other will be less than the given dimension
+ * will be equal to the given dimension and the other will be less than the given dimension.
  */
 public class FitCenter implements Transformation<Bitmap> {
     private BitmapPool pool;

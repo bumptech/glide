@@ -5,7 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import com.bumptech.glide.load.data.DataFetcher;
 
-public abstract class UriLoader<T> implements ModelLoader<Uri, T>{
+public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
     private final Context context;
     private final ModelLoader<GlideUrl, T> urlLoader;
 

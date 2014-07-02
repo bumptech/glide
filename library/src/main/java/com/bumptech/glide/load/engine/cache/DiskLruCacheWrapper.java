@@ -23,7 +23,7 @@ public class DiskLruCacheWrapper implements DiskCache {
 
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
-    private static DiskLruCacheWrapper WRAPPER = null;
+    private static DiskLruCacheWrapper wrapper = null;
     private final SafeKeyGenerator safeKeyGenerator;
 
     /**
@@ -35,11 +35,11 @@ public class DiskLruCacheWrapper implements DiskCache {
      * @param maxSize The max size for the disk cache
      * @return The new disk cache with the given arguments, or the current cache if one already exists
      */
-    public synchronized static DiskCache get(File directory, int maxSize) {
-        if (WRAPPER == null) {
-            WRAPPER = new DiskLruCacheWrapper(directory, maxSize);
+    public static synchronized DiskCache get(File directory, int maxSize) {
+        if (wrapper == null) {
+            wrapper = new DiskLruCacheWrapper(directory, maxSize);
         }
-        return WRAPPER;
+        return wrapper;
     }
 
     private final File directory;

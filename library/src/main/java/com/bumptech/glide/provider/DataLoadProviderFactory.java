@@ -21,10 +21,10 @@ public class DataLoadProviderFactory {
 
         @Override
         public String toString() {
-            return "MultiClassKey{" +
-                    "dataClass=" + dataClass +
-                    ", resourceClass=" + resourceClass +
-                    '}';
+            return "MultiClassKey{"
+                    + "dataClass=" + dataClass
+                    + ", resourceClass=" + resourceClass
+                    + '}';
         }
 
         @Override

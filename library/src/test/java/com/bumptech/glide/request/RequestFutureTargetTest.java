@@ -152,7 +152,8 @@ public class RequestFutureTargetTest {
     }
 
     @Test
-    public void testReturnsResourceOnGetWithTimeoutIfAlreadyDone() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testReturnsResourceOnGetWithTimeoutIfAlreadyDone() throws InterruptedException, ExecutionException,
+            TimeoutException {
         Object expected = new Object();
         future.onResourceReady(expected, null, null, false, false);
 
@@ -166,25 +167,29 @@ public class RequestFutureTargetTest {
     }
 
     @Test(expected = CancellationException.class)
-    public void testThrowsCancellationExceptionIfCancelledBeforeGetWithTimeout() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testThrowsCancellationExceptionIfCancelledBeforeGetWithTimeout()
+            throws InterruptedException, ExecutionException, TimeoutException {
         future.cancel(true);
         future.get(100, TimeUnit.MILLISECONDS);
     }
 
     @Test(expected = ExecutionException.class)
-    public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGet() throws ExecutionException, InterruptedException {
+    public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGet()
+            throws ExecutionException, InterruptedException {
         future.onException(new RuntimeException(), null, null, false);
         future.get();
     }
 
     @Test(expected = ExecutionException.class)
-    public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout() throws ExecutionException, InterruptedException, TimeoutException {
+    public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
+            throws ExecutionException, InterruptedException, TimeoutException {
         future.onException(new RuntimeException(), null, null, false);
         future.get(100, TimeUnit.MILLISECONDS);
     }
 
     @Test(expected = TimeoutException.class)
-    public void testThrowsTimeoutExceptionOnGetIfFailedToReceiveResourceInTime() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testThrowsTimeoutExceptionOnGetIfFailedToReceiveResourceInTime()
+            throws InterruptedException, ExecutionException, TimeoutException {
         future.get(1, TimeUnit.MILLISECONDS);
     }
 

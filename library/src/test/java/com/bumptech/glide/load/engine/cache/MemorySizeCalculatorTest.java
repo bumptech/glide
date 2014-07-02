@@ -86,8 +86,8 @@ public class MemorySizeCalculatorTest {
         int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-        assertTrue("Expected " + (memoryCacheSize + bitmapPoolSize) + " to be less than " +
-                Math.round(memoryClassBytes * harness.sizeMultiplier) + ", memoryCacheSize: " + memoryCacheSize
+        assertTrue("Expected " + (memoryCacheSize + bitmapPoolSize) + " to be less than "
+                + Math.round(memoryClassBytes * harness.sizeMultiplier) + ", memoryCacheSize: " + memoryCacheSize
                 + " bitmapPoolSize: " + bitmapPoolSize + " memoryClass: " + memoryCacheSize
                 + " sizeMultiplier: " + harness.sizeMultiplier,
                 memoryCacheSize + bitmapPoolSize <= Math.round(memoryClassBytes * harness.sizeMultiplier));

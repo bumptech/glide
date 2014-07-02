@@ -66,8 +66,8 @@ public class MemorySizeCalculator {
     private static int getMaxSize(ActivityManager activityManager) {
         final int memoryClassBytes = activityManager.getMemoryClass() * 1024 * 1024;
         final boolean isLowMemoryDevice = isLowMemoryDevice(activityManager);
-        return Math.round(memoryClassBytes *
-                (isLowMemoryDevice ? LOW_MEMORY_MAX_SIZE_MULTIPLIER : MAX_SIZE_MULTIPLIER));
+        return Math.round(memoryClassBytes
+                * (isLowMemoryDevice ? LOW_MEMORY_MAX_SIZE_MULTIPLIER : MAX_SIZE_MULTIPLIER));
     }
 
     private static int toMb(int bytes) {

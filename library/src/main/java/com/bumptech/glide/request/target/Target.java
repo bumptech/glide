@@ -5,7 +5,7 @@ import com.bumptech.glide.request.GlideAnimation;
 import com.bumptech.glide.request.Request;
 
 /**
- * An interface that Glide can load an image into
+ * An interface that Glide can load an image into.
  *
  * @param <R> The type of resource the target can display.
  */
@@ -20,7 +20,8 @@ public interface Target<R> {
     }
 
     /**
-     * The method that will be called when the image load has finished
+     * The method that will be called when the image load has finished.
+     *
      * @param resource the loaded resource.
      */
     public void onResourceReady(R resource, GlideAnimation<R> glideAnimation);
@@ -34,7 +35,8 @@ public interface Target<R> {
     public void setPlaceholder(Drawable placeholder);
 
     /**
-     * A method to retrieve the size of this target
+     * A method to retrieve the size of this target.
+     *
      * @param cb The callback that must be called when the size of the target has been determined
      */
     public void getSize(SizeReadyCallback cb);

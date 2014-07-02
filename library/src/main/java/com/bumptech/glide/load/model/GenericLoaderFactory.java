@@ -97,12 +97,13 @@ public class GenericLoaderFactory {
      * @param <T> The type of the model.
      * @param <Y> The type of the resource.
      */
-    public synchronized <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass, Context context) {
+    public synchronized <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
+                                                                  Context context) {
         ModelLoader<T, Y> result = getCachedLoader(modelClass, resourceClass);
         if (result != null) {
-            // We've already tried to create a model loader and can't with the currently registered set of factories, but
-            // we can't use null to demonstrate that failure because model loaders that haven't been requested yet will
-            // be null in the cache. To avoid this, we use a special signal model loader.
+            // We've already tried to create a model loader and can't with the currently registered set of factories,
+            // but we can't use null to demonstrate that failure because model loaders that haven't been requested
+            // yet will be null in the cache. To avoid this, we use a special signal model loader.
             if (NULL_MODEL_LOADER.equals(result)) {
                 return null;
             } else {

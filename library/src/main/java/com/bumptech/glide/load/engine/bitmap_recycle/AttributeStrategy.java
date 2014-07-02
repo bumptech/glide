@@ -88,14 +88,24 @@ class AttributeStrategy implements LruPoolStrategy {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             Key key = (Key) o;
 
-            if (height != key.height) return false;
-            if (width != key.width) return false;
-            if (config != key.config) return false;
+            if (height != key.height) {
+                return false;
+            }
+            if (width != key.width) {
+                return false;
+            }
+            if (config != key.config) {
+                return false;
+            }
 
             return true;
         }

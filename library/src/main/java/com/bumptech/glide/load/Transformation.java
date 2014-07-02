@@ -3,7 +3,8 @@ package com.bumptech.glide.load;
 import com.bumptech.glide.load.engine.Resource;
 
 /**
- * A class for performing an arbitrary transformation on a bitmap
+ * A class for performing an arbitrary transformation on a bitmap.
+ *
  * @param <T> The type of the resource being transformed.
  */
 public interface Transformation<T> {
@@ -24,7 +25,7 @@ public interface Transformation<T> {
      * The fully qualified class name for this class is appropriate if written out, but getClass().getName() is not
      * because the name may be changed by proguard.
      *
-     * @return A string that uniquely identifies this transformation from other transformations
+     * @return A string that uniquely identifies this transformation from other transformations.
      */
     public String getId();
 }

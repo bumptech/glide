@@ -61,11 +61,11 @@ public class FlickrSearchActivity extends SherlockFragmentActivity {
         LIST
     }
 
-    private static final Map<Page, Integer> PAGE_TO_TITLE = new HashMap<Page, Integer>() {{
+    private static final Map<Page, Integer> PAGE_TO_TITLE = new HashMap<Page, Integer>() { {
         put(Page.SMALL, R.string.small);
         put(Page.MEDIUM, R.string.medium);
         put(Page.LIST, R.string.list);
-    }};
+    } };
 
     @Override
     public void onAttachFragment(Fragment fragment) {

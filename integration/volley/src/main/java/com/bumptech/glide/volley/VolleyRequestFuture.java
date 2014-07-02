@@ -54,8 +54,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @param <T> The type of parsed response this future expects.
  */
-public class VolleyRequestFuture<T> implements Future<T>, Response.Listener<T>,
-       Response.ErrorListener {
+public class VolleyRequestFuture<T> implements Future<T>, Response.Listener<T>, Response.ErrorListener {
     private Request<?> mRequest;
     private boolean mResultReceived = false;
     private T mResult;
@@ -65,8 +64,6 @@ public class VolleyRequestFuture<T> implements Future<T>, Response.Listener<T>,
     public static <E> VolleyRequestFuture<E> newFuture() {
         return new VolleyRequestFuture<E>();
     }
-
-    public VolleyRequestFuture() {}
 
     public synchronized void setRequest(Request<?> request) {
         mRequest = request;

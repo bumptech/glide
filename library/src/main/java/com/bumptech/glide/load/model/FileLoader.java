@@ -6,7 +6,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.File;
 
 /**
- * A simple model loader for {@link File}
+ * A simple model loader for {@link File}.
  */
 public class FileLoader<T> implements ModelLoader<File, T> {
 

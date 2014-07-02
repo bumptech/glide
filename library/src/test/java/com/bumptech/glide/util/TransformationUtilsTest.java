@@ -91,8 +91,8 @@ public class TransformationUtilsTest {
         float originalAspectRatio = original.getWidth() / (float) original.getHeight();
         float transformedAspectRatio = transformed.getWidth() / (float) transformed.getHeight();
 
-        assertTrue("Expected nearly identical aspect ratios, but got original of " + originalAspectRatio +
-                " and transformed of " + transformedAspectRatio,
+        assertTrue("Expected nearly identical aspect ratios, but got original of " + originalAspectRatio
+                        + " and transformed of " + transformedAspectRatio,
                 transformedAspectRatio + wiggle >= originalAspectRatio
                         && transformedAspectRatio - wiggle <= originalAspectRatio);
     }

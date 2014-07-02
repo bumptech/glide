@@ -2,8 +2,6 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 
@@ -13,9 +11,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.UnitTransformation;
-import com.bumptech.glide.load.resource.bitmap.BitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.ChildLoadProvider;
@@ -31,7 +27,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.ViewAnimation;
 import com.bumptech.glide.request.ViewPropertyAnimation;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 
@@ -45,9 +40,10 @@ import java.util.List;
  * decode those resources into bitmaps.
  *
  * @param <ModelType> The type of model representing the image or video.
- * @param <DataType> The data type that the image {@link ModelLoader} will provide that can be decoded by the image
- *      {@link BitmapDecoder}.
+ * @param <DataType> The data type that the image {@link com.bumptech.glide.load.model.ModelLoader} will provide that
+ *                  can be decoded by the {@link com.bumptech.glide.load.ResourceDecoder}.
  * @param <ResourceType> The type of the resource that will be loaded.
+ * @param <TranscodeType> The type of resource the decoded resource will be transcoded to.
  */
 public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> {
     private final Context context;
@@ -80,8 +76,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         this.transcodeClass = transcodeClass;
         this.glide = glide;
         this.requestTracker = requestTracker;
-        this.loadProvider = loadProvider != null ?
-                new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
+        this.loadProvider = loadProvider != null
+                ? new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
 
         if (context == null) {
             throw new NullPointerException("Context can't be null");
@@ -134,10 +130,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * </p>
      *
      * <p>
-     *     Almost all options will be copied from the original load, including the {@link ModelLoader},
-     *     {@link BitmapDecoder}, and {@link Transformation}s. However, {@link #placeholder(int)} and
-     *     {@link #error(int)}, and {@link #listener(RequestListener)} will only be used on the fullsize load and
-     *     will not be copied for the thumbnail load.
+     *     Almost all options will be copied from the original load, including the
+     *     {@link com.bumptech.glide.load.model.ModelLoader}, {@link com.bumptech.glide.load.ResourceDecoder}, and
+     *     {@link Transformation}s. However, {@link #placeholder(int)} and {@link #error(int)},
+     *     and {@link #listener(RequestListener)} will only be used on the fullsize load and will not be copied for
+     *     the thumbnail load.
      * </p>
      *
      * <p>
@@ -175,14 +172,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Loads the resource from the given data type using the given {@link BitmapDecoder}.
+     * Loads the resource from the given data type using the given {@link com.bumptech.glide.load.ResourceDecoder}.
      *
-     * <p>
-     *     Will be ignored if the data represented by the given model is not a video.
-     * </p>
-     *
-     * @param decoder The {@link BitmapDecoder} to use to decode the video resource.
-     * @return This request builder.
+     * @param decoder The {@link com.bumptech.glide.load.ResourceDecoder} to use to decode the resource.
+     * @return This RequestBuilder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> decoder(
             ResourceDecoder<DataType, ResourceType> decoder) {
@@ -196,7 +189,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> cacheDecoder(
-            ResourceDecoder <File, ResourceType> cacheDecoder) {
+            ResourceDecoder<File, ResourceType> cacheDecoder) {
         // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
         // ignore the decoder.
         if (loadProvider != null) {
@@ -209,10 +202,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     /**
      * Sets the source encoder to use to encode the data retrieved by this request directly into cache. The returned
      * resouce will then be decoded from the cached data.
-     *
-     * <p>
-     *     Note - This encoder will not be used unless
-     * </p>
      *
      * @param sourceEncoder The encoder to use.
      * @return This request builder.
@@ -331,8 +320,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets an animator to run a {@link ViewPropertyAnimator} on a view that the target may be wrapping when a resource
-     * load finishes. Will only be run if the load was loaded asynchronously (ie was not in the memory cache).
+     * Sets an animator to run a {@link android.view.ViewPropertyAnimator} on a view that the target may be wrapping
+     * when a resource load finishes. Will only be run if the load was loaded asynchronously (ie was not in the
+     * memory cache).
      *
      * @param animator The {@link com.bumptech.glide.request.ViewPropertyAnimation.Animator} to run.
      * @return This RequestBuilder.
@@ -355,7 +345,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets a resource to display while an image is loading
+     * Sets a resource to display while an image is loading.
      *
      * @param resourceId The id of the resource to use as a placeholder
      * @return This RequestBuilder
@@ -381,10 +371,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets a resource to display if a load fails
+     * Sets a resource to display if a load fails.
      *
-     * @param resourceId The id of the resource to use as a placeholder
-     * @return This request
+     * @param resourceId The id of the resource to use as a placeholder.
+     * @return This RequestBuilder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> error(
             int resourceId) {
@@ -492,10 +482,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets the {@link ImageView} the image will be loaded into, cancels any existing loads into the view, and frees
      * any resources Glide has loaded into the view so they may be reused.
      *
-     * @see Glide#clear(View)
+     * @see Glide#clear(android.view.View)
      *
      * @param view The view to cancel previous loads for and load the new image into.
-     * @return The {@link BitmapImageViewTarget} used to wrap the given {@link ImageView}.
+     * @return The {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link ImageView}.
      */
     public Target<TranscodeType> into(ImageView view) {
         Util.assertMainThread();

@@ -10,7 +10,9 @@ public class TranscoderFactory {
         private Class decoded;
         private Class transcoded;
 
-        public MultiClassKey() {}
+        public MultiClassKey() {
+            // Empty.
+        }
 
         public MultiClassKey(Class decoded, Class transcoded) {
             this.decoded = decoded;
@@ -24,10 +26,10 @@ public class TranscoderFactory {
 
         @Override
         public String toString() {
-            return "MultiClassKey{" +
-                    "decoded=" + decoded +
-                    ", transcoded=" + transcoded +
-                    '}';
+            return "MultiClassKey{"
+                    + "decoded=" + decoded
+                    + ", transcoded=" + transcoded
+                    + '}';
         }
 
         @Override

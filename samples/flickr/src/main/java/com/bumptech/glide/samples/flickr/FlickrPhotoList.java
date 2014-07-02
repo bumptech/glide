@@ -185,7 +185,7 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
                     .crossFade(R.anim.fade_in, 150)
                     .into(viewHolder.imageView);
 
-            viewHolder.titleText.setText(current.title);
+            viewHolder.titleText.setText(current.getTitle());
             return view;
         }
     }

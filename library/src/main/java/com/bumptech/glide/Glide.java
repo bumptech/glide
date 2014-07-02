@@ -2,7 +2,6 @@ package com.bumptech.glide;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -19,7 +18,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -27,13 +25,11 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorFileLoader;
-import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorResourceLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorStringLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorUriLoader;
 import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.StreamFileLoader;
-import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.load.model.stream.StreamResourceLoader;
 import com.bumptech.glide.load.model.stream.StreamStringLoader;
 import com.bumptech.glide.load.model.stream.StreamUriLoader;
@@ -69,8 +65,9 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * A singleton to present a simple static interface for building requests with {@link BitmapRequestBuilder} and maintaining
- * an {@link Engine}, {@link BitmapPool}, {@link DiskCache} and {@link MemoryCache}.
+ * A singleton to present a simple static interface for building requests with {@link BitmapRequestBuilder} and
+ * maintaining an {@link Engine}, {@link BitmapPool}, {@link com.bumptech.glide.load.engine.cache.DiskCache} and
+ * {@link MemoryCache}.
  *
  * <p>
  * Note - This class is not thread safe.
@@ -82,7 +79,7 @@ public class Glide {
 
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final String TAG = "Glide";
-    private static Glide GLIDE;
+    private static Glide glide;
 
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
     private final Engine engine;
@@ -136,15 +133,15 @@ public class Glide {
      * @return the singleton
      */
     public static Glide get(Context context) {
-        if (GLIDE == null) {
+        if (glide == null) {
             synchronized (Glide.class) {
-                if (GLIDE == null) {
-                    GLIDE = new GlideBuilder(context).createGlide();
+                if (glide == null) {
+                    glide = new GlideBuilder(context).createGlide();
                 }
             }
         }
 
-        return GLIDE;
+        return glide;
     }
 
     /**
@@ -154,7 +151,7 @@ public class Glide {
      * @see #setup(GlideBuilder)
      */
     public static boolean isSetup() {
-        return GLIDE != null;
+        return glide != null;
     }
 
     /**
@@ -171,11 +168,11 @@ public class Glide {
             throw new IllegalArgumentException("Glide is already setup, check with isSetup() first");
         }
 
-        GLIDE = builder.createGlide();
+        glide = builder.createGlide();
     }
 
     static void tearDown() {
-        GLIDE = null;
+        glide = null;
     }
 
     Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context) {
@@ -274,7 +271,7 @@ public class Glide {
     /**
      * Clears as much memory as possible.
      *
-     * @see ComponentCallbacks2#onLowMemory()
+     * @see android.content.ComponentCallbacks2#onLowMemory()
      */
     public void clearMemory() {
         bitmapPool.clearMemory();
@@ -284,7 +281,7 @@ public class Glide {
     /**
      * Clears some memory with the exact amount depending on the given level.
      *
-     * @see ComponentCallbacks2#onTrimMemory(int)
+     * @see android.content.ComponentCallbacks2#onTrimMemory(int)
      */
     public void trimMemory(int level) {
         bitmapPool.trimMemory(level);
@@ -315,7 +312,7 @@ public class Glide {
      */
     public static void clear(Target target) {
         Request request = target.getRequest();
-        if (request!= null) {
+        if (request != null) {
             request.clear();
         }
     }
@@ -351,10 +348,10 @@ public class Glide {
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
      * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Typically the {@link RequestManager#using(StreamModelLoader)} or
-     * {@link RequestManager#using(FileDescriptorModelLoader)} syntax is preferred because it directly links the model
-     * with the ModelLoader being used to load it. Any factory replaced by the given factory will have its
-     * {@link ModelLoaderFactory#teardown()}} method called.
+     * models. Typically the {@link RequestManager#using(com.bumptech.glide.load.model.stream.StreamModelLoader)} or
+     * {@link RequestManager#using(com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader)} syntax is
+     * preferred because it directly links the model with the ModelLoader being used to load it. Any factory replaced
+     * by the given factory will have its {@link ModelLoaderFactory#teardown()}} method called.
      *
      * <p>
      *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
@@ -367,8 +364,8 @@ public class Glide {
      *     retained statically.
      * </p>
      *
-     * @see RequestManager#using(FileDescriptorModelLoader)
-     * @see RequestManager#using(StreamModelLoader)
+     * @see RequestManager#using(com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader)
+     * @see RequestManager#using(com.bumptech.glide.load.model.stream.StreamModelLoader)
      *
      * @param modelClass The model class.
      * @param resourceClass The resource class the model loader will translate the model type into.

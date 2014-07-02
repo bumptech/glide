@@ -42,7 +42,7 @@ public class GifDataTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testReturnsSetTransformation(){
+    public void testReturnsSetTransformation() {
         Transformation<Bitmap> transformation = mock(Transformation.class);
 
         data.setFrameTransformation(transformation);

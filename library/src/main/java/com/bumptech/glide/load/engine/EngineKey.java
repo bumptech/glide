@@ -75,10 +75,8 @@ public class EngineKey implements Key {
             return false;
         } else if (!transcoder.getId().equals(engineKey.transcoder.getId())) {
             return false;
-        } else if (!sourceEncoder.getId().equals(engineKey.sourceEncoder.getId())) {
-            return false;
         } else {
-            return true;
+            return sourceEncoder.getId().equals(engineKey.sourceEncoder.getId());
         }
     }
 

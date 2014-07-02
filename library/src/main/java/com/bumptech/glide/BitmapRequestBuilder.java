@@ -14,10 +14,8 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
@@ -37,9 +35,10 @@ import java.io.InputStream;
  * @param <ModelType> The type of model that will be loaded into the target.
  * @param <TranscodeType> The type of the transcoded resource that the target will receive
  */
-@SuppressWarnings("unused") //public api
-public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericRequestBuilder<ModelType, ImageVideoWrapper,
-        Bitmap, TranscodeType> {
+// Public api.
+@SuppressWarnings("unused")
+public class BitmapRequestBuilder<ModelType, TranscodeType>
+        extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> {
     private final BitmapPool bitmapPool;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
@@ -180,18 +179,18 @@ public class BitmapRequestBuilder<ModelType, TranscodeType> extends GenericReque
     }
 
     /**
-     * Transform images using {@link CenterCrop}.
+     * Transform images using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
-     * @return This RequestBuilder
+     * @return This RequestBuilder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> centerCrop() {
         return transform(glide.getBitmapCenterCrop());
     }
 
     /**
-     * Transform images using {@link FitCenter}.
+     * Transform images using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
-     * @return This RequestBuilder
+     * @return This RequestBuilder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> fitCenter() {
         return transform(glide.getBitmapFitCenter());

@@ -69,7 +69,9 @@ public class DownsamplerTest {
             if (os != null) {
                 try {
                     os.close();
-                } catch (IOException e) { }
+                } catch (IOException e) {
+                    // Do nothing.
+                }
             }
         }
 

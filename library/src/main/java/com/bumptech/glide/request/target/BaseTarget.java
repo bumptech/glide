@@ -1,21 +1,22 @@
 package com.bumptech.glide.request.target;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.view.View;
-import com.bumptech.glide.Glide;
+
 import com.bumptech.glide.request.Request;
 
 /**
- * A base {@link Target} for loading {@link Bitmap}s that provides basic or empty implementations for most methods.
+ * A base {@link Target} for loading {@link com.bumptech.glide.load.engine.Resource}s that provides basic or empty
+ * implementations for most methods.
  *
  * <p>
- *     For maximum efficiency, clear this target when you have finished using or displaying the {@link Bitmap} loaded
- *     into it using {@link Glide#clear(Target)}.
+ *     For maximum efficiency, clear this target when you have finished using or displaying the
+ *     {@link com.bumptech.glide.load.engine.Resource} loaded into it using
+ *     {@link com.bumptech.glide.Glide#clear(Target)}.
  * </p>
  *
  * <p>
- *     For loading {@link Bitmap}s into {@link View}s, {@link ViewTarget} is preferable to this class.
+ *     For loading {@link com.bumptech.glide.load.engine.Resource}s into {@link android.view.View}s, {@link ViewTarget}
+ *     is preferable to this class.
  * </p>
  */
 public abstract class BaseTarget<Z> implements Target<Z> {

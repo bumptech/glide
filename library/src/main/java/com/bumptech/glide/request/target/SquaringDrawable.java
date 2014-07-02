@@ -111,19 +111,19 @@ public class SquaringDrawable extends Drawable {
 
     @Override
     public void invalidateSelf() {
-        super.invalidateSelf();    //To change body of overridden methods use File | Settings | File Templates.
+        super.invalidateSelf();
         wrapped.invalidateSelf();
     }
 
     @Override
     public void unscheduleSelf(Runnable what) {
-        super.unscheduleSelf(what);    //To change body of overridden methods use File | Settings | File Templates.
+        super.unscheduleSelf(what);
         wrapped.unscheduleSelf(what);
     }
 
     @Override
     public void scheduleSelf(Runnable what, long when) {
-        super.scheduleSelf(what, when);    //To change body of overridden methods use File | Settings | File Templates.
+        super.scheduleSelf(what, when);
         wrapped.scheduleSelf(what, when);
     }
 

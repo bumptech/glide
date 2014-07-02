@@ -90,7 +90,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      */
     @Override
     public synchronized int available() throws IOException {
-        InputStream localIn = in; // &#39;in&#39; could be invalidated by close()
+        // in could be invalidated by close().
+        InputStream localIn = in;
         if (buf == null || localIn == null) {
             throw streamClosed();
         }
@@ -222,7 +223,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
         /* Are there buffered bytes available? */
         if (pos >= count && fillbuf(localIn, localBuf) == -1) {
-            return -1; /* no, fill buffer */
+            /* no, fill buffer */
+            return -1;
         }
         // localBuf may have been invalidated by fillbuf
         if (localBuf != buf) {
@@ -267,7 +269,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
         if (localBuf == null) {
             throw streamClosed();
         }
-        //Arrays.checkOffsetAndCount(buffer.length, offset, byteCount);
+        // Arrays.checkOffsetAndCount(buffer.length, offset, byteCount);
         if (byteCount == 0) {
             return 0;
         }
@@ -393,8 +395,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
                     pos += byteCount - read;
                     return byteCount;
                 }
-                // Couldn&#39;t get all the bytes, skip what we read
-                read += (count - pos);
+                // Couldn't get all the bytes, skip what we read.
+                read = read + count - pos;
                 pos = count;
                 return read;
             }

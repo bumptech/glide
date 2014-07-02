@@ -50,7 +50,7 @@ public class ThumbnailStreamOpenerTest {
 
     @Test
     public void testReturnsNullIfCursorHasEmptyPath() throws FileNotFoundException {
-        MatrixCursor cursor= new MatrixCursor(new String[1]);
+        MatrixCursor cursor = new MatrixCursor(new String[1]);
         cursor.addRow(new Object[]{ "" });
         when(harness.query.query(eq(Robolectric.application), eq(harness.uri))).thenReturn(cursor);
         assertNull(harness.get()
@@ -67,7 +67,7 @@ public class ThumbnailStreamOpenerTest {
     @Test
     public void testReturnNullIfFileLengthIsZero() throws FileNotFoundException {
         when(harness.service.get(anyString())).thenReturn(harness.file);
-        when(harness.service.length(eq(harness.file))).thenReturn(0l);
+        when(harness.service.length(eq(harness.file))).thenReturn(0L);
         assertNull(harness.get().open(Robolectric.application, harness.uri));
     }
 
@@ -114,7 +114,7 @@ public class ThumbnailStreamOpenerTest {
             when(query.query(eq(Robolectric.application), eq(uri))).thenReturn(cursor);
             when(service.get(eq(file.getAbsolutePath()))).thenReturn(file);
             when(service.exists(eq(file))).thenReturn(true);
-            when(service.length(eq(file))).thenReturn(1l);
+            when(service.length(eq(file))).thenReturn(1L);
         }
 
         public MediaStoreThumbFetcher.ThumbnailStreamOpener get() {

@@ -19,7 +19,7 @@ class GifFrameResourceDecoder implements ResourceDecoder<GifDecoder, Bitmap> {
     @Override
     public Resource<Bitmap> decode(GifDecoder source, int width, int height) throws IOException {
         Bitmap bitmap = source.getNextFrame();
-        return new BitmapResource(bitmap ,bitmapPool);
+        return new BitmapResource(bitmap, bitmapPool);
     }
 
     @Override

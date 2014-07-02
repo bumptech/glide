@@ -5,9 +5,10 @@ import com.bumptech.glide.load.engine.Resource;
 import java.io.IOException;
 
 /**
- * An interface for decoding resources
+ * An interface for decoding resources.
+ *
  * @param <T> The type the resource will be decoded from (File, InputStream etc).
- * @param <Z> The type of the decoded resource (Bitmap, Drawable etc:w
+ * @param <Z> The type of the decoded resource (Bitmap, Drawable etc).
  */
 public interface ResourceDecoder<T, Z> {
 

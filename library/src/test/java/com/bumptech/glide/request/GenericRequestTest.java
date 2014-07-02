@@ -245,7 +245,7 @@ public class GenericRequestTest {
         when(harness.engine.load(anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(DataFetcher.class), any(Encoder.class), any(ResourceDecoder.class), any(Transformation.class),
                 any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
-                any(DiskCacheStrategy.class), any(ResourceCallback.class))).thenReturn (loadStatus);
+                any(DiskCacheStrategy.class), any(ResourceCallback.class))).thenReturn(loadStatus);
 
         GenericRequest request = harness.getRequest();
 

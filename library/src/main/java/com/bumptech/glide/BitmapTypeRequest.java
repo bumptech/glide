@@ -55,7 +55,7 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
         this.glide = glide;
-        this.requestTracker= requestTracker;
+        this.requestTracker = requestTracker;
         this.optionsApplier = optionsApplier;
     }
 

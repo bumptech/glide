@@ -1,9 +1,7 @@
 package com.bumptech.glide.request;
 
-import com.bumptech.glide.request.target.Target;
-
 /**
- * A request that loads an asset for an {@link Target}.
+ * A request that loads an asset for an {@link com.bumptech.glide.request.target.Target}.
  */
 public interface Request {
 
@@ -33,5 +31,8 @@ public interface Request {
      */
     public boolean isFailed();
 
+    /**
+     * Recycles the request object and releases its resources.
+     */
     public void recycle();
 }

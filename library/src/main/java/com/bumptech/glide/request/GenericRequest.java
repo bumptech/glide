@@ -30,7 +30,7 @@ import java.util.Queue;
  * @param <T> The type of the data that the resource will be loaded from.
  * @param <Z> The type of the resource that will be loaded.
  */
-public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback,
+public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback,
         ResourceCallback {
     private static final String TAG = "GenericRequest";
 
@@ -65,7 +65,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     private boolean isRunning;
     private long startTime;
 
-    private static final Queue<GenericRequest> queue = new ArrayDeque<GenericRequest>();
+    private static final Queue<GenericRequest> REQUEST_POOL = new ArrayDeque<GenericRequest>();
 
     @SuppressWarnings("unchecked")
     public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
@@ -89,7 +89,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             int overrideWidth,
             int overrideHeight,
             DiskCacheStrategy diskCacheStrategy) {
-        GenericRequest request = queue.poll();
+        GenericRequest request = REQUEST_POOL.poll();
         if (request == null) {
             request = new GenericRequest();
         }
@@ -138,7 +138,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         loadStatus = null;
         isRunning = false;
         cacheSource = false;
-        queue.offer(this);
+        REQUEST_POOL.offer(this);
     }
 
     private void init(
@@ -191,8 +191,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
                 throw new NullPointerException("CacheDecoder must not be null, try .cacheDecoder(ResouceDecoder)");
             }
             if (loadProvider.getSourceDecoder() == null) {
-                throw new NullPointerException("SourceDecoder must not be null, try .imageDecoder(ResourceDecoder) " +
-                        "and/or .videoDecoder()");
+                throw new NullPointerException("SourceDecoder must not be null, try .imageDecoder(ResourceDecoder) "
+                        + "and/or .videoDecoder()");
             }
             if (loadProvider.getEncoder() == null) {
                 throw new NullPointerException("Encoder must not be null, try .encode(ResourceEncoder)");
@@ -268,13 +268,17 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
     }
 
     private void setPlaceHolder() {
-        if (!canSetPlaceholder()) return;
+        if (!canSetPlaceholder()) {
+            return;
+        }
 
         target.setPlaceholder(getPlaceholderDrawable());
     }
 
     private void setErrorPlaceholder() {
-        if (!canSetPlaceholder()) return;
+        if (!canSetPlaceholder()) {
+            return;
+        }
 
         Drawable error = getErrorDrawable();
         if (error != null) {
@@ -312,7 +316,7 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
         ResourceDecoder<File, Z> cacheDecoder = loadProvider.getCacheDecoder();
         Encoder<T> sourceEncoder = loadProvider.getSourceEncoder();
         ResourceDecoder<T, Z> decoder = loadProvider.getSourceDecoder();
-        ResourceEncoder <Z> encoder = loadProvider.getEncoder();
+        ResourceEncoder<Z> encoder = loadProvider.getEncoder();
         ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
         ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
 
@@ -354,8 +358,8 @@ public class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCall
             if (resource != null) {
                 resource.release();
             }
-            onException(new Exception("Expected to receive an object of " + transcodeClass + " but instead got " +
-                    (resource != null ? resource.get() : null)));
+            onException(new Exception("Expected to receive an object of " + transcodeClass + " but instead got "
+                    + (resource != null ? resource.get() : null)));
             return;
         }
         R result = (R) resource.get();

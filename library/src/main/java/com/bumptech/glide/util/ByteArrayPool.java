@@ -5,7 +5,7 @@ import android.util.Log;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public class ByteArrayPool {
+public final class ByteArrayPool {
     private static final String TAG = "ByteArrayPool";
     // 64 KB.
     private static final int TEMP_BYTES_SIZE = 64 * 1024;

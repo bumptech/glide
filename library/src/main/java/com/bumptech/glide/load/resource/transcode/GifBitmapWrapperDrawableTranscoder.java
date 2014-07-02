@@ -10,7 +10,8 @@ public class GifBitmapWrapperDrawableTranscoder implements ResourceTranscoder<Gi
     private final ResourceTranscoder<Bitmap, ? extends Drawable> bitmapDrawableResourceTranscoder;
     private final ResourceTranscoder<GifData, ? extends Drawable> gifDrawableResourceTranscoder;
 
-    public GifBitmapWrapperDrawableTranscoder(ResourceTranscoder<Bitmap, ? extends Drawable> bitmapDrawableResourceTranscoder,
+    public GifBitmapWrapperDrawableTranscoder(
+            ResourceTranscoder<Bitmap, ? extends Drawable> bitmapDrawableResourceTranscoder,
             ResourceTranscoder<GifData, ? extends Drawable> gifDrawableResourceTranscoder) {
         this.bitmapDrawableResourceTranscoder = bitmapDrawableResourceTranscoder;
         this.gifDrawableResourceTranscoder = gifDrawableResourceTranscoder;

@@ -58,8 +58,8 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         public FifoPriorityLoadTask(Runnable runnable, T result, int order) {
             super(runnable, result);
             if (!(runnable instanceof Prioritized)) {
-                throw new IllegalArgumentException("FifoPriorityThreadPoolExecutor must be given Runnables that " +
-                        "implement Prioritized");
+                throw new IllegalArgumentException("FifoPriorityThreadPoolExecutor must be given Runnables that "
+                        + "implement Prioritized");
             }
             priority = ((Prioritized) runnable).getPriority();
             this.order = order;

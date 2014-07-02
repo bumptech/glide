@@ -41,8 +41,7 @@ public class MediaStoreThumbFetcherTest {
     }
 
     @Test
-    public void testReturnsInputStreamFromDefaultFetcherIfStreamFromThumbnailOpenerIsNull()
-            throws Exception {
+    public void testReturnsInputStreamFromDefaultFetcherIfStreamFromThumbnailOpenerIsNull() throws Exception {
         InputStream expected = new ByteArrayInputStream(new byte[0]);
 
         when(harness.thumbnailFetcher.open(eq(Robolectric.application), eq(harness.uri))).thenReturn(null);

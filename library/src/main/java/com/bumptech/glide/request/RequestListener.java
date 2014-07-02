@@ -33,9 +33,9 @@ public interface RequestListener<T, R> {
      *     relevant builder calls (like centerCrop, placeholder etc).
      * </p>
      *
-     * @param e The exception, or null
-     * @param model The model we were trying to load when the exception occurred
-     * @param target The {@link Target} we were trying to load the image into
+     * @param e The exception, or null.
+     * @param model The model we were trying to load when the exception occurred.
+     * @param target The {@link Target} we were trying to load the image into.
      * @return True if the listener has handled updating the target for the given exception, false to allow
      *         Glide's request to update the target.
      */
@@ -43,7 +43,7 @@ public interface RequestListener<T, R> {
 
     /**
      * Called when a load completes successfully, immediately after
-     * {@link Target#onResourceReady(Object, GlideAnimation)}
+     * {@link Target#onResourceReady(Object, GlideAnimation)}.
      *
      * @param resource The resource that was loaded for the target.
      * @param model The specific model that was used to load the image.

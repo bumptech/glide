@@ -664,7 +664,9 @@ public class GlideTest {
         DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
         try {
             when(fetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            // Do nothing.
+        }
         when(fetcher.getId()).thenReturn(UUID.randomUUID().toString());
         when(modelLoader.getResourceFetcher(any(modelClass), anyInt(), anyInt()))
                 .thenReturn(fetcher);
@@ -699,36 +701,37 @@ public class GlideTest {
     // using static maps seems to fix the issue.
     @Implements(value = ContentResolver.class, resetStaticState = true)
     public static class ShadowFileDescriptorContentResolver {
-        private static final Map<Uri, AssetFileDescriptor> uriToFileDescriptors = new HashMap<Uri, AssetFileDescriptor>();
-        private static final Map<Uri, InputStream> uriToInputStreams = new HashMap<Uri, InputStream>();
+        private static final Map<Uri, AssetFileDescriptor> URI_TO_FILE_DESCRIPTOR =
+                new HashMap<Uri, AssetFileDescriptor>();
+        private static final Map<Uri, InputStream> URI_TO_INPUT_STREAMS = new HashMap<Uri, InputStream>();
 
         public void registerInputStream(Uri uri, InputStream inputStream) {
-            uriToInputStreams.put(uri, inputStream);
+            URI_TO_INPUT_STREAMS.put(uri, inputStream);
         }
 
         public void registerAssetFileDescriptor(Uri uri, AssetFileDescriptor assetFileDescriptor) {
-            uriToFileDescriptors.put(uri, assetFileDescriptor);
+            URI_TO_FILE_DESCRIPTOR.put(uri, assetFileDescriptor);
         }
 
         @Implementation
         public InputStream openInputStream(Uri uri) {
-            if (!uriToInputStreams.containsKey(uri)) {
+            if (!URI_TO_INPUT_STREAMS.containsKey(uri)) {
                 throw new IllegalArgumentException("You must first register an InputStream for uri: " + uri);
             }
-            return uriToInputStreams.get(uri);
+            return URI_TO_INPUT_STREAMS.get(uri);
         }
 
         @Implementation
         public AssetFileDescriptor openAssetFileDescriptor(Uri uri, String type) {
-            if (!uriToFileDescriptors.containsKey(uri)) {
+            if (!URI_TO_FILE_DESCRIPTOR.containsKey(uri)) {
                 throw new IllegalArgumentException("You must first register an AssetFileDescriptor for uri: " + uri);
             }
-            return uriToFileDescriptors.get(uri);
+            return URI_TO_FILE_DESCRIPTOR.get(uri);
         }
 
         public static void reset() {
-            uriToInputStreams.clear();
-            uriToFileDescriptors.clear();
+            URI_TO_INPUT_STREAMS.clear();
+            URI_TO_FILE_DESCRIPTOR.clear();
         }
     }
 

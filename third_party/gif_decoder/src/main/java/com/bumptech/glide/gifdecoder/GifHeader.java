@@ -5,27 +5,33 @@ import java.util.List;
 
 public class GifHeader {
 
-    public int[] gct = null;
+    int[] gct = null;
     /**
-     * Global status code of GIF data parsing
+     * Global status code of GIF data parsing.
      */
-    public int status = GifDecoder.STATUS_OK;
-    public int frameCount = 0;
+    int status = GifDecoder.STATUS_OK;
+    int frameCount = 0;
 
-    public GifFrame currentFrame;
-    public List<GifFrame> frames = new ArrayList<GifFrame>();
-     // logical screen size
-    public int width; // full image width
-    public int height; // full image height
+    GifFrame currentFrame;
+    List<GifFrame> frames = new ArrayList<GifFrame>();
+    // Logical screen size.
+    // Full image width.
+    int width;
+    // Full image height.
+    int height;
 
-    public boolean gctFlag; // 1 : global color table flag
-    // 2-4 : color resolution
-    // 5 : gct sort flag
-    public int gctSize; // 6-8 : gct size
-    public int bgIndex; // background color index
-    public int pixelAspect; // pixel aspect ratio
+    // 1 : global color table flag.
+    boolean gctFlag;
+    // 2-4 : color resolution.
+    // 5 : gct sort flag.
+    // 6-8 : gct size.
+    int gctSize;
+    // Background color index.
+    int bgIndex;
+    // Pixel aspect ratio.
+    int pixelAspect;
     //TODO: this is set both during reading the header and while decoding frames...
-    public int bgColor;
-    public boolean isTransparent;
-    public int loopCount;
+    int bgColor;
+    boolean isTransparent;
+    int loopCount;
 }

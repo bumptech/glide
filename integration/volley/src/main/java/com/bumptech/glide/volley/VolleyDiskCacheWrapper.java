@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.android.volley.Cache;
 import com.android.volley.toolbox.ByteArrayPool;
-import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.PoolingByteArrayOutputStream;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.StringKey;
@@ -22,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Closely based on {@link DiskBasedCache}.
+ * Closely based on {@link com.android.volley.toolbox.DiskBasedCache}.
  */
 public class VolleyDiskCacheWrapper implements Cache {
     private static final String TAG = "VolleyDiskCacheWrapper";
@@ -143,38 +142,38 @@ public class VolleyDiskCacheWrapper implements Cache {
         return entry;
     }
 
-        /**
+    /**
      * Handles holding onto the cache headers for an entry.
      */
     // Visible for testing.
     class CacheHeader {
-        /** The size of the data identified by this CacheHeader. (This is not
-         * serialized to disk. */
-        public long size;
+        /** The size of the data identified by this CacheHeader. (This is not serialized to disk). */
+        long size;
 
         /** The key that identifies the cache entry. */
-        public String key;
+        String key;
 
         /** ETag for cache coherence. */
-        public String etag;
+        String etag;
 
         /** Date of this response as reported by the server. */
-        public long serverDate;
+        long serverDate;
 
         /** TTL for this record. */
-        public long ttl;
+        long ttl;
 
         /** Soft TTL for this record. */
-        public long softTtl;
+        long softTtl;
 
         /** Headers from the response resulting in this cache entry. */
-        public Map<String, String> responseHeaders;
+        Map<String, String> responseHeaders;
 
         private CacheHeader() { }
 
         /**
-         * Instantiates a new CacheHeader object
-         * @param key The key that identifies the cache entry
+         * Instantiates a new CacheHeader object.
+         *
+         * @param key The key that identifies the cache entry.
          * @param entry The cache entry.
          */
         public CacheHeader(String key, Entry entry) {
@@ -252,34 +251,34 @@ public class VolleyDiskCacheWrapper implements Cache {
 
     static int readInt(InputStream is) throws IOException {
         int n = 0;
-        n |= (read(is) << 0);
-        n |= (read(is) << 8);
-        n |= (read(is) << 16);
-        n |= (read(is) << 24);
+        n |= read(is) << 0;
+        n |= read(is) << 8;
+        n |= read(is) << 16;
+        n |= read(is) << 24;
         return n;
     }
 
     static void writeLong(OutputStream os, long n) throws IOException {
-        os.write((byte)(n >>> 0));
-        os.write((byte)(n >>> 8));
-        os.write((byte)(n >>> 16));
-        os.write((byte)(n >>> 24));
-        os.write((byte)(n >>> 32));
-        os.write((byte)(n >>> 40));
-        os.write((byte)(n >>> 48));
-        os.write((byte)(n >>> 56));
+        os.write((byte) (n >>> 0));
+        os.write((byte) (n >>> 8));
+        os.write((byte) (n >>> 16));
+        os.write((byte) (n >>> 24));
+        os.write((byte) (n >>> 32));
+        os.write((byte) (n >>> 40));
+        os.write((byte) (n >>> 48));
+        os.write((byte) (n >>> 56));
     }
 
     static long readLong(InputStream is) throws IOException {
         long n = 0;
-        n |= ((read(is) & 0xFFL) << 0);
-        n |= ((read(is) & 0xFFL) << 8);
-        n |= ((read(is) & 0xFFL) << 16);
-        n |= ((read(is) & 0xFFL) << 24);
-        n |= ((read(is) & 0xFFL) << 32);
-        n |= ((read(is) & 0xFFL) << 40);
-        n |= ((read(is) & 0xFFL) << 48);
-        n |= ((read(is) & 0xFFL) << 56);
+        n |= (read(is) & 0xFFL) << 0;
+        n |= (read(is) & 0xFFL) << 8;
+        n |= (read(is) & 0xFFL) << 16;
+        n |= (read(is) & 0xFFL) << 24;
+        n |= (read(is) & 0xFFL) << 32;
+        n |= (read(is) & 0xFFL) << 40;
+        n |= (read(is) & 0xFFL) << 48;
+        n |= (read(is) & 0xFFL) << 56;
         return n;
     }
 

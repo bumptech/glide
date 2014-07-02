@@ -4,12 +4,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Photo {
-    public final String id;
-    public final String owner;
-    public final String title;
-    public final String server;
-    public final String farm;
-    public final String secret;
+    private final String id;
+    private final String owner;
+    private final String title;
+    private final String server;
+    private final String farm;
+    private final String secret;
     private String partialUrl = null;
 
     public Photo(JSONObject jsonPhoto) throws JSONException {
@@ -22,10 +22,30 @@ public class Photo {
     }
 
     public String getPartialUrl() {
-        if (partialUrl == null ) {
+        if (partialUrl == null) {
             partialUrl = Api.getCacheableUrl(this);
         }
         return partialUrl;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
+    public String getFarm() {
+        return farm;
+    }
+
+    public String getSecret() {
+        return secret;
     }
 
     @Override

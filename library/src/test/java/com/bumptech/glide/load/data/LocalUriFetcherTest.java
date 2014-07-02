@@ -53,7 +53,7 @@ public class LocalUriFetcherTest {
     }
 
     private static class TestLocalUriFetcher extends LocalUriFetcher<Closeable> {
-        public Closeable closeable = mock(Closeable.class);
+        final Closeable closeable = mock(Closeable.class);
         public TestLocalUriFetcher(Context context, Uri uri) {
             super(context, uri);
         }

@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Api {
-    private static Api API;
+    private static Api api;
     private static final String TAG = "FlickrApi";
     private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
     private static final String SIGNED_API_URL = "https://api.flickr.com/services/rest/?method=%s&format=json&api_key="
@@ -32,7 +32,7 @@ public class Api {
     private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
 
 
-    private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() {{
+    private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() { {
         put(75, "s");
         put(100, "t");
         put(150, "q");
@@ -40,7 +40,7 @@ public class Api {
         put(320, "n");
         put(640, "z");
         put(1024, "b");
-    }};
+    } };
     private static final List<Integer> SORTED_SIZE_KEYS = new ArrayList<Integer>(EDGE_TO_SIZE_KEY.size());
     static {
         SORTED_SIZE_KEYS.addAll(EDGE_TO_SIZE_KEY.keySet());
@@ -63,7 +63,7 @@ public class Api {
     }
 
     public static String getCacheableUrl(Photo photo) {
-        return String.format(CACHEABLE_PHOTO_URL, photo.farm, photo.server, photo.id, photo.secret);
+        return String.format(CACHEABLE_PHOTO_URL, photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret());
     }
 
     public static String getPhotoURL(Photo photo, int width, int height) {
@@ -88,10 +88,10 @@ public class Api {
     }
 
     public static Api get(Context context) {
-        if (API == null) {
-            API = new Api(context);
+        if (api == null) {
+            api = new Api(context);
         }
-        return API;
+        return api;
     }
 
     private final RequestQueue requestQueue;
@@ -157,8 +157,8 @@ public class Api {
     }
 
     private static class SearchResult {
-        public final String searchString;
-        public final List<Photo> results;
+        private final String searchString;
+        private final List<Photo> results;
 
         public SearchResult(String searchString, List<Photo> results) {
 

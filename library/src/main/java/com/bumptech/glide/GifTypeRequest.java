@@ -37,7 +37,7 @@ public class GifTypeRequest<A> extends GifRequestBuilder<A, GifDrawable> {
     }
 
     GifTypeRequest(Context context, A model, ModelLoader<A, InputStream> streamModelLoader, Glide glide,
-            RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier){
+            RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
         super(context, model, buildProvider(glide, streamModelLoader, GifDrawable.class, null), GifDrawable.class,
                 glide, requestTracker);
         this.context = context;

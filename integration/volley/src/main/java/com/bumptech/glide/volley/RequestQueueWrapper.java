@@ -12,14 +12,13 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.NoCache;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import static android.content.pm.PackageManager.NameNotFoundException;
 
 /**
- * A clone of the {@link Volley#newRequestQueue(Context)} allowing the user to set a disk cache and defaulting to
- * no disk cache.
+ * A clone of the {@link com.android.volley.toolbox.Volley#newRequestQueue(Context)} allowing the user to set a disk
+ * cache and defaulting to no disk cache.
  */
 public class RequestQueueWrapper {
 
@@ -38,6 +37,7 @@ public class RequestQueueWrapper {
             PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
             userAgent = packageName + "/" + info.versionCode;
         } catch (NameNotFoundException e) {
+            // Do nothing.
         }
 
         final HttpStack stack;
@@ -45,7 +45,7 @@ public class RequestQueueWrapper {
             stack = new HurlStack();
         } else {
             // Prior to Gingerbread, HttpUrlConnection was unreliable.
-            // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html
+            // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html.
             stack = new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
         }
 

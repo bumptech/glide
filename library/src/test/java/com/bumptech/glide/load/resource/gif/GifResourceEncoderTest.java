@@ -54,7 +54,7 @@ public class GifResourceEncoderTest {
         OutputStream os = new ByteArrayOutputStream() {
             @Override
             public void write(byte[] buffer) throws IOException {
-                super.write(buffer);    //To change body of overridden methods use File | Settings | File Templates.
+                super.write(buffer);
                 throw new IOException("Test");
             }
         };

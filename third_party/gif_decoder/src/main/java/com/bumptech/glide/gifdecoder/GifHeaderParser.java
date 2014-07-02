@@ -11,18 +11,17 @@ import static com.bumptech.glide.gifdecoder.GifDecoder.STATUS_FORMAT_ERROR;
 public class GifHeaderParser {
     public static final String TAG = "GifHeaderParser";
     /**
-     * max decoder pixel stack size
+     * Max decoder pixel stack size.
      */
     private static final int MAX_STACK_SIZE = 4096;
 
     private final ByteBuffer rawData;
     private GifHeader header = new GifHeader();
 
-    // Raw data read working array
-    protected byte[] block = new byte[256]; // current data block
-    protected int blockSize = 0; // block size last graphic control extension info
-    protected boolean lctFlag; // local color table flag
-    protected int lctSize; // local color table size
+    // Raw data read working array.
+    private byte[] block = new byte[256];
+    // Block size last graphic control extension info.
+    private int blockSize = 0;
     private short[] prefix;
     private byte[] suffix;
     private byte[] pixelStack;
@@ -58,23 +57,27 @@ public class GifHeaderParser {
      * Main file parser. Reads GIF content blocks.
      */
     protected void readContents() {
-        // read GIF file content blocks
+        // Read GIF file content blocks.
         boolean done = false;
         while (!(done || err())) {
             int code = read();
             switch (code) {
-                case 0x2C: // image separator
+                // Image separator.
+                case 0x2C:
                     readBitmap();
                     break;
-                case 0x21: // extension
+                // Extension.
+                case 0x21:
                     code = read();
                     switch (code) {
-                        case 0xf9: // graphics control extension
-                            //Start a new frame
+                        // Graphics control extension.
+                        case 0xf9:
+                            // Start a new frame.
                             header.currentFrame = new GifFrame();
                             readGraphicControlExt();
                             break;
-                        case 0xff: // application extension
+                        // Application extension.
+                        case 0xff:
                             readBlock();
                             String app = "";
                             for (int i = 0; i < 11; i++) {
@@ -83,23 +86,29 @@ public class GifHeaderParser {
                             if (app.equals("NETSCAPE2.0")) {
                                 readNetscapeExt();
                             } else {
-                                skip(); // don't care
+                                // Don't care.
+                                skip();
                             }
                             break;
-                        case 0xfe:// comment extension
+                        // Comment extension.
+                        case 0xfe:
                             skip();
                             break;
-                        case 0x01:// plain text extension
+                        // Plain text extension.
+                        case 0x01:
                             skip();
                             break;
-                        default: // uninteresting extension
+                        // Uninteresting extension.
+                        default:
                             skip();
                     }
                     break;
-                case 0x3b: // terminator
+                // Terminator.
+                case 0x3b:
                     done = true;
                     break;
-                case 0x00: // bad byte, but keep going and see what happens break;
+                // Bad byte, but keep going and see what happens break;
+                case 0x00:
                 default:
                     header.status = STATUS_FORMAT_ERROR;
             }
@@ -107,47 +116,60 @@ public class GifHeaderParser {
     }
 
     /**
-     * Reads Graphics Control Extension values
+     * Reads Graphics Control Extension values.
      */
     protected void readGraphicControlExt() {
-        read(); // block size
-        int packed = read(); // packed fields
-        header.currentFrame.dispose = (packed & 0x1c) >> 2; // disposal method
+        // Block size.
+        read();
+        // Packed fields.
+        int packed = read();
+        // Disposal method.
+        header.currentFrame.dispose = (packed & 0x1c) >> 2;
         if (header.currentFrame.dispose == 0) {
-            header.currentFrame.dispose = 1; // elect to keep old image if discretionary
+            // Elect to keep old image if discretionary.
+            header.currentFrame.dispose = 1;
         }
         header.currentFrame.transparency = (packed & 1) != 0;
         header.isTransparent |= header.currentFrame.transparency;
-        header.currentFrame.delay = readShort() * 10; // delay in milliseconds
-        header.currentFrame.transIndex = read(); // transparent color index
-        read(); // block terminator
+        // Delay in milliseconds.
+        header.currentFrame.delay = readShort() * 10;
+        // Transparent color index
+        header.currentFrame.transIndex = read();
+        // Block terminator
+        read();
     }
 
-     /**
-     * Reads next frame image
+    /**
+     * Reads next frame image.
      */
     protected void readBitmap() {
-        header.currentFrame.ix = readShort(); // (sub)image position & size
+        // (sub)image position & size.
+        header.currentFrame.ix = readShort();
         header.currentFrame.iy = readShort();
         header.currentFrame.iw = readShort();
         header.currentFrame.ih = readShort();
 
         int packed = read();
-        lctFlag = (packed & 0x80) != 0; // 1 - local color table flag interlace
-        lctSize = (int) Math.pow(2, (packed & 0x07) + 1);
+        // 1 - local color table flag interlace
+        boolean lctFlag = (packed & 0x80) != 0;
+        int lctSize = (int) Math.pow(2, (packed & 0x07) + 1);
         // 3 - sort flag
         // 4-5 - reserved lctSize = 2 << (packed & 7); // 6-8 - local color
         // table size
         header.currentFrame.interlace = (packed & 0x40) != 0;
         if (lctFlag) {
-            header.currentFrame.lct = readColorTable(lctSize); // read table
+            // Read table.
+            header.currentFrame.lct = readColorTable(lctSize);
         } else {
-            header.currentFrame.lct = null; //No local color table
+            // No local color table.
+            header.currentFrame.lct = null;
         }
 
-        header.currentFrame.bufferFrameStart = rawData.position(); //Save this as the decoding position pointer
+        // Save this as the decoding position pointer.
+        header.currentFrame.bufferFrameStart = rawData.position();
 
-        skipBitmapData();  // false decode pixel data to advance buffer.
+        // False decode pixel data to advance buffer.
+        skipBitmapData();
 
         skip();
         if (err()) {
@@ -155,16 +177,17 @@ public class GifHeaderParser {
         }
 
         header.frameCount++;
-        header.frames.add(header.currentFrame); // add image to frame
+        // Add image to frame.
+        header.frames.add(header.currentFrame);
     }
-       /**
-     * Reads Netscape extenstion to obtain iteration count
+    /**
+     * Reads Netscape extension to obtain iteration count.
      */
     protected void readNetscapeExt() {
         do {
             readBlock();
             if (block[0] == 1) {
-                // loop count sub-block
+                // Loop count sub-block.
                 int b1 = ((int) block[1]) & 0xff;
                 int b2 = ((int) block[2]) & 0xff;
                 header.loopCount = (b2 << 8) | b1;
@@ -173,7 +196,7 @@ public class GifHeaderParser {
     }
 
 
-       /**
+    /**
      * Reads GIF file header information.
      */
     private void readHeader() {
@@ -191,32 +214,32 @@ public class GifHeaderParser {
             header.bgColor = header.gct[header.bgIndex];
         }
     }
-     /**
-     * Reads Logical Screen Descriptor
+    /**
+     * Reads Logical Screen Descriptor.
      */
     protected void readLSD() {
-        // logical screen size
+        // Logical screen size.
         header.width = readShort();
         header.height = readShort();
-        // packed fields
+        // Packed fields
         int packed = read();
-        header.gctFlag = (packed & 0x80) != 0; // 1 : global color table flag
-        // 2-4 : color resolution
-        // 5 : gct sort flag
-        header.gctSize = 2 << (packed & 7); // 6-8 : gct size
-        header.bgIndex = read(); // background color index
-        header.pixelAspect = read(); // pixel aspect ratio
-
-        //Now that we know the size, init scratch arrays
-        //TODO: these shouldn't go here.
-//        mainPixels = new byte[header.width * header.height];
-//        mainScratch = new int[header.width * header.height];
+        // 1 : global color table flag.
+        header.gctFlag = (packed & 0x80) != 0;
+        // 2-4 : color resolution.
+        // 5 : gct sort flag.
+        // 6-8 : gct size.
+        header.gctSize = 2 << (packed & 7);
+        // Background color index.
+        header.bgIndex = read();
+        // Pixel aspect ratio
+        header.pixelAspect = read();
     }
-     /**
-     * Reads color table as 256 RGB integer values
+
+    /**
+     * Reads color table as 256 RGB integer values.
      *
-     * @param ncolors int number of colors to read
-     * @return int array containing 256 colors (packed ARGB with full alpha)
+     * @param ncolors int number of colors to read.
+     * @return int array containing 256 colors (packed ARGB with full alpha).
      */
     protected int[] readColorTable(int ncolors) {
         int nbytes = 3 * ncolors;
@@ -226,7 +249,8 @@ public class GifHeaderParser {
         try {
             rawData.get(c);
 
-            tab = new int[256]; // max size to avoid bounds checks
+            // Max size to avoid bounds checks.
+            tab = new int[256];
             int i = 0;
             int j = 0;
             while (i < ncolors) {
@@ -243,13 +267,14 @@ public class GifHeaderParser {
         return tab;
     }
 
-      /**
+    /**
      * Decodes LZW image data into pixel array. Adapted from John Cristy's BitmapMagick.
      */
     protected void skipBitmapData() {
         int nullCode = -1;
         int npix = header.width * header.height;
-        int available, clear, code_mask, code_size, end_of_information, in_code, old_code, bits, code, count, i, datum, data_size, first, top, bi, pi;
+        int available, clear, codeMask, codeSize, endOfInformation, inCode, oldCode, bits, code, count, i, datum,
+                dataSize, first, top, bi;
 
         if (prefix == null) {
             prefix = new short[MAX_STACK_SIZE];
@@ -262,27 +287,24 @@ public class GifHeaderParser {
         }
 
         // Initialize GIF data stream decoder.
-        data_size = read();
-        clear = 1 << data_size;
-        end_of_information = clear + 1;
+        dataSize = read();
+        clear = 1 << dataSize;
+        endOfInformation = clear + 1;
         available = clear + 2;
-        old_code = nullCode;
-        code_size = data_size + 1;
-        code_mask = (1 << code_size) - 1;
-        long start = System.currentTimeMillis();
+        oldCode = nullCode;
+        codeSize = dataSize + 1;
+        codeMask = (1 << codeSize) - 1;
         for (code = 0; code < clear; code++) {
-            prefix[code] = 0; // XXX ArrayIndexOutOfBoundsException
+            // XXX ArrayIndexOutOfBoundsException.
+            prefix[code] = 0;
             suffix[code] = (byte) code;
         }
 
-        start = System.currentTimeMillis();
         // Decode GIF pixel stream.
-        datum = bits = count = first = top = pi = bi = 0;
-        int iterations = 0;
+        datum = bits = count = first = top = bi = 0;
         for (i = 0; i < npix; ) {
-            iterations++;
             if (top == 0) {
-                if (bits < code_size) {
+                if (bits < codeSize) {
                     // Load bytes until there are enough bits for a code.
                     if (count == 0) {
                         // Read a new data block.
@@ -299,50 +321,50 @@ public class GifHeaderParser {
                     continue;
                 }
                 // Get the next code.
-                code = datum & code_mask;
-                datum >>= code_size;
-                bits -= code_size;
-                // Interpret the code
-                if ((code > available) || (code == end_of_information)) {
+                code = datum & codeMask;
+                datum >>= codeSize;
+                bits -= codeSize;
+                // Interpret the code.
+                if ((code > available) || (code == endOfInformation)) {
                     break;
                 }
                 if (code == clear) {
                     // Reset decoder.
-                    code_size = data_size + 1;
-                    code_mask = (1 << code_size) - 1;
+                    codeSize = dataSize + 1;
+                    codeMask = (1 << codeSize) - 1;
                     available = clear + 2;
-                    old_code = nullCode;
+                    oldCode = nullCode;
                     continue;
                 }
-                if (old_code == nullCode) {
+                if (oldCode == nullCode) {
                     pixelStack[top++] = suffix[code];
-                    old_code = code;
+                    oldCode = code;
                     first = code;
                     continue;
                 }
-                in_code = code;
+                inCode = code;
                 if (code == available) {
                     pixelStack[top++] = (byte) first;
-                    code = old_code;
+                    code = oldCode;
                 }
                 while (code > clear) {
                     pixelStack[top++] = suffix[code];
                     code = prefix[code];
                 }
                 first = ((int) suffix[code]) & 0xff;
-                // Add a new string to the string table,
+                // Add a new string to the string table.
                 if (available >= MAX_STACK_SIZE) {
                     break;
                 }
                 pixelStack[top++] = (byte) first;
-                prefix[available] = (short) old_code;
+                prefix[available] = (short) oldCode;
                 suffix[available] = (byte) first;
                 available++;
-                if (((available & code_mask) == 0) && (available < MAX_STACK_SIZE)) {
-                    code_size++;
-                    code_mask += available;
+                if (((available & codeMask) == 0) && (available < MAX_STACK_SIZE)) {
+                    codeSize++;
+                    codeMask += available;
                 }
-                old_code = in_code;
+                oldCode = inCode;
             }
             // Pop a pixel off the pixel stack.
             top--;
@@ -350,7 +372,7 @@ public class GifHeaderParser {
         }
     }
 
-      /**
+    /**
      * Skips variable length blocks up to and including next zero length block.
      */
     protected void skip() {
@@ -359,7 +381,7 @@ public class GifHeaderParser {
         } while ((blockSize > 0) && !err());
     }
 
-     /**
+    /**
      * Reads next variable length block from input.
      *
      * @return number of bytes stored in "buffer"
@@ -384,13 +406,13 @@ public class GifHeaderParser {
         return n;
     }
 
-      /**
+    /**
      * Reads a single byte from the input stream.
      */
     private int read() {
         int curByte = 0;
         try {
-            curByte = (rawData.get() & 0xFF);
+            curByte = rawData.get() & 0xFF;
         } catch (Exception e) {
             header.status = STATUS_FORMAT_ERROR;
         }
@@ -398,10 +420,10 @@ public class GifHeaderParser {
     }
 
     /**
-     * Reads next 16-bit value, LSB first
+     * Reads next 16-bit value, LSB first.
      */
     protected int readShort() {
-        // read 16-bit value
+        // Read 16-bit value.
         return rawData.getShort();
     }
 
