@@ -6,8 +6,8 @@ package com.bumptech.glide.load.engine.cache;
 
 import android.util.Log;
 
+import com.bumptech.glide.disklrucache.DiskLruCache;
 import com.bumptech.glide.load.Key;
-import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.File;
 import java.io.IOException;

@@ -7,6 +7,6 @@
 [submodule "third_party/volley/volley"]
 	path = third_party/volley/volley
 	url = https://android.googlesource.com/platform/frameworks/volley
-[submodule "third_party/disklrucache/disklrucache"]
-	path = third_party/disklrucache/disklrucache
+[submodule "third_party/disklrucache"]
+	path = third_party/disklrucache
 	url = https://github.com/sjudd/DiskLruCache.git

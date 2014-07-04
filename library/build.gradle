@@ -1,9 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
+apply plugin: 'maven'
 
 dependencies {
     compile project(':third_party:gif_decoder')
-    compile project(':third_party:disklrucache:disklrucache')
+    compile project(':third_party:disklrucache')
 
     compile 'com.android.support:support-v4:19.1.+'
 
@@ -37,3 +38,17 @@ android {
 }
 
 apply from: "https://raw.githubusercontent.com/mcxiaoke/gradle-mvn-push/master/gradle-mvn-push.gradle"
+
+// All dependencies are written to the pom file with the default type (.jar). Since we're uploading the gif decoder
+// as an aar we need to change the type in the pom file to match or maven/gradle wont' be able to find the transitive
+// dependency.
+afterEvaluate {
+    def installer = install.repositories.mavenInstaller
+    def deployer = uploadArchives.repositories.mavenDeployer
+
+    [installer, deployer]*.pom*.whenConfigured { pom ->
+        pom.dependencies.find { dep ->
+            dep.groupId == 'com.github.bumptech.glide' && dep.artifactId == 'glide-gif-decoder'
+        }.type = "aar"
+    }
+}
