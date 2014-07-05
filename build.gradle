@@ -43,8 +43,8 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
 }
 
-evaluationDependsOn(":integration:volley")
 evaluationDependsOn(":third_party:gif_decoder")
+evaluationDependsOn(":third_party:disklrucache")
 evaluationDependsOn(":library")
 
 def getAndroidSdkDirectory() {
@@ -66,6 +66,16 @@ def getAndroidLibraryVariants() {
     }.sum().unique{ it.name }
 }
 
+// Currently the only excluded project is the :integration:volley project.
+def androidProjects = [':third_party:gif_decoder', ':library'].collect { project(it) }
+def javaProjects = [':third_party:disklrucache'].collect { project(it) }
+def allProjects = androidProjects + javaProjects
+def releaseVariantAndroidProjects = androidProjects.collect {
+    it.android.libraryVariants.findAll { variant ->
+        variant.buildType.name.equalsIgnoreCase("release")
+    }
+}
+
 // Generate javadocs containing batched documentation for all android library subprojects.
 getAndroidLibraryVariants().each { variant ->
     def androidJar = "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
@@ -75,7 +85,8 @@ getAndroidLibraryVariants().each { variant ->
         delete destinationDirPath
     }
 
-    task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+    def javadocTask = task("${variant.name}Javadoc", type: Javadoc) {
+        classifier = 'javadoc'
 
         // Get the variant from each subproject that matches our current variant's name.
         def childEquivalentChildVariants = getAndroidChildren().collect { project ->
@@ -83,7 +94,11 @@ getAndroidLibraryVariants().each { variant ->
         }.sum()
 
         source = childEquivalentChildVariants.collect { it.javaCompile.source }
-        classpath = files(childEquivalentChildVariants.collect { files(it.javaCompile.classpath.files, androidJar) })
+        source += javaProjects.collect { it.sourceSets.main.allJava }
+        classpath = files(childEquivalentChildVariants.collect {
+            files(it.javaCompile.classpath.files, androidJar)
+        })
+        classpath += javaProjects.collect { files(it.configurations.compile) }
 
         options {
             links("http://docs.oracle.com/javase/7/docs/api/")
@@ -94,55 +109,37 @@ getAndroidLibraryVariants().each { variant ->
         exclude '**/R.java'
 
         destinationDir = new File(destinationDirPath)
-
-        dependsOn("clean${variant.name.capitalize()}Javadoc")
     }
+    javadocTask.dependsOn("clean${variant.name.capitalize()}Javadoc")
 }
 
-task addChildJarTasks {
-    configure(getAndroidChildren()) { project ->
-        def copyTask = task("makeJar", type: Copy) {
-            from("${project.buildDir}/intermediates/bundles/release/")
-            into("${project.buildDir}/lib")
-            include('classes.jar')
-            rename('classes.jar', "${project.name}.jar")
-        }
-        copyTask.dependsOn project.build
-    }
-}
-
-task childJars(type: Copy) {
-    destinationDir = file("${buildDir}/lib")
-
-    into("${buildDir}/lib") {
-        getAndroidChildren().each { p ->
-            from(p.tasks.getByName("makeJar")*.outputs)
-        }
-    }
-}
-
-task cleanChildJars(type: Delete) {
-    delete "${buildDir}/lib"
-}
-
-childJars.dependsOn(addChildJarTasks, cleanChildJars)
-
-def binDirName = "bin"
+/** Build a fat jar of all internal dependencies */
+def releaseJarOut = 'bin'
 
 task releaseJar(type: Jar) {
-    from(file("${buildDir}/lib").listFiles().collect { zipTree(it)})
-    into("${buildDir}/lib")
-    destinationDir = file(binDirName)
+    from files(
+            releaseVariantAndroidProjects.collect { variant ->
+                variant.javaCompile.destinationDir
+            }
+    )
+    exclude "**/R.class"
+    exclude "**/BuildConfig.class"
+    from files(javaProjects.collect { it.sourceSets.main.output })
+
+    destinationDir = file(releaseJarOut)
     baseName = "glide-${VERSION_NAME}"
 }
 
-task cleanJar(type: Delete) {
-    delete binDirName
+task cleanReleaseJar(type: Delete) {
+    delete releaseJarOut
 }
+releaseJar.dependsOn(cleanReleaseJar)
 
-releaseJar.dependsOn(cleanJar, childJars)
+allProjects.each { project ->
+    releaseJar.dependsOn(project.tasks.getByName("checkstyle"))
+    releaseJar.dependsOn(project.build)
+}
 
 artifacts {
     archives releaseJar
 }
-

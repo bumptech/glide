@@ -22,7 +22,11 @@ repositories {
 }
 
 dependencies {
-  compile group: 'com.github.bumptech.glide', name:'glide', version:'3.3.0-SNAPSHOT', changing: true
+    compile('com.github.bumptech.glide:library:3.3.0a-SNAPSHOT:@aar') {
+        transitive = true
+        changing = true
+    }
+    compile 'com.android.support:support-v4:19.0.0'
 }
 ```
 
@@ -46,6 +50,11 @@ In your module:
   <artifactId>library</artifactId>
   <version>3.3.0-SNAPSHOT</version>
   <type>aar</type>
+</dependency>
+<dependency>
+	<groupId>com.google.android</groupId>
+	<artifactId>support-v4</artifactId>
+	<version>r7</version>
 </dependency>
 ```
 

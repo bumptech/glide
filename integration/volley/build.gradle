@@ -21,4 +21,4 @@ android {
     }
 }
 
-apply from: "https://raw.githubusercontent.com/mcxiaoke/gradle-mvn-push/master/gradle-mvn-push.gradle"
+apply from: "$rootProject.projectDir/scripts/upload.gradle"
