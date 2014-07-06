@@ -15,7 +15,7 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
     private Handler mainHandler;
     private final int width;
     private final int height;
-    // exposed for testing only.
+    // Exposed for testing only.
     private final boolean assertBackgroundThread;
 
     private R resource;
@@ -23,6 +23,7 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
     private boolean isCancelled;
     private Exception exception;
     private boolean resultReceived;
+    private boolean exceptionReceived;
 
     public RequestFutureTarget(Handler mainHandler, int width, int height) {
         this(mainHandler, width, height, true);
@@ -45,8 +46,8 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
         if (result) {
             isCancelled = true;
             clear();
+            notifyAll();
         }
-        notifyAll();
         return result;
     }
 
@@ -77,6 +78,7 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
     @Override
     public synchronized boolean onResourceReady(R resource, T model, Target target,
                                    boolean isFromMemoryCache, boolean isFirstResource) {
+        // We might get a null result.
         resultReceived = true;
         this.resource = resource;
         notifyAll();
@@ -85,6 +87,8 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
 
     @Override
     public synchronized boolean onException(Exception e, Object model, Target target, boolean isFirstImage) {
+        // We might get a null exception.
+        exceptionReceived = true;
         this.exception = e;
         notifyAll();
         return true;
@@ -122,7 +126,7 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
 
         if (isCancelled) {
             throw new CancellationException();
-        } else if (exception != null) {
+        } else if (exceptionReceived) {
             throw new ExecutionException(exception);
         } else if (resultReceived) {
             return resource;
@@ -130,13 +134,13 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
 
         if (timeoutMillis == null) {
             wait(0);
-        } else {
+        } else if (timeoutMillis > 0) {
             wait(timeoutMillis);
         }
 
         if (Thread.interrupted()) {
             throw new InterruptedException();
-        } else if (exception != null) {
+        } else if (exceptionReceived) {
             throw new ExecutionException(exception);
         } else if (isCancelled) {
             throw new CancellationException();

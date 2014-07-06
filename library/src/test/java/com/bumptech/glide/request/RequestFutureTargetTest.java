@@ -181,6 +181,13 @@ public class RequestFutureTargetTest {
     }
 
     @Test(expected = ExecutionException.class)
+    public void testThrowsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
+            throws ExecutionException, InterruptedException, TimeoutException {
+        future.onException(null, null, null, false);
+        future.get(100, TimeUnit.MILLISECONDS);
+    }
+
+    @Test(expected = ExecutionException.class)
     public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
             throws ExecutionException, InterruptedException, TimeoutException {
         future.onException(new RuntimeException(), null, null, false);
