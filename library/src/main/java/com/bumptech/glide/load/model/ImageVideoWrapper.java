@@ -4,6 +4,9 @@ import android.os.ParcelFileDescriptor;
 
 import java.io.InputStream;
 
+/**
+ * A simple wrapper that wraps an {@link java.io.InputStream} and/or an {@link android.os.ParcelFileDescriptor}.
+ */
 public class ImageVideoWrapper {
     private final InputStream streamData;
     private final ParcelFileDescriptor fileDescriptor;

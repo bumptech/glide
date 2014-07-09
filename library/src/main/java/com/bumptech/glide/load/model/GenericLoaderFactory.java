@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Maintain a map of model class to factory to retrieve a {@link ModelLoaderFactory} and/or a {@link ModelLoader}
+ * Maintains a map of model class to factory to retrieve a {@link ModelLoaderFactory} and/or a {@link ModelLoader}
  * for a given model type.
  */
 public class GenericLoaderFactory {

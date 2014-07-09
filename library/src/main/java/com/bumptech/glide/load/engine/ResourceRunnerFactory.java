@@ -11,20 +11,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import java.io.File;
 
 interface ResourceRunnerFactory {
-    /**
-     *
-     * @param key
-     * @param cacheDecoder
-     * @param fetcher
-     * @param decoder
-     * @param transformation
-     * @param encoder
-     * @param priority
-     * @param <T> The type of data the resource will be decoded from.
-     * @param <Z> The type of the resource that will be decoded.
-     * @param <R> The type of the resource that will be transcoded to from the decoded resource.
-     * @return
-     */
+
     public <T, Z, R> ResourceRunner<Z, R> build(EngineKey key, int width, int height,
             ResourceDecoder<File, Z> cacheDecoder, DataFetcher<T> fetcher,  Encoder<T> sourceEncoder,
             ResourceDecoder<T, Z> decoder, Transformation<Z> transformation, ResourceEncoder<Z> encoder,

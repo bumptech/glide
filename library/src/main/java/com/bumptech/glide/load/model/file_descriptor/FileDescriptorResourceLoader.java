@@ -10,7 +10,7 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.ResourceLoader;
 
 /**
- * A {@link ModelLoader} For translating android resource id models into {@link ParcelFileDescriptor} resources.
+ * A {@link ModelLoader} For translating android resource id models into {@link ParcelFileDescriptor} data.
  */
 public class FileDescriptorResourceLoader extends ResourceLoader<ParcelFileDescriptor>
         implements FileDescriptorModelLoader<Integer> {

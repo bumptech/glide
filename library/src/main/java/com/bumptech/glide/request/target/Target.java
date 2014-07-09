@@ -1,7 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.Request;
 
 /**
@@ -41,7 +41,13 @@ public interface Target<R> {
      */
     public void getSize(SizeReadyCallback cb);
 
+    /**
+     * Sets the current request for this target to retain, should not be called outside of Glide.
+     */
     public void setRequest(Request request);
 
+    /**
+     * Retrieves the current request for this target, should not be called outside of Glide.
+     */
     public Request getRequest();
 }

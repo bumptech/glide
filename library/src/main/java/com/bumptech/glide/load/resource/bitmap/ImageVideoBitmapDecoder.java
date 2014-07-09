@@ -10,6 +10,13 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A {@link com.bumptech.glide.load.ResourceDecoder} that decodes
+ * {@link com.bumptech.glide.load.model.ImageVideoWrapper}s using a wrapped
+ * {@link com.bumptech.glide.load.ResourceDecoder} for {@link java.io.InputStream}s and a wrapped
+ * {@link com.bumptech.glide.load.ResourceDecoder} for {@link android.os.ParcelFileDescriptor}s. The
+ * {@link java.io.InputStream} data in the {@link com.bumptech.glide.load.model.ImageVideoWrapper} is always preferred.
+ */
 public class ImageVideoBitmapDecoder implements ResourceDecoder<ImageVideoWrapper, Bitmap> {
     private static final String TAG = "ImageVideoDecoder";
     private final ResourceDecoder<InputStream, Bitmap> streamDecoder;

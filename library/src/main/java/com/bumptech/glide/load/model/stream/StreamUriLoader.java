@@ -14,7 +14,7 @@ import com.bumptech.glide.load.data.StreamLocalUriFetcher;
 import java.io.InputStream;
 
 /**
- * A {@link ModelLoader} for translating uri models into {@link InputStream} resources. Capable of handling 'http',
+ * A {@link ModelLoader} for translating uri models into {@link InputStream} data. Capable of handling 'http',
  * 'https', 'android.resource', 'content', and 'file' schemes. Unsupported schemes will throw an exception in
  * {@link #getResourceFetcher(Uri, int, int)}.
  */

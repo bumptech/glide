@@ -241,7 +241,7 @@ public class LruCacheTest {
         }
 
         @Override
-        protected void onItemRemoved(String key, Object item) {
+        protected void onItemEvicted(String key, Object item) {
             listener.onItemRemoved(item);
         }
 

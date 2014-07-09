@@ -9,6 +9,10 @@ import com.bumptech.glide.load.DecodeFormat;
 
 import java.io.IOException;
 
+/**
+ * An {@link com.bumptech.glide.load.ResourceDecoder} for decoding {@link android.graphics.Bitmap}s from
+ * {@link android.os.ParcelFileDescriptor} data.
+ */
 public class FileDescriptorBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor, Bitmap> {
     private final VideoBitmapDecoder bitmapDecoder;
     private final BitmapPool bitmapPool;

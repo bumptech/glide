@@ -46,20 +46,49 @@ public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
         sizeDeterminer = new SizeDeterminer(view);
     }
 
+    /**
+     * Returns the wrapped {@link android.view.View}.
+     */
     public T getView() {
         return view;
     }
 
+    /**
+     * Determines the size of the view by first checking {@link android.view.View#getWidth()} and
+     * {@link android.view.View#getHeight()}. If one or both are zero, it then checks the view's
+     * {@link android.view.ViewGroup.LayoutParams}. If one or both of the params width and height are less than or
+     * equal to zero, it then adds an {@link android.view.ViewTreeObserver.OnPreDrawListener} which waits until the view
+     * has been measured before calling the callback with the view's drawn width and height.
+     *
+     * @param cb {@inheritDoc}
+     */
     @Override
     public void getSize(SizeReadyCallback cb) {
         sizeDeterminer.getSize(cb);
     }
 
+    /**
+     * Stores the request using {@link View#setTag(Object)}.
+     *
+     * @param request {@inheritDoc}
+     */
     @Override
     public void setRequest(Request request) {
         view.setTag(request);
     }
 
+    /**
+     * Returns any stored request using {@link android.view.View#getTag()}.
+     *
+     * <p>
+     *     For Glide to function correctly, Glide must be the only thing that calls {@link View#setTag(Object)}. If the
+     *     tag is cleared or set to another object type, Glide will not be able to retrieve and cancel previous loads
+     *     which will not only prevent Glide from reusing resource, but will also result in incorrect images being
+     *     loaded and lots of flashing of images in lists. As a result, this will throw an
+     *     {@link java.lang.IllegalArgumentException} if {@link android.view.View#getTag()}} returns a non null object
+     *     that is not an {@link com.bumptech.glide.request.Request}.
+     * </p>
+     */
     @Override
     public Request getRequest() {
         Object tag = view.getTag();

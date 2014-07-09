@@ -10,7 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * A decoder that wraps an InputStream decoder to allow it to decode from a file.
+ * A decoder that wraps an {@link InputStream} decoder to allow it to decode from a file.
+ *
  * @param <T> The type of resource that the wrapped InputStream decoder decodes.
  */
 public class FileToStreamDecoder<T> implements ResourceDecoder<File, T> {

@@ -6,6 +6,10 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataTransformation;
 
+/**
+ * A {@link com.bumptech.glide.load.Transformation} that can apply a wrapped {@link android.graphics.Bitmap}
+ * transformation to both {@link android.graphics.Bitmap}s and {@link com.bumptech.glide.load.resource.gif.GifData}.
+ */
 public class GifBitmapWrapperTransformation implements Transformation<GifBitmapWrapper> {
     private Transformation<Bitmap> bitmapTransformation;
     private Transformation<GifData> gifDataTransformation;

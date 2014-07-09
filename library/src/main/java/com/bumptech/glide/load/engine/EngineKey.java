@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-public class EngineKey implements Key {
+class EngineKey implements Key {
     private static final String FORMAT = "UTF-8";
 
     private final String id;

@@ -4,7 +4,6 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.executor.Prioritized;
@@ -15,11 +14,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 /**
+ * A background {@link java.lang.Runnable} responsible for loading a {@link com.bumptech.glide.load.engine.Resource}
+ * from the disk cache and for starting an {@link com.bumptech.glide.load.engine.SourceResourceRunner} if the
+ * {@link com.bumptech.glide.load.engine.Resource} is not found in the disk cache.
  *
  * @param <Z> The type of the resource that will be decoded.
  * @param <R> the type of the resource the decoded resource will be transcoded to.
  */
-public class ResourceRunner<Z, R> implements Runnable, Prioritized {
+class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private static final String TAG = "ResourceRunner";
 
     private final EngineKey key;

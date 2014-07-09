@@ -4,14 +4,31 @@ import android.annotation.TargetApi;
 import android.app.Fragment;
 import com.bumptech.glide.RequestManager;
 
+/**
+ * A view-less {@link android.app.Fragment} used to safely store an {@link com.bumptech.glide.RequestManager} that
+ * can be used to start, stop and manage Glide requests started for targets the fragment or activity this fragment is a
+ * child of.
+ *
+ * @see com.bumptech.glide.manager.SupportRequestManagerFragment
+ * @see com.bumptech.glide.manager.RequestManagerRetriever
+ * @see com.bumptech.glide.RequestManager
+ */
 @TargetApi(11)
 public class RequestManagerFragment extends Fragment {
     private RequestManager requestManager;
 
+    /**
+     * Sets the current {@link com.bumptech.glide.RequestManager}.
+     *
+     * @param requestManager The request manager to use.
+     */
     public void setRequestManager(RequestManager requestManager) {
         this.requestManager = requestManager;
     }
 
+    /**
+     * Returns the current {@link com.bumptech.glide.RequestManager} or null if none exists.
+     */
     public RequestManager getRequestManager() {
         return requestManager;
     }

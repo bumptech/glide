@@ -7,7 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

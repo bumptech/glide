@@ -12,7 +12,7 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import java.io.File;
 
 /**
- * A {@link ModelLoader} For translating {@link File} models into {@link ParcelFileDescriptor} resources.
+ * A {@link ModelLoader} For translating {@link File} models into {@link ParcelFileDescriptor} data.
  */
 public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor>
         implements FileDescriptorModelLoader<File> {

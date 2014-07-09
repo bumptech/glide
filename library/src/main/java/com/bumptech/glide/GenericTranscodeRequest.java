@@ -7,6 +7,7 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.UnitTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.FutureTarget;
@@ -14,7 +15,15 @@ import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 
-public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T, Z, Z> {
+/**
+ * A class for handling requests to load a generic resource type or transcode the generic resource type into another
+ * generic resource type.
+ *
+ * @param <A> The type of the model used to retrieve data.
+ * @param <T> The type of data retrieved.
+ * @param <Z> The type of resource to be decoded from the the data.
+ */
+public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T, Z, Z> implements DownloadOptions {
     private final Context context;
     private final A model;
     private final Glide glide;
@@ -49,6 +58,14 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
         this.optionsApplier = optionsApplier;
     }
 
+    /**
+     * Adds a transcoder to this request to transcode from the resource type to the given transcode type.
+     *
+     * @param transcoder The transcoder to use.
+     * @param transcodeClass The class of the resource type that will be transcoded to.
+     * @param <R> The type of the resource that will be transcoded to.
+     * @return A new request builder to set options for the transcoded load.
+     */
     public <R> GenericRequestBuilder<A, T, Z, R> transcode(ResourceTranscoder<Z, R> transcoder,
             Class<R> transcodeClass) {
         return optionsApplier.apply(model, new GenericRequestBuilder<A, T, Z, R>(context, model,

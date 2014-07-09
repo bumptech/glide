@@ -21,10 +21,16 @@ public enum DiskCacheStrategy {
         this.cacheResult = cacheResult;
     }
 
+    /**
+     * Returns true if this request should cache the original unmodified data.
+     */
     public boolean cacheSource() {
         return cacheSource;
     }
 
+    /**
+     * Returns true if this request should cache the final transformed result.
+     */
     public boolean cacheResult() {
         return cacheResult;
     }

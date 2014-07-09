@@ -5,9 +5,18 @@ import com.bumptech.glide.load.engine.Resource;
 
 import java.io.IOException;
 
+/**
+ * A simple {@link com.bumptech.glide.load.ResourceDecoder} that always returns null.
+ */
 public class NullDecoder<T, Z> implements ResourceDecoder<T, Z> {
     private static final NullDecoder NULL_DECODER = new NullDecoder();
 
+    /**
+     * Returns an instance of the NullDecoder for the given types.
+     *
+     * @param <T> The data type.
+     * @param <Z> The resource type.
+     */
     @SuppressWarnings("unchecked")
     public static <T, Z> NullDecoder<T, Z> get() {
         return NULL_DECODER;

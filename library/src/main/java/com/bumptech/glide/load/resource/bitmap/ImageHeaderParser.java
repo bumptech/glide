@@ -14,7 +14,7 @@ import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageTyp
 import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.UNKNOWN;
 
 /**
- * A class for parsing the exif orientation from an InputStream for an image. Handles jpegs and tiffs.
+ * A class for parsing the exif orientation and other data from an image header.
  */
 public class ImageHeaderParser {
     private static final String TAG = "ImageHeaderParser";

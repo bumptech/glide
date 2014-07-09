@@ -20,7 +20,7 @@ import com.bumptech.glide.load.resource.NullResourceEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.io.File;

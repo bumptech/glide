@@ -4,7 +4,6 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.CacheLoader;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -22,12 +21,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
+ * A background {@link java.lang.Runnable} responsible for loading a resource from its original data if the resource is
+ * not in cache.
  *
  * @param <T> The type of the data the resource will be decoded from.
  * @param <Z> The type of the resource that will be decoded.
  * @param <R> The type of the resource that will be transcoded to from the decoded resource.
  */
-public class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
+class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
     private static final WriterFactory DEFAULT_WRITER_FACTORY = new DefaultWriterFactory();
 
     private static final String TAG = "SourceRunner";

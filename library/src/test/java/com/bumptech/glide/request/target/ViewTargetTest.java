@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import junit.framework.TestCase;
 import org.junit.Before;

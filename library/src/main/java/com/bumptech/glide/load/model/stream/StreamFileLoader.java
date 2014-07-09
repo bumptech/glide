@@ -12,7 +12,7 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
- * A {@link ModelLoader} For translating {@link File} models for local uris into {@link InputStream} resources.
+ * A {@link ModelLoader} For translating {@link File} models for local uris into {@link InputStream} data.
  */
 public class StreamFileLoader extends FileLoader<InputStream> implements StreamModelLoader<File> {
 

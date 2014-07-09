@@ -1,7 +1,8 @@
-package com.bumptech.glide.request;
+package com.bumptech.glide.request.animation;
 
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

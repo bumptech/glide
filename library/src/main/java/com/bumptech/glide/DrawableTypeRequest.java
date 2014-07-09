@@ -10,6 +10,7 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.target.Target;
@@ -17,7 +18,15 @@ import com.bumptech.glide.request.target.Target;
 import java.io.File;
 import java.io.InputStream;
 
-public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
+/**
+ * A class for creating a load request that loads either an animated GIF drawable or a Bitmap drawable directly, or
+ * adds an {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} to transcode the data into a
+ * resource type other than a {@link android.graphics.drawable.Drawable}.
+ *
+ * @param <A> The type of model to use to load the {@link android.graphics.drawable.BitmapDrawable} or
+ * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
+ */
+public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> implements DownloadOptions {
     private final ModelLoader<A, InputStream> streamModelLoader;
     private final ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Context context;
@@ -61,11 +70,28 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> {
         this.optionsApplier = optionsApplier;
     }
 
+    /**
+     * Attempts to always load the resource as a {@link android.graphics.Bitmap}, even if it could actually be animated.
+     *
+     * @return A new request builder for loading a {@link android.graphics.Bitmap}
+     */
     public BitmapTypeRequest<A> asBitmap() {
         return optionsApplier.apply(model, new BitmapTypeRequest<A>(context, model, streamModelLoader,
                 fileDescriptorModelLoader, glide, requestTracker, optionsApplier));
     }
 
+    /**
+     * Attempts to always load the resource as a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
+     * <p>
+     *     If the underlying data is not a GIF, this will fail. As a result, this should only be used if the model
+     *     represents an animated GIF and the caller wants to interact with the GIfDrawable directly. Normally using
+     *     just an {@link com.bumptech.glide.DrawableTypeRequest} is sufficient because it will determine whether or
+     *     not the given data represents an animated GIF and return the appropriate animated or not animated
+     *     {@link android.graphics.drawable.Drawable} automatically.
+     * </p>
+     *
+     * @return A new request builder for loading a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
+     */
     public GifTypeRequest<A> asGif() {
         return optionsApplier.apply(model, new GifTypeRequest<A>(context, model, streamModelLoader, glide,
                 requestTracker, optionsApplier));

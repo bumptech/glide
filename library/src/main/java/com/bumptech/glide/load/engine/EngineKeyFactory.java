@@ -6,7 +6,7 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
-public class EngineKeyFactory {
+class EngineKeyFactory {
 
     public EngineKey buildKey(String id, int width, int height, ResourceDecoder cacheDecoder,
             ResourceDecoder sourceDecoder, Transformation transformation, ResourceEncoder encoder,

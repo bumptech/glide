@@ -23,16 +23,25 @@ public abstract class BaseTarget<Z> implements Target<Z> {
 
     private Request request;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setRequest(Request request) {
         this.request = request;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Request getRequest() {
         return request;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setPlaceholder(Drawable placeholder) { }
 }

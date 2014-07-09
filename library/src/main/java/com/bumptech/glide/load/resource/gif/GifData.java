@@ -11,6 +11,10 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A container for data related to a particular GIF image that includes a partially decoded header and the bytes of
+ * the compressed image that can be used together to decode individual frames of the GIF.
+ */
 public class GifData {
     private final Context context;
     private final GifHeader header;
@@ -33,6 +37,9 @@ public class GifData {
         bitmapProvider = new GifDecoderBitmapProvider(bitmapPool);
     }
 
+    /**
+     * Returns the current non null frame {@link com.bumptech.glide.load.Transformation}.
+     */
     @SuppressWarnings("unchecked")
     public Transformation<Bitmap> getFrameTransformation() {
         if (frameTransformation != null) {
@@ -42,18 +49,40 @@ public class GifData {
         }
     }
 
+    /**
+     * Sets a {@link com.bumptech.glide.load.Transformation} that will be applied to each frame in the animation
+     * individually.
+     *
+     * <p>
+     *     Note - The frame transformations are not permanent in that they do not modify the underlying data,
+     *     but only each frame as they are decoded. As a result these frame transformations cannot be cached and must
+     *     be applied to the GifData whenever one is decoded, regardless of whether it came from the cache or not.
+     * </p>
+     *
+     * @param transformation The transformation to apply.
+     */
     public void setFrameTransformation(Transformation<Bitmap> transformation) {
         this.frameTransformation = transformation;
     }
 
+    /**
+     * Returns the size in bytes of the original compressed GIF image.
+     */
     public int getByteSize() {
         return data.length;
     }
 
+    /**
+     * Returns the bytes of the original compressed GIF image.
+     */
     public byte[] getData() {
         return data;
     }
 
+    /**
+     * Returns a new {@link com.bumptech.glide.load.resource.gif.GifDrawable} that can animate between the frames of
+     * the wrapped GIF.
+     */
     public GifDrawable getDrawable() {
         GifDecoder gifDecoder = new GifDecoder(bitmapProvider);
         gifDecoder.setData(gifId, header, data);
@@ -65,6 +94,10 @@ public class GifData {
         return result;
     }
 
+    /**
+     * Recycles the resources used by any {@link com.bumptech.glide.load.resource.gif.GifDrawable}s returned from
+     * {@link #getDrawable()}.
+     */
     public void recycle() {
         for (GifDrawable drawable : drawables) {
             drawable.stop();

@@ -5,7 +5,8 @@ import android.net.Uri;
 import com.bumptech.glide.load.data.DataFetcher;
 
 /**
- * A model loader for handling resources. Model must be a resource id in the package of the given context.
+ * A model loader for handling Android resource files. Model must be an Android resource id in the package of the given
+ * context.
  */
 public class ResourceLoader<T> implements ModelLoader<Integer, T> {
 

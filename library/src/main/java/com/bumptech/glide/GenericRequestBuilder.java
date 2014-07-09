@@ -18,15 +18,15 @@ import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.GenericRequest;
-import com.bumptech.glide.request.GlideAnimationFactory;
-import com.bumptech.glide.request.NoAnimation;
+import com.bumptech.glide.request.animation.GlideAnimationFactory;
+import com.bumptech.glide.request.animation.NoAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.RequestFutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
-import com.bumptech.glide.request.ViewAnimation;
-import com.bumptech.glide.request.ViewPropertyAnimation;
+import com.bumptech.glide.request.animation.ViewAnimation;
+import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 
@@ -172,7 +172,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Loads the resource from the given data type using the given {@link com.bumptech.glide.load.ResourceDecoder}.
+     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} to use to load the resource from the original data.
+     * By default, this decoder will only be used if the final transformed resource is not in the disk cache.
+     *
+     * @see #cacheDecoder(com.bumptech.glide.load.ResourceDecoder)
+     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
      *
      * @param decoder The {@link com.bumptech.glide.load.ResourceDecoder} to use to decode the resource.
      * @return This RequestBuilder.
@@ -188,6 +192,16 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         return this;
     }
 
+    /**
+     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} to use to load the resource from the disk cache. By
+     * default, this decoder will only be used if the final transformed resource is already in the disk cache.
+     *
+     * @see #decoder(com.bumptech.glide.load.ResourceDecoder)
+     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
+     *
+     * @param cacheDecoder The decoder to use.
+     * @return This request builder.
+     */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> cacheDecoder(
             ResourceDecoder<File, ResourceType> cacheDecoder) {
         // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
@@ -201,7 +215,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     /**
      * Sets the source encoder to use to encode the data retrieved by this request directly into cache. The returned
-     * resouce will then be decoded from the cached data.
+     * resource will then be decoded from the cached data.
+     *
+     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
      *
      * @param sourceEncoder The encoder to use.
      * @return This request builder.
@@ -238,6 +254,19 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         return this;
     }
 
+    /**
+     * Sets the {@link com.bumptech.glide.load.Encoder} to use to encode the original data directly to cache. Will only
+     * be used if the original data is not already in cache and if the
+     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy} is set to
+     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#SOURCE} or
+     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#ALL}.
+     *
+     * @see #sourceEncoder(com.bumptech.glide.load.Encoder)
+     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
+     *
+     * @param encoder The encoder to use.
+     * @return This request builder.
+     */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> encoder(
             ResourceEncoder<ResourceType> encoder) {
         // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
@@ -282,6 +311,17 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         return this;
     }
 
+    /**
+     * Sets the {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} to use for this load.
+     *
+     * @see com.bumptech.glide.load.resource.transcode.UnitTranscoder
+     * @see com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder
+     * @see com.bumptech.glide.load.resource.transcode.GifDataDrawableTranscoder
+     * @see com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTranscoder
+     *
+     * @param transcoder The transcoder to use.
+     * @return This request builder.
+     */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transcoder(
             ResourceTranscoder<ResourceType, TranscodeType> transcoder) {
         if (loadProvider != null) {
@@ -324,7 +364,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * when a resource load finishes. Will only be run if the load was loaded asynchronously (ie was not in the
      * memory cache).
      *
-     * @param animator The {@link com.bumptech.glide.request.ViewPropertyAnimation.Animator} to run.
+     * @param animator The {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} to run.
      * @return This RequestBuilder.
      */
     // This is safe because the view property animation doesn't care about the resource type it receives.
@@ -439,10 +479,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> override(int width, int height) {
         if (width <= 0) {
-            throw new IllegalArgumentException("Width must be >= 0");
+            throw new IllegalArgumentException("Width must be > 0");
         }
         if (height <= 0) {
-            throw new IllegalArgumentException("Height must be >= 0");
+            throw new IllegalArgumentException("Height must be > 0");
         }
         this.overrideWidth = width;
         this.overrideHeight = height;

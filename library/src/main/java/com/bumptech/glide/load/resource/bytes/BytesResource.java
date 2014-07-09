@@ -2,6 +2,9 @@ package com.bumptech.glide.load.resource.bytes;
 
 import com.bumptech.glide.load.engine.Resource;
 
+/**
+ * An {@link com.bumptech.glide.load.engine.Resource} wrapping a byte array.
+ */
 public class BytesResource extends Resource<byte[]> {
     private byte[] bytes;
 

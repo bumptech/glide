@@ -3,7 +3,7 @@ package com.bumptech.glide;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.widget.AbsListView;
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 
 import java.util.ArrayDeque;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Queue;
 
 /**
- * Loads a few images ahead in the direction of scrolling in any {@link AbsListView} so that images are in the memory
+ * Loads a few resources ahead in the direction of scrolling in any {@link AbsListView} so that images are in the memory
  * cache just before the corresponding view in created in the list. Gives the appearance of an infinitely large image
  * cache, depending on scrolling speed, cpu speed, and cache size.
  *
@@ -59,7 +59,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     /**
-     * Returns the dimensions of the view in the list where the images will be displayed.
+     * Returns the dimensions of the view in the list where the resources will be displayed.
      * <p>
      *     Note - The dimensions returned here must precisely match those of the view in the list.
      * </p>
@@ -79,8 +79,8 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     protected abstract List<T> getItems(int start, int end);
 
     /**
-     * Returns a glide request for a given item. Must exactly match the request used to load the image in the list. The
-     * target and context will be provided by the preloader.
+     * Returns a glide request for a given item. Must exactly match the request used to load the resource in the list.
+     * The target and context will be provided by the preloader.
      *
      * @param item The model to load.
      * @return A non null {@link BitmapRequestBuilder}.

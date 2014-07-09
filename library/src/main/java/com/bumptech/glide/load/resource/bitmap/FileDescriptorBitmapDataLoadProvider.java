@@ -3,7 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.DataLoadProvider;
+import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -13,6 +13,10 @@ import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 
 import java.io.File;
 
+/**
+ * An {@link com.bumptech.glide.provider.DataLoadProvider} that provides classes for decoding and encoding
+ * {@link android.graphics.Bitmap}s from {@link android.os.ParcelFileDescriptor} data.
+ */
 public class FileDescriptorBitmapDataLoadProvider implements DataLoadProvider<ParcelFileDescriptor, Bitmap> {
     private final ResourceDecoder<File, Bitmap> cacheDecoder;
     private final FileDescriptorBitmapDecoder sourceDecoder;

@@ -10,6 +10,10 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 
 import java.io.InputStream;
 
+/**
+ * An {@link com.bumptech.glide.load.model.ModelLoader} for translating {@link com.bumptech.glide.load.model.GlideUrl}
+ * (http/https URLS) into {@link java.io.InputStream} data.
+ */
 public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {

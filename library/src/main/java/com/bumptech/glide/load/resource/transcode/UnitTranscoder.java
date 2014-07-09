@@ -2,6 +2,10 @@ package com.bumptech.glide.load.resource.transcode;
 
 import com.bumptech.glide.load.engine.Resource;
 
+/**
+ * A simple {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} that simply returns the given
+ * resource.
+ */
 public class UnitTranscoder implements ResourceTranscoder {
     private static final UnitTranscoder UNIT_TRANSCODER = new UnitTranscoder();
 

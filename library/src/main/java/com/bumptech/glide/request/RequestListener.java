@@ -19,12 +19,12 @@ public interface RequestListener<T, R> {
      *     It is safe to reload this or a different model or change what is displayed in the target at this point.
      *     For example:
      * <pre>
-     * <code>
-     *     public void onException(Exception e, ModelType model, Target target) {
-     *         target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
-     *         Glide.load(model).into(target);
-     *     }
-     * </code>
+     * {@code
+     * public void onException(Exception e, T model, Target target, boolean isFirstResource) {
+     *     target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
+     *     Glide.load(model).into(target);
+     * }
+     * }
      * </pre>
      * </p>
      *
@@ -36,14 +36,15 @@ public interface RequestListener<T, R> {
      * @param e The exception, or null.
      * @param model The model we were trying to load when the exception occurred.
      * @param target The {@link Target} we were trying to load the image into.
+     * @param isFirstResource True if this exception is for the first resource to load.
      * @return True if the listener has handled updating the target for the given exception, false to allow
      *         Glide's request to update the target.
      */
-    public abstract boolean onException(Exception e, T model, Target target, boolean isFirstImage);
+    public abstract boolean onException(Exception e, T model, Target target, boolean isFirstResource);
 
     /**
      * Called when a load completes successfully, immediately after
-     * {@link Target#onResourceReady(Object, GlideAnimation)}.
+     * {@link Target#onResourceReady(Object, com.bumptech.glide.request.animation.GlideAnimation)}.
      *
      * @param resource The resource that was loaded for the target.
      * @param model The specific model that was used to load the image.

@@ -16,6 +16,8 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.LogTime;
 
@@ -52,7 +54,6 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
     private int overrideWidth;
     private int overrideHeight;
     private String tag = String.valueOf(hashCode());
-    private boolean cacheSource;
     private DiskCacheStrategy diskCacheStrategy;
 
     private Drawable placeholderDrawable;
@@ -137,7 +138,6 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         loadedFromMemoryCache = false;
         loadStatus = null;
         isRunning = false;
-        cacheSource = false;
         REQUEST_POOL.offer(this);
     }
 
@@ -181,7 +181,6 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         this.animationFactory = animationFactory;
         this.overrideWidth = overrideWidth;
         this.overrideHeight = overrideHeight;
-        this.cacheSource = cacheSource;
         this.diskCacheStrategy = diskCacheStrategy;
 
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
@@ -209,6 +208,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void begin() {
         startTime = LogTime.getLogTime();
@@ -233,6 +235,16 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         }
     }
 
+    /**
+     * Cancels the current load but does not release any resources held by the request and continues to display
+     * the loaded resource if the load completed before the call to cancel.
+     *
+     * <p>
+     *     Cancelled requests can be restarted with a subsequent call to {@link #begin()}.
+     * </p>
+     *
+     * @see #clear()
+     */
     public void cancel() {
         isRunning = false;
         isCancelled = true;
@@ -242,6 +254,16 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         }
     }
 
+    /**
+     * Cancels the current load if it is in progress, clears any resources held onto by the request and replaces
+     * the loaded resource if the load completed with the placeholder.
+     *
+     * <p>
+     *     Cleared requests can be restarted with a subsequent call to {@link #begin()}
+     * </p>
+     *
+     * @see #cancel()
+     */
     @Override
     public void clear() {
         cancel();
@@ -252,16 +274,25 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isRunning() {
         return isRunning;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isComplete() {
         return resource != null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isFailed() {
         return isError;
@@ -302,6 +333,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         return placeholderDrawable;
     }
 
+    /**
+     * A callback method that should never be invoked directly.
+     */
     @Override
     public void onSizeReady(int width, int height) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -346,6 +380,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         return requestCoordinator == null || !requestCoordinator.isAnyRequestComplete();
     }
 
+    /**
+     * A callback method that should never be invoked directly.
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void onResourceReady(Resource resource) {
@@ -378,6 +415,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         }
     }
 
+    /**
+     * A callback method that should never be invoked directly.
+     */
     @Override
     public void onException(Exception e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {

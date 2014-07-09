@@ -1,6 +1,5 @@
 package com.bumptech.glide.provider;
 
-import com.bumptech.glide.DataLoadProvider;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,12 +8,12 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
-public class DataLoadProviderFactoryTest {
-    private DataLoadProviderFactory factory;
+public class DataLoadProviderRegistryTest {
+    private DataLoadProviderRegistry factory;
 
     @Before
     public void setUp() {
-        factory = new DataLoadProviderFactory();
+        factory = new DataLoadProviderRegistry();
     }
 
     @Test

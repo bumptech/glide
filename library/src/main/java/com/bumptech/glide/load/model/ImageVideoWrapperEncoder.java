@@ -7,6 +7,11 @@ import com.bumptech.glide.load.Encoder;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * A source encoder that writes a {@link com.bumptech.glide.load.model.ImageVideoWrapper} to disk by preferentially
+ * writing data from the wrapper's {@link java.io.InputStream} and falling back to the wrapper's
+ * {@link android.os.ParcelFileDescriptor} if the {@link java.io.InputStream} isn't available.
+ */
 public class ImageVideoWrapperEncoder implements Encoder<ImageVideoWrapper> {
     private final Encoder<InputStream> streamEncoder;
     private final Encoder<ParcelFileDescriptor> fileDescriptorEncoder;

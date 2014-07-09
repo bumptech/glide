@@ -1,4 +1,4 @@
-package com.bumptech.glide.request;
+package com.bumptech.glide.request.animation;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -7,7 +7,9 @@ import android.graphics.drawable.TransitionDrawable;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+
 import com.bumptech.glide.request.target.Target;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

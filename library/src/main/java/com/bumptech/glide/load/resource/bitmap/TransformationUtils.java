@@ -10,7 +10,7 @@ import android.util.Log;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 /**
- * A class for storing methods to resize Bitmaps.
+ * A class with methods to efficiently resize Bitmaps.
  */
 public class TransformationUtils {
     private static final String TAG = "TransformationUtils";

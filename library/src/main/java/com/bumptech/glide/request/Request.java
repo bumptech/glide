@@ -1,7 +1,7 @@
 package com.bumptech.glide.request;
 
 /**
- * A request that loads an asset for an {@link com.bumptech.glide.request.target.Target}.
+ * A request that loads a resource for an {@link com.bumptech.glide.request.target.Target}.
  */
 public interface Request {
 

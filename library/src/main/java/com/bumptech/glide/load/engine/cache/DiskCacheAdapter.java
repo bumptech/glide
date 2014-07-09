@@ -4,6 +4,9 @@ import com.bumptech.glide.load.Key;
 
 import java.io.File;
 
+/**
+ * A simple class that returns null for all gets and ignores all writes.
+ */
 public class DiskCacheAdapter implements DiskCache {
     @Override
     public File get(Key key) {

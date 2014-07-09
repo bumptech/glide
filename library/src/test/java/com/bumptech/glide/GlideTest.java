@@ -30,7 +30,7 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -391,7 +391,7 @@ public class GlideTest {
                 .load(string)
                 .listener(new RequestListener<String, Drawable>() {
                     @Override
-                    public boolean onException(Exception e, String model, Target target, boolean isFirstImage) {
+                    public boolean onException(Exception e, String model, Target target, boolean isFirstResource) {
                         if (!(e instanceof IOException)) {
                             throw new RuntimeException(e);
                         }

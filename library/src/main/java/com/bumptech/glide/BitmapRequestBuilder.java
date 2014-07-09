@@ -23,7 +23,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.ViewPropertyAnimation;
+import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 
 import java.io.File;
 import java.io.InputStream;
@@ -38,7 +38,7 @@ import java.io.InputStream;
 // Public api.
 @SuppressWarnings("unused")
 public class BitmapRequestBuilder<ModelType, TranscodeType>
-        extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> {
+        extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> implements BitmapOptions {
     private final BitmapPool bitmapPool;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
@@ -62,7 +62,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      *
      * @see #downsample(Downsampler)
      *
-     * @return This RequestBuilder
+     * @return This request builder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> approximate() {
         return downsample(Downsampler.AT_LEAST);
@@ -73,10 +73,22 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      *
      * @see #downsample(Downsampler)
      *
-     * @return This RequestBuilder
+     * @return This request builder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> asIs() {
         return downsample(Downsampler.NONE);
+    }
+
+    /**
+     * Load images at a size that is at most exactly as big as the target using
+     * {@link com.bumptech.glide.load.resource.bitmap.Downsampler#AT_MOST}.
+     *
+     * @see #downsample(com.bumptech.glide.load.resource.bitmap.Downsampler)
+     *
+     * @return This request builder.
+     */
+    public BitmapRequestBuilder<ModelType, TranscodeType> atMost() {
+        return downsample(Downsampler.AT_MOST);
     }
 
     /**
@@ -87,8 +99,8 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      *
      * @see #imageDecoder
      *
-     * @param downsampler The downsampler
-     * @return This RequestBuilder
+     * @param downsampler The downsampler.
+     * @return This request builder.
      */
     private BitmapRequestBuilder<ModelType, TranscodeType> downsample(Downsampler downsampler) {
         this.downsampler = downsampler;
@@ -97,30 +109,65 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(float sizeMultiplier) {
         super.thumbnail(sizeMultiplier);
         return this;
     }
 
+    /**
+     * Loads and displays the {@link android.graphics.Bitmap} retrieved by the given thumbnail request if it finishes
+     * before this request. Best used for loading thumbnail {@link Bitmap}s that are smaller and will be loaded more
+     * quickly than the fullsize {@link Bitmap}. There are no guarantees about the order in which the requests will
+     * actually finish. However, if the thumb request completes after the full request, the thumb
+     * {@link android.graphics.Bitmap} will never replace the full image.
+     *
+     * @see #thumbnail(float)
+     *
+     * <p>
+     *     Note - Any options on the main request will not be passed on to the thumbnail request. For example, if
+     *     you want an animation to occur when either the full {@link android.graphics.Bitmap} loads or the thumbnail
+     *     loads, you need to call {@link #animate(int)} on both the thumb and the full request. For a simpler thumbnail
+     *     option where these options are applied to the humbnail as well, see {@link #thumbnail(float)}.
+     * </p>
+     *
+     * <p>
+     *     Only the thumbnail call on the main request will be obeyed, recursive calls to this method are ignored.
+     * </p>
+     *
+     * @param thumbnailRequest The request to use to load the thumbnail.
+     * @return This request builder.
+     */
     public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(BitmapRequestBuilder<ModelType, TranscodeType>
             thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> sizeMultiplier(float sizeMultiplier) {
         super.sizeMultiplier(sizeMultiplier);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> decoder(ResourceDecoder<ImageVideoWrapper, Bitmap> decoder) {
         super.decoder(decoder);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> cacheDecoder(
             ResourceDecoder<File, Bitmap> cacheDecoder) {
@@ -128,18 +175,37 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> encoder(ResourceEncoder<Bitmap> encoder) {
         super.encoder(encoder);
         return this;
     }
 
+    /**
+     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} that will be used to decode {@link Bitmap}s obtained
+     * from an {@link java.io.InputStream}.
+     *
+     * @see #videoDecoder
+     *
+     * @param decoder The decoder to use to decode {@link Bitmap}s.
+     * @return This request builder.
+     */
     public BitmapRequestBuilder<ModelType, TranscodeType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
         imageDecoder = decoder;
         super.decoder(new ImageVideoBitmapDecoder(decoder, videoDecoder));
         return this;
     }
 
+    /**
+     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} that will be used to decode {@link Bitmap}s obtained
+     * from an {@link android.os.ParcelFileDescriptor}.
+     *
+     * @param decoder The decoder to use to decode {@link Bitmap}s.
+     * @return This request builder.
+     */
     public BitmapRequestBuilder<ModelType, TranscodeType> videoDecoder(
             ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
         videoDecoder = decoder;
@@ -181,7 +247,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * Transform images using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> centerCrop() {
         return transform(glide.getBitmapCenterCrop());
@@ -190,18 +256,24 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * Transform images using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> fitCenter() {
         return transform(glide.getBitmapFitCenter());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> transform(Transformation<Bitmap> transformation) {
         super.transform(transformation);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> transcoder(
             ResourceTranscoder<Bitmap, TranscodeType> transcoder) {
@@ -209,48 +281,72 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> animate(int animationId) {
         super.animate(animationId);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> animate(Animation animation) {
         super.animate(animation);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> animate(ViewPropertyAnimation.Animator animator) {
         super.animate(animator);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> placeholder(int resourceId) {
         super.placeholder(resourceId);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> placeholder(Drawable drawable) {
         super.placeholder(drawable);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> error(int resourceId) {
         super.error(resourceId);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> error(Drawable drawable) {
         super.error(drawable);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> listener(
             RequestListener<ModelType, TranscodeType> requestListener) {
@@ -258,24 +354,36 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> skipMemoryCache(boolean skip) {
         super.skipMemoryCache(skip);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> diskCacheStrategy(DiskCacheStrategy  strategy) {
         super.diskCacheStrategy(strategy);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> override(int width, int height) {
         super.override(width, height);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(
             GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> thumbnailRequest) {
@@ -283,6 +391,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
         super.sourceEncoder(sourceEncoder);

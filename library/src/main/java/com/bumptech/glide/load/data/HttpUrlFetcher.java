@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * A DataFetcher that retrieves an {@link java.io.InputStream} for a Url.
+ */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
     private static final HttpUrlConnectionFactory DEFAULT_FACTORY = new DefaultHttpUrlConnectionFactory();
     private GlideUrl glideUrl;

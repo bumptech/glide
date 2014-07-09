@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.file;
 
-import com.bumptech.glide.DataLoadProvider;
+import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -12,6 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * An {@link com.bumptech.glide.provider.DataLoadProvider} that provides encoders and decoders for for obtaining a
+ * cache file from {@link java.io.InputStream} data.
+ */
 public class StreamFileDataLoadProvider implements DataLoadProvider<InputStream, File> {
     private static final ErrorSourceDecoder ERROR_DECODER = new ErrorSourceDecoder();
 
@@ -47,9 +51,9 @@ public class StreamFileDataLoadProvider implements DataLoadProvider<InputStream,
 
         @Override
         public Resource<File> decode(InputStream source, int width, int height) throws IOException {
-            throw new Error("You cannot decode a File from an InputStream by default, "
-                    + "try either #cacheSource(true) to avoid this call or #decoder(ResourceDecoder) to replace this "
-                    + "Decoder");
+            throw new Error("You cannot decode a File from an InputStream by default,"
+                    + " try either #diskCacheStratey(DiskCacheStrategy.SOURCE) to avoid this call or"
+                    + " #decoder(ResourceDecoder) to replace this Decoder");
         }
 
         @Override

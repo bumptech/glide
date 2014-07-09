@@ -7,6 +7,10 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A {@link com.bumptech.glide.load.ResourceDecoder} that can decode an
+ * {@link com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper} from {@link java.io.InputStream} data.
+ */
 public class GifBitmapWrapperStreamResourceDecoder implements ResourceDecoder<InputStream, GifBitmapWrapper> {
     private ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder;
 

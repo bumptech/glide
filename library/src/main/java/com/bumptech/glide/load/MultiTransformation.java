@@ -5,7 +5,7 @@ import com.bumptech.glide.load.engine.Resource;
 import java.util.List;
 
 /**
- * A transformation that applies an ordered array of one or more transformations to an image.
+ * A transformation that applies an ordered array or list of one or more transformations to a resource.
  */
 public class MultiTransformation<T> implements Transformation<T> {
     private Transformation<T>[] transformations;

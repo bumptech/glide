@@ -8,12 +8,12 @@ import java.io.File;
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
-public class TranscoderFactoryTest {
-    private TranscoderFactory factories;
+public class TranscoderRegistryTest {
+    private TranscoderRegistry factories;
 
     @Before
     public void setUp() {
-        factories = new TranscoderFactory();
+        factories = new TranscoderRegistry();
     }
 
     @Test

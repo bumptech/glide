@@ -10,7 +10,11 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.io.InputStream;
 
-//TODO(actually fill out this stub)
+/**
+ * An {@link com.bumptech.glide.load.ResourceDecoder} that uses an
+ * {@link com.bumptech.glide.load.resource.bitmap.Downsampler} to decode an {@link android.graphics.Bitmap} from an
+ * {@link java.io.InputStream}.
+ */
 public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap> {
     private static final String ID = "StreamBitmapDecoder.com.bumptech.glide.load.resource.bitmap";
     private final Downsampler downsampler;

@@ -11,7 +11,7 @@ import com.bumptech.glide.load.model.ResourceLoader;
 import java.io.InputStream;
 
 /**
- * A {@link ModelLoader} For translating android resource id models for local uris into {@link InputStream} resources.
+ * A {@link ModelLoader} For translating android resource id models for local uris into {@link InputStream} data.
  */
 public class StreamResourceLoader extends ResourceLoader<InputStream> implements StreamModelLoader<Integer> {
 

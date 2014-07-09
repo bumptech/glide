@@ -5,7 +5,7 @@ import com.bumptech.glide.load.Key;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
-public class OriginalEngineKey implements Key {
+class OriginalEngineKey implements Key {
     private String id;
 
     public OriginalEngineKey(String id) {

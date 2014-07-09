@@ -7,6 +7,10 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+/**
+ * A calculator that tries to intelligently determine cache sizes for a given device based on some constants and the
+ * devices screen density, width, and height.
+ */
 public class MemorySizeCalculator {
     private static final String TAG = "MemorySizeCalculator";
 
@@ -55,10 +59,16 @@ public class MemorySizeCalculator {
         }
     }
 
+    /**
+     * Returns the recommended memory cache size for the device it is run on in bytes.
+     */
     public int getMemoryCacheSize() {
         return memoryCacheSize;
     }
 
+    /**
+     * Returns the recommended bitmap pool size for the device it is run on in bytes.
+     */
     public int getBitmapPoolSize() {
         return bitmapPoolSize;
     }

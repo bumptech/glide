@@ -8,7 +8,10 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class SafeKeyGenerator {
+/**
+ * A class that generates and caches safe and unique string file names from {@link com.bumptech.glide.load.Key}s.
+ */
+class SafeKeyGenerator {
     private final LruCache<Key, String> loadIdToSafeHash = new LruCache<Key, String>(1000);
 
     public String getSafeKey(Key key) {

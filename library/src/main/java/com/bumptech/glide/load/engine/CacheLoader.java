@@ -1,14 +1,15 @@
-package com.bumptech.glide.load;
+package com.bumptech.glide.load.engine;
 
 import android.util.Log;
 
-import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import java.io.File;
 import java.io.IOException;
 
-public class CacheLoader {
+class CacheLoader {
     private static final String TAG = "CacheLoader";
     private DiskCache diskCache;
 

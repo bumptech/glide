@@ -11,8 +11,8 @@ import com.bumptech.glide.load.model.StringLoader;
 import java.io.InputStream;
 
 /**
- * A {@link ModelLoader} For translating {@link String} models, such as file paths or remote urls, into
- * {@link InputStream} resources.
+ * A {@link ModelLoader} for translating {@link String} models, such as file paths or remote urls, into
+ * {@link InputStream} data.
  */
 public class StreamStringLoader extends StringLoader<InputStream> implements StreamModelLoader<String> {
 

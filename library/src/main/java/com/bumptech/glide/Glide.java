@@ -50,11 +50,12 @@ import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDataDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.resource.transcode.TranscoderFactory;
+import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
-import com.bumptech.glide.provider.DataLoadProviderFactory;
+import com.bumptech.glide.provider.DataLoadProvider;
+import com.bumptech.glide.provider.DataLoadProviderRegistry;
 import com.bumptech.glide.request.FutureTarget;
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -68,10 +69,6 @@ import java.net.URL;
  * A singleton to present a simple static interface for building requests with {@link BitmapRequestBuilder} and
  * maintaining an {@link Engine}, {@link BitmapPool}, {@link com.bumptech.glide.load.engine.cache.DiskCache} and
  * {@link MemoryCache}.
- *
- * <p>
- * Note - This class is not thread safe.
- * </p>
  */
 public class Glide {
     // 250 MB
@@ -86,8 +83,8 @@ public class Glide {
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
     private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
-    private final TranscoderFactory transcoderFactory = new TranscoderFactory();
-    private final DataLoadProviderFactory dataLoadProviderFactory;
+    private final TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
+    private final DataLoadProviderRegistry dataLoadProviderRegistry;
     private final CenterCrop bitmapCenterCrop;
     private final GifBitmapWrapperTransformation drawableCenterCrop;
     private final FitCenter bitmapFitCenter;
@@ -95,23 +92,25 @@ public class Glide {
     private final Handler mainHandler;
 
     /**
-     * Try to get the external cache directory if available and default to the internal. Use a default name for the
-     * cache directory if no name is provided
+     * Returns a directory with a default name in the private cache directory of the application to use to store
+     * retrieved media and thumbnails.
      *
-     * @param context A context
-     * @return A File representing the default disk cache directory
+     * @see #getPhotoCacheDir(android.content.Context, String)
+     *
+     * @param context A context.
      */
     public static File getPhotoCacheDir(Context context) {
         return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
     }
 
     /**
-     * Try to get the external cache directory if available and default to the internal. Use a default name for the
-     * cache directory if no name is provided
+     * Returns a directory with the given name in the private cache directory of the application to use to store
+     * retrieved media and thumbnails.
      *
-     * @param context A context
-     * @param cacheName The name of the subdirectory in which to store the cache
-     * @return A File representing the default disk cache directory
+     * @see #getPhotoCacheDir(android.content.Context)
+     *
+     * @param context A context.
+     * @param cacheName The name of the subdirectory in which to store the cache.
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static File getPhotoCacheDir(Context context, String cacheName) {
@@ -171,6 +170,7 @@ public class Glide {
         glide = builder.createGlide();
     }
 
+    // For testing.
     static void tearDown() {
         glide = null;
     }
@@ -181,22 +181,23 @@ public class Glide {
         this.memoryCache = memoryCache;
         mainHandler = new Handler(Looper.getMainLooper());
 
-        dataLoadProviderFactory = new DataLoadProviderFactory();
+        dataLoadProviderRegistry = new DataLoadProviderRegistry();
 
-        dataLoadProviderFactory.register(InputStream.class, Bitmap.class, new StreamBitmapDataLoadProvider(bitmapPool));
-        dataLoadProviderFactory.register(ParcelFileDescriptor.class, Bitmap.class,
+        dataLoadProviderRegistry.register(InputStream.class, Bitmap.class,
+                new StreamBitmapDataLoadProvider(bitmapPool));
+        dataLoadProviderRegistry.register(ParcelFileDescriptor.class, Bitmap.class,
                 new FileDescriptorBitmapDataLoadProvider(bitmapPool));
 
         ImageVideoDataLoadProvider imageVideoDataLoadProvider = new ImageVideoDataLoadProvider(bitmapPool);
-        dataLoadProviderFactory.register(ImageVideoWrapper.class, Bitmap.class, imageVideoDataLoadProvider);
+        dataLoadProviderRegistry.register(ImageVideoWrapper.class, Bitmap.class, imageVideoDataLoadProvider);
 
         GifDataLoadProvider gifDataLoadProvider = new GifDataLoadProvider(context, bitmapPool);
-        dataLoadProviderFactory.register(InputStream.class, GifData.class, gifDataLoadProvider);
+        dataLoadProviderRegistry.register(InputStream.class, GifData.class, gifDataLoadProvider);
 
-        dataLoadProviderFactory.register(ImageVideoWrapper.class, GifBitmapWrapper.class,
+        dataLoadProviderRegistry.register(ImageVideoWrapper.class, GifBitmapWrapper.class,
                 new ImageVideoGifDataLoadProvider(imageVideoDataLoadProvider, gifDataLoadProvider));
 
-        dataLoadProviderFactory.register(InputStream.class, File.class,
+        dataLoadProviderRegistry.register(InputStream.class, File.class,
                 new StreamFileDataLoadProvider());
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
@@ -210,12 +211,12 @@ public class Glide {
         register(URL.class, InputStream.class, new StreamUrlLoader.Factory());
         register(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
 
-        transcoderFactory.register(Bitmap.class, BitmapDrawable.class,
+        transcoderRegistry.register(Bitmap.class, BitmapDrawable.class,
                 new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
-        transcoderFactory.register(GifBitmapWrapper.class, Drawable.class,
+        transcoderRegistry.register(GifBitmapWrapper.class, Drawable.class,
                 new GifBitmapWrapperDrawableTranscoder(new BitmapDrawableTranscoder(context.getResources(), bitmapPool),
                         new GifDataDrawableTranscoder()));
-        transcoderFactory.register(GifData.class, GifDrawable.class, new GifDataDrawableTranscoder());
+        transcoderRegistry.register(GifData.class, GifDrawable.class, new GifDataDrawableTranscoder());
 
         bitmapCenterCrop = new CenterCrop(bitmapPool);
         drawableCenterCrop = new GifBitmapWrapperTransformation(bitmapCenterCrop);
@@ -224,16 +225,38 @@ public class Glide {
         drawableFitCenter = new GifBitmapWrapperTransformation(bitmapFitCenter);
     }
 
+    /**
+     * Returns the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} used to temporarily store
+     * {@link android.graphics.Bitmap}s so they can be reused to avoid garbage collections.
+     *
+     * <p>
+     *     Note - Using this pool directly can lead to undefined behavior and strange drawing errors. Any
+     *     {@link android.graphics.Bitmap} added to the pool must not be currently in use in any other part of the
+     *     application. Any {@link android.graphics.Bitmap} added to the pool must be removed from the pool before it
+     *     is added a second time.
+     * </p>
+     *
+     * <p>
+     *     Note - To make effective use of the pool, any {@link android.graphics.Bitmap} removed from the pool must
+     *     eventually be re-added. Otherwise the pool will eventually empty and will not serve any useful purpose.
+     * </p>
+     *
+     * <p>
+     *     The primary reason this object is exposed is for use in custom
+     *     {@link com.bumptech.glide.load.ResourceDecoder}s and {@link com.bumptech.glide.load.Transformation}s. Use
+     *     outside of these classes is not generally recommended.
+     * </p>
+     */
     public BitmapPool getBitmapPool() {
         return bitmapPool;
     }
 
     <Z, R> ResourceTranscoder<Z, R> buildTranscoder(Class<Z> decodedClass, Class<R> transcodedClass) {
-        return transcoderFactory.get(decodedClass, transcodedClass);
+        return transcoderRegistry.get(decodedClass, transcodedClass);
     }
 
     <T, Z> DataLoadProvider<T, Z> buildDataProvider(Class<T> dataClass, Class<Z> decodedClass) {
-        return dataLoadProviderFactory.get(dataClass, decodedClass);
+        return dataLoadProviderRegistry.get(dataClass, decodedClass);
     }
 
     <R> Target<R> buildImageViewTarget(ImageView imageView, Class<R> transcodedClass) {
@@ -318,7 +341,7 @@ public class Glide {
     }
 
     /**
-     * Cancel any pending loads Glide may have for the target and free any resources that mayhave been loaded into
+     * Cancel any pending loads Glide may have for the target and free any resources that may have been loaded into
      * the target so they may be reused.
      *
      * @param target The target to cancel loads for.
@@ -483,26 +506,74 @@ public class Glide {
     /**
      * Begin a load with Glide by passing in a context.
      *
+     * <p>
+     *     Any requests started using a context will only have the application level options applied and will not be
+     *     started or stopped based on lifecycle events. In general, loads should be started at the level the result
+     *     will be used in. If the resource will be used in a view in a child fragment,
+     *     the load should be started with {@link #with(android.app.Fragment)}} using that child fragment. Similarly,
+     *     if the resource will be used in a view in the parent fragment, the load should be started with
+     *     {@link #with(android.app.Fragment)} using the parent fragment. In the same vein, if the resource will be used
+     *     in a view in an activity, the load should be started with {@link #with(android.app.Activity)}}.
+     * </p>
+     *
+     * <p>
+     *     This method is appropriate for resources that will be used outside of the normal fragment or activity
+     *     lifecycle (For example in services, or for notification thumbnails).
+     * </p>
+     *
+     * @see #with(android.app.Activity)
+     * @see #with(android.app.Fragment)
+     * @see #with(android.support.v4.app.Fragment)
+     * @see #with(android.support.v4.app.FragmentActivity)
+     *
      * @param context Any context, will not be retained.
-     * @return A model request to pass in the object representing the image to be loaded.
+     * @return A RequestManager for the top level application that can be used to start a load.
      */
     public static RequestManager with(Context context) {
         return RequestManagerRetriever.get(context);
     }
 
+    /**
+     * Begin a load with Glide that will be tied to the given {@link android.app.Activity}'s lifecycle and that uses the
+     * given {@link Activity}'s default options.
+     *
+     * @param activity The activity to use.
+     * @return A RequestManager for the given activity that can be used to start a load.
+     */
     public static RequestManager with(Activity activity) {
         return RequestManagerRetriever.get(activity);
     }
 
+    /**
+     * Begin a load with Glide that will tied to the give {@link android.support.v4.app.FragmentActivity}'s lifecycle
+     * and that uses the given {@link android.support.v4.app.FragmentActivity}'s default options.
+     *
+     * @param activity The activity to use.
+     * @return A RequestManager for the given FragmentActivity that can be used to start a load.
+     */
     public static RequestManager with(FragmentActivity activity) {
         return RequestManagerRetriever.get(activity);
     }
 
+    /**
+     * Begin a load with Glide that will be tied to the given {@link android.app.Fragment}'s lifecycle and that uses
+     * the given {@link android.app.Fragment}'s default options.
+     *
+     * @param fragment The fragment to use.
+     * @return A RequestManager for the given Fragment that can be used to start a load.
+     */
     @TargetApi(11)
     public static RequestManager with(android.app.Fragment fragment) {
         return RequestManagerRetriever.get(fragment);
     }
 
+    /**
+     * Begin a load with Glide that will be tied to the given {@link android.support.v4.app.Fragment}'s lifecycle and
+     * that uses the given {@link android.support.v4.app.Fragment}'s default options.
+     *
+     * @param fragment The fragment to use.
+     * @return A RequestManager for the given Fragment that can be used to start a load.
+     */
     public static RequestManager with(Fragment fragment) {
         return RequestManagerRetriever.get(fragment);
     }

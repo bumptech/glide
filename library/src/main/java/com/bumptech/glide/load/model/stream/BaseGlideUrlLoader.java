@@ -11,7 +11,7 @@ import java.io.InputStream;
 
 /**
  * A base class for loading images over http/https. Can be subclassed for use with any model that can be translated
- * in to an image.
+ * in to {@link java.io.InputStream} data.
  *
  * @param <T> The type of the model
  */

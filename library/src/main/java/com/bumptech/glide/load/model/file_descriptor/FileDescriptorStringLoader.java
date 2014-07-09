@@ -11,7 +11,7 @@ import com.bumptech.glide.load.model.StringLoader;
 
 /**
  * A {@link ModelLoader} For translating {@link String} models, such as file paths, into {@link ParcelFileDescriptor}
- * resources.
+ * data.
  */
 public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescriptor>
         implements FileDescriptorModelLoader<String> {

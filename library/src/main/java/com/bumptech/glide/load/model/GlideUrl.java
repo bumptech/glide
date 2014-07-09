@@ -6,10 +6,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * This is a simple wrapper for strings representing http/https urls. new URL() is an excessively expensive operation
- * that may be unnecessary if the class loading the image from the url doesn't actually require a URL object.
+ * This is a simple wrapper for strings representing http/https URLs. new URL() is an excessively expensive operation
+ * that may be unnecessary if the class loading the image from the URL doesn't actually require a URL object.
  *
- * Users wishing to replace the class for handling urls must register a factory using GlideUrl.
+ * Users wishing to replace the class for handling URLs must register a factory using GlideUrl.
  */
 public class GlideUrl {
     private String stringUrl;

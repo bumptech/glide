@@ -11,6 +11,10 @@ import android.support.v4.app.FragmentManager;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Util;
 
+/**
+ * A collection of static methods for creating new {@link com.bumptech.glide.RequestManager}s or retrieving existing
+ * ones from activities and fragment.
+ */
 public class RequestManagerRetriever {
     static final String TAG = "com.bumptech.glide.manager";
     private static RequestManager applicationManager;

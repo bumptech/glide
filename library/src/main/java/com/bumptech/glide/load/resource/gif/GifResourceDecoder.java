@@ -16,6 +16,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
+/**
+ * An {@link com.bumptech.glide.load.ResourceDecoder} that decodes {@link com.bumptech.glide.load.resource.gif.GifData}
+ * from {@link java.io.InputStream} data.
+ */
 public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData> {
     private static final String TAG = "GifResourceDecoder";
     private Context context;
@@ -43,11 +47,12 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
         return "GifResourceDecoder.com.bumptech.glide.load.resource.gif";
     }
 
+    // A best effort attempt to get a unique id that can be used as a cache key for frames of the decoded GIF.
     private String getGifId(byte[] data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
             digest.update(data);
-            return Util.sha256BytesToHex(digest.digest());
+            return Util.sha1BytesToHex(digest.digest());
         } catch (NoSuchAlgorithmException e) {
             if (Log.isLoggable(TAG, Log.WARN)) {
                 Log.w(TAG, "Missing sha1 algorithm?", e);

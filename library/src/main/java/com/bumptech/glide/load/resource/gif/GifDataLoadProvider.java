@@ -2,7 +2,7 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.content.Context;
 
-import com.bumptech.glide.DataLoadProvider;
+import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;

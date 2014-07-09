@@ -8,6 +8,12 @@ import com.bumptech.glide.load.DecodeFormat;
 
 import java.io.IOException;
 
+/**
+ * An {@link com.bumptech.glide.load.resource.bitmap.BitmapDecoder} that can decode a thumbnail frame
+ * {@link Bitmap} from a {@link android.os.ParcelFileDescriptor} containing a video.
+ *
+ * @see android.media.MediaMetadataRetriever
+ */
 public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
     private static final DefaultFactory DEFAULT_FACTORY = new DefaultFactory();
     private MediaMetadataRetrieverFactory factory;
@@ -19,7 +25,6 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
     public VideoBitmapDecoder() {
         this(DEFAULT_FACTORY);
     }
-
 
     VideoBitmapDecoder(MediaMetadataRetrieverFactory factory) {
         this.factory = factory;

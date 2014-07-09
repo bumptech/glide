@@ -5,6 +5,9 @@ import com.bumptech.glide.load.Key;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
+/**
+ * A {@link com.bumptech.glide.load.Key} that wraps a single {@link java.lang.String}.
+ */
 public class StringKey implements Key {
     private String key;
 

@@ -1,4 +1,4 @@
-package com.bumptech.glide.request;
+package com.bumptech.glide.request.animation;
 
 public interface GlideAnimationFactory<R> {
 

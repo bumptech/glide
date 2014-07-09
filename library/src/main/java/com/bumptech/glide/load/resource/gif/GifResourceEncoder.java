@@ -7,6 +7,10 @@ import com.bumptech.glide.load.ResourceEncoder;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * An {@link com.bumptech.glide.load.ResourceEncoder} that can write
+ * {@link com.bumptech.glide.load.resource.gif.GifData} to cache.
+ */
 public class GifResourceEncoder implements ResourceEncoder<GifData> {
     private static final String TAG = "GifEncoder";
 
@@ -26,6 +30,7 @@ public class GifResourceEncoder implements ResourceEncoder<GifData> {
 
     @Override
     public String getId() {
-        return "GifResourceEncoder.com.bumptech.glide.load.resource.gif";
+        // Empty is acceptable here because the data is written directly to disk with no modification.
+        return "";
     }
 }

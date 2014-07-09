@@ -7,6 +7,15 @@ import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.InputStream;
 
+/**
+ * A wrapper model loader that provides both an {@link java.io.InputStream} and a
+ * {@link android.os.ParcelFileDescriptor} for a given model type by wrapping an
+ * {@link com.bumptech.glide.load.model.ModelLoader} for {@link java.io.InputStream}s for the given model type and an
+ * {@link com.bumptech.glide.load.model.ModelLoader} for {@link android.os.ParcelFileDescriptor} for the given model
+ * type.
+ *
+ * @param <A> The model type.
+ */
 public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrapper> {
     private static final String TAG = "IVML";
 

@@ -1,4 +1,4 @@
-package com.bumptech.glide.request;
+package com.bumptech.glide.request.animation;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -7,8 +7,15 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+
 import com.bumptech.glide.request.target.Target;
 
+/**
+ * A cross fade {@link GlideAnimation} for {@link android.graphics.drawable.Drawable}s
+ * that uses an {@link android.graphics.drawable.TransitionDrawable} to transition from an existing drawable
+ * already visible on the target to a new drawable. If no existing drawable exists, this class can instead fall back
+ * to a default animation that doesn't rely on {@link android.graphics.drawable.TransitionDrawable}.
+ */
 public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> {
     // 150 ms.
     public static final int DEFAULT_DURATION = 300;
@@ -21,6 +28,18 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
         return animation;
     }
 
+    /**
+     * A factory class that produces a new {@link GlideAnimation} that varies depending
+     * on whether or not the drawable was loaded from the memory cache and whether or not the drawable is the first
+     * image to be set on the target.
+     *
+     * <p>
+     *     Resources are usually loaded from the memory cache just before the user can see the view,
+     *     for example when the user changes screens or scrolls back and forth in a list. In those cases the user
+     *     typically does not expect to see an animation. As a result, when the resource is loaded from the memory
+     *     cache this factory producdes an {@link NoAnimation}.
+     * </p>
+     */
     public static class DrawableCrossFadeFactory implements GlideAnimationFactory<Drawable> {
         private Context context;
         private int defaultAnimationId;
@@ -64,11 +83,36 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
         }
     }
 
+    /**
+     * Constructor that takes a default animation and a duration in milliseconds that the cross fade animation should
+     * last.
+     * @param defaultAnimation The default animation that will run if there is nothing to cross fade from when a new
+     *                         {@link android.graphics.drawable.Drawable} is set.
+     * @param duration The duration that the cross fade animation should run if there is something to cross fade from
+     *                 when a new {@link android.graphics.drawable.Drawable} is set.
+     */
     public DrawableCrossFadeViewAnimation(Animation defaultAnimation, int duration) {
         this.defaultAnimation = defaultAnimation;
         this.duration = duration;
     }
 
+    /**
+     * Animates from the previous drawable to the current drawable in one of two ways.
+     *
+     * <ol>
+     *     <li>Using the default animation provided in the constructor if the previous drawable is null</li>
+     *     <li>Using the cross fade animation with the duration provided in the constructor if the previous
+     *     drawable is non null</li>
+     * </ol>
+     *
+     * @param previous The previous drawable that is currently being displayed in the {@link android.view.View}.
+     * @param current The new drawable that should be displayed in the {@link com.bumptech.glide.request.target.Target}
+     *                after this animation completes.
+     * @param view The {@link android.view.View} the animation should run on.
+     * @param target The {@link com.bumptech.glide.request.target.Target} wrapping the given view.
+     * @return true if in the process of running the animation the current drawable is set on the view, false if the
+     * current drawable must be set on the view manually by the caller of this method.
+     */
     @Override
     public boolean animate(Drawable previous, Drawable current, View view, Target<Drawable> target) {
         if (previous != null) {

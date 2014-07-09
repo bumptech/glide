@@ -9,6 +9,11 @@ import com.bumptech.glide.load.engine.Resource;
 public class UnitTransformation<T> implements Transformation<T> {
     private static final UnitTransformation TRANSFORMATION = new UnitTransformation();
 
+    /**
+     * Returns a UnitTransformation for the given type.
+     *
+     * @param <T> The type of the resource to be transformed.
+     */
     @SuppressWarnings("unchecked")
     public static <T> UnitTransformation<T> get() {
         return TRANSFORMATION;

@@ -12,7 +12,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
- *
+ * A DataFetcher that uses an {@link android.content.ContentResolver} to load data from a {@link android.net.Uri}
+ * pointing to a local resource.
  */
 public abstract class LocalUriFetcher<T extends Closeable> implements DataFetcher<T> {
     private static final String TAG = "LocalUriFetcher";

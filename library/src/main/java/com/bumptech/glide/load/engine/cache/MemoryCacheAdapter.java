@@ -3,6 +3,9 @@ package com.bumptech.glide.load.engine.cache;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 
+/**
+ * A simple class that ignores all puts and returns null for all gets.
+ */
 public class MemoryCacheAdapter implements MemoryCache {
 
     private ResourceRemovedListener listener;

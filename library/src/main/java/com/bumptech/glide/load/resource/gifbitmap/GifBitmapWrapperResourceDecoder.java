@@ -12,6 +12,11 @@ import com.bumptech.glide.util.ByteArrayPool;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * An {@link com.bumptech.glide.load.ResourceDecoder} that can decode either an {@link android.graphics.Bitmap} or an
+ * {@link com.bumptech.glide.load.resource.gif.GifData} from an {@link java.io.InputStream} or an
+ * {@link android.os.ParcelFileDescriptor}.
+ */
 public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> {
     private final ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
     private final ResourceDecoder<InputStream, GifData> gifDecoder;
@@ -32,6 +37,7 @@ public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVid
         GifBitmapWrapper result = null;
         if (is != null) {
             source = new ImageVideoWrapper(bis, source.getFileDescriptor());
+            // 2048 is rather arbitrary, for most well formatted image types we only need 32 bytes.
             bis.mark(2048);
             ImageHeaderParser.ImageType type = new ImageHeaderParser(bis).getType();
             bis.reset();

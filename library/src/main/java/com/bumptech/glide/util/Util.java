@@ -9,9 +9,15 @@ public class Util {
     private static final char[] HEX_CHAR_ARRAY = "0123456789abcdef".toCharArray();
     // 32 bytes from sha-256 -> 64 hex chars.
     private static final char[] SHA_256_CHARS = new char[64];
+    // 20 bytes from sha-1 -> 40 chars.
+    private static final char[] SHA_1_CHARS = new char[40];
 
     public static String sha256BytesToHex(byte[] bytes) {
         return bytesToHex(bytes, SHA_256_CHARS);
+    }
+
+    public static String sha1BytesToHex(byte[] bytes) {
+        return bytesToHex(bytes, SHA_1_CHARS);
     }
 
     // Taken from:

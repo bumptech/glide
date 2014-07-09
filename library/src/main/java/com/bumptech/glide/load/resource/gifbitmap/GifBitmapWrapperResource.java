@@ -4,6 +4,9 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifData;
 
+/**
+ * A resource that wraps an {@link com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper}.
+ */
 public class GifBitmapWrapperResource extends Resource<GifBitmapWrapper> {
     private GifBitmapWrapper data;
 

@@ -51,10 +51,34 @@ public class RequestManager {
         this.optionsApplier = new OptionsApplier();
     }
 
+    /**
+     * An interface that allows a default set of options to be applied to all requests started from an
+     * {@link com.bumptech.glide.RequestManager}.
+     */
     public interface DefaultOptions {
+        /**
+         * Allows the implementor to apply some options to the given request.
+         *
+         * @param model The model that is being loaded.
+         * @param requestBuilder The request builder being used to construct the load.
+         * @param <T> The type of the model.
+         */
         public <T> void apply(T model, GenericRequestBuilder<T, ?, ?, ?> requestBuilder);
     }
 
+    /**
+     * Sets an interface that can apply some default options to all Requests started using this {@link RequestManager}.
+     *
+     * <p>
+     *     Note - These options will be retained for the life the of this {@link com.bumptech.glide.RequestManager}
+     *     so be wary of using
+     *     {@link com.bumptech.glide.GenericRequestBuilder#listener(com.bumptech.glide.request.RequestListener)}} when
+     *     starting requests using an {@link android.content.Context} or {@link android.app.Application} to avoid
+     *     leaking memory. Any option that does not use an anonymous inner class is generally safe.
+     * </p>
+     *
+     * @param options The default options to apply to all requests.
+     */
     public void setDefaultOptions(DefaultOptions options) {
         this.options = options;
     }
@@ -390,22 +414,13 @@ public class RequestManager {
         }
     }
 
-    class OptionsApplier {
-
-        public <A, X extends GenericRequestBuilder<A, ?, ?, ?>> X apply(A model, X builder) {
-            if (options != null) {
-                options.apply(model, builder);
-            }
-            return builder;
-        }
-
-    }
-
     /**
-     * A helper class for building requests with custom {@link ModelLoader}s that translate models to
-     * {@link InputStream} resources for loading images.
+     * A helper class for building requests with custom {@link ModelLoader}s that requires the user to provide a
+     * specific model.
      *
-     * @param <T> The type of the model.
+     * @param <A> The type of the model.
+     * @param <T> The type of data the {@link com.bumptech.glide.load.model.ModelLoader} provides an
+     * {@link com.bumptech.glide.load.data.DataFetcher} to convert the model to.
      */
     public final class GenericModelRequest<A, T> {
         private final ModelLoader<A, T> modelLoader;
@@ -416,10 +431,21 @@ public class RequestManager {
             this.dataClass = dataClass;
         }
 
+        /**
+         * Sets the specific model that will be loaded.
+         *
+         * @param model The model to use.
+         * @return This request builder.
+         */
         public GenericTypeRequest load(A model) {
             return new GenericTypeRequest(model, modelLoader, dataClass);
         }
 
+        /**
+         * A helper class for building requests with custom {@link com.bumptech.glide.load.model.ModelLoader}s that
+         * requires the user to specify a specific resource class that will be loaded.
+         *
+         */
         public final class GenericTypeRequest {
             private final A model;
             private final ModelLoader<A, T> modelLoader;
@@ -431,11 +457,29 @@ public class RequestManager {
                 this.dataClass = dataClass;
             }
 
+            /**
+             * Sets the resource class that will be loaded.
+             *
+             * @param resourceClass The class of the resource that will be loaded.
+             * @param <Z> The type of the resource that will be loaded.
+             * @return This request builder.
+             */
             public <Z> GenericTranscodeRequest<A, T, Z> as(Class<Z> resourceClass) {
                 return optionsApplier.apply(model, new GenericTranscodeRequest<A, T, Z>(context, glide, model,
                         modelLoader, dataClass, resourceClass, requestTracker, optionsApplier));
             }
         }
+    }
+
+    class OptionsApplier {
+
+        public <A, X extends GenericRequestBuilder<A, ?, ?, ?>> X apply(A model, X builder) {
+            if (options != null) {
+                options.apply(model, builder);
+            }
+            return builder;
+        }
+
     }
 
     private static class RequestManagerConnectivityListener implements ConnectivityMonitor.ConnectivityListener {

@@ -25,7 +25,7 @@ public class ModelCache<A, B> {
     public ModelCache(int size) {
         cache = new LruCache<ModelKey<A>, B>(size) {
             @Override
-            protected void onItemRemoved(ModelKey<A> key, B item) {
+            protected void onItemEvicted(ModelKey<A> key, B item) {
                 key.release();
             }
         };

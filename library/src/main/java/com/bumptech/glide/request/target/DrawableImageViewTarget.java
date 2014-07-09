@@ -4,8 +4,12 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import com.bumptech.glide.request.GlideAnimation;
+import com.bumptech.glide.request.animation.GlideAnimation;
 
+/**
+ * A {@link com.bumptech.glide.request.target.Target} that can display an {@link android.graphics.drawable.Drawable} in
+ * an {@link android.widget.ImageView}.
+ */
 public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
     private static final float SQUARE_RATIO_MARGIN = 0.05f;
     private final ImageView view;
@@ -15,6 +19,15 @@ public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
         this.view = view;
     }
 
+    /**
+     * {@inheritDoc}
+     * If no {@link com.bumptech.glide.request.animation.GlideAnimation} is given or if the animation does not set the
+     * {@link android.graphics.drawable.Drawable} on the view, the drawable is set using
+     * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}.
+     *
+     * @param resource {@inheritDoc}
+     * @param animation {@inheritDoc}
+     */
     @Override
     public void onResourceReady(Drawable resource, GlideAnimation<Drawable> animation) {
         if (!(resource instanceof Animatable)) {
@@ -37,6 +50,12 @@ public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
         }
     }
 
+    /**
+     * Sets the given {@link android.graphics.drawable.Drawable} on the view using
+     * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}.
+     *
+     * @param placeholder {@inheritDoc}
+     */
     @Override
     public void setPlaceholder(Drawable placeholder) {
         view.setImageDrawable(placeholder);

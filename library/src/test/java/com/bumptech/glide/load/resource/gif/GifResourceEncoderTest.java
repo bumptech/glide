@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.tests.Util;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 import static org.mockito.Mockito.mock;
@@ -64,7 +65,6 @@ public class GifResourceEncoderTest {
 
     @Test
     public void testHasValidId() {
-        Util.assertClassHasValidId(GifResourceEncoder.class, encoder.getId());
+        assertEquals("", encoder.getId());
     }
-
 }

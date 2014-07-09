@@ -13,6 +13,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A DataFetcher that retrieves an {@link java.io.InputStream} for a local Uri that may or may not be for a resource
+ * in the media store. If the local Uri is for a resource in the media store and the size requested is less than or
+ * equal to the media store thumbnail size, preferentially attempts to fetch data for the pre-generated media store
+ * thumbs using {@link android.provider.MediaStore.Images.Thumbnails} and
+ * {@link android.provider.MediaStore.Video.Thumbnails}.
+ */
 public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
     private static final int MINI_WIDTH = 512;
     private static final int MINI_HEIGHT = 384;

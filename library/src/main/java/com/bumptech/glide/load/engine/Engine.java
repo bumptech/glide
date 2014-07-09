@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * Responsible for starting loads and managing active and cached resources.
+ */
 public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener, Resource.ResourceListener {
     private static final String TAG = "Engine";
     private final Map<Key, ResourceRunner> runners;
@@ -87,15 +90,45 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     /**
-     * @param cacheDecoder
-     * @param fetcher
-     * @param decoder
-     * @param encoder
-     * @param transcoder
-     * @param priority
-     * @param <T>          The type of data the resource will be decoded from.
-     * @param <Z>          The type of the resource that will be decoded.
-     * @param <R>          The type of the resource that will be transcoded from the decoded resource.
+     * Starts a load for the given arguments. Must be called on the main thread.
+     *
+     * <p>
+     *     The flow for any request is as follows:
+     *     <ul>
+     *         <li>Check the memory cache and provide the cached resource if present</li>
+     *         <li>Check the current set of actively used resources and return the active resource if present</li>
+     *         <li>Check the current set of in progress loads and add the cb to the in progress load if present</li>
+     *         <li>Start a new load</li>
+     *     </ul>
+     * </p>
+     *
+     * <p>
+     *     Active resources are those that have been provided to at least one request and have not yet been released.
+     *     Once all consumers of a resource have released that resource, the resource then goes to cache. If the
+     *     resource is ever returned to a new consumer from cache, it is re-added to the active resources. If the
+     *     resource is evicted from the cache, its resources are recycled and re-used if possible and the resource is
+     *     discarded. There is no strict requirement that consumers release their resources so active resources are
+     *     held weakly.
+     * </p>
+     *
+     * @param width The target width of the retrieved resource.
+     * @param height The target height of the retrieved resource.
+     * @param cacheDecoder The decoder to use to decode data already in the disk cache.
+     * @param fetcher The fetcher to use to retrieve data not in the disk cache.
+     * @param sourceEncoder The encoder to use to encode any retrieved data directly to cache.
+     * @param decoder The decoder to use to decode any retrieved data not in cache.
+     * @param transformation The transformation to use to transform the decoded resource.
+     * @param encoder The encoder to to use to write the decoded and transformed resource to the disk cache.
+     * @param transcoder The transcoder to use to transcode the decoded and transformed resource.
+     * @param priority The priority with which the request should run.
+     * @param isMemoryCacheable True if the transcoded resource can be cached in memory.
+     * @param diskCacheStrategy The strategy to use that determines what type of data, if any,
+     *                          will be cached in the local disk cache.
+     * @param cb The callback that will be called when the load completes.
+     *
+     * @param <T> The type of data the resource will be decoded from.
+     * @param <Z> The type of the resource that will be decoded.
+     * @param <R> The type of the resource that will be transcoded from the decoded resource.
      */
     public <T, Z, R> LoadStatus load(int width, int height, ResourceDecoder<File, Z> cacheDecoder,
             DataFetcher<T> fetcher, Encoder<T> sourceEncoder, ResourceDecoder<T, Z> decoder,
@@ -199,6 +232,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
     }
 
+    // Responsible for cleaning up the active resource map by remove weak references that have been cleared.
     private static class RefQueueIdleHandler implements MessageQueue.IdleHandler {
         private Map<Key, WeakReference<Resource>> activeResources;
         private ReferenceQueue<Resource> queue;

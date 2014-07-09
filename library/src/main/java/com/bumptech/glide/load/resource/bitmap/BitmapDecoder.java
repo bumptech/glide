@@ -26,6 +26,13 @@ public interface BitmapDecoder<T> {
 
     /**
      * Returns some unique String id that distinguishes this decoder from any other decoder.
+     *
+     * <p>
+     *     This method can return the empty string if for all practical purposes it applies no transformations to the
+     *     data while loading the resource. For {@link android.graphics.Bitmap}s this would mean at a minimum doing no
+     *     downsampling and also probably always producing {@link android.graphics.Bitmap}s with
+     *     {@link android.graphics.Bitmap.Config#ARGB_8888} as their config.
+     * </p>
      */
     public String getId();
 }

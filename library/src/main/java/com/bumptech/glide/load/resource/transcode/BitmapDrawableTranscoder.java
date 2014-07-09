@@ -7,6 +7,10 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
+/**
+ * An {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} that converts
+ * {@link android.graphics.Bitmap}s into {@link android.graphics.drawable.BitmapDrawable}s.
+ */
 public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, BitmapDrawable> {
     private Resources resources;
     private BitmapPool bitmapPool;

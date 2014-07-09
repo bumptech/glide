@@ -4,6 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
+/**
+ * A factory responsible for producing the correct type of {@link com.bumptech.glide.request.target.Target} for a given
+ * {@link android.view.View} subclass.
+ */
 public class ImageViewTargetFactory {
 
     @SuppressWarnings("unchecked")

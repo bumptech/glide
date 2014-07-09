@@ -12,6 +12,9 @@ import android.os.Build;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
 
+/**
+ * An animated {@link android.graphics.drawable.Drawable} that plays the frames of an animated GIF.
+ */
 public class GifDrawable extends Drawable implements Animatable, GifFrameManager.FrameCallback {
 
     private final Paint paint;
@@ -50,7 +53,6 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         }
         return super.setVisible(visible, restart);
     }
-
 
     @Override
     public int getIntrinsicWidth() {
@@ -124,12 +126,15 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         frameManager.getNextFrame(this);
     }
 
+    /**
+     * Clears any resources for loading frames that are currently held on to by this object.
+     */
     public void recycle() {
         isRecycled = true;
         frameManager.clear();
     }
 
-    public boolean isRecycled() {
+    boolean isRecycled() {
         return isRecycled;
     }
 }

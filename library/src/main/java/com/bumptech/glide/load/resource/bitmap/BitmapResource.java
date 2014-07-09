@@ -5,6 +5,9 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Util;
 
+/**
+ * A resource wrapping a {@link android.graphics.Bitmap} object.
+ */
 public class BitmapResource extends Resource<Bitmap> {
     private Bitmap bitmap;
     private BitmapPool bitmapPool;
