@@ -42,8 +42,8 @@ public class ViewPropertyAnimation implements GlideAnimation {
          * {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} provided in the constructor.
          */
         @Override
-        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstImage) {
-            if (isFromMemoryCache || !isFirstImage) {
+        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstResource) {
+            if (isFromMemoryCache || !isFirstResource) {
                 return NoAnimation.get();
             }
             if (animation == null) {

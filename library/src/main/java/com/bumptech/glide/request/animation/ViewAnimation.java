@@ -38,11 +38,11 @@ public class ViewAnimation implements GlideAnimation {
          * {@link com.bumptech.glide.request.animation.ViewAnimation}.
          *
          * @param isFromMemoryCache {@inheritDoc}
-         * @param isFirstImage {@inheritDoc}
+         * @param isFirstResource {@inheritDoc}
          */
         @Override
-        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstImage) {
-            if (isFromMemoryCache || !isFirstImage) {
+        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstResource) {
+            if (isFromMemoryCache || !isFirstResource) {
                 return NoAnimation.get();
             }
 

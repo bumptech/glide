@@ -12,7 +12,7 @@ public class NoAnimation implements GlideAnimation {
 
     public static class NoAnimationFactory implements GlideAnimationFactory {
         @Override
-        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstImage) {
+        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstResource) {
             return NO_ANIMATION;
         }
     }

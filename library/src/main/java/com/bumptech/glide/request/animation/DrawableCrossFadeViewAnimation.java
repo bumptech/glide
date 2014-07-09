@@ -65,7 +65,7 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
         }
 
         @Override
-        public GlideAnimation<T> build(boolean isFromMemoryCache, boolean isFirstImage) {
+        public GlideAnimation<T> build(boolean isFromMemoryCache, boolean isFirstResource) {
             if (isFromMemoryCache) {
                 return NoAnimation.get();
             }
