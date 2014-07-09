@@ -5,9 +5,10 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 import android.widget.ImageView;
+
 import com.bumptech.glide.request.animation.GlideAnimation;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +51,7 @@ public class DrawableImageViewTargetTest {
     @Test
     public void testSetsDrawableOnViewInOnResourceReadyWhenAnimationReturnsFalse() {
         GlideAnimation animation = mock(GlideAnimation.class);
-        when(animation.animate(any(Drawable.class), any(Drawable.class), any(View.class), any(Target.class)))
+        when(animation.animate(any(Drawable.class), any(Drawable.class), any(ImageView.class)))
                 .thenReturn(false);
         Drawable resource = new ColorDrawable(Color.GRAY);
         target.onResourceReady(resource, animation);
@@ -62,7 +63,7 @@ public class DrawableImageViewTargetTest {
     public void testDoesNotSetDrawableOnViewInOnResourceReadyWhenAnimationReturnsTrue() {
         Drawable resource = new ColorDrawable(Color.RED);
         GlideAnimation animation = mock(GlideAnimation.class);
-        when(animation.animate((Drawable) isNull(), eq(resource), eq(view), eq(target))).thenReturn(true);
+        when(animation.animate((Drawable) isNull(), eq(resource), eq(view))).thenReturn(true);
         target.onResourceReady(resource, animation);
 
         assertNull(view.getDrawable());
@@ -85,7 +86,7 @@ public class DrawableImageViewTargetTest {
 
         target.onResourceReady(new ColorDrawable(Color.GREEN), animation);
 
-        verify(animation).animate(eq(placeholder), any(Drawable.class), any(View.class), any(Target.class));
+        verify(animation).animate(eq(placeholder), any(Drawable.class), any(ImageView.class));
     }
 
     @Test

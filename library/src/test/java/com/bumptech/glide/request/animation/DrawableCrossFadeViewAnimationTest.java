@@ -4,22 +4,18 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-
-import com.bumptech.glide.request.target.Target;
+import android.widget.ImageView;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -34,40 +30,38 @@ public class DrawableCrossFadeViewAnimationTest {
 
     @Test
     public void testStartsDefaultAnimationIfNoPreviousDrawableIsNotSet() {
-        harness.view = mock(View.class);
-        harness.animation.animate(harness.previous, harness.current, harness.view, harness.target);
+        harness.animation.animate(harness.previous, harness.current, harness.view);
         verify(harness.view).startAnimation(any(Animation.class));
     }
 
     @Test
     public void testReturnsFalseIfStartsDefaultAnimation() {
-        assertFalse(harness.animation.animate(harness.previous, harness.current, harness.view, harness.target));
+        assertFalse(harness.animation.animate(harness.previous, harness.current, harness.view));
     }
 
     @Test
     public void testSetsTransitionDrawableIfPreviousIsNotNull() {
         harness.previous = new ColorDrawable(Color.WHITE);
-        harness.animation.animate(harness.previous, harness.current, harness.view, harness.target);
+        harness.animation.animate(harness.previous, harness.current, harness.view);
 
-        GlideAnimation<Drawable> noAnimation = NoAnimation.get();
-        verify(harness.target).onResourceReady(any(TransitionDrawable.class), eq(noAnimation));
+        verify(harness.view).setImageDrawable(any(TransitionDrawable.class));
     }
 
     @Test
     public void testReturnsTrueIfSetsTransitionDrawable() {
         harness.previous = new ColorDrawable(Color.RED);
-        assertTrue(harness.animation.animate(harness.previous, harness.current, harness.view, harness.target));
+        assertTrue(harness.animation.animate(harness.previous, harness.current, harness.view));
     }
 
     @SuppressWarnings("unchecked")
     private static class CrossFadeHarness {
         Drawable previous = null;
         Drawable current = new ColorDrawable(Color.GRAY);
-        Target<Drawable> target = mock(Target.class);
-        View view = new View(Robolectric.application);
+        ImageView view = mock(ImageView.class);
         Animation defaultAnimation = new AlphaAnimation(0f, 1f);
         int duration = 200;
-        DrawableCrossFadeViewAnimation animation = new DrawableCrossFadeViewAnimation(defaultAnimation, duration);
+        DrawableCrossFadeViewAnimation<Drawable> animation = new DrawableCrossFadeViewAnimation<Drawable>(
+                defaultAnimation, duration);
     }
 }
 

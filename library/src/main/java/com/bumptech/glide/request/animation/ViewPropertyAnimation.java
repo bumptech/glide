@@ -2,7 +2,7 @@ package com.bumptech.glide.request.animation;
 
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import com.bumptech.glide.request.target.Target;
+import android.widget.ImageView;
 
 /**
  * An {@link com.bumptech.glide.request.animation.GlideAnimation} that accepts an interface that can apply an
@@ -75,11 +75,10 @@ public class ViewPropertyAnimation implements GlideAnimation {
      * @param previous {@inheritDoc}
      * @param current {@inheritDoc}
      * @param view {@inheritDoc}
-     * @param target {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(Drawable previous, Object current, View view, Target target) {
+    public boolean animate(Drawable previous, Object current, ImageView view) {
         animator.animate(view);
         return false;
     }

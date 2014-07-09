@@ -1,8 +1,7 @@
 package com.bumptech.glide.request.animation;
 
 import android.graphics.drawable.Drawable;
-import android.view.View;
-import com.bumptech.glide.request.target.Target;
+import android.widget.ImageView;
 
 /**
  * An interface that allows a transformation to be applied to {@link android.view.View}s in
@@ -21,9 +20,8 @@ public interface GlideAnimation<R> {
      * @param previous The {@link android.graphics.drawable.Drawable} currently displayed in the given view.
      * @param current The new resource that will be displayed in the view.
      * @param view The view.
-     * @param target The target wrapping the view.
      * @return True if int he process of running the animation the new resource was set on the view, false if the caller
      * needs to manually set the current resource on the view.
      */
-    public boolean animate(Drawable previous, R current, View view, Target<R> target);
+    public boolean animate(Drawable previous, R current, ImageView view);
 }

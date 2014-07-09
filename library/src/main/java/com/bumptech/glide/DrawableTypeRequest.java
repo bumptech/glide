@@ -23,17 +23,17 @@ import java.io.InputStream;
  * adds an {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} to transcode the data into a
  * resource type other than a {@link android.graphics.drawable.Drawable}.
  *
- * @param <A> The type of model to use to load the {@link android.graphics.drawable.BitmapDrawable} or
+ * @param <ModelType> The type of model to use to load the {@link android.graphics.drawable.BitmapDrawable} or
  * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
  */
-public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> implements DownloadOptions {
-    private final ModelLoader<A, InputStream> streamModelLoader;
-    private final ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader;
+public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<ModelType> implements DownloadOptions {
+    private final ModelLoader<ModelType, InputStream> streamModelLoader;
+    private final ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Context context;
     private final Glide glide;
     private RequestTracker requestTracker;
     private RequestManager.OptionsApplier optionsApplier;
-    private final A model;
+    private final ModelType model;
 
     private static <A, Z, R> FixedLoadProvider<A, ImageVideoWrapper, Z, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader,
@@ -54,8 +54,8 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> implements
         return new FixedLoadProvider<A, ImageVideoWrapper, Z, R>(modelLoader, transcoder, dataLoadProvider);
     }
 
-    DrawableTypeRequest(A model, ModelLoader<A, InputStream> streamModelLoader,
-            ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide,
+    DrawableTypeRequest(ModelType model, ModelLoader<ModelType, InputStream> streamModelLoader,
+            ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide,
             RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class,
@@ -75,8 +75,8 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> implements
      *
      * @return A new request builder for loading a {@link android.graphics.Bitmap}
      */
-    public BitmapTypeRequest<A> asBitmap() {
-        return optionsApplier.apply(model, new BitmapTypeRequest<A>(context, model, streamModelLoader,
+    public BitmapTypeRequest<ModelType> asBitmap() {
+        return optionsApplier.apply(model, new BitmapTypeRequest<ModelType>(context, model, streamModelLoader,
                 fileDescriptorModelLoader, glide, requestTracker, optionsApplier));
     }
 
@@ -92,8 +92,8 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> implements
      *
      * @return A new request builder for loading a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
      */
-    public GifTypeRequest<A> asGif() {
-        return optionsApplier.apply(model, new GifTypeRequest<A>(context, model, streamModelLoader, glide,
+    public GifTypeRequest<ModelType> asGif() {
+        return optionsApplier.apply(model, new GifTypeRequest<ModelType>(context, model, streamModelLoader, glide,
                 requestTracker, optionsApplier));
     }
 
@@ -120,8 +120,8 @@ public class DrawableTypeRequest<A> extends DrawableRequestBuilder<A> implements
         return getDownloadOnlyRequest().downloadOnly(width, height);
     }
 
-    private GenericTranscodeRequest<A, InputStream, File> getDownloadOnlyRequest() {
-        return optionsApplier.apply(model, new GenericTranscodeRequest<A, InputStream, File>(context, glide, model,
-                streamModelLoader, InputStream.class, File.class, requestTracker, optionsApplier));
+    private GenericTranscodeRequest<ModelType, InputStream, File> getDownloadOnlyRequest() {
+        return optionsApplier.apply(model, new GenericTranscodeRequest<ModelType, InputStream, File>(context, glide,
+                model, streamModelLoader, InputStream.class, File.class, requestTracker, optionsApplier));
     }
 }

@@ -3,12 +3,10 @@ package com.bumptech.glide.request.animation;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-
-import com.bumptech.glide.request.target.Target;
+import android.widget.ImageView;
 
 /**
  * A cross fade {@link GlideAnimation} for {@link android.graphics.drawable.Drawable}s
@@ -16,7 +14,7 @@ import com.bumptech.glide.request.target.Target;
  * already visible on the target to a new drawable. If no existing drawable exists, this class can instead fall back
  * to a default animation that doesn't rely on {@link android.graphics.drawable.TransitionDrawable}.
  */
-public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> {
+public class DrawableCrossFadeViewAnimation<T extends Drawable> implements GlideAnimation<T> {
     // 150 ms.
     public static final int DEFAULT_DURATION = 300;
     private Animation defaultAnimation;
@@ -40,12 +38,12 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
      *     cache this factory producdes an {@link NoAnimation}.
      * </p>
      */
-    public static class DrawableCrossFadeFactory implements GlideAnimationFactory<Drawable> {
+    public static class DrawableCrossFadeFactory<T extends Drawable> implements GlideAnimationFactory<T> {
         private Context context;
         private int defaultAnimationId;
         private Animation defaultAnimation;
         private int duration;
-        private DrawableCrossFadeViewAnimation animation;
+        private DrawableCrossFadeViewAnimation<T> animation;
 
         public DrawableCrossFadeFactory() {
             this(getDefaultAnimation(), DEFAULT_DURATION);
@@ -67,7 +65,7 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
         }
 
         @Override
-        public GlideAnimation<Drawable> build(boolean isFromMemoryCache, boolean isFirstImage) {
+        public GlideAnimation<T> build(boolean isFromMemoryCache, boolean isFirstImage) {
             if (isFromMemoryCache) {
                 return NoAnimation.get();
             }
@@ -76,7 +74,7 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
                 if (defaultAnimation == null) {
                     defaultAnimation = AnimationUtils.loadAnimation(context, defaultAnimationId);
                 }
-                animation = new DrawableCrossFadeViewAnimation(defaultAnimation, duration);
+                animation = new DrawableCrossFadeViewAnimation<T>(defaultAnimation, duration);
             }
 
             return animation;
@@ -108,19 +106,17 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
      * @param previous The previous drawable that is currently being displayed in the {@link android.view.View}.
      * @param current The new drawable that should be displayed in the {@link com.bumptech.glide.request.target.Target}
      *                after this animation completes.
-     * @param view The {@link android.view.View} the animation should run on.
-     * @param target The {@link com.bumptech.glide.request.target.Target} wrapping the given view.
+     * @param view The {@link android.widget.ImageView} the animation should run on.
      * @return true if in the process of running the animation the current drawable is set on the view, false if the
      * current drawable must be set on the view manually by the caller of this method.
      */
     @Override
-    public boolean animate(Drawable previous, Drawable current, View view, Target<Drawable> target) {
+    public boolean animate(Drawable previous, T current, ImageView view) {
         if (previous != null) {
             TransitionDrawable transitionDrawable = new TransitionDrawable(new Drawable[] { previous, current });
             transitionDrawable.setCrossFadeEnabled(true);
             transitionDrawable.startTransition(duration);
-            GlideAnimation<Drawable> none = NoAnimation.get();
-            target.onResourceReady(transitionDrawable, none);
+            view.setImageDrawable(transitionDrawable);
             return true;
         } else {
             view.startAnimation(defaultAnimation);

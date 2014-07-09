@@ -45,7 +45,7 @@ public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
             }
         }
 
-        if (animation == null || !animation.animate(view.getDrawable(), resource, view, this)) {
+        if (animation == null || !animation.animate(view.getDrawable(), resource, view)) {
             view.setImageDrawable(resource);
         }
     }

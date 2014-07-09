@@ -1,6 +1,6 @@
 package com.bumptech.glide.request.animation;
 
-import android.view.View;
+import android.widget.ImageView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,13 +26,13 @@ public class ViewPropertyAnimationTest {
 
     @Test
     public void testAlwaysReturnsFalse() {
-        assertFalse(animation.animate(null, new Object(), new View(Robolectric.application), null));
+        assertFalse(animation.animate(null, new Object(), new ImageView(Robolectric.application)));
     }
 
     @Test
     public void testCallsAnimatorWithGivenView() {
-        View view = new View(Robolectric.application);
-        animation.animate(null, new Object(), view, null);
+        ImageView view = new ImageView(Robolectric.application);
+        animation.animate(null, new Object(), view);
 
         verify(animator).animate(eq(view));
     }

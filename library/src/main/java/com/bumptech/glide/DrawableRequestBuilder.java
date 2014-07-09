@@ -29,7 +29,7 @@ import java.io.File;
  */
 public class DrawableRequestBuilder<ModelType>
         extends GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, Drawable>
-        implements BitmapOptions {
+        implements BitmapOptions, DrawableOptions {
     private final Glide glide;
     private final Context context;
 
@@ -186,90 +186,35 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
-     * Applies a cross fade transformation that fades from the placeholder to the loaded
-     * {@link android.graphics.drawable.Drawable}. If no placeholder is set, the Drawable will instead simply fade in.
-     *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
-     *
-     * @see #crossFade(int)
-     * @see #crossFade(int, int)
-     * @see #crossFade(android.view.animation.Animation, int)
-     *
-     * @return This request builder.
+     * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade() {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory());
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<Drawable>());
         return this;
     }
 
     /**
-     * Applies a cross fade transformation that fades from the placeholder to the loaded
-     * {@link android.graphics.drawable.Drawable}. If no placeholder is set the Drawable will instead simply fade in.
-     *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
-     *
-     * @see #crossFade()
-     * @see #crossFade(int, int)
-     * @see #crossFade(android.view.animation.Animation, int)
-     *
-     * @param duration The duration of the cross fade and initial fade in.
-     * @return This request builder.
+     * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory(duration));
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<Drawable>(duration));
         return this;
     }
 
     /**
-     * Applies a cross fade transformation that des from the placeholder to the loaded
-     * {@link android.graphics.drawable.Drawable}. If no placeholder is set, the Drawable will instead be animated in
-     * using the given {@link android.view.animation.Animation}.
-     *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
-     *
-     * @see #crossFade()
-     * @see #crossFade(int)
-     * @see #crossFade(int, int)
-     *
-     * @param animation The Animation to use if no placeholder is set.
-     * @param duration The duration of the cross fade animation.
-     * @return This request builder.
+     * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory(animation, duration));
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<Drawable>(animation, duration));
         return this;
     }
 
-
     /**
-     * Applies a cross fade transformation that des from the placeholder to the loaded
-     * {@link android.graphics.drawable.Drawable}. If no placeholder is set, the Drawable will instead be animated in
-     * using the {@link android.view.animation.Animation} loaded from the given animation id.
-     *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
-     *
-     * @see #crossFade()
-     * @see #crossFade(int)
-     * @see #crossFade(android.view.animation.Animation, int)
-     *
-     * @param animationId The id of the Animation to use if no placeholder is set.
-     * @param duration The duration of the cross fade animation.
-     * @return This request builder.
+     * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory(context, animationId, duration));
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<Drawable>(context, animationId,
+                duration));
         return this;
     }
 

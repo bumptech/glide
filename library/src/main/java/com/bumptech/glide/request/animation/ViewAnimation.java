@@ -2,10 +2,9 @@ package com.bumptech.glide.request.animation;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import com.bumptech.glide.request.target.Target;
+import android.widget.ImageView;
 
 /**
  * An {@link com.bumptech.glide.request.animation.GlideAnimation} that can apply a
@@ -71,17 +70,16 @@ public class ViewAnimation implements GlideAnimation {
     /**
      * Always clears the current animation on the view using {@link android.view.View#clearAnimation()}, then
      * starts the {@link android.view.animation.Animation} given in the constructor using
-     * {@link View#startAnimation(android.view.animation.Animation)} and then returns {@code false} because the
-     * animation does not actually set the current resource on the view.
+     * {@link android.view.View#startAnimation(android.view.animation.Animation)} and then returns {@code false} because
+     * the animation does not actually set the current resource on the view.
      *
      * @param previous {@inheritDoc}
      * @param current {@inheritDoc}
      * @param view {@inheritDoc}
-     * @param target {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(Drawable previous, Object current, View view, Target target) {
+    public boolean animate(Drawable previous, Object current, ImageView view) {
         view.clearAnimation();
 
         view.startAnimation(animation);

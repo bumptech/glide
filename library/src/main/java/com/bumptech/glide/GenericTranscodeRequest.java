@@ -19,17 +19,18 @@ import java.io.File;
  * A class for handling requests to load a generic resource type or transcode the generic resource type into another
  * generic resource type.
  *
- * @param <A> The type of the model used to retrieve data.
- * @param <T> The type of data retrieved.
- * @param <Z> The type of resource to be decoded from the the data.
+ * @param <ModelType> The type of the model used to retrieve data.
+ * @param <DataType> The type of data retrieved.
+ * @param <ResourceType> The type of resource to be decoded from the the data.
  */
-public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T, Z, Z> implements DownloadOptions {
+public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
+        extends GenericRequestBuilder<ModelType, DataType, ResourceType, ResourceType> implements DownloadOptions {
     private final Context context;
-    private final A model;
+    private final ModelType model;
     private final Glide glide;
-    private final ModelLoader<A, T> modelLoader;
-    private final Class<T> dataClass;
-    private final Class<Z> resourceClass;
+    private final ModelLoader<ModelType, DataType> modelLoader;
+    private final Class<DataType> dataClass;
+    private final Class<ResourceType> resourceClass;
     private final RequestTracker requestTracker;
     private final RequestManager.OptionsApplier optionsApplier;
 
@@ -42,12 +43,11 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
         return new FixedLoadProvider<A, T, Z, R>(modelLoader, transcoder, dataLoadProvider);
     }
 
-    GenericTranscodeRequest(Context context, Glide glide, A model, ModelLoader<A, T> modelLoader,
-            Class<T> dataClass, Class<Z> resourceClass, RequestTracker requestTracker,
+    GenericTranscodeRequest(Context context, Glide glide, ModelType model, ModelLoader<ModelType, DataType> modelLoader,
+            Class<DataType> dataClass, Class<ResourceType> resourceClass, RequestTracker requestTracker,
             RequestManager.OptionsApplier optionsApplier) {
-        super(context, model,
-                build(glide, modelLoader, dataClass, resourceClass, (ResourceTranscoder<Z, Z>) null),
-                resourceClass, glide, requestTracker);
+        super(context, model, build(glide, modelLoader, dataClass, resourceClass,
+                (ResourceTranscoder<ResourceType, ResourceType>) null), resourceClass, glide, requestTracker);
         this.context = context;
         this.model = model;
         this.glide = glide;
@@ -63,14 +63,18 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
      *
      * @param transcoder The transcoder to use.
      * @param transcodeClass The class of the resource type that will be transcoded to.
-     * @param <R> The type of the resource that will be transcoded to.
+     * @param <TranscodeType> The type of the resource that will be transcoded to.
      * @return A new request builder to set options for the transcoded load.
      */
-    public <R> GenericRequestBuilder<A, T, Z, R> transcode(ResourceTranscoder<Z, R> transcoder,
-            Class<R> transcodeClass) {
-        return optionsApplier.apply(model, new GenericRequestBuilder<A, T, Z, R>(context, model,
-                build(glide, modelLoader, dataClass, resourceClass, transcoder), transcodeClass, glide,
-                requestTracker));
+    public <TranscodeType> GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transcode(
+            ResourceTranscoder<ResourceType, TranscodeType> transcoder,
+            Class<TranscodeType> transcodeClass) {
+        LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider = build(glide, modelLoader,
+                dataClass, resourceClass, transcoder);
+
+        return optionsApplier.apply(model,
+                new GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>(context, model,
+                loadProvider, transcodeClass, glide, requestTracker));
     }
 
     /**
@@ -96,12 +100,12 @@ public class GenericTranscodeRequest<A, T, Z> extends GenericRequestBuilder<A, T
         return getDownloadOnlyRequest().into(width, height);
     }
 
-    private GenericRequestBuilder<A, T, File, File> getDownloadOnlyRequest() {
+    private GenericRequestBuilder<ModelType, DataType, File, File> getDownloadOnlyRequest() {
         ResourceTranscoder<File, File> transcoder = UnitTranscoder.get();
-        DataLoadProvider<T, File> dataLoadProvider = glide.buildDataProvider(dataClass, File.class);
-        FixedLoadProvider<A, T, File, File> fixedLoadProvider = new FixedLoadProvider<A, T, File, File>(modelLoader,
-                transcoder, dataLoadProvider);
-        return optionsApplier.apply(model, new GenericRequestBuilder<A, T, File, File>(context, model,
+        DataLoadProvider<DataType, File> dataLoadProvider = glide.buildDataProvider(dataClass, File.class);
+        FixedLoadProvider<ModelType, DataType, File, File> fixedLoadProvider =
+                new FixedLoadProvider<ModelType, DataType, File, File>(modelLoader, transcoder, dataLoadProvider);
+        return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, DataType, File, File>(context, model,
                 fixedLoadProvider,
                 File.class, glide,
                 requestTracker)

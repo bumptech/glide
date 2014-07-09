@@ -30,7 +30,7 @@ public class BitmapImageViewTarget extends ViewTarget<ImageView, Bitmap> {
      */
     @Override
     public void onResourceReady(Bitmap resource, GlideAnimation<Bitmap> glideAnimation) {
-        if (glideAnimation == null || !glideAnimation.animate(view.getDrawable(), resource, view, this)) {
+        if (glideAnimation == null || !glideAnimation.animate(view.getDrawable(), resource, view)) {
             view.setImageBitmap(resource);
         }
     }

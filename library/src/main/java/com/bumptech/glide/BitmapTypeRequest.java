@@ -20,13 +20,13 @@ import java.io.InputStream;
  * {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} to transcode the {@link Bitmap} into another
  * resource type.
  *
- * @param <A> The type of model to load the {@link Bitmap} or transcoded class from.
+ * @param <ModelType> The type of model to load the {@link Bitmap} or transcoded class from.
  */
-public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
+public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType, Bitmap> {
     private final Context context;
-    private final A model;
-    private final ModelLoader<A, InputStream> streamModelLoader;
-    private ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader;
+    private final ModelType model;
+    private final ModelLoader<ModelType, InputStream> streamModelLoader;
+    private ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Glide glide;
     private RequestTracker requestTracker;
     private RequestManager.OptionsApplier optionsApplier;
@@ -50,9 +50,9 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
         return new FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R>(modelLoader, transcoder, loadProvider);
     }
 
-    BitmapTypeRequest(Context context, A model,
-            ModelLoader<A, InputStream> streamModelLoader,
-            ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader,
+    BitmapTypeRequest(Context context, ModelType model,
+            ModelLoader<ModelType, InputStream> streamModelLoader,
+            ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader,
             Glide glide, RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, null),
@@ -75,8 +75,9 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
      * @param <R> The type of the resource the {@link Bitmap} will be transcoded to.
      * @return This request builder.
      */
-    public <R> BitmapRequestBuilder<A, R> transcode(ResourceTranscoder<Bitmap, R> transcoder, Class<R> transcodeClass) {
-        return optionsApplier.apply(model, new BitmapRequestBuilder<A, R>(context, model,
+    public <R> BitmapRequestBuilder<ModelType, R> transcode(ResourceTranscoder<Bitmap, R> transcoder,
+            Class<R> transcodeClass) {
+        return optionsApplier.apply(model, new BitmapRequestBuilder<ModelType, R>(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, transcodeClass, transcoder),
                 transcodeClass, glide, requestTracker));
     }
@@ -89,7 +90,7 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
      *
      * @return This request builder.
      */
-    public BitmapRequestBuilder<A, byte[]> toBytes() {
+    public BitmapRequestBuilder<ModelType, byte[]> toBytes() {
         return transcode(new BitmapBytesTranscoder(), byte[].class);
     }
 
@@ -104,7 +105,7 @@ public class BitmapTypeRequest<A> extends BitmapRequestBuilder<A, Bitmap> {
      * @param quality The quality level from 0-100 to use to compress the {@link Bitmap}.
      * @return This request builder.
      */
-    public BitmapRequestBuilder<A, byte[]> toBytes(Bitmap.CompressFormat compressFormat, int quality) {
+    public BitmapRequestBuilder<ModelType, byte[]> toBytes(Bitmap.CompressFormat compressFormat, int quality) {
         return transcode(new BitmapBytesTranscoder(compressFormat, quality), byte[].class);
     }
 }
