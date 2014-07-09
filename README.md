@@ -149,9 +149,11 @@ Build
 Building Glide with gradle is fairly straight forward:
 
 ```
+git clone git@github.com:bumptech/glide.git
+cd glide
+git checkout origin/3.0a
 git submodule init && git submodule update
-cd glide/library
-./gradlew build
+./gradlew build releaseJar
 ```
 
 Note: Make sure your Android SDK has the Android Support Repository installed, and that your `$ANDROID_HOME` environment variable is pointing at the SDK.
