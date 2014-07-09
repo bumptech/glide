@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -14,6 +15,8 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.io.InputStream;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -51,14 +54,15 @@ public class GifTypeRequestTest {
 
     @Test
     public void testTranscodeAppliesDefaultOptions() {
-        ResourceTranscoder<GifData, Object> transcoder = mock(ResourceTranscoder.class);
-        GifRequestBuilder<String, Object> builder = request.transcode(transcoder, Object.class);
+        ResourceTranscoder<GifData, GifDrawable> transcoder = mock(ResourceTranscoder.class);
+        GenericRequestBuilder<String, InputStream, GifData, GifDrawable> builder = request.transcode(transcoder,
+                GifDrawable.class);
         verify(optionsApplier).apply(eq(model), eq(builder));
     }
 
     @Test
     public void testToBytesApplesDefaultOptions() {
-        GifRequestBuilder<String, byte[]> builder = request.toBytes();
+        GenericRequestBuilder<String, InputStream, GifData, byte[]> builder = request.toBytes();
         verify(optionsApplier).apply(eq(model), eq(builder));
     }
 }

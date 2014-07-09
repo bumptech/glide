@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.view.animation.Animation;
 
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gif.GifData;
@@ -11,7 +10,6 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
-import com.bumptech.glide.request.animation.DrawableCrossFadeViewAnimation;
 
 import java.io.InputStream;
 
@@ -23,7 +21,7 @@ import java.io.InputStream;
  * @param <ModelType> The type of model to load the {@link com.bumptech.glide.load.resource.gif.GifDrawable} or other
  *           transcoded class from.
  */
-public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType, GifDrawable> implements DrawableOptions {
+public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
     private final Context context;
     private final ModelType model;
     private final ModelLoader<ModelType, InputStream> streamModelLoader;
@@ -44,13 +42,11 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType, GifD
         DataLoadProvider<InputStream, GifData> dataLoadProvider = glide.buildDataProvider(InputStream.class,
                 GifData.class);
         return new FixedLoadProvider<A, InputStream, GifData, R>(streamModelLoader, transcoder, dataLoadProvider);
-
     }
 
     GifTypeRequest(Context context, ModelType model, ModelLoader<ModelType, InputStream> streamModelLoader, Glide glide,
             RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
-        super(context, model, buildProvider(glide, streamModelLoader, GifDrawable.class, null), GifDrawable.class,
-                glide, requestTracker);
+        super(context, model, buildProvider(glide, streamModelLoader, GifDrawable.class, null),  glide, requestTracker);
         this.context = context;
         this.model = model;
         this.streamModelLoader = streamModelLoader;
@@ -74,9 +70,9 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType, GifD
      *           trasncoded to.
      * @return This request builder.
      */
-    public <R> GifRequestBuilder<ModelType, R> transcode(ResourceTranscoder<GifData, R> transcoder,
-            Class<R> transcodeClass) {
-        return optionsApplier.apply(model, new GifRequestBuilder<ModelType, R>(context, model,
+    public <R> GenericRequestBuilder<ModelType, InputStream, GifData, R> transcode(
+            ResourceTranscoder<GifData, R> transcoder, Class<R> transcodeClass) {
+        return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, InputStream, GifData, R>(context, model,
                 buildProvider(glide, streamModelLoader, transcodeClass, transcoder), transcodeClass, glide,
                 requestTracker));
     }
@@ -90,44 +86,7 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType, GifD
      *
      * @return A new Builder object to build a request to transform the given model into the bytes of an animated gif.
      */
-    public GifRequestBuilder<ModelType, byte[]> toBytes() {
+    public GenericRequestBuilder<ModelType, InputStream, GifData, byte[]> toBytes() {
         return transcode(new GifDataBytesTranscoder(), byte[].class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GifTypeRequest<ModelType> crossFade() {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>());
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GifTypeRequest<ModelType> crossFade(int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(duration));
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GifTypeRequest<ModelType> crossFade(Animation animation, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(animation, duration));
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GifTypeRequest<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(context, animationId,
-                duration));
-        return this;
     }
 }

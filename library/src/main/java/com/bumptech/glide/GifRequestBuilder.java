@@ -14,10 +14,12 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataTransformation;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.DrawableCrossFadeViewAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 
 import java.io.File;
@@ -27,17 +29,17 @@ import java.io.InputStream;
  * A class for creating a request to load an animated gif.
  *
  * @param <ModelType> The type of model that will be loaded into the target.
- * @param <TranscodeType> The type of the resource class the GifData will be transcoded to.
  */
-public class GifRequestBuilder<ModelType, TranscodeType>
-        extends GenericRequestBuilder<ModelType, InputStream, GifData, TranscodeType>
-        implements BitmapOptions {
-    private Glide glide;
+public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, GifData, GifDrawable>
+        implements BitmapOptions, DrawableOptions {
+    private final Context context;
+    private final Glide glide;
 
     GifRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, InputStream, GifData, TranscodeType> loadProvider,
-            Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker) {
-        super(context, model, loadProvider, transcodeClass, glide, requestTracker);
+            LoadProvider<ModelType, InputStream, GifData, GifDrawable> loadProvider,
+            Glide glide, RequestTracker requestTracker) {
+        super(context, model, loadProvider, GifDrawable.class, glide, requestTracker);
+        this.context = context;
         this.glide = glide;
     }
 
@@ -45,8 +47,8 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> thumbnail(
-            GenericRequestBuilder<ModelType, InputStream, GifData, TranscodeType> thumbnailRequest) {
+    public GifRequestBuilder<ModelType> thumbnail(
+            GenericRequestBuilder<ModelType, InputStream, GifData, GifDrawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -74,8 +76,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * @param thumbnailRequest The request to use to load the thumbnail.
      * @return This builder object.
      */
-    public GifRequestBuilder<ModelType, TranscodeType> thumbnail(
-            GifRequestBuilder<ModelType, TranscodeType> thumbnailRequest) {
+    public GifRequestBuilder<ModelType> thumbnail(GifRequestBuilder<ModelType> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -84,7 +85,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> thumbnail(float sizeMultiplier) {
+    public GifRequestBuilder<ModelType> thumbnail(float sizeMultiplier) {
         super.thumbnail(sizeMultiplier);
         return this;
     }
@@ -93,7 +94,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> sizeMultiplier(float sizeMultiplier) {
+    public GifRequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
         super.sizeMultiplier(sizeMultiplier);
         return this;
     }
@@ -102,7 +103,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> decoder(
+    public GifRequestBuilder<ModelType> decoder(
             ResourceDecoder<InputStream, GifData> decoder) {
         super.decoder(decoder);
         return this;
@@ -112,7 +113,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> cacheDecoder(
+    public GifRequestBuilder<ModelType> cacheDecoder(
             ResourceDecoder<File, GifData> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
@@ -122,7 +123,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> encoder(
+    public GifRequestBuilder<ModelType> encoder(
             ResourceEncoder<GifData> encoder) {
         super.encoder(encoder);
         return this;
@@ -132,7 +133,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> priority(Priority priority) {
+    public GifRequestBuilder<ModelType> priority(Priority priority) {
         super.priority(priority);
         return this;
     }
@@ -144,7 +145,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      *
      * @return This request builder.
      */
-    public GifRequestBuilder<ModelType, TranscodeType> centerCrop() {
+    public GifRequestBuilder<ModelType> centerCrop() {
         return transformFrame(new CenterCrop(glide.getBitmapPool()));
     }
 
@@ -155,7 +156,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      *
      * @return This request builder..
      */
-    public GifRequestBuilder<ModelType, TranscodeType> fitCenter() {
+    public GifRequestBuilder<ModelType> fitCenter() {
         return transformFrame(new FitCenter(glide.getBitmapPool()));
     }
 
@@ -165,7 +166,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * @param bitmapTransformation The transformation to use.
      * @return This request builder.
      */
-    public GifRequestBuilder<ModelType, TranscodeType> transformFrame(Transformation<Bitmap> bitmapTransformation) {
+    public GifRequestBuilder<ModelType> transformFrame(Transformation<Bitmap> bitmapTransformation) {
         return transform(new GifDataTransformation(bitmapTransformation));
     }
 
@@ -173,7 +174,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> transform(Transformation<GifData> transformation) {
+    public GifRequestBuilder<ModelType> transform(Transformation<GifData> transformation) {
         super.transform(transformation);
         return this;
     }
@@ -182,8 +183,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> transcoder(
-            ResourceTranscoder<GifData, TranscodeType> transcoder) {
+    public GifRequestBuilder<ModelType> transcoder(ResourceTranscoder<GifData, GifDrawable> transcoder) {
         super.transcoder(transcoder);
         return this;
     }
@@ -192,7 +192,44 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> dontAnimate() {
+    public GifRequestBuilder<ModelType> crossFade() {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>());
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GifRequestBuilder<ModelType> crossFade(int duration) {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(duration));
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GifRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(animation, duration));
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GifRequestBuilder<ModelType> crossFade(int animationId, int duration) {
+        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(context, animationId,
+                duration));
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GifRequestBuilder<ModelType> dontAnimate() {
         super.dontAnimate();
         return this;
     }
@@ -201,7 +238,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> animate(int animationId) {
+    public GifRequestBuilder<ModelType> animate(int animationId) {
         super.animate(animationId);
         return this;
     }
@@ -210,7 +247,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> animate(Animation animation) {
+    public GifRequestBuilder<ModelType> animate(Animation animation) {
         super.animate(animation);
         return this;
     }
@@ -219,7 +256,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> animate(ViewPropertyAnimation.Animator animator) {
+    public GifRequestBuilder<ModelType> animate(ViewPropertyAnimation.Animator animator) {
         super.animate(animator);
         return this;
     }
@@ -228,7 +265,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> placeholder(int resourceId) {
+    public GifRequestBuilder<ModelType> placeholder(int resourceId) {
         super.placeholder(resourceId);
         return this;
     }
@@ -237,7 +274,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> placeholder(Drawable drawable) {
+    public GifRequestBuilder<ModelType> placeholder(Drawable drawable) {
         super.placeholder(drawable);
         return this;
     }
@@ -246,7 +283,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> error(int resourceId) {
+    public GifRequestBuilder<ModelType> error(int resourceId) {
         super.error(resourceId);
         return this;
     }
@@ -255,7 +292,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> error(Drawable drawable) {
+    public GifRequestBuilder<ModelType> error(Drawable drawable) {
         super.error(drawable);
         return this;
     }
@@ -264,8 +301,8 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> listener(
-            RequestListener<ModelType, TranscodeType> requestListener) {
+    public GifRequestBuilder<ModelType> listener(
+            RequestListener<ModelType, GifDrawable> requestListener) {
         super.listener(requestListener);
         return this;
     }
@@ -274,7 +311,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> skipMemoryCache(boolean skip) {
+    public GifRequestBuilder<ModelType> skipMemoryCache(boolean skip) {
         super.skipMemoryCache(skip);
         return this;
     }
@@ -283,7 +320,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> diskCacheStrategy(DiskCacheStrategy strategy) {
+    public GifRequestBuilder<ModelType> diskCacheStrategy(DiskCacheStrategy strategy) {
         super.diskCacheStrategy(strategy);
         return this;
     }
@@ -292,7 +329,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> override(int width, int height) {
+    public GifRequestBuilder<ModelType> override(int width, int height) {
         super.override(width, height);
         return this;
     }
@@ -301,7 +338,7 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
+    public GifRequestBuilder<ModelType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
         super.sourceEncoder(sourceEncoder);
         return this;
     }
