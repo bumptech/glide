@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import android.view.animation.Animation;
 
-public interface DrawableOptions {
+interface DrawableOptions {
 
     /**
      * Applies a cross fade transformation that fades from the placeholder to the loaded

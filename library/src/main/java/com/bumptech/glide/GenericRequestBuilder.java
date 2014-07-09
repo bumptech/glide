@@ -18,13 +18,13 @@ import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.GenericRequest;
-import com.bumptech.glide.request.animation.GlideAnimationFactory;
-import com.bumptech.glide.request.animation.NoAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.RequestFutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
+import com.bumptech.glide.request.animation.GlideAnimationFactory;
+import com.bumptech.glide.request.animation.NoAnimation;
 import com.bumptech.glide.request.animation.ViewAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
@@ -109,7 +109,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * </p>
      *
      * @param thumbnailRequest The request to use to load the thumbnail.
-     * @return This builder object.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnail(
             GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>
@@ -142,7 +142,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * </p>
      *
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the thumbnail.
-     * @return This builder object.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnail(
             float sizeMultiplier) {
@@ -159,7 +159,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * or trying to avoid loading huge bitmaps on devices with overly dense screens.
      *
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the image.
-     * @return This builder object.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> sizeMultiplier(
             float sizeMultiplier) {
@@ -179,7 +179,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @see com.bumptech.glide.load.engine.DiskCacheStrategy
      *
      * @param decoder The {@link com.bumptech.glide.load.ResourceDecoder} to use to decode the resource.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> decoder(
             ResourceDecoder<DataType, ResourceType> decoder) {
@@ -345,7 +345,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * was loaded asynchronously (ie was not in the memory cache)
      *
      * @param animationId The resource id of the animation to run
-     * @return This RequestBuilder
+     * @return This request builder.
      */
     // This is safe because the view animation doesn't care about the resource type it receives.
     @SuppressWarnings("unchecked")
@@ -359,7 +359,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * was loaded asynchronously (ie was not in the memory cache)
      *
      * @param animation The animation to run
-     * @return This RequestBuilder
+     * @return This request builder.
      */
     // This is safe because the view animation doesn't care about the resource type it receives.
     @SuppressWarnings("unchecked")
@@ -374,7 +374,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * memory cache).
      *
      * @param animator The {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} to run.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     // This is safe because the view property animation doesn't care about the resource type it receives.
     @SuppressWarnings("unchecked")
@@ -397,7 +397,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets a resource to display while an image is loading.
      *
      * @param resourceId The id of the resource to use as a placeholder
-     * @return This RequestBuilder
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> placeholder(
             int resourceId) {
@@ -410,7 +410,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets a drawable to display while an image is loading.
      *
      * @param drawable The drawable to display as a placeholder.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> placeholder(
             Drawable drawable) {
@@ -423,7 +423,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets a resource to display if a load fails.
      *
      * @param resourceId The id of the resource to use as a placeholder.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> error(
             int resourceId) {
@@ -436,7 +436,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets a {@link Drawable} to display if a load fails.
      *
      * @param drawable The drawable to display.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> error(
             Drawable drawable) {
@@ -451,7 +451,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * avoid some redundant object allocation.
      *
      * @param requestListener The request listener to use.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> listener(
             RequestListener<ModelType, TranscodeType> requestListener) {
@@ -469,7 +469,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * </p>
      *
      * @param skip True to allow the resource to skip the memory cache.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipMemoryCache(boolean skip) {
         this.isCacheable = !skip;
@@ -484,7 +484,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      *
      * @param width The width to use to load the resource.
      * @param height The height to use to load the resource.
-     * @return This RequestBuilder.
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> override(int width, int height) {
         if (width <= 0) {
