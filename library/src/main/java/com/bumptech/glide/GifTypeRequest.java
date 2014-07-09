@@ -57,6 +57,9 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType, GifD
         this.glide = glide;
         this.requestTracker = requestTracker;
         this.optionsApplier = optionsApplier;
+
+        // Default to animating.
+        crossFade();
     }
 
     /**

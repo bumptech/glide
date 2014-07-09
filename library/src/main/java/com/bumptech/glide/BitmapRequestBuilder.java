@@ -285,6 +285,15 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> dontAnimate() {
+        super.dontAnimate();
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> animate(int animationId) {
         super.animate(animationId);
         return this;

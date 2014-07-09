@@ -192,6 +192,15 @@ public class GifRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
+    public GifRequestBuilder<ModelType, TranscodeType> dontAnimate() {
+        super.dontAnimate();
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public GifRequestBuilder<ModelType, TranscodeType> animate(int animationId) {
         super.animate(animationId);
         return this;

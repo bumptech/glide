@@ -39,6 +39,9 @@ public class DrawableRequestBuilder<ModelType>
         super(context, model, loadProvider, Drawable.class, glide, requestTracker);
         this.context = context;
         this.glide = glide;
+
+        // Default to animating.
+        crossFade();
     }
 
     /**
@@ -215,6 +218,15 @@ public class DrawableRequestBuilder<ModelType>
     public DrawableRequestBuilder<ModelType> crossFade(int animationId, int duration) {
         super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<Drawable>(context, animationId,
                 duration));
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DrawableRequestBuilder<ModelType> dontAnimate() {
+        super.dontAnimate();
         return this;
     }
 

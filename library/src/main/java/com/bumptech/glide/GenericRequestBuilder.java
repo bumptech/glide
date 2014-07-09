@@ -332,6 +332,15 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
+     * Removes any existing animation set on the builder. Will be overridden by subsequent calls that set an animation.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> dontAnimate() {
+        GlideAnimationFactory<TranscodeType> animation = NoAnimation.getFactory();
+        return animate(animation);
+    }
+
+    /**
      * Sets an animation to run on the wrapped target when an image load finishes. Will only be run if the image
      * was loaded asynchronously (ie was not in the memory cache)
      *
