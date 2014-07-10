@@ -222,13 +222,11 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     private static class ResourceWeakReference extends WeakReference<Resource> {
-        private final Object resource;
         private final Key key;
 
         public ResourceWeakReference(Key key, Resource r, ReferenceQueue<? super Resource> q) {
             super(r, q);
             this.key = key;
-            resource = r.get();
         }
     }
 
@@ -247,9 +245,6 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             ResourceWeakReference ref = (ResourceWeakReference) queue.poll();
             if (ref != null) {
                 activeResources.remove(ref.key);
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Maybe leaked a resource: " + ref.resource);
-                }
             }
 
             return true;

@@ -205,6 +205,10 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
             if (loadProvider.getSourceEncoder() == null) {
                 throw new NullPointerException("SourceEncoder must not be null, try .sourceEncoder(Encoder)");
             }
+            if (transformation == null) {
+                throw new NullPointerException("Transformation must not be null, try .transform(UnitTransformation"
+                        + ".get())");
+            }
         }
     }
 
@@ -391,15 +395,16 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
             resource.release();
             return;
         }
-        if (resource == null || !transcodeClass.isAssignableFrom(resource.get().getClass())) {
+        Object received = resource != null ? resource.get() : null;
+        if (resource == null || !transcodeClass.isAssignableFrom(received.getClass())) {
             if (resource != null) {
                 resource.release();
             }
             onException(new Exception("Expected to receive an object of " + transcodeClass + " but instead got "
-                    + (resource != null ? resource.get() : null)));
+                    + received));
             return;
         }
-        R result = (R) resource.get();
+        R result = (R) received;
 
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstImage())) {

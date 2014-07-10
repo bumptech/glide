@@ -67,13 +67,15 @@ class GifFrameManager {
         frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
         sourceEncoder = NullEncoder.get();
 
+        if (transformation == null) {
+            throw new NullPointerException("Transformation must not be null");
+        }
+
         if (!decoder.isTransparent()) {
             // For non transparent gifs, we can beat the performance of our gif decoder for each frame by decoding jpegs
             // from disk.
-
-            //TODO:
             cacheDecoder = new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(context));
-            encoder = new BitmapEncoder(Bitmap.CompressFormat.JPEG, 70);
+            encoder = new BitmapEncoder();
         } else {
             // For transparent gifs, we would have to encode as pngs which is actually slower than our gif decoder so we
             // avoid writing frames to the disk cache entirely.

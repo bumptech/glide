@@ -64,6 +64,7 @@ public class GenericRequestTest {
         int placeholderResourceId = 0;
         Drawable placeholderDrawable = null;
         int errorResourceId = 0;
+        Transformation transformation = mock(Transformation.class);
         Drawable errorDrawable = null;
         LoadProvider<Object, Object, Object, Object> loadProvider = mock(LoadProvider.class);
         ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
@@ -107,7 +108,7 @@ public class GenericRequestTest {
                     requestListener,
                     requestCoordinator,
                     engine,
-                    mock(Transformation.class),
+                    transformation,
                     Object.class,
                     skipMemoryCache,
                     factory,
@@ -160,6 +161,13 @@ public class GenericRequestTest {
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenMissingSourceEncoder() {
         when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenTransformationIsNull() {
+        harness.transformation = null;
 
         harness.getRequest();
     }
@@ -630,6 +638,15 @@ public class GenericRequestTest {
         verify(harness.target, times(2)).onResourceReady(eq(harness.result),
                 any(GlideAnimation.class));
     }
+
+    @Test
+    public void testResourceOnlyReceivesOneGetOnResourceReady() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.onResourceReady(harness.resource);
+
+        verify(harness.resource, times(1)).get();
+    }
+
 
     private static class CallResourceCallback implements Answer {
 
