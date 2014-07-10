@@ -84,12 +84,8 @@ public class GifData {
      * the wrapped GIF.
      */
     public GifDrawable getDrawable() {
-        GifDecoder gifDecoder = new GifDecoder(bitmapProvider);
-        gifDecoder.setData(gifId, header, data);
-        GifFrameManager frameManager = new GifFrameManager(context, gifDecoder, getFrameTransformation(),
-                targetWidth, targetHeight);
-
-        GifDrawable result = new GifDrawable(gifDecoder, frameManager);
+        GifDrawable result = new GifDrawable(gifId, header, data, context, getFrameTransformation(), targetWidth,
+                targetHeight, bitmapProvider);
         drawables.add(result);
         return result;
     }

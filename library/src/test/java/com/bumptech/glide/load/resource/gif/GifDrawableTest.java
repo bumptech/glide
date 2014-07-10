@@ -5,14 +5,22 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+
 import com.bumptech.glide.gifdecoder.GifDecoder;
+import com.bumptech.glide.gifdecoder.GifHeader;
+import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.tests.GlideShadowLooper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -25,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = GlideShadowLooper.class)
 public class GifDrawableTest {
     private GifDecoder gifDecoder;
     private GifDrawable drawable;
@@ -209,5 +218,22 @@ public class GifDrawableTest {
         drawable.recycle();
 
         assertTrue(drawable.isRecycled());
+    }
+
+    @Test
+    public void testReturnsNonNullConstantState() {
+        assertNotNull(drawable.getConstantState());
+    }
+
+    @Test
+    public void testReturnsNewDrawableFromConstantState() {
+        GifHeader gifHeader = mock(GifHeader.class);
+        Transformation<Bitmap> transformation = mock(Transformation.class);
+        GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
+        drawable = new GifDrawable("fakeId", gifHeader, new byte[0], Robolectric.application, transformation, 100, 100,
+                provider);
+
+        assertNotNull(drawable.getConstantState().newDrawable());
+        assertNotNull(drawable.getConstantState().newDrawable(Robolectric.application.getResources()));
     }
 }
