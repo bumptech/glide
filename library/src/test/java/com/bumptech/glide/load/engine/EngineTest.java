@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import android.os.Looper;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
@@ -17,8 +19,10 @@ import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLooper;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -317,9 +321,12 @@ public class EngineTest {
 
     @Test
     public void testResourceIsRecycledIfNotCacheableWhenReleased() {
+        ShadowLooper shadowLooper = Robolectric.shadowOf(Looper.getMainLooper());
         when(harness.resource.isCacheable()).thenReturn(false);
+        shadowLooper.pause();
         harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
-
+        verify(harness.resource, never()).recycle();
+        shadowLooper.runOneTask();
         verify(harness.resource).recycle();
     }
 
@@ -339,8 +346,12 @@ public class EngineTest {
 
     @Test
     public void testResourceIsRecycledWhenRemovedFromCache() {
+        ShadowLooper shadowLooper = Robolectric.shadowOf(Looper.getMainLooper());
+        shadowLooper.pause();
         harness.engine.onResourceRemoved(harness.resource);
-
+        // We expect the release to be posted
+        verify(harness.resource, never()).recycle();
+        shadowLooper.runOneTask();
         verify(harness.resource).recycle();
     }
 

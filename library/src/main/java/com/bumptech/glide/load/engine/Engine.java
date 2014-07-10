@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.MessageQueue;
 import android.util.Log;
 
@@ -37,6 +38,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     private final MemoryCache cache;
     private final Map<Key, WeakReference<Resource>> activeResources;
     private final ReferenceQueue<Resource> resourceReferenceQueue;
+    private final Handler mainHandler;
 
     public static class LoadStatus {
         private final EngineJob engineJob;
@@ -87,6 +89,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         MessageQueue queue = Looper.myQueue();
         queue.addIdleHandler(new RefQueueIdleHandler(activeResources, resourceReferenceQueue));
         cache.setResourceRemovedListener(this);
+
+        mainHandler = new Handler(Looper.getMainLooper(), new ResourceRecyclerCallback());
     }
 
     /**
@@ -207,8 +211,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     @Override
-    public void onResourceRemoved(Resource resource) {
-        resource.recycle();
+    public void onResourceRemoved(final Resource resource) {
+        recycleResource(resource);
     }
 
     @Override
@@ -217,7 +221,27 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         if (resource.isCacheable()) {
             cache.put(cacheKey, resource);
         } else {
-            resource.recycle();
+            recycleResource(resource);
+        }
+    }
+
+    private void recycleResource(Resource resource) {
+        // If a resource has sub-resources, releasing a sub resource can cause it's parent to be synchronously
+        // evicted which leads to a recycle loop when the parent the releases it's children. Posting breaks this loops.
+        mainHandler.obtainMessage(ResourceRecyclerCallback.RECYCLE_RESOURCE, resource).sendToTarget();
+    }
+
+    private static class ResourceRecyclerCallback implements Handler.Callback {
+        public static final int RECYCLE_RESOURCE = 1;
+
+        @Override
+        public boolean handleMessage(Message message) {
+            if (message.what == RECYCLE_RESOURCE) {
+                Resource resource = (Resource) message.obj;
+                resource.recycle();
+                return true;
+            }
+            return false;
         }
     }
 
