@@ -34,4 +34,12 @@ public class GifHeader {
     int bgColor;
     boolean isTransparent;
     int loopCount;
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
 }

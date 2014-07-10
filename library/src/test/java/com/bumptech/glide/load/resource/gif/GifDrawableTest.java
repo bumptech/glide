@@ -39,44 +39,16 @@ public class GifDrawableTest {
     private GifDrawable drawable;
     private GifFrameManager frameManager = mock(GifFrameManager.class);
     private Drawable.Callback cb = mock(Drawable.Callback.class);
+    private int frameHeight;
+    private int frameWidth;
 
     @Before
     public void setUp() {
+        frameWidth = 120;
+        frameHeight = 450;
         gifDecoder = mock(GifDecoder.class);
-        drawable = new GifDrawable(gifDecoder, frameManager);
+        drawable = new GifDrawable(gifDecoder, frameManager, frameWidth, frameHeight);
         drawable.setCallback(cb);
-    }
-
-    @Test
-    public void testReturnsInvalidWidthBeforeFirstFrame() {
-        assertEquals(-1, drawable.getIntrinsicWidth());
-    }
-
-    @Test
-    public void testReturnsInvalidHeightBeforeFirstFrame() {
-        assertEquals(-1, drawable.getIntrinsicHeight());
-    }
-
-    @Test
-    public void testReturnsFrameWidthAfterFirstFrame() {
-        int width = 123;
-        Bitmap bitmap = Bitmap.createBitmap(width, 1231, Bitmap.Config.ARGB_8888);
-
-        drawable.setIsRunning(true);
-        drawable.onFrameRead(bitmap);
-
-        assertEquals(width, drawable.getIntrinsicWidth());
-    }
-
-    @Test
-    public void testReturnsFrameHeightAfterFirstFrame() {
-        int height = 456;
-        Bitmap bitmap = Bitmap.createBitmap(1, height, Bitmap.Config.RGB_565);
-
-        drawable.setIsRunning(true);
-        drawable.onFrameRead(bitmap);
-
-        assertEquals(height, drawable.getIntrinsicHeight());
     }
 
     @Test
@@ -230,10 +202,16 @@ public class GifDrawableTest {
         GifHeader gifHeader = mock(GifHeader.class);
         Transformation<Bitmap> transformation = mock(Transformation.class);
         GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
-        drawable = new GifDrawable("fakeId", gifHeader, new byte[0], Robolectric.application, transformation, 100, 100,
-                provider);
+        drawable = new GifDrawable(Robolectric.application, provider, transformation, 100, 100, "fakeId", gifHeader,
+                new byte[0], 100, 100);
 
         assertNotNull(drawable.getConstantState().newDrawable());
         assertNotNull(drawable.getConstantState().newDrawable(Robolectric.application.getResources()));
+    }
+
+    @Test
+    public void testReturnsFrameWidthAndHeightForIntrinsictDimensions() {
+        assertEquals(frameWidth, drawable.getIntrinsicWidth());
+        assertEquals(frameHeight, drawable.getIntrinsicHeight());
     }
 }

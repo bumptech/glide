@@ -2,8 +2,10 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
@@ -14,27 +16,46 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = GlideShadowLooper.class)
 public class GifDataTest {
     private GifData data;
     private byte[] bytes;
+    private GifData.GifDrawableFactory factory;
+    private GifHeader header;
+    private String gifId;
+    private int targetWidth;
+    private int targetHeight;
+    private int originalHeight;
+    private int originalWidth;
+    private BitmapPool bitmapPool;
 
     @Before
     public void setUp() {
-        BitmapPool bitmapPool = mock(BitmapPool.class);
-        GifHeader header = mock(GifHeader.class);
+        bitmapPool = mock(BitmapPool.class);
+        gifId = "gifId";
+        header = mock(GifHeader.class);
         bytes = new byte[] { 'G', 'I', 'F' };
-        data = new GifData(Robolectric.application, bitmapPool, "gifId", header, bytes, 123, 456);
+        factory = mock(GifData.GifDrawableFactory.class);
+        targetWidth = 123;
+        targetHeight = 456;
+
+        originalWidth = 100;
+        originalHeight = 100;
+        when(header.getWidth()).thenReturn(originalWidth);
+        when(header.getHeight()).thenReturn(originalHeight);
+
+        data = new GifData(Robolectric.application, bitmapPool, gifId, header, bytes, targetWidth, targetHeight,
+                factory);
     }
 
     @Test
@@ -46,33 +67,66 @@ public class GifDataTest {
     @Test
     public void testReturnsSetTransformation() {
         Transformation<Bitmap> transformation = mock(Transformation.class);
+        Resource<Bitmap> resource = mock(Resource.class);
+        when(resource.get()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444));
+        when(transformation.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(resource);
 
         data.setFrameTransformation(transformation);
         assertEquals(transformation, data.getFrameTransformation());
     }
 
     @Test
-    public void testReturnsDifferentDrawables() {
-        GifDrawable first = data.getDrawable();
-        GifDrawable second = data.getDrawable();
+    public void testBuildsDrawableWithFactory() {
+        data.getDrawable();
 
-        assertNotSame(first, second);
+        verify(factory).build(eq(Robolectric.application), any(GifDecoder.BitmapProvider.class),
+                any(Transformation.class), eq(targetWidth), eq(targetHeight), eq(gifId), eq(header), eq(bytes),
+                eq(originalWidth), eq(originalHeight));
+    }
+
+    @Test
+    public void testReturnsDifferentDrawables() {
+        data.getDrawable();
+        data.getDrawable();
+
+        verify(factory, times(2)).build(eq(Robolectric.application), any(GifDecoder.BitmapProvider.class),
+                any(Transformation.class), eq(targetWidth), eq(targetHeight), eq(gifId), eq(header), eq(bytes),
+                eq(originalWidth), eq(originalHeight));
     }
 
     @Test
     public void testCallsRecycleOnAllReturnedDrawablesWhenRecycled() {
-        List<GifDrawable> drawables = new ArrayList<GifDrawable>();
-        for (int i = 0; i < 10; i++) {
-            drawables.add(data.getDrawable());
+        GifDrawable drawable = mock(GifDrawable.class);
+        when(factory.build(eq(Robolectric.application), any(GifDecoder.BitmapProvider.class), any(Transformation.class),
+                eq(targetWidth), eq(targetHeight), eq(gifId), eq(header), eq(bytes), eq(originalWidth),
+                eq(originalHeight)))
+                .thenReturn(drawable);
+
+        int toGet = 10;
+        for (int i = 0; i < toGet; i++) {
+            data.getDrawable();
         }
         data.recycle();
-        for (GifDrawable drawable : drawables) {
-            assertTrue(drawable.isRecycled());
-        }
+        verify(drawable, times(toGet)).recycle();
     }
 
     @Test
-    public void testReturnsNonNullDrawable() {
-        assertNotNull(data.getDrawable());
+    public void testPassesTransformedDimensionsToFactoryIfGivenTransformation() {
+        int expectedWidth = 222;
+        int expectedHeight = 444;
+
+        Resource<Bitmap> resource = mock(Resource.class);
+        when(resource.get()).thenReturn(Bitmap.createBitmap(expectedWidth, expectedHeight, Bitmap.Config.RGB_565));
+
+        Transformation<Bitmap> transformation = mock(Transformation.class);
+        when(transformation.transform(any(Resource.class), eq(targetWidth), eq(targetHeight)))
+                .thenReturn(resource);
+
+        data.setFrameTransformation(transformation);
+        data.getDrawable();
+
+        verify(factory).build(eq(Robolectric.application), any(GifDecoder.BitmapProvider.class), eq(transformation),
+                eq(targetWidth), eq(targetHeight), eq(gifId), eq(header), eq(bytes), eq(expectedWidth),
+                eq(expectedHeight));
     }
 }

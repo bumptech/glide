@@ -24,18 +24,16 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     private final Paint paint = new Paint();
     private GifFrameManager frameManager;
     private GifState state;
-    private int width = -1;
-    private int height = -1;
     private GifDecoder decoder;
     private boolean isRunning;
     private Bitmap currentFrame;
     private boolean isRecycled;
 
-    public GifDrawable(String id, GifHeader gifHeader, byte[] data, Context context,
-            Transformation<Bitmap> frameTransformation, int targetWidth, int targetHeight,
-            GifDecoder.BitmapProvider bitmapProvider) {
-        this(new GifState(id, gifHeader, data, context, frameTransformation, targetWidth, targetHeight,
-                bitmapProvider));
+    public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider,
+            Transformation<Bitmap> frameTransformation, int targetFrameWidth, int targetFrameHeight, String id,
+            GifHeader gifHeader, byte[] data, int finalFrameWidth, int finalFrameHeight) {
+        this(new GifState(id, gifHeader, data, context, frameTransformation, targetFrameWidth, targetFrameHeight,
+                bitmapProvider, finalFrameWidth, finalFrameHeight));
     }
 
     private GifDrawable(GifState state) {
@@ -47,10 +45,12 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     }
 
     // For testing.
-    GifDrawable(GifDecoder decoder, GifFrameManager frameManager) {
+    GifDrawable(GifDecoder decoder, GifFrameManager frameManager, int finalFrameWidth, int finalFrameHeight) {
         this.decoder = decoder;
         this.frameManager = frameManager;
         this.state = new GifState(null);
+        state.finalFrameWidth = finalFrameWidth;
+        state.finalFrameHeight = finalFrameHeight;
     }
 
 
@@ -75,12 +75,12 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
     @Override
     public int getIntrinsicWidth() {
-        return width;
+        return state.finalFrameWidth;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return height;
+        return state.finalFrameHeight;
     }
 
     @Override
@@ -130,13 +130,6 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
             return;
         }
 
-        if (width == -1) {
-            width = frame.getWidth();
-        }
-        if (height == -1) {
-            height = frame.getHeight();
-        }
-
         if (frame != null) {
             currentFrame = frame;
             invalidateSelf();
@@ -166,6 +159,8 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         String id;
         GifHeader gifHeader;
         byte[] data;
+        int finalFrameWidth;
+        int finalFrameHeight;
         Context context;
         Transformation<Bitmap> frameTransformation;
         int targetWidth;
@@ -174,10 +169,12 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
         public GifState(String id, GifHeader header, byte[] data, Context context,
                 Transformation<Bitmap> frameTransformation, int targetWidth, int targetHeight,
-                GifDecoder.BitmapProvider provider) {
+                GifDecoder.BitmapProvider provider, int finalFrameWidth, int finalFrameHeight) {
             this.id = id;
             gifHeader = header;
             this.data = data;
+            this.finalFrameWidth = finalFrameWidth;
+            this.finalFrameHeight = finalFrameHeight;
             this.context = context.getApplicationContext();
             this.frameTransformation = frameTransformation;
             this.targetWidth = targetWidth;
@@ -195,12 +192,14 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
                 targetWidth = original.targetWidth;
                 targetHeight = original.targetHeight;
                 bitmapProvider = original.bitmapProvider;
+                finalFrameWidth = original.finalFrameWidth;
+                finalFrameHeight = original.finalFrameHeight;
             }
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return super.newDrawable(res);
+            return new GifDrawable(this);
         }
 
         @Override
