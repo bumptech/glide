@@ -126,9 +126,5 @@
         <!-- See http://checkstyle.sourceforge.net/config_design.html -->
         <module name="FinalClass" />
         <module name="InterfaceIsType" />
-        <module name="VisibilityModifier">
-            <property name="packageAllowed" value="true" />
-            <property name="protectedAllowed" value="true" />
-        </module>
     </module>
 </module>
