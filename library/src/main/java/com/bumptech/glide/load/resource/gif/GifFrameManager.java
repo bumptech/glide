@@ -37,7 +37,7 @@ class GifFrameManager {
     private final ResourceEncoder<Bitmap> encoder;
     private final Context context;
     private final Encoder<GifDecoder> sourceEncoder;
-    private Transformation<Bitmap> transformation;
+    private final Transformation<Bitmap> transformation;
     private final int targetWidth;
     private final int targetHeight;
     private DelayTarget current;
@@ -120,12 +120,12 @@ class GifFrameManager {
 
     public void clear() {
         if (current != null) {
-            Glide.clear(current);
             mainHandler.removeCallbacks(current);
+            Glide.clear(current);
         }
         if (next != null) {
-            Glide.clear(next);
             mainHandler.removeCallbacks(next);
+            Glide.clear(next);
         }
     }
 
@@ -146,16 +146,15 @@ class GifFrameManager {
             frameSize = resource.getHeight() * resource.getRowBytes();
             this.resource = resource;
             mainHandler.postAtTime(this, targetTime);
-            if (current != null) {
-                Glide.clear(current);
-            }
-            current = next;
-            next = null;
         }
 
         @Override
         public void run() {
             cb.onFrameRead(resource);
+            if (current != null) {
+                Glide.clear(current);
+            }
+            current = this;
         }
     }
 }
