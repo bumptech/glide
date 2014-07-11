@@ -42,4 +42,8 @@ public class GifHeader {
     public int getWidth() {
         return width;
     }
+
+    public int getNumFrames() {
+        return frameCount;
+    }
 }

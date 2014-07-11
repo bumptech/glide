@@ -109,6 +109,7 @@ public class GifDecoder {
     private GifHeader header;
     private String id;
     private BitmapProvider bitmapProvider;
+    private GifHeaderParser parser = new GifHeaderParser();
 
     public interface BitmapProvider {
         public Bitmap obtain(int width, int height, Bitmap.Config config);
@@ -308,7 +309,7 @@ public class GifDecoder {
      */
     public int read(byte[] data) {
         this.data = data;
-        this.header = new GifHeaderParser(data).parseHeader();
+        this.header = parser.setData(data).parseHeader();
         if (data != null) {
             // Initialize the raw data buffer.
             rawData = ByteBuffer.wrap(data);

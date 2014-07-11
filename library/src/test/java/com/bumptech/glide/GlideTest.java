@@ -496,20 +496,25 @@ public class GlideTest {
     }
 
     @Test
-    public void testReceivesGif() {
+    public void testReceivesGif() throws IOException {
         String fakeUri = "content://fake";
-        mockUri(fakeUri);
+        InputStream testGifData = openResource("test.gif");
+        mockUri(Uri.parse(fakeUri), testGifData);
+
         Glide.with(getContext())
                 .load(fakeUri)
                 .asGif()
                 .into(target);
+
         verify(target).onResourceReady(any(GifDrawable.class), any(GlideAnimation.class));
     }
 
     @Test
-    public void testReceivesGifBytes() {
+    public void testReceivesGifBytes() throws IOException {
         String fakeUri = "content://fake";
-        mockUri(fakeUri);
+        InputStream testGifData = openResource("test.gif");
+        mockUri(Uri.parse(fakeUri), testGifData);
+
         Glide.with(getContext())
                 .load(fakeUri)
                 .asGif()
@@ -614,8 +619,10 @@ public class GlideTest {
         verify(target).setPlaceholder(eq(drawable));
     }
 
-    private void mockUri(String uriString) {
-        mockUri(Uri.parse(uriString));
+    @Test
+    public void testByteData() {
+        byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
+        Glide.with(getContext()).load(data).into(target);
     }
 
     @SuppressWarnings("unchecked")
@@ -631,11 +638,21 @@ public class GlideTest {
         Glide.get(getContext()).register(failModel, failResource, failFactory);
     }
 
+    private void mockUri(String uriString) {
+        mockUri(Uri.parse(uriString), null);
+    }
 
     private void mockUri(Uri uri) {
+        mockUri(uri, null);
+    }
+
+    private void mockUri(Uri uri, InputStream is) {
+        if (is == null) {
+            is = new ByteArrayInputStream(new byte[0]);
+        }
         ContentResolver contentResolver = Robolectric.application.getContentResolver();
         ShadowFileDescriptorContentResolver shadowContentResolver = Robolectric.shadowOf_(contentResolver);
-        shadowContentResolver.registerInputStream(uri, new ByteArrayInputStream(new byte[0]));
+        shadowContentResolver.registerInputStream(uri, is);
 
         AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
         ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
@@ -672,6 +689,11 @@ public class GlideTest {
                 .thenReturn(fetcher);
 
         return modelLoader;
+    }
+
+
+    private InputStream openResource(String imageName) throws IOException {
+        return getClass().getResourceAsStream("/" + imageName);
     }
 
     private static class CallCallback implements Answer<Void> {

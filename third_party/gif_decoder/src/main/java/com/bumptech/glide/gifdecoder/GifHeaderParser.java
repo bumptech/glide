@@ -5,6 +5,7 @@ import android.util.Log;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 import static com.bumptech.glide.gifdecoder.GifDecoder.STATUS_FORMAT_ERROR;
 
@@ -15,8 +16,8 @@ public class GifHeaderParser {
      */
     private static final int MAX_STACK_SIZE = 4096;
 
-    private final ByteBuffer rawData;
-    private GifHeader header = new GifHeader();
+    private ByteBuffer rawData;
+    private GifHeader header;
 
     // Raw data read working array.
     private byte[] block = new byte[256];
@@ -26,7 +27,8 @@ public class GifHeaderParser {
     private byte[] suffix;
     private byte[] pixelStack;
 
-    public GifHeaderParser(byte[] data) {
+    public GifHeaderParser setData(byte[] data) {
+        reset();
         if (data != null) {
             rawData = ByteBuffer.wrap(data);
             rawData.rewind();
@@ -35,6 +37,17 @@ public class GifHeaderParser {
             rawData = null;
             header.status = GifDecoder.STATUS_OPEN_ERROR;
         }
+        return this;
+    }
+
+    private void reset() {
+        rawData = null;
+        Arrays.fill(block, (byte) 0);
+        header = new GifHeader();
+        blockSize = 0;
+        prefix = null;
+        suffix = null;
+        pixelStack = null;
     }
 
     public GifHeader parseHeader() {

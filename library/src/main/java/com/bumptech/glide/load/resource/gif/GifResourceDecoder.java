@@ -24,22 +24,35 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
     private static final String TAG = "GifResourceDecoder";
     private Context context;
     private BitmapPool bitmapPool;
+    private GifHeaderParser parser;
 
     public GifResourceDecoder(Context context) {
         this(context, Glide.get(context).getBitmapPool());
     }
 
     public GifResourceDecoder(Context context, BitmapPool bitmapPool) {
+        this(context, bitmapPool, new GifHeaderParser());
+    }
+
+    GifResourceDecoder(Context context, BitmapPool bitmapPool, GifHeaderParser parser) {
         this.context = context;
         this.bitmapPool = bitmapPool;
+        this.parser = parser;
     }
 
     @Override
     public GifDataResource decode(InputStream source, int width, int height) throws IOException {
         byte[] data = inputStreamToBytes(source);
-        GifHeader header = new GifHeaderParser(data).parseHeader();
+        GifHeader header = parser.setData(data).parseHeader();
+
+        if (header.getNumFrames() <= 0) {
+            // If we couldn't decode the GIF, we will end up with a frame count of 0.
+            return null;
+        }
+
         String id = getGifId(data);
-        return new GifDataResource(new GifData(context, bitmapPool, id, header, data, width, height));
+        GifData gifData = new GifData(context, bitmapPool, id, header, data, width, height);
+        return new GifDataResource(gifData);
     }
 
     @Override
