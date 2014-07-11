@@ -40,28 +40,29 @@ class GifFrameManager {
     private final Transformation<Bitmap> transformation;
     private final int targetWidth;
     private final int targetHeight;
+    private final int totalFrameSize;
     private DelayTarget current;
     private DelayTarget next;
-    private int frameSize = -1;
 
     public interface FrameCallback {
         public void onFrameRead(Bitmap frame);
     }
 
     public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation, int targetWidth,
-            int targetHeight) {
+            int targetHeight, int frameWidth, int frameHeight) {
         this(context, Glide.get(context).getBitmapPool(), decoder, new Handler(Looper.getMainLooper()), transformation,
-                targetWidth, targetHeight);
+                targetWidth, targetHeight, frameWidth, frameHeight);
     }
 
     public GifFrameManager(Context context, BitmapPool bitmapPool, GifDecoder decoder, Handler mainHandler,
-            Transformation<Bitmap> transformation, int targetWidth, int targetHeight) {
+            Transformation<Bitmap> transformation, int targetWidth, int targetHeight, int frameWidth, int frameHeight) {
         this.context = context;
         this.decoder = decoder;
         this.mainHandler = mainHandler;
         this.transformation = transformation;
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
+        this.totalFrameSize = frameWidth * frameHeight * (decoder.isTransparent() ? 4 : 2);
         calculator = new MemorySizeCalculator(context);
         frameLoader = new GifFrameModelLoader();
         frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
@@ -88,19 +89,11 @@ class GifFrameManager {
         return transformation;
     }
 
-    private int getEstimatedTotalFrameSize() {
-        if (frameSize == -1) {
-            return decoder.getDecodedFramesByteSizeSum();
-        } else {
-            return frameSize * decoder.getFrameCount();
-        }
-    }
-
     public void getNextFrame(FrameCallback cb) {
         decoder.advance();
         // We don't want to blow out the entire memory cache with frames of gifs, so try to set some
         // maximum size beyond which we will always just decode one frame at a time.
-        boolean skipCache = getEstimatedTotalFrameSize() > calculator.getMemoryCacheSize() / 2;
+        boolean skipCache = totalFrameSize > calculator.getMemoryCacheSize() / 2;
 
         long targetTime = SystemClock.uptimeMillis() + (Math.max(MIN_FRAME_DELAY, decoder.getNextDelay()));
         next = new DelayTarget(cb, targetTime);
@@ -142,8 +135,6 @@ class GifFrameManager {
 
         @Override
         public void onResourceReady(final Bitmap resource, GlideAnimation<Bitmap> glideAnimation) {
-            // Ignore allocationByteSize, we only want the minimum frame size.
-            frameSize = resource.getHeight() * resource.getRowBytes();
             this.resource = resource;
             mainHandler.postAtTime(this, targetTime);
         }

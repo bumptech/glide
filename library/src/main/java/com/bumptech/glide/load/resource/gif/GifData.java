@@ -26,14 +26,14 @@ public class GifData {
     private final byte[] data;
     private final GifDecoderBitmapProvider bitmapProvider;
     private final String gifId;
-    /** The target dimensions we should pass to Glide to use when loading individual frames */
+    /** The target dimensions we should pass to Glide to use when loading individual frames. */
     private final int targetWidth;
     private final int targetHeight;
     private final GifDrawableFactory factory;
     private final List<GifDrawable> drawables = new ArrayList<GifDrawable>();
 
     private Transformation<Bitmap> frameTransformation;
-    /** The final dimensions of the transformed frames */
+    /** The final dimensions of the transformed frames. */
     private int frameHeight;
     private int frameWidth;
 

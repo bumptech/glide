@@ -41,7 +41,7 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         this.decoder = new GifDecoder(state.bitmapProvider);
         decoder.setData(state.id, state.gifHeader, state.data);
         frameManager = new GifFrameManager(state.context, decoder, state.frameTransformation, state.targetWidth,
-                state.targetHeight);
+                state.targetHeight, state.finalFrameWidth, state.finalFrameHeight);
     }
 
     // For testing.
@@ -52,7 +52,6 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         state.finalFrameWidth = finalFrameWidth;
         state.finalFrameHeight = finalFrameHeight;
     }
-
 
     @Override
     public void start() {
