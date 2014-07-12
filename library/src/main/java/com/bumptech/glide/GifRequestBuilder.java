@@ -10,8 +10,6 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -41,6 +39,9 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
         super(context, model, loadProvider, GifDrawable.class, glide, requestTracker);
         this.context = context;
         this.glide = glide;
+
+        // Default to transforming gif to fit within target size.
+        fitCenter();
     }
 
     /**
@@ -148,7 +149,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      * @return This request builder.
      */
     public GifRequestBuilder<ModelType> centerCrop() {
-        return transformFrame(new CenterCrop(glide.getBitmapPool()));
+        return transformFrame(glide.getBitmapCenterCrop());
     }
 
     /**
@@ -161,7 +162,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      * @return This request builder..
      */
     public GifRequestBuilder<ModelType> fitCenter() {
-        return transformFrame(new FitCenter(glide.getBitmapPool()));
+        return transformFrame(glide.getBitmapFitCenter());
     }
 
     /**
@@ -358,6 +359,15 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     @Override
     public GifRequestBuilder<ModelType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
         super.sourceEncoder(sourceEncoder);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GifRequestBuilder<ModelType> dontTransform() {
+        super.dontTransform();
         return this;
     }
 }

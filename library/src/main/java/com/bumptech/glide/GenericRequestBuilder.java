@@ -293,7 +293,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * transformations.
      *
      * @param transformations the transformations to apply in order.
-     * @return This RequestBuilder
+     * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transform(
             Transformation<ResourceType>... transformations) {
@@ -304,6 +304,17 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         }
 
         return this;
+    }
+
+    /**
+     * Removes the current {@link com.bumptech.glide.load.Transformation}.
+     *
+     * @return This request builder.
+     */
+    @SuppressWarnings("unchecked")
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> dontTransform() {
+        Transformation<ResourceType> transformation = UnitTransformation.get();
+        return transform(transformation);
     }
 
     /**

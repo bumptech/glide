@@ -42,6 +42,8 @@ public class DrawableRequestBuilder<ModelType>
 
         // Default to animating.
         crossFade();
+        // And default to resizing bitmap to fit within target size.
+        fitCenter();
     }
 
     /**
@@ -204,8 +206,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public DrawableRequestBuilder<ModelType> transcoder(
-            ResourceTranscoder<GifBitmapWrapper, Drawable> transcoder) {
+    public DrawableRequestBuilder<ModelType> transcoder(ResourceTranscoder<GifBitmapWrapper, Drawable> transcoder) {
         super.transcoder(transcoder);
         return this;
     }
@@ -357,6 +358,15 @@ public class DrawableRequestBuilder<ModelType>
     @Override
     public DrawableRequestBuilder<ModelType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
         super.sourceEncoder(sourceEncoder);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DrawableRequestBuilder<ModelType> dontTransform() {
+        super.dontTransform();
         return this;
     }
 }

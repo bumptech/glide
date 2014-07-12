@@ -55,6 +55,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
 
         imageDecoder = new StreamBitmapDecoder(bitmapPool);
         videoDecoder = new FileDescriptorBitmapDecoder(bitmapPool);
+
+        // Default to transforming bitmap to fit within target size.
+        fitCenter();
     }
 
     /**
@@ -415,6 +418,15 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
         super.sourceEncoder(sourceEncoder);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> dontTransform() {
+        super.dontTransform();
         return this;
     }
 }
