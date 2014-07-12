@@ -31,8 +31,6 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A generic class that can handle loading a bitmap either from an image or as a thumbnail from a video given
@@ -52,8 +50,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private final Class<TranscodeType> transcodeClass;
     private final Glide glide;
     private final RequestTracker requestTracker;
-    private List<Transformation<ResourceType>> transformations = null;
-    private Transformation<ResourceType> singleTransformation = UnitTransformation.get();
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType, TranscodeType> requestListener;
@@ -69,6 +65,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private int overrideHeight = -1;
     private int overrideWidth = -1;
     private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
+    private Transformation<ResourceType> transformation = UnitTransformation.get();
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
@@ -292,20 +289,18 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Transform images with the given {@link Transformation}. Appends this transformation onto any existing
-     * transformations
+     * Transform resources with the given {@link Transformation}s. Replaces any existing transformation or
+     * transformations.
      *
-     * @param transformation the transformation to apply.
+     * @param transformations the transformations to apply in order.
      * @return This RequestBuilder
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transform(
-            Transformation<ResourceType> transformation) {
-        if (singleTransformation == UnitTransformation.get()) {
-            singleTransformation = transformation;
+            Transformation<ResourceType>... transformations) {
+        if (transformations.length == 1) {
+            transformation = transformations[0];
         } else {
-            transformations = new ArrayList<Transformation<ResourceType>>();
-            transformations.add(singleTransformation);
-            transformations.add(transformation);
+            transformation = new MultiTransformation<ResourceType>(transformations);
         }
 
         return this;
@@ -651,21 +646,12 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 requestListener,
                 requestCoordinator,
                 glide.getEngine(),
-                getFinalTransformation(),
+                transformation,
                 transcodeClass,
                 isCacheable,
                 animationFactory,
                 overrideWidth,
                 overrideHeight,
                 diskCacheStrategy);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Transformation<ResourceType> getFinalTransformation() {
-        if (transformations == null) {
-            return singleTransformation;
-        } else {
-            return new MultiTransformation<ResourceType>(transformations);
-        }
     }
 }

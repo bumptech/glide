@@ -144,6 +144,10 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * Transform {@link Drawable}s using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
+     * @see #fitCenter()
+     * @see #bitmapTransform(com.bumptech.glide.load.Transformation[])
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
      * @return This request builder.
      */
     public DrawableRequestBuilder<ModelType> centerCrop() {
@@ -154,6 +158,10 @@ public class DrawableRequestBuilder<ModelType>
      * Transform {@link android.graphics.drawable.Drawable}s using
      * {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
+     * @see #centerCrop()
+     * @see #bitmapTransform(com.bumptech.glide.load.Transformation[])
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
      * @return This request builder.
      */
     public DrawableRequestBuilder<ModelType> fitCenter() {
@@ -161,19 +169,33 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
-     * Transform {@link android.graphics.drawable.Drawable}s using the given bitmap transformation.
+     * Transform {@link android.graphics.drawable.Drawable}s using the given {@link android.graphics.Bitmap}
+     * transformations. Replaces any previous transformations.
+     *
+     * @see #fitCenter()
+     * @see #centerCrop()
+     * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder.
      */
-    public DrawableRequestBuilder<ModelType> bitmapTransform(Transformation<Bitmap> bitmapTransformation) {
-        return transform(new GifBitmapWrapperTransformation(bitmapTransformation));
+    public DrawableRequestBuilder<ModelType> bitmapTransform(Transformation<Bitmap>... bitmapTransformations) {
+        GifBitmapWrapperTransformation[] transformations =
+                new GifBitmapWrapperTransformation[bitmapTransformations.length];
+        for (int i = 0; i < bitmapTransformations.length; i++) {
+            transformations[i] = new GifBitmapWrapperTransformation(bitmapTransformations[i]);
+        }
+        return transform(transformations);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @see #bitmapTransform(com.bumptech.glide.load.Transformation[])
+     * @see #centerCrop()
+     * @see #fitCenter()
      */
     @Override
-    public DrawableRequestBuilder<ModelType> transform(Transformation<GifBitmapWrapper> transformation) {
+    public DrawableRequestBuilder<ModelType> transform(Transformation<GifBitmapWrapper>... transformation) {
         super.transform(transformation);
         return this;
     }

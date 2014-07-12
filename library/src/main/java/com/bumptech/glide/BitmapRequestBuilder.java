@@ -247,6 +247,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * Transform images using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
+     * @see #fitCenter()
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
      * @return This request builder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> centerCrop() {
@@ -256,6 +259,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * Transform images using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
+     * @see #centerCrop()
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
      * @return This request builder.
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> fitCenter() {
@@ -264,10 +270,13 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
 
     /**
      * {@inheritDoc}
+     *
+     * @see #fitCenter()
+     * @see #centerCrop()
      */
     @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> transform(Transformation<Bitmap> transformation) {
-        super.transform(transformation);
+    public BitmapRequestBuilder<ModelType, TranscodeType> transform(Transformation<Bitmap>... transformations) {
+        super.transform(transformations);
         return this;
     }
 

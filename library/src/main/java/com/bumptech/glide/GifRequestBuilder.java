@@ -141,7 +141,9 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     /**
      * Transforms each frame of the GIF using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
-     * @see #transformFrame(com.bumptech.glide.load.Transformation)
+     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
+     * @see #fitCenter()
+     * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder.
      */
@@ -152,7 +154,9 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     /**
      * Transforms each frame of the GIF using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
-     * @see #transformFrame(com.bumptech.glide.load.Transformation)
+     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
+     * @see #centerCrop()
+     * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder..
      */
@@ -163,19 +167,33 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     /**
      * Transforms each frame of the GIF using the given transformation.
      *
-     * @param bitmapTransformation The transformation to use.
+     * @see #fitCenter()
+     * @see #centerCrop()
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
+     * @param bitmapTransformations The transformation to use.
      * @return This request builder.
      */
-    public GifRequestBuilder<ModelType> transformFrame(Transformation<Bitmap> bitmapTransformation) {
-        return transform(new GifDataTransformation(bitmapTransformation));
+    public GifRequestBuilder<ModelType> transformFrame(Transformation<Bitmap>... bitmapTransformations) {
+        GifDataTransformation[] transformations = new GifDataTransformation[bitmapTransformations.length];
+        for (int i = 0; i < bitmapTransformations.length; i++) {
+            transformations[i] = new GifDataTransformation(bitmapTransformations[i]);
+        }
+
+        return transform(transformations);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @see #fitCenter()
+     * @see #centerCrop()
+     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
+     *
      */
     @Override
-    public GifRequestBuilder<ModelType> transform(Transformation<GifData> transformation) {
-        super.transform(transformation);
+    public GifRequestBuilder<ModelType> transform(Transformation<GifData>... transformations) {
+        super.transform(transformations);
         return this;
     }
 
