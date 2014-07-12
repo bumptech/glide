@@ -100,7 +100,7 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
         @Override
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(FlickrPhotoGrid.this)
-                    .loadFromImage(item)
+                    .load(item)
                     .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     .priority(Priority.HIGH);
@@ -149,9 +149,9 @@ public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
             }
 
             Glide.with(FlickrPhotoGrid.this)
-                    .loadFromImage(current)
+                    .load(current)
                     .thumbnail(Glide.with(FlickrPhotoGrid.this)
-                            .loadFromImage(current)
+                            .load(current)
                             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                             .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     )

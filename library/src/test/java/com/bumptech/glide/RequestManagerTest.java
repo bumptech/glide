@@ -100,7 +100,7 @@ public class RequestManagerTest {
         String model = "fake";
         FileDescriptorModelLoader<String> modelLoader = mock(FileDescriptorModelLoader.class);
         DrawableTypeRequest<String> builder = manager.using(modelLoader)
-                .loadFromVideo(model);
+                .load(model);
 
         verify(options).apply(eq(model), eq(builder));
     }
@@ -158,7 +158,7 @@ public class RequestManagerTest {
     @Test
     public void testAppliesDefaultOptionsToLoadFromImageByteWithId() {
         byte[] model = new byte[] { 1, 2, 4 };
-        DrawableTypeRequest<byte[]> builder = manager.loadFromImage(model, "fakeId");
+        DrawableTypeRequest<byte[]> builder = manager.load(model, "fakeId");
 
         verify(options).apply(eq(model), eq(builder));
     }
@@ -166,7 +166,7 @@ public class RequestManagerTest {
     @Test
     public void testAppliesDefaultOptionsToLoadFromImageBytes() {
         byte[] model = new byte[] { 5, 9, 23 };
-        DrawableTypeRequest<byte[]> builder = manager.loadFromImage(model);
+        DrawableTypeRequest<byte[]> builder = manager.load(model);
 
         verify(options).apply(eq(model), eq(builder));
     }
@@ -177,7 +177,7 @@ public class RequestManagerTest {
         when(factory.build(any(Context.class), any(GenericLoaderFactory.class))).thenReturn(mock(ModelLoader.class));
         Glide.get(Robolectric.application).register(Float.class, InputStream.class, factory);
         Float model = 23.2f;
-        DrawableTypeRequest<Float> builder = manager.loadFromVideo(model);
+        DrawableTypeRequest<Float> builder = manager.load(model);
 
         verify(options).apply(eq(model), eq(builder));
         Glide.get(Robolectric.application).unregister(Float.class, InputStream.class);

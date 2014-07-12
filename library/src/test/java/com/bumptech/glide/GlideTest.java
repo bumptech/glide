@@ -257,8 +257,8 @@ public class GlideTest {
     public void testUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
 
-        Glide.with(getContext()).loadFromImage(url).into(target);
-        Glide.with(getContext()).loadFromImage(url).into(imageView);
+        Glide.with(getContext()).load(url).into(target);
+        Glide.with(getContext()).load(url).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -447,8 +447,8 @@ public class GlideTest {
     @Test
     public void testByteArrayDefaultLoader() {
         byte[] bytes = new byte[10];
-        Glide.with(getContext()).loadFromImage(bytes).into(target);
-        Glide.with(getContext()).loadFromImage(bytes).into(imageView);
+        Glide.with(getContext()).load(bytes).into(target);
+        Glide.with(getContext()).load(bytes).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -461,8 +461,8 @@ public class GlideTest {
         byte[] bytes = new byte[10];
         String id = "test";
 
-        Glide.with(getContext()).loadFromImage(bytes, id).into(target);
-        Glide.with(getContext()).loadFromImage(bytes, id).into(imageView);
+        Glide.with(getContext()).load(bytes, id).into(target);
+        Glide.with(getContext()).load(bytes, id).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -563,12 +563,12 @@ public class GlideTest {
 
     @Test
     public void testNullModelInGenericImageLoadDoesNotThrow() {
-        Glide.with(getContext()).loadFromImage((Double) null).into(target);
+        Glide.with(getContext()).load((Double) null).into(target);
     }
 
     @Test
     public void testNullModelInGenericVideoLoadDoesNotThrow() {
-        Glide.with(getContext()).loadFromVideo((Float) null).into(target);
+        Glide.with(getContext()).load((Float) null).into(target);
     }
 
     @Test

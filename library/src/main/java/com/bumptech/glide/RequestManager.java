@@ -276,20 +276,6 @@ public class RequestManager {
     }
 
     /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for the given model type to
-     * load the image represented by the given model.
-     *
-     * @param model The model to load.
-     * @param <T> The type of the model to load.
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
-     * into.
-     */
-    @SuppressWarnings("unused")
-    public <T> DrawableTypeRequest<T> loadFromImage(T model) {
-        return loadGeneric(model);
-    }
-
-    /**
      * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link URL} to load the
      * image represented by the given {@link URL}. Defaults to
      * {@link com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader} and
@@ -301,22 +287,22 @@ public class RequestManager {
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
      * into.
      */
-    public DrawableTypeRequest<URL> loadFromImage(URL url) {
+    public DrawableTypeRequest<URL> load(URL url) {
         return loadGeneric(url);
     }
 
     /**
      * Use a new {@link StreamByteArrayLoader} to load an image from the given model.
      *
-     * @see #loadFromImage(byte[])
+     * @see #load(byte[])
      *
      * @param model The data to load.
      * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
-     *           (url, filepath etc). If there is no suitable id, use {@link #loadFromImage(byte[])} instaed.
+     *           (url, filepath etc). If there is no suitable id, use {@link #load(byte[])} instaed.
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public DrawableTypeRequest<byte[]> loadFromImage(byte[] model, final String id) {
+    public DrawableTypeRequest<byte[]> load(byte[] model, final String id) {
         final StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
         return optionsApplier.apply(model,
                 new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker, optionsApplier));
@@ -330,23 +316,8 @@ public class RequestManager {
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
-    public DrawableTypeRequest<byte[]> loadFromImage(byte[] model) {
-        return loadFromImage(model, UUID.randomUUID()
-                .toString());
-    }
-
-    /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for the given model type
-     * for {@link ParcelFileDescriptor}s to load a thumbnail for the video represented by the given model.
-     *
-     * @param model The model to load.
-     * @param <T> The type of the model to load.
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
-     * into.
-     */
-    @SuppressWarnings("unused")
-    public <T> DrawableTypeRequest<T> loadFromVideo(T model) {
-        return loadGeneric(model);
+    public DrawableTypeRequest<byte[]> load(byte[] model) {
+        return load(model, UUID.randomUUID().toString());
     }
 
     /**
@@ -389,7 +360,7 @@ public class RequestManager {
             this.loader = loader;
         }
 
-        public DrawableTypeRequest<T> loadFromVideo(T model) {
+        public DrawableTypeRequest<T> load(T model) {
             return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, null, loader, context, glide,
                     requestTracker, optionsApplier));
         }

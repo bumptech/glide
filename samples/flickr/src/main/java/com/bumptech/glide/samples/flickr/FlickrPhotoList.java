@@ -114,9 +114,9 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
         @Override
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(FlickrPhotoList.this)
-                    .loadFromImage(item)
+                    .load(item)
                     .thumbnail(Glide.with(FlickrPhotoList.this)
-                        .loadFromImage(item)
+                        .load(item)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     )
@@ -175,10 +175,10 @@ public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
             }
 
             Glide.with(FlickrPhotoList.this)
-                    .loadFromImage(current)
+                    .load(current)
                     .placeholder(new ColorDrawable(Color.GRAY))
                     .thumbnail(Glide.with(FlickrPhotoList.this)
-                        .loadFromImage(current)
+                        .load(current)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
                     .centerCrop()
