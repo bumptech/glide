@@ -11,6 +11,7 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -98,8 +99,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public DrawableRequestBuilder<ModelType> sizeMultiplier(
-            float sizeMultiplier) {
+    public DrawableRequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
         super.sizeMultiplier(sizeMultiplier);
         return this;
     }
@@ -108,8 +108,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public DrawableRequestBuilder<ModelType> decoder(
-            ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> decoder) {
+    public DrawableRequestBuilder<ModelType> decoder(ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> decoder) {
         super.decoder(decoder);
         return this;
     }
@@ -118,8 +117,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public DrawableRequestBuilder<ModelType> cacheDecoder(
-            ResourceDecoder<File, GifBitmapWrapper> cacheDecoder) {
+    public DrawableRequestBuilder<ModelType> cacheDecoder(ResourceDecoder<File, GifBitmapWrapper> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
     }
@@ -128,8 +126,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public DrawableRequestBuilder<ModelType> encoder(
-            ResourceEncoder<GifBitmapWrapper> encoder) {
+    public DrawableRequestBuilder<ModelType> encoder(ResourceEncoder<GifBitmapWrapper> encoder) {
         super.encoder(encoder);
         return this;
     }
@@ -144,9 +141,31 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
+     * Transform {@link android.graphics.drawable.Drawable}s using the given
+     * {@link com.bumptech.glide.load.resource.bitmap.BitmapTransformation}s.
+     *
+     * <p>
+     *     Note - Bitmap transformations will apply individually to each frame of animated GIF images and also to
+     *     individual {@link Bitmap}s.
+     * </p>
+     *
+     * @see #centerCrop()
+     * @see #fitCenter()
+     * @see #bitmapTransform(com.bumptech.glide.load.Transformation[])
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
+     * @param transformations The transformations to apply in order.
+     * @return This request builder.
+     */
+    public DrawableRequestBuilder<ModelType> transform(BitmapTransformation... transformations) {
+        return bitmapTransform(transformations);
+    }
+
+    /**
      * Transform {@link Drawable}s using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
      * @see #fitCenter()
+     * @see #transform(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
      * @see #bitmapTransform(com.bumptech.glide.load.Transformation[])
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
@@ -161,6 +180,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
      * @see #centerCrop()
+     * @see #transform(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
      * @see #bitmapTransform(com.bumptech.glide.load.Transformation[])
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
@@ -176,6 +196,7 @@ public class DrawableRequestBuilder<ModelType>
      *
      * @see #fitCenter()
      * @see #centerCrop()
+     * @see #transform(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder.

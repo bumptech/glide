@@ -46,7 +46,7 @@ public class CenterCropTest {
 
     @Test
     public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
-        Resource<Bitmap> result = harness.centerCrop.transform(harness.resource, harness.bitmapWidth,
+        harness.centerCrop.transform(harness.resource, harness.bitmapWidth,
                 harness.bitmapHeight);
 
         verify(harness.resource, never()).recycle();
@@ -68,6 +68,40 @@ public class CenterCropTest {
         harness.centerCrop.transform(harness.resource, 50, 50);
 
         verify(harness.resource, never()).recycle();
+    }
+
+    @Test
+    public void testReturnsBitmapWithExactlyGivenDimensionsIfBitmapIsLargerThanTarget() {
+        int expectedWidth = 75;
+        int expectedHeight = 74;
+
+        Resource<Bitmap> resource = mock(Resource.class);
+        for (int[] dimens : new int[][] { new int[] { 800, 200}, new int[] { 450, 100 }, new int[] { 78, 78 }}) {
+            Bitmap toTransform = Bitmap.createBitmap(dimens[0], dimens[1], Bitmap.Config.ARGB_4444);
+            when(resource.get()).thenReturn(toTransform);
+
+            Resource<Bitmap> result = harness.centerCrop.transform(resource, expectedWidth, expectedHeight);
+            Bitmap transformed = result.get();
+            assertEquals(expectedWidth, transformed.getWidth());
+            assertEquals(expectedHeight, transformed.getHeight());
+        }
+    }
+
+    @Test
+    public void testReturnsBitmapWithExactlyGivenDimensionsIfBitmapIsSmallerThanTarget() {
+        int expectedWidth = 100;
+        int expectedHeight = 100;
+
+        Resource<Bitmap> resource = mock(Resource.class);
+        for (int[] dimens : new int[][] { new int[] { 50, 90}, new int[] { 150, 2 }, new int[] { 78, 78 }}) {
+            Bitmap toTransform = Bitmap.createBitmap(dimens[0], dimens[1], Bitmap.Config.ARGB_4444);
+            when(resource.get()).thenReturn(toTransform);
+
+            Resource<Bitmap> result = harness.centerCrop.transform(resource, expectedWidth, expectedHeight);
+            Bitmap transformed = result.get();
+            assertEquals(expectedWidth, transformed.getWidth());
+            assertEquals(expectedHeight, transformed.getHeight());
+        }
     }
 
     @Test

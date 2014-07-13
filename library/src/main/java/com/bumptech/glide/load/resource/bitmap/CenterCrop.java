@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import android.content.Context;
 import android.graphics.Bitmap;
-import com.bumptech.glide.load.engine.Resource;
+
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.Transformation;
 
 /**
  * Scale the image so that either the width of the image matches the given width and the height of the image is
@@ -11,31 +11,24 @@ import com.bumptech.glide.load.Transformation;
  *
  * Does not maintain the image's aspect ratio
  */
-public class CenterCrop implements Transformation<Bitmap> {
-    private BitmapPool pool;
+public class CenterCrop extends BitmapTransformation {
 
-    public CenterCrop(BitmapPool pool) {
-        this.pool = pool;
+    public CenterCrop(Context context) {
+        super(context);
+    }
+
+    public CenterCrop(BitmapPool bitmapPool) {
+        super(bitmapPool);
     }
 
     @Override
-    public Resource<Bitmap> transform(Resource<Bitmap> resource, int outWidth, int outHeight) {
-        if (outWidth <= 0 || outHeight <= 0) {
-            throw new IllegalArgumentException("Cannot center crop image to width=" + outWidth + " and height="
-                    + outHeight);
-        }
-
-        final Bitmap toReuse = pool.get(outWidth, outHeight, resource.get().getConfig());
-        Bitmap transformed = TransformationUtils.centerCrop(toReuse, resource.get(), outWidth, outHeight);
+    protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+        final Bitmap toReuse = pool.get(outWidth, outHeight, toTransform.getConfig());
+        Bitmap transformed = TransformationUtils.centerCrop(toReuse, toTransform, outWidth, outHeight);
         if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
             toReuse.recycle();
         }
-
-        if (transformed == resource.get()) {
-            return resource;
-        } else {
-            return new BitmapResource(transformed, pool);
-        }
+        return transformed;
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -142,8 +143,9 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     /**
      * Transforms each frame of the GIF using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
-     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
      * @see #fitCenter()
+     * @see #transformFrame(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
+     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder.
@@ -155,8 +157,9 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     /**
      * Transforms each frame of the GIF using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
-     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
      * @see #centerCrop()
+     * @see #transformFrame(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
+     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder..
@@ -166,22 +169,41 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     }
 
     /**
-     * Transforms each frame of the GIF using the given transformation.
+     * Transforms each frame of the GIF using the given transformations.
+     *
+     * @see #centerCrop()
+     * @see #fitCenter()
+     * @see #transformFrame(com.bumptech.glide.load.Transformation[])
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
+     * @param bitmapTransformations The transformations to apply in order to each frame.
+     * @return This request builder.
+     */
+    public GifRequestBuilder<ModelType> transformFrame(BitmapTransformation... bitmapTransformations) {
+        return transform(toGifTransformations(bitmapTransformations));
+    }
+
+    /**
+     * Transforms each frame of the GIF using the given transformations.
      *
      * @see #fitCenter()
      * @see #centerCrop()
+     * @see #transformFrame(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
-     * @param bitmapTransformations The transformation to use.
+     * @param bitmapTransformations The transformations to apply in order to each frame.
      * @return This request builder.
      */
     public GifRequestBuilder<ModelType> transformFrame(Transformation<Bitmap>... bitmapTransformations) {
+        return transform(toGifTransformations(bitmapTransformations));
+    }
+
+    private static GifDataTransformation[] toGifTransformations(Transformation<Bitmap>[] bitmapTransformations) {
         GifDataTransformation[] transformations = new GifDataTransformation[bitmapTransformations.length];
         for (int i = 0; i < bitmapTransformations.length; i++) {
             transformations[i] = new GifDataTransformation(bitmapTransformations[i]);
         }
-
-        return transform(transformations);
+        return transformations;
     }
 
     /**
@@ -189,6 +211,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      *
      * @see #fitCenter()
      * @see #centerCrop()
+     * @see #transformFrame(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
      * @see #transformFrame(com.bumptech.glide.load.Transformation[])
      *
      */

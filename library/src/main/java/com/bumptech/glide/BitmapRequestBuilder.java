@@ -14,6 +14,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoBitmapDecoder;
@@ -172,8 +173,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      * {@inheritDoc}
      */
     @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> cacheDecoder(
-            ResourceDecoder<File, Bitmap> cacheDecoder) {
+    public BitmapRequestBuilder<ModelType, TranscodeType> cacheDecoder(ResourceDecoder<File, Bitmap> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
     }
@@ -248,9 +248,25 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     }
 
     /**
+     * Transform images using the given {@link com.bumptech.glide.load.resource.bitmap.BitmapTransformation}s.
+     *
+     * @see #centerCrop()
+     * @see #fitCenter()
+     * @see #transform(com.bumptech.glide.load.Transformation[])
+     *
+     * @param transformations The transformations to apply in order.
+     * @return This request builder.
+     */
+    public BitmapRequestBuilder<ModelType, TranscodeType> transform(BitmapTransformation... transformations) {
+        super.transform(transformations);
+        return this;
+    }
+
+    /**
      * Transform images using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
      * @see #fitCenter()
+     * @see #transform(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder.
@@ -263,6 +279,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      * Transform images using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
      * @see #centerCrop()
+     * @see #transform(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
      * @see #transform(com.bumptech.glide.load.Transformation[])
      *
      * @return This request builder.
