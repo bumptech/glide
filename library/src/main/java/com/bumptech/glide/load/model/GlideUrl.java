@@ -16,11 +16,17 @@ public class GlideUrl {
     private URL url;
 
     public GlideUrl(URL url) {
+        if (url == null) {
+            throw new IllegalArgumentException("URL must not be null!");
+        }
         this.url = url;
         stringUrl = null;
     }
 
     public GlideUrl(String url) {
+        if (TextUtils.isEmpty(url)) {
+            throw new IllegalArgumentException("String url must not be empty or null: " + url);
+        }
         this.stringUrl = url;
         this.url = null;
     }

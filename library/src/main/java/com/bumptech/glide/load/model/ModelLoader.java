@@ -30,11 +30,17 @@ public interface ModelLoader<T, Y> {
      * Obtains an {@link DataFetcher} that can fetch the data required to decode the resource represented by this model.
      * The {@link DataFetcher} will not be used if the resource is already cached.
      *
-     * @param model The model representing the resource
+     * <p>
+     *     Note - If no valid data fetcher can be returned (for example if a model has a null URL), then it is
+     *     acceptable to return a null data fetcher from this method. Doing so will be treated any other failure or
+     *     exception during the load process.
+     * </p>
+     *
+     * @param model The model representing the resource.
      * @param width The width of the view or target the resource will be loaded into
      * @param height The height of the view or target the resource will be loaded into
      * @return A {@link DataFetcher} that can obtain the data the resource can be decoded from if the resource is not
-     * cached.
+     * cached, or null if no valid {@link com.bumptech.glide.load.data.DataFetcher} could be constructed.
      */
     public DataFetcher<Y> getResourceFetcher(T model, int width, int height);
 }

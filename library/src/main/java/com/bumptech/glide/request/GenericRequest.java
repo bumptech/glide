@@ -351,14 +351,20 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
 
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
+
+        ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
+        final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
+
+        if (dataFetcher == null) {
+            onException(new Exception("Got null fetcher from model loader"));
+            return;
+        }
+
         ResourceDecoder<File, Z> cacheDecoder = loadProvider.getCacheDecoder();
         Encoder<T> sourceEncoder = loadProvider.getSourceEncoder();
         ResourceDecoder<T, Z> decoder = loadProvider.getSourceDecoder();
         ResourceEncoder<Z> encoder = loadProvider.getEncoder();
         ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
-        ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
-
-        final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));

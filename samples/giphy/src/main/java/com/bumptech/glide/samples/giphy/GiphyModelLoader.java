@@ -1,6 +1,7 @@
 package com.bumptech.glide.samples.giphy;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -33,10 +34,14 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
         int fixedHeightDifference = getDifference(fixedHeight, width, height);
         Api.GifImage fixedWidth = model.images.fixed_width_downsampled;
         int fixedWidthDifference = getDifference(fixedWidth, width, height);
-        if (fixedHeightDifference < fixedWidthDifference) {
+        if (fixedHeightDifference < fixedWidthDifference && !TextUtils.isEmpty(fixedHeight.url)) {
             return fixedHeight.url;
-        } else {
+        } else if (!TextUtils.isEmpty(fixedWidth.url)) {
             return fixedWidth.url;
+        } else if (!TextUtils.isEmpty(model.images.original.url)) {
+            return model.images.original.url;
+        } else {
+            return null;
         }
     }
 

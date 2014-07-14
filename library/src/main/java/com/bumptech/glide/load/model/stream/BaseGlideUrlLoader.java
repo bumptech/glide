@@ -1,6 +1,8 @@
 package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
+import android.text.TextUtils;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -46,6 +48,10 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
 
         if (result == null) {
             String stringURL = getUrl(model, width, height);
+            if (TextUtils.isEmpty(stringURL)) {
+               return null;
+            }
+
             result = new GlideUrl(stringURL);
 
             if (modelCache != null) {

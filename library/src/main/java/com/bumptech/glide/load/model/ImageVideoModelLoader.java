@@ -41,7 +41,12 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
         if (fileDescriptorLoader != null) {
             fileDescriptorFetcher = fileDescriptorLoader.getResourceFetcher(model, width, height);
         }
-        return new ImageVideoFetcher(streamFetcher, fileDescriptorFetcher);
+
+        if (streamFetcher != null || fileDescriptorFetcher != null) {
+            return new ImageVideoFetcher(streamFetcher, fileDescriptorFetcher);
+        } else {
+            return null;
+        }
     }
 
     public static class ImageVideoFetcher implements DataFetcher<ImageVideoWrapper> {

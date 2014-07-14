@@ -54,6 +54,7 @@ public class GenericRequestTest {
 
     @SuppressWarnings("unchecked")
     private static class RequestHarness {
+        ModelLoader<Object, Object> modelLoader;
         Engine engine = mock(Engine.class);
         Object model = new Object();
         Target<Object> target = mock(Target.class);
@@ -81,7 +82,8 @@ public class GenericRequestTest {
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
 
         public RequestHarness() {
-            ModelLoader<Object, Object> modelLoader = mock(ModelLoader.class);
+            modelLoader = mock(ModelLoader.class);
+            when(modelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(mock(DataFetcher.class));
             when(loadProvider.getModelLoader()).thenReturn(modelLoader);
             when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
             when(loadProvider.getSourceDecoder()).thenReturn(sourceDecoder);
@@ -645,6 +647,16 @@ public class GenericRequestTest {
         request.onResourceReady(harness.resource);
 
         verify(harness.resource, times(1)).get();
+    }
+
+    @Test
+    public void testOnSizeReadyWithNullDataFetcherCallsOnException() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        when(harness.modelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+        request.onSizeReady(100, 100);
+
+        verify(harness.requestListener).onException(any(Exception.class), anyObject(), any(Target.class),
+                anyBoolean());
     }
 
 

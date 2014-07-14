@@ -15,6 +15,7 @@ import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -169,6 +170,31 @@ public class ImageVideoModelLoaderTest {
                 .thenThrow(new IOException("test"));
 
         assertNotNull(harness.getFetcher().loadData(Priority.LOW));
+    }
+
+    @Test
+    public void testReturnsNullFetcherIfBothStreamAndFileDescriptorLoadersReturnNullFetchers() throws Exception {
+        when(harness.streamModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+        when(harness.fileDescriptorModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+
+        assertNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
+    }
+
+    @Test
+    public void testReturnsNullFetcherIfStreamModelLoaderIsNullAndFileModelLoaderReturnsNullFetcher() throws Exception {
+        harness.streamModelLoader = null;
+        when(harness.fileDescriptorModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+
+        assertNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
+    }
+
+    @Test
+    public void testReturnsNullFetcherIfFileDescriptorModelLoaderIsNullAndStreamModelLoaderReturnsNullFetcher()
+            throws Exception {
+        harness.fileDescriptorModelLoader = null;
+        when(harness.streamModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+
+        assertNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
     }
 
     @Test(expected = IOException.class)
