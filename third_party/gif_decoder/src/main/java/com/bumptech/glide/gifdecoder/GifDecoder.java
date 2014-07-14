@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * Reads frame data from a GIF image source and decodes it into individual frames
@@ -78,7 +79,7 @@ public class GifDecoder {
     /**
      * GIF Disposal Method meaning leave canvas from previous frame.
      */
-//    private static final int DISPOSAL_NONE = 1;
+    private static final int DISPOSAL_NONE = 1;
     /**
      * GIF Disposal Method meaning clear canvas to background color.
      */
@@ -86,7 +87,7 @@ public class GifDecoder {
     /**
      * GIF Disposal Method meaning clear canvas to frame before last.
      */
-//    private static final int DISPOSAL_PREVIOUS = 3;
+    private static final int DISPOSAL_PREVIOUS = 3;
 
     // Global File Header values and parsing flags.
     // Active color table.
@@ -110,6 +111,8 @@ public class GifDecoder {
     private String id;
     private BitmapProvider bitmapProvider;
     private GifHeaderParser parser = new GifHeaderParser();
+    private Bitmap previousImage;
+    private boolean savePrevious;
 
     public interface BitmapProvider {
         public Bitmap obtain(int width, int height, Bitmap.Config config);
@@ -134,11 +137,6 @@ public class GifDecoder {
 
     public byte[] getData() {
         return data;
-    }
-
-    public int getDecodedFramesByteSizeSum() {
-        // 4 == ARGB_8888, 2 == RGB_565
-        return header.frameCount * header.width * header.height * (header.isTransparent ? 4 : 2);
     }
 
     /**
@@ -296,6 +294,15 @@ public class GifDecoder {
         rawData.rewind();
         rawData.order(ByteOrder.LITTLE_ENDIAN);
 
+        // No point in specially saving an old frame if we're never going to use it.
+        savePrevious = false;
+        for (GifFrame frame : header.frames) {
+            if (frame.dispose == DISPOSAL_PREVIOUS) {
+                savePrevious = true;
+                break;
+            }
+        }
+
         // Now that we know the size, init scratch arrays.
         mainPixels = new byte[header.width * header.height];
         mainScratch = new int[header.width * header.height];
@@ -319,6 +326,15 @@ public class GifDecoder {
             // Now that we know the size, init scratch arrays.
             mainPixels = new byte[header.width * header.height];
             mainScratch = new int[header.width * header.height];
+
+            // No point in specially saving an old frame if we're never going to use it.
+            savePrevious = false;
+            for (GifFrame frame : header.frames) {
+                if (frame.dispose == DISPOSAL_PREVIOUS) {
+                    savePrevious = true;
+                    break;
+                }
+            }
         }
 
         return header.status;
@@ -334,33 +350,26 @@ public class GifDecoder {
         if (previousIndex >= 0) {
             previousFrame = header.frames.get(previousIndex);
         }
+        int width = header.width;
+        int height = header.height;
 
         // Final location of blended pixels.
         final int[] dest = mainScratch;
 
-        // Fill in starting image contents based on last image's dispose code.
+        // fill in starting image contents based on last image's dispose code
         if (previousFrame != null && previousFrame.dispose > DISPOSAL_UNSPECIFIED) {
+            // We don't need to do anything for DISPOSAL_NONE, if it has the correct pixels so will our mainScratch
+            // and therefore so will our dest array.
             if (previousFrame.dispose == DISPOSAL_BACKGROUND) {
                 // Start with a canvas filled with the background color
                 int c = 0;
                 if (!currentFrame.transparency) {
                     c = header.bgColor;
                 }
-                for (int i = 0; i < previousFrame.ih; i++) {
-                    int n1 = (previousFrame.iy + i) * header.width + previousFrame.ix;
-                    int n2 = n1 + previousFrame.iw;
-                    for (int k = n1; k < n2; k++) {
-                        dest[k] = c;
-                    }
-                }
-            }
-        } else {
-            int c = 0;
-            if (!currentFrame.transparency) {
-                c = header.bgColor;
-            }
-            for (int i = 0; i < dest.length; i++) {
-                dest[i] = c;
+                Arrays.fill(dest, c);
+            } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {
+                // Start with the previous frame
+                previousImage.getPixels(dest, 0, width, 0, 0, width, height);
             }
         }
 
@@ -420,9 +429,17 @@ public class GifDecoder {
             }
         }
 
+        //Copy pixels into previous image
+        if (savePrevious && currentFrame.dispose == DISPOSAL_UNSPECIFIED || currentFrame.dispose == DISPOSAL_NONE) {
+            if (previousImage == null) {
+                previousImage = getNextBitmap();
+                previousImage.setPixels(dest, 0, width, 0, 0, width, height);
+            }
+        }
+
         // Set pixels for current image.
         Bitmap result = getNextBitmap();
-        result.setPixels(dest, 0, header.width, 0, 0, header.width, header.height);
+        result.setPixels(dest, 0, width, 0, 0, width, height);
         return result;
     }
 

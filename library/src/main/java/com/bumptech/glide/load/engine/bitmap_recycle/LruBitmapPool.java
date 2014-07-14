@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.Log;
@@ -67,6 +68,7 @@ public class LruBitmapPool implements BitmapPool {
         trimToSize(maxSize);
     }
 
+    @TargetApi(12)
     @Override
     public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
         final Bitmap result = strategy.get(width, height, config);
@@ -78,6 +80,9 @@ public class LruBitmapPool implements BitmapPool {
         } else {
             hits++;
             currentSize -= strategy.getSize(result);
+            if (Build.VERSION.SDK_INT >= 12) {
+                result.setHasAlpha(true);
+            }
         }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "Get bitmap=" + strategy.logBitmap(width, height, config));

@@ -12,6 +12,7 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.resource.NullDecoder;
@@ -91,9 +92,18 @@ class GifFrameManager {
 
     public void getNextFrame(FrameCallback cb) {
         decoder.advance();
+
+        /**
+         * Note - Using the disk cache can potentially cause frames to be decoded incorrectly because the decoder is
+         * sequential. If earlier frames are evicted for some reason, later ones may then not be decoded correctly.
+         */
+
         // We don't want to blow out the entire memory cache with frames of gifs, so try to set some
         // maximum size beyond which we will always just decode one frame at a time.
         boolean skipCache = totalFrameSize > calculator.getMemoryCacheSize() / 2;
+        // We can decode non transparent (cached as jpegs) frames more quickly from cache, but transparent
+        // (cached as png) frames more quickly from the gif data.
+        boolean skipDiskCache = decoder.isTransparent();
 
         long targetTime = SystemClock.uptimeMillis() + (Math.max(MIN_FRAME_DELAY, decoder.getNextDelay()));
         next = new DelayTarget(cb, targetTime);
@@ -108,6 +118,7 @@ class GifFrameManager {
                 .encoder(encoder)
                 .transform(transformation)
                 .skipMemoryCache(skipCache)
+                .diskCacheStrategy(skipDiskCache ? DiskCacheStrategy.NONE : DiskCacheStrategy.RESULT)
                 .into(next);
     }
 

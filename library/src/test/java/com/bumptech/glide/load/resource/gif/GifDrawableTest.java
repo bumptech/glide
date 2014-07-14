@@ -199,7 +199,7 @@ public class GifDrawableTest {
 
     @Test
     public void testReturnsNewDrawableFromConstantState() {
-        GifHeader gifHeader = mock(GifHeader.class);
+        GifHeader gifHeader = new GifHeader();
         Transformation<Bitmap> transformation = mock(Transformation.class);
         GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
         drawable = new GifDrawable(Robolectric.application, provider, transformation, 100, 100, "fakeId", gifHeader,

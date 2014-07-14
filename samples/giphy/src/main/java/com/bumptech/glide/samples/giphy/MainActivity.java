@@ -11,6 +11,8 @@ import android.widget.ListView;
 
 import com.bumptech.glide.Glide;
 
+import java.io.InputStream;
+
 
 public class MainActivity extends Activity implements Api.Monitor {
     private static final String TAG = "GiphyActivity";
@@ -21,6 +23,8 @@ public class MainActivity extends Activity implements Api.Monitor {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Glide.get(this).register(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
         Api.get().getTrending();
 
         ImageView giphyLogoView = (ImageView) findViewById(R.id.giphy_logo_view);
@@ -88,7 +92,7 @@ public class MainActivity extends Activity implements Api.Monitor {
             ImageView gifView = (ImageView) convertView.findViewById(R.id.gif_view);
 
             Glide.with(MainActivity.this)
-                    .load(result.images.original.url)
+                    .load(result)
                     .fitCenter()
                     .into(gifView);
 
