@@ -39,6 +39,10 @@ import java.io.InputStream;
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
 
+    /**
+     * An exception thrown when a mark can no longer be obeyed because the underlying buffer size is smaller than the
+     * amount of data read after the mark position.
+     */
     public static class InvalidMarkException extends RuntimeException {
         public InvalidMarkException(String detailMessage) {
             super(detailMessage);

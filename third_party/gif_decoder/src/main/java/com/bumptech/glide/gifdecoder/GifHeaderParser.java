@@ -9,6 +9,10 @@ import java.util.Arrays;
 
 import static com.bumptech.glide.gifdecoder.GifDecoder.STATUS_FORMAT_ERROR;
 
+/**
+ * A class responsible for creating {@link com.bumptech.glide.gifdecoder.GifHeader}s from data representing animated
+ * gifs.
+ */
 public class GifHeaderParser {
     public static final String TAG = "GifHeaderParser";
     /**

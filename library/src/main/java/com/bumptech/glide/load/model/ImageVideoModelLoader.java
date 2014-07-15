@@ -49,7 +49,7 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
         }
     }
 
-    public static class ImageVideoFetcher implements DataFetcher<ImageVideoWrapper> {
+    static class ImageVideoFetcher implements DataFetcher<ImageVideoWrapper> {
         private final DataFetcher<InputStream> streamFetcher;
         private final DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher;
 

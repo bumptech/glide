@@ -40,6 +40,9 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     private final ReferenceQueue<Resource> resourceReferenceQueue;
     private final Handler mainHandler;
 
+    /**
+     * Allows a request to indicate it no longer is interested in a given load.
+     */
     public static class LoadStatus {
         private final EngineJob engineJob;
         private final ResourceCallback cb;

@@ -16,6 +16,10 @@ import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 
 import java.io.File;
 
+/**
+ * A {@link com.bumptech.glide.provider.DataLoadProvider} for loading either an {@link java.io.InputStream} or an
+ * {@link android.os.ParcelFileDescriptor} as an {@link android.graphics.Bitmap}.
+ */
 public class ImageVideoDataLoadProvider implements DataLoadProvider<ImageVideoWrapper, Bitmap> {
     private final ImageVideoBitmapDecoder sourceDecoder;
     private final ResourceDecoder<File, Bitmap> cacheDecoder;

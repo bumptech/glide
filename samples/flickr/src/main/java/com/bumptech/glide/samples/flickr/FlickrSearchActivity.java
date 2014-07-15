@@ -39,6 +39,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * An activity that allows users to search for images on Flickr and that contains a series of fragments that display
+ * retrieved image thumbnails.
+ */
 public class FlickrSearchActivity extends SherlockFragmentActivity {
     private static final String TAG = "FlickrSearchActivity";
     private static final String STATE_SEARCH_STRING = "state_search_string";

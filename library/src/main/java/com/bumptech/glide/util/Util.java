@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
 
+/**
+ * A collection of assorted utility classes.
+ */
 public class Util {
     private static final char[] HEX_CHAR_ARRAY = "0123456789abcdef".toCharArray();
     // 32 bytes from sha-256 -> 64 hex chars.

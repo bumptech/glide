@@ -13,6 +13,11 @@ import com.bumptech.glide.load.resource.gif.GifData;
 import java.io.File;
 import java.io.InputStream;
 
+/**
+ * An {@link com.bumptech.glide.provider.DataLoadProvider} that can load either an
+ * {@link com.bumptech.glide.load.resource.gif.GifDrawable} or an {@link Bitmap} from either an
+ * {@link java.io.InputStream} or an {@link android.os.ParcelFileDescriptor}.
+ */
 public class ImageVideoGifDataLoadProvider implements DataLoadProvider<ImageVideoWrapper, GifBitmapWrapper> {
     private final ResourceDecoder<File, GifBitmapWrapper> cacheDecoder;
     private final ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> sourceDecoder;

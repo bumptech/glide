@@ -14,6 +14,9 @@ import java.lang.ref.WeakReference;
 /**
  * A DataFetcher that uses an {@link android.content.ContentResolver} to load data from a {@link android.net.Uri}
  * pointing to a local resource.
+ *
+ * @param <T> The type of data that will obtained for the given uri (For example, {@link java.io.InputStream} or
+ * {@link android.os.ParcelFileDescriptor}.
  */
 public abstract class LocalUriFetcher<T extends Closeable> implements DataFetcher<T> {
     private static final String TAG = "LocalUriFetcher";

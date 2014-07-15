@@ -3,6 +3,9 @@ package com.bumptech.glide.samples.flickr.api;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * A POJO representing a JSON object returned from Flickr's api representing a single image.
+ */
 public class Photo {
     private final String id;
     private final String owner;

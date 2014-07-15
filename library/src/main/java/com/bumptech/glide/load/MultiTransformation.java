@@ -6,6 +6,8 @@ import java.util.List;
 
 /**
  * A transformation that applies an ordered array or list of one or more transformations to a resource.
+ *
+ * @param <T> The type of {@link com.bumptech.glide.load.engine.Resource} that will be transformed.
  */
 public class MultiTransformation<T> implements Transformation<T> {
     private Transformation<T>[] transformations;

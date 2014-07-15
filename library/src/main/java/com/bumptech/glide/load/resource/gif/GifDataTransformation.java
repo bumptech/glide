@@ -5,6 +5,11 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.Transformation;
 
+/**
+ * An {@link com.bumptech.glide.load.Transformation} that wraps a transformation for a {@link Bitmap}
+ * and can apply it to every frame of any {@link com.bumptech.glide.load.resource.gif.GifDrawable}s produced by
+ * any transformed {@link com.bumptech.glide.load.resource.gif.GifData}.
+ */
 public class GifDataTransformation implements Transformation<GifData> {
     private Transformation<Bitmap> wrapped;
 

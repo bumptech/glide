@@ -5,6 +5,8 @@ import com.bumptech.glide.load.engine.Resource;
 
 /**
  * A noop Transformation that simply returns the given resource.
+ *
+ * @param <T> The type of the resource that will always be returned unmodified.
  */
 public class UnitTransformation<T> implements Transformation<T> {
     private static final UnitTransformation TRANSFORMATION = new UnitTransformation();

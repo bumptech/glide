@@ -18,7 +18,9 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
     AtomicInteger ordering = new AtomicInteger();
 
     /**
-     * Constructor to build a fixed thread pool with the given pool size using {@link DefaultThreadFactory}.
+     * Constructor to build a fixed thread pool with the given pool size using
+     * {@link com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor.DefaultThreadFactory}.
+     *
      * @param poolSize The number of threads.
      */
     public FifoPriorityThreadPoolExecutor(int poolSize) {
@@ -35,11 +37,15 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         return new FifoPriorityLoadTask<T>(runnable, value, ordering.getAndIncrement());
     }
 
+    /**
+     * A {@link java.util.concurrent.ThreadFactory} that builds threads with priority
+     * {@link android.os.Process#THREAD_PRIORITY_BACKGROUND}.
+     */
     public static class DefaultThreadFactory implements ThreadFactory {
         int threadNum = 0;
         @Override
         public Thread newThread(Runnable runnable) {
-            final Thread result = new Thread(runnable, "image-manager-resize-" + threadNum) {
+            final Thread result = new Thread(runnable, "fifo-pool-thread-" + threadNum) {
                 @Override
                 public void run() {
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);

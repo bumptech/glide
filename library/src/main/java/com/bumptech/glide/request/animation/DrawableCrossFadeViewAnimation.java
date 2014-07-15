@@ -13,6 +13,8 @@ import android.widget.ImageView;
  * that uses an {@link android.graphics.drawable.TransitionDrawable} to transition from an existing drawable
  * already visible on the target to a new drawable. If no existing drawable exists, this class can instead fall back
  * to a default animation that doesn't rely on {@link android.graphics.drawable.TransitionDrawable}.
+ *
+ * @param <T> The type of the {@link android.graphics.drawable.Drawable} that will be animated.
  */
 public class DrawableCrossFadeViewAnimation<T extends Drawable> implements GlideAnimation<T> {
     // 150 ms.

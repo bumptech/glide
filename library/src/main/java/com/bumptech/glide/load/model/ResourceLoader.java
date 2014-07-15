@@ -7,6 +7,8 @@ import com.bumptech.glide.load.data.DataFetcher;
 /**
  * A model loader for handling Android resource files. Model must be an Android resource id in the package of the given
  * context.
+ *
+ * @param <T> The type of data that will be loaded for the given android resource.
  */
 public class ResourceLoader<T> implements ModelLoader<Integer, T> {
 

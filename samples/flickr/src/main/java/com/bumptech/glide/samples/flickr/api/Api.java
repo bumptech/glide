@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A class for interfacing with Flickr's http API.
+ */
 public class Api {
     private static Api api;
     private static final String TAG = "FlickrApi";
@@ -82,8 +85,24 @@ public class Api {
         return photo.getPartialUrl() + sizeKey + ".jpg";
     }
 
+    /**
+     * An interface for listening for search results from the Flickr API.
+     */
     public interface SearchListener {
+        /**
+         * Called when a search completes successfully.
+         *
+         * @param searchString The term that was searched for.
+         * @param photos A list of images that were found for the given search term.
+         */
         public void onSearchCompleted(String searchString, List<Photo> photos);
+
+        /**
+         * Called when a search fails.
+         *
+         * @param searchString The term that was searched for.
+         * @param e The exception that caused the search to fail.
+         */
         public void onSearchFailed(String searchString, Exception e);
     }
 

@@ -19,6 +19,10 @@ import com.bumptech.glide.samples.flickr.api.Photo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A fragment that shows square image thumbnails whose size is determined by the framgent's arguments in a grid
+ * pattern.
+ */
 public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
     private static final String STATE_POSITION_INDEX = "state_position_index";
 

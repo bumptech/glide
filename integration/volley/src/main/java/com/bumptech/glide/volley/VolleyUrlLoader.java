@@ -15,10 +15,16 @@ import java.io.InputStream;
  */
 public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
+    /**
+     * An interface for building {@link com.bumptech.glide.volley.VolleyRequestFuture}s.
+     */
     public interface FutureFactory {
         public VolleyRequestFuture<InputStream> build();
     }
 
+    /**
+     * The default factory for {@link com.bumptech.glide.volley.VolleyUrlLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
         private final FutureFactory futureFactory;
         private RequestQueue requestQueue;

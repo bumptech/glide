@@ -16,6 +16,9 @@ import com.bumptech.glide.load.model.StringLoader;
 public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescriptor>
         implements FileDescriptorModelLoader<String> {
 
+    /**
+     * The default factory for {@link com.bumptech.glide.load.model.file_descriptor.FileDescriptorStringLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<String, ParcelFileDescriptor> {
         @Override
         public ModelLoader<String, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {

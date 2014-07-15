@@ -8,6 +8,12 @@ import android.util.Log;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 
+/**
+ * An {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation that uses an
+ * {@link com.bumptech.glide.load.engine.bitmap_recycle.LruPoolStrategy} to bucket {@link Bitmap}s and then uses an LRU
+ * eviction policy to evict {@link android.graphics.Bitmap}s from the least recently used bucket in order to keep
+ * the pool below a given maximum size limit.
+ */
 public class LruBitmapPool implements BitmapPool {
     private static final String TAG = "LruBitmapPool";
     private final LruPoolStrategy strategy;
@@ -27,6 +33,11 @@ public class LruBitmapPool implements BitmapPool {
         this.strategy = strategy;
     }
 
+    /**
+     * Constructor for LruBitmapPool.
+     *
+     * @param maxSize The initial maximum size of the pool in bytes.
+     */
     public LruBitmapPool(int maxSize) {
         initialMaxSize = maxSize;
         this.maxSize = maxSize;

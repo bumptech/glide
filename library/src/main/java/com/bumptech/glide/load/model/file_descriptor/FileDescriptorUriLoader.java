@@ -17,6 +17,9 @@ import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
  */
 public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> implements FileDescriptorModelLoader<Uri> {
 
+    /**
+     * The default factory for {@link com.bumptech.glide.load.model.file_descriptor.FileDescriptorUriLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<Uri, ParcelFileDescriptor> {
         @Override
         public ModelLoader<Uri, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {

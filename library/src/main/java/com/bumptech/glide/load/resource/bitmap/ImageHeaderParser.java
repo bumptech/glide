@@ -19,6 +19,9 @@ import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageTyp
 public class ImageHeaderParser {
     private static final String TAG = "ImageHeaderParser";
 
+    /**
+     * The format of the image data including whether or not the image may include transparent pixels.
+     */
     public static enum ImageType {
         /** GIF type. */
         GIF(true),

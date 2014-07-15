@@ -4,6 +4,9 @@ import com.bumptech.glide.load.engine.Resource;
 
 import java.io.File;
 
+/**
+ * A simple {@link com.bumptech.glide.load.engine.Resource} that wraps a {@link File}.
+ */
 public class FileResource extends Resource<File> {
     private File file;
 

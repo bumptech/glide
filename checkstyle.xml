@@ -4,6 +4,10 @@
     <module name="FileLength"/>
     <module name="FileTabCharacter"/>
 
+    <module name="SuppressionFilter">
+        <property name="file" value="checkstyle_suppressions.xml" />
+    </module>
+
     <!-- Trailing spaces -->
     <module name="RegexpSingleline">
         <property name="format" value="\s+$"/>
@@ -39,6 +43,9 @@
         <!-- Validates Javadoc comments to help ensure they are well formed. -->
         <!-- See http://checkstyle.sourceforge.net/config_javadoc.html#JavadocStyle -->
         <module name="JavadocStyle" />
+        <module name="JavadocType">
+            <property name="scope" value="public"/>
+        </module>
 
         <!-- Each of these naming modules validates identifiers for particular
                 code elements. -->

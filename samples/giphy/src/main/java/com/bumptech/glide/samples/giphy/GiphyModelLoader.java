@@ -10,7 +10,15 @@ import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 
 import java.io.InputStream;
 
+/**
+ * A model loader that translates a POJO mirroring a JSON object representing a single image from Giphy's api
+ * into an {@link java.io.InputStream} that can be decoded into an {@link android.graphics.drawable.Drawable}.
+ */
 public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
+
+    /**
+     * The default factory for {@link com.bumptech.glide.samples.giphy.GiphyModelLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<Api.GifResult, InputStream> {
 
         @Override

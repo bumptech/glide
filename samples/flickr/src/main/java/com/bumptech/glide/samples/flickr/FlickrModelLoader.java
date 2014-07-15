@@ -19,6 +19,9 @@ import java.io.InputStream;
  */
 public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
 
+    /**
+     * The default factory for {@link com.bumptech.glide.samples.flickr.FlickrModelLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<Photo, InputStream> {
         private final ModelCache<Photo, GlideUrl> modelCache = new ModelCache<Photo, GlideUrl>(500);
 

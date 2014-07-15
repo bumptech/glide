@@ -3,6 +3,11 @@ package com.bumptech.glide.gifdecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A header object containing the number of frames in an animated GIF image as well as basic metadata like width and
+ * height that can be used to decode each individual frame of the GIF. Can be shared by one or more
+ * {@link com.bumptech.glide.gifdecoder.GifDecoder}s to play the same animated GIF in multiple views.
+ */
 public class GifHeader {
 
     int[] gct = null;

@@ -13,6 +13,10 @@ import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import java.io.File;
 import java.io.InputStream;
 
+/**
+ * An {@link com.bumptech.glide.provider.DataLoadProvider} that loads an {@link java.io.InputStream} into
+ * {@link com.bumptech.glide.load.resource.gif.GifData} that can be used to display an animated GIF.
+ */
 public class GifDataLoadProvider implements DataLoadProvider<InputStream, GifData> {
     private final GifResourceDecoder decoder;
     private final GifResourceEncoder encoder;

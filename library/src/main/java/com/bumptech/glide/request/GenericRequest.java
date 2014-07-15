@@ -31,6 +31,7 @@ import java.util.Queue;
  * @param <A> The type of the model that the resource will be loaded from.
  * @param <T> The type of the data that the resource will be loaded from.
  * @param <Z> The type of the resource that will be loaded.
+ * @param <R> The type of the resource that will be transcoded from the loaded resource.
  */
 public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback,
         ResourceCallback {

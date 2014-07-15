@@ -7,6 +7,9 @@ import java.io.IOException;
 
 /**
  * A simple {@link com.bumptech.glide.load.ResourceDecoder} that always returns null.
+ *
+ * @param <T> The type of the data that will be ignored by this class.
+ * @param <Z> The type of the decoded resource that will always be null.
  */
 public class NullDecoder<T, Z> implements ResourceDecoder<T, Z> {
     private static final NullDecoder NULL_DECODER = new NullDecoder();

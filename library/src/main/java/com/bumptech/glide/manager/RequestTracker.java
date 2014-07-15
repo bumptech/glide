@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+/**
+ * A class for tracking, canceling, and restarting in progress, completed, and failed requests.
+ */
 public class RequestTracker {
     // Most requests will be for views and will therefore be held strongly (and safely) by the view via the tag.
     // However, a user can always pass in a different type of target which may end up not being strongly referenced even
@@ -15,10 +18,16 @@ public class RequestTracker {
     // where holding strong references would steadily leak bitmaps and/or views.
     private final Set<Request> requests = Collections.newSetFromMap(new WeakHashMap<Request, Boolean>());
 
+    /**
+     * Starts tracking the given request.
+     */
     public void addRequest(Request request) {
         requests.add(request);
     }
 
+    /**
+     * Stops tracking the given request.
+     */
     public void removeRequest(Request request) {
         requests.remove(request);
     }

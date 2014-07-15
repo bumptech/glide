@@ -18,6 +18,8 @@ import com.bumptech.glide.request.Request;
  *     For loading {@link com.bumptech.glide.load.engine.Resource}s into {@link android.view.View}s, {@link ViewTarget}
  *     is preferable to this class.
  * </p>
+ *
+ * @param <Z> The type of resource that will be received by this target.
  */
 public abstract class BaseTarget<Z> implements Target<Z> {
 

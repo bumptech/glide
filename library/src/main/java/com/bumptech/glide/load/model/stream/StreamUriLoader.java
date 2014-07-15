@@ -20,6 +20,9 @@ import java.io.InputStream;
  */
 public class StreamUriLoader extends UriLoader<InputStream> implements StreamModelLoader<Uri> {
 
+    /**
+     * THe default factory for {@link com.bumptech.glide.load.model.stream.StreamUriLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
 
         @Override

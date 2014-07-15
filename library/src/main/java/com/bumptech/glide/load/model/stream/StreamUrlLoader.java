@@ -17,6 +17,9 @@ import java.net.URL;
  */
 public class StreamUrlLoader extends UrlLoader<InputStream> {
 
+    /**
+     * The default factory for {@link com.bumptech.glide.load.model.stream.StreamUrlLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<URL, InputStream> {
         @Override
         public ModelLoader<URL, InputStream> build(Context context, GenericLoaderFactory factories) {

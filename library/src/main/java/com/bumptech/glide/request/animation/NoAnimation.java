@@ -10,6 +10,9 @@ public class NoAnimation implements GlideAnimation {
     private static final NoAnimation NO_ANIMATION = new NoAnimation();
     private static final GlideAnimationFactory NO_ANIMATION_FACTORY = new NoAnimationFactory();
 
+    /**
+     * A factory that always returns the same {@link com.bumptech.glide.request.animation.NoAnimation}.
+     */
     public static class NoAnimationFactory implements GlideAnimationFactory {
         @Override
         public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstResource) {

@@ -7,6 +7,10 @@ import android.content.Context;
  * retain {@link Context} or any other objects that cannot be retained for the life of the application. ModelLoaders
  * will not be retained statically so it is safe for any ModelLoader built by this factory to retain a reference to a
  * {@link Context}.
+ *
+ * @param <T> The type of the model the {@link com.bumptech.glide.load.model.ModelLoader}s built by this factory
+ *           can handle
+ * @param <Y> The type of data the {@link com.bumptech.glide.load.model.ModelLoader}s built by this factory can load.
  */
 public interface ModelLoaderFactory<T, Y> {
 

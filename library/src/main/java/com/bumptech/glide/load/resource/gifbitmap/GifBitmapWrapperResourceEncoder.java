@@ -7,6 +7,10 @@ import com.bumptech.glide.load.resource.gif.GifData;
 
 import java.io.OutputStream;
 
+/**
+ * A {@link com.bumptech.glide.load.ResourceEncoder} that can encode either an {@link Bitmap} or
+ * {@link com.bumptech.glide.load.resource.gif.GifData}.
+ */
 public class GifBitmapWrapperResourceEncoder implements ResourceEncoder<GifBitmapWrapper> {
     private final ResourceEncoder<Bitmap> bitmapEncoder;
     private final ResourceEncoder<GifData> gifEncoder;

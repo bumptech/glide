@@ -16,6 +16,9 @@ import java.io.InputStream;
  */
 public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
+    /**
+     * The default factory for {@link com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
         @Override
         public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {

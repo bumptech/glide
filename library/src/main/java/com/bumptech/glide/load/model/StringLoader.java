@@ -8,6 +8,8 @@ import java.io.File;
 /**
  * A model loader for handling certain string models. Handles paths, urls, and any uri string with a scheme handled by
  * {@link android.content.ContentResolver#openInputStream(Uri)}.
+ *
+ * @param <T> The type of data that will be loaded from the given {@link java.lang.String}.
  */
 public class StringLoader<T> implements ModelLoader<String, T> {
     private final ModelLoader<Uri, T> uriLoader;

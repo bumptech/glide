@@ -21,6 +21,9 @@ import com.bumptech.glide.samples.flickr.api.Photo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A fragment that shows cropped image thumbnails half the width of the screen in a scrolling list.
+ */
 public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
     private static final String STATE_POSITION_INDEX = "state_position_index";
     private static final String STATE_POSITION_OFFSET = "state_position_offset";

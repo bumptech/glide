@@ -14,6 +14,9 @@ import com.bumptech.glide.Glide;
 import java.io.InputStream;
 
 
+/**
+ * The primary activity in the Giphy sample that allows users to view trending animated GIFs from Giphy's api.
+ */
 public class MainActivity extends Activity implements Api.Monitor {
     private static final String TAG = "GiphyActivity";
 

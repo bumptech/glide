@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- * Based on https://github.com/Giphy/GiphyAPI.
+ * A java wrapper for Giphy's http api based on https://github.com/Giphy/GiphyAPI.
  */
 public final class Api {
     private static Api api = null;
@@ -40,8 +40,15 @@ public final class Api {
         return signUrl(BASE_URL + TRENDING_PATH + "?limit=" + limit + "&offset=" + offset);
     }
 
-
+    /**
+     * An interface for listening for search results.
+     */
     public interface Monitor {
+        /**
+         * Called when a search completes.
+         *
+         * @param result The results returned from Giphy's search api.
+         */
         public void onSearchComplete(SearchResult result);
     }
 
@@ -129,6 +136,9 @@ public final class Api {
         });
     }
 
+    /**
+     * A POJO mirroring the top level result JSON object returned from Giphy's api.
+     */
     public static class SearchResult {
         public GifResult[] data;
 
@@ -140,6 +150,9 @@ public final class Api {
         }
     }
 
+    /**
+     * A POJO mirroring an individual GIF image returned from Giphy's api.
+     */
     public static class GifResult {
         public String id;
         // Page url not gif url
@@ -156,6 +169,10 @@ public final class Api {
         }
     }
 
+    /**
+     * A POJO mirroring a JSON object with a set of urls of different sizes and dimensions returned for a single image
+     * from Giphy's api.
+     */
     public static class GifUrlSet {
         public GifImage original;
         public GifImage fixed_width_downsampled;
@@ -171,6 +188,10 @@ public final class Api {
         }
     }
 
+    /**
+     * A POJO mirroring a JSON object for an image with one particular url, size and dimension returned from Giphy's
+     * api.
+     */
     public static class GifImage {
         public String url;
         public int width;

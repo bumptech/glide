@@ -16,6 +16,9 @@ import java.io.InputStream;
  */
 public class StreamStringLoader extends StringLoader<InputStream> implements StreamModelLoader<String> {
 
+    /**
+     * The default factory for {@link com.bumptech.glide.load.model.stream.StreamStringLoader}s.
+     */
     public static class Factory implements ModelLoaderFactory<String, InputStream> {
         @Override
         public ModelLoader<String, InputStream> build(Context context, GenericLoaderFactory factories) {
