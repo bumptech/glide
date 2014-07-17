@@ -123,8 +123,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
                         .load(item)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
-                    )
-                    .centerCrop();
+                    );
         }
     }
 
@@ -185,7 +184,6 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
                         .load(current)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
-                    .centerCrop()
                     .crossFade(R.anim.fade_in, 150)
                     .into(viewHolder.imageView);
 

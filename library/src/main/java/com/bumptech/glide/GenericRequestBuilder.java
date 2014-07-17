@@ -33,12 +33,10 @@ import com.bumptech.glide.util.Util;
 import java.io.File;
 
 /**
- * A generic class that can handle loading a bitmap either from an image or as a thumbnail from a video given
- * models loaders to translate a model into generic resources for either an image or a video and decoders that can
- * decode those resources into bitmaps.
+ * A generic class that can handle setting options and staring loads for generic resource types.
  *
- * @param <ModelType> The type of model representing the image or video.
- * @param <DataType> The data type that the image {@link com.bumptech.glide.load.model.ModelLoader} will provide that
+ * @param <ModelType> The type of model representing the resource.
+ * @param <DataType> The data type that the resource {@link com.bumptech.glide.load.model.ModelLoader} will provide that
  *                  can be decoded by the {@link com.bumptech.glide.load.ResourceDecoder}.
  * @param <ResourceType> The type of the resource that will be loaded.
  * @param <TranscodeType> The type of resource the decoded resource will be transcoded to.
@@ -66,6 +64,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private int overrideWidth = -1;
     private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
     private Transformation<ResourceType> transformation = UnitTransformation.get();
+    private boolean isTransformationSet;
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
@@ -87,16 +86,16 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Loads and displays the image retrieved by the given thumbnail request if it finishes before this request.
-     * Best used for loading thumbnail images that are smaller and will be loaded more quickly than the fullsize
-     * image. There are no guarantees about the order in which the requests will actually finish. However, if the
-     * thumb request completes after the full request, the thumb image will never replace the full image.
+     * Loads and displays the resource retrieved by the given thumbnail request if it finishes before this request.
+     * Best used for loading thumbnail resources that are smaller and will be loaded more quickly than the fullsize
+     * resource. There are no guarantees about the order in which the requests will actually finish. However, if the
+     * thumb request completes after the full request, the thumb resource will never replace the full resource.
      *
      * @see #thumbnail(float)
      *
      * <p>
      *     Note - Any options on the main request will not be passed on to the thumbnail request. For example, if
-     *     you want an animation to occur when either the full image loads or the thumbnail loads, you need to call
+     *     you want an animation to occur when either the full resource loads or the thumbnail loads, you need to call
      *     {@link #animate(int)} on both the thumb and the full request. For a simpler thumbnail option, see
      *     {@link #thumbnail(float)}.
      * </p>
@@ -117,12 +116,12 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Loads an image in an identical manner to this request except with the dimensions of the target multiplied
+     * Loads a resource in an identical manner to this request except with the dimensions of the target multiplied
      * by the given size multiplier. If the thumbnail load completes before the fullsize load, the thumbnail will
      * be shown. If the thumbnail load completes afer the fullsize load, the thumbnail will not be shown.
      *
      * <p>
-     *     Note - The thumbnail image will be smaller than the size requested so the target (or {@link ImageView})
+     *     Note - The thumbnail resource will be smaller than the size requested so the target (or {@link ImageView})
      *     must be able to scale the thumbnail appropriately. See {@link android.widget.ImageView.ScaleType}.
      * </p>
      *
@@ -152,10 +151,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Applies a multiplier to the {@link Target}'s size before loading the image. Useful for loading thumbnails
-     * or trying to avoid loading huge bitmaps on devices with overly dense screens.
+     * Applies a multiplier to the {@link Target}'s size before loading the resource. Useful for loading thumbnails
+     * or trying to avoid loading huge resources (particularly {@link android.graphics.Bitmap}s on devices with overly
+     * dense screens.
      *
-     * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the image.
+     * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the resource.
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> sizeMultiplier(
@@ -234,7 +234,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      *
      * <p>
      *     For most applications {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT} is ideal.
-     *     Applications that use the same image multiple times in multiple sizes and are willing to trade off some
+     *     Applications that use the same resource multiple times in multiple sizes and are willing to trade off some
      *     speed and disk space in return for lower bandwidth usage may want to consider using
      *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#SOURCE} or
      *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}. Any download only operations should
@@ -297,6 +297,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transform(
             Transformation<ResourceType>... transformations) {
+        isTransformationSet = true;
         if (transformations.length == 1) {
             transformation = transformations[0];
         } else {
@@ -347,7 +348,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets an animation to run on the wrapped target when an image load finishes. Will only be run if the image
+     * Sets an animation to run on the wrapped target when an resource load finishes. Will only be run if the resource
      * was loaded asynchronously (ie was not in the memory cache)
      *
      * @param animationId The resource id of the animation to run
@@ -361,7 +362,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets an animation to run on the wrapped target when an image load finishes. Will only be run if the image
+     * Sets an animation to run on the wrapped target when a resource load finishes. Will only be run if the resource
      * was loaded asynchronously (ie was not in the memory cache)
      *
      * @param animation The animation to run
@@ -400,7 +401,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets a resource to display while an image is loading.
+     * Sets an Android resource id for a {@link android.graphics.drawable.Drawable} resourceto display while a resource
+     * is loading.
      *
      * @param resourceId The id of the resource to use as a placeholder
      * @return This request builder.
@@ -413,7 +415,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets a drawable to display while an image is loading.
+     * Sets an {@link android.graphics.drawable.Drawable} to display while a resource is loading.
      *
      * @param drawable The drawable to display as a placeholder.
      * @return This request builder.
@@ -452,7 +454,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets a RequestBuilder listener to monitor the image load. It's best to create a single instance of an
+     * Sets a RequestBuilder listener to monitor the resource load. It's best to create a single instance of an
      * exception handler per type of request (usually activity/fragment) rather than pass one in per request to
      * avoid some redundant object allocation.
      *
@@ -506,9 +508,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Set the target the image will be loaded into.
+     * Set the target the resource will be loaded into.
      *
-     * @param target The target to load te image for
+     * @see Glide#clear(com.bumptech.glide.request.target.Target)
+     *
+     * @param target The target to load the resource into.
      * @return The given target.
      */
     public <Y extends Target<TranscodeType>> Y into(Y target) {
@@ -534,12 +538,12 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets the {@link ImageView} the image will be loaded into, cancels any existing loads into the view, and frees
-     * any resources Glide has loaded into the view so they may be reused.
+     * Sets the {@link ImageView} the resource will be loaded into, cancels any existing loads into the view, and frees
+     * any resources Glide may have previously loaded into the view so they may be reused.
      *
      * @see Glide#clear(android.view.View)
      *
-     * @param view The view to cancel previous loads for and load the new image into.
+     * @param view The view to cancel previous loads for and load the new resource into.
      * @return The {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link ImageView}.
      */
     public Target<TranscodeType> into(ImageView view) {
@@ -547,6 +551,20 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         if (view == null) {
             throw new IllegalArgumentException("You must pass in a non null View");
         }
+
+        if (!isTransformationSet && view.getScaleType() != null) {
+            switch (view.getScaleType()) {
+                case CENTER_CROP:
+                    applyCenterCrop();
+                    break;
+                case FIT_CENTER:
+                case FIT_START:
+                case FIT_END:
+                    applyFitCenter();
+                    break;
+            }
+        }
+
         return into(glide.buildImageViewTarget(view, transcodeClass));
     }
 
@@ -557,6 +575,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      *              previously called.
      * @param height The desired height (note this will be overriden by {@link #override(int, int)}}
      *               if previously called.
+     *
+     * @see Glide#clear(com.bumptech.glide.request.FutureTarget)
+     *
      * @return An {@link com.bumptech.glide.request.FutureTarget} that can be used to obtain the
      *         resource in a blocking manner.
      */
@@ -576,6 +597,14 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         });
 
         return target;
+    }
+
+    void applyCenterCrop() {
+        // To be implemented by subclasses when possible.
+    }
+
+    void applyFitCenter() {
+        // To be implemented by subclasses when possible.
     }
 
     private Request buildRequest(Target<TranscodeType> target) {

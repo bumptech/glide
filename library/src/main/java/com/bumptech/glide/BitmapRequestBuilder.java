@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
+import android.widget.ImageView;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Encoder;
@@ -25,6 +26,7 @@ import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
+import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 import java.io.InputStream;
@@ -56,9 +58,6 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
 
         imageDecoder = new StreamBitmapDecoder(bitmapPool);
         videoDecoder = new FileDescriptorBitmapDecoder(bitmapPool);
-
-        // Default to transforming bitmap to fit within target size.
-        fitCenter();
     }
 
     /**
@@ -445,5 +444,32 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     public BitmapRequestBuilder<ModelType, TranscodeType> dontTransform() {
         super.dontTransform();
         return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     *     Note - If no transformation is set for this load, a default transformation will be applied based on the
+     *     value returned from {@link android.widget.ImageView#getScaleType()}. To avoid this default transformation,
+     *     use {@link #dontTransform()}.
+     * </p>
+     *
+     * @param view {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public Target<TranscodeType> into(ImageView view) {
+        return super.into(view);
+    }
+
+    @Override
+    void applyFitCenter() {
+        fitCenter();
+    }
+
+    @Override
+    void applyCenterCrop() {
+        centerCrop();
     }
 }

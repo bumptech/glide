@@ -161,7 +161,6 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
                             .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     )
                     .animate(R.anim.fade_in)
-                    .centerCrop()
                     .into(imageView);
 
             return imageView;

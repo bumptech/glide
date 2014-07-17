@@ -113,7 +113,6 @@
         <module name="DefaultComesLast" />
         <module name="EmptyStatement" />
         <module name="EqualsHashCode" />
-        <module name="MissingSwitchDefault" />
         <module name="NoClone" />
         <module name="NoFinalizer" />
         <module name="OneStatementPerLine" />

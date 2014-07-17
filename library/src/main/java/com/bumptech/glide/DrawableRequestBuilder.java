@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
+import android.widget.ImageView;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -20,6 +21,7 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.animation.DrawableCrossFadeViewAnimation;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
+import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 
@@ -43,8 +45,6 @@ public class DrawableRequestBuilder<ModelType>
 
         // Default to animating.
         crossFade();
-        // And default to resizing bitmap to fit within target size.
-        fitCenter();
     }
 
     /**
@@ -389,5 +389,32 @@ public class DrawableRequestBuilder<ModelType>
     public DrawableRequestBuilder<ModelType> dontTransform() {
         super.dontTransform();
         return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     *     Note - If no transformation is set for this load, a default transformation will be applied based on the
+     *     value returned from {@link android.widget.ImageView#getScaleType()}. To avoid this default transformation,
+     *     use {@link #dontTransform()}.
+     * </p>
+     *
+     * @param view {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public Target<Drawable> into(ImageView view) {
+        return super.into(view);
+    }
+
+    @Override
+    void applyFitCenter() {
+        fitCenter();
+    }
+
+    @Override
+    void applyCenterCrop() {
+        centerCrop();
     }
 }
