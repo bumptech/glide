@@ -1,6 +1,3 @@
-[submodule "samples/flickr/ActionBarSherlock"]
-	path = samples/flickr/ActionBarSherlock
-	url = https://github.com/JakeWharton/ActionBarSherlock.git
 [submodule "library/src/test/resources/exif-orientation-examples"]
 	path = library/src/test/resources/exif-orientation-examples
 	url = https://github.com/recurser/exif-orientation-examples.git

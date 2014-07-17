@@ -1,13 +1,14 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import com.actionbarsherlock.app.SherlockFragment;
+
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
@@ -23,7 +24,7 @@ import java.util.List;
  * A fragment that shows square image thumbnails whose size is determined by the framgent's arguments in a grid
  * pattern.
  */
-public class FlickrPhotoGrid extends SherlockFragment implements PhotoViewer {
+public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     private static final String STATE_POSITION_INDEX = "state_position_index";
 
     private static final String IMAGE_SIZE_KEY = "image_size";

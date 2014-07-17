@@ -3,6 +3,7 @@ package com.bumptech.glide.samples.flickr;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.actionbarsherlock.app.SherlockFragment;
+
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
@@ -24,7 +25,7 @@ import java.util.List;
 /**
  * A fragment that shows cropped image thumbnails half the width of the screen in a scrolling list.
  */
-public class FlickrPhotoList extends SherlockFragment implements PhotoViewer {
+public class FlickrPhotoList extends Fragment implements PhotoViewer {
     private static final String STATE_POSITION_INDEX = "state_position_index";
     private static final String STATE_POSITION_OFFSET = "state_position_offset";
     private FlickrPhotoListAdapter adapter;

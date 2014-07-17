@@ -12,6 +12,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -22,8 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
@@ -43,7 +43,7 @@ import java.util.concurrent.ExecutionException;
  * An activity that allows users to search for images on Flickr and that contains a series of fragments that display
  * retrieved image thumbnails.
  */
-public class FlickrSearchActivity extends SherlockFragmentActivity {
+public class FlickrSearchActivity extends ActionBarActivity {
     private static final String TAG = "FlickrSearchActivity";
     private static final String STATE_SEARCH_STRING = "state_search_string";
 

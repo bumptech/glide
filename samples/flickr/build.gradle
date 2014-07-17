@@ -3,8 +3,8 @@ apply plugin: 'com.android.application'
 dependencies {
     compile project(':library')
 
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
     compile 'com.android.support:support-v4:19.1.+'
+    compile 'com.android.support:appcompat-v7:18.0.+'
     compile 'com.mcxiaoke.volley:library:1.0.+'
 }
 
