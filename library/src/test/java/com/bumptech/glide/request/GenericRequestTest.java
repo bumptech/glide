@@ -242,7 +242,6 @@ public class GenericRequestTest {
         harness.priority = expected;
         GenericRequest request = harness.getRequest();
 
-
         request.onSizeReady(100, 100);
 
         verify(harness.engine).load(anyInt(), anyInt(), any(ResourceDecoder.class), any(DataFetcher.class),
@@ -659,6 +658,17 @@ public class GenericRequestTest {
                 anyBoolean());
     }
 
+    @Test
+    public void testDoesNotStartALoadIfOnSizeReadyIsCalledAfterCancel() {
+        GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
+        request.cancel();
+        request.onSizeReady(100, 100);
+
+        verify(harness.engine, never()).load(anyInt(), anyInt(), any(ResourceDecoder.class), any(DataFetcher.class),
+                any(Encoder.class), any(ResourceDecoder.class), any(Transformation.class),
+                any(ResourceEncoder.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
+                any(DiskCacheStrategy.class), any(ResourceCallback.class));
+    }
 
     private static class CallResourceCallback implements Answer {
 
