@@ -15,8 +15,9 @@ import com.bumptech.glide.request.Request;
  * </p>
  *
  * <p>
- *     For loading {@link com.bumptech.glide.load.engine.Resource}s into {@link android.view.View}s, {@link ViewTarget}
- *     is preferable to this class.
+ *     For loading {@link com.bumptech.glide.load.engine.Resource}s into {@link android.view.View}s,
+ *     {@link com.bumptech.glide.request.target.ViewTarget} or {@link com.bumptech.glide.request.target.ImageViewTarget}
+ *     are preferable.
  * </p>
  *
  * @param <Z> The type of resource that will be received by this target.
@@ -45,5 +46,23 @@ public abstract class BaseTarget<Z> implements Target<Z> {
      * {@inheritDoc}
      */
     @Override
-    public void setPlaceholder(Drawable placeholder) { }
+    public void onLoadCleared(Drawable placeholder) {
+        // Do nothing.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onLoadStarted(Drawable placeholder) {
+        // Do nothing.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+        // Do nothing.
+    }
 }

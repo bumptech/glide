@@ -1,8 +1,6 @@
 package com.bumptech.glide.request.animation;
 
-import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.widget.ImageView;
 
 /**
  * An {@link com.bumptech.glide.request.animation.GlideAnimation} that accepts an interface that can apply an
@@ -72,14 +70,16 @@ public class ViewPropertyAnimation implements GlideAnimation {
      * constructor to the given view and returns {@code false} because the animator cannot set the new resource on
      * the view.
      *
-     * @param previous {@inheritDoc}
      * @param current {@inheritDoc}
-     * @param view {@inheritDoc}
+     * @param adapter {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(Drawable previous, Object current, ImageView view) {
-        animator.animate(view);
+    public boolean animate(Object current, ViewAdapter adapter) {
+        final View view = adapter.getView();
+        if (view != null) {
+            animator.animate(adapter.getView());
+        }
         return false;
     }
 }

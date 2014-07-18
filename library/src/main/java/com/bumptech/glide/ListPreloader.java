@@ -3,8 +3,10 @@ package com.bumptech.glide;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.widget.AbsListView;
+
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 
 import java.util.ArrayDeque;
 import java.util.LinkedList;

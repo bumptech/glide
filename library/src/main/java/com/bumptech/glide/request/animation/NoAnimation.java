@@ -1,8 +1,5 @@
 package com.bumptech.glide.request.animation;
 
-import android.graphics.drawable.Drawable;
-import android.widget.ImageView;
-
 /**
  * A simple {@link com.bumptech.glide.request.animation.GlideAnimation} that performs no actions.
  */
@@ -40,7 +37,7 @@ public class NoAnimation implements GlideAnimation {
      * Performs no animation and always returns {@code false}.
      */
     @Override
-    public boolean animate(Drawable previous, Object current, ImageView view) {
+    public boolean animate(Object current, ViewAdapter adapter) {
         return false;
     }
 }

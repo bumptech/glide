@@ -8,11 +8,6 @@ interface DrawableOptions {
      * Applies a cross fade transformation that fades from the placeholder to the loaded
      * {@link android.graphics.drawable.Drawable}. If no placeholder is set, the Drawable will instead simply fade in.
      *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
-     *
      * @see #crossFade(int)
      * @see #crossFade(int, int)
      * @see #crossFade(android.view.animation.Animation, int)
@@ -24,11 +19,6 @@ interface DrawableOptions {
     /**
      * Applies a cross fade transformation that fades from the placeholder to the loaded
      * {@link android.graphics.drawable.Drawable}. If no placeholder is set the Drawable will instead simply fade in.
-     *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
      *
      * @see #crossFade()
      * @see #crossFade(int, int)
@@ -45,11 +35,6 @@ interface DrawableOptions {
      * {@link android.graphics.drawable.Drawable}. If no placeholder is set, the Drawable will instead be animated in
      * using the given {@link android.view.animation.Animation}.
      *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
-     *
      * @see #crossFade()
      * @see #crossFade(int)
      * @see #crossFade(int, int)
@@ -65,11 +50,6 @@ interface DrawableOptions {
      * Applies a cross fade transformation that des from the placeholder to the loaded
      * {@link android.graphics.drawable.Drawable}. If no placeholder is set, the Drawable will instead be animated in
      * using the {@link android.view.animation.Animation} loaded from the given animation id.
-     *
-     * <p>
-     *     Note - this only works by default for {@link android.view.View}s and
-     *     {@link com.bumptech.glide.request.target.ViewTarget}s.
-     * </p>
      *
      * @see #crossFade()
      * @see #crossFade(int)

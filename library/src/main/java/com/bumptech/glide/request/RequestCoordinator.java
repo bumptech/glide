@@ -17,7 +17,7 @@ public interface RequestCoordinator {
      *
      * @param request The {@link Request} requesting permission to display a placeholder.
      */
-    public boolean canSetPlaceholder(Request request);
+    public boolean canNotifyStatusChanged(Request request);
 
     /**
      * Returns true if any coordinated {@link Request} has successfully completed.

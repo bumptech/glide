@@ -75,17 +75,17 @@ public class ThumbnailRequestCoordinatorTest {
 
     @Test
     public void testDoesNotAllowThumbToSetPlaceholder() {
-        assertFalse(coordinator.canSetPlaceholder(thumb));
+        assertFalse(coordinator.canNotifyStatusChanged(thumb));
     }
 
     @Test
     public void testAllowsFullToSetPlaceholder() {
-        assertTrue(coordinator.canSetPlaceholder(full));
+        assertTrue(coordinator.canNotifyStatusChanged(full));
     }
 
     @Test
     public void testDoesNotAllowFullToSetPlaceholderIfThumbComplete() {
         when(thumb.isComplete()).thenReturn(true);
-        assertFalse(coordinator.canSetPlaceholder(full));
+        assertFalse(coordinator.canNotifyStatusChanged(full));
     }
 }

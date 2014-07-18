@@ -1,7 +1,7 @@
 package com.bumptech.glide.request.animation;
 
 import android.graphics.drawable.Drawable;
-import android.widget.ImageView;
+import android.view.View;
 
 /**
  * An interface that allows a transformation to be applied to {@link android.view.View}s in
@@ -13,15 +13,43 @@ import android.widget.ImageView;
  * @param <R> The type of the resource that should be animated to.
  */
 public interface GlideAnimation<R> {
+
+    /**
+     * An interface wrapping a view that exposes the necessary methods to run the various types of android animations
+     * ({@link com.bumptech.glide.request.animation.ViewAnimation},
+     * {@link com.bumptech.glide.request.animation.ViewPropertyAnimation} and animated
+     * {@link android.graphics.drawable.Drawable}s).
+     */
+    public interface ViewAdapter {
+        /**
+         * Returns the wrapped {@link android.view.View}.
+         */
+        public View getView();
+
+        /**
+         * Returns the current drawable being displayed in the view, or null if no such drawable exists (or one cannot
+         * be retrieved).
+         */
+        public Drawable getCurrentDrawable();
+
+        /**
+         * Sets the current drawable (usually an animated drawable) to display in the wrapped view.
+         *
+         * @param drawable The drawable to display in the wrapped view.
+         */
+        public void setDrawable(Drawable drawable);
+    }
+
     /**
      * Animates from the previous {@link android.graphics.drawable.Drawable} that is currently being displayed in the
      * given view, if not null, to the new resource that should be displayed in the view.
      *
-     * @param previous The {@link android.graphics.drawable.Drawable} currently displayed in the given view.
      * @param current The new resource that will be displayed in the view.
-     * @param view The view.
+     * @param adapter The {@link com.bumptech.glide.request.animation.GlideAnimation.ViewAdapter} wrapping a view that
+     *                can at least return an {@link android.view.View} from
+     *                {@link com.bumptech.glide.request.animation.GlideAnimation.ViewAdapter#getView()}.
      * @return True if int he process of running the animation the new resource was set on the view, false if the caller
      * needs to manually set the current resource on the view.
      */
-    public boolean animate(Drawable previous, R current, ImageView view);
+    public boolean animate(R current, ViewAdapter adapter);
 }

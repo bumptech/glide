@@ -20,6 +20,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 
 import org.junit.Before;
@@ -91,7 +92,7 @@ public class GenericRequestTest {
             when(loadProvider.getEncoder()).thenReturn(encoder);
             when(loadProvider.getTranscoder()).thenReturn(transcoder);
             when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
-            when(requestCoordinator.canSetPlaceholder(any(Request.class))).thenReturn(true);
+            when(requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(true);
 
             when(resource.get()).thenReturn(result);
         }
@@ -447,9 +448,10 @@ public class GenericRequestTest {
     public void testCallsTargetOnExceptionIfNoRequestListener() {
         harness.requestListener = null;
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        request.onException(new IOException("test"));
+        Exception exception = new IOException("test");
+        request.onException(exception);
 
-        verify(harness.target).setPlaceholder(eq(harness.errorDrawable));
+        verify(harness.target).onLoadFailed(eq(exception), eq(harness.errorDrawable));
     }
 
     @Test
@@ -457,9 +459,10 @@ public class GenericRequestTest {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         when(harness.requestListener.onException(any(Exception.class), anyObject(), eq(harness.target), anyBoolean()))
                 .thenReturn(false);
-        request.onException(new IOException("test"));
+        Exception exception = new IOException("Test");
+        request.onException(exception);
 
-        verify(harness.target).setPlaceholder(eq(harness.errorDrawable));
+        verify(harness.target).onLoadFailed(eq(exception), eq(harness.errorDrawable));
     }
 
     @Test
@@ -467,9 +470,10 @@ public class GenericRequestTest {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         when(harness.requestListener.onException(any(Exception.class), anyObject(), eq(harness.target), anyBoolean()))
                 .thenReturn(true);
+
         request.onException(new IllegalArgumentException("test"));
 
-        verify(harness.target, never()).setPlaceholder(any(Drawable.class));
+        verify(harness.target, never()).onLoadFailed(any(Exception.class), any(Drawable.class));
     }
 
     @Test
@@ -574,7 +578,7 @@ public class GenericRequestTest {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         request.begin();
 
-        verify(harness.target).getSize(any(Target.SizeReadyCallback.class));
+        verify(harness.target).getSize(any(SizeReadyCallback.class));
     }
 
     @Test
@@ -584,7 +588,7 @@ public class GenericRequestTest {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         request.begin();
 
-        verify(harness.target).getSize(any(Target.SizeReadyCallback.class));
+        verify(harness.target).getSize(any(SizeReadyCallback.class));
     }
 
     @Test
@@ -594,7 +598,7 @@ public class GenericRequestTest {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         request.begin();
 
-        verify(harness.target, never()).getSize(any(Target.SizeReadyCallback.class));
+        verify(harness.target, never()).getSize(any(SizeReadyCallback.class));
     }
 
     @Test
@@ -614,16 +618,16 @@ public class GenericRequestTest {
     public void testDoesNotSetErrorDrawableIfRequestCoordinatorDoesntAllowIt() {
         harness.errorDrawable = new ColorDrawable(Color.RED);
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
-        when(harness.requestCoordinator.canSetPlaceholder(any(Request.class))).thenReturn(false);
+        when(harness.requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(false);
         request.onException(new IOException("Test"));
 
-        verify(harness.target, never()).setPlaceholder(any(Drawable.class));
+        verify(harness.target, never()).onLoadFailed(any(Exception.class), any(Drawable.class));
     }
 
     @Test
     public void testCanReRunCancelledRequests() {
         doAnswer(new CallSizeReady(100, 100)).when(harness.target)
-                .getSize(any(Target.SizeReadyCallback.class));
+                .getSize(any(SizeReadyCallback.class));
         when(harness.engine.load(anyInt(), anyInt(), any(ResourceDecoder.class),
                 any(DataFetcher.class), any(Encoder.class),
                 any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
@@ -699,8 +703,8 @@ public class GenericRequestTest {
 
         @Override
         public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-            Target.SizeReadyCallback cb =
-                    (Target.SizeReadyCallback) invocationOnMock.getArguments()[0];
+            SizeReadyCallback cb =
+                    (SizeReadyCallback) invocationOnMock.getArguments()[0];
             cb.onSizeReady(width, height);
             return null;
         }
@@ -721,14 +725,27 @@ public class GenericRequestTest {
         private Drawable currentPlaceholder;
 
         @Override
+        public void onLoadCleared(Drawable placeholder) {
+            currentPlaceholder = placeholder;
+        }
+
+        @Override
+        public void onLoadStarted(Drawable placeholder) {
+            currentPlaceholder = placeholder;
+
+        }
+
+        @Override
+        public void onLoadFailed(Exception e, Drawable errorDrawable) {
+            currentPlaceholder = errorDrawable;
+
+        }
+
+        @Override
         public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
             currentPlaceholder = null;
         }
 
-        @Override
-        public void setPlaceholder(Drawable placeholder) {
-            currentPlaceholder = placeholder;
-        }
 
         @Override
         public void getSize(SizeReadyCallback cb) {

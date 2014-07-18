@@ -10,7 +10,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
  * A {@link com.bumptech.glide.request.target.Target} that can display an {@link android.graphics.drawable.Drawable} in
  * an {@link android.widget.ImageView}.
  */
-public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
+public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
     private static final float SQUARE_RATIO_MARGIN = 0.05f;
     private final ImageView view;
 
@@ -44,20 +44,18 @@ public class DrawableImageViewTarget extends ViewTarget<ImageView, Drawable> {
                 resource = new SquaringDrawable(resource, view.getWidth());
             }
         }
-
-        if (animation == null || !animation.animate(view.getDrawable(), resource, view)) {
-            view.setImageDrawable(resource);
-        }
+        super.onResourceReady(resource, animation);
     }
 
     /**
-     * Sets the given {@link android.graphics.drawable.Drawable} on the view using
+     * Sets the drawable on the view using
      * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}.
      *
-     * @param placeholder {@inheritDoc}
+     * @param resource The {@link android.graphics.drawable.Drawable} to display in the view.
      */
     @Override
-    public void setPlaceholder(Drawable placeholder) {
-        view.setImageDrawable(placeholder);
+    protected void setResource(Drawable resource) {
+        view.setImageDrawable(resource);
     }
+
 }

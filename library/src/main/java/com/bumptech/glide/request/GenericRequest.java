@@ -18,6 +18,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.LogTime;
 
@@ -33,7 +34,7 @@ import java.util.Queue;
  * @param <Z> The type of the resource that will be loaded.
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
  */
-public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeReadyCallback,
+public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallback,
         ResourceCallback {
     private static final String TAG = "GenericRequest";
 
@@ -232,7 +233,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         }
 
         if (!isComplete() && !isFailed()) {
-            setPlaceHolder();
+            if (canNotifyStatusChanged()) {
+                target.onLoadStarted(getPlaceholderDrawable());
+            }
             isRunning = true;
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -272,10 +275,13 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
     @Override
     public void clear() {
         cancel();
-        setPlaceHolder();
+        // Resource must be released before canNotifyStatusChanged is called.
         if (resource != null) {
             resource.release();
             resource = null;
+        }
+        if (canNotifyStatusChanged()) {
+            target.onLoadCleared(getPlaceholderDrawable());
         }
     }
 
@@ -303,25 +309,16 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         return isError;
     }
 
-    private void setPlaceHolder() {
-        if (!canSetPlaceholder()) {
-            return;
-        }
-
-        target.setPlaceholder(getPlaceholderDrawable());
-    }
-
-    private void setErrorPlaceholder() {
-        if (!canSetPlaceholder()) {
+    private void setErrorPlaceholder(Exception e) {
+        if (!canNotifyStatusChanged()) {
             return;
         }
 
         Drawable error = getErrorDrawable();
-        if (error != null) {
-            target.setPlaceholder(error);
-        } else {
-            setPlaceHolder();
+        if (error == null) {
+            error = getPlaceholderDrawable();
         }
+        target.onLoadFailed(e, error);
     }
 
     private Drawable getErrorDrawable() {
@@ -379,15 +376,15 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         }
     }
 
-    private boolean canSetImage() {
+    private boolean canSetResource() {
         return requestCoordinator == null || requestCoordinator.canSetImage(this);
     }
 
-    private boolean canSetPlaceholder() {
-        return requestCoordinator == null || requestCoordinator.canSetPlaceholder(this);
+    private boolean canNotifyStatusChanged() {
+        return requestCoordinator == null || requestCoordinator.canNotifyStatusChanged(this);
     }
 
-    private boolean isFirstImage() {
+    private boolean isFirstReadyResource() {
         return requestCoordinator == null || !requestCoordinator.isAnyRequestComplete();
     }
 
@@ -398,7 +395,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
     @Override
     public void onResourceReady(Resource resource) {
         isRunning = false;
-        if (!canSetImage()) {
+        if (!canSetResource()) {
             resource.release();
             return;
         }
@@ -414,8 +411,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         R result = (R) received;
 
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
-                isFirstImage())) {
-            GlideAnimation<R> animation = animationFactory.build(loadedFromMemoryCache, isFirstImage());
+                isFirstReadyResource())) {
+            GlideAnimation<R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
             target.onResourceReady(result, animation);
         }
 
@@ -439,8 +436,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, Target.SizeRea
         isRunning = false;
         isError = true;
         //TODO: what if this is a thumbnail request?
-        if (requestListener == null || !requestListener.onException(e, model, target, isFirstImage())) {
-            setErrorPlaceholder();
+        if (requestListener == null || !requestListener.onException(e, model, target, isFirstReadyResource())) {
+            setErrorPlaceholder(e);
         }
     }
 

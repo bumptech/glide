@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -30,11 +31,13 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.GlideShadowLooper;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +90,7 @@ public class GlideTest {
         target = mock(Target.class);
         imageView = new ImageView(Robolectric.application);
         imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
-        doAnswer(new CallCallback()).when(target).getSize(any(Target.SizeReadyCallback.class));
+        doAnswer(new CallCallback()).when(target).getSize(any(SizeReadyCallback.class));
 
         Handler bgHandler = mock(Handler.class);
         when(bgHandler.post(any(Runnable.class))).thenAnswer(new Answer<Object>() {
@@ -188,7 +191,7 @@ public class GlideTest {
         File expected = new File("test");
 
         Target<File> target = mock(Target.class);
-        doAnswer(new CallCallback()).when(target).getSize(any(Target.SizeReadyCallback.class));
+        doAnswer(new CallCallback()).when(target).getSize(any(SizeReadyCallback.class));
 
         GlideUrl glideUrl =  mock(GlideUrl.class);
         DataFetcher<File> dataFetcher = mock(DataFetcher.class);
@@ -586,7 +589,7 @@ public class GlideTest {
                 .placeholder(drawable)
                 .into(target);
 
-        verify(target).setPlaceholder(eq(drawable));
+        verify(target).onLoadFailed(any(Exception.class), eq(drawable));
     }
 
     @Test
@@ -602,7 +605,7 @@ public class GlideTest {
                 .error(error)
                 .into(target);
 
-        verify(target).setPlaceholder(eq(error));
+        verify(target).onLoadFailed(any(Exception.class), eq(error));
     }
 
     @Test
@@ -616,7 +619,7 @@ public class GlideTest {
                 .placeholder(drawable)
                 .into(target);
 
-        verify(target).setPlaceholder(eq(drawable));
+        verify(target).onLoadFailed(any(Exception.class), eq(drawable));
     }
 
     @Test
@@ -711,7 +714,7 @@ public class GlideTest {
 
         @Override
         public Void answer(InvocationOnMock invocation) throws Throwable {
-            Target.SizeReadyCallback cb = (Target.SizeReadyCallback) invocation.getArguments()[0];
+            SizeReadyCallback cb = (SizeReadyCallback) invocation.getArguments()[0];
             cb.onSizeReady(width, height);
             return null;
         }

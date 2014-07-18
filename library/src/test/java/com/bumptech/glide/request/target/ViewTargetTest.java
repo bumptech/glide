@@ -5,9 +5,12 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import com.bumptech.glide.request.animation.GlideAnimation;
+
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.animation.GlideAnimation;
+
 import junit.framework.TestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +28,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewTreeObserver.OnPreDrawListener;
-import static com.bumptech.glide.request.target.Target.SizeReadyCallback;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNull;
 import static org.mockito.Matchers.anyInt;
@@ -44,16 +46,7 @@ public class ViewTargetTest {
     @Before
     public void setUp() {
         view = new View(Robolectric.application);
-        target = new ViewTarget<View, Object>(view) {
-
-            @Override
-            public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
-            }
-
-            @Override
-            public void setPlaceholder(Drawable placeholder) {
-            }
-        };
+        target = new TestViewTarget(view);
     }
 
     @Test
@@ -87,15 +80,7 @@ public class ViewTargetTest {
 
         target.setRequest(request);
 
-        ViewTarget<View, Object> second = new ViewTarget<View, Object>(view) {
-            @Override
-            public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
-            }
-
-            @Override
-            public void setPlaceholder(Drawable placeholder) {
-            }
-        };
+        ViewTarget<View, Object> second = new TestViewTarget(view);
 
         assertEquals(request, second.getRequest());
     }
@@ -244,17 +229,7 @@ public class ViewTargetTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfGivenNullView() {
-        ViewTarget viewTarget = new ViewTarget(null) {
-            @Override
-            public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
-
-            }
-
-            @Override
-            public void setPlaceholder(Drawable placeholder) {
-
-            }
-        };
+        ViewTarget viewTarget = new TestViewTarget(null);
     }
 
     @Implements(ViewTreeObserver.class)
@@ -324,6 +299,33 @@ public class ViewTargetTest {
         @Implementation
         public int getHeight() {
             return height;
+        }
+    }
+
+    private static class TestViewTarget extends ViewTarget<View, Object> {
+
+        public TestViewTarget(View view) {
+            super(view);
+        }
+
+        @Override
+        public void onLoadStarted(Drawable placeholder) {
+
+        }
+
+        @Override
+        public void onLoadFailed(Exception e, Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
+
+        }
+
+        @Override
+        public void onLoadCleared(Drawable placeholder) {
+
         }
     }
 }

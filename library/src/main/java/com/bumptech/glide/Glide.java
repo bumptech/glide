@@ -584,9 +584,21 @@ public class Glide {
         }
 
         @Override
+        public void onLoadStarted(Drawable placeholder) {
+
+        }
+
+        @Override
+        public void onLoadFailed(Exception e, Drawable errorDrawable) {
+
+        }
+
+        @Override
         public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) { }
 
         @Override
-        public void setPlaceholder(Drawable placeholder) { }
+        public void onLoadCleared(Drawable placeholder) {
+
+        }
     }
 }

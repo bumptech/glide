@@ -36,7 +36,7 @@ import java.util.Set;
  */
 public abstract class ViewTarget<T extends View, Z> implements Target<Z> {
     private static final String TAG = "ViewTarget";
-    private final T view;
+    protected final T view;
     private final SizeDeterminer sizeDeterminer;
 
     public ViewTarget(T view) {

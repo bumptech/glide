@@ -7,9 +7,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import com.bumptech.glide.request.animation.GlideAnimation;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
@@ -19,11 +16,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -31,62 +25,16 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class DrawableImageViewTargetTest {
-    private ImageView view;
-    private DrawableImageViewTarget target;
-
-    @Before
-    public void setUp() {
-        view = new ImageView(Robolectric.application);
-        target = new DrawableImageViewTarget(view);
-    }
 
     @Test
-    public void testSetsDrawableOnViewInOnResourceReadyWhenAnimationIsNull() {
-        Drawable resource = new ColorDrawable(Color.BLUE);
-        target.onResourceReady(resource, null);
+    public void testSetsDrawableOnViewInSetResource() {
+        ImageView view = new ImageView(Robolectric.application);
+        DrawableImageViewTarget target = new DrawableImageViewTarget(view);
+        Drawable expected = new ColorDrawable(Color.GRAY);
 
-        assertEquals(resource, view.getDrawable());
-    }
+        target.setResource(expected);
 
-    @Test
-    public void testSetsDrawableOnViewInOnResourceReadyWhenAnimationReturnsFalse() {
-        GlideAnimation animation = mock(GlideAnimation.class);
-        when(animation.animate(any(Drawable.class), any(Drawable.class), any(ImageView.class)))
-                .thenReturn(false);
-        Drawable resource = new ColorDrawable(Color.GRAY);
-        target.onResourceReady(resource, animation);
-
-        assertEquals(resource, view.getDrawable());
-    }
-
-    @Test
-    public void testDoesNotSetDrawableOnViewInOnResourceReadyWhenAnimationReturnsTrue() {
-        Drawable resource = new ColorDrawable(Color.RED);
-        GlideAnimation animation = mock(GlideAnimation.class);
-        when(animation.animate((Drawable) isNull(), eq(resource), eq(view))).thenReturn(true);
-        target.onResourceReady(resource, animation);
-
-        assertNull(view.getDrawable());
-    }
-
-    @Test
-    public void testSetsPlaceholderOnView() {
-        Drawable placeholder = new ColorDrawable(Color.RED);
-        target.setPlaceholder(placeholder);
-
-        assertEquals(placeholder, view.getDrawable());
-    }
-
-    @Test
-    public void testProvidesCurrentPlaceholderToAnimationIfPresent() {
-        Drawable placeholder = new ColorDrawable(Color.BLACK);
-        view.setImageDrawable(placeholder);
-
-        GlideAnimation animation = mock(GlideAnimation.class);
-
-        target.onResourceReady(new ColorDrawable(Color.GREEN), animation);
-
-        verify(animation).animate(eq(placeholder), any(Drawable.class), any(ImageView.class));
+        assertEquals(expected, view.getDrawable());
     }
 
     @Test

@@ -488,7 +488,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     /**
      * Overrides the {@link Target}'s width and height with the given values. This is useful almost exclusively for
      * thumbnails, and should only be used when you both need a very specific sized image and when it is impossible or
-     * impractical to return that size from {@link Target#getSize(Target.SizeReadyCallback)}.
+     * impractical to return that size from {@link Target#getSize(com.bumptech.glide.request.target.SizeReadyCallback)}.
      *
      * @param width The width to use to load the resource.
      * @param height The height to use to load the resource.
@@ -584,7 +584,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     public FutureTarget<TranscodeType> into(int width, int height) {
         final RequestFutureTarget<ModelType, TranscodeType> target =
                 new RequestFutureTarget<ModelType, TranscodeType>(glide.getMainHandler(), width, height);
-        listener(target);
 
         // TODO: Currently all loads must be started on the main thread...
         glide.getMainHandler().post(new Runnable() {

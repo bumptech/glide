@@ -3,10 +3,10 @@ package com.bumptech.glide.request.animation;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 
 /**
  * A cross fade {@link GlideAnimation} for {@link android.graphics.drawable.Drawable}s
@@ -105,23 +105,24 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
      *     drawable is non null</li>
      * </ol>
      *
-     * @param previous The previous drawable that is currently being displayed in the {@link android.view.View}.
-     * @param current The new drawable that should be displayed in the {@link com.bumptech.glide.request.target.Target}
-     *                after this animation completes.
-     * @param view The {@link android.widget.ImageView} the animation should run on.
-     * @return true if in the process of running the animation the current drawable is set on the view, false if the
-     * current drawable must be set on the view manually by the caller of this method.
+     * @param current {@inheritDoc}
+     * @param adapter  {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(Drawable previous, T current, ImageView view) {
+    public boolean animate(T current, ViewAdapter adapter) {
+        Drawable previous = adapter.getCurrentDrawable();
         if (previous != null) {
             TransitionDrawable transitionDrawable = new TransitionDrawable(new Drawable[] { previous, current });
             transitionDrawable.setCrossFadeEnabled(true);
             transitionDrawable.startTransition(duration);
-            view.setImageDrawable(transitionDrawable);
+            adapter.setDrawable(transitionDrawable);
             return true;
         } else {
-            view.startAnimation(defaultAnimation);
+            View view = adapter.getView();
+            if (view != null) {
+                view.startAnimation(defaultAnimation);
+            }
             return false;
         }
     }

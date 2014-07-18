@@ -31,7 +31,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
      * @param request {@inheritDoc}.
      */
     @Override
-    public boolean canSetPlaceholder(Request request) {
+    public boolean canNotifyStatusChanged(Request request) {
         return request == full && !isAnyRequestComplete();
     }
 
