@@ -4,7 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.util.Util;
 
 import java.util.concurrent.CancellationException;
@@ -35,12 +35,15 @@ import java.util.concurrent.TimeoutException;
  * @param <T> The type of the data to load.
  * @param <R> The type of the resource that will be loaded.
  */
-public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureTarget<R>, Runnable {
+public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
+    private static final Waiter DEFAULT_WAITER = new DefaultWaiter();
+
     private final Handler mainHandler;
     private final int width;
     private final int height;
     // Exists for testing only.
     private final boolean assertBackgroundThread;
+    private final Waiter waiter;
 
     private R resource;
     private Request request;
@@ -53,14 +56,15 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
      * Constructor for a RequestFutureTarget. Should not be used directly.
      */
     public RequestFutureTarget(Handler mainHandler, int width, int height) {
-        this(mainHandler, width, height, true);
+        this(mainHandler, width, height, true, DEFAULT_WAITER);
     }
 
-    RequestFutureTarget(Handler mainHandler, int width, int height, boolean assertBackgroundThread) {
+    RequestFutureTarget(Handler mainHandler, int width, int height, boolean assertBackgroundThread, Waiter waiter) {
         this.mainHandler = mainHandler;
         this.width = width;
         this.height = height;
         this.assertBackgroundThread = assertBackgroundThread;
+        this.waiter = waiter;
     }
 
     /**
@@ -76,7 +80,7 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
         if (result) {
             isCancelled = true;
             clear();
-            notifyAll();
+            waiter.notifyAll(this);
         }
         return result;
     }
@@ -121,31 +125,6 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
      * A callback that should never be invoked directly.
      */
     @Override
-    public synchronized boolean onResourceReady(R resource, T model, Target target,
-                                   boolean isFromMemoryCache, boolean isFirstResource) {
-        // We might get a null result.
-        resultReceived = true;
-        this.resource = resource;
-        notifyAll();
-        return true;
-    }
-
-    /**
-     * A callback that should never be invoked directly.
-     */
-    @Override
-    public synchronized boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
-        // We might get a null exception.
-        exceptionReceived = true;
-        this.exception = e;
-        notifyAll();
-        return true;
-    }
-
-    /**
-     * A callback that should never be invoked directly.
-     */
-    @Override
     public void getSize(SizeReadyCallback cb) {
         cb.onSizeReady(width, height);
     }
@@ -170,7 +149,7 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
      * A callback that should never be invoked directly.
      */
     @Override
-    public final void onResourceReady(R resource, GlideAnimation<R> glideAnimation) {
+    public void onLoadCleared(Drawable placeholder) {
         // Do nothing.
     }
 
@@ -178,8 +157,30 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
      * A callback that should never be invoked directly.
      */
     @Override
-    public void setPlaceholder(Drawable placeholder) {
+    public void onLoadStarted(Drawable placeholder) {
         // Do nothing.
+    }
+
+    /**
+     * A callback that should never be invoked directly.
+     */
+    @Override
+    public synchronized void onLoadFailed(Exception e, Drawable errorDrawable) {
+         // We might get a null exception.
+        exceptionReceived = true;
+        this.exception = e;
+        waiter.notifyAll(this);
+    }
+
+    /**
+     * A callback that should never be invoked directly.
+     */
+    @Override
+    public synchronized void onResourceReady(R resource, GlideAnimation<R> glideAnimation) {
+        // We might get a null result.
+        resultReceived = true;
+        this.resource = resource;
+        waiter.notifyAll(this);
     }
 
     private synchronized R doGet(Long timeoutMillis) throws ExecutionException, InterruptedException, TimeoutException {
@@ -196,9 +197,9 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
         }
 
         if (timeoutMillis == null) {
-            wait(0);
+            waiter.waitForTimeout(this, 0);
         } else if (timeoutMillis > 0) {
-            wait(timeoutMillis);
+            waiter.waitForTimeout(this, timeoutMillis);
         }
 
         if (Thread.interrupted()) {
@@ -229,5 +230,24 @@ public class RequestFutureTarget<T, R> implements RequestListener<T, R>, FutureT
     @Override
     public void clear() {
         mainHandler.post(this);
+    }
+
+    interface Waiter {
+        public void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException;
+
+        public void notifyAll(Object toNotify);
+    }
+
+    private static class DefaultWaiter implements Waiter {
+
+        @Override
+        public void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException {
+            toWaitOn.wait(timeoutMillis);
+        }
+
+        @Override
+        public void notifyAll(Object toNotify) {
+            toNotify.notifyAll();
+        }
     }
 }
