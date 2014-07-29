@@ -62,8 +62,8 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
      */
     @Override
     public void clear() {
-        full.clear();
         thumb.clear();
+        full.clear();
     }
 
     /**

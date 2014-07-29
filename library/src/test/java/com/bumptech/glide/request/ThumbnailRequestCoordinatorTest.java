@@ -2,9 +2,11 @@ package com.bumptech.glide.request;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -88,4 +90,20 @@ public class ThumbnailRequestCoordinatorTest {
         when(thumb.isComplete()).thenReturn(true);
         assertFalse(coordinator.canNotifyStatusChanged(full));
     }
+
+    @Test
+    public void testCallsClearOnRequestsWhenCleared() {
+        coordinator.clear();
+        InOrder order = inOrder(thumb, full);
+        order.verify(thumb).clear();
+        order.verify(full).clear();
+    }
+
+    @Test
+    public void testRecyclesRequestsWhenRecycled() {
+        coordinator.recycle();
+        verify(thumb).recycle();
+        verify(full).recycle();
+    }
+
 }
