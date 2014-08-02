@@ -20,16 +20,15 @@ public class GifHeaderParser {
      */
     private static final int MAX_STACK_SIZE = 4096;
 
+    // Raw data read working array.
+    private final byte[] block = new byte[256];
+    // Block size last graphic control extension info.
+    private final short[] prefix = new short[MAX_STACK_SIZE];
+    private final byte[] suffix = new byte[MAX_STACK_SIZE];
+
     private ByteBuffer rawData;
     private GifHeader header;
-
-    // Raw data read working array.
-    private byte[] block = new byte[256];
-    // Block size last graphic control extension info.
     private int blockSize = 0;
-    private short[] prefix;
-    private byte[] suffix;
-    private byte[] pixelStack;
 
     public GifHeaderParser setData(byte[] data) {
         reset();
@@ -49,9 +48,6 @@ public class GifHeaderParser {
         Arrays.fill(block, (byte) 0);
         header = new GifHeader();
         blockSize = 0;
-        prefix = null;
-        suffix = null;
-        pixelStack = null;
     }
 
     public GifHeader parseHeader() {
@@ -285,23 +281,13 @@ public class GifHeaderParser {
     }
 
     /**
-     * Decodes LZW image data into pixel array. Adapted from John Cristy's BitmapMagick.
+     * Skips LZW image data for a single frame to advance buffer. Adapted from John Cristy's BitmapMagick.
      */
     protected void skipBitmapData() {
         int nullCode = -1;
         int npix = header.width * header.height;
         int available, clear, codeMask, codeSize, endOfInformation, inCode, oldCode, bits, code, count, i, datum,
                 dataSize, first, top, bi;
-
-        if (prefix == null) {
-            prefix = new short[MAX_STACK_SIZE];
-        }
-        if (suffix == null) {
-            suffix = new byte[MAX_STACK_SIZE];
-        }
-        if (pixelStack == null) {
-            pixelStack = new byte[MAX_STACK_SIZE + 1];
-        }
 
         // Initialize GIF data stream decoder.
         dataSize = read();
@@ -318,7 +304,7 @@ public class GifHeaderParser {
         }
 
         // Decode GIF pixel stream.
-        datum = bits = count = first = top = bi = 0;
+        datum = bits = count = top = bi = 0;
         for (i = 0; i < npix; ) {
             if (top == 0) {
                 if (bits < codeSize) {
@@ -354,18 +340,14 @@ public class GifHeaderParser {
                     continue;
                 }
                 if (oldCode == nullCode) {
-                    pixelStack[top++] = suffix[code];
                     oldCode = code;
-                    first = code;
                     continue;
                 }
                 inCode = code;
                 if (code == available) {
-                    pixelStack[top++] = (byte) first;
                     code = oldCode;
                 }
                 while (code > clear) {
-                    pixelStack[top++] = suffix[code];
                     code = prefix[code];
                 }
                 first = ((int) suffix[code]) & 0xff;
@@ -373,7 +355,6 @@ public class GifHeaderParser {
                 if (available >= MAX_STACK_SIZE) {
                     break;
                 }
-                pixelStack[top++] = (byte) first;
                 prefix[available] = (short) oldCode;
                 suffix[available] = (byte) first;
                 available++;

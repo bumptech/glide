@@ -9,6 +9,8 @@ import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -18,7 +20,9 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -26,22 +30,50 @@ import static org.mockito.Mockito.when;
 public class GifResourceDecoderTest {
     private GifResourceDecoder decoder;
     private GifHeaderParser parser;
+    private GifResourceDecoder.GifHeaderParserPool parserPool;
 
     @Before
     public void setUp() {
         BitmapPool bitmapPool = mock(BitmapPool.class);
         parser = mock(GifHeaderParser.class);
-        decoder = new GifResourceDecoder(Robolectric.application, bitmapPool, parser);
+        parserPool = mock(GifResourceDecoder.GifHeaderParserPool.class);
+        when(parserPool.obtain(any(byte[].class))).thenReturn(parser);
+        decoder = new GifResourceDecoder(Robolectric.application, bitmapPool, parserPool);
     }
 
     @Test
     public void testReturnsNullIfParsedHeaderHasZeroFrames() throws IOException {
         GifHeader header = mock(GifHeader.class);
-        when(parser.setData(any(byte[].class))).thenReturn(parser);
         when(parser.parseHeader()).thenReturn(header);
         when(header.getNumFrames()).thenReturn(0);
 
         assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+    }
+
+    @Test
+    public void testReturnsParserToPool() throws IOException {
+        when(parserPool.obtain(any(byte[].class))).thenReturn(parser);
+        when(parser.parseHeader()).thenReturn(mock(GifHeader.class));
+
+        decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
+        verify(parserPool).release(eq(parser));
+    }
+
+    @Test
+    public void testReturnsParserToPoolWhenParserThrows() {
+        when(parser.parseHeader()).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                throw new IOException("Test");
+            }
+        });
+        try {
+            decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
+        } catch (IOException e) {
+            // Expected.
+        }
+
+        verify(parserPool).release(eq(parser));
     }
 
     @Test
