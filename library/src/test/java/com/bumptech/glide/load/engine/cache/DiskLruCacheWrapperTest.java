@@ -23,14 +23,13 @@ import static junit.framework.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class DiskLruCacheWrapperTest {
-    private File dir;
     private DiskLruCacheWrapper cache;
     private byte[] data;
     private StringKey key;
 
     @Before
     public void setUp() {
-        dir = Robolectric.application.getCacheDir();
+        File dir = Robolectric.application.getCacheDir();
         cache = new DiskLruCacheWrapper(dir, 10 * 1024 * 1024);
         key = new StringKey("test");
         data = new byte[] { 1, 2, 3, 4, 5, 6 };
@@ -82,6 +81,36 @@ public class DiskLruCacheWrapperTest {
         });
 
         assertNull(cache.get(key));
+    }
+
+    @Test
+    public void testEditIsAbortedIfWriterThrows() throws FileNotFoundException {
+        try {
+            cache.put(key, new DiskCache.Writer() {
+                @Override
+                public boolean write(File file) {
+                    throw new RuntimeException("test");
+                }
+            });
+        } catch (RuntimeException e) {
+            // Expected.
+        }
+
+        cache.put(key, new DiskCache.Writer() {
+            @Override
+            public boolean write(File file) {
+                try {
+                    new FileOutputStream(file).write(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return true ;
+            }
+        });
+
+        byte[] received = isToBytes(new FileInputStream(cache.get(key)), data.length);
+
+        assertTrue(Arrays.equals(data, received));
     }
 
     private static byte[] isToBytes(InputStream is, int length) {

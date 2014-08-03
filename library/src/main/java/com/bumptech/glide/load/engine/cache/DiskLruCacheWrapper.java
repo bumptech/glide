@@ -87,9 +87,13 @@ public class DiskLruCacheWrapper implements DiskCache {
             DiskLruCache.Editor editor = getDiskCache().edit(safeKey);
             // Editor will be null if there are two concurrent puts. In the worst case we will just silently fail.
             if (editor != null) {
-                File file = editor.getFile(0);
-                if (writer.write(file)) {
-                    editor.commit();
+                try {
+                    File file = editor.getFile(0);
+                    if (writer.write(file)) {
+                        editor.commit();
+                    }
+                } finally {
+                    editor.abortUnlessCommitted();
                 }
             }
         } catch (IOException e) {
