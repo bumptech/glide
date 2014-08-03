@@ -30,9 +30,13 @@ public class RequestManagerRetriever {
             }
         }
 
-        // Either a context or we're on a background thread.
+        // Either an application context or we're on a background thread.
         if (applicationManager == null) {
-            applicationManager = new RequestManager(context.getApplicationContext(), new Lifecycle());
+            synchronized (RequestManagerRetriever.class) {
+                if (applicationManager == null) {
+                    applicationManager = new RequestManager(context.getApplicationContext(), new Lifecycle());
+                }
+            }
         }
         return applicationManager;
     }
