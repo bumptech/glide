@@ -18,7 +18,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testClearRequestsClearsAddedRequests() {
+    public void testClearsAddedRequestsOnDestroy() {
         Request request = mock(Request.class);
         tracker.addRequest(request);
 
@@ -52,7 +52,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testClearsInProgressRequestsOnPause() {
+    public void testClearsInProgressRequestsWhenPaused() {
         Request request = mock(Request.class);
         when(request.isRunning()).thenReturn(true);
         tracker.addRequest(request);
@@ -63,7 +63,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testDoesNotClearCompleteRequestsOnPause() {
+    public void testDoesNotClearCompleteRequestsWhenPaused() {
         Request request = mock(Request.class);
         when(request.isComplete()).thenReturn(true);
         tracker.addRequest(request);
@@ -74,7 +74,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testDoesNotClearFailedRequestsOnPause() {
+    public void testDoesNotClearFailedRequestsWhenPaused() {
         Request request = mock(Request.class);
         when(request.isFailed()).thenReturn(true);
         tracker.addRequest(request);
@@ -85,7 +85,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testRestartsStoppedRequestOnResume() {
+    public void testRestartsStoppedRequestWhenResumed() {
         Request request = mock(Request.class);
         tracker.addRequest(request);
 
@@ -95,7 +95,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testDoesNotRestartCompletedRequestsOnResume() {
+    public void testDoesNotRestartCompletedRequestsWhenResumed() {
         Request request = mock(Request.class);
         when(request.isComplete()).thenReturn(true);
         tracker.addRequest(request);
@@ -106,7 +106,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testDoesRestartFailedRequestsOnResume() {
+    public void testDoesRestartFailedRequestsWhenResumed() {
         Request request = mock(Request.class);
         when(request.isFailed()).thenReturn(true);
         tracker.addRequest(request);
@@ -117,7 +117,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testDoesNotStartStartedRequestsOnResume() {
+    public void testDoesNotStartStartedRequestsWhenResumed() {
         Request request = mock(Request.class);
         when(request.isRunning()).thenReturn(true);
         tracker.addRequest(request);

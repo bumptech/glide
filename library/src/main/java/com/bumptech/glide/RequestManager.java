@@ -2,6 +2,8 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
 import com.bumptech.glide.load.model.ModelLoader;
@@ -11,6 +13,8 @@ import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
+import com.bumptech.glide.manager.Lifecycle;
+import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.util.Util;
 
@@ -30,25 +34,41 @@ import java.util.UUID;
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
-public class RequestManager {
-    private final ConnectivityMonitor connectivityMonitor;
+public class RequestManager implements LifecycleListener {
     private final Context context;
     private final RequestTracker requestTracker;
     private final Glide glide;
     private final OptionsApplier optionsApplier;
     private DefaultOptions options;
 
-    public RequestManager(Context context) {
-        this(context, new RequestTracker(), new ConnectivityMonitorFactory());
+    public RequestManager(Context context, Lifecycle lifecycle) {
+        this(context, lifecycle, new RequestTracker(), new ConnectivityMonitorFactory());
     }
 
-    RequestManager(Context context, RequestTracker requestTracker, ConnectivityMonitorFactory factory) {
+    RequestManager(Context context, final Lifecycle lifecycle, RequestTracker requestTracker,
+            ConnectivityMonitorFactory factory) {
         this.context = context;
         this.requestTracker = requestTracker;
-        this.connectivityMonitor = factory.build(context, new RequestManagerConnectivityListener(requestTracker));
-        connectivityMonitor.register();
         this.glide = Glide.get(context);
         this.optionsApplier = new OptionsApplier();
+
+        ConnectivityMonitor connectivityMonitor = factory.build(context,
+                new RequestManagerConnectivityListener(requestTracker));
+
+        // If we're the application level request manager, we may be created on a background thread. In that case we
+        // cannot risk synchronously pausing or resuming requests, so we hack around the issue by delaying adding
+        // ourselves as a lifecycle listener by posting to the main thread. This should be entirely safe.
+        if (Util.isOnBackgroundThread()) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    lifecycle.addListener(RequestManager.this);
+                }
+            });
+        } else {
+            lifecycle.addListener(this);
+        }
+        lifecycle.addListener(connectivityMonitor);
     }
 
     /**
@@ -103,9 +123,9 @@ public class RequestManager {
      * Lifecycle callback that registers for connectivity events (if the android.permission.ACCESS_NETWORK_STATE
      * permission is present) and restarts failed or paused requests.
      */
+    @Override
     public void onStart() {
         // onStart might not be called because this object may be created after the fragment/activity's onStart method.
-        connectivityMonitor.register();
         resumeRequests();
     }
 
@@ -113,8 +133,8 @@ public class RequestManager {
      * Lifecycle callback that unregisters for connectivity events (if the android.permission.ACCESS_NETWORK_STATE
      * permission is present) and pauses in progress loads.
      */
+    @Override
     public void onStop() {
-        connectivityMonitor.unregister();
         pauseRequests();
     }
 
@@ -122,6 +142,7 @@ public class RequestManager {
      * Lifecycle callback that cancels all in progress requests and clears and recycles resources for all completed
      * requests.
      */
+    @Override
     public void onDestroy() {
         requestTracker.clearRequests();
     }

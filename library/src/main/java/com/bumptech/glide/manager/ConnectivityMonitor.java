@@ -3,7 +3,7 @@ package com.bumptech.glide.manager;
 /**
  * An interface for monitoring network connectivity events.
  */
-public interface ConnectivityMonitor {
+public interface ConnectivityMonitor extends LifecycleListener {
 
     /**
      * An interface for listening to network connectivity events picked up by the monitor.
@@ -16,14 +16,4 @@ public interface ConnectivityMonitor {
          */
         public void onConnectivityChanged(boolean isConnected);
     }
-
-    /**
-     * Indicates the monitor should register itself to listen to connectivity events.
-     */
-    public void register();
-
-    /**
-     * Indicates the monitor should unregister itself and stop listening to connectivity events.
-     */
-    public void unregister();
 }

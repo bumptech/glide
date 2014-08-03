@@ -32,7 +32,7 @@ public class RequestManagerRetriever {
 
         // Either a context or we're on a background thread.
         if (applicationManager == null) {
-            applicationManager = new RequestManager(context.getApplicationContext());
+            applicationManager = new RequestManager(context.getApplicationContext(), new Lifecycle());
         }
         return applicationManager;
     }
@@ -112,7 +112,7 @@ public class RequestManagerRetriever {
         }
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new RequestManager(context);
+            requestManager = new RequestManager(context, current.getLifecycle());
             current.setRequestManager(requestManager);
         }
         return requestManager;
@@ -132,7 +132,7 @@ public class RequestManagerRetriever {
         }
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new RequestManager(context);
+            requestManager = new RequestManager(context, current.getLifecycle());
             current.setRequestManager(requestManager);
         }
         return requestManager;

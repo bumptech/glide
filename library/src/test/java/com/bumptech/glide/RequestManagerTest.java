@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -11,6 +12,7 @@ import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -33,7 +35,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +46,7 @@ public class RequestManagerTest {
     private RequestTracker requestTracker;
     private ConnectivityMonitor.ConnectivityListener connectivityListener;
     private RequestManager.DefaultOptions options;
+    private Lifecycle lifecycle = mock(Lifecycle.class);
 
     @Before
     public void setUp() {
@@ -59,7 +61,7 @@ public class RequestManagerTest {
                     }
                 });
         requestTracker = mock(RequestTracker.class);
-        manager = new RequestManager(Robolectric.application, requestTracker, factory);
+        manager = new RequestManager(Robolectric.application, lifecycle, requestTracker, factory);
         options = mock(RequestManager.DefaultOptions.class);
         manager.setDefaultOptions(options);
     }
@@ -220,22 +222,13 @@ public class RequestManagerTest {
     }
 
     @Test
-    public void testRegistersConnectivityReceiverWhenConstructed() {
-        verify(connectivityMonitor).register();
+    public void testAddsConnectivityMonitorToLifecycleWhenConstructed() {
+        verify(lifecycle).addListener(eq(connectivityMonitor));
     }
 
     @Test
-    public void testRegistersConnectivityReceiverOnStart() {
-        manager.onStart();
-
-        verify(connectivityMonitor, times(2)).register();
-    }
-
-    @Test
-    public void testUnregistersConnectivityReceiverOnStop() {
-        manager.onStop();
-
-        verify(connectivityMonitor).unregister();
+    public void testAddsSelfToLifecycleWhenConstructed() {
+        verify(lifecycle).addListener(eq(manager));
     }
 
     @Test

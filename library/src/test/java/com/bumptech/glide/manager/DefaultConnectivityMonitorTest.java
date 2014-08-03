@@ -31,32 +31,32 @@ public class DefaultConnectivityMonitorTest {
     }
 
     @Test
-    public void testRegistersReceiverOnRegister() {
-        monitor.register();
+    public void testRegistersReceiverOnStart() {
+        monitor.onStart();
 
         assertEquals(1, getConnectivityReceiverCount());
     }
 
     @Test
-    public void testDoesNotRegisterTwiceOnRegister() {
-        monitor.register();
-        monitor.register();
+    public void testDoesNotRegisterTwiceOnStart() {
+        monitor.onStart();
+        monitor.onStart();
 
         assertEquals(1, getConnectivityReceiverCount());
     }
 
     @Test
-    public void testUnregistersReceiverOnUnregister() {
-        monitor.register();
-        monitor.unregister();
+    public void testUnregistersReceiverOnStop() {
+        monitor.onStart();
+        monitor.onStop();
 
         assertEquals(0, getConnectivityReceiverCount());
     }
 
     @Test
     public void testHandlesUnregisteringTwiceInARow() {
-        monitor.unregister();
-        monitor.unregister();
+        monitor.onStop();
+        monitor.onStop();
 
         assertEquals(0, getConnectivityReceiverCount());
     }
@@ -66,7 +66,7 @@ public class DefaultConnectivityMonitorTest {
         ConnectivityHarness harness = new ConnectivityHarness();
         harness.connect();
 
-        monitor.register();
+        monitor.onStart();
         harness.broadcast();
 
         verify(listener, never()).onConnectivityChanged(anyBoolean());
@@ -77,7 +77,7 @@ public class DefaultConnectivityMonitorTest {
         ConnectivityHarness harness = new ConnectivityHarness();
         harness.connect();
 
-        monitor.register();
+        monitor.onStart();
         harness.disconnect();
         harness.broadcast();
 
@@ -89,7 +89,7 @@ public class DefaultConnectivityMonitorTest {
         ConnectivityHarness harness = new ConnectivityHarness();
         harness.disconnect();
 
-        monitor.register();
+        monitor.onStart();
         harness.connect();
         harness.broadcast();
 
@@ -101,8 +101,8 @@ public class DefaultConnectivityMonitorTest {
         ConnectivityHarness harness = new ConnectivityHarness();
         harness.disconnect();
 
-        monitor.register();
-        monitor.unregister();
+        monitor.onStart();
+        monitor.onStop();
         harness.connect();
         harness.broadcast();
 

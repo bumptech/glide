@@ -6,12 +6,17 @@ package com.bumptech.glide.manager;
 class NullConnectivityMonitor implements ConnectivityMonitor {
 
     @Override
-    public void register() {
+    public void onStart() {
 
     }
 
     @Override
-    public void unregister() {
+    public void onStop() {
+
+    }
+
+    @Override
+    public void onDestroy() {
 
     }
 }

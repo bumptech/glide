@@ -1,5 +1,6 @@
 package com.bumptech.glide.manager;
 
+import android.annotation.SuppressLint;
 import android.support.v4.app.Fragment;
 import com.bumptech.glide.RequestManager;
 
@@ -14,6 +15,17 @@ import com.bumptech.glide.RequestManager;
  */
 public class SupportRequestManagerFragment extends Fragment {
     private RequestManager requestManager;
+    private final Lifecycle lifecycle;
+
+    public SupportRequestManagerFragment() {
+        this(new Lifecycle());
+    }
+
+    // For testing only.
+    @SuppressLint("ValidFragment")
+    public SupportRequestManagerFragment(Lifecycle lifecycle) {
+        this.lifecycle = lifecycle;
+    }
 
     /**
      * Sets the current {@link com.bumptech.glide.RequestManager}.
@@ -22,6 +34,10 @@ public class SupportRequestManagerFragment extends Fragment {
      */
     public void setRequestManager(RequestManager requestManager) {
         this.requestManager = requestManager;
+    }
+
+    public Lifecycle getLifecycle() {
+        return lifecycle;
     }
 
     /**
@@ -34,24 +50,18 @@ public class SupportRequestManagerFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if (requestManager != null) {
-            requestManager.onStart();
-        }
+        lifecycle.onStart();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (requestManager != null) {
-            requestManager.onStop();
-        }
+        lifecycle.onStop();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (requestManager != null) {
-            requestManager.onDestroy();
-        }
+        lifecycle.onDestroy();
     }
 }

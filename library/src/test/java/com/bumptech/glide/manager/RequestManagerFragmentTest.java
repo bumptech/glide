@@ -2,17 +2,22 @@ package com.bumptech.glide.manager;
 
 import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
+
 import com.bumptech.glide.RequestManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.exceptions.base.MockitoAssertionError;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
@@ -31,62 +36,85 @@ public class RequestManagerFragmentTest {
 
     @Test
     public void testSupportCanSetAndGetRequestManager() {
-        for (Harness harness : harnesses) {
-            RequestManager manager = mock(RequestManager.class);
-            harness.setRequestManager(manager);
-            assertEquals(manager, harness.getManager());
-        }
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                RequestManager manager = mock(RequestManager.class);
+                harness.setRequestManager(manager);
+                assertEquals(manager, harness.getManager());
+            }
+        });
     }
 
     @Test
-    public void testCallsRequestManagerStart() {
-        for (Harness harness : harnesses) {
-            harness.getController().start();
-
-            verify(harness.getManager()).onStart();
-        }
+    public void testReturnsLifecycle() {
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                assertEquals(harness.getHarnessLifecycle(), harness.getFragmentLifecycle());
+            }
+        });
     }
 
     @Test
-    public void testIgnoresNullRequestManagerOnStart() {
-        for (Harness harness : harnesses) {
-            harness.setRequestManager(null);
-            harness.getController().start();
-        }
+    public void testDoesNotAddNullRequestManagerToLifecycleWhenSet() {
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                harness.setRequestManager(null);
+                verify(harness.getHarnessLifecycle(), never()).addListener(any(LifecycleListener.class));
+            }
+        });
+    }
+
+    @Test
+    public void testCallsLifecycleStart() {
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                harness.getController().start();
+
+                verify(harness.getHarnessLifecycle()).onStart();
+            }
+        });
     }
 
     @Test
     public void testCallsRequestManagerStop() {
-        for (Harness harness : harnesses) {
-            harness.getController().start().resume().pause().stop();
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                harness.getController().start().resume().pause().stop();
 
-            verify(harness.getManager()).onStop();
-        }
-    }
-
-    @Test
-    public void testIgnoresNullRequestManagerOnStop() {
-        for (Harness harness : harnesses) {
-            harness.setRequestManager(null);
-            harness.getController().start().stop();
-        }
+                verify(harness.getHarnessLifecycle()).onStop();
+            }
+        });
     }
 
     @Test
     public void testCallsRequestManagerDestroy() {
-        for (Harness harness : harnesses) {
-            harness.getController().start().resume().pause().stop().destroy();
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                harness.getController().start().resume().pause().stop().destroy();
 
-            verify(harness.getManager()).onDestroy();
+                verify(harness.getHarnessLifecycle()).onDestroy();
+            }
+        });
+    }
+
+    private void runTest(TestCase testCase) {
+        for (Harness harness : harnesses) {
+            try {
+                testCase.runTest(harness);
+            } catch (MockitoAssertionError e) {
+                throw new Error("Failed to get expected call on " + harness, e);
+            }
         }
     }
 
-    @Test
-    public void testIgnoresNullRequestManagerOnDestroy() {
-        for (Harness harness : harnesses) {
-            harness.setRequestManager(null);
-            harness.getController().start().resume().pause().stop().destroy();
-        }
+    private interface TestCase {
+        public void runTest(Harness harness);
     }
 
     private interface Harness {
@@ -94,16 +122,20 @@ public class RequestManagerFragmentTest {
 
         public void setRequestManager(RequestManager manager);
 
+        public Lifecycle getHarnessLifecycle();
+
+        public Lifecycle getFragmentLifecycle();
+
         public ActivityController getController();
     }
 
     private static class RequestManagerHarness implements Harness {
         private final ActivityController<Activity> controller;
         private final RequestManagerFragment fragment;
-        private final RequestManager manager;
+        private final Lifecycle lifecycle = mock(Lifecycle.class);
 
         public RequestManagerHarness() {
-            fragment = new RequestManagerFragment();
+            fragment = new RequestManagerFragment(lifecycle);
             controller = Robolectric.buildActivity(Activity.class).create();
             controller.get()
                 .getFragmentManager()
@@ -111,9 +143,11 @@ public class RequestManagerFragmentTest {
                 .add(fragment, TAG)
                 .commit();
             controller.get().getFragmentManager().executePendingTransactions();
+        }
 
-            this.manager = mock(RequestManager.class);
-            fragment.setRequestManager(manager);
+        @Override
+        public String toString() {
+            return "DefaultHarness";
         }
 
         @Override
@@ -127,6 +161,16 @@ public class RequestManagerFragmentTest {
         }
 
         @Override
+        public Lifecycle getHarnessLifecycle() {
+            return lifecycle;
+        }
+
+        @Override
+        public Lifecycle getFragmentLifecycle() {
+            return fragment.getLifecycle();
+        }
+
+        @Override
         public ActivityController getController() {
             return controller;
         }
@@ -135,10 +179,10 @@ public class RequestManagerFragmentTest {
     private static class SupportRequestManagerHarness implements Harness {
         private final SupportRequestManagerFragment supportFragment;
         private final ActivityController<FragmentActivity> supportController;
-        private final RequestManager manager;
+        private final Lifecycle lifecycle = mock(Lifecycle.class);
 
         public SupportRequestManagerHarness() {
-            supportFragment = new SupportRequestManagerFragment();
+            supportFragment = new SupportRequestManagerFragment(lifecycle);
             supportController = Robolectric.buildActivity(FragmentActivity.class).create();
 
             supportController.get()
@@ -147,10 +191,11 @@ public class RequestManagerFragmentTest {
                 .add(supportFragment, TAG)
                 .commit();
             supportController.get().getSupportFragmentManager().executePendingTransactions();
+        }
 
-            this.manager = mock(RequestManager.class);
-            supportFragment.setRequestManager(manager);
-
+        @Override
+        public String toString() {
+            return "SupportHarness";
         }
 
         @Override
@@ -161,6 +206,16 @@ public class RequestManagerFragmentTest {
         @Override
         public void setRequestManager(RequestManager manager) {
             supportFragment.setRequestManager(manager);
+        }
+
+        @Override
+        public Lifecycle getHarnessLifecycle() {
+            return lifecycle;
+        }
+
+        @Override
+        public Lifecycle getFragmentLifecycle() {
+            return supportFragment.getLifecycle();
         }
 
         @Override

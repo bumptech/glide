@@ -30,8 +30,7 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
         this.listener = listener;
     }
 
-    @Override
-    public void register() {
+    private void register() {
         if (isRegistered) {
             return;
         }
@@ -41,8 +40,7 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
         isRegistered = true;
     }
 
-    @Override
-    public void unregister() {
+    private void unregister() {
         if (!isRegistered) {
             return;
         }
@@ -56,5 +54,20 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
+    }
+
+    @Override
+    public void onStart() {
+        register();
+    }
+
+    @Override
+    public void onStop() {
+        unregister();
+    }
+
+    @Override
+    public void onDestroy() {
+        // Do nothing.
     }
 }
