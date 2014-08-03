@@ -3,7 +3,7 @@ package com.bumptech.glide.load.resource.gifbitmap;
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class GifBitmapResourceEncoderTest {
     private ResourceEncoder<Bitmap> bitmapEncoder;
-    private ResourceEncoder<GifData> gifEncoder;
+    private ResourceEncoder<GifDrawable> gifEncoder;
     private GifBitmapWrapperResourceEncoder encoder;
     private Resource<GifBitmapWrapper> resource;
     private GifBitmapWrapper gifBitmap;
@@ -64,7 +64,7 @@ public class GifBitmapResourceEncoderTest {
 
     @Test
     public void testEncodesWithGifEncoderIfHasGif() {
-        Resource<GifData> gifResource = mock(Resource.class);
+        Resource<GifDrawable> gifResource = mock(Resource.class);
         when(gifBitmap.getGifResource()).thenReturn(gifResource);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -75,7 +75,7 @@ public class GifBitmapResourceEncoderTest {
 
     @Test
     public void testReturnsGifEncoderResultIfHasGifResource() {
-        Resource<GifData> gifResource = mock(Resource.class);
+        Resource<GifDrawable> gifResource = mock(Resource.class);
         when(gifBitmap.getGifResource()).thenReturn(gifResource);
 
         when(gifEncoder.encode(any(Resource.class), any(OutputStream.class))).thenReturn(true);

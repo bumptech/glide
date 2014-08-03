@@ -3,7 +3,7 @@ package com.bumptech.glide.load.resource.gifbitmap;
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class GifBitmapWrapperResourceDecoderTest {
     private ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
-    private ResourceDecoder<InputStream, GifData> gifDecoder;
+    private ResourceDecoder<InputStream, GifDrawable> gifDecoder;
     private GifBitmapWrapperResourceDecoder decoder;
 
     @SuppressWarnings("unchecked")
@@ -40,6 +40,4 @@ public class GifBitmapWrapperResourceDecoderTest {
         assertTrue(id.contains(bitmapId));
         assertTrue(id.contains(gifId));
     }
-
-
 }

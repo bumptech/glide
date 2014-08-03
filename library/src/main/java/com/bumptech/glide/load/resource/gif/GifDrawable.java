@@ -37,6 +37,26 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     /** True if the drawable is currently visible. */
     private boolean isVisible;
 
+    /**
+     * Constructor for GifDrawable.
+     *
+     * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, int, int)
+     *
+     * @param context A context.
+     * @param bitmapProvider An {@link com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider} that can be used to
+     *                       retrieve re-usable {@link android.graphics.Bitmap}s.
+     * @param frameTransformation An {@link com.bumptech.glide.load.Transformation} that can be applied to each frame.
+     * @param targetFrameWidth The desired width of the frames displayed by this drawable (the width of the view or
+     *                         {@link com.bumptech.glide.request.target.Target} this drawable is being loaded into).
+     * @param targetFrameHeight The desired height of the frames displayed by this drawable (the height of the view or
+     *                          {@link com.bumptech.glide.request.target.Target} this drawable is being loaded into).
+     * @param id An id that uniquely identifies this particular gif.
+     * @param gifHeader The header data for this gif.
+     * @param data The full bytes of the gif.
+     * @param finalFrameWidth The final width of the frames displayed by this drawable after they have been transformed.
+     * @param finalFrameHeight The final height of the frames displayed by this drwaable after they have been
+     *                         transformed.
+     */
     public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider,
             Transformation<Bitmap> frameTransformation, int targetFrameWidth, int targetFrameHeight, String id,
             GifHeader gifHeader, byte[] data, int finalFrameWidth, int finalFrameHeight) {
@@ -59,6 +79,21 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         this.state = new GifState(null);
         state.finalFrameWidth = finalFrameWidth;
         state.finalFrameHeight = finalFrameHeight;
+    }
+
+    public void setFrameTransformation(Transformation<Bitmap> frameTransformation, int finalFrameWidth,
+            int finalFrameHeight) {
+        state.frameTransformation = frameTransformation;
+        state.finalFrameWidth = finalFrameWidth;
+        state.finalFrameHeight = finalFrameHeight;
+    }
+
+    public Transformation<Bitmap> getFrameTransformation() {
+        return state.frameTransformation;
+    }
+
+    public byte[] getData() {
+        return state.data;
     }
 
     @Override
@@ -219,7 +254,7 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new GifDrawable(this);
+            return newDrawable();
         }
 
         @Override

@@ -388,8 +388,8 @@ public class GifHeaderParser {
         blockSize = read();
         int n = 0;
         if (blockSize > 0) {
+            int count = 0;
             try {
-                int count;
                 while (n < blockSize) {
                     count = blockSize - n;
                     rawData.get(block, n, count);
@@ -397,7 +397,7 @@ public class GifHeaderParser {
                     n += count;
                 }
             } catch (Exception e) {
-                Log.w(TAG, "Error Reading Block", e);
+                Log.w(TAG, "Error Reading Block n: " + n + " count: " + count + " blockSize: " + blockSize, e);
                 header.status = STATUS_FORMAT_ERROR;
             }
         }

@@ -2,7 +2,7 @@ package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 public class GifBitmapWrapperResourceEncoderTest {
     private ResourceEncoder<Bitmap> bitmapEncoder;
-    private ResourceEncoder<GifData> gifEncoder;
+    private ResourceEncoder<GifDrawable> gifEncoder;
     private GifBitmapWrapperResourceEncoder encoder;
 
     @SuppressWarnings("unchecked")
@@ -34,6 +34,4 @@ public class GifBitmapWrapperResourceEncoderTest {
         assertTrue(id.contains(bitmapId));
         assertTrue(id.contains(gifId));
     }
-
-
 }

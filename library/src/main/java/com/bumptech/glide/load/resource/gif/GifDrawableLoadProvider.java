@@ -15,28 +15,28 @@ import java.io.InputStream;
 
 /**
  * An {@link com.bumptech.glide.provider.DataLoadProvider} that loads an {@link java.io.InputStream} into
- * {@link com.bumptech.glide.load.resource.gif.GifData} that can be used to display an animated GIF.
+ * {@link com.bumptech.glide.load.resource.gif.GifDrawable} that can be used to display an animated GIF.
  */
-public class GifDataLoadProvider implements DataLoadProvider<InputStream, GifData> {
+public class GifDrawableLoadProvider implements DataLoadProvider<InputStream, GifDrawable> {
     private final GifResourceDecoder decoder;
     private final GifResourceEncoder encoder;
     private final StreamEncoder sourceEncoder;
-    private final FileToStreamDecoder<GifData> cacheDecoder;
+    private final FileToStreamDecoder<GifDrawable> cacheDecoder;
 
-    public GifDataLoadProvider(Context context, BitmapPool bitmapPool) {
+    public GifDrawableLoadProvider(Context context, BitmapPool bitmapPool) {
         decoder = new GifResourceDecoder(context, bitmapPool);
-        cacheDecoder = new FileToStreamDecoder<GifData>(decoder);
+        cacheDecoder = new FileToStreamDecoder<GifDrawable>(decoder);
         encoder = new GifResourceEncoder();
         sourceEncoder = new StreamEncoder();
     }
 
     @Override
-    public ResourceDecoder<File, GifData> getCacheDecoder() {
+    public ResourceDecoder<File, GifDrawable> getCacheDecoder() {
         return cacheDecoder;
     }
 
     @Override
-    public ResourceDecoder<InputStream, GifData> getSourceDecoder() {
+    public ResourceDecoder<InputStream, GifDrawable> getSourceDecoder() {
         return decoder;
     }
 
@@ -46,7 +46,7 @@ public class GifDataLoadProvider implements DataLoadProvider<InputStream, GifDat
     }
 
     @Override
-    public ResourceEncoder<GifData> getEncoder() {
+    public ResourceEncoder<GifDrawable> getEncoder() {
         return encoder;
     }
 }

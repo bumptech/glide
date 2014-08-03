@@ -2,7 +2,7 @@ package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,7 +46,7 @@ public class GifBitmapWrapperResourceTest {
 
     @Test
     public void testRecyclesGifResource() {
-        Resource<GifData> gifDataResource = mock(Resource.class);
+        Resource<GifDrawable> gifDataResource = mock(Resource.class);
         when(data.getGifResource()).thenReturn(gifDataResource);
 
         resource.recycle();

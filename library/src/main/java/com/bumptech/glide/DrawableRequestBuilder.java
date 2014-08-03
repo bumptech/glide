@@ -206,7 +206,7 @@ public class DrawableRequestBuilder<ModelType>
         GifBitmapWrapperTransformation[] transformations =
                 new GifBitmapWrapperTransformation[bitmapTransformations.length];
         for (int i = 0; i < bitmapTransformations.length; i++) {
-            transformations[i] = new GifBitmapWrapperTransformation(bitmapTransformations[i]);
+            transformations[i] = new GifBitmapWrapperTransformation(glide.getBitmapPool(), bitmapTransformations[i]);
         }
         return transform(transformations);
     }

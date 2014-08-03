@@ -1,13 +1,17 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.util.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -20,10 +24,10 @@ import java.util.Queue;
 import java.util.UUID;
 
 /**
- * An {@link com.bumptech.glide.load.ResourceDecoder} that decodes {@link com.bumptech.glide.load.resource.gif.GifData}
- * from {@link java.io.InputStream} data.
+ * An {@link com.bumptech.glide.load.ResourceDecoder} that decodes
+ * {@link com.bumptech.glide.load.resource.gif.GifDrawable} from {@link java.io.InputStream} data.
  */
-public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData> {
+public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawable> {
     private static final String TAG = "GifResourceDecoder";
     private static final GifHeaderParserPool PARSER_POOL = new DefaultGifHeaderParserPool();
     private final Context context;
@@ -45,7 +49,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
     }
 
     @Override
-    public GifDataResource decode(InputStream source, int width, int height) throws IOException {
+    public GifDrawableResource decode(InputStream source, int width, int height) throws IOException {
         byte[] data = inputStreamToBytes(source);
         final GifHeaderParser parser = parserPool.obtain(data);
         try {
@@ -55,7 +59,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
         }
     }
 
-    private GifDataResource decode(byte[] data, int width, int height, GifHeaderParser parser) {
+    private GifDrawableResource decode(byte[] data, int width, int height, GifHeaderParser parser) {
         final GifHeader header = parser.parseHeader();
         if (header.getNumFrames() <= 0) {
             // If we couldn't decode the GIF, we will end up with a frame count of 0.
@@ -63,13 +67,17 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
         }
 
         String id = getGifId(data);
-        GifData gifData = new GifData(context, bitmapPool, id, header, data, width, height);
-        return new GifDataResource(gifData);
+
+        Transformation<Bitmap> transformation = UnitTransformation.get();
+        GifDrawable gifDrawable = new GifDrawable(context, new GifBitmapProvider(bitmapPool), transformation, width,
+                height, id, header, data, header.getWidth(), header.getHeight());
+
+        return new GifDrawableResource(gifDrawable);
     }
 
     @Override
     public String getId() {
-        return "GifResourceDecoder.com.bumptech.glide.load.resource.gif";
+        return "";
     }
 
     // A best effort attempt to get a unique id that can be used as a cache key for frames of the decoded GIF.
@@ -128,6 +136,19 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifData>
             synchronized (POOL) {
                 POOL.offer(parser);
             }
+        }
+    }
+
+    private static class GifBitmapProvider implements GifDecoder.BitmapProvider {
+        private BitmapPool bitmapPool;
+
+        public GifBitmapProvider(BitmapPool bitmapPool) {
+            this.bitmapPool = bitmapPool;
+        }
+
+        @Override
+        public Bitmap obtain(int width, int height, Bitmap.Config config) {
+            return bitmapPool.get(width, height, config);
         }
     }
 }

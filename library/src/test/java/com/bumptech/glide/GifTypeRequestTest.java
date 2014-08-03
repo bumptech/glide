@@ -1,12 +1,12 @@
 package com.bumptech.glide;
 
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.GlideShadowLooper;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,15 +55,15 @@ public class GifTypeRequestTest {
 
     @Test
     public void testTranscodeAppliesDefaultOptions() {
-        ResourceTranscoder<GifData, GifDrawable> transcoder = mock(ResourceTranscoder.class);
-        GenericRequestBuilder<String, InputStream, GifData, GifDrawable> builder = request.transcode(transcoder,
+        ResourceTranscoder<GifDrawable, GifDrawable> transcoder = mock(ResourceTranscoder.class);
+        GenericRequestBuilder<String, InputStream, GifDrawable, GifDrawable> builder = request.transcode(transcoder,
                 GifDrawable.class);
         verify(optionsApplier).apply(eq(model), eq(builder));
     }
 
     @Test
     public void testToBytesApplesDefaultOptions() {
-        GenericRequestBuilder<String, InputStream, GifData, byte[]> builder = request.toBytes();
+        GenericRequestBuilder<String, InputStream, GifDrawable, byte[]> builder = request.toBytes();
         verify(optionsApplier).apply(eq(model), eq(builder));
     }
 }

@@ -1,51 +1,60 @@
 package com.bumptech.glide.load.resource.gif;
 
-import com.bumptech.glide.load.engine.Resource;
+import android.graphics.drawable.Drawable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.robolectric.RobolectricTestRunner;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class GifDrawableResourceTest {
-    private Resource<GifData> wrapped;
+    private GifDrawable drawable;
     private GifDrawableResource resource;
-    private GifData gifData;
 
     @Before
     public void setUp() {
-        gifData = mock(GifData.class);
-        wrapped = mock(Resource.class);
-        when(wrapped.get()).thenReturn(gifData);
-        resource = new GifDrawableResource(wrapped);
+        drawable = mock(GifDrawable.class);
+        resource = new GifDrawableResource(drawable);
     }
 
     @Test
-    public void testReturnsDrawableFromWrappedResource() {
-        GifDrawable expected = mock(GifDrawable.class);
-        when(gifData.getDrawable()).thenReturn(expected);
+    public void testReturnsDrawableOnFirstGet() {
+        assertEquals(drawable, resource.get());
+    }
 
+    @Test
+    public void testReturnsNewDrawableOnSecondGet() {
+        GifDrawable expected = mock(GifDrawable.class);
+        Drawable.ConstantState constantState = mock(Drawable.ConstantState.class);
+        when(constantState.newDrawable()).thenReturn(expected);
+        when(drawable.getConstantState()).thenReturn(constantState);
+
+        resource.get();
         assertEquals(expected, resource.get());
     }
 
     @Test
-    public void testReturnsWrappedSize() {
+    public void testReturnsDrawableSize() {
         final int size = 2134;
-        when(wrapped.getSize()).thenReturn(size);
+        when(drawable.getData()).thenReturn(new byte[size]);
 
         assertEquals(size, resource.getSize());
     }
 
     @Test
-    public void testRecyclesWrappedWhenRecycled() {
+    public void testStopsAndThenRecyclesDrawableWhenRecycled() {
         resource.recycle();
 
-        verify(wrapped).recycle();
+        InOrder inOrder = inOrder(drawable);
+        inOrder.verify(drawable).stop();
+        inOrder.verify(drawable).recycle();
     }
 
 }

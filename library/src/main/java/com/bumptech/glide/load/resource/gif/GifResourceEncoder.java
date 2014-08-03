@@ -9,13 +9,13 @@ import java.io.OutputStream;
 
 /**
  * An {@link com.bumptech.glide.load.ResourceEncoder} that can write
- * {@link com.bumptech.glide.load.resource.gif.GifData} to cache.
+ * {@link com.bumptech.glide.load.resource.gif.GifDrawable} to cache.
  */
-public class GifResourceEncoder implements ResourceEncoder<GifData> {
+public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
     private static final String TAG = "GifEncoder";
 
     @Override
-    public boolean encode(Resource<GifData> resource, OutputStream os) {
+    public boolean encode(Resource<GifDrawable> resource, OutputStream os) {
         boolean result = true;
         try {
             os.write(resource.get().getData());

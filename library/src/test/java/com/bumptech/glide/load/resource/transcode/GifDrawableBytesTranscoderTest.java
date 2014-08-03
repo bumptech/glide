@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.transcode;
 
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,25 +12,25 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class GifDataBytesTranscoderTest {
-    private GifDataBytesTranscoder transcoder;
-    private GifData gifData;
-    private Resource<GifData> resource;
+public class GifDrawableBytesTranscoderTest {
+    private GifDrawableBytesTranscoder transcoder;
+    private GifDrawable gifDrawable;
+    private Resource<GifDrawable> resource;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        gifData = mock(GifData.class);
+        gifDrawable = mock(GifDrawable.class);
         resource = mock(Resource.class);
-        when(resource.get()).thenReturn(gifData);
-        transcoder = new GifDataBytesTranscoder();
+        when(resource.get()).thenReturn(gifDrawable);
+        transcoder = new GifDrawableBytesTranscoder();
     }
 
     @Test
-    public void testReturnsBytesOfGivenGifData() {
+    public void testReturnsBytesOfGivenGifDrawable() {
         for (String fakeData : new String[] { "test", "1235asfklaw3", "@$@#"}) {
             byte[] expected = fakeData.getBytes();
-            when(gifData.getData()).thenReturn(expected);
+            when(gifDrawable.getData()).thenReturn(expected);
 
             Resource<byte[]> transcoded = transcoder.transcode(resource);
 
@@ -40,6 +40,6 @@ public class GifDataBytesTranscoderTest {
 
     @Test
     public void testReturnsValidId() {
-        Util.assertClassHasValidId(GifDataBytesTranscoder.class, transcoder.getId());
+        Util.assertClassHasValidId(GifDrawableBytesTranscoder.class, transcoder.getId());
     }
 }

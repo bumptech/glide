@@ -1,12 +1,13 @@
 package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.load.engine.Resource;
+
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.ByteArrayPool;
 
 import java.io.IOException;
@@ -14,16 +15,16 @@ import java.io.InputStream;
 
 /**
  * An {@link com.bumptech.glide.load.ResourceDecoder} that can decode either an {@link android.graphics.Bitmap} or an
- * {@link com.bumptech.glide.load.resource.gif.GifData} from an {@link java.io.InputStream} or an
+ * {@link com.bumptech.glide.load.resource.gif.GifDrawable} from an {@link java.io.InputStream} or an
  * {@link android.os.ParcelFileDescriptor}.
  */
 public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> {
     private final ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
-    private final ResourceDecoder<InputStream, GifData> gifDecoder;
+    private final ResourceDecoder<InputStream, GifDrawable> gifDecoder;
     private String id;
 
     public GifBitmapWrapperResourceDecoder(ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder,
-            ResourceDecoder<InputStream, GifData> gifDecoder) {
+            ResourceDecoder<InputStream, GifDrawable> gifDecoder) {
         this.bitmapDecoder = bitmapDecoder;
         this.gifDecoder = gifDecoder;
     }
@@ -43,7 +44,7 @@ public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVid
             bis.reset();
 
             if (type == ImageHeaderParser.ImageType.GIF) {
-                Resource<GifData> gifResource = gifDecoder.decode(bis, width, height);
+                Resource<GifDrawable> gifResource = gifDecoder.decode(bis, width, height);
                 result = new GifBitmapWrapper(null, gifResource);
             }
         }

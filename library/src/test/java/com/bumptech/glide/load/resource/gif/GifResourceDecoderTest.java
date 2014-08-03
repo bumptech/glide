@@ -4,7 +4,6 @@ import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.GlideShadowLooper;
-import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +17,7 @@ import org.robolectric.annotation.Config;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -78,6 +78,6 @@ public class GifResourceDecoderTest {
 
     @Test
     public void testHasValidId() {
-        Util.assertClassHasValidId(GifResourceDecoder.class, decoder.getId());
+        assertEquals("", decoder.getId());
     }
 }

@@ -2,10 +2,12 @@ package com.bumptech.glide.load.resource.transcode;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.tests.Util;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,13 +22,11 @@ import static org.mockito.Mockito.when;
 public class GifBitmapWrapperDrawableTranscoderTest {
     private GifBitmapWrapperDrawableTranscoder transcoder;
     private ResourceTranscoder<Bitmap, Drawable> bitmapTranscoder;
-    private ResourceTranscoder<GifData, Drawable> gifDataTranscoder;
 
     @Before
     public void setUp() {
         bitmapTranscoder = mock(ResourceTranscoder.class);
-        gifDataTranscoder = mock(ResourceTranscoder.class);
-        transcoder = new GifBitmapWrapperDrawableTranscoder(bitmapTranscoder, gifDataTranscoder);
+        transcoder = new GifBitmapWrapperDrawableTranscoder(bitmapTranscoder);
     }
 
     @Test
@@ -40,9 +40,8 @@ public class GifBitmapWrapperDrawableTranscoderTest {
     @Test
     public void testReturnsDrawableFromGifTranscoderIfGifBitmapHasGif() {
         GifBitmapWithGifHarness harness = new GifBitmapWithGifHarness();
-        when(gifDataTranscoder.transcode(eq(harness.gifResource))).thenReturn(harness.expected);
 
-        assertEquals(harness.expected, transcoder.transcode(harness.gifBitmapResource));
+        assertEquals(harness.gifResource, transcoder.transcode(harness.gifBitmapResource));
     }
 
     @Test
@@ -70,12 +69,12 @@ public class GifBitmapWrapperDrawableTranscoderTest {
     }
 
     private static class GifBitmapWithGifHarness extends TranscoderHarness {
-        GifData gifData = mock(GifData.class);
-        Resource<GifData> gifResource = mock(Resource.class);
+        GifDrawable gifDrawable = mock(GifDrawable.class);
+        Resource<GifDrawable> gifResource = mock(Resource.class);
 
         public GifBitmapWithGifHarness() {
             super();
-            when(gifResource.get()).thenReturn(gifData);
+            when(gifResource.get()).thenReturn(gifDrawable);
             when(gifBitmap.getGifResource()).thenReturn(gifResource);
         }
     }

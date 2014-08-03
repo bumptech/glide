@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
-import android.widget.ImageView;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -12,9 +11,8 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.bumptech.glide.load.resource.gif.GifData;
-import com.bumptech.glide.load.resource.gif.GifDataTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
@@ -22,7 +20,6 @@ import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.DrawableCrossFadeViewAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
-import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 import java.io.InputStream;
@@ -32,14 +29,15 @@ import java.io.InputStream;
  *
  * @param <ModelType> The type of model that will be loaded into the target.
  */
-public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelType, InputStream, GifData, GifDrawable>
+public class GifRequestBuilder<ModelType>
+        extends GenericRequestBuilder<ModelType, InputStream, GifDrawable, GifDrawable>
         implements BitmapOptions, DrawableOptions {
     private final Context context;
     private final Glide glide;
 
     GifRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, InputStream, GifData, GifDrawable> loadProvider,
-            Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
+            LoadProvider<ModelType, InputStream, GifDrawable, GifDrawable> loadProvider, Glide glide,
+            RequestTracker requestTracker, Lifecycle lifecycle) {
         super(context, model, loadProvider, GifDrawable.class, glide, requestTracker, lifecycle);
         this.context = context;
         this.glide = glide;
@@ -50,7 +48,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      */
     @Override
     public GifRequestBuilder<ModelType> thumbnail(
-            GenericRequestBuilder<ModelType, InputStream, GifData, GifDrawable> thumbnailRequest) {
+            GenericRequestBuilder<ModelType, InputStream, GifDrawable, GifDrawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -106,7 +104,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      */
     @Override
     public GifRequestBuilder<ModelType> decoder(
-            ResourceDecoder<InputStream, GifData> decoder) {
+            ResourceDecoder<InputStream, GifDrawable> decoder) {
         super.decoder(decoder);
         return this;
     }
@@ -116,7 +114,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      */
     @Override
     public GifRequestBuilder<ModelType> cacheDecoder(
-            ResourceDecoder<File, GifData> cacheDecoder) {
+            ResourceDecoder<File, GifDrawable> cacheDecoder) {
         super.cacheDecoder(cacheDecoder);
         return this;
     }
@@ -126,7 +124,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      */
     @Override
     public GifRequestBuilder<ModelType> encoder(
-            ResourceEncoder<GifData> encoder) {
+            ResourceEncoder<GifDrawable> encoder) {
         super.encoder(encoder);
         return this;
     }
@@ -198,10 +196,10 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
         return transform(toGifTransformations(bitmapTransformations));
     }
 
-    private static GifDataTransformation[] toGifTransformations(Transformation<Bitmap>[] bitmapTransformations) {
-        GifDataTransformation[] transformations = new GifDataTransformation[bitmapTransformations.length];
+    private GifDrawableTransformation[] toGifTransformations(Transformation<Bitmap>[] bitmapTransformations) {
+        GifDrawableTransformation[] transformations = new GifDrawableTransformation[bitmapTransformations.length];
         for (int i = 0; i < bitmapTransformations.length; i++) {
-            transformations[i] = new GifDataTransformation(bitmapTransformations[i]);
+            transformations[i] = new GifDrawableTransformation(bitmapTransformations[i], glide.getBitmapPool());
         }
         return transformations;
     }
@@ -216,7 +214,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      *
      */
     @Override
-    public GifRequestBuilder<ModelType> transform(Transformation<GifData>... transformations) {
+    public GifRequestBuilder<ModelType> transform(Transformation<GifDrawable>... transformations) {
         super.transform(transformations);
         return this;
     }
@@ -225,7 +223,7 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType> transcoder(ResourceTranscoder<GifData, GifDrawable> transcoder) {
+    public GifRequestBuilder<ModelType> transcoder(ResourceTranscoder<GifDrawable, GifDrawable> transcoder) {
         super.transcoder(transcoder);
         return this;
     }
@@ -392,23 +390,6 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
     public GifRequestBuilder<ModelType> dontTransform() {
         super.dontTransform();
         return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>
-     *     Note - If no transformation is set for this load, a default transformation will be applied based on the
-     *     value returned from {@link android.widget.ImageView#getScaleType()}. To avoid this default transformation,
-     *     use {@link #dontTransform()}.
-     * </p>
-     *
-     * @param view {@inheritDoc}
-     * @return {@inheritDoc}
-     */
-    @Override
-    public Target<GifDrawable> into(ImageView view) {
-        return super.into(view);
     }
 
     @Override

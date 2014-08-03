@@ -3,7 +3,8 @@ package com.bumptech.glide.load.resource.gifbitmap;
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class GifBitmapWrapperTransformationTest {
     private Transformation<Bitmap> bitmapTransformation;
-    private Transformation<GifData> gifTransformation;
+    private Transformation<GifDrawable> gifTransformation;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -32,7 +33,8 @@ public class GifBitmapWrapperTransformationTest {
         Resource<Bitmap> bitmapResource = mock(Resource.class);
         GifBitmapWrapper gifBitmapWrapper = mock(GifBitmapWrapper.class);
         Resource<GifBitmapWrapper> resource = mock(Resource.class);
-        GifBitmapWrapperTransformation transformation = new GifBitmapWrapperTransformation(bitmapTransformation);
+        GifBitmapWrapperTransformation transformation = new GifBitmapWrapperTransformation(
+                mock(BitmapPool.class), bitmapTransformation);
         int width = 123;
         int height = 456;
 
@@ -43,8 +45,8 @@ public class GifBitmapWrapperTransformationTest {
     }
 
     private class GifResourceHarness {
-        GifData gifData = mock(GifData.class);
-        Resource<GifData> gifResource = mock(Resource.class);
+        GifDrawable gifDrawable = mock(GifDrawable.class);
+        Resource<GifDrawable> gifResource = mock(Resource.class);
         GifBitmapWrapper gifBitmapWrapper = mock(GifBitmapWrapper.class);
         Resource<GifBitmapWrapper> resource = mock(Resource.class);
         GifBitmapWrapperTransformation transformation = new GifBitmapWrapperTransformation(null, gifTransformation);
@@ -52,7 +54,7 @@ public class GifBitmapWrapperTransformationTest {
         int height = 456;
 
         public GifResourceHarness() {
-            when(gifResource.get()).thenReturn(gifData);
+            when(gifResource.get()).thenReturn(gifDrawable);
             when(gifBitmapWrapper.getGifResource()).thenReturn(gifResource);
             when(resource.get()).thenReturn(gifBitmapWrapper);
         }
@@ -63,7 +65,8 @@ public class GifBitmapWrapperTransformationTest {
         String expectedId = "asdfas";
         when(bitmapTransformation.getId()).thenReturn(expectedId);
 
-        assertEquals(expectedId, new GifBitmapWrapperTransformation(bitmapTransformation).getId());
+        assertEquals(expectedId, new GifBitmapWrapperTransformation(mock(BitmapPool.class), bitmapTransformation).getId
+                ());
     }
 
     @Test
@@ -106,7 +109,7 @@ public class GifBitmapWrapperTransformationTest {
     @Test
     public void testAppliesGifTransformationIfGifTransformationGivenAndResourceHasGifResource() {
         GifResourceHarness harness = new GifResourceHarness();
-        Resource<GifData> transformedGifResource = mock(Resource.class);
+        Resource<GifDrawable> transformedGifResource = mock(Resource.class);
         when(gifTransformation.transform(eq(harness.gifResource), eq(harness.width), eq(harness.height)))
                 .thenReturn(transformedGifResource);
         Resource<GifBitmapWrapper> transformed = harness.transformation.transform(harness.resource, harness.width,

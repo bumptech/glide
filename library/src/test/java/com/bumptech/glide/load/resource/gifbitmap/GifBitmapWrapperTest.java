@@ -2,7 +2,7 @@ package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.gif.GifData;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
@@ -20,9 +20,9 @@ public class GifBitmapWrapperTest {
 
     @Test
     public void testReturnsGifResourceIfHasGifResource() {
-        Resource<GifData> gifDataResource = mock(Resource.class);
-        GifBitmapWrapper wrapper = new GifBitmapWrapper(null, gifDataResource);
-        assertEquals(gifDataResource, wrapper.getGifResource());
+        Resource<GifDrawable> gifDrawableResource = mock(Resource.class);
+        GifBitmapWrapper wrapper = new GifBitmapWrapper(null, gifDrawableResource);
+        assertEquals(gifDrawableResource, wrapper.getGifResource());
     }
 
     @Test
@@ -38,9 +38,9 @@ public class GifBitmapWrapperTest {
     @Test
     public void testReturnsGifSizeIfHasGif() {
         final int size = 48523;
-        Resource<GifData> gifDataResource = mock(Resource.class);
-        when(gifDataResource.getSize()).thenReturn(size);
-        GifBitmapWrapper wrapper = new GifBitmapWrapper(null, gifDataResource);
+        Resource<GifDrawable> gifDrawableResource = mock(Resource.class);
+        when(gifDrawableResource.getSize()).thenReturn(size);
+        GifBitmapWrapper wrapper = new GifBitmapWrapper(null, gifDrawableResource);
 
         assertEquals(size, wrapper.getSize());
     }
@@ -48,8 +48,8 @@ public class GifBitmapWrapperTest {
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfGivenBothBitmapAndGif() {
         Resource<Bitmap> bitmapResource = mock(Resource.class);
-        Resource<GifData> gifDataResource = mock(Resource.class);
-        new GifBitmapWrapper(bitmapResource, gifDataResource);
+        Resource<GifDrawable> gifDrawableResource = mock(Resource.class);
+        new GifBitmapWrapper(bitmapResource, gifDrawableResource);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -2,11 +2,12 @@ package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
-import com.bumptech.glide.load.engine.Resource;
+
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
-import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class GifBitmapResourceDecoderTest {
     private ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
-    private ResourceDecoder<InputStream, GifData> gifDecoder;
+    private ResourceDecoder<InputStream, GifDrawable> gifDecoder;
     private GifBitmapWrapperResourceDecoder decoder;
 
     @SuppressWarnings("unchecked")
@@ -39,10 +40,8 @@ public class GifBitmapResourceDecoderTest {
     @Test
     public void testDecoderUsesGifDecoderResultIfGif() throws IOException {
         GifDrawable expected = mock(GifDrawable.class);
-        GifData gifData = mock(GifData.class);
-        when(gifData.getDrawable()).thenReturn(expected);
-        Resource<GifData> gifDrawableResource = mock(Resource.class);
-        when(gifDrawableResource.get()).thenReturn(gifData);
+        Resource<GifDrawable> gifDrawableResource = mock(Resource.class);
+        when(gifDrawableResource.get()).thenReturn(expected);
         when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifDrawableResource);
 
         byte[] data = new byte[] { 'G', 'I', 'F'};
@@ -50,7 +49,7 @@ public class GifBitmapResourceDecoderTest {
 
         Resource<GifBitmapWrapper> result = decoder.decode(wrapper, 100, 100);
 
-        assertEquals(expected, result.get().getGifResource().get().getDrawable());
+        assertEquals(expected, result.get().getGifResource().get());
     }
 
     @Test
