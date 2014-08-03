@@ -2,7 +2,9 @@ package com.bumptech.glide.manager;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -22,11 +24,13 @@ public class RequestManagerRetriever {
     public static RequestManager get(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("You cannot start a load on a null Context");
-        } else if (Util.isOnMainThread()) {
+        } else if (Util.isOnMainThread() && !(context instanceof Application)) {
             if (context instanceof FragmentActivity) {
                 return get((FragmentActivity) context);
             } else if (context instanceof Activity) {
                 return get((Activity) context);
+            } else if (context instanceof ContextWrapper) {
+                return get(((ContextWrapper) context).getBaseContext());
             }
         }
 

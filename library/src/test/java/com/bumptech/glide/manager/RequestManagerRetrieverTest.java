@@ -2,12 +2,15 @@ package com.bumptech.glide.manager;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -178,6 +181,23 @@ public class RequestManagerRetrieverTest {
         RequestManager requestManager = harness.doGet();
 
         assertEquals(requestManager, RequestManagerRetriever.get((Context) harness.getController().get()));
+    }
+
+    @Test
+    public void testHandlesContextWrappersForActivities() {
+        DefaultRetrieverHarness harness = new DefaultRetrieverHarness();
+        RequestManager requestManager = harness.doGet();
+        ContextWrapper contextWrapper = new ContextWrapper((Context) harness.getController().get());
+
+        assertEquals(requestManager, RequestManagerRetriever.get(contextWrapper));
+    }
+
+    @Test
+    public void testHandlesContextWrappersForApplication() {
+        ContextWrapper contextWrapper = new ContextWrapper(Robolectric.application);
+        RequestManager requestManager = RequestManagerRetriever.get(Robolectric.application);
+
+        assertEquals(requestManager, RequestManagerRetriever.get(contextWrapper));
     }
 
     @Test
