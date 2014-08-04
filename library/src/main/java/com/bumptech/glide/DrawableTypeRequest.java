@@ -9,6 +9,7 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
@@ -33,6 +34,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
     private final Glide glide;
     private RequestTracker requestTracker;
     private RequestManager.OptionsApplier optionsApplier;
+    private Lifecycle lifecycle;
     private final ModelType model;
 
     private static <A, Z, R> FixedLoadProvider<A, ImageVideoWrapper, Z, R> buildProvider(Glide glide,
@@ -56,11 +58,11 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
 
     DrawableTypeRequest(ModelType model, ModelLoader<ModelType, InputStream> streamModelLoader,
             ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide,
-            RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
+            RequestTracker requestTracker, Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class,
                         Drawable.class, null),
-                glide, requestTracker);
+                glide, requestTracker, lifecycle);
         this.model = model;
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
@@ -68,6 +70,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
         this.glide = glide;
         this.requestTracker = requestTracker;
         this.optionsApplier = optionsApplier;
+        this.lifecycle = lifecycle;
     }
 
     /**
@@ -77,7 +80,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
      */
     public BitmapTypeRequest<ModelType> asBitmap() {
         return optionsApplier.apply(model, new BitmapTypeRequest<ModelType>(context, model, streamModelLoader,
-                fileDescriptorModelLoader, glide, requestTracker, optionsApplier));
+                fileDescriptorModelLoader, glide, requestTracker, lifecycle, optionsApplier));
     }
 
     /**
@@ -94,7 +97,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
      */
     public GifTypeRequest<ModelType> asGif() {
         return optionsApplier.apply(model, new GifTypeRequest<ModelType>(context, model, streamModelLoader, glide,
-                requestTracker, optionsApplier));
+                requestTracker, lifecycle, optionsApplier));
     }
 
     /**
@@ -113,6 +116,6 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
 
     private GenericTranscodeRequest<ModelType, InputStream, File> getDownloadOnlyRequest() {
         return optionsApplier.apply(model, new GenericTranscodeRequest<ModelType, InputStream, File>(context, glide,
-                model, streamModelLoader, InputStream.class, File.class, requestTracker, optionsApplier));
+                model, streamModelLoader, InputStream.class, File.class, requestTracker, lifecycle, optionsApplier));
     }
 }

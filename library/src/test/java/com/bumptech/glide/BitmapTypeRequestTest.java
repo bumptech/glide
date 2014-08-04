@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.After;
@@ -42,7 +43,7 @@ public class BitmapTypeRequestTest {
         model = "testModel";
         request = new BitmapTypeRequest(Robolectric.application, model, mock(ModelLoader.class),
                 mock(ModelLoader.class), Glide.get(Robolectric.application), mock(RequestTracker.class),
-                optionsApplier);
+                mock(Lifecycle.class), optionsApplier);
     }
 
     @After

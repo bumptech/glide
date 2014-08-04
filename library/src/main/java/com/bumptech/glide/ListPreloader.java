@@ -180,6 +180,5 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         public void getSize(SizeReadyCallback cb) {
             cb.onSizeReady(photoWidth, photoHeight);
         }
-
     }
 }

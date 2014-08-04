@@ -232,6 +232,30 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
         mainHandler.post(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onStart() {
+        // Do nothing.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onStop() {
+        // Do nothing.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onDestroy() {
+        // Do nothing.
+    }
+
     interface Waiter {
         public void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException;
 

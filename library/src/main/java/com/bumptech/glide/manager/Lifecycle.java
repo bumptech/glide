@@ -1,16 +1,16 @@
 package com.bumptech.glide.manager;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * A class for tracking and notifying listeners of {@link android.app.Fragment} and {@link android.app.Activity}
  * lifecycle events.
  */
 public class Lifecycle {
-    private final List<LifecycleListener> lifecycleListeners =
-            Collections.synchronizedList(new ArrayList<LifecycleListener>());
+    private final Set<LifecycleListener> lifecycleListeners =
+            Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<LifecycleListener, Boolean>()));
     private boolean isStarted;
     private boolean isDestroyed;
 

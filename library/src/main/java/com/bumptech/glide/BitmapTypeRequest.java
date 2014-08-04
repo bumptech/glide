@@ -9,6 +9,7 @@ import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
@@ -26,10 +27,11 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
     private final Context context;
     private final ModelType model;
     private final ModelLoader<ModelType, InputStream> streamModelLoader;
-    private ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
+    private final ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Glide glide;
-    private RequestTracker requestTracker;
-    private RequestManager.OptionsApplier optionsApplier;
+    private final RequestTracker requestTracker;
+    private final RequestManager.OptionsApplier optionsApplier;
+    private final Lifecycle lifecycle;
 
     private static <A, R> FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader,
@@ -53,17 +55,19 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
     BitmapTypeRequest(Context context, ModelType model,
             ModelLoader<ModelType, InputStream> streamModelLoader,
             ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader,
-            Glide glide, RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
+            Glide glide, RequestTracker requestTracker, Lifecycle lifecycle,
+            RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, null),
                 Bitmap.class,
-                glide, requestTracker);
+                glide, requestTracker, lifecycle);
         this.context = context;
         this.model = model;
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
         this.glide = glide;
         this.requestTracker = requestTracker;
+        this.lifecycle = lifecycle;
         this.optionsApplier = optionsApplier;
     }
 
@@ -79,7 +83,7 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
             Class<R> transcodeClass) {
         return optionsApplier.apply(model, new BitmapRequestBuilder<ModelType, R>(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, transcodeClass, transcoder),
-                transcodeClass, glide, requestTracker));
+                transcodeClass, glide, requestTracker, lifecycle));
     }
 
     /**

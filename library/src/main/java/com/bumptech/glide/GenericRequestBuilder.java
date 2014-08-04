@@ -13,6 +13,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.ChildLoadProvider;
 import com.bumptech.glide.provider.LoadProvider;
@@ -48,6 +49,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private final Class<TranscodeType> transcodeClass;
     private final Glide glide;
     private final RequestTracker requestTracker;
+    private Lifecycle lifecycle;
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType, TranscodeType> requestListener;
@@ -68,10 +70,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
-            Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker) {
+            Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
         this.transcodeClass = transcodeClass;
         this.glide = glide;
         this.requestTracker = requestTracker;
+        this.lifecycle = lifecycle;
         this.loadProvider = loadProvider != null
                 ? new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
 
@@ -533,6 +536,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         target.setRequest(request);
         requestTracker.addRequest(request);
         request.begin();
+        lifecycle.addListener(target);
 
         return target;
     }

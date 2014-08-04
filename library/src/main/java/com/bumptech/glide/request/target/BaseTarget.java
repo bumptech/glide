@@ -65,4 +65,28 @@ public abstract class BaseTarget<Z> implements Target<Z> {
     public void onLoadFailed(Exception e, Drawable errorDrawable) {
         // Do nothing.
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onStart() {
+        // Do nothing.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onStop() {
+        // Do nothing.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onDestroy() {
+        // Do nothing.
+    }
 }

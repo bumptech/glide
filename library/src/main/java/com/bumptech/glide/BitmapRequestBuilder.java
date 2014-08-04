@@ -22,6 +22,7 @@ import com.bumptech.glide.load.resource.bitmap.ImageVideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
@@ -51,8 +52,8 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
 
     BitmapRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> streamLoadProvider,
-            Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker) {
-        super(context, model, streamLoadProvider, transcodeClass, glide, requestTracker);
+            Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
+        super(context, model, streamLoadProvider, transcodeClass, glide, requestTracker, lifecycle);
         this.glide = glide;
         this.bitmapPool = glide.getBitmapPool();
 

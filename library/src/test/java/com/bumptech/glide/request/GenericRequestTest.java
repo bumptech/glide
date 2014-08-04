@@ -759,5 +759,19 @@ public class GenericRequestTest {
         public Request getRequest() {
             return null;
         }
+
+        @Override
+        public void onStart() {
+        }
+
+        @Override
+        public void onStop() {
+
+        }
+
+        @Override
+        public void onDestroy() {
+
+        }
     }
 }

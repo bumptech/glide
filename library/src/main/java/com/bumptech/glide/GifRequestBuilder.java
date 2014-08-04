@@ -16,6 +16,7 @@ import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDataTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
@@ -38,8 +39,8 @@ public class GifRequestBuilder<ModelType> extends GenericRequestBuilder<ModelTyp
 
     GifRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, InputStream, GifData, GifDrawable> loadProvider,
-            Glide glide, RequestTracker requestTracker) {
-        super(context, model, loadProvider, GifDrawable.class, glide, requestTracker);
+            Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
+        super(context, model, loadProvider, GifDrawable.class, glide, requestTracker, lifecycle);
         this.context = context;
         this.glide = glide;
     }

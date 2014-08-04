@@ -7,6 +7,7 @@ import com.bumptech.glide.load.resource.gif.GifData;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.GifDataBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
@@ -28,6 +29,7 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
     private final Glide glide;
     private final RequestTracker requestTracker;
     private RequestManager.OptionsApplier optionsApplier;
+    private Lifecycle lifecycle;
 
     private static <A, R> FixedLoadProvider<A, InputStream, GifData, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader, Class<R> transcodeClass,
@@ -45,14 +47,16 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
     }
 
     GifTypeRequest(Context context, ModelType model, ModelLoader<ModelType, InputStream> streamModelLoader, Glide glide,
-            RequestTracker requestTracker, RequestManager.OptionsApplier optionsApplier) {
-        super(context, model, buildProvider(glide, streamModelLoader, GifDrawable.class, null),  glide, requestTracker);
+            RequestTracker requestTracker, Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
+        super(context, model, buildProvider(glide, streamModelLoader, GifDrawable.class, null),  glide,
+                requestTracker, lifecycle);
         this.context = context;
         this.model = model;
         this.streamModelLoader = streamModelLoader;
         this.glide = glide;
         this.requestTracker = requestTracker;
         this.optionsApplier = optionsApplier;
+        this.lifecycle = lifecycle;
 
         // Default to animating.
         crossFade();
@@ -74,7 +78,7 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
             ResourceTranscoder<GifData, R> transcoder, Class<R> transcodeClass) {
         return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, InputStream, GifData, R>(context, model,
                 buildProvider(glide, streamModelLoader, transcodeClass, transcoder), transcodeClass, glide,
-                requestTracker));
+                requestTracker, lifecycle));
     }
 
     /**

@@ -36,6 +36,7 @@ import java.util.UUID;
  */
 public class RequestManager implements LifecycleListener {
     private final Context context;
+    private Lifecycle lifecycle;
     private final RequestTracker requestTracker;
     private final Glide glide;
     private final OptionsApplier optionsApplier;
@@ -48,6 +49,7 @@ public class RequestManager implements LifecycleListener {
     RequestManager(Context context, final Lifecycle lifecycle, RequestTracker requestTracker,
             ConnectivityMonitorFactory factory) {
         this.context = context;
+        this.lifecycle = lifecycle;
         this.requestTracker = requestTracker;
         this.glide = Glide.get(context);
         this.optionsApplier = new OptionsApplier();
@@ -261,7 +263,7 @@ public class RequestManager implements LifecycleListener {
         ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader = Glide.buildFileDescriptorModelLoader(uri,
                 context);
         return optionsApplier.apply(uri, new DrawableTypeRequest<Uri>(uri, mediaStoreLoader, fileDescriptorModelLoader,
-                context, glide, requestTracker, optionsApplier));
+                context, glide, requestTracker, lifecycle, optionsApplier));
     }
 
     /**
@@ -326,7 +328,8 @@ public class RequestManager implements LifecycleListener {
     public DrawableTypeRequest<byte[]> load(byte[] model, final String id) {
         final StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
         return optionsApplier.apply(model,
-                new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker, optionsApplier));
+                new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker,
+                        lifecycle, optionsApplier));
     }
 
     /**
@@ -365,7 +368,7 @@ public class RequestManager implements LifecycleListener {
                     + " Glide#register with a ModelLoaderFactory for your custom model class");
         }
         return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, streamModelLoader,
-                fileDescriptorModelLoader, context, glide, requestTracker, optionsApplier));
+                fileDescriptorModelLoader, context, glide, requestTracker, lifecycle, optionsApplier));
     }
 
     /**
@@ -383,7 +386,7 @@ public class RequestManager implements LifecycleListener {
 
         public DrawableTypeRequest<T> load(T model) {
             return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, null, loader, context, glide,
-                    requestTracker, optionsApplier));
+                    requestTracker, lifecycle, optionsApplier));
         }
     }
 
@@ -402,7 +405,7 @@ public class RequestManager implements LifecycleListener {
 
         public DrawableTypeRequest<T> load(T model) {
             return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, loader, null, context, glide,
-                    requestTracker, optionsApplier));
+                    requestTracker, lifecycle, optionsApplier));
         }
     }
 
@@ -458,7 +461,7 @@ public class RequestManager implements LifecycleListener {
              */
             public <Z> GenericTranscodeRequest<A, T, Z> as(Class<Z> resourceClass) {
                 return optionsApplier.apply(model, new GenericTranscodeRequest<A, T, Z>(context, glide, model,
-                        modelLoader, dataClass, resourceClass, requestTracker, optionsApplier));
+                        modelLoader, dataClass, resourceClass, requestTracker, lifecycle, optionsApplier));
             }
         }
     }

@@ -2,6 +2,7 @@ package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
 
+import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
 
@@ -25,7 +26,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
  *
  * @param <R> The type of resource the target can display.
  */
-public interface Target<R> {
+public interface Target<R> extends LifecycleListener {
 
     /**
      * A lifecycle callback that is called when a load is started.

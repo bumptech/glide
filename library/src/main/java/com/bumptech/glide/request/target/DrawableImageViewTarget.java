@@ -13,6 +13,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
     private static final float SQUARE_RATIO_MARGIN = 0.05f;
     private final ImageView view;
+    private Drawable resource;
 
     public DrawableImageViewTarget(ImageView view) {
         super(view);
@@ -45,6 +46,7 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
             }
         }
         super.onResourceReady(resource, animation);
+        this.resource = resource;
     }
 
     /**
@@ -58,4 +60,17 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
         view.setImageDrawable(resource);
     }
 
+    @Override
+    public void onStart() {
+        if (resource instanceof Animatable) {
+            ((Animatable) resource).start();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        if (resource instanceof Animatable) {
+            ((Animatable) resource).stop();
+        }
+    }
 }

@@ -6,6 +6,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.UnitTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
@@ -33,6 +34,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
     private final Class<ResourceType> resourceClass;
     private final RequestTracker requestTracker;
     private final RequestManager.OptionsApplier optionsApplier;
+    private Lifecycle lifecycle;
 
     private static <A, T, Z, R> LoadProvider<A, T, Z, R> build(Glide glide, ModelLoader<A, T> modelLoader,
             Class<T> dataClass, Class<Z> resourceClass, ResourceTranscoder<Z, R> transcoder) {
@@ -45,9 +47,10 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
 
     GenericTranscodeRequest(Context context, Glide glide, ModelType model, ModelLoader<ModelType, DataType> modelLoader,
             Class<DataType> dataClass, Class<ResourceType> resourceClass, RequestTracker requestTracker,
-            RequestManager.OptionsApplier optionsApplier) {
+            Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
         super(context, model, build(glide, modelLoader, dataClass, resourceClass,
-                (ResourceTranscoder<ResourceType, ResourceType>) null), resourceClass, glide, requestTracker);
+                (ResourceTranscoder<ResourceType, ResourceType>) null), resourceClass, glide, requestTracker,
+                lifecycle);
         this.context = context;
         this.model = model;
         this.glide = glide;
@@ -56,6 +59,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         this.resourceClass = resourceClass;
         this.requestTracker = requestTracker;
         this.optionsApplier = optionsApplier;
+        this.lifecycle = lifecycle;
     }
 
     /**
@@ -74,7 +78,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
 
         return optionsApplier.apply(model,
                 new GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>(context, model,
-                loadProvider, transcodeClass, glide, requestTracker));
+                loadProvider, transcodeClass, glide, requestTracker, lifecycle));
     }
 
     /**
@@ -99,7 +103,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, DataType, File, File>(context, model,
                 fixedLoadProvider,
                 File.class, glide,
-                requestTracker)
+                requestTracker, lifecycle)
                 .priority(Priority.LOW)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .skipMemoryCache(true));

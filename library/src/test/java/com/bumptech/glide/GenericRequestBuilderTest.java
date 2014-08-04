@@ -5,6 +5,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.Request;
@@ -38,13 +39,14 @@ public class GenericRequestBuilderTest {
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
         new GenericRequestBuilder(null,
-                new Object(), mock(LoadProvider.class), Object.class, mock(Glide.class), requestTracker);
+                new Object(), mock(LoadProvider.class), Object.class, mock(Glide.class),
+                requestTracker, mock(Lifecycle.class));
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfNonNullModelAndNullLoadProvider() {
         new GenericRequestBuilder(Robolectric.application, new Object(), null, Object.class, mock(Glide.class),
-                requestTracker);
+                requestTracker, mock(Lifecycle.class));
     }
 
     @Test(expected = NullPointerException.class)
@@ -75,7 +77,7 @@ public class GenericRequestBuilderTest {
     @Test
     public void testDoesNotThrowWhenModelAndLoaderNull() {
         new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class),
-                requestTracker);
+                requestTracker, mock(Lifecycle.class));
     }
 
     @Test
@@ -158,6 +160,6 @@ public class GenericRequestBuilderTest {
         when(glide.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(
                 mock(Target.class));
         return new GenericRequestBuilder(Robolectric.application, null, null, Object.class,
-                glide, requestTracker);
+                glide, requestTracker, mock(Lifecycle.class));
     }
 }
