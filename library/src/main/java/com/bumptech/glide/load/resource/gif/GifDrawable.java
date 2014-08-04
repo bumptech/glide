@@ -22,12 +22,20 @@ import com.bumptech.glide.load.Transformation;
 public class GifDrawable extends Drawable implements Animatable, GifFrameManager.FrameCallback {
 
     private final Paint paint = new Paint();
-    private GifFrameManager frameManager;
-    private GifState state;
-    private GifDecoder decoder;
-    private boolean isRunning;
+    private final GifFrameManager frameManager;
+    private final GifState state;
+    private final GifDecoder decoder;
+
+    /** The current frame to draw, or null if no frame has been loaded yet */
     private Bitmap currentFrame;
+    /** True if the drawable is currently animating */
+    private boolean isRunning;
+    /** True if the drawable should animate while visible */
+    private boolean isStarted;
+    /** True if the drawable's resources have been recycled */
     private boolean isRecycled;
+    /** True if the drawable is currently visible. */
+    private boolean isVisible;
 
     public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider,
             Transformation<Bitmap> frameTransformation, int targetFrameWidth, int targetFrameHeight, String id,
@@ -55,6 +63,19 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
     @Override
     public void start() {
+        isStarted = true;
+        if (isVisible) {
+            startRunning();
+        }
+    }
+
+    @Override
+    public void stop() {
+        isStarted = false;
+        stopRunning();
+    }
+
+    private void startRunning() {
         if (!isRunning) {
             isRunning = true;
             frameManager.getNextFrame(this);
@@ -62,12 +83,17 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         }
     }
 
+    private void stopRunning() {
+        isRunning = false;
+    }
+
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
+        isVisible = visible;
         if (!visible) {
-            stop();
-        } else {
-            start();
+            stopRunning();
+        } else if (isStarted) {
+            startRunning();
         }
         return super.setVisible(visible, restart);
     }
@@ -80,11 +106,6 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     @Override
     public int getIntrinsicHeight() {
         return state.finalFrameHeight;
-    }
-
-    @Override
-    public void stop() {
-        isRunning = false;
     }
 
     @Override

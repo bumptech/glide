@@ -61,6 +61,7 @@ public class GifDrawableTest {
 
     @Test
     public void testRequestsNextFrameOnStart() {
+        drawable.setVisible(true, true);
         drawable.start();
 
         verify(frameManager).getNextFrame(eq(drawable));
@@ -68,6 +69,7 @@ public class GifDrawableTest {
 
     @Test
     public void testShouldInvalidateSelfOnRun() {
+        drawable.setVisible(true, true);
         drawable.start();
 
         verify(cb).invalidateDrawable(eq(drawable));
@@ -75,6 +77,7 @@ public class GifDrawableTest {
 
     @Test
     public void testShouldNotScheduleItselfIfAlreadyRunning() {
+        drawable.setVisible(true, true);
         drawable.start();
         drawable.start();
 
@@ -88,6 +91,7 @@ public class GifDrawableTest {
 
     @Test
     public void testReturnsTrueFromIsRunningWhenRunning() {
+        drawable.setVisible(true, true);
         drawable.start();
 
         assertTrue(drawable.isRunning());
@@ -153,10 +157,36 @@ public class GifDrawableTest {
     }
 
     @Test
-    public void testStartsOnSetVisibleTrue() {
+    public void testStartsOnSetVisibleTrueIfRunning() {
+        drawable.start();
+        drawable.setVisible(false, false);
         drawable.setVisible(true, true);
 
         assertTrue(drawable.isRunning());
+    }
+
+    @Test
+    public void testDoesNotStartOnVisibleTrueIfNotRunning() {
+        drawable.setVisible(true, true);
+
+        assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testDoesNotStartOnSetVisibleIfStartedAndStopped() {
+        drawable.start();
+        drawable.stop();
+        drawable.setVisible(true, true);
+
+        assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testDoesNotImmediatelyRunIfStartedWhileNotVisible() {
+        drawable.setVisible(false, false);
+        drawable.start();
+
+        assertFalse(drawable.isRunning());
     }
 
     @Test

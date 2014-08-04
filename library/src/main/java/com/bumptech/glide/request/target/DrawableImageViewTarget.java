@@ -47,6 +47,9 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
         }
         super.onResourceReady(resource, animation);
         this.resource = resource;
+        if (resource instanceof Animatable) {
+            ((Animatable) resource).start();
+        }
     }
 
     /**

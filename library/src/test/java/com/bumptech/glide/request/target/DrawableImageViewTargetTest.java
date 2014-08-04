@@ -1,6 +1,9 @@
 package com.bumptech.glide.request.target;
 
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -157,5 +160,74 @@ public class DrawableImageViewTargetTest {
             }
         }).when(mockView).setImageDrawable(any(Drawable.class));
         verify(mockView).setImageDrawable(any(BitmapDrawable.class));
+    }
+
+    @Test
+    public void testStartsAnimatableDrawablesInOnReasourceReady() {
+        MockAnimatedDrawable drawable = new MockAnimatedDrawable();
+        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        target.onResourceReady(drawable, null);
+
+        assertTrue(drawable.isStarted);
+    }
+
+    @Test
+    public void testStartsAnimatableDrawablesOnStart() {
+        MockAnimatedDrawable drawable = new MockAnimatedDrawable();
+        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        target.onResourceReady(drawable, null);
+        target.onStop();
+        target.onStart();
+
+        assertTrue(drawable.isStarted);
+    }
+
+    @Test
+    public void testStopsAnimatedDrawablesOnStop() {
+        MockAnimatedDrawable drawable = new MockAnimatedDrawable();
+        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        target.onResourceReady(drawable, null);
+        target.onStop();
+
+        assertFalse(drawable.isStarted);
+    }
+
+    private static class MockAnimatedDrawable extends Drawable implements Animatable {
+        private boolean isStarted;
+
+        @Override
+        public void start() {
+            isStarted = true;
+        }
+
+        @Override
+        public void stop() {
+            isStarted = false;
+        }
+
+        @Override
+        public boolean isRunning() {
+            return false;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+
+        }
+
+        @Override
+        public void setAlpha(int i) {
+
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+
+        }
+
+        @Override
+        public int getOpacity() {
+            return 0;
+        }
     }
 }
