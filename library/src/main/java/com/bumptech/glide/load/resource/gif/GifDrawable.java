@@ -206,6 +206,7 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         frameManager.clear();
     }
 
+    // For testing.
     boolean isRecycled() {
         return isRecycled;
     }

@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -37,6 +36,7 @@ import com.bumptech.glide.load.model.stream.StreamUrlLoader;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDataLoadProvider;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoDataLoadProvider;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDataLoadProvider;
 import com.bumptech.glide.load.resource.file.StreamFileDataLoadProvider;
@@ -45,7 +45,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawableLoadProvider;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.gifbitmap.ImageVideoGifDrawableLoadProvider;
-import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
+import com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
@@ -209,11 +209,11 @@ public class Glide {
         register(URL.class, InputStream.class, new StreamUrlLoader.Factory());
         register(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
 
-        transcoderRegistry.register(Bitmap.class, BitmapDrawable.class,
-                new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
+        transcoderRegistry.register(Bitmap.class, GlideBitmapDrawable.class,
+                new GlideBitmapDrawableTranscoder(context.getResources(), bitmapPool));
         transcoderRegistry.register(GifBitmapWrapper.class, Drawable.class,
                 new GifBitmapWrapperDrawableTranscoder(
-                        new BitmapDrawableTranscoder(context.getResources(), bitmapPool)));
+                        new GlideBitmapDrawableTranscoder(context.getResources(), bitmapPool)));
 
         bitmapCenterCrop = new CenterCrop(bitmapPool);
         drawableCenterCrop = new GifBitmapWrapperTransformation(bitmapPool, bitmapCenterCrop);

@@ -2,28 +2,29 @@ package com.bumptech.glide.load.resource.transcode;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawableResource;
 
 /**
  * An {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} that converts
  * {@link android.graphics.Bitmap}s into {@link android.graphics.drawable.BitmapDrawable}s.
  */
-public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, BitmapDrawable> {
+public class GlideBitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, GlideBitmapDrawable> {
     private Resources resources;
     private BitmapPool bitmapPool;
 
-    public BitmapDrawableTranscoder(Resources resources, BitmapPool bitmapPool) {
+    public GlideBitmapDrawableTranscoder(Resources resources, BitmapPool bitmapPool) {
         this.resources = resources;
         this.bitmapPool = bitmapPool;
     }
 
     @Override
-    public Resource<BitmapDrawable> transcode(Resource<Bitmap> toTranscode) {
-        BitmapDrawable drawable = new BitmapDrawable(resources, toTranscode.get());
-        return new BitmapDrawableResource(drawable, bitmapPool);
+    public Resource<GlideBitmapDrawable> transcode(Resource<Bitmap> toTranscode) {
+        GlideBitmapDrawable drawable = new GlideBitmapDrawable(resources, toTranscode.get());
+        return new GlideBitmapDrawableResource(drawable, bitmapPool);
     }
 
     @Override

@@ -325,7 +325,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets the {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} to use for this load.
      *
      * @see com.bumptech.glide.load.resource.transcode.UnitTranscoder
-     * @see com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder
+     * @see com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder
      * @see com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTranscoder
      *
      * @param transcoder The transcoder to use.
