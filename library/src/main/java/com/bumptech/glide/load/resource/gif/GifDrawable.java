@@ -8,34 +8,37 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 
 /**
  * An animated {@link android.graphics.drawable.Drawable} that plays the frames of an animated GIF.
  */
-public class GifDrawable extends Drawable implements Animatable, GifFrameManager.FrameCallback {
-
+public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameCallback {
     private final Paint paint = new Paint();
     private final GifFrameManager frameManager;
     private final GifState state;
     private final GifDecoder decoder;
 
-    /** The current frame to draw, or null if no frame has been loaded yet */
+    /** The current frame to draw, or null if no frame has been loaded yet. */
     private Bitmap currentFrame;
-    /** True if the drawable is currently animating */
+    /** True if the drawable is currently animating. */
     private boolean isRunning;
-    /** True if the drawable should animate while visible */
+    /** True if the drawable should animate while visible. */
     private boolean isStarted;
-    /** True if the drawable's resources have been recycled */
+    /** True if the drawable's resources have been recycled. */
     private boolean isRecycled;
     /** True if the drawable is currently visible. */
     private boolean isVisible;
+    /** The number of times we've looped over all the frames in the gif. */
+    private int loopCount;
+    /** The number of times to loop through the gif animation. */
+    private int maxLoopCount = LOOP_FOREVER;
 
     /**
      * Constructor for GifDrawable.
@@ -96,9 +99,14 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
         return state.data;
     }
 
+    private void resetLoopCount() {
+        loopCount = 0;
+    }
+
     @Override
     public void start() {
         isStarted = true;
+        resetLoopCount();
         if (isVisible) {
             startRunning();
         }
@@ -177,7 +185,7 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
 
     @TargetApi(11)
     @Override
-    public void onFrameRead(Bitmap frame) {
+    public void onFrameRead(Bitmap frame, int frameIndex) {
         if (Build.VERSION.SDK_INT >= 11 && getCallback() == null) {
             stop();
             return;
@@ -190,7 +198,15 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
             invalidateSelf();
         }
 
-        frameManager.getNextFrame(this);
+        if (frameIndex == decoder.getFrameCount() - 1) {
+            loopCount++;
+        }
+
+        if (maxLoopCount != LOOP_FOREVER && loopCount >= maxLoopCount) {
+            stop();
+        } else {
+            frameManager.getNextFrame(this);
+        }
     }
 
     @Override
@@ -209,6 +225,25 @@ public class GifDrawable extends Drawable implements Animatable, GifFrameManager
     // For testing.
     boolean isRecycled() {
         return isRecycled;
+    }
+
+    @Override
+    public boolean isAnimated() {
+        return true;
+    }
+
+    @Override
+    public void setLoopCount(int loopCount) {
+        if (loopCount <= 0 && loopCount != LOOP_FOREVER && loopCount != LOOP_INTRINSIC) {
+            throw new IllegalArgumentException("Loop count must be greater than 0, or equal to "
+                    + "GlideDrawable.LOOP_FOREVER, or equal to GlideDrawable.LOOP_INTRINSIC");
+        }
+
+        if (loopCount == LOOP_INTRINSIC) {
+            maxLoopCount = decoder.getLoopCount();
+        } else {
+            maxLoopCount = loopCount;
+        }
     }
 
     static class GifState extends ConstantState {

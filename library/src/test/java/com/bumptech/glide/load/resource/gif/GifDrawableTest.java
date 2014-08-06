@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
 import org.junit.Before;
@@ -100,7 +101,7 @@ public class GifDrawableTest {
     @Test
     public void testStartsLoadingNextFrameWhenCurrentFinishes() {
         drawable.setIsRunning(true);
-        drawable.onFrameRead(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+        drawable.onFrameRead(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), 0);
 
         verify(frameManager).getNextFrame(eq(drawable));
     }
@@ -108,7 +109,7 @@ public class GifDrawableTest {
     @Test
     public void testInvalidatesSelfWhenFrameReady() {
         drawable.setIsRunning(true);
-        drawable.onFrameRead(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
+        drawable.onFrameRead(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), 0);
 
         verify(cb).invalidateDrawable(eq(drawable));
     }
@@ -116,7 +117,7 @@ public class GifDrawableTest {
     @Test
     public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfNotRunning() {
         drawable.setIsRunning(false);
-        drawable.onFrameRead(Bitmap.createBitmap(10, 100, Bitmap.Config.ARGB_8888));
+        drawable.onFrameRead(Bitmap.createBitmap(10, 100, Bitmap.Config.ARGB_8888), 0);
 
         verify(frameManager, never()).getNextFrame(eq(drawable));
     }
@@ -125,7 +126,7 @@ public class GifDrawableTest {
     public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfHasNoCallback() {
         drawable.setIsRunning(true);
         drawable.setCallback(null);
-        drawable.onFrameRead(Bitmap.createBitmap(1, 2, Bitmap.Config.ARGB_8888));
+        drawable.onFrameRead(Bitmap.createBitmap(1, 2, Bitmap.Config.ARGB_8888), 0);
 
         verify(frameManager, never()).getNextFrame(eq(drawable));
     }
@@ -134,7 +135,7 @@ public class GifDrawableTest {
     public void testStopsWhenCurrentFrameFinishesIfHasNoCallback() {
         drawable.setIsRunning(true);
         drawable.setCallback(null);
-        drawable.onFrameRead(Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888));
+        drawable.onFrameRead(Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888), 0);
 
         assertFalse(drawable.isRunning());
     }
@@ -243,5 +244,126 @@ public class GifDrawableTest {
     public void testReturnsFrameWidthAndHeightForIntrinsictDimensions() {
         assertEquals(frameWidth, drawable.getIntrinsicWidth());
         assertEquals(frameHeight, drawable.getIntrinsicHeight());
+    }
+
+    @Test
+    public void testIsAnimated() {
+        assertTrue(drawable.isAnimated());
+    }
+
+    @Test
+    public void testLoopsASingleTimeIfLoopCountIsSetToOne() {
+        when(gifDecoder.getFrameCount()).thenReturn(1);
+        drawable.setLoopCount(1);
+        drawable.setVisible(true, true);
+        drawable.start();
+        drawable.onFrameRead(getBitmap(), 0);
+
+        verify(frameManager, times(1)).getNextFrame(eq(drawable));
+        assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testLoopsForeverIfLoopCountIsSetToLoopForever() {
+        when(gifDecoder.getFrameCount()).thenReturn(1);
+        drawable.setLoopCount(GifDrawable.LOOP_FOREVER);
+        drawable.setVisible(true, true);
+        drawable.start();
+
+        int loops = 40;
+        for (int i = 0; i < 40; i++) {
+            drawable.onFrameRead(getBitmap(), 0);
+        }
+
+        verify(frameManager, times(loops + 1)).getNextFrame(eq(drawable));
+    }
+
+    @Test
+    public void testLoopsOnceIfLoopCountIsSetToOneWithThreeFrames() {
+        when(gifDecoder.getFrameCount()).thenReturn(3);
+        drawable.setLoopCount(1);
+        drawable.setVisible(true, true);
+        drawable.start();
+        drawable.onFrameRead(getBitmap(), 0);
+        drawable.onFrameRead(getBitmap(), 1);
+        drawable.onFrameRead(getBitmap(), 2);
+
+        verify(frameManager, times(3)).getNextFrame(eq(drawable));
+        assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testLoopsThreeTimesIfLoopCountIsSetToThree() {
+        when(gifDecoder.getFrameCount()).thenReturn(1);
+        drawable.setLoopCount(3);
+        drawable.setVisible(true, true);
+        drawable.start();
+        drawable.onFrameRead(getBitmap(), 0);
+        drawable.onFrameRead(getBitmap(), 0);
+        drawable.onFrameRead(getBitmap(), 0);
+
+        verify(frameManager, times(3)).getNextFrame(eq(drawable));
+        assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testCallingStartResetsLoopCounter() {
+        when(gifDecoder.getFrameCount()).thenReturn(2);
+        drawable.setLoopCount(1);
+        drawable.setVisible(true, true);
+        drawable.start();
+
+        drawable.onFrameRead(getBitmap(), 0);
+        drawable.onFrameRead(getBitmap(), 1);
+
+        drawable.start();
+
+        drawable.onFrameRead(getBitmap(), 0);
+        drawable.onFrameRead(getBitmap(), 1);
+
+        verify(frameManager, times(4)).getNextFrame(eq(drawable));
+        assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testChangingTheLoopCountAfterHittingTheMaxLoopCount() {
+        when(gifDecoder.getFrameCount()).thenReturn(1);
+        drawable.setLoopCount(1);
+        drawable.setVisible(true, true);
+        drawable.start();
+
+        drawable.onFrameRead(getBitmap(), 0);
+
+        drawable.setLoopCount(2);
+        drawable.start();
+
+        drawable.onFrameRead(getBitmap(), 0);
+        drawable.onFrameRead(getBitmap(), 0);
+
+        verify(frameManager, times(3)).getNextFrame(eq(drawable));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsIfGivenLoopCountLessThanZeroAndNotInfinite() {
+        drawable.setLoopCount(-2);
+    }
+
+    @Test
+    public void testUsesDecoderNetscapeLoopCountIfLoopCountIsLoopIntrinsic() {
+        when(gifDecoder.getLoopCount()).thenReturn(2);
+        when(gifDecoder.getFrameCount()).thenReturn(1);
+        drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
+        drawable.setVisible(true, true);
+        drawable.start();
+
+        drawable.onFrameRead(getBitmap(), 0);
+        drawable.onFrameRead(getBitmap(), 0);
+
+        verify(frameManager, times(2)).getNextFrame(eq(drawable));
+    }
+
+
+    private static Bitmap getBitmap() {
+        return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     }
 }

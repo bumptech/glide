@@ -46,7 +46,7 @@ class GifFrameManager {
     private DelayTarget next;
 
     public interface FrameCallback {
-        public void onFrameRead(Bitmap frame);
+        public void onFrameRead(Bitmap frame, int index);
     }
 
     public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation, int targetWidth,
@@ -107,6 +107,7 @@ class GifFrameManager {
 
         long targetTime = SystemClock.uptimeMillis() + (Math.max(MIN_FRAME_DELAY, decoder.getNextDelay()));
         next = new DelayTarget(cb, targetTime);
+        next.setFrameIndex(decoder.getCurrentFrameIndex());
 
         Glide.with(context)
                 .using(frameLoader, GifDecoder.class)
@@ -137,11 +138,16 @@ class GifFrameManager {
         private FrameCallback cb;
         private long targetTime;
         private Bitmap resource;
+        private int index;
 
         public DelayTarget(FrameCallback cb, long targetTime) {
             super(targetWidth, targetHeight);
             this.cb = cb;
             this.targetTime = targetTime;
+        }
+
+        public void setFrameIndex(int index) {
+            this.index = index;
         }
 
         @Override
@@ -152,7 +158,7 @@ class GifFrameManager {
 
         @Override
         public void run() {
-            cb.onFrameRead(resource);
+            cb.onFrameRead(resource, index);
             if (current != null) {
                 Glide.clear(current);
             }
