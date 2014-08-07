@@ -176,7 +176,7 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
      * A callback that should never be invoked directly.
      */
     @Override
-    public synchronized void onResourceReady(R resource, GlideAnimation<R> glideAnimation) {
+    public synchronized void onResourceReady(R resource, GlideAnimation<? super R> glideAnimation) {
         // We might get a null result.
         resultReceived = true;
         this.resource = resource;

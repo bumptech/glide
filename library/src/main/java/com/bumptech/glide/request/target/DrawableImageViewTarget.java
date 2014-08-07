@@ -1,23 +1,43 @@
 package com.bumptech.glide.request.target;
 
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 
 /**
  * A {@link com.bumptech.glide.request.target.Target} that can display an {@link android.graphics.drawable.Drawable} in
  * an {@link android.widget.ImageView}.
  */
-public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
+public class DrawableImageViewTarget extends ImageViewTarget<GlideDrawable> {
     private static final float SQUARE_RATIO_MARGIN = 0.05f;
     private final ImageView view;
-    private Drawable resource;
+    private int maxLoopCount;
+    private GlideDrawable resource;
 
+    /**
+     * Constructor for an {@link com.bumptech.glide.request.target.Target} that can display an
+     * {@link com.bumptech.glide.load.resource.drawable.GlideDrawable} in an {@link android.widget.ImageView}.
+     *
+     * @param view The view to display the drawable in.
+     */
     public DrawableImageViewTarget(ImageView view) {
+        this(view, GlideDrawable.LOOP_FOREVER);
+    }
+
+    /**
+     * Constructor for an {@link com.bumptech.glide.request.target.Target} that can display an
+     * {@link com.bumptech.glide.load.resource.drawable.GlideDrawable} in an {@link android.widget.ImageView}.
+     *
+     * @param view The view to display the drawable in.
+     * @param maxLoopCount A value to pass to to {@link com.bumptech.glide.load.resource.drawable.GlideDrawable}s
+     *                     indicating how many times they should repeat their animation (if they have one). See
+     *                     {@link com.bumptech.glide.load.resource.drawable.GlideDrawable#setLoopCount(int)}.
+     */
+    public DrawableImageViewTarget(ImageView view, int maxLoopCount) {
         super(view);
         this.view = view;
+        this.maxLoopCount = maxLoopCount;
     }
 
     /**
@@ -30,8 +50,8 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
      * @param animation {@inheritDoc}
      */
     @Override
-    public void onResourceReady(Drawable resource, GlideAnimation<Drawable> animation) {
-        if (!(resource instanceof Animatable)) {
+    public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
+        if (!resource.isAnimated()) {
             //TODO: Try to generalize this to other sizes/shapes.
             // This is a dirty hack that tries to make loading square thumbnails and then square full images less costly
             // by forcing both the smaller thumb and the larger version to have exactly the same intrinsic dimensions.
@@ -47,9 +67,8 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
         }
         super.onResourceReady(resource, animation);
         this.resource = resource;
-        if (resource instanceof Animatable) {
-            ((Animatable) resource).start();
-        }
+        resource.setLoopCount(maxLoopCount);
+        resource.start();
     }
 
     /**
@@ -59,21 +78,21 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
      * @param resource The {@link android.graphics.drawable.Drawable} to display in the view.
      */
     @Override
-    protected void setResource(Drawable resource) {
+    protected void setResource(GlideDrawable resource) {
         view.setImageDrawable(resource);
     }
 
     @Override
     public void onStart() {
-        if (resource instanceof Animatable) {
-            ((Animatable) resource).start();
+        if (resource != null) {
+            resource.start();
         }
     }
 
     @Override
     public void onStop() {
-        if (resource instanceof Animatable) {
-            ((Animatable) resource).stop();
+        if (resource != null) {
+            resource.stop();
         }
     }
 }

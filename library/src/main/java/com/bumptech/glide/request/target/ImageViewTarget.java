@@ -71,7 +71,7 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
     }
 
     @Override
-    public void onResourceReady(Z resource, GlideAnimation<Z> glideAnimation) {
+    public void onResourceReady(Z resource, GlideAnimation<? super Z> glideAnimation) {
         if (glideAnimation == null || !glideAnimation.animate(resource, this)) {
             setResource(resource);
         }

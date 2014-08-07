@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.resource.transcode;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.tests.Util;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class GifBitmapWrapperDrawableTranscoderTest {
     private GifBitmapWrapperDrawableTranscoder transcoder;
-    private ResourceTranscoder<Bitmap, Drawable> bitmapTranscoder;
+    private ResourceTranscoder<Bitmap, GlideBitmapDrawable> bitmapTranscoder;
 
     @Before
     public void setUp() {
@@ -52,7 +52,7 @@ public class GifBitmapWrapperDrawableTranscoderTest {
     private static class TranscoderHarness {
         Resource<GifBitmapWrapper> gifBitmapResource = mock(Resource.class);
         GifBitmapWrapper gifBitmap = mock(GifBitmapWrapper.class);
-        Resource<Drawable> expected = mock(Resource.class);
+        Resource<GlideBitmapDrawable> expected = mock(Resource.class);
 
         public TranscoderHarness() {
             when(gifBitmapResource.get()).thenReturn(gifBitmap);

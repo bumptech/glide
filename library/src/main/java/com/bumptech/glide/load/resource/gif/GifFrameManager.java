@@ -151,7 +151,7 @@ class GifFrameManager {
         }
 
         @Override
-        public void onResourceReady(final Bitmap resource, GlideAnimation<Bitmap> glideAnimation) {
+        public void onResourceReady(final Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
             this.resource = resource;
             mainHandler.postAtTime(this, targetTime);
         }

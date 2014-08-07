@@ -39,14 +39,15 @@ import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoDataLoadProvider;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDataLoadProvider;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.file.StreamFileDataLoadProvider;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableLoadProvider;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.load.resource.gifbitmap.ImageVideoGifDrawableLoadProvider;
-import com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTranscoder;
+import com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -211,7 +212,7 @@ public class Glide {
 
         transcoderRegistry.register(Bitmap.class, GlideBitmapDrawable.class,
                 new GlideBitmapDrawableTranscoder(context.getResources(), bitmapPool));
-        transcoderRegistry.register(GifBitmapWrapper.class, Drawable.class,
+        transcoderRegistry.register(GifBitmapWrapper.class, GlideDrawable.class,
                 new GifBitmapWrapperDrawableTranscoder(
                         new GlideBitmapDrawableTranscoder(context.getResources(), bitmapPool)));
 

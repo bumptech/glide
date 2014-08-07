@@ -7,17 +7,19 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+
 /**
  * A wrapper drawable to square the wrapped drawable so that it expands to fill a square with exactly the given side
  * length. The goal of this drawable is to ensure that square thumbnail drawables always match the size of the view
  * they will be displayed in to avoid a costly requestLayout call. This class should not be used with views or drawables
  * that are not square.
  */
-public class SquaringDrawable extends Drawable {
-    private final Drawable wrapped;
-    private int side;
+public class SquaringDrawable extends GlideDrawable {
+    private final GlideDrawable wrapped;
+    private final int side;
 
-    public SquaringDrawable(Drawable wrapped, int side) {
+    public SquaringDrawable(GlideDrawable wrapped, int side) {
         this.wrapped = wrapped;
         this.side = side;
     }
@@ -145,5 +147,30 @@ public class SquaringDrawable extends Drawable {
     @Override
     public int getOpacity() {
         return wrapped.getOpacity();
+    }
+
+    @Override
+    public boolean isAnimated() {
+        return wrapped.isAnimated();
+    }
+
+    @Override
+    public void setLoopCount(int loopCount) {
+        wrapped.setLoopCount(loopCount);
+    }
+
+    @Override
+    public void start() {
+        wrapped.start();
+    }
+
+    @Override
+    public void stop() {
+        wrapped.stop();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return wrapped.isRunning();
     }
 }

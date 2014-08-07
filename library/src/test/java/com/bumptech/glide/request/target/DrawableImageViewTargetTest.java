@@ -1,14 +1,12 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +31,7 @@ public class DrawableImageViewTargetTest {
     public void testSetsDrawableOnViewInSetResource() {
         ImageView view = new ImageView(Robolectric.application);
         DrawableImageViewTarget target = new DrawableImageViewTarget(view);
-        Drawable expected = new ColorDrawable(Color.GRAY);
+        GlideDrawable expected = new MockAnimatedDrawable();
 
         target.setResource(expected);
 
@@ -46,7 +44,7 @@ public class DrawableImageViewTargetTest {
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(100);
         DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
-        Drawable drawable = new ColorDrawable(Color.RED) {
+        GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
                 return 100;
@@ -78,7 +76,7 @@ public class DrawableImageViewTargetTest {
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(100);
         DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
-        Drawable drawable = new AnimationDrawable() {
+        GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
                 return 100;
@@ -108,7 +106,7 @@ public class DrawableImageViewTargetTest {
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(100);
         DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
-        Drawable drawable = new ColorDrawable(Color.RED) {
+        GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
                 return 100;
@@ -138,7 +136,7 @@ public class DrawableImageViewTargetTest {
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(150);
         DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
-        Drawable drawable = new ColorDrawable(Color.RED) {
+        GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
                 return 100;
@@ -183,6 +181,12 @@ public class DrawableImageViewTargetTest {
     }
 
     @Test
+    public void testDoesNotStartNullDrawablesOnStart() {
+        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        target.onStart();
+    }
+
+    @Test
     public void testStopsAnimatedDrawablesOnStop() {
         MockAnimatedDrawable drawable = new MockAnimatedDrawable();
         DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
@@ -192,8 +196,25 @@ public class DrawableImageViewTargetTest {
         assertFalse(drawable.isStarted);
     }
 
-    private static class MockAnimatedDrawable extends Drawable implements Animatable {
+    @Test
+    public void testDoesNotStopNullDrawablesOnStop() {
+        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        target.onStop();
+    }
+
+    @Test
+    public void testSetsLoopCountOnDrawable() {
+        int maxLoopCount = 6;
+        MockAnimatedDrawable drawable = new MockAnimatedDrawable();
+        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application),
+                maxLoopCount);
+        target.onResourceReady(drawable, null);
+        assertEquals(maxLoopCount, drawable.loopCount);
+    }
+
+    private static class MockAnimatedDrawable extends GlideDrawable {
         private boolean isStarted;
+        private int loopCount;
 
         @Override
         public void start() {
@@ -228,6 +249,16 @@ public class DrawableImageViewTargetTest {
         @Override
         public int getOpacity() {
             return 0;
+        }
+
+        @Override
+        public boolean isAnimated() {
+            return false;
+        }
+
+        @Override
+        public void setLoopCount(int loopCount) {
+            this.loopCount = loopCount;
         }
     }
 }

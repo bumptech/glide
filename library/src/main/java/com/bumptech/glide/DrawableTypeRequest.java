@@ -1,12 +1,12 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 
 import com.bumptech.glide.load.model.ImageVideoModelLoader;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
@@ -61,7 +61,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
             RequestTracker requestTracker, Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
         super(context, model,
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class,
-                        Drawable.class, null),
+                        GlideDrawable.class, null),
                 glide, requestTracker, lifecycle);
         this.model = model;
         this.streamModelLoader = streamModelLoader;
