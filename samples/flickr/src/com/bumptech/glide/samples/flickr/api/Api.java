@@ -21,7 +21,7 @@ public class Api {
     private static Api API;
     private static final String TAG = "FlickrApi";
     private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
-    private static final String SIGNED_API_URL = "http://api.flickr.com/services/rest/?method=%s&format=json&api_key="
+    private static final String SIGNED_API_URL = "https://api.flickr.com/services/rest/?method=%s&format=json&api_key="
             + API_KEY;
     //incomplete size independent url for photos that can be cached per photo
     private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
