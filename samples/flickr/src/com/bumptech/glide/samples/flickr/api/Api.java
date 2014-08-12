@@ -64,6 +64,10 @@ public class Api {
     public static Api get(RequestQueue requestQueue) {
         if (API == null) {
             API = new Api(requestQueue);
+        } else {
+            if(requestQueue != API.requestQueue) {
+                API.requestQueue = requestQueue;
+            }
         }
         return API;
     }
