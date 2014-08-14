@@ -47,7 +47,7 @@ public class TransformationUtils {
         }
 
         m.setScale(scale, scale);
-        m.postTranslate((int) dx + 0.5f, (int) dy + 0.5f);
+        m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
         final Bitmap result;
         if (recycled != null) {
             result = recycled;
