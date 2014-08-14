@@ -1,21 +1,35 @@
 package com.bumptech.glide.samples.flickr.api;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.os.Build;
 import android.util.Log;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.resize.ImageManager;
+import com.bumptech.glide.resize.bitmap_recycle.LruBitmapPool;
+import com.bumptech.glide.resize.cache.DiskCache;
+import com.bumptech.glide.resize.cache.DiskLruCacheWrapper;
+import com.bumptech.glide.resize.cache.LruMemoryCache;
+import com.bumptech.glide.volley.VolleyUrlLoader;
 
 public class Api {
     private static Api API;
@@ -42,6 +56,8 @@ public class Api {
     }
 
     private final RequestQueue requestQueue;
+    private final Context context;
+    private static final String CACHE_NAME = "flickr_cache";
 
     private static String getSizeKey(int width, int height) {
         final int largestEdge = Math.max(width, height);
@@ -61,19 +77,36 @@ public class Api {
         public void onSearchFailed(Exception e);
     }
 
-    public static Api get(RequestQueue requestQueue) {
+    public static Api get(Context context) {
         if (API == null) {
-            API = new Api(requestQueue);
-        } else {
-            if(requestQueue != API.requestQueue) {
-                API.requestQueue = requestQueue;
-            }
+            API = new Api(context);
         }
         return API;
     }
 
-    protected Api(RequestQueue requestQueue) {
-        this.requestQueue = requestQueue;
+    protected Api(Context context) {
+        this.context = context;
+        requestQueue = Volley.newRequestQueue(context);
+
+        final Glide glide = Glide.get();
+        if (!glide.isImageManagerSet()) {
+            File cacheDir = ImageManager.getPhotoCacheDir(context, CACHE_NAME);
+
+            DiskCache diskCache = DiskLruCacheWrapper.get(cacheDir, 50 * 1024 * 1024);
+
+            // When we can recycle bitmaps, the smaller our cache is, the more quickly our scrolling will become smooth
+            // so prefer large bitmap pool and a small cache.
+            final int safeMemCacheSize = ImageManager.getSafeMemoryCacheSize(context);
+            glide.setImageManager(new ImageManager.Builder(context)
+                    .setBitmapCompressQuality(70)
+                    .setMemoryCache(new LruMemoryCache(
+                            Build.VERSION.SDK_INT >= 11 ? safeMemCacheSize / 2 : safeMemCacheSize))
+                    .setBitmapPool(new LruBitmapPool(
+                            Build.VERSION.SDK_INT >= 11 ? Math.round(safeMemCacheSize * 1.5f) : safeMemCacheSize))
+                    .setDiskCache(diskCache));
+        }
+        glide.register(URL.class, new VolleyUrlLoader.Factory(requestQueue));
+
     }
 
     public static String getPhotoURL(Photo photo, int width, int height) {
