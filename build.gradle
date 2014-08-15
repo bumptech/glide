@@ -76,25 +76,35 @@ def releaseVariantAndroidProjects = androidProjects.collect {
     }
 }
 
-// Generate javadocs containing batched documentation for all android library subprojects.
+// Generate javadocs and sources containing batched documentation and sources for all subprojects.
 getAndroidLibraryVariants().each { variant ->
     def androidJar = "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
     def destinationDirPath = "${getProjectDir()}/doc/${variant.baseName}"
 
-    task("clean${variant.name.capitalize()}Javadoc", type: Delete) {
+    // Get the variant from each subproject that matches our current variant name.
+    def childEquivalentChildVariants = getAndroidChildren().collect { project ->
+        project.android.libraryVariants.findAll { type -> type.name == variant.name }
+    }.sum()
+
+    // Collect the source files from all android and java subprojects
+    def sourceFiles = childEquivalentChildVariants.collect { it.javaCompile.source } +
+                      javaProjects.collect { it.sourceSets.main.allJava }
+
+    task("${variant.name}SourceJar", type: Jar) {
+      classifier = 'sources'
+      from sourceFiles
+    }
+
+    def cleanJavadocTask = task("clean${variant.name.capitalize()}Javadoc", type: Delete) {
         delete destinationDirPath
     }
+    clean.dependsOn(cleanJavadocTask)
 
     def javadocTask = task("${variant.name}Javadoc", type: Javadoc) {
         classifier = 'javadoc'
 
-        // Get the variant from each subproject that matches our current variant's name.
-        def childEquivalentChildVariants = getAndroidChildren().collect { project ->
-            project.android.libraryVariants.findAll { type -> type.name == variant.name }
-        }.sum()
+        source = sourceFiles
 
-        source = childEquivalentChildVariants.collect { it.javaCompile.source }
-        source += javaProjects.collect { it.sourceSets.main.allJava }
         classpath = files(childEquivalentChildVariants.collect {
             files(it.javaCompile.classpath.files, androidJar)
         })
@@ -110,13 +120,18 @@ getAndroidLibraryVariants().each { variant ->
 
         destinationDir = new File(destinationDirPath)
     }
-    javadocTask.dependsOn("clean${variant.name.capitalize()}Javadoc")
+
+    def javadocJarTask = task("${variant.name}JavadocJar", type: Jar) {
+      classifier = 'javadoc'
+      from javadocTask.destinationDir
+    }
+    javadocJarTask.dependsOn(javadocTask)
 }
 
 /** Build a fat jar of all internal dependencies */
 def releaseJarOut = 'bin'
 
-task releaseJar(type: Jar) {
+jar {
     from files(
             releaseVariantAndroidProjects.collect { variant ->
                 variant.javaCompile.destinationDir
@@ -127,19 +142,17 @@ task releaseJar(type: Jar) {
     from files(javaProjects.collect { it.sourceSets.main.output })
 
     destinationDir = file(releaseJarOut)
-    baseName = "glide-${VERSION_NAME}"
 }
-
-task cleanReleaseJar(type: Delete) {
-    delete releaseJarOut
-}
-releaseJar.dependsOn(cleanReleaseJar)
 
 allProjects.each { project ->
-    releaseJar.dependsOn(project.tasks.getByName("checkstyle"))
-    releaseJar.dependsOn(project.build)
+    if (!project.getPlugins().hasPlugin('android')) {
+        jar.dependsOn(project.build)
+    }
 }
 
 artifacts {
-    archives releaseJar
+    archives releaseJavadocJar
+    archives releaseSourceJar
 }
+
+apply from: "$rootProject.projectDir/scripts/upload.gradle"

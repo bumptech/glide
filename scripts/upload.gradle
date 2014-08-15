@@ -46,6 +46,8 @@ def getRepositoryPassword() {
 }
 
 afterEvaluate { project ->
+    // To avoid uploading the default empty jar artifact in the project root directory, we use a custom
+    // configuration to specify which artifacts we want to upload.
     uploadArchives {
         repositories {
             mavenDeployer {
@@ -101,6 +103,8 @@ afterEvaluate { project ->
 
     signing {
         required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+        // The default configuration is 'archives', we need to change it to add our signatures to
+        // the configuration we're actually uploading ('glideArchives').
         sign configurations.archives
     }
 
@@ -136,25 +140,12 @@ afterEvaluate { project ->
             classifier = 'sources'
             from project.android.sourceSets.main.java.source
         }
-    } else {
-        task sourcesJar(type: Jar, dependsOn:classes) {
-            classifier = 'sources'
-            from sourceSets.main.allSource
-        }
-
-        task javadocJar(type: Jar, dependsOn:javadoc) {
-            classifier = 'javadoc'
-            from javadoc.destinationDir
-        }
     }
 
     artifacts {
         if (project.getPlugins().hasPlugin('android') || project.getPlugins().hasPlugin('android-library')) {
             archives androidSourcesJar
             archives androidJavadocsJar
-        } else {
-            archives sourcesJar
-            archives javadocJar
         }
     }
 }

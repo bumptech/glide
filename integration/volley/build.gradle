@@ -1,5 +1,9 @@
 apply plugin: 'com.android.library'
 
+configurations {
+  glideArchives
+}
+
 repositories {
   mavenCentral()
 }
