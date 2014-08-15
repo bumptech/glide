@@ -1,8 +1,16 @@
 language: android
 android:
   components:
-    - build-tools-19.1.0
+  - build-tools-19.1.0
   licenses: 
-    - 'android-sdk-license.*'
+  - 'android-sdk-license.*'
 
 script: 'travis_retry ./gradlew build'
+
+after_success:
+- ./gradlew uploadGlideArchives -PNEXUS_USERNAME="${NEXUS_USERNAME}" -PNEXUS_PASSWORD="${NEXUS_PASSWORD}"
+
+env:
+  global:
+  - secure: m/sb1iqIHzL/xCANDf0PHBRtX4ihiccFFWsMWby5PiGDh5ncItjI+kU+Yrgdy/PwmSwwTfB5nXzCdcJe8nLADSLF5PPccuKKO63mGH/Vsai0SJt94+wr+JnBS+T1LmTrlvtlRFEcKjFhOQsnAeJL30iNtQWsoqNSgVrYqUaBdAM=
+  - secure: dMBw5H/o1VsmFX9vama8KWpS3ZbwSgVeNdwByfBgZz82ad1AkYPFN2QNt02qZsopeHCs3w91J1+2ULkEcGpi/eCjRNV449uQyx1DXB0pGkiGq9OAgeZhO/HiRAPqqzJRC4gxgOHBvfxaKm6ZD8THfExWJKTQfXrwFrh+9R4cL3g=
