@@ -105,9 +105,10 @@ public class EngineJobTest {
 
     @Test
     public void testListenerNotifiedOfCancelOnCancel() {
-        harness.getJob().cancel();
+        EngineJob job = harness.getJob();
+        job.cancel();
 
-        verify(harness.listener).onEngineJobCancelled(eq(harness.key));
+        verify(harness.listener).onEngineJobCancelled(eq(job), eq(harness.key));
     }
 
     @Test
@@ -164,7 +165,7 @@ public class EngineJobTest {
         job.onResourceReady(harness.resource);
         job.cancel();
 
-        verify(harness.listener, never()).onEngineJobCancelled(eq(harness.key));
+        verify(harness.listener, never()).onEngineJobCancelled(eq(job), eq(harness.key));
     }
 
     @Test
@@ -173,7 +174,7 @@ public class EngineJobTest {
         job.cancel();
         job.cancel();
 
-        verify(harness.listener, times(1)).onEngineJobCancelled(eq(harness.key));
+        verify(harness.listener, times(1)).onEngineJobCancelled(eq(job), eq(harness.key));
     }
 
     @Test

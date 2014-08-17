@@ -290,7 +290,7 @@ public class EngineTest {
     public void testRunnerIsRemovedFromRunnersOnEngineNotifiedJobCancel() {
         harness.doLoad();
 
-        harness.engine.onEngineJobCancelled(harness.cacheKey);
+        harness.engine.onEngineJobCancelled(harness.job, harness.cacheKey);
 
         assertFalse(harness.runners.containsKey(harness.cacheKey));
     }
@@ -299,9 +299,27 @@ public class EngineTest {
     public void testRunnerIsCancelledOnEngineNotifiedJobCanceled() {
         harness.doLoad();
 
-        harness.engine.onEngineJobCancelled(harness.cacheKey);
+        harness.engine.onEngineJobCancelled(harness.job, harness.cacheKey);
 
         verify(harness.runner).cancel();
+    }
+
+    @Test
+    public void testRunnerIsNotRemovedFromRunnersIfOldJobIsCancelled() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobCancelled(mock(EngineJob.class), harness.cacheKey);
+
+        assertEquals(harness.runner, harness.runners.get(harness.cacheKey));
+    }
+
+    @Test
+    public void testRunnerIsNotCancelledIfOldJobIsCancelled() {
+        harness.doLoad();
+
+        harness.engine.onEngineJobCancelled(mock(EngineJob.class), harness.cacheKey);
+
+        verify(harness.runner, never()).cancel();
     }
 
     @Test

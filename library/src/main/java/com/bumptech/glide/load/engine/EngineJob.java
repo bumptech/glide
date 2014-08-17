@@ -13,7 +13,7 @@ import java.util.List;
  * A class that manages a load by adding and removing callbacks for for the load and notifying callbacks when the
  * load completes.
  */
-public class EngineJob implements ResourceCallback {
+class EngineJob implements ResourceCallback {
     private static final String TAG = "EngineJob";
     private boolean isCacheable;
     private final EngineJobListener listener;
@@ -61,7 +61,7 @@ public class EngineJob implements ResourceCallback {
             return;
         }
         isCancelled = true;
-        listener.onEngineJobCancelled(key);
+        listener.onEngineJobCancelled(this, key);
     }
 
     // Exposed for testing.

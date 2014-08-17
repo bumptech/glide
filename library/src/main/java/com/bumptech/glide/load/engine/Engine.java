@@ -208,9 +208,12 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     @Override
-    public void onEngineJobCancelled(Key key) {
-        ResourceRunner runner = runners.remove(key);
-        runner.cancel();
+    public void onEngineJobCancelled(EngineJob engineJob, Key key) {
+        ResourceRunner runner = runners.get(key);
+        if (runner.getJob() == engineJob) {
+            runners.remove(key);
+            runner.cancel();
+        }
     }
 
     @Override

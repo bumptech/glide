@@ -6,5 +6,5 @@ interface EngineJobListener {
 
     public void onEngineJobComplete(Key key, Resource resource);
 
-    public void onEngineJobCancelled(Key key);
+    public void onEngineJobCancelled(EngineJob engineJob, Key key);
 }
