@@ -16,7 +16,6 @@
         android:layout_marginRight="10dp"
         android:layout_weight="1"
         android:cursorVisible="true"
-        android:textCursorDrawable="@null"
         android:textSize="16sp"
         android:singleLine="true"
         android:inputType="text"

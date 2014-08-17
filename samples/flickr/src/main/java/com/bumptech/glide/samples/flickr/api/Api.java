@@ -3,6 +3,7 @@ package com.bumptech.glide.samples.flickr.api;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -16,10 +17,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,7 +34,7 @@ public class Api {
     private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
 
 
-    private static final Map<Integer, String> EDGE_TO_SIZE_KEY = new HashMap<Integer, String>() { {
+    private static final SparseArray<String> EDGE_TO_SIZE_KEY = new SparseArray<String>() {{
         put(75, "s");
         put(100, "t");
         put(150, "q");
@@ -43,10 +42,12 @@ public class Api {
         put(320, "n");
         put(640, "z");
         put(1024, "b");
-    } };
+    }};
     private static final List<Integer> SORTED_SIZE_KEYS = new ArrayList<Integer>(EDGE_TO_SIZE_KEY.size());
     static {
-        SORTED_SIZE_KEYS.addAll(EDGE_TO_SIZE_KEY.keySet());
+        for (int i = 0; i < EDGE_TO_SIZE_KEY.size(); i++) {
+            SORTED_SIZE_KEYS.add(EDGE_TO_SIZE_KEY.keyAt(i));
+        }
         Collections.sort(SORTED_SIZE_KEYS);
     }
 
