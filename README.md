@@ -16,86 +16,32 @@ branch, use Gradle:
 ```groovy
 repositories {
   mavenCentral()
-  maven {
-      url "https://oss.sonatype.org/content/repositories/snapshots"
-  }
 }
 
 dependencies {
-    compile('com.github.bumptech.glide:library:3.3.0a-SNAPSHOT:@aar') {
-        transitive = true
-        changing = true
-    }
+    compile('com.github.bumptech.glide:glide:3.3.0a')
     compile 'com.android.support:support-v4:19.0.0'
 }
 ```
 
 Or Maven:
 
-In your parent pom:
-
-```xml
-<parent>
-  <groupId>org.sonatype.oss</groupId>
-  <artifactId>oss-parent</artifactId>
-  <version>7</version>
-</parent>
-```
-
 In your module:
 
 ```xml
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
-  <artifactId>library</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <artifactId>glide</artifactId>
+  <version>3.3.0</version>
   <type>aar</type>
 </dependency>
 <dependency>
-	<groupId>com.google.android</groupId>
-	<artifactId>support-v4</artifactId>
-	<version>r7</version>
+  <groupId>com.google.android</groupId>
+  <artifactId>support-v4</artifactId>
+  <version>r7</version>
 </dependency>
 ```
 
-Volley
--------
-Volley is now an optional dependency that can be included via a utility library. More utility libraries for other
-projects will hopefully be coming soon. To use the utility library with Gradle, add:
-
-```groovy
-dependencies {
-    compile group: 'com.github.bumptech.glide', name:'volley', version:'3.3.0-SNAPSHOT', changing:true
-    compile 'com.mcxiaoke.volley:library:1.0.+'
-}
-```
-
-Or with maven:
-
-```xml
-<dependency>
-    <groupId>com.github.bumptech.glide</groupId>
-    <artifactId>volley</artifactId>
-    <version>3.3.0-SNAPSHOT</version>
-    <type>aar</type>
-</dependency>
-<dependency>
-    <groupId>com.mcxiaoke.volley</groupId>
-    <artifactId>library</artifactId>
-    <version>1.0.5</version>
-    <type>aar</type>
-</dependency>
-```
-
-Then in your Activity or Application, register the Volley based model loader:
-```java
-public void onCreate() {
-  Glide.get(this).register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(yourRequestQueue));
-  ...
-}
-```
-
-After the call to register any requests using http or https will go through Volley.
 
 How do I use Glide?
 -------------------
@@ -140,9 +86,87 @@ public View getView(int position, View recycled, ViewGroup container) {
 
 ```
 
+Volley
+-------
+Volley is now an optional dependency that can be included via a utility library. To use Volley to fetch media over http/https:
+
+With Gradle:
+
+```groovy
+dependencies {
+    compile 'com.github.bumptech.glide:volley-integration:3.3.0'
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+}
+```
+
+Or with Maven:
+
+```xml
+<dependency>
+    <groupId>com.github.bumptech.glide</groupId>
+    <artifactId>volley-integration</artifactId>
+    <version>3.3.0</version>
+    <type>jar</type>
+</dependency>
+<dependency>
+    <groupId>com.mcxiaoke.volley</groupId>
+    <artifactId>library</artifactId>
+    <version>1.0.5</version>
+    <type>aar</type>
+</dependency>
+```
+
+Then in your Activity or Application, register the Volley based model loader:
+```java
+public void onCreate() {
+  Glide.get(this).register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(yourRequestQueue));
+  ...
+}
+```
+
+After the call to register any requests using http or https will go through Volley.
+
+OkHttp
+------
+In addition to Volley, Glide also includes support for fetching media using OkHttp. To use OkHttp to fetch media over http/https:
+
+With Gradle:
+
+```groovy
+dependencies {
+    compile 'com.github.bumptech.glide:okhttp-integration:3.3.0'
+    compile 'com.squareup.okhttp:okhttp:2.0.+'
+}
+```
+
+Or with Maven:
+
+```xml
+<dependency>
+    <groupId>com.github.bumptech.glide</groupId>
+    <artifactId>okhttp-integration</artifactId>
+    <version>3.3.0</version>
+    <type>jar</type>
+</dependency>
+<dependency>
+    <groupId>com.squareup.okhttp</groupId>
+    <artifactId>okhttp</artifactId>
+    <version>2.0.0</version>
+    <type>jar</type>
+</dependency>
+```
+
+Then in your Activity or Application, register the OkHttp based model loader:
+```java
+public void onCreate() {
+  Glide.get(this).register(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(yourOkHttpClient));
+  ...
+}
+```
+
 Status
 ------
-Glide was used at Bump for around a year in two of our Android apps at version 1.0. Version 2.0 was the first public release with a stable api. Version 3.0 is a work in progress and is in use in open source projects at Google including in the Android Camera app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
+Glide was used at Bump for around a year in two of our Android apps at version 1.0. Version 2.0 was the first public release with a stable api. Version 3.0 is in the beta stage with a nearly final api and is used in multiple open source projects at Google including in the Android Camera app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
 
 Build
 ------
@@ -153,10 +177,14 @@ git clone git@github.com:bumptech/glide.git
 cd glide
 git checkout origin/3.0a
 git submodule init && git submodule update
-./gradlew build releaseJar
+./gradlew jar
 ```
 
 Note: Make sure your Android SDK has the Android Support Repository installed, and that your `$ANDROID_HOME` environment variable is pointing at the SDK.
+
+Development
+-----------
+Follow the steps in the 'Build' section to setup the project and then edit the files however you wish. Intellij's [IDEA 14 early access build](http://confluence.jetbrains.com/display/IDEADEV/IDEA+14+EAP) cleanly imports both Glide's source and tests and is the recommended way to work with Glide. Earlier versions of intellij do not import the gradle project cleanly. Although Android Studio imports the source cleanly, it is not possible to run or debug the tests without manually modifying the tests' classpath.
 
 Thanks
 ------
