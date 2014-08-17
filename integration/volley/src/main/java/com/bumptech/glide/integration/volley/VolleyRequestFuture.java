@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bumptech.glide.volley;
+package com.bumptech.glide.integration.volley;
 
 import com.android.volley.Request;
 import com.android.volley.Response;

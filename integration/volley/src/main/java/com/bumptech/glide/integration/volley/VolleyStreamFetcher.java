@@ -1,4 +1,4 @@
-package com.bumptech.glide.volley;
+package com.bumptech.glide.integration.volley;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;

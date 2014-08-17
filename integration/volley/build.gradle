@@ -1,9 +1,5 @@
 apply plugin: 'com.android.library'
 
-configurations {
-  glideArchives
-}
-
 repositories {
   mavenCentral()
 }
@@ -17,11 +13,13 @@ dependencies {
 android {
     compileSdkVersion 19
     buildToolsVersion = '19.1.0'
-    sourceSets {
-        main {
-            java.srcDirs         = ['src/main/java']
-            manifest.srcFile 'AndroidManifest.xml'
-        }
+
+    defaultConfig {
+        applicationId "com.bumptech.glide.integration.volley"
+        minSdkVersion 10
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0.0"
     }
 }
 
