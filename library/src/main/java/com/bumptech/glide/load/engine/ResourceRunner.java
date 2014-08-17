@@ -79,20 +79,43 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
             return;
         }
 
+        Resource<R> result = null;
+        try {
+            result = runWrapped();
+        } catch (Exception e) {
+            job.onException(e);
+        }
+        if (result != null) {
+            job.onResourceReady(result);
+        } else {
+            submitSourceRunner();
+        }
+    }
+
+    private Resource<R> runWrapped() throws Exception {
         long start = SystemClock.currentThreadTimeMillis();
         Resource<Z> fromCache = cacheLoader.load(key, cacheDecoder, width, height);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "loaded from disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
         }
+
+        Resource<R> transcoded = null;
         if (fromCache != null) {
             Resource<Z> transformed = transformation.transform(fromCache, width, height);
             if (transformed != fromCache) {
                 fromCache.recycle();
             }
-            Resource<R> transcoded = transcoder.transcode(transformed);
-            job.onResourceReady(transcoded);
-        } else {
+            transcoded = transcoder.transcode(transformed);
+        }
+        return transcoded;
+    }
+
+    private void submitSourceRunner() {
+        try {
             future = resizeService.submit(sourceRunner);
+        } catch (Exception e) {
+            // A variety of exceptions can be thrown here, particularly related to when/if the pool is shutdown.
+            job.onException(e);
         }
     }
 

@@ -118,53 +118,55 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
             return;
         }
 
+        Resource<R> result = null;
         try {
-            long start = SystemClock.currentThreadTimeMillis();
-            Resource<Z> decoded = cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
-
-            if (decoded == null) {
-                decoded = decodeFromSource();
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Decoded from source in " + (SystemClock.currentThreadTimeMillis() - start) + " cache");
-                    start = SystemClock.currentThreadTimeMillis();
-                }
-            }
-
-            Resource<Z> result = null;
-
-            if (decoded != null) {
-                Resource<Z> transformed = transformation.transform(decoded, width, height);
-                if (decoded != transformed) {
-                    decoded.recycle();
-                }
-                result = transformed;
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "transformed in " + (SystemClock.currentThreadTimeMillis() - start));
-                }
-            }
-
-            if (result != null) {
-                if (diskCacheStrategy.cacheResult()) {
-                    diskCache.put(key, writerFactory.build(encoder, result));
-                }
-                start = SystemClock.currentThreadTimeMillis();
-                Resource<R> transcoded = transcoder.transcode(result);
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.d(TAG, "transcoded in " + (SystemClock.currentThreadTimeMillis() - start));
-                }
-                cb.onResourceReady(transcoded);
-            } else {
-                cb.onException(null);
-            }
-
+            result = runWrapped();
         } catch (Exception e) {
             cb.onException(e);
         }
+
+        if (result == null) {
+            cb.onException(null);
+        } else {
+            cb.onResourceReady(result);
+        }
     }
 
-    private Resource<Z> encodeSourceAndDecodeFromCache(final T data) {
-        diskCache.put(key.getOriginalKey(), writerFactory.build(sourceEncoder, data));
-        return cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
+    private Resource<R> runWrapped() throws Exception {
+        long start = SystemClock.currentThreadTimeMillis();
+        Resource<Z> decoded = cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
+
+        if (decoded == null) {
+            decoded = decodeFromSource();
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Decoded from source in " + (SystemClock.currentThreadTimeMillis() - start) + " cache");
+                start = SystemClock.currentThreadTimeMillis();
+            }
+        }
+
+        Resource<Z> transformed = null;
+        if (decoded != null) {
+            transformed = transformation.transform(decoded, width, height);
+            if (decoded != transformed) {
+                decoded.recycle();
+            }
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "transformed in " + (SystemClock.currentThreadTimeMillis() - start));
+            }
+        }
+
+        Resource<R> transcoded = null;
+        if (transformed != null) {
+            if (diskCacheStrategy.cacheResult()) {
+                diskCache.put(key, writerFactory.build(encoder, transformed));
+            }
+            start = SystemClock.currentThreadTimeMillis();
+            transcoded = transcoder.transcode(transformed);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.d(TAG, "transcoded in " + (SystemClock.currentThreadTimeMillis() - start));
+            }
+        }
+        return transcoded;
     }
 
     private Resource<Z> decodeFromSource() throws Exception {
@@ -182,6 +184,11 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
         }
 
         return null;
+    }
+
+    private Resource<Z> encodeSourceAndDecodeFromCache(final T data) {
+        diskCache.put(key.getOriginalKey(), writerFactory.build(sourceEncoder, data));
+        return cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
     }
 
     @Override

@@ -331,6 +331,95 @@ public class SourceResourceRunnerTest {
         verify(harness.cb).onResourceReady(eq(harness.transcoded));
     }
 
+    @Test
+    public void testNotifiesJobOfFailureIfCacheLoaderThrows() {
+        final Exception exception = new RuntimeException("test");
+        when(harness.cacheLoader.load(any(Key.class), any(ResourceDecoder.class), anyInt(), anyInt())).thenAnswer(
+                new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        throw exception;
+                    }
+                });
+        harness.getRunner().run();
+        verify(harness.cb).onException(eq(exception));
+    }
+
+    @Test
+    public void testNotifiesJobOfFailureIfTransformationThrows() throws Exception {
+        harness.mockSuccessfulFetchAndDecode();
+
+        final Exception exception = new RuntimeException("test");
+        when(harness.transformation.transform(any(Resource.class), anyInt(), anyInt())).thenAnswer(
+                new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        throw exception;
+                    }
+                });
+        harness.getRunner().run();
+        verify(harness.cb).onException(eq(exception));
+    }
+
+    @Test
+    public void testNotifiesJobOfFailureIfDiskCacheThrows() throws Exception {
+        harness.mockSuccessfulFetchAndDecode();
+
+        final Exception exception = new IOException("test");
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                throw exception;
+            }
+        }).when(harness.diskCache).put(any(Key.class), any(DiskCache.Writer.class));
+        harness.getRunner().run();
+        verify(harness.cb).onException(eq(exception));
+    }
+
+    @Test
+    public void testNotifiesJobOfFailureIfTranscoderThrows() throws Exception {
+        harness.mockSuccessfulFetchAndDecode();
+
+        final Exception exception = new RuntimeException("test");
+        when(harness.transcoder.transcode(any(Resource.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                throw exception;
+            }
+        });
+
+        harness.getRunner().run();
+        verify(harness.cb).onException(eq(exception));
+    }
+
+    @Test
+    public void testNotifiesJobOfFailureIfFetcherThrows() throws Exception {
+        final IOException exception = new IOException("test");
+        when(harness.fetcher.loadData(any(Priority.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                throw exception;
+            }
+        });
+        harness.getRunner().run();
+        verify(harness.cb).onException(eq(exception));
+    }
+
+    @Test
+    public void testNotifiesJobOfFailureIfDecoderThrows() throws Exception {
+        when(harness.fetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
+
+        final Exception exception = new RuntimeException("test");
+        when(harness.decoder.decode(anyObject(), anyInt(), anyInt())).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                throw exception;
+            }
+        });
+        harness.getRunner().run();
+        verify(harness.cb).onException(exception);
+    }
+
     @SuppressWarnings("unchecked")
     private static class SourceResourceHarness {
         CacheLoader cacheLoader = mock(CacheLoader.class);
