@@ -1,0 +1,106 @@
+apply plugin: 'java'
+
+evaluationDependsOn(":third_party:gif_decoder")
+evaluationDependsOn(":third_party:disklrucache")
+evaluationDependsOn(":library")
+
+def getAndroidSdkDirectory() {
+  project(":library").android.sdkDirectory
+}
+
+def getAndroidCompileSdkVersion() {
+  project(":library").android.compileSdkVersion
+}
+
+def getInternalAndroidProjects() {
+    [':third_party:gif_decoder', ':library'].collect { project(it) }
+}
+def getInternalJavaProjects() {
+    [':third_party:disklrucache'].collect { project(it) }
+}
+
+def getAllInternalProjects() {
+    getInternalAndroidProjects() + getInternalJavaProjects()
+}
+
+def getReleaseVariantAndroidProjects() {
+    getAndroidLibraryVariants("release")
+}
+
+def getAndroidLibraryVariants(variantName) {
+    getInternalAndroidProjects().collect { project ->
+        project.android.libraryVariants.findAll { type ->
+            type.buildType.name.equalsIgnoreCase(variantName)
+        }
+    }.sum()
+}
+
+def getSourceFilesForVariant(variantName) {
+    getAndroidLibraryVariants(variantName).collect { it.javaCompile.source } +
+            getInternalJavaProjects().collect { it.sourceSets.main.allJava }
+}
+
+def getAndroidJar() {
+    "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
+}
+
+// Generate javadocs and sources containing batched documentation and sources for all internal projects.
+["release", "debug"].each { variantName ->
+
+    task("${variantName}SourceJar", type: Jar) {
+      classifier = 'sources'
+      from getSourceFilesForVariant(variantName)
+    }
+
+    def javadocTask = task("${variantName}Javadoc", type: Javadoc) {
+        classifier = 'javadoc'
+
+        source = getSourceFilesForVariant(variantName)
+
+        classpath = files(getAndroidLibraryVariants(variantName).collect {
+            files(it.javaCompile.classpath.files, getAndroidJar())
+        })
+        classpath += getInternalJavaProjects().collect { files(it.configurations.compile) }
+
+        options {
+            links("http://docs.oracle.com/javase/7/docs/api/")
+            linksOffline("http://d.android.com/reference", "${getAndroidSdkDirectory()}/docs/reference")
+        }
+
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+    }
+
+    def cleanJavadocTask = task("clean${variantName.capitalize()}Javadoc", type: Delete) {
+        delete javadocTask.destinationDir
+    }
+    clean.dependsOn(cleanJavadocTask)
+
+    def javadocJarTask = task("${variantName}JavadocJar", type: Jar) {
+      classifier = 'javadoc'
+      from javadocTask.destinationDir
+    }
+    javadocJarTask.dependsOn(javadocTask)
+}
+
+jar {
+    from files(
+            getReleaseVariantAndroidProjects().collect { variant ->
+                variant.javaCompile.destinationDir
+            }
+    )
+    exclude "**/R.class"
+    exclude "**/BuildConfig.class"
+    from files(getInternalJavaProjects().collect { it.sourceSets.main.output })
+}
+
+getAllInternalProjects().each { project ->
+    jar.dependsOn(project.build)
+}
+
+artifacts {
+    archives releaseJavadocJar
+    archives releaseSourceJar
+}
+
+apply from: "$rootProject.projectDir/scripts/upload.gradle"

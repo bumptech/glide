@@ -21,6 +21,7 @@ allprojects {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
     }
+
     apply plugin: 'checkstyle'
 
     checkstyle {
@@ -37,122 +38,7 @@ allprojects {
     }
 }
 
-apply plugin: 'java'
-
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
 }
 
-evaluationDependsOn(":third_party:gif_decoder")
-evaluationDependsOn(":third_party:disklrucache")
-evaluationDependsOn(":library")
-
-def getAndroidSdkDirectory() {
-  project("library").android.sdkDirectory
-}
-
-def getAndroidCompileSdkVersion() {
-  project("library").android.compileSdkVersion
-}
-
-def getAndroidChildren() {
-    subprojects.findAll { project -> project.plugins.hasPlugin('android-library') }
-}
-
-// For now this is just [release, debug]
-def getAndroidLibraryVariants() {
-    getAndroidChildren().collect { project ->
-        project.android.libraryVariants
-    }.sum().unique{ it.name }
-}
-
-// Currently the only excluded project is the :integration:volley project.
-def androidProjects = [':third_party:gif_decoder', ':library'].collect { project(it) }
-def javaProjects = [':third_party:disklrucache'].collect { project(it) }
-def allProjects = androidProjects + javaProjects
-def releaseVariantAndroidProjects = androidProjects.collect {
-    it.android.libraryVariants.findAll { variant ->
-        variant.buildType.name.equalsIgnoreCase("release")
-    }
-}
-
-// Generate javadocs and sources containing batched documentation and sources for all subprojects.
-getAndroidLibraryVariants().each { variant ->
-    def androidJar = "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
-    def destinationDirPath = "${getProjectDir()}/doc/${variant.baseName}"
-
-    // Get the variant from each subproject that matches our current variant name.
-    def childEquivalentChildVariants = getAndroidChildren().collect { project ->
-        project.android.libraryVariants.findAll { type -> type.name == variant.name }
-    }.sum()
-
-    // Collect the source files from all android and java subprojects
-    def sourceFiles = childEquivalentChildVariants.collect { it.javaCompile.source } +
-                      javaProjects.collect { it.sourceSets.main.allJava }
-
-    task("${variant.name}SourceJar", type: Jar) {
-      classifier = 'sources'
-      from sourceFiles
-    }
-
-    def cleanJavadocTask = task("clean${variant.name.capitalize()}Javadoc", type: Delete) {
-        delete destinationDirPath
-    }
-    clean.dependsOn(cleanJavadocTask)
-
-    def javadocTask = task("${variant.name}Javadoc", type: Javadoc) {
-        classifier = 'javadoc'
-
-        source = sourceFiles
-
-        classpath = files(childEquivalentChildVariants.collect {
-            files(it.javaCompile.classpath.files, androidJar)
-        })
-        classpath += javaProjects.collect { files(it.configurations.compile) }
-
-        options {
-            links("http://docs.oracle.com/javase/7/docs/api/")
-            linksOffline("http://d.android.com/reference", "${getAndroidSdkDirectory()}/docs/reference")
-        }
-
-        exclude '**/BuildConfig.java'
-        exclude '**/R.java'
-
-        destinationDir = new File(destinationDirPath)
-    }
-
-    def javadocJarTask = task("${variant.name}JavadocJar", type: Jar) {
-      classifier = 'javadoc'
-      from javadocTask.destinationDir
-    }
-    javadocJarTask.dependsOn(javadocTask)
-}
-
-/** Build a fat jar of all internal dependencies */
-def releaseJarOut = 'bin'
-
-jar {
-    from files(
-            releaseVariantAndroidProjects.collect { variant ->
-                variant.javaCompile.destinationDir
-            }
-    )
-    exclude "**/R.class"
-    exclude "**/BuildConfig.class"
-    from files(javaProjects.collect { it.sourceSets.main.output })
-
-    destinationDir = file(releaseJarOut)
-}
-
-allProjects.each { project ->
-    if (!project.getPlugins().hasPlugin('android')) {
-        jar.dependsOn(project.build)
-    }
-}
-
-artifacts {
-    archives releaseJavadocJar
-    archives releaseSourceJar
-}
-
-apply from: "$rootProject.projectDir/scripts/upload.gradle"

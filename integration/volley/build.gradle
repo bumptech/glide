@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':library')
+    compile project(':glide')
 
     compile 'com.mcxiaoke.volley:library:1.0.+'
 }
