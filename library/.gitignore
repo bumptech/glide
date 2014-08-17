@@ -1,9 +1,0 @@
-tests/ant.properties
-tests/local.properties
-tests/gen/**/*
-tests/bin
-libs/volley.jar
-libs/gifdecoder*.jar
-libs/disklrucache*.jar
-doc/**/*
-

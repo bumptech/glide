@@ -10,7 +10,7 @@ import com.bumptech.glide.util.Util;
  * A {@link com.bumptech.glide.load.engine.Resource} that wraps an {@link android.graphics.drawable.BitmapDrawable}
  * <p>
  *     This class ensures that every call to {@link #get()}} always returns a new
- *     {@link android.graphics.drawable .BitmapDrawable} to avoid rendering issues if used in multiple views and
+ *     {@link android.graphics.drawable.BitmapDrawable} to avoid rendering issues if used in multiple views and
  *     is also responsible for returning the underlying {@link android.graphics.Bitmap} to the given
  *     {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} when the resource is recycled.
  * </p>

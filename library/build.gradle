@@ -17,20 +17,10 @@ android {
     buildToolsVersion = '19.1.0'
 
     defaultConfig {
+        applicationId "com.bumptech.glide"
         minSdkVersion 10
         targetSdkVersion 19
         versionCode = VERSION_CODE
         versionName = VERSION_NAME
-    }
-
-    sourceSets {
-        main {
-            java.srcDirs         = ['src/main/java']
-            manifest.srcFile 'AndroidManifest.xml'
-        }
-
-        androidTest {
-            java.srcDirs = ['src/test/java']
-        }
     }
 }
