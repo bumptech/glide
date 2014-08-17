@@ -485,7 +485,9 @@ public class ImageManager {
                 // receive results from old runners if the old runner was cancelled, but completed successfully anyway
                 // because it received the cancellation too late.
                 runner.cancel();
-                jobs.remove(key);
+                if (jobs.get(key) == this) {
+                    jobs.remove(key);
+                }
             }
         }
 
