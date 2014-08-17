@@ -1,0 +1,13 @@
+evaluationDependsOnChildren()
+
+subprojects {
+    android.libraryVariants.all { variant ->
+        def jarTask = project.tasks.create(name: "jar${variant.name.capitalize()}", type: Jar) {
+            from variant.javaCompile.destinationDir
+            exclude "**/R.class"
+            exclude "**/BuildConfig.class"
+        }
+        jarTask.dependsOn variant.javaCompile
+        artifacts.add('archives', jarTask);
+    }
+}
