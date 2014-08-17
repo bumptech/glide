@@ -3,5 +3,5 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
    android:id="@+id/gif_view"
    android:layout_width="match_parent"
-   android:layout_height="100dp">
-</ImageView>
+   android:layout_height="100dp"
+   android:contentDescription="@string/image_description" />

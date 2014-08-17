@@ -1,25 +1,20 @@
 apply plugin: 'com.android.application'
 
+dependencies {
+    compile project(':library')
+    compile 'com.google.code.gson:gson:2.2.4'
+}
+
 android {
     compileSdkVersion 19
     buildToolsVersion "19.1.0"
 
     defaultConfig {
-        applicationId "com.bumptech.glide.giphy"
+        applicationId "com.bumptech.glide.samples.giphy"
         minSdkVersion 14
         targetSdkVersion 19
         versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+        versionName "1.0.0"
     }
 }
 
-dependencies {
-    compile project(':library')
-    compile 'com.google.code.gson:gson:2.2.4'
-}

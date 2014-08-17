@@ -7,33 +7,15 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.+'
 }
 
-ext {
-    versionMajor = 1
-    versionMinor = 0
-    versionPatch = 0
-    versionBuild = 1
-}
-
-def getVersionName() {
-    return "${versionMajor}.${versionMinor}.${versionPatch}a"
-}
-
 android {
     compileSdkVersion 19
     buildToolsVersion = '19.1.0'
 
     defaultConfig {
+        applicationId "com.bumptech.glide.samples.flickr"
         minSdkVersion 10
         targetSdkVersion 19
-        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
-        versionName getVersionName()
-    }
-
-    sourceSets {
-        main {
-            java.srcDirs         = ['src/main/java']
-            res.srcDirs          = ['res']
-            manifest.srcFile 'AndroidManifest.xml'
-        }
+        versionCode 1
+        versionName "1.0.0"
     }
 }

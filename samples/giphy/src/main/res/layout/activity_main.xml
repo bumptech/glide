@@ -12,7 +12,9 @@
         android:id="@+id/giphy_logo_view"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@string/giphy_logo_description"
+        />
     <ListView
         android:id="@+id/gif_list"
         android:layout_width="match_parent"
