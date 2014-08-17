@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':library')
+
+    compile 'com.squareup.okhttp:okhttp:2.0.+'
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.1.0"
+
+    defaultConfig {
+        applicationId "com.bumptech.glide.integration.okhttp"
+        minSdkVersion 10
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0.0"
+    }
+}
+
