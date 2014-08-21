@@ -2,8 +2,8 @@ Glide
 =====
 Glide is fast and efficient image loading library for Android that wraps image downloading, resizing, memory and disk
 caching, and bitmap recycling into one simple and easy to use interface. Glide includes a flexible api allowing it to
-plug in to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes a
-utility library to plug in to Google's Volley project instead.
+plug in to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes
+utility libraries plug in to Google's Volley project or Square's OkHttp library instead.
 
 Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
 also effective for almost any case where you need to fetch, resize, and display a remote image.
@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.github.bumptech.glide:glide:3.3.0a')
+    compile 'com.github.bumptech.glide:glide:3.3.0'
     compile 'com.android.support:support-v4:19.0.0'
 }
 ```
@@ -42,7 +42,6 @@ In your module:
 </dependency>
 ```
 
-
 How do I use Glide?
 -------------------
 Checkout the GitHub wiki for pages on a variety of topics and links to javadocs.
@@ -51,7 +50,7 @@ Simple use cases will look something like this:
 
 ```Java
 
-//For a simple view:
+// For a simple view:
 @Override
 public void onCreate(Bundle savedInstanceState) {
     ...
@@ -61,7 +60,7 @@ public void onCreate(Bundle savedInstanceState) {
     Glide.with(this).load("http://goo.gl/h8qOq7").into(imageView);
 }
 
-//For a list:
+// For a list:
 @Override
 public View getView(int position, View recycled, ViewGroup container) {
     final ImageView myImageView;
@@ -166,7 +165,7 @@ public void onCreate() {
 
 Status
 ------
-Glide was used at Bump for around a year in two of our Android apps at version 1.0. Version 2.0 was the first public release with a stable api. Version 3.0 is in the beta stage with a nearly final api and is used in multiple open source projects at Google including in the Android Camera app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
+Version 3.0 is in the beta stage with a nearly final api and is used in multiple open source projects at Google including in the Android Camera app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
 
 Build
 ------
@@ -184,12 +183,24 @@ Note: Make sure your Android SDK has the Android Support Repository installed, a
 
 Development
 -----------
-Follow the steps in the 'Build' section to setup the project and then edit the files however you wish. Intellij's [IDEA 14 early access build](http://confluence.jetbrains.com/display/IDEADEV/IDEA+14+EAP) cleanly imports both Glide's source and tests and is the recommended way to work with Glide. Earlier versions of intellij do not import the gradle project cleanly. Although Android Studio imports the source cleanly, it is not possible to run or debug the tests without manually modifying the tests' classpath.
+Follow the steps in the 'Build' section to setup the project and then edit the files however you wish. Intellij's [IDEA 14 early access build](http://confluence.jetbrains.com/display/IDEADEV/IDEA+14+EAP) cleanly imports both Glide's source and tests and is the recommended way to work with Glide. Earlier versions of intellij do not import the gradle project cleanly. Although Android Studio imports the source cleanly, it is not possible to run or debug the tests without manually modifying the tests' classpath. To open the project in Intellij 14 go to File > Open... > navigate to Glide's root directory > select settings.gradle.
+
+Getting Help
+------------
+To report a specific problem or feature request, [open a new issue on Github](https://github.com/bumptech/glide/issues/new). For questions, suggestions, or anything else, join or email [Glide's discussion group](https://groups.google.com/forum/#!forum/glidelibrary)
+
+Contributing
+------------
+Before submitting pull requests, contributors must sign Google's [individual contribution license agreement](https://developers.google.com/open-source/cla/individual).
 
 Thanks
 ------
-Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) included with Glide. Thanks also to the Android team for [Volley](https://android.googlesource.com/platform/frameworks/volley/). Thanks to Dave Smith for his [GifDecoder gist](https://gist.github.com/devunwired/4479231) on which Glide's is based. Thanks also to everyone who has contributed code and reported issues!
+Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) Glide's disk cache is based on, to Dave Smith for the [gif decoder implementation](https://gist.github.com/devunwired/4479231) Glide's gif decoder is based on and thanks also to everyone who has contributed code and reported issues!
 
 Author
 ------
 Sam Judd - @samajudd
+
+Disclaimer
+---------
+This is not an official Google product.
