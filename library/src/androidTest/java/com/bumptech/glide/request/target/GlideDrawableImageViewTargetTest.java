@@ -25,12 +25,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class DrawableImageViewTargetTest {
+public class GlideDrawableImageViewTargetTest {
 
     @Test
     public void testSetsDrawableOnViewInSetResource() {
         ImageView view = new ImageView(Robolectric.application);
-        DrawableImageViewTarget target = new DrawableImageViewTarget(view);
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(view);
         GlideDrawable expected = new MockAnimatedDrawable();
 
         target.setResource(expected);
@@ -43,7 +43,7 @@ public class DrawableImageViewTargetTest {
         ImageView mockView = mock(ImageView.class);
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(100);
-        DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(mockView);
         GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
@@ -75,7 +75,7 @@ public class DrawableImageViewTargetTest {
         ImageView mockView = mock(ImageView.class);
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(100);
-        DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(mockView);
         GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
@@ -105,7 +105,7 @@ public class DrawableImageViewTargetTest {
         ImageView mockView = mock(ImageView.class);
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(100);
-        DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(mockView);
         GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
@@ -135,7 +135,7 @@ public class DrawableImageViewTargetTest {
         ImageView mockView = mock(ImageView.class);
         when(mockView.getWidth()).thenReturn(100);
         when(mockView.getHeight()).thenReturn(150);
-        DrawableImageViewTarget target = new DrawableImageViewTarget(mockView);
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(mockView);
         GlideDrawable drawable = new MockAnimatedDrawable() {
             @Override
             public int getIntrinsicHeight() {
@@ -163,7 +163,7 @@ public class DrawableImageViewTargetTest {
     @Test
     public void testStartsAnimatableDrawablesInOnReasourceReady() {
         MockAnimatedDrawable drawable = new MockAnimatedDrawable();
-        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(new ImageView(Robolectric.application));
         target.onResourceReady(drawable, null);
 
         assertTrue(drawable.isStarted);
@@ -172,7 +172,7 @@ public class DrawableImageViewTargetTest {
     @Test
     public void testStartsAnimatableDrawablesOnStart() {
         MockAnimatedDrawable drawable = new MockAnimatedDrawable();
-        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(new ImageView(Robolectric.application));
         target.onResourceReady(drawable, null);
         target.onStop();
         target.onStart();
@@ -182,14 +182,14 @@ public class DrawableImageViewTargetTest {
 
     @Test
     public void testDoesNotStartNullDrawablesOnStart() {
-        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(new ImageView(Robolectric.application));
         target.onStart();
     }
 
     @Test
     public void testStopsAnimatedDrawablesOnStop() {
         MockAnimatedDrawable drawable = new MockAnimatedDrawable();
-        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(new ImageView(Robolectric.application));
         target.onResourceReady(drawable, null);
         target.onStop();
 
@@ -198,7 +198,7 @@ public class DrawableImageViewTargetTest {
 
     @Test
     public void testDoesNotStopNullDrawablesOnStop() {
-        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application));
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(new ImageView(Robolectric.application));
         target.onStop();
     }
 
@@ -206,7 +206,7 @@ public class DrawableImageViewTargetTest {
     public void testSetsLoopCountOnDrawable() {
         int maxLoopCount = 6;
         MockAnimatedDrawable drawable = new MockAnimatedDrawable();
-        DrawableImageViewTarget target = new DrawableImageViewTarget(new ImageView(Robolectric.application),
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(new ImageView(Robolectric.application),
                 maxLoopCount);
         target.onResourceReady(drawable, null);
         assertEquals(maxLoopCount, drawable.loopCount);

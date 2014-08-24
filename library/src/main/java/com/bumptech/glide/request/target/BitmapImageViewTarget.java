@@ -7,7 +7,7 @@ import android.widget.ImageView;
  * A {@link com.bumptech.glide.request.target.Target} that can display an {@link android.graphics.Bitmap} in an
  * {@link android.widget.ImageView}.
  *
- * @see com.bumptech.glide.request.target.DrawableImageViewTarget
+ * @see GlideDrawableImageViewTarget
  */
 public class BitmapImageViewTarget extends ImageViewTarget<Bitmap> {
     private final ImageView view;
