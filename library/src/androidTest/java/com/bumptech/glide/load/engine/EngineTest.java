@@ -122,7 +122,7 @@ public class EngineTest {
 
     @Test
     public void testResourceIsReturnedFromActiveResourcesIfPresent() {
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(harness.resource));
 
         harness.doLoad();
 
@@ -131,7 +131,7 @@ public class EngineTest {
 
     @Test
     public void testResourceIsNotReturnedFromActiveResourcesIfRefIsCleared() {
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(null));
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(null));
 
         harness.doLoad();
 
@@ -140,7 +140,7 @@ public class EngineTest {
 
     @Test
     public void testKeyIsRemovedFromActiveResourcesIfRefIsCleared() {
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(null));
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(null));
 
         harness.doLoad();
 
@@ -149,7 +149,7 @@ public class EngineTest {
 
     @Test
     public void testResourceIsAcquiredIfReturnedFromActiveResources() {
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(harness.resource));
 
         harness.doLoad();
 
@@ -158,7 +158,7 @@ public class EngineTest {
 
     @Test
     public void testNewLoadIsNotStartedIfResourceIsActive() {
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(harness.resource));
 
         harness.doLoad();
 
@@ -167,7 +167,7 @@ public class EngineTest {
 
     @Test
     public void testNullLoadStatusIsReturnedIfResourceIsActive() {
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(harness.resource));
 
         assertNull(harness.doLoad());
     }
@@ -175,8 +175,8 @@ public class EngineTest {
     @Test
     public void testActiveResourcesIsNotCheckedIfReturnedFromCache() {
         when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
-        Resource other = mock(Resource.class);
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(other));
+        EngineResource other = mock(EngineResource.class);
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(other));
 
         harness.doLoad();
 
@@ -223,7 +223,7 @@ public class EngineTest {
 
     @Test
     public void testNewLoadIsNotStartedIfResourceIsCached() {
-        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(mock(Resource.class));
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(mock(EngineResource.class));
 
         harness.doLoad();
 
@@ -232,7 +232,7 @@ public class EngineTest {
 
     @Test
     public void testNullLoadStatusIsReturnedForCachedResource() {
-        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(mock(Resource.class));
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(mock(EngineResource.class));
 
         Engine.LoadStatus loadStatus = harness.doLoad();
         assertNull(loadStatus);
@@ -276,7 +276,7 @@ public class EngineTest {
     public void testResourceIsAddedToActiveResourcesOnEngineComplete() {
         harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
 
-        WeakReference<Resource> resourceRef = harness.activeResources.get(harness.cacheKey);
+        WeakReference<EngineResource> resourceRef = harness.activeResources.get(harness.cacheKey);
         assertEquals(harness.resource, resourceRef.get());
     }
 
@@ -350,7 +350,7 @@ public class EngineTest {
 
     @Test
     public void testResourceIsRemovedFromActiveResourcesWhenReleased() {
-        harness.activeResources.put(harness.cacheKey, new WeakReference<Resource>(harness.resource));
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource>(harness.resource));
 
         harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
 
@@ -430,11 +430,11 @@ public class EngineTest {
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         Priority priority = Priority.NORMAL;
         ResourceCallback cb = mock(ResourceCallback.class);
-        Resource resource = mock(Resource.class);
+        EngineResource resource = mock(EngineResource.class);
         Map<Key, ResourceRunner> runners = new HashMap<Key, ResourceRunner>();
         Transformation transformation = mock(Transformation.class);
         ResourceRunnerFactory factory = mock(ResourceRunnerFactory.class);
-        Map<Key, WeakReference<Resource>> activeResources = new HashMap<Key, WeakReference<Resource>>();
+        Map<Key, WeakReference<EngineResource>> activeResources = new HashMap<Key, WeakReference<EngineResource>>();
         Encoder<Object> sourceEncoder = mock(Encoder.class);
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
 

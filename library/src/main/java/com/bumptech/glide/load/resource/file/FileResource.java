@@ -7,7 +7,7 @@ import java.io.File;
 /**
  * A simple {@link com.bumptech.glide.load.engine.Resource} that wraps a {@link File}.
  */
-public class FileResource extends Resource<File> {
+public class FileResource implements Resource<File> {
     private File file;
 
     public FileResource(File file) {
@@ -26,7 +26,7 @@ public class FileResource extends Resource<File> {
     }
 
     @Override
-    protected void recycleInternal() {
+    public void recycle() {
 
     }
 }

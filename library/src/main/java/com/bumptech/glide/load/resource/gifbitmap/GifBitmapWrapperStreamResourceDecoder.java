@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.gifbitmap;
 
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 
 import java.io.IOException;

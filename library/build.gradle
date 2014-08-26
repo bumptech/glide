@@ -19,6 +19,7 @@ android {
     defaultConfig {
         applicationId 'com.bumptech.glide'
         minSdkVersion 10
+
         targetSdkVersion 19
         versionCode = VERSION_CODE
         versionName = VERSION_NAME

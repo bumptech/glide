@@ -5,7 +5,7 @@ import com.bumptech.glide.load.engine.Resource;
 /**
  * A resource wrapping an {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
  */
-public class GifDrawableResource extends Resource<GifDrawable> {
+public class GifDrawableResource implements Resource<GifDrawable> {
     private final GifDrawable drawable;
     private boolean returnedInitial;
 
@@ -29,7 +29,7 @@ public class GifDrawableResource extends Resource<GifDrawable> {
     }
 
     @Override
-    protected void recycleInternal() {
+    public void recycle() {
         drawable.stop();
         drawable.recycle();
     }

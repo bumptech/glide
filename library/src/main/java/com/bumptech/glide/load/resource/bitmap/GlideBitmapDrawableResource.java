@@ -7,7 +7,7 @@ import com.bumptech.glide.util.Util;
 /**
  * A resource wrapper for {@link com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable}.
  */
-public class GlideBitmapDrawableResource extends Resource<GlideBitmapDrawable> {
+public class GlideBitmapDrawableResource implements Resource<GlideBitmapDrawable> {
     private GlideBitmapDrawable drawable;
     private BitmapPool bitmapPool;
     private boolean returnedOriginalDrawable;
@@ -35,7 +35,7 @@ public class GlideBitmapDrawableResource extends Resource<GlideBitmapDrawable> {
     }
 
     @Override
-    protected void recycleInternal() {
+    public void recycle() {
         bitmapPool.put(drawable.getBitmap());
     }
 }

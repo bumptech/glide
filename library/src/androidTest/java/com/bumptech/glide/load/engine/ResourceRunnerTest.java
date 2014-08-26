@@ -80,7 +80,6 @@ public class ResourceRunnerTest {
         harness.runner.run();
 
         verify(harness.transformed, never()).recycle();
-        verify(harness.transformed, never()).release();
     }
 
     @Test

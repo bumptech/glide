@@ -8,7 +8,7 @@ import com.bumptech.glide.util.Util;
 /**
  * A resource wrapping a {@link android.graphics.Bitmap} object.
  */
-public class BitmapResource extends Resource<Bitmap> {
+public class BitmapResource implements Resource<Bitmap> {
     private Bitmap bitmap;
     private BitmapPool bitmapPool;
 
@@ -28,7 +28,7 @@ public class BitmapResource extends Resource<Bitmap> {
     }
 
     @Override
-    public void recycleInternal() {
+    public void recycle() {
         if (!bitmapPool.put(bitmap)) {
             bitmap.recycle();
         }

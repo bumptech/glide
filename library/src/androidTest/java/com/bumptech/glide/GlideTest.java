@@ -13,11 +13,11 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.EngineResource;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -39,7 +39,6 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.GlideShadowLooper;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -256,7 +255,7 @@ public class GlideTest {
         requestManager.load(file).into(target);
         requestManager.load(file).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(EngineResource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());

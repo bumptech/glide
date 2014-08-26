@@ -5,7 +5,7 @@ import com.bumptech.glide.load.engine.Resource;
 /**
  * An {@link com.bumptech.glide.load.engine.Resource} wrapping a byte array.
  */
-public class BytesResource extends Resource<byte[]> {
+public class BytesResource implements Resource<byte[]> {
     private byte[] bytes;
 
     public BytesResource(byte[] bytes) {
@@ -23,7 +23,7 @@ public class BytesResource extends Resource<byte[]> {
     }
 
     @Override
-    protected void recycleInternal() {
+    public void recycle() {
         // Do nothing.
     }
 }

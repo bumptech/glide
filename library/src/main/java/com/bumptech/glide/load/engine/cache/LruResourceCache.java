@@ -3,13 +3,13 @@ package com.bumptech.glide.load.engine.cache;
 import android.annotation.SuppressLint;
 
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.EngineResource;
 import com.bumptech.glide.util.LruCache;
 
 /**
  * An LRU in memory cache for {@link com.bumptech.glide.load.engine.Resource}s.
  */
-public class LruResourceCache extends LruCache<Key, Resource<?>> implements MemoryCache {
+public class LruResourceCache extends LruCache<Key, EngineResource<?>> implements MemoryCache {
     private ResourceRemovedListener listener;
 
     /**
@@ -27,14 +27,14 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
     }
 
     @Override
-    protected void onItemEvicted(Key key, Resource<?> item) {
+    protected void onItemEvicted(Key key, EngineResource<?> item) {
         if (listener != null) {
             listener.onResourceRemoved(item);
         }
     }
 
     @Override
-    protected int getSize(Resource<?> item) {
+    protected int getSize(EngineResource<?> item) {
         return item.getSize();
     }
 

@@ -13,60 +13,84 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class ResourceTest {
-    private MockResource resource;
-    private Resource.ResourceListener listener;
+public class EngineResourceTest {
+    private EngineResource<Object> engineResource;
+    private EngineResource.ResourceListener listener;
     private Key cacheKey = mock(Key.class);
+    private Resource<Object> resource;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        resource = new MockResource();
-        listener = mock(Resource.ResourceListener.class);
-        resource.setResourceListener(cacheKey, listener);
+        resource = mock(Resource.class);
+        engineResource = new EngineResource<Object>(resource);
+        listener = mock(EngineResource.ResourceListener.class);
+        engineResource.setResourceListener(cacheKey, listener);
     }
 
     @Test
     public void testCanAcquireAndRelease() {
-        resource.acquire(1);
-        resource.release();
+        engineResource.acquire(1);
+        engineResource.release();
 
-        verify(listener).onResourceReleased(cacheKey, resource);
+        verify(listener).onResourceReleased(cacheKey, engineResource);
     }
 
     @Test
     public void testCanAcquireMultipleTimesAndRelease() {
-        resource.acquire(2);
-        resource.release();
-        resource.release();
+        engineResource.acquire(2);
+        engineResource.release();
+        engineResource.release();
 
-        verify(listener).onResourceReleased(eq(cacheKey), eq(resource));
+        verify(listener).onResourceReleased(eq(cacheKey), eq(engineResource));
+    }
+
+    @Test
+    public void testDelegatesGetToWrappedResource() {
+        Object expected = new Object();
+        when(resource.get()).thenReturn(expected);
+        assertEquals(expected, engineResource.get());
+    }
+
+    @Test
+    public void testDelegatesGetSizeToWrappedResource() {
+        int expectedSize = 1234;
+        when(resource.getSize()).thenReturn(expectedSize);
+        assertEquals(expectedSize, engineResource.getSize());
+    }
+
+    @Test
+    public void testRecyclesWrappedResourceWhenRecycled() {
+        engineResource.acquire(1);
+        engineResource.release();
+        engineResource.recycle();
+        verify(resource).recycle();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfRecycledTwice() {
-        resource.recycle();
-        resource.recycle();
+        engineResource.recycle();
+        engineResource.recycle();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfReleasedBeforeAcquired() {
-        resource.release();
-
-        assertEquals(1, resource.recycled);
+        engineResource.release();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfRecycledWhileAcquired() {
-        resource.acquire(1);
-        resource.recycle();
+        engineResource.acquire(1);
+        engineResource.recycle();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfAcquiredAfterRecycled() {
-        resource.recycle();
-        resource.acquire(1);
+        engineResource.recycle();
+        engineResource.acquire(1);
     }
 
     @Test
@@ -75,7 +99,7 @@ public class ResourceTest {
             @Override
             public void run() {
                 try {
-                    resource.acquire(1);
+                    engineResource.acquire(1);
                 } catch (IllegalThreadStateException e) {
                     return;
                 }
@@ -88,12 +112,12 @@ public class ResourceTest {
 
     @Test
     public void testThrowsIfReleasedOnBackgroundThread() throws InterruptedException {
-        resource.acquire(1);
+        engineResource.acquire(1);
         Thread otherThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                     resource.release();
+                     engineResource.release();
                 } catch (IllegalThreadStateException e) {
                     return;
                 }
@@ -106,45 +130,26 @@ public class ResourceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfAcquiredWithTimesEqualToZero() {
-        resource.acquire(0);
+        engineResource.acquire(0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfAcquiredWithTimesLessThanToZero() {
-        resource.acquire(-1);
+        engineResource.acquire(-1);
     }
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfReleasedMoreThanAcquired() {
-        resource.acquire(1);
-        resource.release();
-        resource.release();
+        engineResource.acquire(1);
+        engineResource.release();
+        engineResource.release();
     }
 
     @Test
     public void testCanSetAndGetIsCacheable() {
-        resource.setCacheable(true);
-        assertTrue(resource.isCacheable());
-        resource.setCacheable(false);
-        assertFalse(resource.isCacheable());
+        engineResource.setCacheable(true);
+        assertTrue(engineResource.isCacheable());
+        engineResource.setCacheable(false);
+        assertFalse(engineResource.isCacheable());
     }
-
-    private static class MockResource extends Resource<Object> {
-        int recycled = 0;
-        @Override
-        public Object get() {
-            return null;
-        }
-
-        @Override
-        public int getSize() {
-            return 0;
-        }
-
-        @Override
-        protected void recycleInternal() {
-            recycled++;
-        }
-    }
-
 }

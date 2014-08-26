@@ -3,7 +3,6 @@ package com.bumptech.glide.request;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -27,7 +26,7 @@ import java.io.File;
 import java.util.Queue;
 
 /**
- * A {@link Request} that loads a {@link Resource} into a given {@link Target}.
+ * A {@link Request} that loads a {@link com.bumptech.glide.load.engine.Resource} into a given {@link Target}.
  *
  * @param <A> The type of the model that the resource will be loaded from.
  * @param <T> The type of the data that the resource will be loaded from.
@@ -281,12 +280,16 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         cancel();
         // Resource must be released before canNotifyStatusChanged is called.
         if (resource != null) {
-            resource.release();
-            resource = null;
+            releaseResource(resource);
         }
         if (canNotifyStatusChanged()) {
             target.onLoadCleared(getPlaceholderDrawable());
         }
+    }
+
+    private void releaseResource(Resource resource) {
+        engine.release(resource);
+        this.resource = null;
     }
 
     /**
@@ -399,7 +402,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     @Override
     public void onResourceReady(Resource<?> resource) {
         if (!canSetResource()) {
-            resource.release();
+            releaseResource(resource);
             // We can't set the status to complete before asking canSetResource().
             status = Status.COMPLETE;
             return;
@@ -407,7 +410,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         Object received = resource != null ? resource.get() : null;
         if (resource == null || !transcodeClass.isAssignableFrom(received.getClass())) {
             if (resource != null) {
-                resource.release();
+                releaseResource(resource);
             }
             onException(new Exception("Expected to receive an object of " + transcodeClass + " but instead got "
                     + received));

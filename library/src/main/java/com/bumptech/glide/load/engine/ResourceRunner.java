@@ -14,9 +14,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 /**
- * A background {@link java.lang.Runnable} responsible for loading a {@link com.bumptech.glide.load.engine.Resource}
+ * A background {@link java.lang.Runnable} responsible for loading a {@link Resource}
  * from the disk cache and for starting an {@link com.bumptech.glide.load.engine.SourceResourceRunner} if the
- * {@link com.bumptech.glide.load.engine.Resource} is not found in the disk cache.
+ * {@link Resource} is not found in the disk cache.
  *
  * @param <Z> The type of the resource that will be decoded.
  * @param <R> the type of the resource the decoded resource will be transcoded to.

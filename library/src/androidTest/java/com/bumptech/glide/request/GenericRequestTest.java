@@ -320,7 +320,7 @@ public class GenericRequestTest {
         request.onResourceReady(harness.resource);
         request.clear();
 
-        verify(harness.resource).release();
+        verify(harness.engine).release(eq(harness.resource));
     }
 
     @Test

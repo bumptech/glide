@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.drawable.BitmapDrawable;
-
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Util;
@@ -15,7 +14,7 @@ import com.bumptech.glide.util.Util;
  *     {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} when the resource is recycled.
  * </p>
  */
-public class BitmapDrawableResource extends Resource<BitmapDrawable> {
+public class BitmapDrawableResource implements Resource<BitmapDrawable> {
     private final BitmapDrawable drawable;
     private final BitmapPool bitmapPool;
 
@@ -46,7 +45,7 @@ public class BitmapDrawableResource extends Resource<BitmapDrawable> {
     }
 
     @Override
-    protected void recycleInternal() {
+    public void recycle() {
         bitmapPool.put(drawable.getBitmap());
     }
 }

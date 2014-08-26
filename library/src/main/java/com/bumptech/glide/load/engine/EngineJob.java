@@ -16,9 +16,10 @@ import java.util.List;
  */
 class EngineJob implements ResourceCallback {
     private static final String TAG = "EngineJob";
+    private static final EngineResourceFactory DEFAULT_FACTORY = new DefaultEngineResourceFactory();
 
     private final List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
-
+    private final EngineResourceFactory engineResourceFactory;
     private final EngineJobListener listener;
     private final Key key;
     private final Handler mainHandler;
@@ -28,10 +29,16 @@ class EngineJob implements ResourceCallback {
     private boolean isComplete;
 
     public EngineJob(Key key, Handler mainHandler, boolean isCacheable, EngineJobListener listener) {
+        this(key, mainHandler, isCacheable, listener, DEFAULT_FACTORY);
+    }
+
+    public EngineJob(Key key, Handler mainHandler, boolean isCacheable, EngineJobListener listener,
+                     EngineResourceFactory engineResourceFactory) {
         this.key = key;
         this.isCacheable = isCacheable;
         this.listener = listener;
         this.mainHandler = mainHandler;
+        this.engineResourceFactory = engineResourceFactory;
     }
 
     public void addCallback(ResourceCallback cb) {
@@ -77,19 +84,20 @@ class EngineJob implements ResourceCallback {
                 } else if (cbs.isEmpty()) {
                     throw new IllegalStateException("Received a resource without any callbacks to notify");
                 }
-                resource.setCacheable(isCacheable);
                 isComplete = true;
+                EngineResource engineResource = engineResourceFactory.build(resource);
+                engineResource.setCacheable(isCacheable);
 
                 // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
                 // synchronously released by one of the callbacks.
-                resource.acquire(1);
-                listener.onEngineJobComplete(key, resource);
-                resource.acquire(cbs.size());
+                engineResource.acquire(1);
+                listener.onEngineJobComplete(key, engineResource);
+                engineResource.acquire(cbs.size());
                 for (ResourceCallback cb : cbs) {
-                    cb.onResourceReady(resource);
+                    cb.onResourceReady(engineResource);
                 }
                 // Our request is complete, so we can release the resource.
-                resource.release();
+                engineResource.release();
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "Finished resource ready in " + LogTime.getElapsedMillis(start));
                 }
@@ -112,7 +120,6 @@ class EngineJob implements ResourceCallback {
                 } else if (cbs.isEmpty()) {
                     throw new IllegalStateException("Received an exception without any callbacks to notify");
                 }
-
                 isComplete = true;
 
                 listener.onEngineJobComplete(key, null);
@@ -124,5 +131,17 @@ class EngineJob implements ResourceCallback {
                 }
             }
         });
+    }
+
+    interface EngineResourceFactory {
+        public <R> EngineResource<R> build(Resource<R> resource);
+    }
+
+    private static final class DefaultEngineResourceFactory implements EngineResourceFactory {
+
+        @Override
+        public <R> EngineResource<R> build(Resource<R> resource) {
+            return new EngineResource<R>(resource);
+        }
     }
 }
