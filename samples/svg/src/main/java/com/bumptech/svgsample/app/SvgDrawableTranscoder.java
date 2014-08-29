@@ -1,18 +1,25 @@
 package com.bumptech.svgsample.app;
 
+import android.graphics.Picture;
+import android.graphics.drawable.PictureDrawable;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.caverock.androidsvg.SVG;
 
-public class SvgDrawableTranscoder implements ResourceTranscoder<Svg, SvgDrawable> {
+/**
+ * Convert the {@link SVG}'s internal representation to an Android-compatible one ({@link Picture}).
+ */
+public class SvgDrawableTranscoder implements ResourceTranscoder<SVG, PictureDrawable> {
     @Override
-    public Resource<SvgDrawable> transcode(Resource<Svg> toTranscode) {
-        Svg svg = toTranscode.get();
-        return new SvgDrawableResource(new SvgDrawable(svg));
+    public Resource<PictureDrawable> transcode(Resource<SVG> toTranscode) {
+        SVG svg = toTranscode.get();
+        Picture picture = svg.renderToPicture();
+        PictureDrawable drawable = new PictureDrawable(picture);
+        return new SvgDrawableResource(drawable);
     }
 
     @Override
     public String getId() {
-        // If you're planning on having more than one transcoder, add an id, otherwise empty string is fine.
         return "";
     }
 }
