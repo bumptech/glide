@@ -2,14 +2,15 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.os.Build;
 
 import java.util.TreeMap;
 
 /**
- * A strategy for reusing bitmaps that relies on {@link Bitmap#reconfigure(int, int, Bitmap.Config)}. Requires KitKat
- * (API 19) or higher.
+ * A strategy for reusing bitmaps that relies on {@link Bitmap#reconfigure(int, int, Bitmap.Config)}.
+ * Requires {@link Build.VERSION_CODES#KITKAT KitKat} (API {@value Build.VERSION_CODES#KITKAT}) or higher.
  */
-@TargetApi(19)
+@TargetApi(Build.VERSION_CODES.KITKAT)
 class SizeStrategy implements LruPoolStrategy {
     private static final int MAX_SIZE_MULTIPLE = 4;
     private final KeyPool keyPool = new KeyPool();

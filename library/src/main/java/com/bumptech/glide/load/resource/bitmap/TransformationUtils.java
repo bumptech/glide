@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -104,6 +105,7 @@ public class TransformationUtils {
      * @param pathToOriginal Path to original image file that may have exif data.
      * @return  A rotation in degrees based on exif orientation
      */
+    @SuppressLint("InlinedApi")
     public static int getOrientation(String pathToOriginal) {
         int degreesToRotate = 0;
         try {

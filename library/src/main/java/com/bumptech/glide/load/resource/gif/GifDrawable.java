@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
-import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -183,13 +183,14 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         return decoder.isTransparent() ? PixelFormat.TRANSPARENT : PixelFormat.OPAQUE;
     }
 
-    @TargetApi(11)
+    @SuppressLint("NewApi")
     @Override
     public void onFrameRead(Bitmap frame, int frameIndex) {
-        if (Build.VERSION.SDK_INT >= 11 && getCallback() == null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getCallback() == null) {
             stop();
             return;
-        } if (!isRunning) {
+        }
+        if (!isRunning) {
             return;
         }
 
