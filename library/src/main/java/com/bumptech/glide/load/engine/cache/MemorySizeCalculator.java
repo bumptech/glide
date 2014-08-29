@@ -84,10 +84,11 @@ public class MemorySizeCalculator {
         return bytes / (1024 * 1024);
     }
 
-    @TargetApi(19)
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private static boolean isLowMemoryDevice(ActivityManager activityManager) {
         final int sdkInt = Build.VERSION.SDK_INT;
-        return sdkInt < 11 || (sdkInt >= 19 && activityManager.isLowRamDevice());
+        return sdkInt < Build.VERSION_CODES.HONEYCOMB
+                || (sdkInt >= Build.VERSION_CODES.KITKAT && activityManager.isLowRamDevice());
     }
 
     private static class DisplayMetricsScreenDimensions implements ScreenDimensions {

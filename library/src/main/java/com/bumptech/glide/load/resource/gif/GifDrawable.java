@@ -183,13 +183,14 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         return decoder.isTransparent() ? PixelFormat.TRANSPARENT : PixelFormat.OPAQUE;
     }
 
-    @TargetApi(11)
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void onFrameRead(Bitmap frame, int frameIndex) {
-        if (Build.VERSION.SDK_INT >= 11 && getCallback() == null) {
+        if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT && getCallback() == null) {
             stop();
             return;
-        } if (!isRunning) {
+        }
+        if (!isRunning) {
             return;
         }
 

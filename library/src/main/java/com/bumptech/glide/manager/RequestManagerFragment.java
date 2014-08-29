@@ -3,6 +3,8 @@ package com.bumptech.glide.manager;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Fragment;
+import android.os.Build;
+
 import com.bumptech.glide.RequestManager;
 
 /**
@@ -14,7 +16,7 @@ import com.bumptech.glide.RequestManager;
  * @see com.bumptech.glide.manager.RequestManagerRetriever
  * @see com.bumptech.glide.RequestManager
  */
-@TargetApi(11)
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class RequestManagerFragment extends Fragment {
     private final Lifecycle lifecycle;
     private RequestManager requestManager;

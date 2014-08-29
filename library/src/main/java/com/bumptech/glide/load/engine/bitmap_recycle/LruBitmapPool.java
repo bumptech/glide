@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -8,9 +9,6 @@ import android.util.Log;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 
 /**
  * An {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation that uses an
@@ -81,7 +79,7 @@ public class LruBitmapPool implements BitmapPool {
         trimToSize(maxSize);
     }
 
-    @TargetApi(12)
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     @Override
     public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
         final Bitmap result = strategy.get(width, height, config);
@@ -94,7 +92,7 @@ public class LruBitmapPool implements BitmapPool {
             hits++;
             currentSize -= strategy.getSize(result);
             tracker.remove(result);
-            if (Build.VERSION.SDK_INT >= 12) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
                 result.setHasAlpha(true);
             }
         }
@@ -111,11 +109,12 @@ public class LruBitmapPool implements BitmapPool {
         trimToSize(0);
     }
 
+    @SuppressLint("InlinedApi")
     @Override
     public void trimMemory(int level) {
-        if (level >= TRIM_MEMORY_MODERATE) {
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
             clearMemory();
-        } else if (level >= TRIM_MEMORY_BACKGROUND) {
+        } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
             trimToSize(maxSize / 2);
         }
     }
@@ -143,7 +142,7 @@ public class LruBitmapPool implements BitmapPool {
 
     private static LruPoolStrategy getDefaultStrategy() {
         final LruPoolStrategy strategy;
-        if (Build.VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             strategy = new SizeStrategy();
         } else {
             strategy = new AttributeStrategy();

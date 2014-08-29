@@ -45,12 +45,12 @@ public class RequestManagerRetriever {
         return applicationManager;
     }
 
-    @TargetApi(17)
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static RequestManager get(FragmentActivity activity) {
         if (Util.isOnBackgroundThread()) {
             return get(activity.getApplicationContext());
         } else {
-            if (Build.VERSION.SDK_INT >= 11 && activity.isDestroyed()) {
+            if (Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT && activity.isDestroyed()) {
                 throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
             }
             FragmentManager fm = activity.getSupportFragmentManager();
@@ -73,12 +73,12 @@ public class RequestManagerRetriever {
         }
     }
 
-    @TargetApi(17)
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static RequestManager get(Activity activity) {
         if (Util.isOnBackgroundThread()) {
             return get(activity.getApplicationContext());
         } else {
-            if (Build.VERSION.SDK_INT >= 17 && activity.isDestroyed()) {
+            if (Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT && activity.isDestroyed()) {
                 throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
             }
             android.app.FragmentManager fm = activity.getFragmentManager();
@@ -86,7 +86,7 @@ public class RequestManagerRetriever {
         }
     }
 
-    @TargetApi(17)
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static RequestManager get(android.app.Fragment fragment) {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
@@ -94,10 +94,10 @@ public class RequestManagerRetriever {
         if (Util.isOnBackgroundThread()) {
             return get(fragment.getActivity().getApplicationContext());
         } else {
-            if (Build.VERSION.SDK_INT >= 13 && fragment.isDetached()) {
+            if (Build.VERSION_CODES.HONEYCOMB_MR2 <= Build.VERSION.SDK_INT && fragment.isDetached()) {
                 throw new IllegalArgumentException("You cannot start a load on a detached fragment");
             }
-            if (Build.VERSION.SDK_INT >= 17) {
+            if (Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT) {
                 android.app.FragmentManager fm = fragment.getChildFragmentManager();
                 return fragmentGet(fragment.getActivity(), fm);
             } else {
@@ -106,7 +106,7 @@ public class RequestManagerRetriever {
         }
     }
 
-    @TargetApi(11)
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     static RequestManager fragmentGet(Context context, android.app.FragmentManager fm) {
         RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {
