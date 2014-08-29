@@ -10,7 +10,7 @@ import java.util.Queue;
  * model, width and height. For a loader that takes a model and returns a url, the cache could be used to safely memoize
  * url creation based on the width and height of the view.
  *
- * @param <A> Some Model type that implements equals and hashcode.
+ * @param <A> Some Model type that implements {@link #equals} and {@link #hashCode}.
  * @param <B> Some useful type that may be expensive to create (URL, file path, etc).
  */
 public class ModelCache<A, B> {

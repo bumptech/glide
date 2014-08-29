@@ -53,7 +53,7 @@ public interface BitmapPool {
     public Bitmap get(int width, int height, Bitmap.Config config);
 
     /**
-     * Removes all {@link android.graphics.Bitmap}s from the poo.
+     * Removes all {@link android.graphics.Bitmap}s from the pool.
      */
     public void clearMemory();
 

@@ -5,13 +5,13 @@ package com.bumptech.glide.load.resource.bitmap;
  *  contributor license agreements.  See the NOTICE file distributed with
  *  this work for additional information regarding copyright ownership.
  *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the &quot;License&quot;); you may not use this file except in compliance with
+ *  (the "License"); you may not use this file except in compliance with
  *  the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
@@ -23,19 +23,18 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Wraps an existing {@link InputStream} and &lt;em&gt;buffers&lt;/em&gt; the input.
+ * Wraps an existing {@link InputStream} and <em>buffers</em> the input.
  * Expensive interaction with the underlying input stream is minimized, since
  * most (smaller) requests can be satisfied by accessing the buffer alone. The
  * drawback is that some extra space is required to hold the buffer and that
  * copying takes place when filling that buffer, but this is usually outweighed
  * by the performance benefits.
  *
- * &lt;p/&gt;A typical application pattern for the class looks like this:&lt;p/&gt;
+ * <p>A typical application pattern for the class looks like this:</p>
  *
- * &lt;pre&gt;
- * BufferedInputStream buf = new BufferedInputStream(new FileInputStream(&amp;quot;file.java&amp;quot;));
- * &lt;/pre&gt;
- *
+ * <pre>
+ * BufferedInputStream buf = new BufferedInputStream(new FileInputStream("file.java"));
+ * </pre>
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
 
@@ -126,7 +125,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     private int fillbuf(InputStream localIn, byte[] localBuf)
             throws IOException {
         if (markpos == -1 || (pos - markpos >= marklimit)) {
-            /* Mark position not set or exceeded readlimit */
+            // Mark position not set or exceeded readlimit
             int result = localIn.read(localBuf);
             if (result > 0) {
                 markpos = -1;
@@ -135,13 +134,13 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             }
             return result;
         }
-        //Added count == localBuf.length so that we do not immediately double the buffer size before reading any data
+        // Added count == localBuf.length so that we do not immediately double the buffer size before reading any data
         // when marklimit > localBuf.length. Instead, we will double the buffer size only after reading the initial
         // localBuf worth of data without finding what we're looking for in the stream. This allows us to set a
         // relatively small initial buffer size and a large marklimit for safety without causing an allocation each time
         // read is called.
         if (markpos == 0 && marklimit > localBuf.length && count == localBuf.length) {
-            /* Increase buffer size to accommodate the readlimit */
+            // Increase buffer size to accommodate the readlimit
             int newLength = localBuf.length * 2;
             if (newLength > marklimit) {
                 newLength = marklimit;
@@ -155,7 +154,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             System.arraycopy(localBuf, markpos, localBuf, 0, localBuf.length
                     - markpos);
         }
-        /* Set the new position and mark position */
+        // Set the new position and mark position
         pos -= markpos;
         count = markpos = 0;
         int bytesread = localIn.read(localBuf, pos, localBuf.length - pos);
@@ -166,7 +165,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     /**
      * Sets a mark position in this stream. The parameter {@code readlimit}
      * indicates how many bytes can be read before a mark is invalidated.
-     * Calling {@code reset()} will reposition the stream back to the marked
+     * Calling {@link #reset()} will reposition the stream back to the marked
      * position if {@code readlimit} has not been surpassed. The underlying
      * buffer may be increased in size to allow {@code readlimit} number of
      * bytes to be supported.
@@ -178,10 +177,10 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      */
     @Override
     public synchronized void mark(int readlimit) {
-        //This is stupid, but BitmapFactory.decodeStream calls mark(1024)
-        //which is too small for a substantial portion of images. This
-        //change (using Math.max) ensures that we don't overwrite readlimit
-        //with a smaller value
+        // This is stupid, but BitmapFactory.decodeStream calls mark(1024)
+        // which is too small for a substantial portion of images. This
+        // change (using Math.max) ensures that we don't overwrite readlimit
+        // with a smaller value
         marklimit = Math.max(marklimit, readlimit);
         markpos = pos;
     }
@@ -192,8 +191,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     }
 
     /**
-     * Indicates whether {@code BufferedInputStream} supports the {@code mark()}
-     * and {@code reset()} methods.
+     * Indicates whether {@code BufferedInputStream} supports the {@link #mark(int)}
+     * and {@link #reset()} methods.
      *
      * @return {@code true} for BufferedInputStreams.
      * @see #mark(int)
@@ -225,9 +224,9 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             throw streamClosed();
         }
 
-        /* Are there buffered bytes available? */
+        // Are there buffered bytes available?
         if (pos >= count && fillbuf(localIn, localBuf) == -1) {
-            /* no, fill buffer */
+            // no, fill buffer
             return -1;
         }
         // localBuf may have been invalidated by fillbuf
@@ -238,7 +237,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             }
         }
 
-        /* Did filling the buffer fail with -1 (EOF)? */
+        // Did filling the buffer fail with -1 (EOF)?
         if (count - pos > 0) {
             return localBuf[pos++] & 0xFF;
         }
@@ -251,14 +250,14 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      * number of bytes actually read or -1 if no bytes were read and the end of
      * the stream was encountered. If all the buffered bytes have been used, a
      * mark has not been set and the requested number of bytes is larger than
-     * the receiver&#39;s buffer size, this implementation bypasses the buffer and
+     * the receiver's buffer size, this implementation bypasses the buffer and
      * simply places the results directly into {@code buffer}.
      *
      * @param buffer
      *            the byte array in which to store the bytes read.
      * @return the number of bytes actually read or -1 if end of stream.
      * @throws IndexOutOfBoundsException
-     *             if {@code offset &lt; 0} or {@code byteCount &lt; 0}, or if
+     *             if {@code offset < 0} or {@code byteCount < 0}, or if
      *             {@code offset + byteCount} is greater than the size of
      *             {@code buffer}.
      * @throws IOException
@@ -267,13 +266,12 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      */
     @Override
     public synchronized int read(byte[] buffer, int offset, int byteCount) throws IOException {
-        // Use local ref since buf may be invalidated by an unsynchronized
-        // close()
+        // Use local ref since buf may be invalidated by an unsynchronized close()
         byte[] localBuf = buf;
         if (localBuf == null) {
             throw streamClosed();
         }
-        // Arrays.checkOffsetAndCount(buffer.length, offset, byteCount);
+        //Arrays.checkOffsetAndCount(buffer.length, offset, byteCount);
         if (byteCount == 0) {
             return 0;
         }
@@ -284,7 +282,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
         int required;
         if (pos < count) {
-            /* There are bytes available in the buffer. */
+            // There are bytes available in the buffer.
             int copylength = count - pos >= byteCount ? byteCount : count - pos;
             System.arraycopy(localBuf, pos, buffer, offset, copylength);
             pos += copylength;
@@ -299,10 +297,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
         while (true) {
             int read;
-            /*
-             * If we&#39;re not marked and the required size is greater than the
-             * buffer, simply read the bytes directly bypassing the buffer.
-             */
+            // If we're not marked and the required size is greater than the buffer,
+            // simply read the bytes directly bypassing the buffer.
             if (markpos == -1 && required >= localBuf.length) {
                 read = localIn.read(buffer, offset, required);
                 if (read == -1) {
@@ -357,11 +353,11 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
     /**
      * Skips {@code byteCount} bytes in this stream. Subsequent calls to
-     * {@code read} will not return these bytes unless {@code reset} is
+     * {@link #read} will not return these bytes unless {@link #reset} is
      * used.
      *
      * @param byteCount
-     *            the number of bytes to skip. {@code skip} does nothing and
+     *            the number of bytes to skip. {@link #skip} does nothing and
      *            returns 0 if {@code byteCount} is less than zero.
      * @return the number of bytes actually skipped.
      * @throws IOException
@@ -369,8 +365,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      */
     @Override
     public synchronized long skip(long byteCount) throws IOException {
-        // Use local refs since buf and in may be invalidated by an
-        // unsynchronized close()
+        // Use local refs since buf and in may be invalidated by an unsynchronized close()
         byte[] localBuf = buf;
         InputStream localIn = in;
         if (localBuf == null) {

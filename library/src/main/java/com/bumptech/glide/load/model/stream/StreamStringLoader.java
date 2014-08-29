@@ -26,7 +26,9 @@ public class StreamStringLoader extends StringLoader<InputStream> implements Str
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public StreamStringLoader(Context context) {

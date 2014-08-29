@@ -23,5 +23,7 @@ public class BytesResource extends Resource<byte[]> {
     }
 
     @Override
-    protected void recycleInternal() {  }
+    protected void recycleInternal() {
+        // Do nothing.
+    }
 }

@@ -10,4 +10,5 @@ import com.bumptech.glide.load.model.ModelLoader;
  * @param <T> The type of the model that will be translated into an {@link java.io.File}.
  */
 public interface FileDescriptorModelLoader<T> extends ModelLoader<T, ParcelFileDescriptor> {
+    // specializing the generic arguments
 }

@@ -30,6 +30,7 @@ public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor>
 
         @Override
         public void teardown() {
+            // Do nothing.
         }
     }
 

@@ -71,7 +71,7 @@ import java.net.URL;
  * {@link MemoryCache}.
  */
 public class Glide {
-    // 250 MB
+    /** 250 MB of cache. */
     static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
 
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
@@ -197,8 +197,7 @@ public class Glide {
         dataLoadProviderRegistry.register(ImageVideoWrapper.class, GifBitmapWrapper.class,
                 new ImageVideoGifDrawableLoadProvider(imageVideoDataLoadProvider, gifDrawableLoadProvider));
 
-        dataLoadProviderRegistry.register(InputStream.class, File.class,
-                new StreamFileDataLoadProvider());
+        dataLoadProviderRegistry.register(InputStream.class, File.class, new StreamFileDataLoadProvider());
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
@@ -585,20 +584,22 @@ public class Glide {
 
         @Override
         public void onLoadStarted(Drawable placeholder) {
-
+            // Do nothing.
         }
 
         @Override
         public void onLoadFailed(Exception e, Drawable errorDrawable) {
-
+            // Do nothing.
         }
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) { }
+        public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
+            // Do nothing.
+        }
 
         @Override
         public void onLoadCleared(Drawable placeholder) {
-
+            // Do nothing.
         }
     }
 }

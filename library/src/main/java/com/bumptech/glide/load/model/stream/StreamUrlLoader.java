@@ -27,7 +27,9 @@ public class StreamUrlLoader extends UrlLoader<InputStream> {
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public StreamUrlLoader(ModelLoader<GlideUrl, InputStream> glideUrlLoader) {

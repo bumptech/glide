@@ -25,7 +25,9 @@ class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
         }
 
         @Override
-        public void cleanup() { }
+        public void cleanup() {
+            // Do nothing.
+        }
 
         @Override
         public String getId() {
@@ -33,6 +35,8 @@ class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
         }
 
         @Override
-        public void cancel() { }
+        public void cancel() {
+            // Do nothing.
+        }
     }
 }

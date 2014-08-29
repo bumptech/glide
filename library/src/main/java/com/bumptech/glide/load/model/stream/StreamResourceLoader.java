@@ -26,7 +26,9 @@ public class StreamResourceLoader extends ResourceLoader<InputStream> implements
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public StreamResourceLoader(Context context) {

@@ -3,7 +3,7 @@ package com.bumptech.glide.load;
 import java.io.OutputStream;
 
 /**
- * An interface for writing data to some persistent data store (ie a local File cache).
+ * An interface for writing data to some persistent data store (i.e. a local File cache).
  *
  * @param <T> The type of the data that will be written.
  */
@@ -18,7 +18,7 @@ public interface Encoder<T> {
      */
     public boolean encode(T data, OutputStream os);
 
-    /*
+    /**
      * Returns an ID identifying any transformation this encoder may apply to the given data that will be mixed in to
      * the cache key.
      *

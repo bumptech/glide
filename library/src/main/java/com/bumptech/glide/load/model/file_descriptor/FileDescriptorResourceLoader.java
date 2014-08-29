@@ -27,7 +27,9 @@ public class FileDescriptorResourceLoader extends ResourceLoader<ParcelFileDescr
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public FileDescriptorResourceLoader(Context context) {

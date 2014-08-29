@@ -26,7 +26,9 @@ public class StreamFileLoader extends FileLoader<InputStream> implements StreamM
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public StreamFileLoader(Context context) {

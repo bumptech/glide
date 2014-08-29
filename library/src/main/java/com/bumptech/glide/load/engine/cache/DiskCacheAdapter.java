@@ -10,12 +10,17 @@ import java.io.File;
 public class DiskCacheAdapter implements DiskCache {
     @Override
     public File get(Key key) {
+        // no op, default for overriders
         return null;
     }
 
     @Override
-    public void put(Key key, Writer writer) { }
+    public void put(Key key, Writer writer) {
+        // no op, default for overriders
+    }
 
     @Override
-    public void delete(Key key) { }
+    public void delete(Key key) {
+        // no op, default for overriders
+    }
 }

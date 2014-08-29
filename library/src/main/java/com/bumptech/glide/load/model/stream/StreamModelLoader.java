@@ -9,4 +9,6 @@ import java.io.InputStream;
  *
  * @param <T> The type of the model that will be translated into an {@link InputStream}.
  */
-public interface StreamModelLoader<T> extends ModelLoader<T, InputStream> { }
+public interface StreamModelLoader<T> extends ModelLoader<T, InputStream> {
+    // specializing the generic arguments
+}

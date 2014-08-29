@@ -28,7 +28,9 @@ public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> imp
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public FileDescriptorUriLoader(Context context) {
