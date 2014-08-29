@@ -19,11 +19,12 @@ import java.io.OutputStream;
  * @see android.graphics.Bitmap#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)
  */
 public class BitmapEncoder implements ResourceEncoder<Bitmap> {
+    private static final int DEFAULT_COMPRESSION_QUALITY = 90;
     private Bitmap.CompressFormat compressFormat;
     private int quality;
 
     public BitmapEncoder() {
-        this(null, 75);
+        this(null, DEFAULT_COMPRESSION_QUALITY);
     }
 
     public BitmapEncoder(Bitmap.CompressFormat compressFormat, int quality) {
