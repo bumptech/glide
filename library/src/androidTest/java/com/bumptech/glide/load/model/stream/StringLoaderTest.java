@@ -34,6 +34,8 @@ public class StringLoaderTest {
     }
 
     @Test
+    //@org.junit.Ignore
+    // on windows it will fail with schema being the drive letter (C:\ -> C)
     public void testHandlesPaths() throws IOException {
         File f = Robolectric.application.getCacheDir();
         stringLoader.getResourceFetcher(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE);
