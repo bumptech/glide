@@ -9,8 +9,7 @@ import com.squareup.okhttp.Request;
 import java.io.InputStream;
 
 /**
- * An {@link DataFetcher} that uses an {@link com.squareup.okhttp.OkHttpClient} to load an {@link InputStream} for
- * an {@link GlideUrl}.
+ * Fetches an {@link InputStream} using the okhttp library.
  */
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     private final OkHttpClient client;
