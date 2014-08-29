@@ -3,7 +3,7 @@ package com.bumptech.glide.request;
 import com.bumptech.glide.load.engine.Resource;
 
 /**
- * A callback that listens for when a resource load completes sucessfully or fails due to an exception.
+ * A callback that listens for when a resource load completes successfully or fails due to an exception.
  */
 public interface ResourceCallback {
 

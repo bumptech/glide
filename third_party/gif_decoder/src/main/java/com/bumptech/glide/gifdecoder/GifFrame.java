@@ -5,17 +5,18 @@ package com.bumptech.glide.gifdecoder;
  */
 class GifFrame {
     int ix, iy, iw, ih;
-    /* Control Flags. */
+    /** Control Flag. */
     boolean interlace;
+    /** Control Flag. */
     boolean transparency;
-    /* Disposal Method. */
+    /** Disposal Method. */
     int dispose;
-    /* Transparency Index. */
+    /** Transparency Index. */
     int transIndex;
-    /* Delay, in ms, to next frame. */
+    /** Delay, in ms, to next frame. */
     int delay;
-    /* Index in the raw buffer where we need to start reading to decode. */
+    /** Index in the raw buffer where we need to start reading to decode. */
     int bufferFrameStart;
-    /* Local Color Table. */
+    /** Local Color Table. */
     int[] lct;
 }

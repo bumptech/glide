@@ -57,7 +57,9 @@ public class LruCache<T, Y> {
      * @param key The key of the evicted item.
      * @param item The evicted item.
      */
-    protected void onItemEvicted(T key, Y item) {  }
+    protected void onItemEvicted(T key, Y item) {
+        // optional override
+    }
 
     /**
      * Returns the sum of the sizes of all items in the cache.

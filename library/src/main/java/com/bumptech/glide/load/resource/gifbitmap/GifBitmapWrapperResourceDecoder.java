@@ -14,9 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * An {@link com.bumptech.glide.load.ResourceDecoder} that can decode either an {@link android.graphics.Bitmap} or an
- * {@link com.bumptech.glide.load.resource.gif.GifDrawable} from an {@link java.io.InputStream} or an
- * {@link android.os.ParcelFileDescriptor}.
+ * An {@link ResourceDecoder} that can decode either an {@link Bitmap} or an {@link GifDrawable}
+ * from an {@link InputStream} or a {@link android.os.ParcelFileDescriptor ParcelFileDescriptor}.
  */
 public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> {
     private final ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;

@@ -27,7 +27,7 @@ public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream>
 
         @Override
         public void teardown() {
-
+            // Do nothing.
         }
     }
 

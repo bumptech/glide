@@ -27,10 +27,11 @@ public abstract class Resource<Z> {
      * Returns an instance of the wrapped resource.
      * <p>
      *     Note - This does not have to be the same instance of the wrapped resource class and in fact it is often
-     *     appropriate to return a new instance for each call. For example, {@link android.graphics.drawable.Drawable}s
-     *     should only be used by a single View at a time so each call to this method for Resources that wrap
-     *     {@link android.graphics.drawable.Drawable}s should always return a new
-     *     {@link android.graphics.drawable.Drawable}.
+     *     appropriate to return a new instance for each call. For example,
+     *     {@link android.graphics.drawable.Drawable Drawable}s should only be used by a single
+     *     {@link android.view.View View} at a time so each call to this method for Resources that wrap
+     *     {@link android.graphics.drawable.Drawable Drawable}s should always return a new
+     *     {@link android.graphics.drawable.Drawable Drawable}.
      * </p>
      */
     public abstract Z get();

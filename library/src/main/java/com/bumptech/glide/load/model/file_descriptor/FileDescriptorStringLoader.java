@@ -27,7 +27,9 @@ public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescripto
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public FileDescriptorStringLoader(Context context) {

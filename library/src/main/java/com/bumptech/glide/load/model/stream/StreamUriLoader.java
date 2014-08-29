@@ -31,7 +31,9 @@ public class StreamUriLoader extends UriLoader<InputStream> implements StreamMod
         }
 
         @Override
-        public void teardown() { }
+        public void teardown() {
+            // Do nothing.
+        }
     }
 
     public StreamUriLoader(Context context) {

@@ -179,15 +179,14 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     private static class NullBitmapTracker implements BitmapTracker {
-
         @Override
         public void add(Bitmap bitmap) {
-
+            // Do nothing.
         }
 
         @Override
         public void remove(Bitmap bitmap) {
-
+            // Do nothing.
         }
     }
 }

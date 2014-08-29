@@ -47,7 +47,9 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     @Override
-    public void onScrollStateChanged(AbsListView absListView, int i) { }
+    public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+        // Do nothing.
+    }
 
     @Override
     public void onScroll(AbsListView absListView, int firstVisible, int visibleCount, int totalCount) {
@@ -71,12 +73,12 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     protected abstract int[] getDimensions(T item);
 
     /**
-     * Returns a list of all models that need to be loaded for the list to display adapter items start - end. A list of
-     * any size can be returned so there can be multiple models per adapter position.
+     * Returns a list of all models that need to be loaded for the list to display adapter items {@code start - end}.
+     * A list of any size can be returned so there can be multiple models per adapter position.
      *
-     * @param start The smallest adapter position. Will be >= 0 && < adapter.getCount() && <= end
-     * @param end The largest adapter position. Will be >= 0 && < adapter.getCount && >= start
-     * @return A non null list of all models for adapter positions between start and end.
+     * @param start The smallest adapter position. Will be {@code >= 0 && < adapter.getCount() && <= end}
+     * @param end The largest adapter position. Will be {@code >= 0 && < adapter.getCount && >= start}
+     * @return A non null list of all models for adapter positions between {@code start} and {@code end}.
      */
     protected abstract List<T> getItems(int start, int end);
 
