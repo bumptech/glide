@@ -1,27 +1,30 @@
 package com.bumptech.svgsample.app;
 
+import android.graphics.drawable.PictureDrawable;
 import com.bumptech.glide.load.engine.Resource;
 
-public class SvgDrawableResource extends Resource<SvgDrawable> {
-    private SvgDrawable svgDrawable;
+/**
+ * Resource wrapping a {@link PictureDrawable}.
+ */
+public class SvgDrawableResource extends Resource<PictureDrawable> {
+    private final PictureDrawable svgDrawable;
 
-    public SvgDrawableResource(SvgDrawable svgDrawable) {
+    public SvgDrawableResource(PictureDrawable svgDrawable) {
         this.svgDrawable = svgDrawable;
     }
 
     @Override
-    public SvgDrawable get() {
+    public PictureDrawable get() {
         return svgDrawable;
     }
 
     @Override
     public int getSize() {
-        // Return the byte size of the SVG.
-        return 1234;
+        return 1;
     }
 
     @Override
     protected void recycleInternal() {
-        // Return any resources you can to some pool to be reused by your decoder.
+        // can't recycle PictureDrawables
     }
 }

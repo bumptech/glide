@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 10(gap) 10(first) 10(gap) 10(second) 10(gap) 10(third) 10(gap) -->
+    <item android:left="10dp" android:right="50dp">
+        <shape android:shape="oval">
+            <size android:width="10dp" android:height="10dp" />
+            <solid android:color="@android:color/black"/>
+        </shape>
+    </item>
+    <item android:left="30dp" android:right="30dp">
+        <shape android:shape="oval">
+            <size android:width="10dp" android:height="10dp" />
+            <solid android:color="@android:color/black"/>
+        </shape>
+    </item>
+    <item android:left="50dp" android:right="10dp">
+        <shape android:shape="oval">
+            <size android:width="10dp" android:height="10dp" />
+            <solid android:color="@android:color/black"/>
+        </shape>
+    </item>
+</layer-list>

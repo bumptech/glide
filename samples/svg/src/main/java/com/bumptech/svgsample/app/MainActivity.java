@@ -1,56 +1,126 @@
 package com.bumptech.svgsample.app;
 
+import android.app.Activity;
+import android.graphics.drawable.PictureDrawable;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.StreamEncoder;
-import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.model.StreamEncoder;
+import com.bumptech.glide.load.resource.NullResourceEncoder;
+import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
+import com.caverock.androidsvg.SVG;
+
+import java.io.File;
 import java.io.InputStream;
 
-public class MainActivity extends ActionBarActivity {
+/**
+ * Displays an SVG image loaded from an android raw resource.
+ */
+public class MainActivity extends Activity {
+    private static final String TAG = "SVGActivity";
+
+    ImageView imageViewRes;
+    ImageView imageViewNet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ImageView imageView = (ImageView) findViewById(R.id.svg_image_view);
+        imageViewRes = (ImageView) findViewById(R.id.svg_image_view1);
+        imageViewNet = (ImageView) findViewById(R.id.svg_image_view2);
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        reload();
+    }
+
+    public void clearCache(View v) {
+        Log.w(TAG, "clearing cache");
+        Glide.clear(imageViewRes);
+        Glide.clear(imageViewNet);
+        Glide.get(this).clearMemory();
+        File cacheDir = Glide.getPhotoCacheDir(this);
+        if (cacheDir.isDirectory()) {
+            for (File child : cacheDir.listFiles()) {
+                if (!child.delete()) {
+                    Log.w(TAG, "cannot delete: " + child);
+                }
+            }
+        }
+        reload();
+    }
+
+    public void cycleScaleType(View v) {
+        ImageView.ScaleType curr = imageViewRes.getScaleType();
+        Log.w(TAG, "cycle: current=" + curr);
+        ImageView.ScaleType[] all = ImageView.ScaleType.values();
+        int nextOrdinal = (curr.ordinal() + 1) % all.length;
+        ImageView.ScaleType next = all[nextOrdinal];
+        Log.w(TAG, "cycle: next=" + next);
+        imageViewRes.setScaleType(next);
+        imageViewNet.setScaleType(next);
+        reload();
+    }
+
+    private void reload() {
+        Log.w(TAG, "reloading");
+        ((TextView) findViewById(R.id.button)).setText(getString(R.string.scaleType, imageViewRes.getScaleType()));
+        loadRes();
+        loadNet();
+    }
+
+    @SuppressWarnings({ "cast", "rawtypes", "unchecked" })
+    private void loadRes() {
         Glide.with(this)
                 .using(Glide.buildStreamModelLoader(Integer.class, this), InputStream.class)
-                .load(R.drawable.ic_launcher) // Some resourceId.
-                .as(Svg.class)
-                .transcode(new SvgDrawableTranscoder(), SvgDrawable.class)
-                .decoder(new SvgDecoder())
-                .encoder(new SvgEncoder())
+                .load(R.raw.android_toy_h)
+                .as(SVG.class)
+                .transcode(new SvgDrawableTranscoder(), PictureDrawable.class)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        // SVG cannot be serialized so it's not worth to cache it
+                        // and the getResources() should be fast enough when acquiring the InputStream
+                .encoder((ResourceEncoder<SVG>) (ResourceEncoder) NullResourceEncoder.get())
+                        // not used
                 .sourceEncoder(new StreamEncoder())
-                .cacheDecoder(new FileToStreamDecoder<Svg>(new SvgDecoder()))
-                .transform(new SvgTransformation())
-                .into(imageView);
+                        // not used
+                .cacheDecoder(new FileToStreamDecoder<SVG>(new SvgDecoder()))
+                        // not used
+                .decoder(new SvgDecoder())
+                .placeholder(R.drawable.image_loading)
+                .error(R.drawable.image_error)
+                .animate(android.R.anim.fade_in)
+                .listener(new SvgSoftwareLayerSetter())
+                .into(imageViewRes);
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    @SuppressWarnings({ "cast", "rawtypes", "unchecked" })
+    private void loadNet() {
+        Glide.with(this)
+                .using(Glide.buildStreamModelLoader(String.class, this), InputStream.class)
+                .load("http://www.clker.com/cliparts/u/Z/2/b/a/6/android-toy-h.svg")
+                .as(SVG.class)
+                .transcode(new SvgDrawableTranscoder(), PictureDrawable.class)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        // SVG cannot be serialized so it's not worth to cache it
+                .sourceEncoder(new StreamEncoder())
+                        // however loading from the network can be cached via StreamEncoder
+                .cacheDecoder(new FileToStreamDecoder<SVG>(new SvgDecoder()))
+                .decoder(new SvgDecoder())
+                .encoder((ResourceEncoder<SVG>) (ResourceEncoder) NullResourceEncoder.get())
+                        // not used
+                .placeholder(R.drawable.image_loading)
+                .error(R.drawable.image_error)
+                .animate(android.R.anim.fade_in)
+                .listener(new SvgSoftwareLayerSetter())
+                .into(imageViewNet);
     }
 }

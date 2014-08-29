@@ -1,26 +1,30 @@
 package com.bumptech.svgsample.app;
 
 import com.bumptech.glide.load.engine.Resource;
+import com.caverock.androidsvg.SVG;
 
-public class SvgResource extends Resource<Svg> {
-    private Svg svg;
+/**
+ * Resource wrapping a {@link SVG}.
+ */
+public class SvgResource extends Resource<SVG> {
+    private final SVG svg;
 
-    public SvgResource(Svg svg) {
+    public SvgResource(SVG svg) {
         this.svg = svg;
     }
 
     @Override
-    public Svg get() {
+    public SVG get() {
         return svg;
     }
 
     @Override
     public int getSize() {
-        return 0; // return the byte size of the svg.
+        return 1;
     }
 
     @Override
     protected void recycleInternal() {
-        // Return any resources you can to some pool to be reused by your decoder.
+        // can't recycle SVGs
     }
 }
