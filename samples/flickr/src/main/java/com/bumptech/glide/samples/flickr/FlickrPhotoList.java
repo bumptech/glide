@@ -119,6 +119,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
             return Glide.with(FlickrPhotoList.this)
                     .load(item)
+                    .centerCrop()
                     .thumbnail(Glide.with(FlickrPhotoList.this)
                         .load(item)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
@@ -180,11 +181,12 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
             Glide.with(FlickrPhotoList.this)
                     .load(current)
                     .placeholder(new ColorDrawable(Color.GRAY))
-                    .thumbnail(Glide.with(FlickrPhotoList.this)
-                        .load(current)
-                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                        .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
+                    .centerCrop()
                     .crossFade(R.anim.fade_in, 150)
+                    .thumbnail(Glide.with(FlickrPhotoList.this)
+                            .load(current)
+                            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                            .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
                     .into(viewHolder.imageView);
 
             viewHolder.titleText.setText(current.getTitle());
