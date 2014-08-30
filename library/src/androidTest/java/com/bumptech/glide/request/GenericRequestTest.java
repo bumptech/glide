@@ -36,7 +36,9 @@ import java.io.IOException;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -127,52 +129,179 @@ public class GenericRequestTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingCacheDecoder() {
+    public void testThrowsWhenMissingCacheDecoderAndNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
         when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
 
         harness.getRequest();
     }
 
     @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingSourceDecoder() {
+    public void testThrowsWhenMissingCacheDecoderAndNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
+        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test
+    public void testReturnsWhenMissingCacheDecoderAndNotNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
+    @Test
+    public void testReturnsWhenMissingCacheDecoderAndNotNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
+        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenMissingSourceDecoderAndNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
         when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
 
         harness.getRequest();
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsWhenMissingSourceDecoderAndNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
+        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test
+    public void testReturnsWhenMissingSourceDecoderAndNotNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
+        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
+    @Test
+    public void testReturnsWhenMissingSourceDecoderAndNotNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
+        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
     @Test(expected =  NullPointerException.class)
-    public void testThrowsWhenMissingEncoder() {
+    public void testThrowsWhenMissingEncoderWhenNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
         when(harness.loadProvider.getEncoder()).thenReturn(null);
 
         harness.getRequest();
     }
 
     @Test(expected =  NullPointerException.class)
+    public void testThrowsWhenMissingEncoderWhenNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
+        when(harness.loadProvider.getEncoder()).thenReturn(null);
+
+        harness.getRequest();
+    }
+
+    @Test
+    public void testReturnsWhenMissingEncoderWhenNotNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
+        when(harness.loadProvider.getEncoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
+    @Test
+    public void testReturnsWhenMissingEncoderWhenNotNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
+        when(harness.loadProvider.getEncoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
+    @Test
     public void testThrowsWhenMissingTranscoder() {
-        when(harness.loadProvider.getTranscoder()).thenReturn(null);
+        for (DiskCacheStrategy strategy : DiskCacheStrategy.values()) {
+            harness = new RequestHarness();
+            harness.diskCacheStrategy = strategy;
+            when(harness.loadProvider.getTranscoder()).thenReturn(null);
 
-        harness.getRequest();
+            try {
+                harness.getRequest();
+                fail(NullPointerException.class.getSimpleName() + " expected for " + strategy);
+            } catch (NullPointerException ex) {
+                // expected
+            }
+        }
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testThrowsWhenMissingModelLoader() {
-        when(harness.loadProvider.getModelLoader()).thenReturn(null);
+        for (DiskCacheStrategy strategy : DiskCacheStrategy.values()) {
+            harness = new RequestHarness();
+            harness.diskCacheStrategy = strategy;
+            when(harness.loadProvider.getModelLoader()).thenReturn(null);
 
-        harness.getRequest();
+            try {
+                harness.getRequest();
+                fail(NullPointerException.class.getSimpleName() + " expected for " + strategy);
+            } catch (NullPointerException ex) {
+                // expected
+            }
+        }
     }
 
     @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingSourceEncoder() {
+    public void testThrowsWhenMissingSourceEncoderAndNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
         when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
 
         harness.getRequest();
     }
 
     @Test(expected = NullPointerException.class)
-    public void testThrowsWhenTransformationIsNull() {
-        harness.transformation = null;
+    public void testThrowsWhenMissingSourceEncoderAndNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
+        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
 
         harness.getRequest();
+    }
+
+    @Test
+    public void testReturnsWhenMissingSourceEncoderAndNotNeeded1() {
+        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
+    @Test
+    public void testReturnsWhenMissingSourceEncoderAndNotNeeded2() {
+        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
+        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
+
+        assertNotNull(harness.getRequest());
+    }
+
+    @Test
+    public void testThrowsWhenTransformationIsNull() {
+        for (DiskCacheStrategy strategy : DiskCacheStrategy.values()) {
+            harness = new RequestHarness();
+            harness.diskCacheStrategy = strategy;
+            harness.transformation = null;
+
+            try {
+                harness.getRequest();
+                fail(NullPointerException.class.getSimpleName() + " expected for " + strategy);
+            } catch (NullPointerException ex) {
+                // expected
+            }
+        }
     }
 
     @Test
@@ -278,6 +407,14 @@ public class GenericRequestTest {
                 any(Encoder.class), any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
                 any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class));
+    }
+
+    @Test
+    public void testIsFailedAfterNoResultAndNullException() {
+        GenericRequest request = harness.getRequest();
+
+        request.onException(null);
+        assertTrue(request.isFailed());
     }
 
     @Test
@@ -767,6 +904,10 @@ public class GenericRequestTest {
         when(resources.getDrawable(eq(resourceId))).thenReturn(drawable);
 
         return context;
+    }
+
+    private static <T> T[] list(T... list) {
+        return list;
     }
 
     private static class MockTarget implements Target {

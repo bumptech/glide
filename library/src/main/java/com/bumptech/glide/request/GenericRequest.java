@@ -192,29 +192,37 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
         // simply skip our sanity checks in that unusual case.
         if (model != null) {
-            if (loadProvider.getCacheDecoder() == null) {
-                throw new NullPointerException("CacheDecoder must not be null, try .cacheDecoder(ResouceDecoder)");
+            check("ModelLoader", loadProvider.getModelLoader(), "try .using(ModelLoader)");
+            check("Transcoder", loadProvider.getTranscoder(), "try .as*(Class).transcode(ResourceTranscoder)");
+            check("Transformation", transformation, "try .transform(UnitTransformation.get())");
+            if (diskCacheStrategy.cacheSource()) {
+                check("SourceEncoder", loadProvider.getSourceEncoder(),
+                        "try .sourceEncoder(Encoder) or .diskCacheStrategy(NONE/RESULT)");
+                // TODO if(resourceClass.isAssignableFrom(InputStream.class) it is possible to wrap sourceDecoder
+                // and use it instead of cacheDecoder: new FileToStreamDecoder<Z>(sourceDecoder)
+                // in that case this shouldn't throw
+                check("CacheDecoder", loadProvider.getCacheDecoder(),
+                        "try .cacheDecoder(ResouceDecoder) or .diskCacheStrategy(NONE/RESULT)");
+            } else {
+                check("SourceDecoder", loadProvider.getSourceDecoder(),
+                        "try .decoder/.imageDecoder/.videoDecoder(ResourceDecoder) or .diskCacheStrategy(ALL/SOURCE)");
             }
-            if (loadProvider.getSourceDecoder() == null) {
-                throw new NullPointerException("SourceDecoder must not be null, try .imageDecoder(ResourceDecoder) "
-                        + "and/or .videoDecoder()");
+            if (diskCacheStrategy.cacheResult()) {
+                check("Encoder", loadProvider.getEncoder(),
+                        "try .encode(ResourceEncoder) or .diskCacheStrategy(NONE/SOURCE)");
             }
-            if (loadProvider.getEncoder() == null) {
-                throw new NullPointerException("Encoder must not be null, try .encode(ResourceEncoder)");
+        }
+    }
+
+    private static void check(String name, Object object, String suggestion) {
+        if (object == null) {
+            StringBuilder message = new StringBuilder(name);
+            message.append(" must not be null");
+            if (suggestion != null) {
+                message.append(", ");
+                message.append(suggestion);
             }
-            if (loadProvider.getTranscoder() == null) {
-                throw new NullPointerException("Transcoder must not be null, try .as(Class, ResourceTranscoder)");
-            }
-            if (loadProvider.getModelLoader() == null) {
-                throw new NullPointerException("ModelLoader must not be null, try .using(ModelLoader)");
-            }
-            if (loadProvider.getSourceEncoder() == null) {
-                throw new NullPointerException("SourceEncoder must not be null, try .sourceEncoder(Encoder)");
-            }
-            if (transformation == null) {
-                throw new NullPointerException("Transformation must not be null, try .transform(UnitTransformation"
-                        + ".get())");
-            }
+            throw new NullPointerException(message.toString());
         }
     }
 
@@ -408,7 +416,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             return;
         }
         Object received = resource != null ? resource.get() : null;
-        if (resource == null || !transcodeClass.isAssignableFrom(received.getClass())) {
+        if (resource == null || received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
             if (resource != null) {
                 releaseResource(resource);
             }

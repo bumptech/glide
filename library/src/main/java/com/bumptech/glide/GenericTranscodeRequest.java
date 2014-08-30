@@ -41,16 +41,8 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
     private final RequestManager.OptionsApplier optionsApplier;
     private Lifecycle lifecycle;
 
-    @SuppressWarnings("unchecked")
-    private static <Z, R> ResourceTranscoder<Z, R> getUnitTranscoder() {
-        return (ResourceTranscoder<Z, R>) UnitTranscoder.get();
-    }
-
     private static <A, T, Z, R> LoadProvider<A, T, Z, R> build(Glide glide, ModelLoader<A, T> modelLoader,
             Class<T> dataClass, Class<Z> resourceClass, ResourceTranscoder<Z, R> transcoder) {
-        if (transcoder == null) {
-            transcoder = getUnitTranscoder();
-        }
         DataLoadProvider<T, Z> dataLoadProvider = glide.buildDataProvider(dataClass, resourceClass);
         return new FixedLoadProvider<A, T, Z, R>(modelLoader, transcoder, dataLoadProvider);
     }
@@ -58,9 +50,9 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
     GenericTranscodeRequest(Context context, Glide glide, ModelType model, ModelLoader<ModelType, DataType> modelLoader,
             Class<DataType> dataClass, Class<ResourceType> resourceClass, RequestTracker requestTracker,
             Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
-        super(context, model, build(glide, modelLoader, dataClass, resourceClass,
-                (ResourceTranscoder<ResourceType, ResourceType>) null), resourceClass, glide, requestTracker,
-                lifecycle);
+        super(context, model,
+                build(glide, modelLoader, dataClass, resourceClass, UnitTranscoder.<ResourceType>get()),
+                resourceClass, glide, requestTracker, lifecycle);
         this.context = context;
         this.model = model;
         this.glide = glide;
@@ -81,8 +73,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
      * @return A new request builder to set options for the transcoded load.
      */
     public <TranscodeType> GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transcode(
-            ResourceTranscoder<ResourceType, TranscodeType> transcoder,
-            Class<TranscodeType> transcodeClass) {
+            ResourceTranscoder<ResourceType, TranscodeType> transcoder, Class<TranscodeType> transcodeClass) {
         LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider = build(glide, modelLoader,
                 dataClass, resourceClass, transcoder);
 

@@ -35,6 +35,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private final int height;
     private final CacheLoader cacheLoader;
     private final ExecutorService diskCacheService;
+    private final DiskCacheStrategy diskCacheStrategy;
     private final ExecutorService resizeService;
     private volatile Future<?> future;
     private volatile boolean isCancelled;
@@ -42,7 +43,8 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
     public ResourceRunner(EngineKey key, int width, int height, CacheLoader cacheLoader,
             ResourceDecoder<File, Z> cacheDecoder, Transformation<Z> transformation,
             ResourceTranscoder<Z, R> transcoder, SourceResourceRunner<?, Z, R> sourceRunner,
-            ExecutorService diskCacheService, ExecutorService resizeService, EngineJob job, Priority priority) {
+            ExecutorService diskCacheService, DiskCacheStrategy diskCacheStrategy, ExecutorService resizeService,
+            EngineJob job, Priority priority) {
         this.key = key;
         this.width = width;
         this.height = height;
@@ -52,6 +54,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         this.transcoder = transcoder;
         this.sourceRunner = sourceRunner;
         this.diskCacheService = diskCacheService;
+        this.diskCacheStrategy = diskCacheStrategy;
         this.resizeService = resizeService;
         this.job = job;
         this.priority = priority;
@@ -95,12 +98,15 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         }
     }
 
-    private Resource<R> runWrapped() {
-        long start = SystemClock.currentThreadTimeMillis();
-        Resource<Z> fromCache = cacheLoader.load(key, cacheDecoder, width, height);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "loaded from disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
-        }
+    private Resource<R> runWrapped() throws Exception {
+        Resource<Z> fromCache = null;
+        if (diskCacheStrategy.cacheSource()) {
+            long start = SystemClock.currentThreadTimeMillis();
+            fromCache = cacheLoader.load(key, cacheDecoder, width, height);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "loaded from disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
+            }
+         }
 
         Resource<R> transcoded = null;
         if (fromCache != null) {
@@ -116,7 +122,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private void submitSourceRunner() {
         try {
             future = resizeService.submit(sourceRunner);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // A variety of exceptions can be thrown here, particularly related to when/if the pool is shutdown.
             job.onException(e);
         }

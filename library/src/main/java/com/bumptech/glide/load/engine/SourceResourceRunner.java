@@ -135,7 +135,10 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
 
     private Resource<R> runWrapped() throws Exception {
         long start = SystemClock.currentThreadTimeMillis();
-        Resource<Z> decoded = cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
+        Resource<Z> decoded = null;
+        if (diskCacheStrategy.cacheSource()) {
+            decoded = cacheLoader.load(key.getOriginalKey(), cacheDecoder, width, height);
+        }
 
         if (decoded == null) {
             decoded = decodeFromSource();
