@@ -11,14 +11,22 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests if {@link EngineKey} {@link Object#hashCode() hashCode} and {@link Object#equals(Object) equals}
+ * and SHA-1 disk cache key are different on any difference in ID or existence of a certain workflow part.
+ * Also checking whether the equals method is symmetric.
+ *
+ * @see #assertDifferent
+ */
 public class EngineKeyTest {
     private Harness harness;
 
@@ -59,34 +67,34 @@ public class EngineKeyTest {
     }
 
     @Test
-    public void testDiffersIfIdDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfIdDiffers() throws Exception {
         EngineKey first = harness.build();
         harness.id = harness.id + "2";
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
     @Test
-    public void testDiffersIfHeightDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfHeightDiffers() throws Exception {
         EngineKey first = harness.build();
         harness.height += 1;
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
     @Test
-    public void testDiffersIfWidthDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfWidthDiffers() throws Exception {
         EngineKey first = harness.build();
         harness.width += 1;
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
     @Test
-    public void testDiffersIfTransformationDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfTransformationDiffers() throws Exception {
         String id = "transformation";
         when(harness.transformation.getId()).thenReturn(id);
         EngineKey first = harness.build();
@@ -94,11 +102,20 @@ public class EngineKeyTest {
         when(harness.transformation.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
     @Test
-    public void testDiffersIfCacheDecoderDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfTransformationMissing() throws Exception {
+        EngineKey first = harness.build();
+        harness.transformation = null;
+        EngineKey second = harness.build();
+
+        assertDifferent(first, second);
+    }
+
+    @Test
+    public void testDiffersIfCacheDecoderDiffers() throws Exception {
         String id = "cacheDecoder";
         when(harness.cacheDecoder.getId()).thenReturn(id);
         EngineKey first = harness.build();
@@ -106,11 +123,20 @@ public class EngineKeyTest {
         when(harness.cacheDecoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
     @Test
-    public void testDiffersIfDecoderDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfCacheDecoderMissing() throws Exception {
+        EngineKey first = harness.build();
+        harness.cacheDecoder = null;
+        EngineKey second = harness.build();
+
+        assertDifferent(first, second);
+    }
+
+    @Test
+    public void testDiffersIfDecoderDiffers() throws Exception {
         String id = "decoder";
         when(harness.decoder.getId()).thenReturn(id);
         EngineKey first = harness.build();
@@ -118,11 +144,20 @@ public class EngineKeyTest {
         when(harness.decoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
     @Test
-    public void testDiffersIfEncoderDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfDecoderMissing() throws Exception {
+        EngineKey first = harness.build();
+        harness.decoder = null;
+        EngineKey second = harness.build();
+
+        assertDifferent(first, second);
+    }
+
+    @Test
+    public void testDiffersIfEncoderDiffers() throws Exception {
         String id = "encoder";
         when(harness.encoder.getId()).thenReturn(id);
         EngineKey first = harness.build();
@@ -130,11 +165,20 @@ public class EngineKeyTest {
         when(harness.encoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
     @Test
-    public void testDiffersWhenTranscoderDiffers() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public void testDiffersIfEncoderMissing() throws Exception {
+        EngineKey first = harness.build();
+        harness.encoder = null;
+        EngineKey second = harness.build();
+
+        assertDifferent(first, second);
+    }
+
+    @Test
+    public void testDiffersWhenTranscoderDiffers() throws Exception {
         String id = "transcoder";
         when(harness.transcoder.getId()).thenReturn(id);
         EngineKey first = harness.build();
@@ -142,13 +186,24 @@ public class EngineKeyTest {
         when(harness.transcoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        // The transcoder doesn't affect the cached data, so we don't expect the key digests to updated differently even
-        // though the transcoder id isn't the same.
-        assertNotSame(first, second, false);
+        // The transcoder doesn't affect the cached data,
+        // so we don't expect the key digests to updated differently even though the transcoder id isn't the same.
+        assertDifferent(first, second, false);
+        assertDifferent(second, first, false);
     }
 
     @Test
-    public void testDiffersWhenSourceEncoderDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void testDiffersIfTranscoderMissing() throws Exception {
+        EngineKey first = harness.build();
+        harness.transcoder = null;
+        EngineKey second = harness.build();
+
+        assertDifferent(first, second, false);
+        assertDifferent(second, first, false);
+    }
+
+    @Test
+    public void testDiffersWhenSourceEncoderDiffers() throws Exception {
         String id = "sourceEncoder";
         when(harness.sourceEncoder.getId()).thenReturn(id);
         EngineKey first = harness.build();
@@ -156,25 +211,36 @@ public class EngineKeyTest {
         when(harness.sourceEncoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertNotSame(first, second);
+        assertDifferent(first, second);
     }
 
-    private static void assertNotSame(EngineKey first, EngineKey second)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        assertNotSame(first, second, true);
+    @Test
+    public void testDiffersIfSourceEncoderMissing() throws Exception {
+        EngineKey first = harness.build();
+        harness.sourceEncoder = null;
+        EngineKey second = harness.build();
+
+        assertDifferent(first, second);
     }
 
-    private static void assertNotSame(EngineKey first, EngineKey second, boolean diskCacheDiffers)
+    private static void assertDifferent(EngineKey first, EngineKey second)
             throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        assertFalse(first.equals(second));
-        assertTrue(first.hashCode() != second.hashCode());
+        assertDifferent(first, second, true);
+        assertDifferent(second, first, true);
+    }
+
+    private static void assertDifferent(EngineKey first, EngineKey second, boolean diskCacheDiffers)
+            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        assertNotEquals(first, second);
+        assertNotEquals(first.hashCode(), second.hashCode());
+
         if (diskCacheDiffers) {
             MessageDigest firstDigest = MessageDigest.getInstance("SHA-1");
             first.updateDiskCacheKey(firstDigest);
             MessageDigest secondDigest = MessageDigest.getInstance("SHA-1");
             second.updateDiskCacheKey(secondDigest);
 
-            assertFalse(Arrays.equals(firstDigest.digest(), secondDigest.digest()));
+            assertThat(firstDigest.digest(), not(equalTo(secondDigest.digest())));
         }
     }
 }
