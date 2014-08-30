@@ -108,7 +108,7 @@ public class GenericRequestBuilderTest {
     @Test
     public void testAddsNewRequestToRequestTracker() {
         getNullModelRequest().into(mock(Target.class));
-        verify(requestTracker).addRequest(any(Request.class));
+        verify(requestTracker).runRequest(any(Request.class));
     }
 
     @Test

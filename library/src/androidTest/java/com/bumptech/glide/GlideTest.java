@@ -32,6 +32,7 @@ import com.bumptech.glide.load.resource.bytes.BytesResource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -83,6 +84,7 @@ import static org.mockito.Mockito.when;
 public class GlideTest {
     private Target target = null;
     private ImageView imageView;
+    private RequestManager requestManager;
 
     @Before
     public void setUp() throws Exception {
@@ -129,6 +131,9 @@ public class GlideTest {
                 .thenReturn(mockUrlLoader);
 
         Glide.get(getContext()).register(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
+        Lifecycle lifecycle = mock(Lifecycle.class);
+        requestManager = new RequestManager(getContext(), lifecycle);
+        requestManager.resumeRequests();
     }
 
     @After
@@ -214,7 +219,7 @@ public class GlideTest {
         Encoder<File> sourceEncoder = mock(Encoder.class);
         when(sourceEncoder.getId()).thenReturn("sourceEncoderId");
 
-        Glide.with(getContext())
+        requestManager
                 .using(modelLoader, File.class)
                 .load(glideUrl)
                 .as(File.class)
@@ -248,8 +253,8 @@ public class GlideTest {
         File file = new File("fake");
         mockUri(Uri.fromFile(file));
 
-        Glide.with(getContext()).load(file).into(target);
-        Glide.with(getContext()).load(file).into(imageView);
+        requestManager.load(file).into(target);
+        requestManager.load(file).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -261,8 +266,8 @@ public class GlideTest {
     public void testUrlDefaultLoader() throws MalformedURLException {
         URL url = new URL("http://www.google.com");
 
-        Glide.with(getContext()).load(url).into(target);
-        Glide.with(getContext()).load(url).into(imageView);
+        requestManager.load(url).into(target);
+        requestManager.load(url).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -275,7 +280,7 @@ public class GlideTest {
         Uri uri = Uri.parse("content://something/else");
         mockUri(uri);
 
-        Glide.with(getContext()).load(uri).asBitmap().into(target);
+        requestManager.load(uri).asBitmap().into(target);
 
         verify(target).onResourceReady(any(Bitmap.class), any(GlideAnimation.class));
     }
@@ -290,7 +295,7 @@ public class GlideTest {
         when(transcoder.getId()).thenReturn("bytes");
         when(transcoder.transcode(any(Resource.class))).thenReturn(new BytesResource(bytes));
 
-        Glide.with(getContext())
+        requestManager
                 .load(uri)
                 .asBitmap()
                 .transcode(transcoder, byte[].class)
@@ -304,7 +309,7 @@ public class GlideTest {
         Uri uri = Uri.parse("content://something/else");
         mockUri(uri);
 
-        Glide.with(getContext()).load(uri).asBitmap().toBytes().into(target);
+        requestManager.load(uri).asBitmap().toBytes().into(target);
 
         verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
     }
@@ -330,8 +335,8 @@ public class GlideTest {
         Uri uri = Uri.parse("content://test/something");
         mockUri(uri);
 
-        Glide.with(getContext()).load(uri).into(target);
-        Glide.with(getContext()).load(uri).into(imageView);
+        requestManager.load(uri).into(target);
+        requestManager.load(uri).into(imageView);
 
         verify(target).onResourceReady(anyObject(), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -391,7 +396,7 @@ public class GlideTest {
     }
 
     private void runTestStringDefaultLoader(String string) {
-        Glide.with(getContext())
+        requestManager
                 .load(string)
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
@@ -410,7 +415,7 @@ public class GlideTest {
                     }
                 })
                 .into(target);
-        Glide.with(getContext()).load(string).into(imageView);
+        requestManager.load(string).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -439,8 +444,8 @@ public class GlideTest {
         int integer = 1234;
         mockUri("android.resource://" + getContext().getPackageName() + "/" + integer);
 
-        Glide.with(getContext()).load(integer).into(target);
-        Glide.with(getContext()).load(integer).into(imageView);
+        requestManager.load(integer).into(target);
+        requestManager.load(integer).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -451,8 +456,8 @@ public class GlideTest {
     @Test
     public void testByteArrayDefaultLoader() {
         byte[] bytes = new byte[10];
-        Glide.with(getContext()).load(bytes).into(target);
-        Glide.with(getContext()).load(bytes).into(imageView);
+        requestManager.load(bytes).into(target);
+        requestManager.load(bytes).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -465,8 +470,8 @@ public class GlideTest {
         byte[] bytes = new byte[10];
         String id = "test";
 
-        Glide.with(getContext()).load(bytes, id).into(target);
-        Glide.with(getContext()).load(bytes, id).into(imageView);
+        requestManager.load(bytes, id).into(target);
+        requestManager.load(bytes, id).into(imageView);
 
         verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
@@ -477,7 +482,7 @@ public class GlideTest {
     @Test(expected = Exception.class)
     public void testUnregisteredModelThrowsException() {
         Float unregistered = 0.5f;
-        Glide.with(getContext()).load(unregistered).into(target);
+        requestManager.load(unregistered).into(target);
     }
 
     @Test
@@ -485,7 +490,7 @@ public class GlideTest {
     public void testUnregisteredModelWithGivenLoaderDoesNotThrow() {
         Float unregistered = 0.5f;
         StreamModelLoader<Float> mockLoader = mockStreamModelLoader(Float.class);
-        Glide.with(getContext())
+        requestManager
                 .using(mockLoader)
                 .load(unregistered)
                 .into(target);
@@ -496,7 +501,7 @@ public class GlideTest {
     public void testNonDefaultModelWithRegisteredFactoryDoesNotThrow() {
         registerMockStreamModelLoader(Float.class);
 
-        Glide.with(getContext()).load(0.5f).into(target);
+        requestManager.load(0.5f).into(target);
     }
 
     @Test
@@ -505,7 +510,7 @@ public class GlideTest {
         InputStream testGifData = openResource("test.gif");
         mockUri(Uri.parse(fakeUri), testGifData);
 
-        Glide.with(getContext())
+        requestManager
                 .load(fakeUri)
                 .asGif()
                 .into(target);
@@ -519,7 +524,7 @@ public class GlideTest {
         InputStream testGifData = openResource("test.gif");
         mockUri(Uri.parse(fakeUri), testGifData);
 
-        Glide.with(getContext())
+        requestManager
                 .load(fakeUri)
                 .asGif()
                 .toBytes()
@@ -532,7 +537,7 @@ public class GlideTest {
     public void testReceivesBitmapBytes() {
         String fakeUri = "content://fake";
         mockUri(fakeUri);
-        Glide.with(getContext())
+        requestManager
                 .load(fakeUri)
                 .asBitmap()
                 .toBytes()
@@ -546,7 +551,7 @@ public class GlideTest {
         String fakeUri = "content://fake";
         mockUri(fakeUri);
         final Bitmap expected = Bitmap.createBitmap(1234, 6432, Bitmap.Config.ALPHA_8);
-        Glide.with(getContext())
+        requestManager
                 .load(fakeUri)
                 .asBitmap()
                 .transcode(new ResourceTranscoder<Bitmap, Bitmap>() {
@@ -567,17 +572,17 @@ public class GlideTest {
 
     @Test
     public void testNullModelInGenericImageLoadDoesNotThrow() {
-        Glide.with(getContext()).load((Double) null).into(target);
+        requestManager.load((Double) null).into(target);
     }
 
     @Test
     public void testNullModelInGenericVideoLoadDoesNotThrow() {
-        Glide.with(getContext()).load((Float) null).into(target);
+        requestManager.load((Float) null).into(target);
     }
 
     @Test
     public void testNullModelInGenericLoadDoesNotThrow() {
-        Glide.with(getContext()).load((Double) null).into(target);
+        requestManager.load((Double) null).into(target);
     }
 
     @Test
@@ -585,7 +590,7 @@ public class GlideTest {
         String nullString = null;
 
         Drawable drawable = new ColorDrawable(Color.RED);
-        Glide.with(getContext())
+        requestManager
                 .load(nullString)
                 .placeholder(drawable)
                 .into(target);
@@ -600,7 +605,7 @@ public class GlideTest {
         Drawable placeholder = new ColorDrawable(Color.GREEN);
         Drawable error = new ColorDrawable(Color.RED);
 
-        Glide.with(getContext())
+        requestManager
                 .load(nullString)
                 .placeholder(placeholder)
                 .error(error)
@@ -614,7 +619,7 @@ public class GlideTest {
         String nullString = null;
         Drawable drawable = new ColorDrawable(Color.RED);
         StreamModelLoader<String> modelLoader = mock(StreamModelLoader.class);
-        Glide.with(getContext())
+        requestManager
                 .using(modelLoader)
                 .load(nullString)
                 .placeholder(drawable)
@@ -626,7 +631,7 @@ public class GlideTest {
     @Test
     public void testByteData() {
         byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
-        Glide.with(getContext()).load(data).into(target);
+        requestManager.load(data).into(target);
     }
 
     @SuppressWarnings("unchecked")

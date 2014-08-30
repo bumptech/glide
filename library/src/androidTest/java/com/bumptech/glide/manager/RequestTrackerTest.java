@@ -65,12 +65,39 @@ public class RequestTrackerTest {
     @Test
     public void testDoesNotClearCompleteRequestsWhenPaused() {
         Request request = mock(Request.class);
-        when(request.isComplete()).thenReturn(true);
         tracker.addRequest(request);
 
+        when(request.isComplete()).thenReturn(true);
         tracker.pauseRequests();
 
         verify(request, never()).clear();
+    }
+
+    @Test
+    public void testStartsRequestOnRun() {
+        Request request = mock(Request.class);
+        tracker.runRequest(request);
+
+        verify(request).begin();
+    }
+
+    @Test
+    public void testDoesNotStartRequestOnRunIfPaused() {
+        Request request = mock(Request.class);
+        tracker.pauseRequests();
+        tracker.runRequest(request);
+
+        verify(request, never()).begin();
+    }
+
+    @Test
+    public void testStartsRequestAddedWhenPausedWhenResumed() {
+        Request request = mock(Request.class);
+        tracker.pauseRequests();
+        tracker.runRequest(request);
+        tracker.resumeRequests();
+
+        verify(request).begin();
     }
 
     @Test
@@ -148,5 +175,52 @@ public class RequestTrackerTest {
 
         verify(request).clear();
         verify(request).begin();
+    }
+
+    @Test
+    public void testDoesNotBeginFailedRequestOnRestartIfPaused() {
+        Request request = mock(Request.class);
+        when(request.isFailed()).thenReturn(true);
+        tracker.pauseRequests();
+        tracker.addRequest(request);
+
+        tracker.restartRequests();
+
+        verify(request, never()).begin();
+    }
+
+    @Test
+    public void testClearsFailedRequestOnRestartIfPaused() {
+        Request request = mock(Request.class);
+        when(request.isFailed()).thenReturn(true);
+        tracker.pauseRequests();
+        tracker.addRequest(request);
+
+        tracker.restartRequests();
+        verify(request).clear();
+    }
+
+    @Test
+    public void testDoesNotBeginIncompleteRequestsOnRestartIfPaused() {
+        Request request = mock(Request.class);
+        when(request.isFailed()).thenReturn(false);
+        when(request.isComplete()).thenReturn(false);
+        tracker.pauseRequests();
+        tracker.addRequest(request);
+        tracker.restartRequests();
+
+        verify(request, never()).begin();
+    }
+
+    @Test
+    public void testClearsIncompleteRequestsOnRestartIfPaused() {
+        Request request = mock(Request.class);
+        when(request.isFailed()).thenReturn(false);
+        when(request.isComplete()).thenReturn(false);
+        tracker.pauseRequests();
+        tracker.addRequest(request);
+        tracker.restartRequests();
+
+        verify(request).clear();
     }
 }

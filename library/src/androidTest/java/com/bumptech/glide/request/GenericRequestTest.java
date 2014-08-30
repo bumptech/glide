@@ -192,6 +192,26 @@ public class GenericRequestTest {
     }
 
     @Test
+    public void testIsNotFailedAfterClear() {
+        GenericRequest request = harness.getRequest();
+
+        request.onResourceReady(null);
+        request.clear();
+
+        assertFalse(request.isFailed());
+    }
+
+    @Test
+    public void testIsNotFailedAfterBegin() {
+        GenericRequest request = harness.getRequest();
+
+        request.onResourceReady(null);
+        request.begin();
+
+        assertFalse(request.isFailed());
+    }
+
+    @Test
     public void testIsCompleteAfterReceivingResource() {
         GenericRequest request = harness.getRequest();
 
@@ -199,6 +219,16 @@ public class GenericRequestTest {
         request.onResourceReady(harness.resource);
 
         assertTrue(request.isComplete());
+    }
+
+    @Test
+    public void testIsNotCompleteAfterClear() {
+        GenericRequest request = harness.getRequest();
+        when(harness.resource.get()).thenReturn(new Object());
+        request.onResourceReady(harness.resource);
+        request.clear();
+
+        assertFalse(request.isComplete());
     }
 
     @Test
@@ -238,10 +268,24 @@ public class GenericRequestTest {
     }
 
     @Test
+    public void testIgnoresOnSizeReadyIfNotWaitingForSize() {
+        GenericRequest request = harness.getRequest();
+        request.begin();
+        request.onSizeReady(100, 100);
+        request.onSizeReady(100, 100);
+
+        verify(harness.engine, times(1)).load(eq(100), eq(100), any(ResourceDecoder.class), any(DataFetcher.class),
+                any(Encoder.class), any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
+                any(ResourceCallback.class));
+    }
+
+    @Test
     public void testEngineLoadPassedCorrectPriority() {
         Priority expected = Priority.HIGH;
         harness.priority = expected;
         GenericRequest request = harness.getRequest();
+        request.begin();
 
         request.onSizeReady(100, 100);
 
@@ -260,6 +304,7 @@ public class GenericRequestTest {
                 any(DiskCacheStrategy.class), any(ResourceCallback.class))).thenReturn(loadStatus);
 
         GenericRequest request = harness.getRequest();
+        request.begin();
 
         request.onSizeReady(100, 100);
         request.cancel();
@@ -516,6 +561,8 @@ public class GenericRequestTest {
                         return null;
                     }
                 });
+
+        request.begin();
         request.onSizeReady(100, 100);
         verify(harness.requestListener).onResourceReady(anyObject(), anyObject(), any(Target.class), eq(true),
                 anyBoolean());
@@ -656,6 +703,7 @@ public class GenericRequestTest {
     public void testOnSizeReadyWithNullDataFetcherCallsOnException() {
         GenericRequest<Object, Object, Object, Object> request = harness.getRequest();
         when(harness.modelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+        request.begin();
         request.onSizeReady(100, 100);
 
         verify(harness.requestListener).onException(any(Exception.class), anyObject(), any(Target.class),

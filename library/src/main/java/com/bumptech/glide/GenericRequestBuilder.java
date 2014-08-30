@@ -533,9 +533,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
         Request request = buildRequest(target);
         target.setRequest(request);
-        requestTracker.addRequest(request);
-        request.begin();
         lifecycle.addListener(target);
+        requestTracker.runRequest(request);
 
         return target;
     }

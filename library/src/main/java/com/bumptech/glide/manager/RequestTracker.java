@@ -17,11 +17,20 @@ public class RequestTracker {
     // can always make repeated requests into targets other than views, or use an activity manager in a fragment pager
     // where holding strong references would steadily leak bitmaps and/or views.
     private final Set<Request> requests = Collections.newSetFromMap(new WeakHashMap<Request, Boolean>());
+    private boolean isPaused;
 
     /**
      * Starts tracking the given request.
      */
-    public void addRequest(Request request) {
+    public void runRequest(Request request) {
+        requests.add(request);
+        if (!isPaused) {
+            request.begin();
+        }
+    }
+
+    // Exposed for testing.
+    void addRequest(Request request) {
         requests.add(request);
     }
 
@@ -36,6 +45,7 @@ public class RequestTracker {
      * Stops any in progress requests.
      */
     public void pauseRequests() {
+        isPaused = true;
         for (Request request : requests) {
             if (!request.isComplete() && !request.isFailed()) {
                 request.clear();
@@ -47,6 +57,7 @@ public class RequestTracker {
      * Starts any not yet completed or failed requests.
      */
     public void resumeRequests() {
+        isPaused = false;
         for (Request request : requests) {
             if (!request.isComplete() && !request.isRunning()) {
                 request.begin();
@@ -69,10 +80,18 @@ public class RequestTracker {
     public void restartRequests() {
         for (Request request : requests) {
             if (request.isFailed()) {
-                request.begin();
+                if (isPaused) {
+                    // Ensure the request will be restarted in onResume.
+                    request.clear();
+                } else {
+                    request.begin();
+                }
             } else if (!request.isComplete()) {
+                // Make sure we re-queue the request, we may just have not received the failure yet.
                 request.clear();
-                request.begin();
+                if (!isPaused) {
+                    request.begin();
+                }
             }
         }
     }

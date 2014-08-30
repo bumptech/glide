@@ -37,6 +37,16 @@ import java.util.Queue;
 public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallback,
         ResourceCallback {
     private static final String TAG = "GenericRequest";
+    private static final Queue<GenericRequest> REQUEST_POOL = new ArrayDeque<GenericRequest>();
+
+    private enum Status {
+        PENDING,
+        RUNNING,
+        WAITING_FOR_SIZE,
+        COMPLETE,
+        FAILED,
+        CANCELLED,
+    }
 
     private int placeholderResourceId;
     private int errorResourceId;
@@ -60,15 +70,11 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
 
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
-    private boolean isCancelled;
-    private boolean isError;
     private boolean loadedFromMemoryCache;
     private Resource resource;
     private Engine.LoadStatus loadStatus;
-    private boolean isRunning;
     private long startTime;
-
-    private static final Queue<GenericRequest> REQUEST_POOL = new ArrayDeque<GenericRequest>();
+    private Status status;
 
     @SuppressWarnings("unchecked")
     public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
@@ -120,7 +126,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     }
 
     private GenericRequest() {
-
+        // Empty.
     }
 
     @Override
@@ -135,11 +141,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         requestCoordinator = null;
         transformation = null;
         animationFactory = null;
-        isCancelled = false;
-        isError = false;
         loadedFromMemoryCache = false;
         loadStatus = null;
-        isRunning = false;
         REQUEST_POOL.offer(this);
     }
 
@@ -184,6 +187,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         this.overrideWidth = overrideWidth;
         this.overrideHeight = overrideHeight;
         this.diskCacheStrategy = diskCacheStrategy;
+        status = Status.PENDING;
 
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
         // simply skip our sanity checks in that unusual case.
@@ -220,12 +224,12 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     @Override
     public void begin() {
         startTime = LogTime.getLogTime();
-        isCancelled = false;
         if (model == null) {
             onException(null);
             return;
         }
 
+        status = Status.WAITING_FOR_SIZE;
         if (overrideWidth > 0 && overrideHeight > 0) {
             onSizeReady(overrideWidth, overrideHeight);
         } else {
@@ -236,7 +240,6 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             if (canNotifyStatusChanged()) {
                 target.onLoadStarted(getPlaceholderDrawable());
             }
-            isRunning = true;
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished run method in " + LogTime.getElapsedMillis(startTime));
@@ -253,9 +256,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
      *
      * @see #clear()
      */
-    public void cancel() {
-        isRunning = false;
-        isCancelled = true;
+    void cancel() {
+        status = Status.CANCELLED;
         if (loadStatus != null) {
             loadStatus.cancel();
             loadStatus = null;
@@ -290,7 +292,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
      */
     @Override
     public boolean isRunning() {
-        return isRunning;
+        return status == Status.RUNNING || status == Status.WAITING_FOR_SIZE;
     }
 
     /**
@@ -298,7 +300,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
      */
     @Override
     public boolean isComplete() {
-        return resource != null;
+        return status == Status.COMPLETE;
     }
 
     /**
@@ -306,7 +308,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
      */
     @Override
     public boolean isFailed() {
-        return isError;
+        return status == Status.FAILED;
     }
 
     private void setErrorPlaceholder(Exception e) {
@@ -343,9 +345,10 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("Got onSizeReady in " + LogTime.getElapsedMillis(startTime));
         }
-        if (isCancelled) {
+        if (status != Status.WAITING_FOR_SIZE) {
             return;
         }
+        status = Status.RUNNING;
 
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
@@ -394,9 +397,10 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     @SuppressWarnings("unchecked")
     @Override
     public void onResourceReady(Resource resource) {
-        isRunning = false;
         if (!canSetResource()) {
             resource.release();
+            // We can't set the status to complete before asking canSetResource().
+            status = Status.COMPLETE;
             return;
         }
         Object received = resource != null ? resource.get() : null;
@@ -409,6 +413,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             return;
         }
         R result = (R) received;
+        status = Status.COMPLETE;
 
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstReadyResource())) {
@@ -433,8 +438,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             Log.d(TAG, "load failed", e);
         }
 
-        isRunning = false;
-        isError = true;
+        status = Status.FAILED;
         //TODO: what if this is a thumbnail request?
         if (requestListener == null || !requestListener.onException(e, model, target, isFirstReadyResource())) {
             setErrorPlaceholder(e);
