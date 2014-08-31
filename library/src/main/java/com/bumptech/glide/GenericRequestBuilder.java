@@ -564,6 +564,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 case FIT_END:
                     applyFitCenter();
                     break;
+                //$CASES-OMITTED$
+                default:
+                    // silently ignore
+                    break;
             }
         }
 

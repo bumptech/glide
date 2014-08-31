@@ -39,8 +39,6 @@ import java.io.InputStream;
  * @param <ModelType> The type of model that will be loaded into the target.
  * @param <TranscodeType> The type of the transcoded resource that the target will receive
  */
-// Public api.
-@SuppressWarnings("unused")
 public class BitmapRequestBuilder<ModelType, TranscodeType>
         extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> implements BitmapOptions {
     private final BitmapPool bitmapPool;

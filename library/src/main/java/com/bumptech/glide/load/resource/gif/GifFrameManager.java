@@ -27,8 +27,8 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import java.io.File;
 
 class GifFrameManager {
-    // 16ms per frame = 60fps
-    static final long MIN_FRAME_DELAY = 16;
+    /** 60fps is {@value #MIN_FRAME_DELAY}ms per frame. */
+    private static final long MIN_FRAME_DELAY = 1000 / 60;
     private final MemorySizeCalculator calculator;
     private final GifFrameModelLoader frameLoader;
     private final GifFrameResourceDecoder frameResourceDecoder;
