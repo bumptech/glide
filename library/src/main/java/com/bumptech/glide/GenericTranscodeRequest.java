@@ -46,7 +46,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
             Class<DataType> dataClass, Class<ResourceType> resourceClass, RequestTracker requestTracker,
             Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
         super(context, model, build(glide, modelLoader, dataClass, resourceClass,
-                UnitTranscoder.<ResourceType, ResourceType>get()), resourceClass, glide, requestTracker, lifecycle);
+                UnitTranscoder.<ResourceType>get()), resourceClass, glide, requestTracker, lifecycle);
         this.context = context;
         this.model = model;
         this.glide = glide;

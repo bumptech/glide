@@ -37,7 +37,7 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
 
     protected abstract DataFetcher<T> getLocalUriFetcher(Context context, Uri uri);
 
-    private boolean isLocalUri(String scheme) {
+    private static boolean isLocalUri(String scheme) {
         return ContentResolver.SCHEME_FILE.equals(scheme)
                 || ContentResolver.SCHEME_CONTENT.equals(scheme)
                 || ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme);

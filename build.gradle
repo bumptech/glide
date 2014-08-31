@@ -3,12 +3,12 @@ buildscript {
         jcenter()
         // TODO: remove this when robolectric 2.4 is released.
         maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
     }
 
     dependencies {
-        classpath 'org.robolectric:robolectric-gradle-plugin:0.11.+'
+        classpath 'org.robolectric:robolectric-gradle-plugin:0.12.+'
         classpath 'com.android.tools.build:gradle:0.12.+'
     }
 }
@@ -18,7 +18,7 @@ allprojects {
         jcenter()
         // TODO: remove this when robolectric 2.4 is released.
         maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
     }
 
@@ -36,9 +36,16 @@ allprojects {
         // empty classpath
         classpath = files()
     }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            if (!name.contains('Test')) {
+                options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+            }
+        }
+    }
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
 }
-

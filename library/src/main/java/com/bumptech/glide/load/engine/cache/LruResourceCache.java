@@ -10,7 +10,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
 /**
  * An LRU in memory cache for {@link com.bumptech.glide.load.engine.Resource}s.
  */
-public class LruResourceCache extends LruCache<Key, Resource> implements MemoryCache {
+public class LruResourceCache extends LruCache<Key, Resource<?>> implements MemoryCache {
     private ResourceRemovedListener listener;
 
     /**
@@ -28,14 +28,14 @@ public class LruResourceCache extends LruCache<Key, Resource> implements MemoryC
     }
 
     @Override
-    protected void onItemEvicted(Key key, Resource item) {
+	protected void onItemEvicted(Key key, Resource<?> item) {
         if (listener != null) {
             listener.onResourceRemoved(item);
         }
     }
 
     @Override
-    protected int getSize(Resource item) {
+    protected int getSize(Resource<?> item) {
         return item.getSize();
     }
 

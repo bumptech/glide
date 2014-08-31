@@ -7,12 +7,13 @@ import com.bumptech.glide.load.ResourceEncoder;
 /**
  * A {@link com.bumptech.glide.provider.DataLoadProvider} that returns {@code null} for every class.
  */
+@SuppressWarnings("rawtypes")
 public class EmptyDataLoadProvider implements DataLoadProvider {
-    private static final EmptyDataLoadProvider EMPTY_DATA_LOAD_PROVIDER = new EmptyDataLoadProvider();
+    private static final DataLoadProvider<?, ?> EMPTY_DATA_LOAD_PROVIDER = new EmptyDataLoadProvider();
 
     @SuppressWarnings("unchecked")
     public static <T, Z> DataLoadProvider<T, Z> get() {
-        return EMPTY_DATA_LOAD_PROVIDER;
+        return (DataLoadProvider<T, Z>) EMPTY_DATA_LOAD_PROVIDER;
     }
 
     @Override

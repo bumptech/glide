@@ -5,6 +5,6 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <suppress files=".*[/\\]library[/\\]src[/\\]androidTest[/\\].*" checks="[a-zA-Z0-9]*"/>
+    <suppress files=".*[/\\]library[/\\]src[/\\]androidTest[/\\].*" checks="Javadoc.*"/>
 </suppressions>
 

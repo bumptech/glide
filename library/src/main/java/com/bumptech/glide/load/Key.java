@@ -10,10 +10,18 @@ import java.security.MessageDigest;
  *
  */
 public interface Key {
-
     /**
      * Adds all uniquely identifying information to the given digest.
      */
-    public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException;
+    void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException;
 
+    /**
+     * {@inheritDoc}
+     */
+    boolean equals(Object o);
+
+    /**
+     * {@inheritDoc}
+     */
+    int hashCode();
 }

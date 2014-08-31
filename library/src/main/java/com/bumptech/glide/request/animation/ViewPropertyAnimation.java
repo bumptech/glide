@@ -3,11 +3,13 @@ package com.bumptech.glide.request.animation;
 import android.view.View;
 
 /**
- * An {@link com.bumptech.glide.request.animation.GlideAnimation} that accepts an interface that can apply an
- * animation like an {@link android.view.ViewPropertyAnimator} or a {@link android.animation.ObjectAnimator} to
- * an {@link View}.
+ * A {@link com.bumptech.glide.request.animation.GlideAnimation GlideAnimation} that accepts an interface
+ * that can apply an animation like a {@link android.view.ViewPropertyAnimator}
+ * or a {@link android.animation.ObjectAnimator} to an {@link View}.
+ *
+ * @param <R> The type of the resource displayed in the view that is animated
  */
-public class ViewPropertyAnimation implements GlideAnimation {
+public class ViewPropertyAnimation<R> implements GlideAnimation<R> {
 
     /**
      * An interface that allows an animation to be applied on or started from an {@link android.view.View}.
@@ -24,9 +26,9 @@ public class ViewPropertyAnimation implements GlideAnimation {
     /**
      * A {@link com.bumptech.glide.request.animation.GlideAnimationFactory} that produces ViewPropertyAnimations.
      */
-    public static class ViewPropertyAnimationFactory implements GlideAnimationFactory {
+    public static class ViewPropertyAnimationFactory<R> implements GlideAnimationFactory<R> {
         private Animator animator;
-        private ViewPropertyAnimation animation;
+        private ViewPropertyAnimation<R> animation;
 
         public ViewPropertyAnimationFactory(Animator animator) {
             this.animator = animator;
@@ -40,12 +42,12 @@ public class ViewPropertyAnimation implements GlideAnimation {
          * {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} provided in the constructor.
          */
         @Override
-        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstResource) {
+        public GlideAnimation<R> build(boolean isFromMemoryCache, boolean isFirstResource) {
             if (isFromMemoryCache || !isFirstResource) {
                 return NoAnimation.get();
             }
             if (animation == null) {
-                animation = new ViewPropertyAnimation(animator);
+                animation = new ViewPropertyAnimation<R>(animator);
             }
 
             return animation;
@@ -75,7 +77,7 @@ public class ViewPropertyAnimation implements GlideAnimation {
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(Object current, ViewAdapter adapter) {
+    public boolean animate(R current, ViewAdapter adapter) {
         final View view = adapter.getView();
         if (view != null) {
             animator.animate(adapter.getView());

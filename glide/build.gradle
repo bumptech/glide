@@ -1,15 +1,15 @@
 apply plugin: 'java'
 
-evaluationDependsOn(":third_party:gif_decoder")
-evaluationDependsOn(":third_party:disklrucache")
-evaluationDependsOn(":library")
+evaluationDependsOn(':third_party:gif_decoder')
+evaluationDependsOn(':third_party:disklrucache')
+evaluationDependsOn(':library')
 
 def getAndroidSdkDirectory() {
-  project(":library").android.sdkDirectory
+  project(':library').android.sdkDirectory
 }
 
 def getAndroidCompileSdkVersion() {
-  project(":library").android.compileSdkVersion
+  project(':library').android.compileSdkVersion
 }
 
 def getInternalAndroidProjects() {
@@ -24,7 +24,7 @@ def getAllInternalProjects() {
 }
 
 def getReleaseVariantAndroidProjects() {
-    getAndroidLibraryVariants("release")
+    getAndroidLibraryVariants('release')
 }
 
 def getAndroidLibraryVariants(variantName) {
@@ -45,7 +45,7 @@ def getAndroidJar() {
 }
 
 // Generate javadocs and sources containing batched documentation and sources for all internal projects.
-["release", "debug"].each { variantName ->
+['release', 'debug'].each { variantName ->
 
     task("${variantName}SourceJar", type: Jar) {
       classifier = 'sources'

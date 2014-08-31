@@ -12,7 +12,8 @@ import java.util.Map;
 public class DataLoadProviderRegistry {
     private static final MultiClassKey GET_KEY = new MultiClassKey();
 
-    private final Map<MultiClassKey, DataLoadProvider> providers = new HashMap<MultiClassKey, DataLoadProvider>();
+    private final Map<MultiClassKey, DataLoadProvider<?, ?>> providers =
+            new HashMap<MultiClassKey, DataLoadProvider<?, ?>>();
 
     /**
      * Registers the given {@link com.bumptech.glide.provider.DataLoadProvider} using the given classes so it can later
@@ -24,7 +25,8 @@ public class DataLoadProviderRegistry {
      * @param <T> The type of the data that the provider provides encoders and decoders for.
      * @param <Z> The type of the resource that the provider provides encoders and decoders for.
      */
-    public <T, Z> void register(Class<T> dataClass, Class<Z> resourceClass, DataLoadProvider provider) {
+    public <T, Z> void register(Class<T> dataClass, Class<Z> resourceClass, DataLoadProvider<T, Z> provider) {
+        //TODO: maybe something like DataLoadProvider<? super T, ? extends Z> may work here
         providers.put(new MultiClassKey(dataClass, resourceClass), provider);
     }
 
@@ -39,10 +41,10 @@ public class DataLoadProviderRegistry {
     @SuppressWarnings("unchecked")
     public <T, Z> DataLoadProvider<T, Z> get(Class<T> dataClass, Class<Z> resourceClass) {
         GET_KEY.set(dataClass, resourceClass);
-        DataLoadProvider<T, Z> result = providers.get(GET_KEY);
+        DataLoadProvider<?, ?> result = providers.get(GET_KEY);
         if (result == null) {
             result = EmptyDataLoadProvider.get();
         }
-        return result;
+        return (DataLoadProvider<T, Z>) result;
     }
 }

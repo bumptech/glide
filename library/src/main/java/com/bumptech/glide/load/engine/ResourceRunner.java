@@ -27,7 +27,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private final EngineKey key;
     private final Transformation<Z> transformation;
     private final ResourceTranscoder<Z, R> transcoder;
-    private final SourceResourceRunner sourceRunner;
+    private final SourceResourceRunner<?, Z, R> sourceRunner;
     private final EngineJob job;
     private final Priority priority;
     private final ResourceDecoder<File, Z> cacheDecoder;
@@ -85,7 +85,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         Resource<R> result = null;
         try {
             result = runWrapped();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             job.onException(e);
         }
         if (result != null) {
@@ -95,7 +95,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         }
     }
 
-    private Resource<R> runWrapped() throws Exception {
+    private Resource<R> runWrapped() {
         Resource<Z> fromCache = null;
         if (diskCacheStrategy.cacheSource()) {
             long start = SystemClock.currentThreadTimeMillis();
