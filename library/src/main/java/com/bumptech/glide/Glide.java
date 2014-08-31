@@ -111,12 +111,13 @@ public class Glide {
      * @param context A context.
      * @param cacheName The name of the subdirectory in which to store the cache.
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static File getPhotoCacheDir(Context context, String cacheName) {
         File cacheDir = context.getCacheDir();
         if (cacheDir != null) {
             File result = new File(cacheDir, cacheName);
-            result.mkdirs();
+            if (!result.mkdirs() && (!result.exists() || !result.isDirectory())) {
+                throw new IllegalStateException("Cannot create cache directory structure for " + result);
+            }
             return result;
         }
         if (Log.isLoggable(TAG, Log.ERROR)) {
@@ -201,6 +202,8 @@ public class Glide {
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
+        register(int.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
+        register(int.class, InputStream.class, new StreamResourceLoader.Factory());
         register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
         register(Integer.class, InputStream.class, new StreamResourceLoader.Factory());
         register(String.class, ParcelFileDescriptor.class, new FileDescriptorStringLoader.Factory());
