@@ -12,7 +12,7 @@ public interface ResourceCallback {
      *
      * @param resource The loaded resource.
      */
-    public void onResourceReady(Resource resource);
+    public void onResourceReady(Resource<?> resource);
 
     /**
      * Called when a resource fails to load successfully.

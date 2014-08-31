@@ -37,7 +37,7 @@ import java.util.Queue;
 public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallback,
         ResourceCallback {
     private static final String TAG = "GenericRequest";
-    private static final Queue<GenericRequest> REQUEST_POOL = Util.createQueue(0);
+    private static final Queue<GenericRequest<?, ?, ?, ?>> REQUEST_POOL = Util.createQueue(0);
 
     private enum Status {
         PENDING,
@@ -71,12 +71,12 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
     private boolean loadedFromMemoryCache;
-    private Resource resource;
+    // doing our own type check
+    private Resource<?> resource;
     private Engine.LoadStatus loadStatus;
     private long startTime;
     private Status status;
 
-    @SuppressWarnings("unchecked")
     public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
             LoadProvider<A, T, Z, R> loadProvider,
             A model,
@@ -98,9 +98,10 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             int overrideWidth,
             int overrideHeight,
             DiskCacheStrategy diskCacheStrategy) {
-        GenericRequest request = REQUEST_POOL.poll();
+        @SuppressWarnings("unchecked")
+        GenericRequest<A, T, Z, R> request = (GenericRequest<A, T, Z, R>) REQUEST_POOL.poll();
         if (request == null) {
-            request = new GenericRequest();
+            request = new GenericRequest<A, T, Z, R>();
         }
         request.init(loadProvider,
                 model,
@@ -395,9 +396,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     /**
      * A callback method that should never be invoked directly.
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public void onResourceReady(Resource resource) {
+    public void onResourceReady(Resource<?> resource) {
         if (!canSetResource()) {
             resource.release();
             // We can't set the status to complete before asking canSetResource().
@@ -413,7 +413,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
                     + received));
             return;
         }
-        R result = (R) received;
+        @SuppressWarnings("unchecked")
+		R result = (R) received;
         status = Status.COMPLETE;
 
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,

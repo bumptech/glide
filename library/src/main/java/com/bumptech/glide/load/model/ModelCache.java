@@ -61,11 +61,11 @@ public class ModelCache<A, B> {
     }
 
     private static final class ModelKey<A> {
-        private static final Queue<ModelKey> KEY_QUEUE = Util.createQueue(0);
+        private static final Queue<ModelKey<?>> KEY_QUEUE = Util.createQueue(0);
 
-        @SuppressWarnings("unchecked")
         public static <A> ModelKey<A> get(A model, int width, int height) {
-            ModelKey<A> modelKey = KEY_QUEUE.poll();
+            @SuppressWarnings("unchecked")
+            ModelKey<A> modelKey = (ModelKey<A>) KEY_QUEUE.poll();
             if (modelKey == null) {
                 modelKey = new ModelKey<A>();
             }
@@ -99,7 +99,7 @@ public class ModelCache<A, B> {
                 return false;
             }
 
-            ModelKey modelKey = (ModelKey) o;
+            ModelKey<?> modelKey = (ModelKey<?>) o;
 
             if (height != modelKey.height) {
                 return false;

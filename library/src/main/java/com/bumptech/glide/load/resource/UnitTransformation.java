@@ -9,7 +9,8 @@ import com.bumptech.glide.load.engine.Resource;
  * @param <T> The type of the resource that will always be returned unmodified.
  */
 public class UnitTransformation<T> implements Transformation<T> {
-    private static final UnitTransformation TRANSFORMATION = new UnitTransformation();
+    @SuppressWarnings("rawtypes")
+    private static final Transformation<?> TRANSFORMATION = new UnitTransformation();
 
     /**
      * Returns a UnitTransformation for the given type.
@@ -18,7 +19,7 @@ public class UnitTransformation<T> implements Transformation<T> {
      */
     @SuppressWarnings("unchecked")
     public static <T> UnitTransformation<T> get() {
-        return TRANSFORMATION;
+        return (UnitTransformation<T>) TRANSFORMATION;
     }
 
     @Override

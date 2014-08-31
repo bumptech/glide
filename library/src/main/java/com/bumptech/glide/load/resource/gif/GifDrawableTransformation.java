@@ -24,6 +24,7 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
     @Override
     public Resource<GifDrawable> transform(Resource<GifDrawable> resource, int outWidth, int outHeight) {
         GifDrawable drawable = resource.get();
+        @SuppressWarnings("unchecked")
         Transformation<Bitmap> newTransformation =
                 new MultiTransformation<Bitmap>(drawable.getFrameTransformation(), wrapped);
 

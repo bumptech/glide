@@ -86,6 +86,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
      * @param item The model to load.
      * @return A non null {@link BitmapRequestBuilder}.
      */
+    @SuppressWarnings("rawtypes")
     protected abstract GenericRequestBuilder getRequestBuilder(T item);
 
     private void preload(int start, boolean increasing) {
@@ -127,6 +128,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         lastEnd = end;
     }
 
+    @SuppressWarnings("unchecked")
     private void preloadItem(List<T> items, int position) {
         final T item = items.get(position);
         final int[] dimensions = getDimensions(item);
@@ -161,12 +163,12 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         }
     }
 
-    private static class PreloadTarget extends BaseTarget {
+    private static class PreloadTarget extends BaseTarget<Object> {
         private int photoHeight;
         private int photoWidth;
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
+        public void onResourceReady(Object resource, GlideAnimation<? super Object> glideAnimation) {
             // Do nothing.
         }
 
