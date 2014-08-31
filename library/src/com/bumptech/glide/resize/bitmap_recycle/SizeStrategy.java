@@ -108,20 +108,25 @@ class SizeStrategy implements LruPoolStrategy {
     }
 
     private static int getBytesPerPixel(Bitmap.Config config) {
-        switch (config) {
-            case ARGB_8888:
-                return 4;
-            case RGB_565:
-                return 2;
-            case ARGB_4444:
-                return 2;
-            case ALPHA_8:
-                return 1;
-            default:
-                // We only use this to calculate sizes to get, so choosing 4 bytes per pixel is conservative and
-                // probably forces us to get a larger bitmap than we really need. Since we can't tell for sure, probably
-                // better safe than sorry.
-                return 4;
+      // a bitmap by decoding a gif has null "config" in certain environments.
+      if (config == null) {
+          return 4;
+      }
+
+      switch (config) {
+          case ARGB_8888:
+              return 4;
+          case RGB_565:
+              return 2;
+          case ARGB_4444:
+              return 2;
+          case ALPHA_8:
+              return 1;
+          default:
+              // We only use this to calculate sizes to get, so choosing 4 bytes per pixel is conservative and
+              // probably forces us to get a larger bitmap than we really need. Since we can't tell for sure, probably
+              // better safe than sorry.
+              return 4;
         }
     }
 
