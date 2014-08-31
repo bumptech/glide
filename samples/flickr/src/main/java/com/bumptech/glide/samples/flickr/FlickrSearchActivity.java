@@ -2,6 +2,7 @@ package com.bumptech.glide.samples.flickr;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -175,7 +176,7 @@ public class FlickrSearchActivity extends ActionBarActivity {
         }
     }
 
-    @TargetApi(14)
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);

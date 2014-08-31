@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.model;
 
 import com.bumptech.glide.util.LruCache;
+import com.bumptech.glide.util.Util;
 
-import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
@@ -61,7 +61,7 @@ public class ModelCache<A, B> {
     }
 
     private static final class ModelKey<A> {
-        private static final Queue<ModelKey> KEY_QUEUE = new ArrayDeque<ModelKey>();
+        private static final Queue<ModelKey> KEY_QUEUE = Util.createQueue(0);
 
         @SuppressWarnings("unchecked")
         public static <A> ModelKey<A> get(A model, int width, int height) {

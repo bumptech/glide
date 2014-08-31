@@ -126,7 +126,7 @@ public class GlideBuilder {
 
         MemorySizeCalculator calculator = new MemorySizeCalculator(context);
         if (bitmapPool == null) {
-            if (Build.VERSION.SDK_INT >= 11) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 bitmapPool = new LruBitmapPool(calculator.getBitmapPoolSize());
             } else {
                 bitmapPool = new BitmapPoolAdapter();

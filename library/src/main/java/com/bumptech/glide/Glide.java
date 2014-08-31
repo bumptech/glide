@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -561,7 +562,7 @@ public class Glide {
      * @param fragment The fragment to use.
      * @return A RequestManager for the given Fragment that can be used to start a load.
      */
-    @TargetApi(11)
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static RequestManager with(android.app.Fragment fragment) {
         return RequestManagerRetriever.get(fragment);
     }

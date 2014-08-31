@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -116,7 +115,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     }
 
     private static class DefaultGifHeaderParserPool implements GifHeaderParserPool {
-        private static final Queue<GifHeaderParser> POOL = new ArrayDeque<GifHeaderParser>();
+        private static final Queue<GifHeaderParser> POOL = Util.createQueue(0);
 
         @Override
         public GifHeaderParser obtain(byte[] data) {

@@ -18,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
@@ -36,6 +37,8 @@ public class DiskLruCacheWrapperTest {
     }
 
     @Test
+    //@org.junit.Ignore
+    // on windows it will fail because new FileOutputStream keeps to lock
     public void testCanInsertAndGet() throws FileNotFoundException {
         cache.put(key, new DiskCache.Writer() {
             @Override
@@ -84,6 +87,8 @@ public class DiskLruCacheWrapperTest {
     }
 
     @Test
+    //@org.junit.Ignore
+    // on windows it will fail because new FileOutputStream keeps to lock
     public void testEditIsAbortedIfWriterThrows() throws FileNotFoundException {
         try {
             cache.put(key, new DiskCache.Writer() {
@@ -104,7 +109,7 @@ public class DiskLruCacheWrapperTest {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return true ;
+                return true;
             }
         });
 
@@ -116,7 +121,7 @@ public class DiskLruCacheWrapperTest {
     private static byte[] isToBytes(InputStream is, int length) {
         byte[] result = new byte[length];
         try {
-            is.read(result);
+            assertEquals(length, is.read(result));
         } catch (IOException e) {
             e.printStackTrace();
         }
