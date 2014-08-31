@@ -7,6 +7,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.tests.Util;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -18,6 +19,17 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class GlideBitmapDrawableTranscoderTest {
+    private GlideBitmapDrawableTranscoder transcoder;
+
+    @Before
+    public void setUp() {
+        transcoder = new GlideBitmapDrawableTranscoder(Robolectric.application.getResources(), mock(BitmapPool.class));
+    }
+
+    @Test
+    public void testHasValidId() {
+        Util.assertClassHasValidId(GlideBitmapDrawableTranscoder.class, transcoder.getId());
+    }
 
     @Test
     public void testReturnsBitmapDrawableResourceContainingGivenBitmap() {
@@ -25,16 +37,8 @@ public class GlideBitmapDrawableTranscoderTest {
         Resource<Bitmap> resource = mock(Resource.class);
         when(resource.get()).thenReturn(expected);
 
-        GlideBitmapDrawableTranscoder transcoder = new GlideBitmapDrawableTranscoder(Robolectric.application.getResources(),
-                mock(BitmapPool.class));
         Resource<GlideBitmapDrawable> transcoded = transcoder.transcode(resource);
 
         assertEquals(expected, transcoded.get().getBitmap());
-    }
-
-    @Test
-    public void testHasValidId() {
-        Util.assertClassHasValidId(GlideBitmapDrawableTranscoder.class,
-                new GlideBitmapDrawableTranscoder(Robolectric.application.getResources(), mock(BitmapPool.class)).getId());
     }
 }
