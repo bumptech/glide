@@ -9,10 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.StreamEncoder;
-import com.bumptech.glide.load.resource.NullResourceEncoder;
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.caverock.androidsvg.SVG;
 
@@ -78,7 +76,6 @@ public class MainActivity extends Activity {
         loadNet();
     }
 
-    @SuppressWarnings({ "cast", "rawtypes", "unchecked" })
     private void loadRes() {
         Glide.with(this)
                 .using(Glide.buildStreamModelLoader(Integer.class, this), InputStream.class)
@@ -88,21 +85,14 @@ public class MainActivity extends Activity {
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                         // SVG cannot be serialized so it's not worth to cache it
                         // and the getResources() should be fast enough when acquiring the InputStream
-                .encoder((ResourceEncoder<SVG>) (ResourceEncoder) NullResourceEncoder.get())
-                        // not used
-                .sourceEncoder(new StreamEncoder())
-                        // not used
-                .cacheDecoder(new FileToStreamDecoder<SVG>(new SvgDecoder()))
-                        // not used
                 .decoder(new SvgDecoder())
                 .placeholder(R.drawable.image_loading)
                 .error(R.drawable.image_error)
                 .animate(android.R.anim.fade_in)
-                .listener(new SvgSoftwareLayerSetter())
+                .listener(new SvgSoftwareLayerSetter<Integer, PictureDrawable>())
                 .into(imageViewRes);
     }
 
-    @SuppressWarnings({ "cast", "rawtypes", "unchecked" })
     private void loadNet() {
         Glide.with(this)
                 .using(Glide.buildStreamModelLoader(String.class, this), InputStream.class)
@@ -115,12 +105,10 @@ public class MainActivity extends Activity {
                         // however loading from the network can be cached via StreamEncoder
                 .cacheDecoder(new FileToStreamDecoder<SVG>(new SvgDecoder()))
                 .decoder(new SvgDecoder())
-                .encoder((ResourceEncoder<SVG>) (ResourceEncoder) NullResourceEncoder.get())
-                        // not used
                 .placeholder(R.drawable.image_loading)
                 .error(R.drawable.image_error)
                 .animate(android.R.anim.fade_in)
-                .listener(new SvgSoftwareLayerSetter())
+                .listener(new SvgSoftwareLayerSetter<String, PictureDrawable>())
                 .into(imageViewNet);
     }
 }
