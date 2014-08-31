@@ -9,8 +9,10 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:onClick="clearCache"
         android:clickable="true"
         android:text="@string/hello_world"
@@ -22,6 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:onClick="cycleScaleType"
         android:text="@string/scaleType"
     />
@@ -41,6 +44,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_below="@id/description"
+        android:layout_above="@id/button"
         android:layout_toLeftOf="@id/align"
         android:layout_toStartOf="@id/align"
         android:layout_centerVertical="true"
@@ -54,6 +59,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_below="@id/description"
+        android:layout_above="@id/button"
         android:layout_toRightOf="@id/align"
         android:layout_toEndOf="@id/align"
         android:layout_centerVertical="true"
