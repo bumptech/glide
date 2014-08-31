@@ -173,6 +173,7 @@ public class DrawableRequestBuilder<ModelType>
      *
      * @return This request builder.
      */
+    @SuppressWarnings("unchecked")
     public DrawableRequestBuilder<ModelType> centerCrop() {
         return transform(glide.getDrawableCenterCrop());
     }
@@ -187,6 +188,7 @@ public class DrawableRequestBuilder<ModelType>
      *
      * @return This request builder.
      */
+    @SuppressWarnings("unchecked")
     public DrawableRequestBuilder<ModelType> fitCenter() {
         return transform(glide.getDrawableFitCenter());
     }

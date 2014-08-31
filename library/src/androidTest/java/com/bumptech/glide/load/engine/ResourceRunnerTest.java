@@ -8,15 +8,13 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -180,55 +178,43 @@ public class ResourceRunnerTest {
 
     @Test
     public void testNotifiesJobOfFailureIfCacheLoaderThrows() {
-        final Exception exception = new IOException("test");
-        when(harness.cacheLoader.load(any(Key.class), any(ResourceDecoder.class), anyInt(), anyInt())).thenAnswer(
-                new Answer<Object>() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        throw exception;
-                    }
-                });
+        Exception exception = new RuntimeException("test");
+        when(harness.cacheLoader.load(any(Key.class), any(ResourceDecoder.class), anyInt(), anyInt()))
+                .thenThrow(exception);
+
         harness.runner.run();
+
         verify(harness.engineJob).onException(eq(exception));
     }
 
     @Test
     public void testNotifiesJobOfFailureIfTransformationThrows() {
-        final Exception exception = new RuntimeException("test");
-        when(harness.tranformation.transform(any(Resource.class), anyInt(), anyInt())).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                throw exception;
-            }
-        });
+        Exception exception = new RuntimeException("test");
+        when(harness.tranformation.transform(any(Resource.class), anyInt(), anyInt())).thenThrow(exception);
+
         harness.runner.run();
+
         verify(harness.engineJob).onException(eq(exception));
     }
 
     @Test
     public void testNotifiesJobOfFailureIfTranscoderThrows() {
-        final Exception exception = new RuntimeException("test");
-        when(harness.transcoder.transcode(any(Resource.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                throw exception;
-            }
-        });
+        Exception exception = new RuntimeException("test");
+        when(harness.transcoder.transcode(any(Resource.class))).thenThrow(exception);
+
         harness.runner.run();
+
         verify(harness.engineJob).onException(eq(exception));
     }
 
     @Test
     public void testNotifiesJobOfFailureIfExecutorThrows() {
-        final Exception exception = new ExecutionException(new RuntimeException("test"));
+        Exception exception = new RejectedExecutionException("test");
         when(harness.cacheLoader.load(any(Key.class), any(ResourceDecoder.class), anyInt(), anyInt())).thenReturn(null);
-        when(harness.resizeService.submit(any(Runnable.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                throw exception;
-            }
-        });
+        when(harness.resizeService.submit(any(Runnable.class))).thenThrow(exception);
+
         harness.runner.run();
+
         verify(harness.engineJob).onException(eq(exception));
     }
 

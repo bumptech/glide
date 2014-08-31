@@ -2,18 +2,23 @@ package com.bumptech.glide.request.animation;
 
 /**
  * A simple {@link com.bumptech.glide.request.animation.GlideAnimation} that performs no actions.
+ *
+ * @param <R> animated resource type
  */
-public class NoAnimation implements GlideAnimation {
-    private static final NoAnimation NO_ANIMATION = new NoAnimation();
-    private static final GlideAnimationFactory NO_ANIMATION_FACTORY = new NoAnimationFactory();
+public class NoAnimation<R> implements GlideAnimation<R> {
+    @SuppressWarnings("rawtypes")
+    private static final NoAnimation<?> NO_ANIMATION = new NoAnimation();
+    @SuppressWarnings("rawtypes")
+    private static final GlideAnimationFactory<?> NO_ANIMATION_FACTORY = new NoAnimationFactory();
 
     /**
      * A factory that always returns the same {@link com.bumptech.glide.request.animation.NoAnimation}.
      */
-    public static class NoAnimationFactory implements GlideAnimationFactory {
+    public static class NoAnimationFactory<R> implements GlideAnimationFactory<R> {
+        @SuppressWarnings("unchecked")
         @Override
-        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstResource) {
-            return NO_ANIMATION;
+        public GlideAnimation<R> build(boolean isFromMemoryCache, boolean isFirstResource) {
+            return (GlideAnimation<R>) NO_ANIMATION;
         }
     }
 
@@ -22,7 +27,7 @@ public class NoAnimation implements GlideAnimation {
      */
     @SuppressWarnings("unchecked")
     public static <R> GlideAnimationFactory<R> getFactory() {
-        return NO_ANIMATION_FACTORY;
+        return (GlideAnimationFactory<R>) NO_ANIMATION_FACTORY;
     }
 
     /**
@@ -30,7 +35,7 @@ public class NoAnimation implements GlideAnimation {
      */
     @SuppressWarnings("unchecked")
     public static <R> GlideAnimation<R> get() {
-        return NO_ANIMATION;
+        return (GlideAnimation<R>) NO_ANIMATION;
     }
 
     /**

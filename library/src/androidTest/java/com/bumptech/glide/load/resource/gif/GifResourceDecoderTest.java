@@ -8,8 +8,6 @@ import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -19,6 +17,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -61,15 +60,11 @@ public class GifResourceDecoderTest {
 
     @Test
     public void testReturnsParserToPoolWhenParserThrows() {
-        when(parser.parseHeader()).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                throw new IOException("Test");
-            }
-        });
+        when(parser.parseHeader()).thenThrow(new RuntimeException("Test"));
         try {
             decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
-        } catch (IOException e) {
+            fail("Expected exception is not thrown.");
+        } catch (RuntimeException e) {
             // Expected.
         }
 

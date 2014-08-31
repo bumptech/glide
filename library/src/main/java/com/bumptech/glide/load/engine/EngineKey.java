@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
+@SuppressWarnings("rawtypes")
 class EngineKey implements Key {
     private static final String FORMAT = "UTF-8";
 
@@ -21,8 +22,8 @@ class EngineKey implements Key {
     private final ResourceDecoder decoder;
     private final Transformation transformation;
     private final ResourceEncoder encoder;
-    private ResourceTranscoder transcoder;
-    private Encoder sourceEncoder;
+    private final ResourceTranscoder transcoder;
+    private final Encoder sourceEncoder;
     private String stringKey;
     private int hashCode;
     private OriginalEngineKey originalKey;

@@ -70,7 +70,7 @@ class EngineJob implements ResourceCallback {
     }
 
     @Override
-    public void onResourceReady(final Resource resource) {
+    public void onResourceReady(final Resource<?> resource) {
         final long start = LogTime.getLogTime();
         mainHandler.post(new Runnable() {
             @Override

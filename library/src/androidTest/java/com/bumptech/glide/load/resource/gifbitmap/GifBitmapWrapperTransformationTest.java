@@ -62,11 +62,13 @@ public class GifBitmapWrapperTransformationTest {
 
     @Test
     public void testHasValidId() {
-        String expectedId = "asdfas";
+        String expectedId = "testID";
         when(bitmapTransformation.getId()).thenReturn(expectedId);
+        BitmapPool pool = mock(BitmapPool.class);
 
-        assertEquals(expectedId, new GifBitmapWrapperTransformation(mock(BitmapPool.class), bitmapTransformation).getId
-                ());
+        GifBitmapWrapperTransformation transformation = new GifBitmapWrapperTransformation(pool, bitmapTransformation);
+
+        assertEquals(expectedId, transformation.getId());
     }
 
     @Test

@@ -11,7 +11,8 @@ import java.io.OutputStream;
  * @param <T> The type of the resource that will always fail to be encoded.
  */
 public class NullResourceEncoder<T> implements ResourceEncoder<T> {
-    private static final NullResourceEncoder NULL_ENCODER = new NullResourceEncoder();
+    @SuppressWarnings("rawtypes")
+    private static final NullResourceEncoder<?> NULL_ENCODER = new NullResourceEncoder();
 
     /**
      * Returns a NullResourceEncoder for the given type.
@@ -20,7 +21,7 @@ public class NullResourceEncoder<T> implements ResourceEncoder<T> {
      */
     @SuppressWarnings("unchecked")
     public static <T> NullResourceEncoder<T> get() {
-        return NULL_ENCODER;
+        return (NullResourceEncoder<T>) NULL_ENCODER;
     }
 
     @Override

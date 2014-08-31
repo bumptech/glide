@@ -6,20 +6,22 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 /**
- * An {@link com.bumptech.glide.request.animation.GlideAnimation} that can apply a
- * {@link android.view.animation.Animation} to a {@link android.view.View} using
- * {@link android.view.View#startAnimation(android.view.animation.Animation)}.
+ * A {@link com.bumptech.glide.request.animation.GlideAnimation GlideAnimation} that can apply a
+ * {@link android.view.animation.Animation Animation} to a {@link android.view.View View} using
+ * {@link android.view.View#startAnimation(android.view.animation.Animation) View.startAnimation}.
+ *
+ * @param <R> The type of the resource displayed in the view that is animated
  */
-public class ViewAnimation implements GlideAnimation {
+public class ViewAnimation<R> implements GlideAnimation<R> {
 
     /**
      * A {@link com.bumptech.glide.request.animation.GlideAnimationFactory} that produces ViewAnimations.
      */
-    public static class ViewAnimationFactory implements GlideAnimationFactory {
+    public static class ViewAnimationFactory<R> implements GlideAnimationFactory<R> {
         private Animation animation;
         private Context context;
         private int animationId;
-        private GlideAnimation glideAnimation;
+        private GlideAnimation<R> glideAnimation;
 
         public ViewAnimationFactory(Animation animation) {
             this.animation = animation;
@@ -40,7 +42,7 @@ public class ViewAnimation implements GlideAnimation {
          * @param isFirstResource {@inheritDoc}
          */
         @Override
-        public GlideAnimation build(boolean isFromMemoryCache, boolean isFirstResource) {
+        public GlideAnimation<R> build(boolean isFromMemoryCache, boolean isFirstResource) {
             if (isFromMemoryCache || !isFirstResource) {
                 return NoAnimation.get();
             }
@@ -49,7 +51,7 @@ public class ViewAnimation implements GlideAnimation {
                 if (animation == null) {
                     animation = AnimationUtils.loadAnimation(context, animationId);
                 }
-                glideAnimation = new ViewAnimation(animation);
+                glideAnimation = new ViewAnimation<R>(animation);
             }
 
             return glideAnimation;
@@ -77,7 +79,7 @@ public class ViewAnimation implements GlideAnimation {
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(Object current, ViewAdapter adapter) {
+    public boolean animate(R current, ViewAdapter adapter) {
         View view = adapter.getView();
         if (view != null) {
             view.clearAnimation();

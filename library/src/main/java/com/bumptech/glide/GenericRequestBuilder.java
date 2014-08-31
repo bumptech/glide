@@ -357,10 +357,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     // This is safe because the view animation doesn't care about the resource type it receives.
-    @SuppressWarnings("unchecked")
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             int animationId) {
-        return animate(new ViewAnimation.ViewAnimationFactory(context, animationId));
+        return animate(new ViewAnimation.ViewAnimationFactory<TranscodeType>(context, animationId));
     }
 
     /**
@@ -371,10 +370,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     // This is safe because the view animation doesn't care about the resource type it receives.
-    @SuppressWarnings("unchecked")
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             Animation animation) {
-        return animate(new ViewAnimation.ViewAnimationFactory(animation));
+        return animate(new ViewAnimation.ViewAnimationFactory<TranscodeType>(animation));
     }
 
     /**
@@ -386,10 +384,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     // This is safe because the view property animation doesn't care about the resource type it receives.
-    @SuppressWarnings("unchecked")
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             ViewPropertyAnimation.Animator animator) {
-        return animate(new ViewPropertyAnimation.ViewPropertyAnimationFactory(animator));
+        return animate(new ViewPropertyAnimation.ViewPropertyAnimationFactory<TranscodeType>(animator));
     }
 
     GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
@@ -563,6 +560,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 case FIT_START:
                 case FIT_END:
                     applyFitCenter();
+                    break;
+                //$CASES-OMITTED$
+                default:
+                    // silently ignore
                     break;
             }
         }

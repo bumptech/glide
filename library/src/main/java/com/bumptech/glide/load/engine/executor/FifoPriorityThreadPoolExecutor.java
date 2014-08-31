@@ -57,7 +57,7 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         }
     }
 
-    private static class FifoPriorityLoadTask<T> extends FutureTask<T> implements Comparable<FifoPriorityLoadTask> {
+    private static class FifoPriorityLoadTask<T> extends FutureTask<T> implements Comparable<FifoPriorityLoadTask<?>> {
         private final int priority;
         private final int order;
 
@@ -72,7 +72,7 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         }
 
         @Override
-        public int compareTo(FifoPriorityLoadTask loadTask) {
+        public int compareTo(FifoPriorityLoadTask<?> loadTask) {
             int result = priority - loadTask.priority;
             if (result == 0 && loadTask != this) {
                 result = order - loadTask.order;

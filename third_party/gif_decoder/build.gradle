@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion = '19.1.0'
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
         applicationId 'com.bumptech.glide.gifdecoder'

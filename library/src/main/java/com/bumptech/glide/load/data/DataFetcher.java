@@ -24,8 +24,8 @@ public interface DataFetcher<T> {
      *     Note - this method will be run on a background thread so blocking I/O is safe.
      * </p>
      *
-     *
      * @param priority The priority with which the request should be completed.
+     * @see #cleanup() where the data retuned will be cleaned up
      */
     public T loadData(Priority priority) throws Exception;
 
