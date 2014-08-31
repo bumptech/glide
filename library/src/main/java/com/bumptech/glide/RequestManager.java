@@ -450,7 +450,7 @@ public class RequestManager implements LifecycleListener {
          * @return This request builder.
          */
         public GenericTypeRequest load(A model) {
-            return new GenericTypeRequest(model, modelLoader, dataClass);
+            return new GenericTypeRequest(model);
         }
 
         /**
@@ -460,13 +460,9 @@ public class RequestManager implements LifecycleListener {
          */
         public final class GenericTypeRequest {
             private final A model;
-            private final ModelLoader<A, T> modelLoader;
-            private final Class<T> dataClass;
 
-            private GenericTypeRequest(A model, ModelLoader<A, T> modelLoader, Class<T> dataClass) {
+            private GenericTypeRequest(A model) {
                 this.model = model;
-                this.modelLoader = modelLoader;
-                this.dataClass = dataClass;
             }
 
             /**
