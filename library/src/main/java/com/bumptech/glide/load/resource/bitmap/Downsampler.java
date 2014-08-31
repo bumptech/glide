@@ -8,10 +8,10 @@ import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.ByteArrayPool;
+import com.bumptech.glide.util.Util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayDeque;
 import java.util.EnumSet;
 import java.util.Queue;
 import java.util.Set;
@@ -26,7 +26,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     private static final Set<ImageHeaderParser.ImageType> TYPES_THAT_USE_POOL = EnumSet.of(
             ImageHeaderParser.ImageType.JPEG, ImageHeaderParser.ImageType.PNG_A, ImageHeaderParser.ImageType.PNG);
 
-    private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = new ArrayDeque<BitmapFactory.Options>();
+    private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
 
     @TargetApi(11)
     private static synchronized BitmapFactory.Options getDefaultOptions() {

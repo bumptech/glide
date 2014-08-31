@@ -1,15 +1,12 @@
 package com.bumptech.glide;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.widget.AbsListView;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.util.Util;
 
-import java.util.ArrayDeque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -145,13 +142,8 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     private static final class PreloadTargetQueue {
         private final Queue<PreloadTarget> queue;
 
-        @TargetApi(9)
         private PreloadTargetQueue(int size) {
-            if (Build.VERSION.SDK_INT >= 9) {
-                queue = new ArrayDeque<PreloadTarget>(size);
-            } else {
-                queue = new LinkedList<PreloadTarget>();
-            }
+            queue = Util.createQueue(size);
 
             for (int i = 0; i < size; i++) {
                 queue.offer(new PreloadTarget());
