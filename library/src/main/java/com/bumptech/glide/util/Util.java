@@ -1,9 +1,14 @@
 package com.bumptech.glide.util;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
+
+import java.util.ArrayDeque;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * A collection of assorted utility classes.
@@ -67,4 +72,12 @@ public class Util {
         return !isOnMainThread();
     }
 
+    @SuppressLint("NewApi")
+    public static <T> Queue<T> createQueue(int size) {
+        if (Build.VERSION.SDK_INT < 9) {
+            return new LinkedList<T>();
+        } else {
+            return new ArrayDeque<T>(size);
+        }
+    }
 }

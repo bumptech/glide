@@ -24,7 +24,6 @@ import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
-import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
@@ -38,7 +37,7 @@ import java.util.Queue;
 public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallback,
         ResourceCallback {
     private static final String TAG = "GenericRequest";
-    private static final Queue<GenericRequest> REQUEST_POOL = new ArrayDeque<GenericRequest>();
+    private static final Queue<GenericRequest> REQUEST_POOL = Util.createQueue(0);
 
     private enum Status {
         PENDING,

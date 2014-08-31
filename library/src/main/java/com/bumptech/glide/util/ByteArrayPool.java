@@ -2,7 +2,6 @@ package com.bumptech.glide.util;
 
 import android.util.Log;
 
-import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
@@ -16,7 +15,7 @@ public final class ByteArrayPool {
     private static final int MAX_SIZE = 2 * 1048 * 1024;
     private static final int MAX_BYTE_ARRAY_COUNT = MAX_SIZE / TEMP_BYTES_SIZE;
 
-    private final Queue<byte[]> tempQueue = new ArrayDeque<byte[]>();
+    private final Queue<byte[]> tempQueue = Util.createQueue(0);
     private static final ByteArrayPool BYTE_ARRAY_POOL = new ByteArrayPool();
 
     /**
