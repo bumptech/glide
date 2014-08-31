@@ -20,7 +20,7 @@ class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
         }
 
         @Override
-        public GifDecoder loadData(Priority priority) throws Exception {
+        public GifDecoder loadData(Priority priority) {
             return decoder;
         }
 

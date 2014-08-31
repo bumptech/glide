@@ -3,8 +3,6 @@ package com.bumptech.glide.load.resource;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 
-import java.io.IOException;
-
 /**
  * A simple {@link com.bumptech.glide.load.ResourceDecoder} that always returns null.
  *
@@ -26,7 +24,7 @@ public class NullDecoder<T, Z> implements ResourceDecoder<T, Z> {
     }
 
     @Override
-    public Resource<Z> decode(T source, int width, int height) throws IOException {
+    public Resource<Z> decode(T source, int width, int height) {
         return null;
     }
 

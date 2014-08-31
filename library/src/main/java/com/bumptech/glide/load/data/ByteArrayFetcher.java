@@ -19,7 +19,7 @@ public class ByteArrayFetcher implements DataFetcher<InputStream> {
     }
 
     @Override
-    public InputStream loadData(Priority priority) throws Exception {
+    public InputStream loadData(Priority priority) {
         return new ByteArrayInputStream(bytes);
     }
 
