@@ -13,15 +13,15 @@ repositories {
 }
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion "20.0.0"
+    compileSdkVersion 19
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
-        applicationId "com.bumptech.svgsample.app"
+        applicationId 'com.bumptech.svgsample.app'
         minSdkVersion 10
-        targetSdkVersion 20
+        targetSdkVersion 19
         versionCode 1
-        versionName "1.0"
+        versionName '1.0'
     }
     buildTypes {
         release {
