@@ -25,7 +25,7 @@ public class ByteArrayFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void cleanup() {
-        // Do nothing.
+        // Do nothing. It's safe to leave a ByteArrayInputStream open.
     }
 
     @Override

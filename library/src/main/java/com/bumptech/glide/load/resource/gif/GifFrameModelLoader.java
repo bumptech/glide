@@ -26,7 +26,7 @@ class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
 
         @Override
         public void cleanup() {
-            // Do nothing.
+            // Do nothing. GifDecoder reads from an arbitrary InputStream, the caller will close that stream.
         }
 
         @Override

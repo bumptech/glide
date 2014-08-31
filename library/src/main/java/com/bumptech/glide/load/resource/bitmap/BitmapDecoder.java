@@ -13,7 +13,7 @@ public interface BitmapDecoder<T> {
     /**
      * Returns a decoded bitmap for a given resource and target dimensions.
      *
-     * @param resource The resource to decode.
+     * @param resource The resource to decode, managed by the caller, no need to clean it up.
      * @param bitmapPool A bitmap pool that can be used to reuse bitmaps during the load. Any bitmaps created or
      *                   obtained from the pool other than the bitmap returned by this method should be returned to the
      *                   pool.

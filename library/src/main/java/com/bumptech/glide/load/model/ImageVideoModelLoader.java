@@ -58,6 +58,9 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
             this.streamFetcher = streamFetcher;
             this.fileDescriptorFetcher = fileDescriptorFetcher;
         }
+
+        @SuppressWarnings("resource")
+        // @see ModelLoader.loadData
         @Override
         public ImageVideoWrapper loadData(Priority priority) throws Exception {
             InputStream is = null;
