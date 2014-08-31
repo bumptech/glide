@@ -1,5 +1,7 @@
 package com.bumptech.glide.provider;
 
+import com.bumptech.glide.util.MultiClassKey;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,58 +44,5 @@ public class DataLoadProviderRegistry {
             result = EmptyDataLoadProvider.get();
         }
         return result;
-    }
-
-    private static class MultiClassKey {
-        private Class dataClass;
-        private Class resourceClass;
-
-        public MultiClassKey() { }
-
-        public MultiClassKey(Class dataClass, Class resourceClass) {
-            this.dataClass = dataClass;
-            this.resourceClass = resourceClass;
-        }
-
-        @Override
-        public String toString() {
-            return "MultiClassKey{"
-                    + "dataClass=" + dataClass
-                    + ", resourceClass=" + resourceClass
-                    + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            MultiClassKey that = (MultiClassKey) o;
-
-            if (!dataClass.equals(that.dataClass)) {
-                return false;
-            }
-            if (!resourceClass.equals(that.resourceClass)) {
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = dataClass.hashCode();
-            result = 31 * result + resourceClass.hashCode();
-            return result;
-        }
-
-        public void set(Class dataClass, Class resourceClass) {
-            this.dataClass = dataClass;
-            this.resourceClass = resourceClass;
-        }
     }
 }
