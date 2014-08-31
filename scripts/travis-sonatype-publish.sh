@@ -11,7 +11,7 @@ if [ "$TRAVIS_REPO_SLUG" == "bumptech/glide" ] && [ "$TRAVIS_PULL_REQUEST" == "f
 
   echo -e "Starting publish to Sonatype...\n"
 
-  ./gradlew uploadArchives -PnexusUsername="${NEXUS_USERNAME}" -PnexusPassword="${NEXUS_PASSWORD}"
+  ./gradlew uploadArchives -PNEXUS_USERNAME="${NEXUS_USERNAME}" -PNEXUS_PASSWORD="${NEXUS_PASSWORD}"
   RETVAL=$?
 
   if [ $RETVAL -eq 0 ]; then
