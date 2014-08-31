@@ -8,7 +8,7 @@ android:
 script: 'travis_retry ./gradlew build'
 
 after_success:
-- ./gradlew uploadGlideArchives -PNEXUS_USERNAME="${NEXUS_USERNAME}" -PNEXUS_PASSWORD="${NEXUS_PASSWORD}"
+- scripts/travis-sonatype-publish.sh
 
 env:
   global:
