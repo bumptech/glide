@@ -334,7 +334,7 @@ public class Glide {
      *
      * @param target The Target to cancel loads for.
      */
-    public static void clear(Target target) {
+    public static void clear(Target<?> target) {
         Request request = target.getRequest();
         if (request != null) {
             request.clear();
@@ -347,7 +347,7 @@ public class Glide {
      *
      * @param target The target to cancel loads for.
      */
-    public static void clear(FutureTarget target) {
+    public static void clear(FutureTarget<?> target) {
         target.clear();
     }
 
@@ -365,7 +365,7 @@ public class Glide {
      * @throws IllegalArgumentException if an object other than Glide's metadata is set as the view's tag.
      */
     public static void clear(View view) {
-        Target viewTarget = new ClearTarget(view);
+        Target<?> viewTarget = new ClearTarget(view);
         clear(viewTarget);
     }
 

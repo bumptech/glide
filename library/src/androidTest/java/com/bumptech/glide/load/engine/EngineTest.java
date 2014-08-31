@@ -430,7 +430,7 @@ public class EngineTest {
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         Priority priority = Priority.NORMAL;
         ResourceCallback cb = mock(ResourceCallback.class);
-        Resource<Object> resource = mock(Resource.class);
+        Resource resource = mock(Resource.class);
         Map<Key, ResourceRunner> runners = new HashMap<Key, ResourceRunner>();
         Transformation transformation = mock(Transformation.class);
         ResourceRunnerFactory factory = mock(ResourceRunnerFactory.class);

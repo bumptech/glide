@@ -39,7 +39,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
     private static <A, T, Z, R> LoadProvider<A, T, Z, R> build(Glide glide, ModelLoader<A, T> modelLoader,
             Class<T> dataClass, Class<Z> resourceClass, ResourceTranscoder<Z, R> transcoder) {
         if (transcoder == null) {
-            transcoder = UnitTranscoder.get();
+            transcoder = (ResourceTranscoder<Z, R>) UnitTranscoder.get();
         }
         DataLoadProvider<T, Z> dataLoadProvider = glide.buildDataProvider(dataClass, resourceClass);
         return new FixedLoadProvider<A, T, Z, R>(modelLoader, transcoder, dataLoadProvider);

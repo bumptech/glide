@@ -38,7 +38,7 @@ class GifFrameManager {
     private final ResourceEncoder<Bitmap> encoder;
     private final Context context;
     private final Encoder<GifDecoder> sourceEncoder;
-    private final Transformation<Bitmap> transformation;
+    private final Transformation<Bitmap>[] transformation;
     private final int targetWidth;
     private final int targetHeight;
     private final int totalFrameSize;
@@ -55,12 +55,13 @@ class GifFrameManager {
                 targetWidth, targetHeight, frameWidth, frameHeight);
     }
 
+    @SuppressWarnings("unchecked")
     public GifFrameManager(Context context, BitmapPool bitmapPool, GifDecoder decoder, Handler mainHandler,
             Transformation<Bitmap> transformation, int targetWidth, int targetHeight, int frameWidth, int frameHeight) {
         this.context = context;
         this.decoder = decoder;
         this.mainHandler = mainHandler;
-        this.transformation = transformation;
+        this.transformation = new Transformation[] {transformation};
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
         this.totalFrameSize = frameWidth * frameHeight * (decoder.isTransparent() ? 4 : 2);
@@ -87,7 +88,7 @@ class GifFrameManager {
     }
 
     Transformation<Bitmap> getTransformation() {
-        return transformation;
+        return transformation[0];
     }
 
     public void getNextFrame(FrameCallback cb) {

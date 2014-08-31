@@ -27,7 +27,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private final EngineKey key;
     private final Transformation<Z> transformation;
     private final ResourceTranscoder<Z, R> transcoder;
-    private final SourceResourceRunner sourceRunner;
+    private final SourceResourceRunner<?, Z, R> sourceRunner;
     private final EngineJob job;
     private final Priority priority;
     private final ResourceDecoder<File, Z> cacheDecoder;
@@ -41,8 +41,8 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
 
     public ResourceRunner(EngineKey key, int width, int height, CacheLoader cacheLoader,
             ResourceDecoder<File, Z> cacheDecoder, Transformation<Z> transformation,
-            ResourceTranscoder<Z, R> transcoder, SourceResourceRunner sourceRunner, ExecutorService diskCacheService,
-            ExecutorService resizeService, EngineJob job, Priority priority) {
+            ResourceTranscoder<Z, R> transcoder, SourceResourceRunner<?, Z, R> sourceRunner,
+            ExecutorService diskCacheService, ExecutorService resizeService, EngineJob job, Priority priority) {
         this.key = key;
         this.width = width;
         this.height = height;

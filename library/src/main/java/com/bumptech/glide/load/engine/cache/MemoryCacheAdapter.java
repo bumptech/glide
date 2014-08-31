@@ -16,12 +16,12 @@ public class MemoryCacheAdapter implements MemoryCache {
     }
 
     @Override
-    public Resource remove(Key key) {
+    public Resource<?> remove(Key key) {
         return null;
     }
 
     @Override
-    public Resource put(Key key, Resource resource) {
+    public Resource<?> put(Key key, Resource<?> resource) {
         listener.onResourceRemoved(resource);
         return null;
     }
