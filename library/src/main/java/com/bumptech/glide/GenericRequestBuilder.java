@@ -54,8 +54,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private int errorId;
     private RequestListener<ModelType, TranscodeType> requestListener;
     private Float thumbSizeMultiplier;
-    private GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>
-            thumbnailRequestBuilder;
+    private GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;

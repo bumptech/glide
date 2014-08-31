@@ -414,7 +414,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             return;
         }
         @SuppressWarnings("unchecked")
-		R result = (R) received;
+        R result = (R) received;
         status = Status.COMPLETE;
 
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
