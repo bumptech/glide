@@ -121,66 +121,79 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      * Load the image for the given InputStream. If a recycled Bitmap whose dimensions exactly match those of the image
      * for the given InputStream is available, the operation is much less expensive in terms of memory.
      *
-     * Note - this method will throw an exception of a Bitmap with dimensions not matching those of the image for the
-     * given InputStream is provided.
+     * <p>
+     *     Note - this method will throw an exception of a Bitmap with dimensions not matching
+     *     those of the image for the given InputStream is provided.
+     * </p>
      *
-     * @param is An InputStream to the data for the image
+     * @param is An {@link InputStream} to the data for the image
      * @param pool A pool of recycled bitmaps
      * @param outWidth The width the final image should be close to
      * @param outHeight The height the final image should be close to
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
      */
+    @SuppressWarnings("resource")
+    // see BitmapDecoder.decode
     @Override
     public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight, DecodeFormat decodeFormat) {
         final ByteArrayPool byteArrayPool = ByteArrayPool.get();
-        byte[] bytesForOptions = byteArrayPool.getBytes();
-        byte[] bytesForStream = byteArrayPool.getBytes();
-        RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytesForStream);
-        bis.mark(MARK_POSITION);
-        int orientation = 0;
-        try {
-            orientation = new ImageHeaderParser(bis).getOrientation();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            bis.reset();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        final byte[] bytesForOptions = byteArrayPool.getBytes();
+        final byte[] bytesForStream = byteArrayPool.getBytes();
         final BitmapFactory.Options options = getDefaultOptions();
-        options.inTempStorage = bytesForOptions;
-
-        final int[] inDimens = getDimensions(bis, options);
-        final int inWidth = inDimens[0];
-        final int inHeight = inDimens[1];
-
-        final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
-        final int sampleSize;
-        if (degreesToRotate == 90 || degreesToRotate == 270) {
-            // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
-            // decreased to near our target's height and the image height is decreased to near our target width.
-            sampleSize = getSampleSize(inHeight, inWidth, outWidth, outHeight);
-        } else {
-            sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
-        }
-
-        final Bitmap downsampled = downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize, decodeFormat);
-
-        Bitmap rotated = null;
-        if (downsampled != null) {
-            rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
-
-            if (downsampled != rotated && !pool.put(downsampled)) {
-                downsampled.recycle();
+        final RecyclableBufferedInputStream bis = new RecyclableBufferedInputStream(is, bytesForStream);
+        try {
+            bis.mark(MARK_POSITION);
+            int orientation = 0;
+            try {
+                orientation = new ImageHeaderParser(bis).getOrientation();
+            } catch (IOException e) {
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Cannot determine the image orientation from header", e);
+                }
+            } finally {
+                try {
+                    bis.reset();
+                } catch (IOException e) {
+                    if (Log.isLoggable(TAG, Log.WARN)) {
+                        Log.w(TAG, "Cannot reset the input stream", e);
+                    }
+                }
             }
-        }
 
-        byteArrayPool.releaseBytes(bytesForOptions);
-        byteArrayPool.releaseBytes(bytesForStream);
-        releaseOptions(options);
-        return rotated;
+            options.inTempStorage = bytesForOptions;
+
+            final int[] inDimens = getDimensions(bis, options);
+            final int inWidth = inDimens[0];
+            final int inHeight = inDimens[1];
+
+            final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
+            final int sampleSize;
+            if (degreesToRotate == 90 || degreesToRotate == 270) {
+                // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
+                // decreased to near our target's height and the image height is decreased to near our target width.
+                sampleSize = getSampleSize(inHeight, inWidth, outWidth, outHeight);
+            } else {
+                sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
+            }
+
+            final Bitmap downsampled =
+                    downsampleWithSize(bis, options, pool, inWidth, inHeight, sampleSize, decodeFormat);
+
+            Bitmap rotated = null;
+            if (downsampled != null) {
+                rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
+
+                if (downsampled != rotated && !pool.put(downsampled)) {
+                    downsampled.recycle();
+                }
+            }
+
+            return rotated;
+        } finally {
+            byteArrayPool.releaseBytes(bytesForOptions);
+            byteArrayPool.releaseBytes(bytesForStream);
+            releaseOptions(options);
+        }
     }
 
     protected Bitmap downsampleWithSize(RecyclableBufferedInputStream bis, BitmapFactory.Options options,
@@ -210,12 +223,16 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
             // look at : https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
             return TYPES_THAT_USE_POOL.contains(type);
         } catch (IOException e) {
-            e.printStackTrace();
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Cannot determine the image type from header", e);
+            }
         } finally {
             try {
                 bis.reset();
             } catch (IOException e) {
-                e.printStackTrace();
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Cannot reset the input stream", e);
+                }
             }
         }
         return false;
@@ -232,12 +249,16 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         try {
             hasAlpha = new ImageHeaderParser(bis).hasAlpha();
         } catch (IOException e) {
-            e.printStackTrace();
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Cannot determine whether the image has alpha or not from header for format " + format, e);
+            }
         } finally {
             try {
                 bis.reset();
             } catch (IOException e) {
-                e.printStackTrace();
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Cannot reset the input stream", e);
+                }
             }
         }
 
@@ -292,8 +313,6 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
             if (options.inJustDecodeBounds) {
                 bis.reset();
                 bis.clearMark();
-            } else {
-                bis.close();
             }
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.ERROR)) {
