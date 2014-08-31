@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- top-left to bottom-right line -->
+    <item>
+        <rotate android:fromDegrees="45">
+            <shape android:shape="line">
+                <size
+                    android:width="128dp"
+                    android:height="128dp" />
+                <stroke
+                    android:color="#f00"
+                    android:width="4dp" />
+            </shape>
+        </rotate>
+    </item>
+
+    <!-- top-right to bottom-left line -->
+    <item>
+        <rotate android:fromDegrees="-45">
+            <shape android:shape="line">
+                <size
+                    android:width="128dp"
+                    android:height="128dp" />
+                <stroke
+                    android:color="#f00"
+                    android:width="4dp" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>
