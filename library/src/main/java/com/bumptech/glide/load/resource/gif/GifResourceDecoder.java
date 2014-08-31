@@ -32,7 +32,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     private static final GifHeaderParserPool PARSER_POOL = new DefaultGifHeaderParserPool();
     private final Context context;
     private final BitmapPool bitmapPool;
-    private GifHeaderParserPool parserPool;
+    private final GifHeaderParserPool parserPool;
 
     public GifResourceDecoder(Context context) {
         this(context, Glide.get(context).getBitmapPool());
@@ -95,11 +95,11 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     }
 
     private static byte[] inputStreamToBytes(InputStream is) {
-        int capacity = 16384;
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(capacity);
+        final int bufferSize = 16384, initialCapacity = bufferSize;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream(initialCapacity);
         try {
             int nRead;
-            byte[] data = new byte[16384];
+            byte[] data = new byte[bufferSize];
             while ((nRead = is.read(data, 0, data.length)) != -1) {
                 buffer.write(data, 0, nRead);
             }
@@ -107,6 +107,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
         } catch (IOException e) {
             Log.w(TAG, "Error reading data from stream", e);
         }
+        //TODO the returned byte[] may be partial if an IOException was thrown from read
         return buffer.toByteArray();
     }
 
