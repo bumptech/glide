@@ -5,7 +5,6 @@ doc/**
 bin/**
 library/bin/*
 library/gen/*
-library/local.properties
 library/.gradle
 library/.settings
 library/target
@@ -20,10 +19,9 @@ samples/flickr/.idea/*
 samples/flickr/gen
 samples/flickr/out
 samples/flickr/bin
-samples/flickr/local.properties
 samples/flickr/target
 integration/volley/target/**
-**/local.properties
+**local.properties
 *.keystore
 **/.idea/*
 .settings
