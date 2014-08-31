@@ -83,8 +83,11 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         try {
             result = runWrapped();
         } catch (Exception e) {
-            job.onException(e);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Failed to decode resource from cache", e);
+            }
         }
+
         if (result != null) {
             job.onResourceReady(result);
         } else {

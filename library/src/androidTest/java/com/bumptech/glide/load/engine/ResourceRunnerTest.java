@@ -179,7 +179,7 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testNotifiesJobOfFailureIfCacheLoaderThrows() {
+    public void testSubmitsSourceRunnerIfCacheLoaderThrows() {
         final Exception exception = new IOException("test");
         when(harness.cacheLoader.load(any(Key.class), any(ResourceDecoder.class), anyInt(), anyInt())).thenAnswer(
                 new Answer<Object>() {
@@ -189,11 +189,12 @@ public class ResourceRunnerTest {
                     }
                 });
         harness.runner.run();
-        verify(harness.engineJob).onException(eq(exception));
+
+        verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
     @Test
-    public void testNotifiesJobOfFailureIfTransformationThrows() {
+    public void testSubmitsSourceRunnerIfTransformationThrows() {
         final Exception exception = new RuntimeException("test");
         when(harness.tranformation.transform(any(Resource.class), anyInt(), anyInt())).thenAnswer(new Answer<Object>() {
             @Override
@@ -202,11 +203,11 @@ public class ResourceRunnerTest {
             }
         });
         harness.runner.run();
-        verify(harness.engineJob).onException(eq(exception));
+        verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
     @Test
-    public void testNotifiesJobOfFailureIfTranscoderThrows() {
+    public void testSubmitsSourceRunnerIfTranscoderThrows() {
         final Exception exception = new RuntimeException("test");
         when(harness.transcoder.transcode(any(Resource.class))).thenAnswer(new Answer<Object>() {
             @Override
@@ -215,7 +216,7 @@ public class ResourceRunnerTest {
             }
         });
         harness.runner.run();
-        verify(harness.engineJob).onException(eq(exception));
+        verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
     @Test
@@ -230,6 +231,15 @@ public class ResourceRunnerTest {
         });
         harness.runner.run();
         verify(harness.engineJob).onException(eq(exception));
+    }
+
+    @Test
+    public void testDoesNotNotifyJobOfFailureIfDecodingFromCacheThrows() {
+        when(harness.cacheLoader.load(any(Key.class), any(ResourceDecoder.class), anyInt(), anyInt()))
+                .thenThrow(new RuntimeException("test"));
+
+        harness.runner.run();
+        verify(harness.engineJob, never()).onException(any(Exception.class));
     }
 
     @SuppressWarnings("unchecked")
