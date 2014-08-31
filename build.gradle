@@ -36,6 +36,14 @@ allprojects {
         // empty classpath
         classpath = files()
     }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            if (!name.contains('Test')) {
+                options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+            }
+        }
+    }
 }
 
 task wrapper(type: Wrapper) {
