@@ -42,6 +42,21 @@ public abstract class Transformation {
             return ImageResizer.fitCenter(bitmap, pool, outWidth, outHeight);
         }
     };
+    
+    /**
+     * Scale the image uniformly (maintaining the image's aspect ratio) so that one of the dimensions of the image
+     * will be equal to the given dimension and the other will be less than the given dimension
+     */
+    public static Transformation CIRCLE_CROP = new Transformation() {
+        @Override
+        public Bitmap transform(Bitmap bitmap, BitmapPool pool, int outWidth, int outHeight) {
+            if (outWidth <= 0 || outHeight <= 0) {
+                throw new IllegalArgumentException("Cannot circle crop image to width=" + outWidth + " and height="
+                        + outHeight);
+            }
+            return ImageResizer.circleCrop(pool.get(outWidth, outHeight, bitmap.getConfig()), bitmap, outWidth, outHeight);
+        }
+    };
 
     /**
      * A noop Transformation that simply returns the given bitmap

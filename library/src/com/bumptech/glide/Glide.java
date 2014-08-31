@@ -18,6 +18,7 @@ import com.bumptech.glide.loader.model.StringLoader;
 import com.bumptech.glide.loader.model.UriLoader;
 import com.bumptech.glide.loader.stream.StreamLoader;
 import com.bumptech.glide.loader.transformation.CenterCrop;
+import com.bumptech.glide.loader.transformation.CircleCrop;
 import com.bumptech.glide.loader.transformation.FitCenter;
 import com.bumptech.glide.loader.transformation.MultiTransformationLoader;
 import com.bumptech.glide.loader.transformation.None;
@@ -532,6 +533,17 @@ public class Glide {
          */
         public Request<T> centerCrop() {
             return transform(new CenterCrop<T>());
+        }
+        
+        /**
+         * Transform images using {@link com.bumptech.glide.loader.transformation.CircleCrop}.
+         *
+         * @see #transform(com.bumptech.glide.loader.transformation.TransformationLoader)
+         *
+         * @return This Request
+         */
+        public Request<T> circleCrop() {
+            return transform(new CircleCrop<T>());
         }
 
         /**
