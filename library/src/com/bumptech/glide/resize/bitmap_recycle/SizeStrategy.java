@@ -108,6 +108,11 @@ class SizeStrategy implements LruPoolStrategy {
     }
 
     private static int getBytesPerPixel(Bitmap.Config config) {
+	// a bitmap by decoding a gif has null "config" in certain environments.
+	if (config == null) {
+		return 4;
+	}
+
         switch (config) {
             case ARGB_8888:
                 return 4;
