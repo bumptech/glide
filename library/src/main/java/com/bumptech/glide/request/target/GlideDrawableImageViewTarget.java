@@ -11,7 +11,6 @@ import com.bumptech.glide.request.animation.GlideAnimation;
  */
 public class GlideDrawableImageViewTarget extends ImageViewTarget<GlideDrawable> {
     private static final float SQUARE_RATIO_MARGIN = 0.05f;
-    private final ImageView view;
     private int maxLoopCount;
     private GlideDrawable resource;
 
@@ -36,7 +35,6 @@ public class GlideDrawableImageViewTarget extends ImageViewTarget<GlideDrawable>
      */
     public GlideDrawableImageViewTarget(ImageView view, int maxLoopCount) {
         super(view);
-        this.view = view;
         this.maxLoopCount = maxLoopCount;
     }
 
