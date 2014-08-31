@@ -4,7 +4,6 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * A simple {@link com.bumptech.glide.load.ResourceDecoder} that creates resource for a given {@link java.io.File}.
@@ -12,7 +11,7 @@ import java.io.IOException;
 public class FileDecoder implements ResourceDecoder<File, File> {
 
     @Override
-    public Resource<File> decode(File source, int width, int height) throws IOException {
+    public Resource<File> decode(File source, int width, int height) {
         return new FileResource(source);
     }
 

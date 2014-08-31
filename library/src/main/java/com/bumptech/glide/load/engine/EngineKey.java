@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
+@SuppressWarnings("rawtypes")
 class EngineKey implements Key {
     private static final String FORMAT = "UTF-8";
 
@@ -21,8 +22,8 @@ class EngineKey implements Key {
     private final ResourceDecoder decoder;
     private final Transformation transformation;
     private final ResourceEncoder encoder;
-    private ResourceTranscoder transcoder;
-    private Encoder sourceEncoder;
+    private final ResourceTranscoder transcoder;
+    private final Encoder sourceEncoder;
     private String stringKey;
     private int hashCode;
     private OriginalEngineKey originalKey;
@@ -65,19 +66,32 @@ class EngineKey implements Key {
             return false;
         } else if (width != engineKey.width) {
             return false;
-        } else  if (!transformation.getId().equals(engineKey.transformation.getId())) {
+        } else if (transformation == null ^ engineKey.transformation == null) {
             return false;
-        } else if (!decoder.getId().equals(engineKey.decoder.getId())) {
+        } else if (transformation != null && !transformation.getId().equals(engineKey.transformation.getId())) {
             return false;
-        } else if (!cacheDecoder.getId().equals(engineKey.cacheDecoder.getId())) {
+        } else if (decoder == null ^ engineKey.decoder == null) {
             return false;
-        } else if (!encoder.getId().equals(engineKey.encoder.getId())) {
+        } else if (decoder != null && !decoder.getId().equals(engineKey.decoder.getId())) {
             return false;
-        } else if (!transcoder.getId().equals(engineKey.transcoder.getId())) {
+        } else if (cacheDecoder == null ^ engineKey.cacheDecoder == null) {
             return false;
-        } else {
-            return sourceEncoder.getId().equals(engineKey.sourceEncoder.getId());
+        } else if (cacheDecoder != null && !cacheDecoder.getId().equals(engineKey.cacheDecoder.getId())) {
+            return false;
+        } else if (encoder == null ^ engineKey.encoder == null) {
+            return false;
+        } else if (encoder != null && !encoder.getId().equals(engineKey.encoder.getId())) {
+            return false;
+        } else if (transcoder == null ^ engineKey.transcoder == null) {
+            return false;
+        } else if (transcoder != null && !transcoder.getId().equals(engineKey.transcoder.getId())) {
+            return false;
+        } else if (sourceEncoder == null ^ engineKey.sourceEncoder == null) {
+            return false;
+        } else if (sourceEncoder != null && !sourceEncoder.getId().equals(engineKey.sourceEncoder.getId())) {
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -86,12 +100,12 @@ class EngineKey implements Key {
             hashCode = id.hashCode();
             hashCode = 31 * hashCode + width;
             hashCode = 31 * hashCode + height;
-            hashCode = 31 * hashCode + cacheDecoder.getId().hashCode();
-            hashCode = 31 * hashCode + decoder.getId().hashCode();
-            hashCode = 31 * hashCode + transformation.getId().hashCode();
-            hashCode = 31 * hashCode + encoder.getId().hashCode();
-            hashCode = 31 * hashCode + transcoder.getId().hashCode();
-            hashCode = 31 * hashCode + sourceEncoder.getId().hashCode();
+            hashCode = 31 * hashCode + (cacheDecoder   != null ? cacheDecoder  .getId().hashCode() : 0);
+            hashCode = 31 * hashCode + (decoder        != null ? decoder       .getId().hashCode() : 0);
+            hashCode = 31 * hashCode + (transformation != null ? transformation.getId().hashCode() : 0);
+            hashCode = 31 * hashCode + (encoder        != null ? encoder       .getId().hashCode() : 0);
+            hashCode = 31 * hashCode + (transcoder     != null ? transcoder    .getId().hashCode() : 0);
+            hashCode = 31 * hashCode + (sourceEncoder  != null ? sourceEncoder .getId().hashCode() : 0);
         }
         return hashCode;
     }
@@ -103,12 +117,12 @@ class EngineKey implements Key {
                 .append(id)
                 .append(width)
                 .append(height)
-                .append(cacheDecoder.getId())
-                .append(decoder.getId())
-                .append(transformation.getId())
-                .append(encoder.getId())
-                .append(transcoder.getId())
-                .append(sourceEncoder)
+                .append(cacheDecoder   != null ? cacheDecoder  .getId() : "")
+                .append(decoder        != null ? decoder       .getId() : "")
+                .append(transformation != null ? transformation.getId() : "")
+                .append(encoder        != null ? encoder       .getId() : "")
+                .append(transcoder     != null ? transcoder    .getId() : "")
+                .append(sourceEncoder  != null ? sourceEncoder .getId() : "")
                 .toString();
         }
         return stringKey;
@@ -122,10 +136,11 @@ class EngineKey implements Key {
                 .array();
         messageDigest.update(id.getBytes(FORMAT));
         messageDigest.update(dimensions);
-        messageDigest.update(cacheDecoder.getId().getBytes(FORMAT));
-        messageDigest.update(decoder.getId().getBytes(FORMAT));
-        messageDigest.update(transformation.getId().getBytes(FORMAT));
-        messageDigest.update(encoder.getId().getBytes(FORMAT));
-        messageDigest.update(sourceEncoder.getId().getBytes(FORMAT));
+        messageDigest.update((cacheDecoder   != null ? cacheDecoder  .getId() : "").getBytes(FORMAT));
+        messageDigest.update((decoder        != null ? decoder       .getId() : "").getBytes(FORMAT));
+        messageDigest.update((transformation != null ? transformation.getId() : "").getBytes(FORMAT));
+        messageDigest.update((encoder        != null ? encoder       .getId() : "").getBytes(FORMAT));
+        // transcoder is not playing in disk cache key, since it's after in the workflow
+        messageDigest.update((sourceEncoder  != null ? sourceEncoder .getId() : "").getBytes(FORMAT));
     }
 }

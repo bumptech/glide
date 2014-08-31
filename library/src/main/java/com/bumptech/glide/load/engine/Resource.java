@@ -15,12 +15,12 @@ import com.bumptech.glide.load.Key;
 public abstract class Resource<Z> {
     private volatile int acquired;
     private volatile boolean isRecycled;
-    private ResourceListener listener;
+    private ResourceListener<Z> listener;
     private Key key;
     private boolean isCacheable;
 
-    interface ResourceListener {
-        public void onResourceReleased(Key key, Resource resource);
+    interface ResourceListener<Z> {
+        public void onResourceReleased(Key key, Resource<Z> resource);
     }
 
     /**
@@ -51,7 +51,7 @@ public abstract class Resource<Z> {
      */
     protected abstract void recycleInternal();
 
-    void setResourceListener(Key key, ResourceListener listener) {
+    void setResourceListener(Key key, ResourceListener<Z> listener) {
         this.key = key;
         this.listener = listener;
     }

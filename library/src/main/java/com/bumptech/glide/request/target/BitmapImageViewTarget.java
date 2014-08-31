@@ -10,11 +10,8 @@ import android.widget.ImageView;
  * @see GlideDrawableImageViewTarget
  */
 public class BitmapImageViewTarget extends ImageViewTarget<Bitmap> {
-    private final ImageView view;
-
     public BitmapImageViewTarget(ImageView view) {
         super(view);
-        this.view = view;
     }
 
     /**

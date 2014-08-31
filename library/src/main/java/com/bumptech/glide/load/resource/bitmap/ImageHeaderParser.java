@@ -175,8 +175,7 @@ public class ImageHeaderParser {
         }
     }
 
-    private int parseExifSegment(RandomAccessReader segmentData) {
-
+    private static int parseExifSegment(RandomAccessReader segmentData) {
         final int headerOffsetSize = JPEG_EXIF_SEGMENT_PREAMBLE.length();
 
         short byteOrderIdentifier = segmentData.getInt16(headerOffsetSize);
@@ -268,7 +267,7 @@ public class ImageHeaderParser {
         return ifdOffset + 2 + (12 * tagIndex);
     }
 
-    private boolean handles(int imageMagicNumber) {
+    private static boolean handles(int imageMagicNumber) {
         return (imageMagicNumber & EXIF_MAGIC_NUMBER) == EXIF_MAGIC_NUMBER
                 || imageMagicNumber == MOTOROLA_TIFF_MAGIC_NUMBER
                 || imageMagicNumber == INTEL_TIFF_MAGIC_NUMBER;

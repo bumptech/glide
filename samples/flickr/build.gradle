@@ -9,13 +9,13 @@ dependencies {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion = '19.1.0'
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
-        applicationId "com.bumptech.glide.samples.flickr"
+        applicationId 'com.bumptech.glide.samples.flickr'
         minSdkVersion 10
         targetSdkVersion 19
         versionCode 1
-        versionName "1.0.0"
+        versionName '1.0.0'
     }
 }

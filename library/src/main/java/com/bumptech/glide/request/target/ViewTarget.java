@@ -36,6 +36,7 @@ import java.util.Set;
  */
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     private static final String TAG = "ViewTarget";
+
     protected final T view;
     private final SizeDeterminer sizeDeterminer;
 
@@ -164,14 +165,13 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
                 WindowManager windowManager =
                         (WindowManager) view.getContext().getSystemService(Context.WINDOW_SERVICE);
                 Display display = windowManager.getDefaultDisplay();
-                final int width = display.getWidth();
-                final int height = display.getHeight();
+                @SuppressWarnings("deprecation") final int width = display.getWidth(), height = display.getHeight();
                 if (Log.isLoggable(TAG, Log.WARN)) {
                     Log.w(TAG, "Trying to load image into ImageView using WRAP_CONTENT, defaulting to screen"
                             + " dimensions: [" + width + "x" + height + "]. Give the view an actual width and height "
                             + " for better performance.");
                 }
-                cb.onSizeReady(display.getWidth(), display.getHeight());
+                cb.onSizeReady(width, height);
             } else {
                 cbs.add(cb);
                 final ViewTreeObserver observer = view.getViewTreeObserver();

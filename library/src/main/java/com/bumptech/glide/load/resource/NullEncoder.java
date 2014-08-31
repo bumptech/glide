@@ -6,9 +6,12 @@ import java.io.OutputStream;
 
 /**
  * A simple {@link com.bumptech.glide.load.Encoder} that never writes data.
+ *
+ * @param <T> type discarded by this Encoder
  */
-public class NullEncoder implements Encoder {
-    private static final NullEncoder NULL_ENCODER = new NullEncoder();
+public class NullEncoder<T> implements Encoder<T> {
+    @SuppressWarnings("rawtypes")
+    private static final NullEncoder<?> NULL_ENCODER = new NullEncoder();
 
     /**
      * Returns an Encoder for the given data type.
@@ -17,12 +20,12 @@ public class NullEncoder implements Encoder {
      */
     @SuppressWarnings("unchecked")
     public static <T> Encoder<T> get() {
-        return NULL_ENCODER;
+        return (Encoder<T>) NULL_ENCODER;
 
     }
 
     @Override
-    public boolean encode(Object data, OutputStream os) {
+    public boolean encode(T data, OutputStream os) {
         return false;
     }
 

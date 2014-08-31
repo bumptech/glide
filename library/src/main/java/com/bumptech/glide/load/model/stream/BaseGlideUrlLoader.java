@@ -29,7 +29,6 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
         this(Glide.buildModelLoader(GlideUrl.class, InputStream.class, context), modelCache);
     }
 
-    @SuppressWarnings("unused")
     public BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader) {
         this(concreteLoader, null);
     }

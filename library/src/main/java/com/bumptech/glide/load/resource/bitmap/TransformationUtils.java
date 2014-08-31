@@ -132,7 +132,6 @@ public class TransformationUtils {
      * @param imageToOrient Image Bitmap to orient.
      * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
      */
-    @SuppressWarnings("unused")
     public static Bitmap orientImage(String pathToOriginal, Bitmap imageToOrient) {
         int degreesToRotate = getOrientation(pathToOriginal);
         return rotateImage(imageToOrient, degreesToRotate);
@@ -166,7 +165,6 @@ public class TransformationUtils {
             if (Log.isLoggable(TAG, Log.ERROR)) {
                 Log.e(TAG, "Exception when trying to orient image", e);
             }
-            e.printStackTrace();
         }
         return result;
     }

@@ -1,0 +1,2 @@
+Run from /glide:
+gradlew clean :samples:svg:checkstyle :samples:svg:assembleDebug :samples:svg:installDebug && adb shell am start -n com.bumptech.svgsample.app/.MainActivity

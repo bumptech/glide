@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Responsible for starting loads and managing active and cached resources.
  */
+@SuppressWarnings("rawtypes")
 public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener, Resource.ResourceListener {
     private static final String TAG = "Engine";
     private final Map<Key, ResourceRunner> runners;
@@ -197,8 +198,9 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         return new LoadStatus(cb, runner.getJob());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void onEngineJobComplete(Key key, Resource resource) {
+    public void onEngineJobComplete(Key key, Resource<?> resource) {
         // A null resource indicates that the load failed, usually due to an exception.
         if (resource != null) {
             resource.setResourceListener(key, this);

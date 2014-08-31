@@ -11,7 +11,7 @@ public interface MemoryCache {
      * An interface that will be called whenever a bitmap is removed from the cache.
      */
     public interface ResourceRemovedListener {
-        public void onResourceRemoved(Resource removed);
+        public void onResourceRemoved(Resource<?> removed);
     }
 
     /**
@@ -31,7 +31,7 @@ public interface MemoryCache {
      *
      * @param key The key.
      */
-    public Resource remove(Key key);
+    public Resource<?> remove(Key key);
 
     /**
      * Add bitmap to the cache with the given key.
@@ -40,7 +40,7 @@ public interface MemoryCache {
      * @param resource The {@link Resource} to store.
      * @return The old value of key (null if key is not in map).
      */
-    public Resource put(Key key, Resource resource);
+    public Resource<?> put(Key key, Resource<?> resource);
 
     /**
      * Set the listener to be called when a bitmap is removed from the cache.
