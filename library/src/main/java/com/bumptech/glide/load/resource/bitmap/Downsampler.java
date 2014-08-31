@@ -197,7 +197,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         return decodeStream(bis, options);
     }
 
-    private boolean shouldUsePool(RecyclableBufferedInputStream bis) {
+    private static boolean shouldUsePool(RecyclableBufferedInputStream bis) {
         // On KitKat+, any bitmap can be used to decode any other bitmap.
         if (Build.VERSION.SDK_INT >= 19) {
             return true;
@@ -221,7 +221,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         return false;
     }
 
-    private Bitmap.Config getConfig(RecyclableBufferedInputStream bis, DecodeFormat format) {
+    private static Bitmap.Config getConfig(RecyclableBufferedInputStream bis, DecodeFormat format) {
         if (format == DecodeFormat.ALWAYS_ARGB_8888) {
             return Bitmap.Config.ARGB_8888;
         }
@@ -276,7 +276,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     }
 
 
-    private Bitmap decodeStream(RecyclableBufferedInputStream bis, BitmapFactory.Options options) {
+    private static Bitmap decodeStream(RecyclableBufferedInputStream bis, BitmapFactory.Options options) {
          if (options.inJustDecodeBounds) {
              // This is large, but jpeg headers are not size bounded so we need something large enough to minimize
              // the possibility of not being able to fit enough of the header in the buffer to get the image size so
