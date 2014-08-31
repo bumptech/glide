@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.drawable.BitmapDrawable;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.drawable.DrawableResource;
 import com.bumptech.glide.util.Util;
 
 /**
@@ -14,29 +14,12 @@ import com.bumptech.glide.util.Util;
  *     {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} when the resource is recycled.
  * </p>
  */
-public class BitmapDrawableResource implements Resource<BitmapDrawable> {
-    private final BitmapDrawable drawable;
+public class BitmapDrawableResource extends DrawableResource<BitmapDrawable> {
     private final BitmapPool bitmapPool;
 
-    private BitmapDrawable next;
-
     public BitmapDrawableResource(BitmapDrawable drawable, BitmapPool bitmapPool) {
-        this.drawable = drawable;
+        super(drawable);
         this.bitmapPool = bitmapPool;
-
-        this.next = drawable;
-    }
-
-    @Override
-    public BitmapDrawable get() {
-        // We usually just have one consumer, so return the given drawable (created on a bg thread) to the first
-        // consumer and then create a new drawable for each subsequent consumer.
-        if (next == null) {
-            next = (BitmapDrawable) drawable.getConstantState().newDrawable();
-        }
-        BitmapDrawable result = next;
-        next = null;
-        return result;
     }
 
     @Override
