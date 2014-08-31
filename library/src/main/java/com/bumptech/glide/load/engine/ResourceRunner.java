@@ -82,7 +82,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         Resource<R> result = null;
         try {
             result = runWrapped();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             job.onException(e);
         }
         if (result != null) {
@@ -92,7 +92,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         }
     }
 
-    private Resource<R> runWrapped() throws Exception {
+    private Resource<R> runWrapped() {
         long start = SystemClock.currentThreadTimeMillis();
         Resource<Z> fromCache = cacheLoader.load(key, cacheDecoder, width, height);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
