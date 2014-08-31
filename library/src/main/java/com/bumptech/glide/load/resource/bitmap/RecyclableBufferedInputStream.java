@@ -43,6 +43,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
      * amount of data read after the mark position.
      */
     public static class InvalidMarkException extends RuntimeException {
+        private static final long serialVersionUID = -4338378848813561757L;
+
         public InvalidMarkException(String detailMessage) {
             super(detailMessage);
         }
@@ -101,7 +103,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
         return count - pos + localIn.available();
     }
 
-    private IOException streamClosed() throws IOException {
+    private static IOException streamClosed() throws IOException {
         throw new IOException("BufferedInputStream is closed");
     }
 

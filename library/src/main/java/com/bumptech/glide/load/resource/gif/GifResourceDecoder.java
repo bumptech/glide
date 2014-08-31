@@ -80,7 +80,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     }
 
     // A best effort attempt to get a unique id that can be used as a cache key for frames of the decoded GIF.
-    private String getGifId(byte[] data) {
+    private static String getGifId(byte[] data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
             digest.update(data);
@@ -93,7 +93,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
         return UUID.randomUUID().toString();
     }
 
-    private byte[] inputStreamToBytes(InputStream is) {
+    private static byte[] inputStreamToBytes(InputStream is) {
         int capacity = 16384;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream(capacity);
         try {

@@ -19,7 +19,7 @@ import java.io.File;
  */
 public class FixedLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R>  {
     private final ModelLoader<A, T> modelLoader;
-    private ResourceTranscoder<Z, R> transcoder;
+    private final ResourceTranscoder<Z, R> transcoder;
     private final DataLoadProvider<T, Z> dataLoadProvider;
 
     public FixedLoadProvider(ModelLoader<A, T> modelLoader, ResourceTranscoder<Z, R> transcoder,
@@ -28,10 +28,12 @@ public class FixedLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R>  
             throw new NullPointerException("ModelLoader must not be null");
         }
         this.modelLoader = modelLoader;
+
         if (transcoder == null) {
             throw new NullPointerException("Transcoder must not be null");
         }
         this.transcoder = transcoder;
+
         if (dataLoadProvider == null) {
             throw new NullPointerException("DataLoadProvider must not be null");
         }

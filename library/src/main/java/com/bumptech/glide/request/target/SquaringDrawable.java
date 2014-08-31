@@ -36,6 +36,8 @@ public class SquaringDrawable extends GlideDrawable {
         super.setBounds(bounds);
         wrapped.setBounds(bounds);
     }
+
+    @Override
     public void setChangingConfigurations(int configs) {
         wrapped.setChangingConfigurations(configs);
     }
