@@ -1,5 +1,8 @@
 Glide
 =====
+
+[![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=3.0a)](https://travis-ci.org/bumptech/glide)
+
 Glide is fast and efficient image loading library for Android that wraps image downloading, resizing, memory and disk
 caching, and bitmap recycling into one simple and easy to use interface. Glide includes a flexible api allowing it to
 plug in to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes
