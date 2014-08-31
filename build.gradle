@@ -3,7 +3,7 @@ buildscript {
         jcenter()
         // TODO: remove this when robolectric 2.4 is released.
         maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
     }
 
@@ -18,7 +18,7 @@ subprojects { project ->
         jcenter()
         // TODO: remove this when robolectric 2.4 is released.
         maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
     }
 
@@ -47,4 +47,3 @@ subprojects { project ->
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
 }
-

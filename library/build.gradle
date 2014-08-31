@@ -14,10 +14,10 @@ dependencies {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion = '19.1.0'
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
-        applicationId "com.bumptech.glide"
+        applicationId 'com.bumptech.glide'
         minSdkVersion 10
         targetSdkVersion 19
         versionCode = VERSION_CODE
