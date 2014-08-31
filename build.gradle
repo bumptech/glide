@@ -13,7 +13,7 @@ buildscript {
     }
 }
 
-allprojects {
+subprojects { project ->
     repositories {
         jcenter()
         // TODO: remove this when robolectric 2.4 is released.
@@ -35,6 +35,12 @@ allprojects {
 
         // empty classpath
         classpath = files()
+    }
+
+    afterEvaluate {
+        if (project.tasks.findByName('check')) {
+            check.dependsOn('checkstyle')
+        }
     }
 }
 

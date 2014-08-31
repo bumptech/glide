@@ -33,8 +33,7 @@ public class Api {
     //incomplete size independent url for photos that can be cached per photo
     private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
 
-
-    private static final SparseArray<String> EDGE_TO_SIZE_KEY = new SparseArray<String>() {{
+    private static final SparseArray<String> EDGE_TO_SIZE_KEY = new SparseArray<String>() { {
         put(75, "s");
         put(100, "t");
         put(150, "q");
@@ -42,7 +41,7 @@ public class Api {
         put(320, "n");
         put(640, "z");
         put(1024, "b");
-    }};
+    } };
     private static final List<Integer> SORTED_SIZE_KEYS = new ArrayList<Integer>(EDGE_TO_SIZE_KEY.size());
     static {
         for (int i = 0; i < EDGE_TO_SIZE_KEY.size(); i++) {
