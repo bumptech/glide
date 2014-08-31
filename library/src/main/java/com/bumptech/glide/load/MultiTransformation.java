@@ -2,53 +2,43 @@ package com.bumptech.glide.load;
 
 import com.bumptech.glide.load.engine.Resource;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
- * A transformation that applies an ordered array or list of one or more transformations to a resource.
+ * A transformation that applies one or more transformations in iteration order to a resource.
  *
  * @param <T> The type of {@link com.bumptech.glide.load.engine.Resource} that will be transformed.
  */
 public class MultiTransformation<T> implements Transformation<T> {
-    private Transformation<T>[] transformations;
-    private List<Transformation<T>> transformationList;
+    private Collection<? extends Transformation<T>> transformations;
     private String id;
 
+    @SafeVarargs
     public MultiTransformation(Transformation<T>... transformations) {
         if (transformations.length < 1) {
             throw new IllegalArgumentException("MultiTransformation must contain at least one Transformation");
         }
-        this.transformations = transformations;
+        this.transformations = Arrays.asList(transformations);
     }
 
-    public MultiTransformation(List<Transformation<T>> transformationList) {
+    public MultiTransformation(Collection<? extends Transformation<T>> transformationList) {
         if (transformationList.size() < 1) {
             throw new IllegalArgumentException("MultiTransformation must contain at least one Transformation");
         }
-        this.transformationList = transformationList;
+        this.transformations = transformationList;
     }
 
     @Override
     public Resource<T> transform(Resource<T> resource, int outWidth, int outHeight) {
         Resource<T> previous = resource;
 
-        if (transformations != null) {
-            for (Transformation<T> transformation : transformations) {
-                Resource<T> transformed = transformation.transform(previous, outWidth, outHeight);
-                if (transformed != previous && previous != resource && previous != null) {
-                    previous.recycle();
-                }
-                previous = transformed;
+        for (Transformation<T> transformation : transformations) {
+            Resource<T> transformed = transformation.transform(previous, outWidth, outHeight);
+            if (transformed != previous && previous != resource && previous != null) {
+                previous.recycle();
             }
-        } else {
-            for (Transformation<T> transformation : transformationList) {
-                 Resource<T> transformed = transformation.transform(previous, outWidth, outHeight);
-                if (transformed != previous && previous != resource && previous != null) {
-                    previous.recycle();
-                }
-                previous = transformed;
-            }
-
+            previous = transformed;
         }
         return previous;
     }
@@ -57,14 +47,8 @@ public class MultiTransformation<T> implements Transformation<T> {
     public String getId() {
         if (id == null) {
             StringBuilder sb = new StringBuilder();
-            if (transformations != null) {
-                for (Transformation transformation : transformations) {
-                    sb.append(transformation.getId());
-                }
-            } else {
-                for (Transformation transformation : transformationList) {
-                    sb.append(transformation.getId());
-                }
+            for (Transformation<T> transformation : transformations) {
+                sb.append(transformation.getId());
             }
             id = sb.toString();
         }
