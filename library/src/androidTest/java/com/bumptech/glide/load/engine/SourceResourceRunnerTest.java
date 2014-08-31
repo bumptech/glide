@@ -33,6 +33,7 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -418,6 +419,14 @@ public class SourceResourceRunnerTest {
         });
         harness.getRunner().run();
         verify(harness.cb).onException(exception);
+    }
+
+    @Test
+    public void testNotifiesJobOfFailureOnlyOnce() throws Exception {
+        when(harness.fetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
+        harness.getRunner().run();
+
+        verify(harness.cb, times(1)).onException(any(Exception.class));
     }
 
     @SuppressWarnings("unchecked")

@@ -5,6 +5,7 @@ import android.util.Log;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,14 @@ import java.util.List;
  */
 class EngineJob implements ResourceCallback {
     private static final String TAG = "EngineJob";
-    private boolean isCacheable;
+
+    private final List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
+
     private final EngineJobListener listener;
-    private Key key;
-    private Handler mainHandler;
-    private List<ResourceCallback> cbs;
-    private ResourceCallback cb;
+    private final Key key;
+    private final Handler mainHandler;
+    private final boolean isCacheable;
+
     private boolean isCancelled;
     private boolean isComplete;
 
@@ -32,25 +35,14 @@ class EngineJob implements ResourceCallback {
     }
 
     public void addCallback(ResourceCallback cb) {
-        if (this.cb == null) {
-            this.cb = cb;
-        } else {
-            if (cbs == null) {
-                cbs = new ArrayList<ResourceCallback>(2);
-                cbs.add(this.cb);
-            }
-            cbs.add(cb);
-        }
+        Util.assertMainThread();
+        cbs.add(cb);
     }
 
     public void removeCallback(ResourceCallback cb) {
-        if (cbs != null) {
-            cbs.remove(cb);
-            if (cbs.size() == 0) {
-                cancel();
-            }
-        } else if (this.cb == cb) {
-            this.cb = null;
+        Util.assertMainThread();
+        cbs.remove(cb);
+        if (cbs.isEmpty()) {
             cancel();
         }
     }
@@ -82,6 +74,8 @@ class EngineJob implements ResourceCallback {
                 if (isCancelled) {
                     resource.recycle();
                     return;
+                } else if (cbs.isEmpty()) {
+                    throw new IllegalStateException("Received a resource without any callbacks to notify");
                 }
                 resource.setCacheable(isCacheable);
                 isComplete = true;
@@ -90,13 +84,8 @@ class EngineJob implements ResourceCallback {
                 // synchronously released by one of the callbacks.
                 resource.acquire(1);
                 listener.onEngineJobComplete(key, resource);
-                if (cbs != null) {
-                    resource.acquire(cbs.size());
-                    for (ResourceCallback cb : cbs) {
-                        cb.onResourceReady(resource);
-                    }
-                } else {
-                    resource.acquire(1);
+                resource.acquire(cbs.size());
+                for (ResourceCallback cb : cbs) {
                     cb.onResourceReady(resource);
                 }
                 // Our request is complete, so we can release the resource.
@@ -120,15 +109,14 @@ class EngineJob implements ResourceCallback {
                 }
                 if (isCancelled) {
                     return;
+                } else if (cbs.isEmpty()) {
+                    throw new IllegalStateException("Received an exception without any callbacks to notify");
                 }
+
                 isComplete = true;
 
                 listener.onEngineJobComplete(key, null);
-                if (cbs != null) {
-                    for (ResourceCallback cb : cbs) {
-                        cb.onException(e);
-                    }
-                } else {
+                for (ResourceCallback cb : cbs) {
                     cb.onException(e);
                 }
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {

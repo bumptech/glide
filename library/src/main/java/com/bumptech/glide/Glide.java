@@ -59,6 +59,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -332,6 +333,7 @@ public class Glide {
      * @param target The Target to cancel loads for.
      */
     public static void clear(Target target) {
+        Util.assertMainThread();
         Request request = target.getRequest();
         if (request != null) {
             request.clear();

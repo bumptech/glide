@@ -21,6 +21,7 @@ import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -276,6 +277,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
      */
     @Override
     public void clear() {
+        Util.assertMainThread();
         cancel();
         // Resource must be released before canNotifyStatusChanged is called.
         if (resource != null) {

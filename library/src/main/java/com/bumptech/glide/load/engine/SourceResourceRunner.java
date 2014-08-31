@@ -118,17 +118,18 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
             return;
         }
 
-        Resource<R> result = null;
+        final Resource<R> result;
         try {
             result = runWrapped();
         } catch (Exception e) {
             cb.onException(e);
+            return;
         }
 
-        if (result == null) {
-            cb.onException(null);
-        } else {
+        if (result != null) {
             cb.onResourceReady(result);
+        } else {
+            cb.onException(null);
         }
     }
 
