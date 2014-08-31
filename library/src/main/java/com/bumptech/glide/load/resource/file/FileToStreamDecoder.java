@@ -45,7 +45,6 @@ public class FileToStreamDecoder<T> implements ResourceDecoder<File, T> {
                     // Do nothing.
                 }
             }
-
         }
         return result;
     }
@@ -60,7 +59,6 @@ public class FileToStreamDecoder<T> implements ResourceDecoder<File, T> {
     }
 
     private static class DefaultFileOpener implements FileOpener {
-
         @Override
         public InputStream open(File file) throws FileNotFoundException {
             return new FileInputStream(file);
