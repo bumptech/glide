@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.resource.transcode;
 
+import com.bumptech.glide.util.MultiClassKey;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,60 +51,5 @@ public class TranscoderRegistry {
                     + transcodedClass);
         }
         return (ResourceTranscoder<Z, R>) result;
-    }
-
-    private static class MultiClassKey {
-        private Class decoded;
-        private Class transcoded;
-
-        public MultiClassKey() {
-            // Empty.
-        }
-
-        public MultiClassKey(Class decoded, Class transcoded) {
-            this.decoded = decoded;
-            this.transcoded = transcoded;
-        }
-
-        public void set(Class decoded, Class transcoded) {
-            this.decoded = decoded;
-            this.transcoded = transcoded;
-        }
-
-        @Override
-        public String toString() {
-            return "MultiClassKey{"
-                    + "decoded=" + decoded
-                    + ", transcoded=" + transcoded
-                    + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            MultiClassKey that = (MultiClassKey) o;
-
-            if (!decoded.equals(that.decoded)) {
-                return false;
-            }
-            if (!transcoded.equals(that.transcoded)) {
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = decoded.hashCode();
-            result = 31 * result + transcoded.hashCode();
-            return result;
-        }
     }
 }
