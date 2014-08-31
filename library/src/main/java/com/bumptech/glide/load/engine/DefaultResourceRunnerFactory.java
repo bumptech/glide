@@ -44,6 +44,6 @@ class DefaultResourceRunnerFactory implements ResourceRunnerFactory {
                 priority, diskCacheStrategy, engineJob);
 
         return new ResourceRunner<Z, R>(key, width, height, cacheLoader, cacheDecoder, transformation,
-                transcoder, sourceRunner, diskCacheService, service, engineJob, priority);
+                transcoder, sourceRunner, diskCacheService, diskCacheStrategy, service, engineJob, priority);
     }
 }
