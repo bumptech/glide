@@ -118,7 +118,8 @@ public class Glide {
         if (cacheDir != null) {
             File result = new File(cacheDir, cacheName);
             if (!result.mkdirs() && (!result.exists() || !result.isDirectory())) {
-                throw new IllegalStateException("Cannot create cache directory structure for " + result);
+                // File wasn't able to create a directory, or the result exists but not a directory
+                return null;
             }
             return result;
         }

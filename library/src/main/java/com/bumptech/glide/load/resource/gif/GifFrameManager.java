@@ -58,32 +58,33 @@ class GifFrameManager {
     @SuppressWarnings("unchecked")
     public GifFrameManager(Context context, BitmapPool bitmapPool, GifDecoder decoder, Handler mainHandler,
             Transformation<Bitmap> transformation, int targetWidth, int targetHeight, int frameWidth, int frameHeight) {
+        if (transformation == null) {
+            throw new NullPointerException("Transformation must not be null");
+        }
+
         this.context = context;
+        this.frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
         this.decoder = decoder;
         this.mainHandler = mainHandler;
         this.transformation = new Transformation[] {transformation};
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
         this.totalFrameSize = frameWidth * frameHeight * (decoder.isTransparent() ? 4 : 2);
-        calculator = new MemorySizeCalculator(context);
-        frameLoader = new GifFrameModelLoader();
-        frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
-        sourceEncoder = NullEncoder.get();
 
-        if (transformation == null) {
-            throw new NullPointerException("Transformation must not be null");
-        }
+        this.calculator = new MemorySizeCalculator(context);
+        this.frameLoader = new GifFrameModelLoader();
+        this.sourceEncoder = NullEncoder.get();
 
         if (!decoder.isTransparent()) {
             // For non transparent gifs, we can beat the performance of our gif decoder for each frame by decoding jpegs
             // from disk.
-            cacheDecoder = new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(context));
-            encoder = new BitmapEncoder();
+            this.cacheDecoder = new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(context));
+            this.encoder = new BitmapEncoder();
         } else {
             // For transparent gifs, we would have to encode as pngs which is actually slower than our gif decoder so we
             // avoid writing frames to the disk cache entirely.
-            cacheDecoder = NullDecoder.get();
-            encoder = NullResourceEncoder.get();
+            this.cacheDecoder = NullDecoder.get();
+            this.encoder = NullResourceEncoder.get();
         }
     }
 
