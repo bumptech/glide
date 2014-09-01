@@ -106,7 +106,21 @@ public class RequestManager implements LifecycleListener {
     }
 
     /**
+     * Returns true if loads for this {@link RequestManager} are currently paused.
+     *
+     * @see #pauseRequests()
+     * @see #resumeRequests()
+     */
+    public boolean isPaused() {
+        Util.assertMainThread();
+        return requestTracker.isPaused();
+    }
+
+    /**
      * Cancels any in progress loads, but does not clear resources of completed loads.
+     *
+     * @see #isPaused()
+     * @see #resumeRequests()
      */
     public void pauseRequests() {
         Util.assertMainThread();
@@ -115,6 +129,9 @@ public class RequestManager implements LifecycleListener {
 
     /**
      * Restarts any loads that have not yet completed.
+     *
+     * @see #isPaused()
+     * @see #pauseRequests()
      */
     public void resumeRequests() {
         Util.assertMainThread();

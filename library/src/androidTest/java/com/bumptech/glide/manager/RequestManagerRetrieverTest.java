@@ -6,11 +6,9 @@ import android.content.ContextWrapper;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +20,7 @@ import org.robolectric.util.ActivityController;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -34,6 +33,9 @@ public class RequestManagerRetrieverTest {
 
     @Before
     public void setUp() {
+        // Clear out static state.
+        RequestManagerRetriever.reset();
+
         harnesses = new RetrieverHarness[] { new DefaultRetrieverHarness(), new SupportRetrieverHarness() };
 
         // If we don't pause the looper, fragment transactions are executed synchronously which is not how they would
@@ -203,6 +205,20 @@ public class RequestManagerRetrieverTest {
     @Test
     public void testReturnsNonNullManagerIfGivenApplicationContext() {
         assertNotNull(RequestManagerRetriever.get(Robolectric.application));
+    }
+
+    @Test
+    public void testApplicationRequestManagerIsNotPausedWhenRetrieved() {
+        RequestManager manager = RequestManagerRetriever.get(Robolectric.application);
+        assertFalse(manager.isPaused());
+    }
+
+    @Test
+    public void testApplicationRequestManagerIsNotReResumedAfterFirstRetrieval() {
+        RequestManager manager = RequestManagerRetriever.get(Robolectric.application);
+        manager.pauseRequests();
+        manager = RequestManagerRetriever.get(Robolectric.application);
+        assertTrue(manager.isPaused());
     }
 
     @Test

@@ -15,15 +15,15 @@ import com.bumptech.glide.RequestManager;
  */
 public class SupportRequestManagerFragment extends Fragment {
     private RequestManager requestManager;
-    private final Lifecycle lifecycle;
+    private final ActivityFragmentLifecycle lifecycle;
 
     public SupportRequestManagerFragment() {
-        this(new Lifecycle());
+        this(new ActivityFragmentLifecycle());
     }
 
     // For testing only.
     @SuppressLint("ValidFragment")
-    public SupportRequestManagerFragment(Lifecycle lifecycle) {
+    public SupportRequestManagerFragment(ActivityFragmentLifecycle lifecycle) {
         this.lifecycle = lifecycle;
     }
 
@@ -36,7 +36,7 @@ public class SupportRequestManagerFragment extends Fragment {
         this.requestManager = requestManager;
     }
 
-    public Lifecycle getLifecycle() {
+    ActivityFragmentLifecycle getLifecycle() {
         return lifecycle;
     }
 

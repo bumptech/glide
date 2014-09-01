@@ -122,9 +122,9 @@ public class RequestManagerFragmentTest {
 
         public void setRequestManager(RequestManager manager);
 
-        public Lifecycle getHarnessLifecycle();
+        public ActivityFragmentLifecycle getHarnessLifecycle();
 
-        public Lifecycle getFragmentLifecycle();
+        public ActivityFragmentLifecycle getFragmentLifecycle();
 
         public ActivityController getController();
     }
@@ -132,7 +132,7 @@ public class RequestManagerFragmentTest {
     private static class RequestManagerHarness implements Harness {
         private final ActivityController<Activity> controller;
         private final RequestManagerFragment fragment;
-        private final Lifecycle lifecycle = mock(Lifecycle.class);
+        private final ActivityFragmentLifecycle lifecycle = mock(ActivityFragmentLifecycle.class);
 
         public RequestManagerHarness() {
             fragment = new RequestManagerFragment(lifecycle);
@@ -161,12 +161,12 @@ public class RequestManagerFragmentTest {
         }
 
         @Override
-        public Lifecycle getHarnessLifecycle() {
+        public ActivityFragmentLifecycle getHarnessLifecycle() {
             return lifecycle;
         }
 
         @Override
-        public Lifecycle getFragmentLifecycle() {
+        public ActivityFragmentLifecycle getFragmentLifecycle() {
             return fragment.getLifecycle();
         }
 
@@ -179,7 +179,7 @@ public class RequestManagerFragmentTest {
     private static class SupportRequestManagerHarness implements Harness {
         private final SupportRequestManagerFragment supportFragment;
         private final ActivityController<FragmentActivity> supportController;
-        private final Lifecycle lifecycle = mock(Lifecycle.class);
+        private final ActivityFragmentLifecycle lifecycle = mock(ActivityFragmentLifecycle.class);
 
         public SupportRequestManagerHarness() {
             supportFragment = new SupportRequestManagerFragment(lifecycle);
@@ -209,12 +209,12 @@ public class RequestManagerFragmentTest {
         }
 
         @Override
-        public Lifecycle getHarnessLifecycle() {
+        public ActivityFragmentLifecycle getHarnessLifecycle() {
             return lifecycle;
         }
 
         @Override
-        public Lifecycle getFragmentLifecycle() {
+        public ActivityFragmentLifecycle getFragmentLifecycle() {
             return supportFragment.getLifecycle();
         }
 

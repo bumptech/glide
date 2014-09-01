@@ -4,6 +4,8 @@ import com.bumptech.glide.request.Request;
 import org.junit.Before;
 import org.junit.Test;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -222,5 +224,17 @@ public class RequestTrackerTest {
         tracker.restartRequests();
 
         verify(request).clear();
+    }
+
+    @Test
+    public void testReturnsTrueFromIsPausedWhenPaused() {
+        tracker.pauseRequests();
+        assertTrue(tracker.isPaused());
+    }
+
+    @Test
+    public void testReturnsFalseFromIsPausedWhenResumed() {
+        tracker.resumeRequests();
+        assertFalse(tracker.isPaused());
     }
 }

@@ -18,16 +18,16 @@ import com.bumptech.glide.RequestManager;
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class RequestManagerFragment extends Fragment {
-    private final Lifecycle lifecycle;
+    private final ActivityFragmentLifecycle lifecycle;
     private RequestManager requestManager;
 
     public RequestManagerFragment() {
-        this(new Lifecycle());
+        this(new ActivityFragmentLifecycle());
     }
 
     // For testing only.
     @SuppressLint("ValidFragment")
-    RequestManagerFragment(Lifecycle lifecycle) {
+    RequestManagerFragment(ActivityFragmentLifecycle lifecycle) {
         this.lifecycle = lifecycle;
     }
 
@@ -40,7 +40,7 @@ public class RequestManagerFragment extends Fragment {
         this.requestManager = requestManager;
     }
 
-    public Lifecycle getLifecycle() {
+    ActivityFragmentLifecycle getLifecycle() {
         return lifecycle;
     }
 

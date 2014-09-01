@@ -38,11 +38,20 @@ public class RequestManagerRetriever {
         if (applicationManager == null) {
             synchronized (RequestManagerRetriever.class) {
                 if (applicationManager == null) {
-                    applicationManager = new RequestManager(context.getApplicationContext(), new Lifecycle());
+                    // Normally pause/resume is taken care of by the fragment we add to the fragment or activity.
+                    // However, in this case since the manager attached to the application will not receive lifecycle
+                    // events, we must force the manager to start resumed.
+                    applicationManager = new RequestManager(context.getApplicationContext(),
+                            new ApplicationLifecycle());
                 }
             }
         }
         return applicationManager;
+    }
+
+    // Exposed for testing.
+    static void reset() {
+        applicationManager = null;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)

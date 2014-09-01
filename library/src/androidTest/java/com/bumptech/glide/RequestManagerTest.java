@@ -32,6 +32,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -264,5 +266,13 @@ public class RequestManagerTest {
                 manager.pauseRequests();
             }
         });
+    }
+
+    @Test
+    public void testDelegatesIsPausedToRequestTracker() {
+        when(requestTracker.isPaused()).thenReturn(true);
+        assertTrue(manager.isPaused());
+        when(requestTracker.isPaused()).thenReturn(false);
+        assertFalse(manager.isPaused());
     }
 }

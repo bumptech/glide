@@ -42,6 +42,13 @@ public class RequestTracker {
     }
 
     /**
+     * Returns {@code true} if requests are currently paused, and {@code false} otherwise.
+     */
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    /**
      * Stops any in progress requests.
      */
     public void pauseRequests() {

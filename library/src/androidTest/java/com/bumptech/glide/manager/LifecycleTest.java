@@ -15,12 +15,12 @@ import static org.mockito.Mockito.verify;
 @RunWith(RobolectricTestRunner.class)
 public class LifecycleTest {
 
-    private Lifecycle lifecycle;
+    private ActivityFragmentLifecycle lifecycle;
     private LifecycleListener listener;
 
     @Before
     public void setUp() {
-        lifecycle = new Lifecycle();
+        lifecycle = new ActivityFragmentLifecycle();
         listener = mock(LifecycleListener.class);
     }
 
