@@ -11,4 +11,9 @@ public class Util {
     public static void assertClassHasValidId(Class clazz, String id) {
         assertEquals(getExpectedClassId(clazz), id);
     }
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").startsWith("Windows");
+    }
+
 }
