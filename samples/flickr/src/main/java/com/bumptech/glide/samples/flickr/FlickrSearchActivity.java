@@ -308,10 +308,10 @@ public class FlickrSearchActivity extends ActionBarActivity {
             Page page = Page.values()[position];
             if (page == Page.SMALL) {
                 int pageSize = getPageSize(R.dimen.small_photo_side);
-                return FlickrPhotoGrid.newInstance(pageSize, 30);
+                return FlickrPhotoGrid.newInstance(pageSize, 30, false /*thumbnail*/);
             } else if (page == Page.MEDIUM) {
                 int pageSize = getPageSize(R.dimen.medium_photo_side);
-                return FlickrPhotoGrid.newInstance(pageSize, 10);
+                return FlickrPhotoGrid.newInstance(pageSize, 10, true /*thumbnail*/);
             } else if (page == Page.LIST) {
                 return FlickrPhotoList.newInstance();
             } else {

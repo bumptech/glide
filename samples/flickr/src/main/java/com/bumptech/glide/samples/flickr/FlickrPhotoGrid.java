@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
@@ -29,17 +30,20 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     private static final String IMAGE_SIZE_KEY = "image_size";
     private static final String PRELOAD_KEY = "preload";
+    private static final String THUMBNAIL_KEY = "thumbnail";
 
     private PhotoAdapter adapter;
     private List<Photo> currentPhotos;
     private int photoSize;
     private GridView grid;
+    private boolean thumbnail;
 
-    public static FlickrPhotoGrid newInstance(int size, int preloadCount) {
+    public static FlickrPhotoGrid newInstance(int size, int preloadCount, boolean thumbnail) {
         FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
         Bundle args = new Bundle();
         args.putInt(IMAGE_SIZE_KEY, size);
         args.putInt(PRELOAD_KEY, preloadCount);
+        args.putBoolean(THUMBNAIL_KEY, thumbnail);
         photoGrid.setArguments(args);
         return photoGrid;
     }
@@ -48,6 +52,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
         photoSize = args.getInt(IMAGE_SIZE_KEY);
+        thumbnail = args.getBoolean(THUMBNAIL_KEY);
 
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
         grid = (GridView) result.findViewById(R.id.images);
@@ -104,11 +109,16 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
         @Override
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
-            return Glide.with(FlickrPhotoGrid.this)
+            DrawableRequestBuilder<Photo> request = Glide.with(FlickrPhotoGrid.this)
                     .load(item)
-                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
                     .priority(Priority.HIGH);
+            if (thumbnail) {
+                request.override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
+                        .diskCacheStrategy(DiskCacheStrategy.SOURCE);
+            } else {
+                request.centerCrop();
+            }
+            return request;
         }
     }
 
@@ -153,15 +163,20 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
                 imageView = (ImageView) view;
             }
 
-            Glide.with(FlickrPhotoGrid.this)
+            DrawableRequestBuilder<Photo> request = Glide.with(FlickrPhotoGrid.this)
                     .load(current)
-                    .thumbnail(Glide.with(FlickrPhotoGrid.this)
-                            .load(current)
-                            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                            .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
-                    )
-                    .animate(R.anim.fade_in)
-                    .into(imageView);
+                    .centerCrop()
+                    .animate(R.anim.fade_in);
+
+            if (thumbnail) {
+                request.thumbnail(Glide.with(FlickrPhotoGrid.this)
+                        .load(current)
+                        .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
+                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                );
+            }
+
+            request.into(imageView);
 
             return imageView;
         }
