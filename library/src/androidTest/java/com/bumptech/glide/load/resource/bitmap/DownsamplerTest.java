@@ -44,8 +44,16 @@ public class DownsamplerTest {
         compressBitmap(rgb565, Bitmap.CompressFormat.JPEG);
         Downsampler downsampler = Downsampler.AT_LEAST;
         InputStream is = new FileInputStream(tempFile);
-        Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.ALWAYS_ARGB_8888);
-        assertEquals(Bitmap.Config.ARGB_8888, result.getConfig());
+        try {
+            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.ALWAYS_ARGB_8888);
+            assertEquals(Bitmap.Config.ARGB_8888, result.getConfig());
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                // Do nothing.
+            }
+        }
     }
 
     @Test
@@ -54,17 +62,23 @@ public class DownsamplerTest {
         compressBitmap(rgb565, Bitmap.CompressFormat.JPEG);
         Downsampler downsampler = Downsampler.AT_LEAST;
         InputStream is = new FileInputStream(tempFile);
-        Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.PREFER_RGB_565);
-        assertEquals(Bitmap.Config.RGB_565, result.getConfig());
+        try {
+            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.PREFER_RGB_565);
+            assertEquals(Bitmap.Config.RGB_565, result.getConfig());
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                // Do nothing.
+            }
+        }
     }
 
-    private void compressBitmap(Bitmap bitmap, Bitmap.CompressFormat compressFormat) {
+    private void compressBitmap(Bitmap bitmap, Bitmap.CompressFormat compressFormat) throws FileNotFoundException {
         OutputStream os = null;
         try {
             os = new BufferedOutputStream(new FileOutputStream(tempFile));
             bitmap.compress(compressFormat, 100, os);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } finally {
             if (os != null) {
                 try {
