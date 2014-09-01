@@ -5,16 +5,16 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.GlideShadowLooper;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import static com.bumptech.glide.tests.Util.arg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -33,12 +33,7 @@ public class GenericTranscodeRequestTest {
     @Before
     public void setUp() {
         optionsApplier = mock(RequestManager.OptionsApplier.class);
-        when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArguments()[1];
-            }
-        });
+        when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(arg(1));
         model = "testModel";
         request = new GenericTranscodeRequest<String, Object, Object>(Robolectric.application,
                 Glide.get(Robolectric.application), model, mock(ModelLoader.class), Object.class, Object.class,

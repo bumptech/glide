@@ -11,6 +11,7 @@ import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.manager.ConnectivityMonitor;
+import com.bumptech.glide.manager.ConnectivityMonitor.ConnectivityListener;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
@@ -44,7 +45,7 @@ public class RequestManagerTest {
     private RequestManager manager;
     private ConnectivityMonitor connectivityMonitor;
     private RequestTracker requestTracker;
-    private ConnectivityMonitor.ConnectivityListener connectivityListener;
+    private ConnectivityListener connectivityListener;
     private RequestManager.DefaultOptions options;
     private Lifecycle lifecycle = mock(Lifecycle.class);
 
@@ -53,10 +54,10 @@ public class RequestManagerTest {
         connectivityMonitor = mock(ConnectivityMonitor.class);
         ConnectivityMonitorFactory factory = mock(ConnectivityMonitorFactory.class);
         when(factory.build(any(Context.class), any(ConnectivityMonitor.ConnectivityListener.class)))
-                .thenAnswer(new Answer<Object>() {
+                .thenAnswer(new Answer<ConnectivityMonitor>() {
                     @Override
-                    public Object answer(InvocationOnMock invocation) throws Throwable {
-                        connectivityListener = (ConnectivityMonitor.ConnectivityListener) invocation.getArguments()[1];
+                    public ConnectivityMonitor answer(InvocationOnMock invocation) throws Throwable {
+                        connectivityListener = (ConnectivityListener) invocation.getArguments()[1];
                         return connectivityMonitor;
                     }
                 });

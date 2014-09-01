@@ -11,14 +11,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
 
+import static com.bumptech.glide.tests.Util.arg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -37,12 +36,7 @@ public class GifTypeRequestTest {
     @Before
     public void setUp() {
         optionsApplier = mock(RequestManager.OptionsApplier.class);
-        when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArguments()[1];
-            }
-        });
+        when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(arg(1));
         model = "testModel";
         request = new GifTypeRequest<String>(Robolectric.application, model, mock(ModelLoader.class),
                 Glide.get(Robolectric.application), mock(RequestTracker.class), mock(Lifecycle.class), optionsApplier);
