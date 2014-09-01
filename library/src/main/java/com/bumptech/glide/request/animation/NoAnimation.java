@@ -6,8 +6,7 @@ package com.bumptech.glide.request.animation;
  * @param <R> animated resource type
  */
 public class NoAnimation<R> implements GlideAnimation<R> {
-    @SuppressWarnings("rawtypes")
-    private static final NoAnimation<?> NO_ANIMATION = new NoAnimation();
+    private static final NoAnimation<?> NO_ANIMATION = new NoAnimation<Object>();
     @SuppressWarnings("rawtypes")
     private static final GlideAnimationFactory<?> NO_ANIMATION_FACTORY = new NoAnimationFactory();
 

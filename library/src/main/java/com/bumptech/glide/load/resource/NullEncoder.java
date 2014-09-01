@@ -10,8 +10,7 @@ import java.io.OutputStream;
  * @param <T> type discarded by this Encoder
  */
 public class NullEncoder<T> implements Encoder<T> {
-    @SuppressWarnings("rawtypes")
-    private static final NullEncoder<?> NULL_ENCODER = new NullEncoder();
+    private static final NullEncoder<?> NULL_ENCODER = new NullEncoder<Object>();
 
     /**
      * Returns an Encoder for the given data type.

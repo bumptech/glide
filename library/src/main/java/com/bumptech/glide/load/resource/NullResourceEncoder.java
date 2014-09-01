@@ -11,8 +11,7 @@ import java.io.OutputStream;
  * @param <T> The type of the resource that will always fail to be encoded.
  */
 public class NullResourceEncoder<T> implements ResourceEncoder<T> {
-    @SuppressWarnings("rawtypes")
-    private static final NullResourceEncoder<?> NULL_ENCODER = new NullResourceEncoder();
+    private static final NullResourceEncoder<?> NULL_ENCODER = new NullResourceEncoder<Object>();
 
     /**
      * Returns a NullResourceEncoder for the given type.

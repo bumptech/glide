@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutorService;
 /**
  * Responsible for starting loads and managing active and cached resources.
  */
-@SuppressWarnings("rawtypes")
 public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener, Resource.ResourceListener {
     private static final String TAG = "Engine";
     private final Map<Key, ResourceRunner> runners;

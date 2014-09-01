@@ -101,14 +101,12 @@ class GroupedLinkedMap<K extends Poolable, V> {
         updateEntry(entry);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static void updateEntry(LinkedEntry entry) {
+    private static <K, V> void updateEntry(LinkedEntry<K, V> entry) {
         entry.next.prev = entry;
         entry.prev.next = entry;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static void removeEntry(LinkedEntry entry) {
+    private static <K, V> void removeEntry(LinkedEntry<K, V> entry) {
         entry.prev.next = entry.next;
         entry.next.prev = entry.prev;
     }

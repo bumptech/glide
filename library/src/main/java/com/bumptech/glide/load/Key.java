@@ -18,10 +18,12 @@ public interface Key {
     /**
      * {@inheritDoc}
      */
+    @Override
     boolean equals(Object o);
 
     /**
      * {@inheritDoc}
      */
+    @Override
     int hashCode();
 }

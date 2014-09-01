@@ -10,8 +10,7 @@ import com.bumptech.glide.load.engine.Resource;
  * @param <Z> The type of the decoded resource that will always be null.
  */
 public class NullDecoder<T, Z> implements ResourceDecoder<T, Z> {
-    @SuppressWarnings("rawtypes")
-    private static final NullDecoder<?, ?> NULL_DECODER = new NullDecoder();
+    private static final NullDecoder<?, ?> NULL_DECODER = new NullDecoder<Object, Object>();
 
     /**
      * Returns an instance of the NullDecoder for the given types.
