@@ -35,7 +35,7 @@ public class Util {
         } finally {
             try {
                 out.close();
-            } catch(IOException ex) {
+            } catch (IOException ex) {
                 // Do nothing.
             }
         }
