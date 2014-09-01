@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        jcenter()
+        // TODO: remove this when robolectric 2.4 is released.
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+    }
+
+    dependencies {
+        classpath 'org.robolectric:robolectric-gradle-plugin:0.12.+'
+        classpath 'com.android.tools.build:gradle:0.12.+'
+    }
+}
+
+subprojects { project ->
+    repositories {
+        jcenter()
+        // TODO: remove this when robolectric 2.4 is released.
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+    }
+
+    apply plugin: 'checkstyle'
+
+    checkstyle {
+        configFile = new File(rootDir, 'checkstyle.xml')
+    }
+
+    task checkstyle(type: Checkstyle) {
+        source 'src'
+        include '**/*.java'
+        exclude '**/gen/**'
+
+        // empty classpath
+        classpath = files()
+    }
+
+    afterEvaluate {
+        if (project.tasks.findByName('check')) {
+            check.dependsOn('checkstyle')
+        }
+    }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            if (!name.contains('Test')) {
+                options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.12'
+}

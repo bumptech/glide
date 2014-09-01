@@ -1,37 +1,26 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.+'
-    }
-}
-
-apply plugin: 'android-library'
-
-repositories {
-    mavenCentral()
-}
+apply plugin: 'com.android.library'
+apply plugin: 'robolectric'
+apply plugin: 'maven'
 
 dependencies {
-    compile files('libs/disklrucache-2.0.2.jar')
-    compile files('libs/volley.jar')
+    compile project(':third_party:gif_decoder')
+    compile project(':third_party:disklrucache')
+    compile 'com.android.support:support-v4:19.1.+'
+    androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
+    androidTestCompile 'junit:junit:4.11'
+    androidTestCompile 'org.mockito:mockito-all:1.9.5'
+    androidTestCompile 'org.robolectric:robolectric:2.4-SNAPSHOT'
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion = "19.0.0"
+    buildToolsVersion '19.1.0'
 
-    sourceSets {
-        main {
-            assets.srcDirs       = ['assets']
-            res.srcDirs          = ['res']
-            aidl.srcDirs         = ['src']
-            resources.srcDirs    = ['src']
-            renderscript.srcDirs = ['src']
-            java.srcDirs         = ['src']
-            manifest.srcFile 'AndroidManifest.xml'
-
-        }
+    defaultConfig {
+        applicationId 'com.bumptech.glide'
+        minSdkVersion 10
+        targetSdkVersion 19
+        versionCode = VERSION_CODE
+        versionName = VERSION_NAME
     }
 }

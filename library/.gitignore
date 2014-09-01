@@ -1,6 +1,0 @@
-tests/ant.properties
-tests/local.properties
-tests/gen/**/*
-tests/bin
-libs/volley.jar
-

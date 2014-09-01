@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+    compile project(':glide')
+
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion '19.1.0'
+
+    defaultConfig {
+        applicationId 'com.bumptech.glide.integration.volley'
+        minSdkVersion 10
+        targetSdkVersion 19
+        versionCode 1
+        versionName '1.0.0'
+    }
+}
+
+apply from: "$rootProject.projectDir/scripts/upload.gradle"

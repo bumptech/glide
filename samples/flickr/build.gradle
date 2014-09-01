@@ -1,0 +1,21 @@
+apply plugin: 'com.android.application'
+
+dependencies {
+    compile project(':library')
+    compile 'com.android.support:support-v4:19.1.+'
+    compile 'com.android.support:appcompat-v7:19.1.+'
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion '19.1.0'
+
+    defaultConfig {
+        applicationId 'com.bumptech.glide.samples.flickr'
+        minSdkVersion 10
+        targetSdkVersion 19
+        versionCode 1
+        versionName '1.0.0'
+    }
+}

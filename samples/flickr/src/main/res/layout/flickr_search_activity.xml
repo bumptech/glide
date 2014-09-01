@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+  <LinearLayout
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_margin="10dp"
+      android:orientation="horizontal">
+      <EditText
+        android:id="@+id/search_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_weight="1"
+        android:cursorVisible="true"
+        android:textSize="16sp"
+        android:singleLine="true"
+        android:inputType="text"
+        android:imeOptions="actionSearch" />
+      <Button
+        android:id="@+id/search"
+        android:layout_width="wrap_content"
+        android:minWidth="50dp"
+        android:layout_height="40dp"
+        android:text="@string/search" />
+    </LinearLayout>
+    <FrameLayout
+      android:layout_width="fill_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1">
+      <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+      <LinearLayout
+        android:id="@+id/searching"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/translucent_black"
+        android:visibility="invisible"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView
+          android:id="@+id/search_term"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:textSize="16sp"
+          android:layout_marginBottom="10dp"/>
+        <ProgressBar
+          android:id="@+id/search_loading"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:indeterminate="true" />
+      </LinearLayout>
+    </FrameLayout>
+  </LinearLayout>
+</merge>
+

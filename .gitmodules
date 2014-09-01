@@ -1,9 +1,9 @@
-[submodule "samples/flickr/ActionBarSherlock"]
-	path = samples/flickr/ActionBarSherlock
-	url = https://github.com/JakeWharton/ActionBarSherlock.git
-[submodule "library/volley"]
-	path = library/volley
+[submodule "third_party/volley/volley"]
+	path = third_party/volley/volley
 	url = https://android.googlesource.com/platform/frameworks/volley
-[submodule "library/tests/assets/exif-orientation-examples"]
-	path = library/tests/assets/exif-orientation-examples
+[submodule "third_party/disklrucache"]
+	path = third_party/disklrucache
+	url = https://github.com/sjudd/DiskLruCache.git
+[submodule "library/src/androidTest/resources/exif-orientation-examples"]
+	path = library/src/androidTest/resources/exif-orientation-examples
 	url = https://github.com/recurser/exif-orientation-examples.git
