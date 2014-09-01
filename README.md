@@ -179,7 +179,17 @@ git submodule init && git submodule update
 ./gradlew jar
 ```
 
-Note: Make sure your Android SDK has the Android Support Repository installed, and that your `$ANDROID_HOME` environment variable is pointing at the SDK.
+Note: Make sure your Android SDK has the Android Support Repository installed, and that your `$ANDROID_HOME` environment variable is pointing at the SDK or have a `local.properties` file in the root project with a `sdk.dir=...` line.
+
+Samples
+-------
+Follow the steps in the 'Build' section to setup the project and then:
+
+```
+gradlew :samples:flickr:run
+gradlew :samples:giphy:run
+gradlew :samples:svg:run
+```
 
 Development
 -----------
