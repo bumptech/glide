@@ -1,20 +1,22 @@
 Glide
 =====
 
-[![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=3.0a)](https://travis-ci.org/bumptech/glide)
+[![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=master)](https://travis-ci.org/bumptech/glide)
 
-Glide is fast and efficient image loading library for Android that wraps image downloading, resizing, memory and disk
-caching, and bitmap recycling into one simple and easy to use interface. Glide includes a flexible api allowing it to
-plug in to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes
-utility libraries plug in to Google's Volley project or Square's OkHttp library instead.
+Glide is a fast and efficient open source media management framework for Android that wraps media decoding, memory and
+disk caching, and resource pooling into a simple and easy to use interface. Glide supports fetching, decoding, and
+displaying video stills, images, and animated GIFs. Glide includes a flexible api that allows developers to plug in
+to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes utility
+libraries plug in to Google's Volley project or Square's OkHttp library instead.
 
 Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
 also effective for almost any case where you need to fetch, resize, and display a remote image.
 
 Download
 --------
-You can download a jar from GitHub's [release page](https://github.com/bumptech/glide/releases) or to use the 3.0 alpha
-branch, use Gradle:
+You can download a jar from GitHub's [release page](https://github.com/bumptech/glide/releases).
+
+Or use Gradle:
 
 ```groovy
 repositories {
@@ -22,14 +24,12 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:3.3.0'
+    compile 'com.github.bumptech.glide:glide:3.3.+'
     compile 'com.android.support:support-v4:19.0.0'
 }
 ```
 
 Or Maven:
-
-In your module:
 
 ```xml
 <dependency>
@@ -47,7 +47,7 @@ In your module:
 
 How do I use Glide?
 -------------------
-Checkout the GitHub wiki for pages on a variety of topics and links to javadocs.
+Checkout the [GitHub wiki](https://github.com/bumptech/glide/wiki) for pages on a variety of topics and links to javadocs.
 
 Simple use cases will look something like this:
 
@@ -80,7 +80,7 @@ public View getView(int position, View recycled, ViewGroup container) {
         .load(url)
         .centerCrop()
         .placeholder(R.drawable.loading_spinner)
-        .animate(R.anim.fade_in)
+        .crossFade()
         .into(myImageView);
 
     return myImageView;
@@ -96,7 +96,7 @@ With Gradle:
 
 ```groovy
 dependencies {
-    compile 'com.github.bumptech.glide:volley-integration:3.3.0'
+    compile 'com.github.bumptech.glide:volley-integration:1.0.+'
     compile 'com.mcxiaoke.volley:library:1.0.+'
 }
 ```
@@ -107,7 +107,7 @@ Or with Maven:
 <dependency>
     <groupId>com.github.bumptech.glide</groupId>
     <artifactId>volley-integration</artifactId>
-    <version>3.3.0</version>
+    <version>1.0.0</version>
     <type>jar</type>
 </dependency>
 <dependency>
@@ -121,7 +121,8 @@ Or with Maven:
 Then in your Activity or Application, register the Volley based model loader:
 ```java
 public void onCreate() {
-  Glide.get(this).register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(yourRequestQueue));
+  Glide.get(this).register(GlideUrl.class, InputStream.class,
+        new VolleyUrlLoader.Factory(yourRequestQueue));
   ...
 }
 ```
@@ -136,7 +137,7 @@ With Gradle:
 
 ```groovy
 dependencies {
-    compile 'com.github.bumptech.glide:okhttp-integration:3.3.0'
+    compile 'com.github.bumptech.glide:okhttp-integration:1.0.+'
     compile 'com.squareup.okhttp:okhttp:2.0.+'
 }
 ```
@@ -147,7 +148,7 @@ Or with Maven:
 <dependency>
     <groupId>com.github.bumptech.glide</groupId>
     <artifactId>okhttp-integration</artifactId>
-    <version>3.3.0</version>
+    <version>1.0.0</version>
     <type>jar</type>
 </dependency>
 <dependency>
@@ -161,14 +162,15 @@ Or with Maven:
 Then in your Activity or Application, register the OkHttp based model loader:
 ```java
 public void onCreate() {
-  Glide.get(this).register(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(yourOkHttpClient));
+  Glide.get(this).register(GlideUrl.class, InputStream.class,
+        new OkHttpUrlLoader.Factory(yourOkHttpClient));
   ...
 }
 ```
 
 Status
 ------
-Version 3.0 is in the beta stage with a nearly final api and is used in multiple open source projects at Google including in the Android Camera app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
+Version 3.x is a stable public release used in multiple open source projects at Google including in the Android Camera app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
 
 Build
 ------
@@ -177,7 +179,6 @@ Building Glide with gradle is fairly straight forward:
 ```
 git clone git@github.com:bumptech/glide.git
 cd glide
-git checkout origin/3.0a
 git submodule init && git submodule update
 ./gradlew jar
 ```
