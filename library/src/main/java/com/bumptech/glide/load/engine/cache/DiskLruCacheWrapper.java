@@ -36,6 +36,7 @@ public class DiskLruCacheWrapper implements DiskCache {
      * @return The new disk cache with the given arguments, or the current cache if one already exists
      */
     public static synchronized DiskCache get(File directory, int maxSize) {
+        // TODO calling twice with different arguments makes it return the cache for the same directory, it's public!
         if (wrapper == null) {
             wrapper = new DiskLruCacheWrapper(directory, maxSize);
         }
