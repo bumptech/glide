@@ -1,6 +1,6 @@
 package com.bumptech.glide.util;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
@@ -42,7 +42,7 @@ public class Util {
     /**
      * Returns the in memory size of the given {@link Bitmap}.
      */
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static int getSize(Bitmap bitmap) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             return bitmap.getHeight() * bitmap.getRowBytes();
@@ -71,7 +71,7 @@ public class Util {
         return !isOnMainThread();
     }
 
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     public static <T> Queue<T> createQueue(int size) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
             return new LinkedList<T>();

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.Log;
@@ -78,7 +79,7 @@ public class LruBitmapPool implements BitmapPool {
         trimToSize(maxSize);
     }
 
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     @Override
     public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
         final Bitmap result = strategy.get(width, height, config);

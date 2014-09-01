@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -50,7 +49,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         }
     }
 
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private static void resetOptions(BitmapFactory.Options decodeBitmapOptions) {
         decodeBitmapOptions.inTempStorage = null;
         decodeBitmapOptions.inDither = false;
@@ -190,7 +189,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         Bitmap.Config config = getConfig(bis, decodeFormat);
         options.inSampleSize = sampleSize;
         options.inPreferredConfig = config;
-        if (options.inSampleSize == 1 || Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
             if (shouldUsePool(bis)) {
                 setInBitmap(options, pool.get(inWidth, inHeight, config));
             }
@@ -200,7 +199,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     private boolean shouldUsePool(RecyclableBufferedInputStream bis) {
         // On KitKat+, any bitmap can be used to decode any other bitmap.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
             return true;
         }
 
@@ -306,7 +305,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         return result;
     }
 
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private static void setInBitmap(BitmapFactory.Options options, Bitmap recycled) {
         if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
             options.inBitmap = recycled;
