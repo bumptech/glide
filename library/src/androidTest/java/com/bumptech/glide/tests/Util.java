@@ -33,7 +33,7 @@ public class Util {
             try {
                 out.close();
             } catch(IOException ex) {
-                // ignore
+                // Do nothing.
             }
         }
     }
@@ -48,7 +48,7 @@ public class Util {
             try {
                 is.close();
             } catch (IOException e) {
-                // ignore
+                // Do nothing.
             }
         }
         return result;
