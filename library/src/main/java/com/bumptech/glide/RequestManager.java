@@ -169,8 +169,7 @@ public class RequestManager implements LifecycleListener {
     /**
      * Use the given generic model loader to load the given generic data class.
      * <p>
-     *     Note that in most cases you will also need to specify an {@link com.bumptech.glide.load.ResourceDecoder} and
-     *     an {@link com.bumptech.glide.load.ResourceEncoder} for the load to complete successfully.
+     *     Warning - This is an experimental api that may change without a change in major version.
      * </p>
      * @param modelLoader The {@link ModelLoader} class to use to load the model.
      * @param dataClass The type of data the {@link ModelLoader} will load.

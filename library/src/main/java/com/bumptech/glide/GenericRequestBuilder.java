@@ -36,6 +36,11 @@ import java.io.File;
 /**
  * A generic class that can handle setting options and staring loads for generic resource types.
  *
+ * <p>
+ *     Warning - It is <em>not</em> safe to use this builder after calling <code>into()</code>, it may be pooled and
+ *     reused.
+ * </p>
+ *
  * @param <ModelType> The type of model representing the resource.
  * @param <DataType> The data type that the resource {@link com.bumptech.glide.load.model.ModelLoader} will provide that
  *                  can be decoded by the {@link com.bumptech.glide.load.ResourceDecoder}.

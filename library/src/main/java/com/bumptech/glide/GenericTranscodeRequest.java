@@ -20,6 +20,11 @@ import java.io.File;
  * A class for handling requests to load a generic resource type or transcode the generic resource type into another
  * generic resource type.
  *
+ * <p>
+ *     Warning - It is <em>not</em> safe to use this builder after calling <code>into()</code>, it may be pooled and
+ *     reused.
+ * </p>
+ *
  * @param <ModelType> The type of the model used to retrieve data.
  * @param <DataType> The type of data retrieved.
  * @param <ResourceType> The type of resource to be decoded from the the data.

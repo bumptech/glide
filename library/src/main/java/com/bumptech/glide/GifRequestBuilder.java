@@ -27,6 +27,11 @@ import java.io.InputStream;
 /**
  * A class for creating a request to load an animated gif.
  *
+ * <p>
+ *     Warning - It is <em>not</em> safe to use this builder after calling <code>into()</code>, it may be pooled and
+ *     reused.
+ * </p>
+ *
  * @param <ModelType> The type of model that will be loaded into the target.
  */
 public class GifRequestBuilder<ModelType>

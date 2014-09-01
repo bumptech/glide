@@ -36,6 +36,11 @@ import java.io.InputStream;
  * A class for creating a request to load a bitmap for an image or from a video. Sets a variety of type independent
  * options including resizing, animations, and placeholders.
  *
+ * <p>
+ *     Warning - It is <em>not</em> safe to use this builder after calling <code>into()</code>, it may be pooled and
+ *     reused.
+ * </p>
+ *
  * @param <ModelType> The type of model that will be loaded into the target.
  * @param <TranscodeType> The type of the transcoded resource that the target will receive
  */
