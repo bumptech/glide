@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,18 +10,14 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
 public class DiskLruCacheWrapperTest {
@@ -32,27 +29,25 @@ public class DiskLruCacheWrapperTest {
     public void setUp() {
         File dir = Robolectric.application.getCacheDir();
         cache = new DiskLruCacheWrapper(dir, 10 * 1024 * 1024);
-        key = new StringKey("test");
+        key = new StringKey("test" + Math.random());
         data = new byte[] { 1, 2, 3, 4, 5, 6 };
     }
 
     @Test
-    //@org.junit.Ignore
-    // on windows it will fail because new FileOutputStream keeps to lock
-    public void testCanInsertAndGet() throws FileNotFoundException {
+    public void testCanInsertAndGet() throws IOException {
         cache.put(key, new DiskCache.Writer() {
             @Override
             public boolean write(File file) {
                 try {
-                    new FileOutputStream(file).write(data);
+                    Util.writeFile(file, data);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    fail(e.toString());
                 }
                 return true;
             }
         });
 
-        byte[] received = isToBytes(new FileInputStream(cache.get(key)), data.length);
+        byte[] received = Util.readFile(cache.get(key), data.length);
 
         assertTrue(Arrays.equals(data, received));
     }
@@ -75,9 +70,9 @@ public class DiskLruCacheWrapperTest {
             @Override
             public boolean write(File file) {
                 try {
-                    new FileOutputStream(file).write(data);
+                    Util.writeFile(file, data);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    fail(e.toString());
                 }
                 return false;
             }
@@ -87,9 +82,7 @@ public class DiskLruCacheWrapperTest {
     }
 
     @Test
-    //@org.junit.Ignore
-    // on windows it will fail because new FileOutputStream keeps to lock
-    public void testEditIsAbortedIfWriterThrows() throws FileNotFoundException {
+    public void testEditIsAbortedIfWriterThrows() throws IOException {
         try {
             cache.put(key, new DiskCache.Writer() {
                 @Override
@@ -105,29 +98,18 @@ public class DiskLruCacheWrapperTest {
             @Override
             public boolean write(File file) {
                 try {
-                    new FileOutputStream(file).write(data);
+                    Util.writeFile(file, data);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    fail(e.toString());
                 }
                 return true;
             }
         });
 
-        byte[] received = isToBytes(new FileInputStream(cache.get(key)), data.length);
+        byte[] received = Util.readFile(cache.get(key), data.length);
 
         assertTrue(Arrays.equals(data, received));
     }
-
-    private static byte[] isToBytes(InputStream is, int length) {
-        byte[] result = new byte[length];
-        try {
-            assertEquals(length, is.read(result));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
 
     private static class StringKey implements Key {
         private final String key;
