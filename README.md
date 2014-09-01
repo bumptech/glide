@@ -168,6 +168,10 @@ public void onCreate() {
 }
 ```
 
+License
+-------
+BSD, part MIT and Apache 2.0. See LICENSE file for details.
+
 Status
 ------
 Version 3.x is a stable public release used in multiple open source projects at Google including in the Android Camera app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
