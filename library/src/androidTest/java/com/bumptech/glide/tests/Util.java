@@ -1,5 +1,8 @@
 package com.bumptech.glide.tests;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -54,4 +57,13 @@ public class Util {
         return result;
     }
 
+    public static <T> Answer<T> arg(final int argumentIndex) {
+        return new Answer<T>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public T answer(InvocationOnMock invocation) {
+                return (T) invocation.getArguments()[argumentIndex];
+            }
+        };
+    }
 }

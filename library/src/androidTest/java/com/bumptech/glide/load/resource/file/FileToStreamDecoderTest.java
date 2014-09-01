@@ -5,8 +5,6 @@ import com.bumptech.glide.load.engine.Resource;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -69,12 +67,7 @@ public class FileToStreamDecoderTest {
         InputStream is = mock(InputStream.class);
         when(fileOpener.open(any(File.class))).thenReturn(is);
 
-        when(streamDecoder.decode(eq(is), anyInt(), anyInt())).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                throw new IOException("test");
-            }
-        });
+        when(streamDecoder.decode(eq(is), anyInt(), anyInt())).thenThrow(new IOException("Test streamDecoder failed"));
 
         try {
             decoder.decode(new File("test"), 100, 100);

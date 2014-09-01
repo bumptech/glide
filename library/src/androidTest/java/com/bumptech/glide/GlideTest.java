@@ -96,9 +96,9 @@ public class GlideTest {
         doAnswer(new CallCallback()).when(target).getSize(any(SizeReadyCallback.class));
 
         Handler bgHandler = mock(Handler.class);
-        when(bgHandler.post(any(Runnable.class))).thenAnswer(new Answer<Object>() {
+        when(bgHandler.post(any(Runnable.class))).thenAnswer(new Answer<Boolean>() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Boolean answer(InvocationOnMock invocation) throws Throwable {
                 Runnable runnable = (Runnable) invocation.getArguments()[0];
                 runnable.run();
                 return true;
@@ -107,9 +107,9 @@ public class GlideTest {
 
         // Run all tasks on the main thread so they complete synchronously.
         ExecutorService service = mock(ExecutorService.class);
-        when(service.submit(any(Runnable.class))).thenAnswer(new Answer<Object>() {
+        when(service.submit(any(Runnable.class))).thenAnswer(new Answer<Future<?>>() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Future<?> answer(InvocationOnMock invocation) throws Throwable {
                 Runnable runnable = (Runnable) invocation.getArguments()[0];
                 runnable.run();
                 return mock(Future.class);
