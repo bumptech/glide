@@ -5,11 +5,10 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.File;
@@ -41,7 +40,7 @@ public class ResourceRunnerTest {
 
     @Test
     public void testDiskCacheIsCheckedWhenNeeded() {
-        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE}) {
+        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.ALL, DiskCacheStrategy.RESULT }) {
             harness = new ResourceRunnerHarness();
             harness.diskCacheStrategy = strategy;
 
@@ -54,7 +53,7 @@ public class ResourceRunnerTest {
 
     @Test
     public void testDiskCacheIsNotCheckedWhenNotNeeded() {
-        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.NONE, DiskCacheStrategy.RESULT}) {
+        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.NONE, DiskCacheStrategy.SOURCE }) {
             harness = new ResourceRunnerHarness();
             harness.diskCacheStrategy = strategy;
 
@@ -298,7 +297,7 @@ public class ResourceRunnerTest {
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         ExecutorService resizeService = mock(ExecutorService.class);
         ExecutorService diskCacheService = mock(ExecutorService.class);
-        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.SOURCE;
+        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         EngineJob engineJob = mock(EngineJob.class);
         Transformation<Object> tranformation = mock(Transformation.class);
         CacheLoader cacheLoader = mock(CacheLoader.class);

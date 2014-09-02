@@ -97,7 +97,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
 
     private Resource<R> runWrapped() throws Exception {
         Resource<Z> fromCache = null;
-        if (diskCacheStrategy.cacheSource()) {
+        if (diskCacheStrategy.cacheResult()) {
             long start = SystemClock.currentThreadTimeMillis();
             fromCache = cacheLoader.load(key, cacheDecoder, width, height);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
