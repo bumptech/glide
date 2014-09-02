@@ -18,8 +18,8 @@ android {
         applicationId 'com.bumptech.glide.integration.volley'
         minSdkVersion 10
         targetSdkVersion 19
-        versionCode 1
-        versionName '1.0.0'
+        versionCode = VERSION_CODE
+        versionName = VERSION_NAME
     }
 }
 
