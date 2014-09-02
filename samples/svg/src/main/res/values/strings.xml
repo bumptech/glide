@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">SVGSample</string>
-    <string name="hello_world">An Android robot playing with a blue linen should appear below after a "dot dot dot" loading image on both the left and the right side. The left is loaded from a raw resource and the right is from the internet. Click here to clear all caches.</string>
-    <string name="scaleType">Cycle scale type (current: %1$s)</string>
-</resources>
