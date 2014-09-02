@@ -12,6 +12,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -39,7 +41,7 @@ public class ResourceRunnerTest {
 
     @Test
     public void testDiskCacheIsCheckedWhenNeeded() {
-        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE}) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.RESULT)) {
             harness = new ResourceRunnerHarness();
             harness.diskCacheStrategy = strategy;
 
@@ -52,7 +54,7 @@ public class ResourceRunnerTest {
 
     @Test
     public void testDiskCacheIsNotCheckedWhenNotNeeded() {
-        for (DiskCacheStrategy strategy : new DiskCacheStrategy[] { DiskCacheStrategy.NONE, DiskCacheStrategy.RESULT}) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.SOURCE)) {
             harness = new ResourceRunnerHarness();
             harness.diskCacheStrategy = strategy;
 
@@ -289,6 +291,10 @@ public class ResourceRunnerTest {
         verify(harness.engineJob, never()).onException(any(Exception.class));
     }
 
+    private static <T> List<T> list(T... items) {
+        return Arrays.asList(items);
+    }
+
     @SuppressWarnings("unchecked")
     private static class ResourceRunnerHarness {
         EngineKey key = mock(EngineKey.class);
@@ -298,7 +304,7 @@ public class ResourceRunnerTest {
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         ExecutorService resizeService = mock(ExecutorService.class);
         ExecutorService diskCacheService = mock(ExecutorService.class);
-        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.SOURCE;
+        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         EngineJob engineJob = mock(EngineJob.class);
         Transformation<Object> tranformation = mock(Transformation.class);
         CacheLoader cacheLoader = mock(CacheLoader.class);

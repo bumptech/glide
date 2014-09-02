@@ -37,6 +37,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         ResourceCallback {
     private static final String TAG = "GenericRequest";
     private static final Queue<GenericRequest<?, ?, ?, ?>> REQUEST_POOL = Util.createQueue(0);
+    private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
     private enum Status {
         PENDING,
@@ -198,14 +199,16 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             if (diskCacheStrategy.cacheSource()) {
                 check("SourceEncoder", loadProvider.getSourceEncoder(),
                         "try .sourceEncoder(Encoder) or .diskCacheStrategy(NONE/RESULT)");
+            } else {
+                check("SourceDecoder", loadProvider.getSourceDecoder(),
+                        "try .decoder/.imageDecoder/.videoDecoder(ResourceDecoder) or .diskCacheStrategy(ALL/SOURCE)");
+            }
+            if (diskCacheStrategy.cacheSource() || diskCacheStrategy.cacheResult()) {
                 // TODO if(resourceClass.isAssignableFrom(InputStream.class) it is possible to wrap sourceDecoder
                 // and use it instead of cacheDecoder: new FileToStreamDecoder<Z>(sourceDecoder)
                 // in that case this shouldn't throw
                 check("CacheDecoder", loadProvider.getCacheDecoder(),
-                        "try .cacheDecoder(ResouceDecoder) or .diskCacheStrategy(NONE/RESULT)");
-            } else {
-                check("SourceDecoder", loadProvider.getSourceDecoder(),
-                        "try .decoder/.imageDecoder/.videoDecoder(ResourceDecoder) or .diskCacheStrategy(ALL/SOURCE)");
+                        "try .cacheDecoder(ResouceDecoder) or .diskCacheStrategy(NONE)");
             }
             if (diskCacheStrategy.cacheResult()) {
                 check("Encoder", loadProvider.getEncoder(),
@@ -407,38 +410,57 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     /**
      * A callback method that should never be invoked directly.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void onResourceReady(Resource<?> resource) {
+        if (resource == null) {
+            onException(new Exception("Expected to receive a Resource<R> with an object of " + transcodeClass
+                    + " inside, but instead got null."));
+            return;
+        }
+
+        Object received = resource.get();
+        if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
+            releaseResource(resource);
+            onException(new Exception("Expected to receive an object of " + transcodeClass
+                    + " but instead got " + (received != null ? received.getClass() : "") + "{" + received + "}"
+                    + " inside Resource{" + resource + "}."
+                    + (received != null ? "" : " "
+                        + "To indicate failure return a null Resource object, "
+                        + "rather than a Resource object containing null data.")
+            ));
+            return;
+        }
+
         if (!canSetResource()) {
             releaseResource(resource);
             // We can't set the status to complete before asking canSetResource().
             status = Status.COMPLETE;
             return;
         }
-        Object received = resource != null ? resource.get() : null;
-        if (resource == null || received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
-            if (resource != null) {
-                releaseResource(resource);
-            }
-            onException(new Exception("Expected to receive an object of " + transcodeClass + " but instead got "
-                    + received));
-            return;
-        }
-        @SuppressWarnings("unchecked")
-        R result = (R) received;
-        status = Status.COMPLETE;
 
+        onResourceReady(resource, (R) received);
+    }
+
+    /**
+     * Internal {@link #onResourceReady(Resource)} where arguments are known to be safe.
+     *
+     * @param resource original {@link Resource}, never <code>null</code>
+     * @param result object returned by {@link Resource#get()}, checked for type and never <code>null</code>
+     */
+    private void onResourceReady(Resource<?> resource, R result) {
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstReadyResource())) {
             GlideAnimation<R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
             target.onResourceReady(result, animation);
         }
 
+        status = Status.COMPLETE;
         this.resource = resource;
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("Resource ready in " + LogTime.getElapsedMillis(startTime) + " size: "
-                    + (resource.getSize() / (1024d * 1024d)) + " fromCache: " + loadedFromMemoryCache);
+                    + (resource.getSize() * TO_MEGABYTE) + " fromCache: " + loadedFromMemoryCache);
         }
     }
 
