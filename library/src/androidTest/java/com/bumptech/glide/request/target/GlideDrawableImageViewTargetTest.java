@@ -15,9 +15,8 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -97,7 +96,7 @@ public class GlideDrawableImageViewTargetTest {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Drawable drawable = (Drawable) invocation.getArguments()[0];
-                assertThat(drawable, is(not(instanceOf(SquaringDrawable.class))));
+                assertThat(drawable, not(instanceOf(SquaringDrawable.class)));
                 return null;
             }
         }).when(mockView).setImageDrawable(any(Drawable.class));
@@ -127,7 +126,7 @@ public class GlideDrawableImageViewTargetTest {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Drawable drawable = (Drawable) invocation.getArguments()[0];
-                assertThat(drawable, is(not(instanceOf(SquaringDrawable.class))));
+                assertThat(drawable, not(instanceOf(SquaringDrawable.class)));
                 return null;
             }
         }).when(mockView).setImageDrawable(any(Drawable.class));
@@ -157,7 +156,7 @@ public class GlideDrawableImageViewTargetTest {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Drawable drawable = (Drawable) invocation.getArguments()[0];
-                assertThat(drawable, is(not(instanceOf(SquaringDrawable.class))));
+                assertThat(drawable, not(instanceOf(SquaringDrawable.class)));
                 return null;
             }
         }).when(mockView).setImageDrawable(any(Drawable.class));

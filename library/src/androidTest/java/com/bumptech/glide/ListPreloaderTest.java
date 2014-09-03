@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -231,10 +231,7 @@ public class ListPreloaderTest {
 
         preloader.onScroll(null, 1, 10, 30);
 
-        assertEquals(objects.size(), loadedObjects.size());
-        for (Object object : objects) {
-            assertThat(loadedObjects, hasItem(object));
-        }
+        assertThat(loadedObjects, containsInAnyOrder(objects.toArray()));
     }
 
     private static class ListPreloaderAdapter extends ListPreloader<Object> {

@@ -9,7 +9,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class FifoPriorityThreadPoolExecutorTest {
@@ -30,7 +33,7 @@ public class FifoPriorityThreadPoolExecutorTest {
 
         executor.awaitTermination(200, TimeUnit.MILLISECONDS);
 
-        assertEquals(numPrioritiesToTest, resultPriorities.size());
+        assertThat(resultPriorities, hasSize(numPrioritiesToTest));
 
         // Since no jobs are queued, the first item added will be run immediately, regardless of priority.
         assertEquals(numPrioritiesToTest, resultPriorities.get(0).intValue());
@@ -43,11 +46,11 @@ public class FifoPriorityThreadPoolExecutorTest {
     @Test
     public void testLoadsWithSamePriorityAreExecutedInSubmitOrder() throws InterruptedException {
         final int numItemsToTest = 10;
-        final List<Integer> executionOrder = new ArrayList<Integer>();
+        final Integer[] executionOrder = new Integer[numItemsToTest];
         final List<Integer> executedOrder = Collections.synchronizedList(new ArrayList<Integer>());
         FifoPriorityThreadPoolExecutor executor = new FifoPriorityThreadPoolExecutor(1);
         for (int i = 0; i < numItemsToTest; i++) {
-            executionOrder.add(i);
+            executionOrder[i] = i;
         }
         for (int i = 0; i < numItemsToTest; i++) {
             final int finalI = i;
@@ -61,11 +64,7 @@ public class FifoPriorityThreadPoolExecutorTest {
         }
         executor.awaitTermination(200, TimeUnit.MILLISECONDS);
 
-        assertEquals(numItemsToTest, executedOrder.size());
-
-        for (int i = 0; i < numItemsToTest; i++) {
-            assertEquals(executionOrder.get(i), executedOrder.get(i));
-        }
+        assertThat(executedOrder, contains(executionOrder));
     }
 
     private static class MockRunnable implements Runnable, Prioritized {
