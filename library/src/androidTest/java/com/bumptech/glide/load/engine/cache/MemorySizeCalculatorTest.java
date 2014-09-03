@@ -7,11 +7,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.matchers.LessOrEqual;
-import org.mockito.internal.matchers.LessThan;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -55,7 +55,7 @@ public class MemorySizeCalculatorTest {
 
         int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
-        assertThat(memoryCacheSize, new LessOrEqual<Integer>(Math.round(memoryClassBytes * harness.sizeMultiplier)));
+        assertThat(memoryCacheSize, lessThanOrEqualTo(Math.round(memoryClassBytes * harness.sizeMultiplier)));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class MemorySizeCalculatorTest {
 
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-        assertThat(bitmapPoolSize, new LessOrEqual<Integer>(Math.round(memoryClassBytes * harness.sizeMultiplier)));
+        assertThat(bitmapPoolSize, lessThanOrEqualTo(Math.round(memoryClassBytes * harness.sizeMultiplier)));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class MemorySizeCalculatorTest {
                 + " memoryClass: "    + memoryCacheSize
                 + " sizeMultiplier: " + harness.sizeMultiplier;
         assertThat(failHelpMessage, memoryCacheSize + bitmapPoolSize,
-                new LessOrEqual<Integer>(Math.round(memoryClassBytes * harness.sizeMultiplier)));
+                lessThanOrEqualTo(Math.round(memoryClassBytes * harness.sizeMultiplier)));
     }
 
     @Test
@@ -108,8 +108,8 @@ public class MemorySizeCalculatorTest {
         final int smallMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         final int smallBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-        assertThat(smallMemoryCacheSize, new LessThan<Integer>(normalMemoryCacheSize));
-        assertThat(smallBitmapPoolSize, new LessThan<Integer>(normalBitmapPoolSize));
+        assertThat(smallMemoryCacheSize, lessThan(normalMemoryCacheSize));
+        assertThat(smallBitmapPoolSize, lessThan(normalBitmapPoolSize));
     }
 
     private int getLargeEnoughMemoryClass() {

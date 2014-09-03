@@ -2,11 +2,12 @@ package com.bumptech.glide.load.engine.cache;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.internal.matchers.Matches;
 
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class KeyGeneratorTest {
     private SafeKeyGenerator keyGenerator;
@@ -18,10 +19,11 @@ public class KeyGeneratorTest {
 
     @Test
     public void testKeysAreValidForDiskCache() {
-        Matches matchesSafeKeyPattern = new Matches("[a-z0-9_-]{64}");
+        final Pattern diskCacheRegex = Pattern.compile("[a-z0-9_-]{64}");
         for (int i = 0; i < 1000; i++) {
             String key = getRandomKeyFromGenerator();
-            assertThat(key, matchesSafeKeyPattern);
+            Matcher matcher = diskCacheRegex.matcher(key);
+            assertTrue(key, matcher.matches());
         }
     }
 

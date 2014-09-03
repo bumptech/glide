@@ -30,8 +30,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -90,7 +93,7 @@ public class EngineTest {
     public void testNewRunnerIsAddedToRunnersMap() {
         harness.doLoad();
 
-        assertThat(harness.runners.keySet(), hasItem(harness.cacheKey));
+        assertThat(harness.runners, hasKey((Key) harness.cacheKey));
     }
 
     @Test
@@ -136,7 +139,7 @@ public class EngineTest {
 
         harness.doLoad();
 
-        verify(harness.cb, never()).onResourceReady((Resource) isNull());
+        verify(harness.cb, never()).onResourceReady(isNull(Resource.class));
     }
 
     @Test
@@ -145,7 +148,7 @@ public class EngineTest {
 
         harness.doLoad();
 
-        assertThat(harness.activeResources.keySet(), not(hasItem(harness.cacheKey)));
+        assertThat(harness.activeResources, not(hasKey((Key) harness.cacheKey)));
     }
 
     @Test
@@ -245,7 +248,7 @@ public class EngineTest {
 
         harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
 
-        assertThat(harness.runners.keySet(), not(hasItem(harness.cacheKey)));
+        assertThat(harness.runners, not(hasKey((Key) harness.cacheKey)));
     }
 
     @Test
@@ -284,7 +287,7 @@ public class EngineTest {
     @Test
     public void testDoesNotPutNullResourceInActiveResourcesOnEngineComplete() {
         harness.engine.onEngineJobComplete(harness.cacheKey, null);
-        assertThat(harness.activeResources.keySet(), not(hasItem(harness.cacheKey)));
+        assertThat(harness.activeResources, not(hasKey((Key) harness.cacheKey)));
     }
 
     @Test
@@ -293,7 +296,7 @@ public class EngineTest {
 
         harness.engine.onEngineJobCancelled(harness.job, harness.cacheKey);
 
-        assertThat(harness.runners.keySet(), not(hasItem(harness.cacheKey)));
+        assertThat(harness.runners, not(hasKey((Key) harness.cacheKey)));
     }
 
     @Test
@@ -355,7 +358,7 @@ public class EngineTest {
 
         harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
 
-        assertThat(harness.activeResources.keySet(), not(hasItem(harness.cacheKey)));
+        assertThat(harness.activeResources, not(hasKey((Key) harness.cacheKey)));
     }
 
     @Test
@@ -378,7 +381,7 @@ public class EngineTest {
     public void testRunnerIsPutInRunnersWithCacheKeyWithRelevantIds() {
         harness.doLoad();
 
-        assertNotNull(harness.runners.get(harness.cacheKey));
+        assertThat(harness.runners, hasEntry(equalTo((Key) harness.cacheKey), notNullValue(ResourceRunner.class)));
     }
 
     @Test

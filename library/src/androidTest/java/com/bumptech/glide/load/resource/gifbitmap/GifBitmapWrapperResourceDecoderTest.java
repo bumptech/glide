@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.io.InputStream;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

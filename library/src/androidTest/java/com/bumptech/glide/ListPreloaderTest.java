@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -75,7 +75,7 @@ public class ListPreloaderTest {
             protected List<Object> getItems(int start, int end) {
                 // Ignore the preload caused from us starting at the end
                 if (start == 40) {
-                    return Collections.EMPTY_LIST;
+                    return Collections.emptyList();
                 }
                 called.set(true);
                 assertEquals(19, start);
@@ -106,7 +106,7 @@ public class ListPreloaderTest {
             @Override
             protected List getItems(int start, int end) {
                 if (start == 40) {
-                    return  Collections.EMPTY_LIST;
+                    return  Collections.emptyList();
                 }
                 return objects;
             }
@@ -146,7 +146,7 @@ public class ListPreloaderTest {
             @Override
             protected List<Object> getItems(int start, int end) {
                 if (start == 17) {
-                    return Collections.EMPTY_LIST;
+                    return Collections.emptyList();
                 }
                 called.set(true);
                 assertEquals(0, start);
@@ -190,7 +190,7 @@ public class ListPreloaderTest {
             @Override
             protected List<Object> getItems(int start, int end) {
                 if (start == 30) {
-                    return Collections.EMPTY_LIST;
+                    return Collections.emptyList();
                 }
                 final int current = called.getAndIncrement();
                 if (current == 0) {

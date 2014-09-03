@@ -5,13 +5,12 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.matchers.GreaterOrEqual;
-import org.mockito.internal.matchers.LessOrEqual;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.hamcrest.CoreMatchers.both;
-import static org.hamcrest.CoreMatchers.either;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -91,27 +90,19 @@ public class TransformationUtilsTest {
     }
 
     private static void assertHasOriginalAspectRatio(Bitmap original, Bitmap transformed) {
-        final float wiggle = 0.05f;
+        double originalAspectRatio = (double) original.getWidth() / (double) original.getHeight();
+        double transformedAspectRatio = (double) transformed.getWidth() / (double) transformed.getHeight();
 
-        float originalAspectRatio = original.getWidth() / (float) original.getHeight();
-        float transformedAspectRatio = transformed.getWidth() / (float) transformed.getHeight();
-
-        String failHelpMessage = "Expected nearly identical aspect ratios, but got"
-                + " and original of " + originalAspectRatio
-                + " and transformed of " + transformedAspectRatio;
-        assertThat(failHelpMessage, originalAspectRatio, is(
-                both(new GreaterOrEqual(transformedAspectRatio - wiggle))
-                .and(new LessOrEqual(transformedAspectRatio + wiggle))
-        ));
+        assertThat("nearly identical aspect ratios", transformedAspectRatio, closeTo(originalAspectRatio, 0.05));
     }
 
     private static void assertBitmapFitsExactlyWithinBounds(int maxSide, Bitmap bitmap) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
 
-        assertThat("width", width, new LessOrEqual<Integer>(maxSide));
-        assertThat("height", height, new LessOrEqual<Integer>(maxSide));
+        assertThat("width", width, lessThanOrEqualTo(maxSide));
+        assertThat("height", height, lessThanOrEqualTo(maxSide));
 
-        assertThat("[" + width + "x" + height + "]", maxSide, either(is(width)).or(is(height)));
+        assertThat("one side must match maxSide", maxSide, either(equalTo(width)).or(equalTo(height)));
     }
 }

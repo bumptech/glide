@@ -15,7 +15,7 @@ import org.robolectric.shadows.ShadowBitmap;
 import java.io.ByteArrayOutputStream;
 
 import static com.bumptech.glide.tests.Util.assertClassHasValidId;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;

@@ -81,6 +81,11 @@
             <property name="illegalPkgs" value="junit" />
             <message key="import.illegal" value="Import from illegal package - {0}. Tests are written in JUnit 4, use org.junit.* equivalents." />
         </module>
+        <!-- Prevent importing Mockito matchers directly -->
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="org.mockito.internal" />
+            <message key="import.illegal" value="Import from illegal package - {0}. Use org.mockito.Matchers to instantiate argument matchers; or org.hamcrest.Matchers for assertThat." />
+        </module>
 
         <!-- Checks for whitespace. -->
         <!-- See http://checkstyle.sourceforge.net/config_whitespace.html -->
