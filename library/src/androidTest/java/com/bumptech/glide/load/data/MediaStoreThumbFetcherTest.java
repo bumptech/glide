@@ -12,8 +12,9 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -87,10 +88,10 @@ public class MediaStoreThumbFetcherTest {
     @Test
     public void testContainsAllRelevantPartsInId() {
         String id = harness.get().getId();
-        assertTrue(id.contains(harness.uri.toString()));
-        assertTrue(id.contains(harness.mimeType));
-        assertTrue(id.contains(String.valueOf(harness.dateModified)));
-        assertTrue(id.contains(String.valueOf(harness.orientation)));
+        assertThat(id, containsString(harness.uri.toString()));
+        assertThat(id, containsString(harness.mimeType));
+        assertThat(id, containsString(String.valueOf(harness.dateModified)));
+        assertThat(id, containsString(String.valueOf(harness.orientation)));
     }
 
     @SuppressWarnings("unchecked")

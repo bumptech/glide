@@ -7,11 +7,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.internal.matchers.LessOrEqual;
+import org.mockito.internal.matchers.LessThan;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +55,7 @@ public class MemorySizeCalculatorTest {
 
         int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
-        assertTrue(memoryCacheSize <= Math.round(memoryClassBytes * harness.sizeMultiplier));
+        assertThat(memoryCacheSize, new LessOrEqual<Integer>(Math.round(memoryClassBytes * harness.sizeMultiplier)));
     }
 
     @Test
@@ -74,7 +76,7 @@ public class MemorySizeCalculatorTest {
 
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-        assertTrue(bitmapPoolSize <= Math.round(memoryClassBytes * harness.sizeMultiplier));
+        assertThat(bitmapPoolSize, new LessOrEqual<Integer>(Math.round(memoryClassBytes * harness.sizeMultiplier)));
     }
 
     @Test
@@ -86,11 +88,13 @@ public class MemorySizeCalculatorTest {
         int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-        assertTrue("Expected " + (memoryCacheSize + bitmapPoolSize) + " to be less than "
-                + Math.round(memoryClassBytes * harness.sizeMultiplier) + ", memoryCacheSize: " + memoryCacheSize
-                + " bitmapPoolSize: " + bitmapPoolSize + " memoryClass: " + memoryCacheSize
-                + " sizeMultiplier: " + harness.sizeMultiplier,
-                memoryCacheSize + bitmapPoolSize <= Math.round(memoryClassBytes * harness.sizeMultiplier));
+        String failHelpMessage =
+                  "memoryCacheSize: " + memoryCacheSize
+                + " bitmapPoolSize: " + bitmapPoolSize
+                + " memoryClass: "    + memoryCacheSize
+                + " sizeMultiplier: " + harness.sizeMultiplier;
+        assertThat(failHelpMessage, memoryCacheSize + bitmapPoolSize,
+                new LessOrEqual<Integer>(Math.round(memoryClassBytes * harness.sizeMultiplier)));
     }
 
     @Test
@@ -104,10 +108,8 @@ public class MemorySizeCalculatorTest {
         final int smallMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         final int smallBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-        assertTrue("Expected " + smallMemoryCacheSize + " to be less than " + normalMemoryCacheSize,
-                smallMemoryCacheSize < normalMemoryCacheSize);
-        assertTrue("Expected " + smallBitmapPoolSize + " to be less than " + normalBitmapPoolSize,
-                smallBitmapPoolSize < normalBitmapPoolSize);
+        assertThat(smallMemoryCacheSize, new LessThan<Integer>(normalMemoryCacheSize));
+        assertThat(smallBitmapPoolSize, new LessThan<Integer>(normalBitmapPoolSize));
     }
 
     private int getLargeEnoughMemoryClass() {

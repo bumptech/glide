@@ -6,9 +6,7 @@ import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +32,7 @@ public class GifDrawableBytesTranscoderTest {
 
             Resource<byte[]> transcoded = transcoder.transcode(resource);
 
-            assertTrue(Arrays.equals(expected, transcoded.get()));
+            assertArrayEquals(expected, transcoded.get());
         }
     }
 

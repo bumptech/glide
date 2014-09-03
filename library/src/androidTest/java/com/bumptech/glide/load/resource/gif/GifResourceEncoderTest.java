@@ -10,8 +10,8 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +42,7 @@ public class GifResourceEncoderTest {
 
         encoder.encode(resource, os);
 
-        assertTrue(Arrays.equals(data, os.toByteArray()));
+        assertArrayEquals(data, os.toByteArray());
     }
 
     @Test

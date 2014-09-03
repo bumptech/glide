@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -231,7 +233,7 @@ public class ListPreloaderTest {
 
         assertEquals(objects.size(), loadedObjects.size());
         for (Object object : objects) {
-            assertTrue(loadedObjects.contains(object));
+            assertThat(loadedObjects, hasItem(object));
         }
     }
 

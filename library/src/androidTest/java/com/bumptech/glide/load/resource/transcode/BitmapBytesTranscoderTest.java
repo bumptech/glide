@@ -9,7 +9,9 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,14 +28,14 @@ public class BitmapBytesTranscoderTest {
     @Test
     public void testReturnsBytesOfGivenBitmap() {
         String transcodedDescription = harness.getTranscodedDescription();
-        assertTrue(transcodedDescription, transcodedDescription.startsWith(harness.description));
+        assertThat(transcodedDescription, startsWith(harness.description));
     }
 
     @Test
     public void testUsesGivenQuality() {
         harness.quality = 66;
         String transcodedDescription = harness.getTranscodedDescription();
-        assertTrue(transcodedDescription, transcodedDescription.contains(String.valueOf(harness.quality)));
+        assertThat(transcodedDescription, containsString(String.valueOf(harness.quality)));
     }
 
     @Test
@@ -41,7 +43,7 @@ public class BitmapBytesTranscoderTest {
         for (Bitmap.CompressFormat format : Bitmap.CompressFormat.values()) {
             harness.compressFormat = format;
             String transcodedDescription = harness.getTranscodedDescription();
-            assertTrue(transcodedDescription, transcodedDescription.contains(format.name()));
+            assertThat(transcodedDescription, containsString(format.name()));
         }
     }
 

@@ -5,8 +5,9 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,8 +30,8 @@ public class GifFrameModelLoaderTest {
 
         String fetcherId = loader.getResourceFetcher(decoder, 1, 2).getId();
 
-        assertTrue(fetcherId.contains(id));
-        assertTrue(fetcherId.contains(String.valueOf(frameIndex)));
+        assertThat(fetcherId, containsString(id));
+        assertThat(fetcherId, containsString(String.valueOf(frameIndex)));
     }
 
     @Test

@@ -9,8 +9,6 @@ import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
 
-import org.junit.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -155,8 +153,7 @@ public class ViewTargetTest {
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb, never()).onSizeReady(anyInt(), anyInt());
-        Assert.assertEquals(1, shadowObserver.getPreDrawListeners()
-                .size());
+        assertEquals(1, shadowObserver.getPreDrawListeners().size());
     }
 
     @Test
@@ -319,7 +316,7 @@ public class ViewTargetTest {
         }
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
+        public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
 
         }
 

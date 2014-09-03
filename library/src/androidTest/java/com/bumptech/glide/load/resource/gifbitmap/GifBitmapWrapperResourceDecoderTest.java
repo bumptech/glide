@@ -11,7 +11,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.io.InputStream;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +38,7 @@ public class GifBitmapWrapperResourceDecoderTest {
         when(gifDecoder.getId()).thenReturn(gifId);
 
         String id = decoder.getId();
-        assertTrue(id.contains(bitmapId));
-        assertTrue(id.contains(gifId));
+        assertThat(id, containsString(bitmapId));
+        assertThat(id, containsString(gifId));
     }
 }

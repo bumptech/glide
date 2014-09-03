@@ -5,9 +5,14 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.internal.matchers.GreaterOrEqual;
+import org.mockito.internal.matchers.LessOrEqual;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.both;
+import static org.hamcrest.CoreMatchers.either;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
@@ -91,20 +96,22 @@ public class TransformationUtilsTest {
         float originalAspectRatio = original.getWidth() / (float) original.getHeight();
         float transformedAspectRatio = transformed.getWidth() / (float) transformed.getHeight();
 
-        assertTrue("Expected nearly identical aspect ratios, but got original of " + originalAspectRatio
-                        + " and transformed of " + transformedAspectRatio,
-                transformedAspectRatio + wiggle >= originalAspectRatio
-                        && transformedAspectRatio - wiggle <= originalAspectRatio);
+        String failHelpMessage = "Expected nearly identical aspect ratios, but got"
+                + " and original of " + originalAspectRatio
+                + " and transformed of " + transformedAspectRatio;
+        assertThat(failHelpMessage, originalAspectRatio, is(
+                both(new GreaterOrEqual(transformedAspectRatio - wiggle))
+                .and(new LessOrEqual(transformedAspectRatio + wiggle))
+        ));
     }
 
     private static void assertBitmapFitsExactlyWithinBounds(int maxSide, Bitmap bitmap) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
 
-        assertTrue("Expected width <=" + maxSide + " but got " + width, width <= maxSide);
-        assertTrue("Expected height <=" + maxSide + " but got " + height, height <= maxSide);
+        assertThat("width", width, new LessOrEqual<Integer>(maxSide));
+        assertThat("height", height, new LessOrEqual<Integer>(maxSide));
 
-        assertTrue("Expected width or height to equal " + maxSide + " but got [" + width + "x"  + height + "]",
-                width == maxSide || height == maxSide);
+        assertThat("[" + width + "x" + height + "]", maxSide, either(is(width)).or(is(height)));
     }
 }

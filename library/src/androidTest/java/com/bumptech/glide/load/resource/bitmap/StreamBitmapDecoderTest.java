@@ -13,9 +13,10 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,9 +50,9 @@ public class StreamBitmapDecoderTest {
         when(harness.downsampler.getId()).thenReturn(downsamplerId);
 
         String actualId = harness.decoder.getId();
-        assertTrue(actualId.contains(downsamplerId));
-        assertTrue(actualId.contains(harness.decodeFormat.toString()));
-        assertTrue(actualId.contains(Util.getExpectedClassId(StreamBitmapDecoder.class)));
+        assertThat(actualId, containsString(downsamplerId));
+        assertThat(actualId, containsString(harness.decodeFormat.toString()));
+        assertThat(actualId, containsString(Util.getExpectedClassId(StreamBitmapDecoder.class)));
     }
 
     private static class DecoderHarness {

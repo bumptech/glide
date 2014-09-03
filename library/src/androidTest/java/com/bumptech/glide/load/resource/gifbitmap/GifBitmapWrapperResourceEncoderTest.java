@@ -6,7 +6,8 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +32,7 @@ public class GifBitmapWrapperResourceEncoderTest {
         when(gifEncoder.getId()).thenReturn(gifId);
 
         String id = encoder.getId();
-        assertTrue(id.contains(bitmapId));
-        assertTrue(id.contains(gifId));
+        assertThat(id, containsString(bitmapId));
+        assertThat(id, containsString(gifId));
     }
 }
