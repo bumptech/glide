@@ -13,8 +13,8 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;

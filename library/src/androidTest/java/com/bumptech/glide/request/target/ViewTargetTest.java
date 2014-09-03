@@ -9,7 +9,7 @@ import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,8 +28,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewTreeObserver.OnPreDrawListener;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -155,7 +155,7 @@ public class ViewTargetTest {
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb, never()).onSizeReady(anyInt(), anyInt());
-        TestCase.assertEquals(1, shadowObserver.getPreDrawListeners()
+        Assert.assertEquals(1, shadowObserver.getPreDrawListeners()
                 .size());
     }
 
