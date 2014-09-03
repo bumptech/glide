@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)

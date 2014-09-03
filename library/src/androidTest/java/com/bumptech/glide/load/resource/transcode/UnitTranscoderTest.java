@@ -3,7 +3,7 @@ package com.bumptech.glide.load.resource.transcode;
 import com.bumptech.glide.load.engine.Resource;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class UnitTranscoderTest {

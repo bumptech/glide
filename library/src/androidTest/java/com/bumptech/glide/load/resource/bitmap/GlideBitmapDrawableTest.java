@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,11 +10,12 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class GlideBitmapDrawableTest {
@@ -68,7 +70,8 @@ public class GlideBitmapDrawableTest {
 
     @Test
     public void testConstantStateReturnsNewGlideBitmapDrawable() {
-        assertTrue(drawable.getConstantState().newDrawable() instanceof GlideBitmapDrawable);
+        Drawable newDrawable = drawable.getConstantState().newDrawable();
+        assertThat(newDrawable, instanceOf(GlideBitmapDrawable.class));
     }
 
     @Test
@@ -84,7 +87,8 @@ public class GlideBitmapDrawableTest {
 
     @Test
     public void testMutatedDrawableIsGlideBitmapDrawable() {
-        assertTrue(drawable.mutate() instanceof GlideBitmapDrawable);
+        Drawable newDrawable = drawable.mutate();
+        assertThat(newDrawable, instanceOf(GlideBitmapDrawable.class));
     }
 
     @Test

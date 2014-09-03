@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.io.InputStream;
 
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class StreamLocalUriFetcherTest {

@@ -8,7 +8,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 public class StreamEncoderTest {

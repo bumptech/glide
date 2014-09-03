@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

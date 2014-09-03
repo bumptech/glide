@@ -11,7 +11,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -42,7 +42,7 @@ public class GlideBitmapDrawableResourceTest {
         GlideBitmapDrawable first = resource.get();
         GlideBitmapDrawable second = resource.get();
 
-        assertFalse(first == second);
+        assertNotSame(first, second);
     }
 
     @Test

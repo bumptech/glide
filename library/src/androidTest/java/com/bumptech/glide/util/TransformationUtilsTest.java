@@ -7,7 +7,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
@@ -86,25 +90,19 @@ public class TransformationUtilsTest {
     }
 
     private static void assertHasOriginalAspectRatio(Bitmap original, Bitmap transformed) {
-        final float wiggle = 0.05f;
+        double originalAspectRatio = (double) original.getWidth() / (double) original.getHeight();
+        double transformedAspectRatio = (double) transformed.getWidth() / (double) transformed.getHeight();
 
-        float originalAspectRatio = original.getWidth() / (float) original.getHeight();
-        float transformedAspectRatio = transformed.getWidth() / (float) transformed.getHeight();
-
-        assertTrue("Expected nearly identical aspect ratios, but got original of " + originalAspectRatio
-                        + " and transformed of " + transformedAspectRatio,
-                transformedAspectRatio + wiggle >= originalAspectRatio
-                        && transformedAspectRatio - wiggle <= originalAspectRatio);
+        assertThat("nearly identical aspect ratios", transformedAspectRatio, closeTo(originalAspectRatio, 0.05));
     }
 
     private static void assertBitmapFitsExactlyWithinBounds(int maxSide, Bitmap bitmap) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
 
-        assertTrue("Expected width <=" + maxSide + " but got " + width, width <= maxSide);
-        assertTrue("Expected height <=" + maxSide + " but got " + height, height <= maxSide);
+        assertThat("width", width, lessThanOrEqualTo(maxSide));
+        assertThat("height", height, lessThanOrEqualTo(maxSide));
 
-        assertTrue("Expected width or height to equal " + maxSide + " but got [" + width + "x"  + height + "]",
-                width == maxSide || height == maxSide);
+        assertThat("one side must match maxSide", maxSide, either(equalTo(width)).or(equalTo(height)));
     }
 }

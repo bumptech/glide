@@ -5,10 +5,9 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class OriginalEngineKeyTest {
 
@@ -43,6 +42,6 @@ public class OriginalEngineKeyTest {
         secondKey.updateDiskCacheKey(secondDigest);
         byte[] secondBytes = secondDigest.digest();
 
-        assertTrue(Arrays.equals(firstBytes, secondBytes));
+        assertArrayEquals(firstBytes, secondBytes);
     }
 }

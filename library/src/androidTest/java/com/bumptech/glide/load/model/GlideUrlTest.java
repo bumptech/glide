@@ -7,7 +7,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 public class GlideUrlTest {

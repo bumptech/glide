@@ -6,7 +6,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
-import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
@@ -21,13 +22,15 @@ public class ConnectivityMonitorFactoryTest {
     @Test
     public void testReturnsDefaultConnectivityMonitorWhenHasPermission() {
         Robolectric.getShadowApplication().grantPermissions("android.permission.ACCESS_NETWORK_STATE");
-        assertTrue(factory.build(Robolectric.application, mock(ConnectivityMonitor.ConnectivityListener.class))
-                instanceof DefaultConnectivityMonitor);
+        ConnectivityMonitor connectivityMonitor =
+                factory.build(Robolectric.application, mock(ConnectivityMonitor.ConnectivityListener.class));
+        assertThat(connectivityMonitor, instanceOf(DefaultConnectivityMonitor.class));
     }
 
     @Test
     public void testReturnsNullConnectivityMonitorWhenDoesNotHavePermission() {
-        assertTrue(factory.build(Robolectric.application, mock(ConnectivityMonitor.ConnectivityListener.class))
-                instanceof NullConnectivityMonitor);
+        ConnectivityMonitor connectivityMonitor =
+                factory.build(Robolectric.application, mock(ConnectivityMonitor.ConnectivityListener.class));
+        assertThat(connectivityMonitor, instanceOf(NullConnectivityMonitor.class));
     }
 }

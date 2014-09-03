@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class KeyGeneratorTest {
     private SafeKeyGenerator keyGenerator;
@@ -19,12 +19,11 @@ public class KeyGeneratorTest {
 
     @Test
     public void testKeysAreValidForDiskCache() {
-        String key;
         final Pattern diskCacheRegex = Pattern.compile("[a-z0-9_-]{64}");
         for (int i = 0; i < 1000; i++) {
-            key = getRandomKeyFromGenerator();
-            final Matcher matcher = diskCacheRegex.matcher(key);
-            assertTrue(matcher.matches());
+            String key = getRandomKeyFromGenerator();
+            Matcher matcher = diskCacheRegex.matcher(key);
+            assertTrue(key, matcher.matches());
         }
     }
 

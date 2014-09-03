@@ -1,5 +1,6 @@
 package com.bumptech.glide.manager;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -12,7 +13,11 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowConnectivityManager;
 import org.robolectric.shadows.ShadowNetworkInfo;
 
-import static junit.framework.Assert.assertEquals;
+import java.util.List;
+
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,7 +39,7 @@ public class DefaultConnectivityMonitorTest {
     public void testRegistersReceiverOnStart() {
         monitor.onStart();
 
-        assertEquals(1, getConnectivityReceiverCount());
+        assertThat(getConnectivityReceivers(), hasSize(1));
     }
 
     @Test
@@ -42,7 +47,7 @@ public class DefaultConnectivityMonitorTest {
         monitor.onStart();
         monitor.onStart();
 
-        assertEquals(1, getConnectivityReceiverCount());
+        assertThat(getConnectivityReceivers(), hasSize(1));
     }
 
     @Test
@@ -50,7 +55,7 @@ public class DefaultConnectivityMonitorTest {
         monitor.onStart();
         monitor.onStop();
 
-        assertEquals(0, getConnectivityReceiverCount());
+        assertThat(getConnectivityReceivers(), empty());
     }
 
     @Test
@@ -58,7 +63,7 @@ public class DefaultConnectivityMonitorTest {
         monitor.onStop();
         monitor.onStop();
 
-        assertEquals(0, getConnectivityReceiverCount());
+        assertThat(getConnectivityReceivers(), empty());
     }
 
     @Test
@@ -109,9 +114,9 @@ public class DefaultConnectivityMonitorTest {
         verify(listener, never()).onConnectivityChanged(anyBoolean());
     }
 
-    private int getConnectivityReceiverCount() {
+    private List<BroadcastReceiver> getConnectivityReceivers() {
         Intent connectivity = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        return Robolectric.getShadowApplication().getReceiversForIntent(connectivity).size();
+        return Robolectric.getShadowApplication().getReceiversForIntent(connectivity);
     }
 
     private static class ConnectivityHarness {

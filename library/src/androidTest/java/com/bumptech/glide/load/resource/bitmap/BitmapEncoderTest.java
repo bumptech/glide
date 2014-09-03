@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +14,9 @@ import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.ByteArrayOutputStream;
 
+import static com.bumptech.glide.tests.Util.assertClassHasValidId;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -83,13 +85,12 @@ public class BitmapEncoderTest {
 
     @Test
     public void testReturnsValidId() {
-        Util.assertClassHasValidId(BitmapEncoder.class,
+        assertClassHasValidId(BitmapEncoder.class,
                 new BitmapEncoder(harness.compressFormat, harness.quality).getId());
     }
 
     private static void assertContains(String string, String expected) {
-        assertTrue("Expected '" + string + "' to contain '" + expected + "'",
-                string.contains(expected));
+        assertThat(string, containsString(expected));
     }
 
     @SuppressWarnings("unchecked")

@@ -13,10 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.util.Arrays;
 
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
@@ -49,7 +48,7 @@ public class DiskLruCacheWrapperTest {
 
         byte[] received = Util.readFile(cache.get(key), data.length);
 
-        assertTrue(Arrays.equals(data, received));
+        assertArrayEquals(data, received);
     }
 
     @Test
@@ -108,7 +107,7 @@ public class DiskLruCacheWrapperTest {
 
         byte[] received = Util.readFile(cache.get(key), data.length);
 
-        assertTrue(Arrays.equals(data, received));
+        assertArrayEquals(data, received);
     }
 
     private static class StringKey implements Key {
