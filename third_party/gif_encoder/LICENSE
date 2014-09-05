@@ -1,0 +1,25 @@
+License for AnimatedGifEncoder.java and LZWEncoder.java
+
+No copyright asserted on the source code of this class. May be used for any
+purpose, however, refer to the Unisys LZW patent for restrictions on use of
+the associated LZWEncoder class. Please forward any corrections to
+kweiner@fmsware.com.
+
+-----------------------------------------------------------------------------
+License for NeuQuant.java
+
+Copyright (c) 1994 Anthony Dekker
+
+NEUQUANT Neural-Net quantization algorithm by Anthony Dekker, 1994. See
+"Kohonen neural networks for optimal colour quantization" in "Network:
+Computation in Neural Systems" Vol. 5 (1994) pp 351-367. for a discussion of
+the algorithm.
+
+Any party obtaining a copy of these files from the author, directly or
+indirectly, is granted, free of charge, a full and unrestricted irrevocable,
+world-wide, paid up, royalty-free, nonexclusive right and license to deal in
+this software and documentation files (the "Software"), including without
+limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons who
+receive copies from any such party to do so, with the only requirement being
+that this copyright notice remain intact.
