@@ -6,22 +6,84 @@ import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Util;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A collection of static methods for creating new {@link com.bumptech.glide.RequestManager}s or retrieving existing
  * ones from activities and fragment.
  */
-public class RequestManagerRetriever {
+public class RequestManagerRetriever implements Handler.Callback {
     static final String TAG = "com.bumptech.glide.manager";
-    private static RequestManager applicationManager;
 
-    public static RequestManager get(Context context) {
+    /** The singleton instance of RequestManagerRetriever. */
+    private static volatile RequestManagerRetriever instance;
+
+    private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
+    private static final int ID_REMOVE_SUPPORT_FRAGMENT_MANAGER = 2;
+
+    /** The top application level RequestManager. */
+    private volatile RequestManager applicationManager;
+
+    // Visible for testing.
+    /** Pending adds for RequestManagerFragments. */
+    final Map<android.app.FragmentManager, RequestManagerFragment> pendingRequestManagerFragments =
+            new HashMap<android.app.FragmentManager, RequestManagerFragment>();
+
+    // Visible for testing.
+    /** Pending adds for SupportRequestManagerFragments. */
+    final Map<FragmentManager, SupportRequestManagerFragment> pendingSupportRequestManagerFragments =
+            new HashMap<FragmentManager, SupportRequestManagerFragment>();
+
+    /** Main thread handler to handle cleaning up pending fragment maps. */
+    private final Handler handler;
+
+    /**
+     * Retrieves and returns the RequestManagerRetriever singleton.
+     */
+    public static RequestManagerRetriever get() {
+        if (instance == null) {
+            synchronized (RequestManagerRetriever.class) {
+                if (instance == null) {
+                    instance = new RequestManagerRetriever();
+                }
+            }
+        }
+        return instance;
+    }
+
+    // Visible for testing.
+    RequestManagerRetriever() {
+        handler = new Handler(Looper.getMainLooper(), this /* Callback */);
+    }
+
+    private RequestManager getApplicationManager(Context context) {
+        // Either an application context or we're on a background thread.
+        if (applicationManager == null) {
+            synchronized (this) {
+                if (applicationManager == null) {
+                    // Normally pause/resume is taken care of by the fragment we add to the fragment or activity.
+                    // However, in this case since the manager attached to the application will not receive lifecycle
+                    // events, we must force the manager to start resumed.
+                    applicationManager = new RequestManager(context.getApplicationContext(),
+                            new ApplicationLifecycle());
+                }
+            }
+        }
+
+        return applicationManager;
+    }
+
+    public RequestManager get(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("You cannot start a load on a null Context");
         } else if (Util.isOnMainThread() && !(context instanceof Application)) {
@@ -34,28 +96,11 @@ public class RequestManagerRetriever {
             }
         }
 
-        // Either an application context or we're on a background thread.
-        if (applicationManager == null) {
-            synchronized (RequestManagerRetriever.class) {
-                if (applicationManager == null) {
-                    // Normally pause/resume is taken care of by the fragment we add to the fragment or activity.
-                    // However, in this case since the manager attached to the application will not receive lifecycle
-                    // events, we must force the manager to start resumed.
-                    applicationManager = new RequestManager(context.getApplicationContext(),
-                            new ApplicationLifecycle());
-                }
-            }
-        }
-        return applicationManager;
-    }
-
-    // Exposed for testing.
-    static void reset() {
-        applicationManager = null;
+        return getApplicationManager(context);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static RequestManager get(FragmentActivity activity) {
+    public RequestManager get(FragmentActivity activity) {
         if (Util.isOnBackgroundThread()) {
             return get(activity.getApplicationContext());
         } else {
@@ -67,7 +112,7 @@ public class RequestManagerRetriever {
         }
     }
 
-    public static RequestManager get(Fragment fragment) {
+    public RequestManager get(Fragment fragment) {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
         }
@@ -83,7 +128,7 @@ public class RequestManagerRetriever {
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static RequestManager get(Activity activity) {
+    public RequestManager get(Activity activity) {
         if (Util.isOnBackgroundThread()) {
             return get(activity.getApplicationContext());
         } else {
@@ -96,7 +141,7 @@ public class RequestManagerRetriever {
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static RequestManager get(android.app.Fragment fragment) {
+    public RequestManager get(android.app.Fragment fragment) {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
         }
@@ -116,16 +161,16 @@ public class RequestManagerRetriever {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    static RequestManager fragmentGet(Context context, android.app.FragmentManager fm) {
+    RequestManager fragmentGet(Context context, final android.app.FragmentManager fm) {
         RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {
-            current = new RequestManagerFragment();
-            fm.beginTransaction().add(current, TAG).commitAllowingStateLoss();
-            // Normally fragment transactions are posted to the main thread. Since we may start multiple requests within
-            // a single synchronous call, we need to make sure that we only add a single fragment for the first call. To
-            // do so, we use executePendingTransactions to skip the post and synchronously add the new fragment so that
-            // the next synchronous request will retrieve it rather than creating a new one.
-            fm.executePendingTransactions();
+            current = pendingRequestManagerFragments.get(fm);
+            if (current == null) {
+                current = new RequestManagerFragment();
+                pendingRequestManagerFragments.put(fm, current);
+                fm.beginTransaction().add(current, TAG).commitAllowingStateLoss();
+                handler.obtainMessage(ID_REMOVE_FRAGMENT_MANAGER, fm).sendToTarget();
+            }
         }
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
@@ -136,16 +181,16 @@ public class RequestManagerRetriever {
 
     }
 
-    static RequestManager supportFragmentGet(Context context, FragmentManager fm) {
+    RequestManager supportFragmentGet(Context context, final FragmentManager fm) {
         SupportRequestManagerFragment current = (SupportRequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {
-            current = new SupportRequestManagerFragment();
-            fm.beginTransaction().add(current, TAG).commitAllowingStateLoss();
-            // Normally fragment transactions are posted to the main thread. Since we may start multiple requests within
-            // a single synchronous call, we need to make sure that we only add a single fragment for the first call. To
-            // do so, we use executePendingTransactions to skip the post and synchronously add the new fragment so that
-            // the next synchronous request will retrieve it rather than creating a new one.
-            fm.executePendingTransactions();
+            current = pendingSupportRequestManagerFragments.get(fm);
+            if (current == null) {
+                current = new SupportRequestManagerFragment();
+                pendingSupportRequestManagerFragments.put(fm, current);
+                fm.beginTransaction().add(current, TAG).commitAllowingStateLoss();
+                handler.obtainMessage(ID_REMOVE_SUPPORT_FRAGMENT_MANAGER, fm).sendToTarget();
+            }
         }
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
@@ -153,5 +198,21 @@ public class RequestManagerRetriever {
             current.setRequestManager(requestManager);
         }
         return requestManager;
+    }
+
+    @Override
+    public boolean handleMessage(Message message) {
+        switch (message.what) {
+            case ID_REMOVE_FRAGMENT_MANAGER:
+                android.app.FragmentManager fm = (android.app.FragmentManager) message.obj;
+                pendingRequestManagerFragments.remove(fm);
+                return true;
+            case ID_REMOVE_SUPPORT_FRAGMENT_MANAGER:
+                FragmentManager supportFm = (FragmentManager) message.obj;
+                pendingSupportRequestManagerFragments.remove(supportFm);
+                return true;
+            default:
+                return false;
+        }
     }
 }
