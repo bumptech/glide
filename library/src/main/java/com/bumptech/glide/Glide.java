@@ -598,7 +598,7 @@ public class Glide {
         }
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation<Object> glideAnimation) {
+        public void onResourceReady(Object resource, GlideAnimation<? super Object> glideAnimation) {
             // Do nothing.
         }
 
