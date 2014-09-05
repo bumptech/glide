@@ -305,6 +305,10 @@ public class GifDecoder {
         mainScratch = null;
     }
 
+    public void setData(GifHeader header, byte[] data) {
+        setData(null, header, data);
+    }
+
     public void setData(String id, GifHeader header, byte[] data) {
         this.id = id;
         this.header = header;

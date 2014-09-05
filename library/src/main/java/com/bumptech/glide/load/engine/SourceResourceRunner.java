@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -229,7 +230,7 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
             boolean success = false;
             OutputStream os = null;
             try {
-                os = new FileOutputStream(file);
+                os = new BufferedOutputStream(new FileOutputStream(file));
                 success = encoder.encode(data, os);
             } catch (FileNotFoundException e) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {

@@ -98,6 +98,10 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         state.firstFrame = firstFrame;
     }
 
+    public GifDecoder getDecoder() {
+        return decoder;
+    }
+
     public Transformation<Bitmap> getFrameTransformation() {
         return state.frameTransformation;
     }

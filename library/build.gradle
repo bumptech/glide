@@ -10,6 +10,7 @@ findbugs {
 
 dependencies {
     compile project(':third_party:gif_decoder')
+    compile project(':third_party:gif_encoder')
     compile project(':third_party:disklrucache')
     compile 'com.android.support:support-v4:19.1.+'
 

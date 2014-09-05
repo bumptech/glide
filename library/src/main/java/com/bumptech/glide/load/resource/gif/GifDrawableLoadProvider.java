@@ -26,7 +26,7 @@ public class GifDrawableLoadProvider implements DataLoadProvider<InputStream, Gi
     public GifDrawableLoadProvider(Context context, BitmapPool bitmapPool) {
         decoder = new GifResourceDecoder(context, bitmapPool);
         cacheDecoder = new FileToStreamDecoder<GifDrawable>(decoder);
-        encoder = new GifResourceEncoder();
+        encoder = new GifResourceEncoder(bitmapPool);
         sourceEncoder = new StreamEncoder();
     }
 

@@ -6,5 +6,6 @@
 
 <suppressions>
     <suppress files=".*[/\\]library[/\\]src[/\\]androidTest[/\\].*" checks="Javadoc.*"/>
+    <suppress files=".*[/\\]gif_encoder[/\\].*" checks=".*"/>
 </suppressions>
 

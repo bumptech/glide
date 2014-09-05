@@ -10,4 +10,4 @@ See also:
 http://members.ozemail.com.au/~dekker/NEUQUANT.HTML
 
 Local Modifications:
-None.
+Converted BufferedImage to Android's Bitmap class, split apart classes into individual files.

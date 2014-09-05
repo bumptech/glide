@@ -218,6 +218,8 @@ public class DrawableRequestBuilder<ModelType>
         return transform(transformations);
     }
 
+
+
     /**
      * {@inheritDoc}
      *

@@ -160,17 +160,4 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
             pool.offer(parser);
         }
     }
-
-    private static class GifBitmapProvider implements GifDecoder.BitmapProvider {
-        private final BitmapPool bitmapPool;
-
-        public GifBitmapProvider(BitmapPool bitmapPool) {
-            this.bitmapPool = bitmapPool;
-        }
-
-        @Override
-        public Bitmap obtain(int width, int height, Bitmap.Config config) {
-            return bitmapPool.get(width, height, config);
-        }
-    }
 }
