@@ -4,10 +4,13 @@ Glide
 [![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=master)](https://travis-ci.org/bumptech/glide)
 
 Glide is a fast and efficient open source media management framework for Android that wraps media decoding, memory and
-disk caching, and resource pooling into a simple and easy to use interface. Glide supports fetching, decoding, and
-displaying video stills, images, and animated GIFs. Glide includes a flexible api that allows developers to plug in
-to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes utility
-libraries plug in to Google's Volley project or Square's OkHttp library instead.
+disk caching, and resource pooling into a simple and easy to use interface.
+
+![](static/glide_logo.png)
+
+Glide supports fetching, decoding, and displaying video stills, images, and animated GIFs. Glide includes a flexible api
+that allows developers to plug in to almost any network stack. By default Glide uses a custom HttpUrlConnection based
+stack, but also includes utility libraries plug in to Google's Volley project or Square's OkHttp library instead.
 
 Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
 also effective for almost any case where you need to fetch, resize, and display a remote image.
@@ -47,7 +50,7 @@ Or Maven:
 
 How do I use Glide?
 -------------------
-Checkout the [GitHub wiki](https://github.com/bumptech/glide/wiki) for pages on a variety of topics and links to javadocs.
+Checkout the [GitHub wiki](https://github.com/bumptech/glide/wiki) for pages on a variety of topics, and see the [javadocs](http://bumptech.github.io/glide/javadocs/330/index.html).
 
 Simple use cases will look something like this:
 
@@ -194,14 +197,21 @@ Samples
 Follow the steps in the 'Build' section to setup the project and then:
 
 ```
-gradlew :samples:flickr:run
-gradlew :samples:giphy:run
-gradlew :samples:svg:run
+./gradlew :samples:flickr:run
+./gradlew :samples:giphy:run
+./gradlew :samples:svg:run
 ```
 
 Development
 -----------
-Follow the steps in the 'Build' section to setup the project and then edit the files however you wish. Intellij's [IDEA 14 early access build](http://confluence.jetbrains.com/display/IDEADEV/IDEA+14+EAP) cleanly imports both Glide's source and tests and is the recommended way to work with Glide. Earlier versions of intellij do not import the gradle project cleanly. Although Android Studio imports the source cleanly, it is not possible to run or debug the tests without manually modifying the tests' classpath. To open the project in Intellij 14 go to File > Open... > navigate to Glide's root directory > select settings.gradle.
+Follow the steps in the 'Build' section to setup the project and then edit the files however you wish. Intellij's [IDEA 14 early access build](http://confluence.jetbrains.com/display/IDEADEV/IDEA+14+EAP) cleanly imports both Glide's source and tests and is the recommended way to work with Glide. Earlier versions of intellij do not import the gradle project cleanly. Although Android Studio imports the source cleanly, it is not possible to run or debug the tests without manually modifying the tests' classpath.
+
+To open the project in Intellij 14:
+
+1. Go to File.
+2. Click on 'Open...'
+3. Navigate to Glide's root directory.
+4. Select settings.gradle.
 
 Getting Help
 ------------
@@ -213,7 +223,11 @@ Before submitting pull requests, contributors must sign Google's [individual con
 
 Thanks
 ------
-Thanks to the Android project and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) Glide's disk cache is based on, to Dave Smith for the [gif decoder implementation](https://gist.github.com/devunwired/4479231) Glide's gif decoder is based on and thanks also to everyone who has contributed code and reported issues!
+* The Android team and Jake Wharton for the [disk cache implementation](https://github.com/JakeWharton/DiskLruCache) Glide's disk cache is based on.
+* Dave Smith for the [gif decoder gist](https://gist.github.com/devunwired/4479231) Glide's gif decoder is based on.
+* Chris Banes for his [gradle-mvn-push](https://github.com/chrisbanes/gradle-mvn-push) script.
+* Corey Hall for Glide's [amazing logo](static/glide_logo.png).
+* Everyone who has contributed code and reported issues!
 
 Author
 ------
