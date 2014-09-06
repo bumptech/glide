@@ -9,16 +9,18 @@ import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.util.ActivityController;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,18 +32,22 @@ import static org.mockito.Mockito.mock;
 public class RequestManagerRetrieverTest {
     private static final String PARENT_TAG = "parent";
     private RetrieverHarness[] harnesses;
+    private RequestManagerRetriever retriever;
 
     @Before
     public void setUp() {
         // Clear out static state.
-        RequestManagerRetriever.reset();
+        retriever = new RequestManagerRetriever();
 
         harnesses = new RetrieverHarness[] { new DefaultRetrieverHarness(), new SupportRetrieverHarness() };
+        Robolectric.shadowOf(Looper.getMainLooper()).pause();
+    }
 
-        // If we don't pause the looper, fragment transactions are executed synchronously which is not how they would
-        // normally behave.
-        ShadowLooper shadowLooper = Robolectric.shadowOf(Looper.getMainLooper());
-        shadowLooper.pause();
+    @After
+    public void tearDown() {
+        Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
+        assertTrue(retriever.pendingRequestManagerFragments.isEmpty());
+        assertTrue(retriever.pendingSupportRequestManagerFragments.isEmpty());
     }
 
     @Test
@@ -49,7 +55,8 @@ public class RequestManagerRetrieverTest {
         for (RetrieverHarness harness : harnesses) {
             harness.doGet();
 
-            assertTrue(harness.hasFragmentWithTag(RequestManagerRetriever.TAG));
+            Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
+            assertThat(harness.hasFragmentWithTag(RequestManagerRetriever.TAG), is(true));
         }
     }
 
@@ -99,15 +106,15 @@ public class RequestManagerRetrieverTest {
     @Test
     public void testCanGetRequestManagerFromActivity() {
         Activity activity = Robolectric.buildActivity(Activity.class).create().start().get();
-        RequestManager manager = RequestManagerRetriever.get(activity);
-        assertEquals(manager, RequestManagerRetriever.get(activity));
+        RequestManager manager = retriever.get(activity);
+        assertEquals(manager, retriever.get(activity));
     }
 
     @Test
     public void testSupportCanGetRequestManagerFromActivity() {
         FragmentActivity fragmentActivity = Robolectric.buildActivity(FragmentActivity.class).create().start().get();
-        RequestManager manager = RequestManagerRetriever.get(fragmentActivity);
-        assertEquals(manager, RequestManagerRetriever.get(fragmentActivity));
+        RequestManager manager = retriever.get(fragmentActivity);
+        assertEquals(manager, retriever.get(fragmentActivity));
     }
 
     @Test
@@ -120,8 +127,8 @@ public class RequestManagerRetrieverTest {
                 .commit();
         activity.getFragmentManager().executePendingTransactions();
 
-        RequestManager manager = RequestManagerRetriever.get(fragment);
-        assertEquals(manager, RequestManagerRetriever.get(fragment));
+        RequestManager manager = retriever.get(fragment);
+        assertEquals(manager, retriever.get(fragment));
     }
 
     @Test
@@ -134,20 +141,20 @@ public class RequestManagerRetrieverTest {
                 .commit();
         activity.getSupportFragmentManager().executePendingTransactions();
 
-        RequestManager manager = RequestManagerRetriever.get(fragment);
-        assertEquals(manager, RequestManagerRetriever.get(fragment));
+        RequestManager manager = retriever.get(fragment);
+        assertEquals(manager, retriever.get(fragment));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfFragmentNotAttached() {
         android.app.Fragment fragment = new android.app.Fragment();
-        RequestManagerRetriever.get(fragment);
+        retriever.get(fragment);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfSupportFragmentNotAttached() {
         Fragment fragment = new Fragment();
-        RequestManagerRetriever.get(fragment);
+        retriever.get(fragment);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -166,7 +173,7 @@ public class RequestManagerRetrieverTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfGivenNullContext() {
-        RequestManagerRetriever.get((Context) null);
+        retriever.get((Context) null);
     }
 
     @Test
@@ -174,7 +181,7 @@ public class RequestManagerRetrieverTest {
         SupportRetrieverHarness harness = new SupportRetrieverHarness();
         RequestManager requestManager = harness.doGet();
 
-        assertEquals(requestManager, RequestManagerRetriever.get((Context) harness.getController().get()));
+        assertEquals(requestManager, retriever.get((Context) harness.getController().get()));
     }
 
     @Test
@@ -182,7 +189,7 @@ public class RequestManagerRetrieverTest {
         DefaultRetrieverHarness harness = new DefaultRetrieverHarness();
         RequestManager requestManager = harness.doGet();
 
-        assertEquals(requestManager, RequestManagerRetriever.get((Context) harness.getController().get()));
+        assertEquals(requestManager, retriever.get((Context) harness.getController().get()));
     }
 
     @Test
@@ -191,33 +198,33 @@ public class RequestManagerRetrieverTest {
         RequestManager requestManager = harness.doGet();
         ContextWrapper contextWrapper = new ContextWrapper((Context) harness.getController().get());
 
-        assertEquals(requestManager, RequestManagerRetriever.get(contextWrapper));
+        assertEquals(requestManager, retriever.get(contextWrapper));
     }
 
     @Test
     public void testHandlesContextWrappersForApplication() {
         ContextWrapper contextWrapper = new ContextWrapper(Robolectric.application);
-        RequestManager requestManager = RequestManagerRetriever.get(Robolectric.application);
+        RequestManager requestManager = retriever.get(Robolectric.application);
 
-        assertEquals(requestManager, RequestManagerRetriever.get(contextWrapper));
+        assertEquals(requestManager, retriever.get(contextWrapper));
     }
 
     @Test
     public void testReturnsNonNullManagerIfGivenApplicationContext() {
-        assertNotNull(RequestManagerRetriever.get(Robolectric.application));
+        assertNotNull(retriever.get(Robolectric.application));
     }
 
     @Test
     public void testApplicationRequestManagerIsNotPausedWhenRetrieved() {
-        RequestManager manager = RequestManagerRetriever.get(Robolectric.application);
+        RequestManager manager = retriever.get(Robolectric.application);
         assertFalse(manager.isPaused());
     }
 
     @Test
     public void testApplicationRequestManagerIsNotReResumedAfterFirstRetrieval() {
-        RequestManager manager = RequestManagerRetriever.get(Robolectric.application);
+        RequestManager manager = retriever.get(Robolectric.application);
         manager.pauseRequests();
-        manager = RequestManagerRetriever.get(Robolectric.application);
+        manager = retriever.get(Robolectric.application);
         assertTrue(manager.isPaused());
     }
 
@@ -226,9 +233,16 @@ public class RequestManagerRetrieverTest {
         testInBackground(new BackgroundUtil.BackgroundTester() {
             @Override
             public void runTest() throws Exception {
-                RequestManagerRetriever.get(Robolectric.application);
+                retriever.get(Robolectric.application);
             }
         });
+    }
+
+    // See Issue #117: https://github.com/bumptech/glide/issues/117.
+    @Test
+    public void testCanCallGetInOnAttachToWindowInFragmentInViewPager() {
+        Robolectric.buildActivity(Issue117Activity.class).create().start().resume().visible();
+        Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
     }
 
     private interface RetrieverHarness {
@@ -265,7 +279,7 @@ public class RequestManagerRetrieverTest {
 
         @Override
         public RequestManager doGet() {
-            return RequestManagerRetriever.get(controller.get());
+            return retriever.get(controller.get());
         }
 
         @Override
@@ -309,7 +323,7 @@ public class RequestManagerRetrieverTest {
 
         @Override
         public RequestManager doGet() {
-            return RequestManagerRetriever.get(controller.get());
+            return retriever.get(controller.get());
         }
 
         @Override

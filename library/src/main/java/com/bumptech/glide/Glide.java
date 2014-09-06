@@ -534,7 +534,8 @@ public class Glide {
      * @return A RequestManager for the top level application that can be used to start a load.
      */
     public static RequestManager with(Context context) {
-        return RequestManagerRetriever.get(context);
+        RequestManagerRetriever retriever = RequestManagerRetriever.get();
+        return retriever.get(context);
     }
 
     /**
@@ -545,7 +546,8 @@ public class Glide {
      * @return A RequestManager for the given activity that can be used to start a load.
      */
     public static RequestManager with(Activity activity) {
-        return RequestManagerRetriever.get(activity);
+        RequestManagerRetriever retriever = RequestManagerRetriever.get();
+        return retriever.get(activity);
     }
 
     /**
@@ -556,7 +558,8 @@ public class Glide {
      * @return A RequestManager for the given FragmentActivity that can be used to start a load.
      */
     public static RequestManager with(FragmentActivity activity) {
-        return RequestManagerRetriever.get(activity);
+        RequestManagerRetriever retriever = RequestManagerRetriever.get();
+        return retriever.get(activity);
     }
 
     /**
@@ -568,7 +571,8 @@ public class Glide {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static RequestManager with(android.app.Fragment fragment) {
-        return RequestManagerRetriever.get(fragment);
+        RequestManagerRetriever retriever = RequestManagerRetriever.get();
+        return retriever.get(fragment);
     }
 
     /**
@@ -579,7 +583,8 @@ public class Glide {
      * @return A RequestManager for the given Fragment that can be used to start a load.
      */
     public static RequestManager with(Fragment fragment) {
-        return RequestManagerRetriever.get(fragment);
+        RequestManagerRetriever retriever = RequestManagerRetriever.get();
+        return retriever.get(fragment);
     }
 
     private static class ClearTarget extends ViewTarget<View, Object> {

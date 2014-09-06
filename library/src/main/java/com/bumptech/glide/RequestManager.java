@@ -344,8 +344,8 @@ public class RequestManager implements LifecycleListener {
     public DrawableTypeRequest<byte[]> load(byte[] model, final String id) {
         final StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
         return optionsApplier.apply(model,
-                new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker,
-                        lifecycle, optionsApplier));
+                new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker, lifecycle,
+                        optionsApplier));
     }
 
     /**
