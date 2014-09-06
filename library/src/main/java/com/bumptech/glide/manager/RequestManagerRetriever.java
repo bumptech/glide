@@ -12,6 +12,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Util;
 
@@ -202,17 +203,26 @@ public class RequestManagerRetriever implements Handler.Callback {
 
     @Override
     public boolean handleMessage(Message message) {
+        boolean handled = true;
+        Object removed = null;
+        Object key = null;
         switch (message.what) {
             case ID_REMOVE_FRAGMENT_MANAGER:
                 android.app.FragmentManager fm = (android.app.FragmentManager) message.obj;
-                pendingRequestManagerFragments.remove(fm);
-                return true;
+                key = fm;
+                removed = pendingRequestManagerFragments.remove(fm);
+                break;
             case ID_REMOVE_SUPPORT_FRAGMENT_MANAGER:
                 FragmentManager supportFm = (FragmentManager) message.obj;
-                pendingSupportRequestManagerFragments.remove(supportFm);
-                return true;
+                key = supportFm;
+                removed = pendingSupportRequestManagerFragments.remove(supportFm);
+                break;
             default:
-                return false;
+                handled = false;
         }
+        if (handled && removed == null && Log.isLoggable(TAG, Log.WARN)) {
+            Log.w(TAG, "Failed to remove expected request manager fragment, manager: " + key);
+        }
+        return handled;
     }
 }

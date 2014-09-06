@@ -20,7 +20,7 @@ import org.robolectric.util.ActivityController;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -40,14 +40,13 @@ public class RequestManagerRetrieverTest {
         retriever = new RequestManagerRetriever();
 
         harnesses = new RetrieverHarness[] { new DefaultRetrieverHarness(), new SupportRetrieverHarness() };
-        Robolectric.shadowOf(Looper.getMainLooper()).pause();
     }
 
     @After
     public void tearDown() {
         Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
-        assertTrue(retriever.pendingRequestManagerFragments.isEmpty());
-        assertTrue(retriever.pendingSupportRequestManagerFragments.isEmpty());
+        assertThat(retriever.pendingRequestManagerFragments.entrySet(), empty());
+        assertThat(retriever.pendingSupportRequestManagerFragments.entrySet(), empty());
     }
 
     @Test
@@ -56,7 +55,7 @@ public class RequestManagerRetrieverTest {
             harness.doGet();
 
             Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
-            assertThat(harness.hasFragmentWithTag(RequestManagerRetriever.TAG), is(true));
+            assertTrue(harness.hasFragmentWithTag(RequestManagerRetriever.TAG));
         }
     }
 
@@ -241,8 +240,11 @@ public class RequestManagerRetrieverTest {
     // See Issue #117: https://github.com/bumptech/glide/issues/117.
     @Test
     public void testCanCallGetInOnAttachToWindowInFragmentInViewPager() {
+        // Robolectric by default runs messages posted to the main looper synchronously, the framework does not. We post
+        // to the main thread here to work around an issue caused by a recursive method call so we need (and reasonably
+        // expect) our message to not run immediately
+        Robolectric.shadowOf(Looper.getMainLooper()).pause();
         Robolectric.buildActivity(Issue117Activity.class).create().start().resume().visible();
-        Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
     }
 
     private interface RetrieverHarness {

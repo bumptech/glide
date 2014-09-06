@@ -16,13 +16,12 @@ import com.bumptech.glide.Glide;
 /**
  * A test activity to reproduce Issue #117: https://github.com/bumptech/glide/issues/117.
  */
-public class Issue117Activity extends FragmentActivity {
+class Issue117Activity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ViewPager viewPager = new ViewPager(this);
-        int id = View.generateViewId();
-        viewPager.setId(id);
+        viewPager.setId(View.generateViewId());
         setContentView(viewPager,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         viewPager.setAdapter(new Issue117Adapter(getSupportFragmentManager()));
