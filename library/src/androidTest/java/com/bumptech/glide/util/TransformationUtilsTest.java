@@ -3,6 +3,7 @@ package com.bumptech.glide.util;
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
+import org.hamcrest.core.CombinableMatcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -103,6 +104,8 @@ public class TransformationUtilsTest {
         assertThat("width", width, lessThanOrEqualTo(maxSide));
         assertThat("height", height, lessThanOrEqualTo(maxSide));
 
-        assertThat("one side must match maxSide", maxSide, either(equalTo(width)).or(equalTo(height)));
+        // See https://code.google.com/p/hamcrest/issues/detail?id=82.
+        CombinableMatcher.CombinableEitherMatcher<Integer> eitherMatcher = either(equalTo(width));
+        assertThat("one side must match maxSide", maxSide, eitherMatcher.or(equalTo(height)));
     }
 }
