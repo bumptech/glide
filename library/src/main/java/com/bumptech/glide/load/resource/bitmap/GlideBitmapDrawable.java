@@ -21,6 +21,7 @@ public class GlideBitmapDrawable extends GlideDrawable {
     private int width;
     private int height;
     private boolean applyGravity;
+    private boolean mutated;
     private BitmapState state;
 
     public GlideBitmapDrawable(Resources res, Bitmap bitmap) {
@@ -120,7 +121,11 @@ public class GlideBitmapDrawable extends GlideDrawable {
 
     @Override
     public Drawable mutate() {
-        return new GlideBitmapDrawable(null, new BitmapState(state));
+        if (!mutated && super.mutate() == this) {
+            state = new BitmapState(state);
+            mutated = true;
+        }
+        return this;
     }
 
     public Bitmap getBitmap() {
