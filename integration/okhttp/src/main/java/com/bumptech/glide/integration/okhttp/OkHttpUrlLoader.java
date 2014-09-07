@@ -19,7 +19,7 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
      * The default factory for {@link OkHttpUrlLoader}s.
      */
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
-        private static OkHttpClient internalClient;
+        private static volatile OkHttpClient internalClient;
         private OkHttpClient client;
 
         private static OkHttpClient getInternalClient() {

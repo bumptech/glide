@@ -77,7 +77,7 @@ public class Glide {
 
     private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final String TAG = "Glide";
-    private static Glide glide;
+    private static volatile Glide glide;
 
     private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
     private final Engine engine;

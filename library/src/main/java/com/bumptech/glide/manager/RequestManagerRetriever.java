@@ -27,7 +27,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     static final String TAG = "com.bumptech.glide.manager";
 
     /** The singleton instance of RequestManagerRetriever. */
-    private static volatile RequestManagerRetriever instance;
+    private static final RequestManagerRetriever INSTANCE = new RequestManagerRetriever();
 
     private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
     private static final int ID_REMOVE_SUPPORT_FRAGMENT_MANAGER = 2;
@@ -52,14 +52,7 @@ public class RequestManagerRetriever implements Handler.Callback {
      * Retrieves and returns the RequestManagerRetriever singleton.
      */
     public static RequestManagerRetriever get() {
-        if (instance == null) {
-            synchronized (RequestManagerRetriever.class) {
-                if (instance == null) {
-                    instance = new RequestManagerRetriever();
-                }
-            }
-        }
-        return instance;
+        return INSTANCE;
     }
 
     // Visible for testing.
@@ -74,7 +67,7 @@ public class RequestManagerRetriever implements Handler.Callback {
                 if (applicationManager == null) {
                     // Normally pause/resume is taken care of by the fragment we add to the fragment or activity.
                     // However, in this case since the manager attached to the application will not receive lifecycle
-                    // events, we must force the manager to start resumed.
+                    // events, we must force the manager to start resumed using ApplicationLifecycle.
                     applicationManager = new RequestManager(context.getApplicationContext(),
                             new ApplicationLifecycle());
                 }
