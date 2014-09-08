@@ -5,7 +5,7 @@ android:
   licenses: 
   - 'android-sdk-license.*'
 
-script: 'travis_retry ./gradlew build'
+script: 'travis_retry ./gradlew build --parallel'
 
 after_success:
 - scripts/travis-sonatype-publish.sh
