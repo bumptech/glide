@@ -113,7 +113,7 @@ afterEvaluate { project ->
 
         def androidSdkDirectory = project.android.sdkDirectory
 
-        task androidJavadocs(type: Javadoc) {
+        task androidJavadocs(type: Javadoc, dependsOn: compileReleaseJava) {
             classifier = 'javadoc'
 
             source = releaseVariants.collect { it.javaCompile.source }
