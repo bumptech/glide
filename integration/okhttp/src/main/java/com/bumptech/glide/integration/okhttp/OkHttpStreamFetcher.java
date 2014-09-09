@@ -6,6 +6,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -15,6 +16,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     private final OkHttpClient client;
     private final GlideUrl url;
     private volatile Request request;
+    private InputStream stream;
 
     public OkHttpStreamFetcher(OkHttpClient client, GlideUrl url) {
         this.client = client;
@@ -27,12 +29,23 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
                 .url(url.toString())
                 .build();
 
-        return client.newCall(request).execute().body().byteStream();
+        stream = client.newCall(request)
+                .execute()
+                .body()
+                .byteStream();
+        return stream;
     }
 
     @Override
     public void cleanup() {
-        // Do nothing.
+        if (stream == null) {
+            return;
+        }
+        try {
+            stream.close();
+        } catch (IOException e) {
+            // Ignored
+        }
     }
 
     @Override

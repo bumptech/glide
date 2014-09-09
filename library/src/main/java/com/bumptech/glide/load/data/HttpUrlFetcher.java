@@ -13,20 +13,23 @@ import java.net.URL;
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
     private static final int MAXIMUM_REDIRECTS = 5;
-    private static final HttpUrlConnectionFactory DEFAULT_FACTORY = new DefaultHttpUrlConnectionFactory();
+    private static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY = new DefaultHttpUrlConnectionFactory();
 
-    private final HttpUrlConnectionFactory factory;
     private final GlideUrl glideUrl;
+    private final HttpUrlConnectionFactory connectionFactory;
+
     private HttpURLConnection urlConnection;
+    private InputStream stream;
     private volatile boolean isCancelled;
 
     public HttpUrlFetcher(GlideUrl glideUrl) {
-        this(glideUrl, DEFAULT_FACTORY);
+        this(glideUrl, DEFAULT_CONNECTION_FACTORY);
     }
 
-    HttpUrlFetcher(GlideUrl glideUrl, HttpUrlConnectionFactory factory) {
+    // Visible for testing.
+    HttpUrlFetcher(GlideUrl glideUrl, HttpUrlConnectionFactory connectionFactory) {
         this.glideUrl = glideUrl;
-        this.factory = factory;
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
@@ -40,7 +43,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         } else if (url.equals(lastUrl)) {
             throw new IOException("In re-direct loop");
         }
-        urlConnection = factory.build(url);
+        urlConnection = connectionFactory.build(url);
         urlConnection.setConnectTimeout(2500);
         urlConnection.setReadTimeout(2500);
         urlConnection.setUseCaches(false);
@@ -53,7 +56,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         }
         final int statusCode = urlConnection.getResponseCode();
         if (statusCode / 100 == 2) {
-            return urlConnection.getInputStream();
+            stream = urlConnection.getInputStream();
+            return stream;
         } else if (statusCode / 100 == 3) {
             String redirectUrlString = urlConnection.getHeaderField("Location");
             URL redirectUrl = new URL(redirectUrlString);
@@ -68,6 +72,13 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void cleanup() {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
         if (urlConnection != null) {
             urlConnection.disconnect();
         }
@@ -95,5 +106,4 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
             return (HttpURLConnection) url.openConnection();
         }
     }
-
 }

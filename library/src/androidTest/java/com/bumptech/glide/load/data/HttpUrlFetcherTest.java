@@ -2,9 +2,9 @@ package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import java.net.URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -24,16 +25,20 @@ public class HttpUrlFetcherTest {
     private HttpURLConnection urlConnection;
     private HttpUrlFetcher fetcher;
     private GlideUrl glideUrl;
+    private InputStream stream;
 
     @Before
     public void setUp() throws IOException {
         urlConnection =  mock(HttpURLConnection.class);
         URL url = new URL("http://www.google.com");
-        HttpUrlFetcher.HttpUrlConnectionFactory factory = mock(HttpUrlFetcher.HttpUrlConnectionFactory.class);
-        when(factory.build(eq(url))).thenReturn(urlConnection);
+        HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory = mock(HttpUrlFetcher.HttpUrlConnectionFactory.class);
+        when(connectionFactory.build(eq(url))).thenReturn(urlConnection);
+
         glideUrl = mock(GlideUrl.class);
         when(glideUrl.toURL()).thenReturn(url);
-        fetcher = new HttpUrlFetcher(glideUrl, factory);
+        fetcher = new HttpUrlFetcher(glideUrl, connectionFactory);
+        stream = mock(InputStream.class);
+        when(urlConnection.getInputStream()).thenReturn(stream);
         when(urlConnection.getResponseCode()).thenReturn(200);
     }
 
@@ -89,5 +94,23 @@ public class HttpUrlFetcherTest {
         fetcher.cancel();
 
         verify(urlConnection, never()).disconnect();
+    }
+
+    @Test
+    public void testClosesStreamInCleanupIfNotNull() throws Exception {
+        fetcher.loadData(Priority.HIGH);
+        fetcher.cleanup();
+
+        verify(stream).close();
+    }
+
+    @Test
+    public void testClosesStreamBeforeDisconnectingConnection() throws Exception {
+        fetcher.loadData(Priority.NORMAL);
+        fetcher.cleanup();
+
+        InOrder order = inOrder(stream, urlConnection);
+        order.verify(stream).close();
+        order.verify(urlConnection).disconnect();
     }
 }
