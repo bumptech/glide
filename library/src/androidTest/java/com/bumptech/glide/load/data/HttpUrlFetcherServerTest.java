@@ -4,6 +4,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,13 +15,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.fail;
 
@@ -88,6 +89,23 @@ public class HttpUrlFetcherServerTest {
     }
 
     @Test
+    public void testHandlesRelativeRedirects() throws Exception {
+        String expected = "fakedata";
+        mockWebServer.enqueue(new MockResponse()
+            .setResponseCode(301)
+            .setHeader("Location", "/redirect"));
+        mockWebServer.enqueue(new MockResponse()
+            .setResponseCode(200)
+            .setBody(expected));
+        InputStream is = getFetcher().loadData(Priority.NORMAL);
+        assertThat(isToString(is), equalTo(expected));
+
+        mockWebServer.takeRequest();
+        RecordedRequest second = mockWebServer.takeRequest();
+        assertThat(second.getPath(), endsWith("/redirect"));
+    }
+
+    @Test
     public void testHandlesUpToFiveRedirects() throws Exception {
         int numRedirects = 4;
         String expected = "redirectedData";
@@ -127,14 +145,27 @@ public class HttpUrlFetcherServerTest {
     }
 
     @Test
-    public void testThrowsIfRedirectLocationIsEmpty() throws Exception {
+    public void testThrowsIfRedirectLocationIsNotPresent() throws Exception {
         mockWebServer.enqueue(new MockResponse().setResponseCode(301));
 
         try {
             getFetcher().loadData(Priority.NORMAL);
             fail("Didn't get expected IOException");
-        } catch (MalformedURLException e) {
-            // Expected
+        } catch (IOException e) {
+            // Expected.
+        }
+    }
+
+    @Test
+    public void testThrowsIfRedirectLocationIsPresentAndEmpty() throws Exception {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(301).setHeader("Location", ""));
+
+        try {
+            getFetcher().loadData(Priority.NORMAL);
+            fail("Didn't get expected IOException");
+        } catch (IOException e) {
+            // Expected.
         }
     }
 
@@ -153,7 +184,6 @@ public class HttpUrlFetcherServerTest {
         }
         getFetcher().loadData(Priority.NORMAL);
     }
-
 
     @Test(expected = IOException.class)
     public void testThrowsIfStatusCodeIs500() throws Exception {
