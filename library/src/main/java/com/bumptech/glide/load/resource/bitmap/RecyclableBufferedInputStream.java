@@ -187,11 +187,6 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
         markpos = pos;
     }
 
-    public synchronized void clearMark() {
-        markpos = -1;
-        marklimit = 0;
-    }
-
     /**
      * Indicates whether {@code BufferedInputStream} supports the {@link #mark(int)}
      * and {@link #reset()} methods.
