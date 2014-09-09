@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import android.text.TextUtils;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
 
@@ -56,7 +57,10 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
             return urlConnection.getInputStream();
         } else if (statusCode / 100 == 3) {
             String redirectUrlString = urlConnection.getHeaderField("Location");
-            URL redirectUrl = new URL(redirectUrlString);
+            if (TextUtils.isEmpty(redirectUrlString)) {
+                throw new IOException("Received empty or null redirect url");
+            }
+            URL redirectUrl = new URL(url, redirectUrlString);
             return loadDataWithRedirects(redirectUrl, redirects + 1, url);
         } else {
             if (statusCode == -1) {
