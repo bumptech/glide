@@ -6,11 +6,14 @@ dependencies {
     compile project(':third_party:gif_decoder')
     compile project(':third_party:disklrucache')
     compile 'com.android.support:support-v4:19.1.+'
+
     androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
     androidTestCompile 'junit:junit:4.11'
     androidTestCompile 'org.mockito:mockito-all:1.9.5'
     androidTestCompile 'org.robolectric:robolectric:2.4-SNAPSHOT'
+    // TODO: increase this to 2.0.+ when we compile against Java 7.
+    androidTestCompile 'com.squareup.okhttp:mockwebserver:1.2.+'
 }
 
 android {

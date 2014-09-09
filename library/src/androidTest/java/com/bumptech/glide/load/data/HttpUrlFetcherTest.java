@@ -44,7 +44,6 @@ public class HttpUrlFetcherTest {
         assertEquals(expected, fetcher.getId());
     }
 
-
     @Test
     public void testSetsReadTimeout() throws Exception {
         fetcher.loadData(Priority.HIGH);
@@ -55,33 +54,6 @@ public class HttpUrlFetcherTest {
     public void testSetsConnectTimeout() throws Exception {
         fetcher.loadData(Priority.IMMEDIATE);
         verify(urlConnection).setConnectTimeout(eq(2500));
-    }
-
-    @Test
-    public void testReturnsInputStreamOnStatusOk() throws Exception {
-        InputStream expected = new ByteArrayInputStream(new byte[0]);
-        when(urlConnection.getResponseCode()).thenReturn(200);
-        when(urlConnection.getInputStream()).thenReturn(expected);
-
-        assertEquals(expected, fetcher.loadData(Priority.NORMAL));
-    }
-
-    @Test(expected = IOException.class)
-    public void testThrowsIfStatusCodeIsNegativeOne() throws Exception {
-        when(urlConnection.getResponseCode()).thenReturn(-1);
-        fetcher.loadData(Priority.HIGH);
-    }
-
-    @Test(expected = IOException.class)
-    public void testThrowsIfStatusCodeIs300() throws Exception {
-        when(urlConnection.getResponseCode()).thenReturn(300);
-        fetcher.loadData(Priority.HIGH);
-    }
-
-    @Test(expected = IOException.class)
-    public void testThrowsIfStatusCodeIs500() throws Exception {
-        when(urlConnection.getResponseCode()).thenReturn(500);
-        fetcher.loadData(Priority.HIGH);
     }
 
     @Test
