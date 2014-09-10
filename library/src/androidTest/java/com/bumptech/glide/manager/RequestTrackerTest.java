@@ -54,14 +54,14 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testClearsInProgressRequestsWhenPaused() {
+    public void testPausesInProgressRequestsWhenPaused() {
         Request request = mock(Request.class);
         when(request.isRunning()).thenReturn(true);
         tracker.addRequest(request);
 
         tracker.pauseRequests();
 
-        verify(request).clear();
+        verify(request).pause();
     }
 
     @Test
@@ -168,14 +168,14 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testCancelsAndRestartsNotYetFinishedRequestsOnRestart() {
+    public void testPausesAndRestartsNotYetFinishedRequestsOnRestart() {
         Request request = mock(Request.class);
         when(request.isComplete()).thenReturn(false);
         tracker.addRequest(request);
 
         tracker.restartRequests();
 
-        verify(request).clear();
+        verify(request).pause();
         verify(request).begin();
     }
 
@@ -192,14 +192,14 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testClearsFailedRequestOnRestartIfPaused() {
+    public void testPausesFailedRequestOnRestartIfPaused() {
         Request request = mock(Request.class);
         when(request.isFailed()).thenReturn(true);
         tracker.pauseRequests();
         tracker.addRequest(request);
 
         tracker.restartRequests();
-        verify(request).clear();
+        verify(request).pause();
     }
 
     @Test
@@ -215,7 +215,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testClearsIncompleteRequestsOnRestartIfPaused() {
+    public void testPausesIncompleteRequestsOnRestartIfPaused() {
         Request request = mock(Request.class);
         when(request.isFailed()).thenReturn(false);
         when(request.isComplete()).thenReturn(false);
@@ -223,7 +223,7 @@ public class RequestTrackerTest {
         tracker.addRequest(request);
         tracker.restartRequests();
 
-        verify(request).clear();
+        verify(request).pause();
     }
 
     @Test

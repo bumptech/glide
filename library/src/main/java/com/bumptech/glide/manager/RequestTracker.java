@@ -54,8 +54,8 @@ public class RequestTracker {
     public void pauseRequests() {
         isPaused = true;
         for (Request request : requests) {
-            if (!request.isComplete() && !request.isFailed()) {
-                request.clear();
+            if (request.isRunning()) {
+                request.pause();
             }
         }
     }
@@ -66,7 +66,7 @@ public class RequestTracker {
     public void resumeRequests() {
         isPaused = false;
         for (Request request : requests) {
-            if (!request.isComplete() && !request.isRunning()) {
+            if (!request.isComplete() && !request.isCancelled() && !request.isRunning()) {
                 request.begin();
             }
         }
@@ -86,16 +86,9 @@ public class RequestTracker {
      */
     public void restartRequests() {
         for (Request request : requests) {
-            if (request.isFailed()) {
-                if (isPaused) {
-                    // Ensure the request will be restarted in onResume.
-                    request.clear();
-                } else {
-                    request.begin();
-                }
-            } else if (!request.isComplete()) {
-                // Make sure we re-queue the request, we may just have not received the failure yet.
-                request.clear();
+            if (!request.isComplete() && !request.isCancelled()) {
+                // Ensure the request will be restarted in onResume.
+                request.pause();
                 if (!isPaused) {
                     request.begin();
                 }

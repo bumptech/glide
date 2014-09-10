@@ -57,6 +57,12 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
         }
     }
 
+    @Override
+    public void pause() {
+        full.pause();
+        thumb.pause();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -64,6 +70,11 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     public void clear() {
         thumb.clear();
         full.clear();
+    }
+
+    @Override
+    public boolean isPaused() {
+        return full.isPaused();
     }
 
     /**
@@ -80,6 +91,11 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     @Override
     public boolean isComplete() {
         return full.isComplete();
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return full.isCancelled();
     }
 
     /**

@@ -365,6 +365,32 @@ public class GenericRequestTest {
     }
 
     @Test
+    public void testIsPausedAfterPause() {
+        GenericRequest request = harness.getRequest();
+        request.pause();
+
+        assertTrue(request.isPaused());
+    }
+
+    @Test
+    public void testIsNotCancelledAfterPause() {
+        GenericRequest request = harness.getRequest();
+        request.pause();
+
+        assertFalse(request.isCancelled());
+    }
+
+    @Test
+    public void testIsNotPausedAfterBeginningWhilePaused() {
+        GenericRequest request = harness.getRequest();
+        request.pause();
+        request.begin();
+
+        assertFalse(request.isPaused());
+        assertTrue(request.isRunning());
+    }
+
+    @Test
     public void testIsNotFailedAfterBegin() {
         GenericRequest request = harness.getRequest();
 
@@ -390,6 +416,14 @@ public class GenericRequestTest {
         request.clear();
 
         assertFalse(request.isComplete());
+    }
+
+    @Test
+    public void testIsCancelledAfterClear() {
+        GenericRequest request = harness.getRequest();
+        request.clear();
+
+        assertTrue(request.isCancelled());
     }
 
     @Test

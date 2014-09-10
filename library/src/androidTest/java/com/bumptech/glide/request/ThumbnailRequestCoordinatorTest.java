@@ -106,4 +106,17 @@ public class ThumbnailRequestCoordinatorTest {
         verify(full).recycle();
     }
 
+    @Test
+    public void testIsPausedWhenFullIsPaused() {
+        when(full.isPaused()).thenReturn(true);
+        assertTrue(coordinator.isPaused());
+    }
+
+    @Test
+    public void testPausesBothRequestsWhenPaused() {
+        coordinator.pause();
+        verify(full).pause();
+        verify(thumb).pause();
+    }
+
 }

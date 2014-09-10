@@ -40,12 +40,20 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
     private enum Status {
+        /** Created but not yet running. */
         PENDING,
+        /** In the process of fetching media. */
         RUNNING,
+        /** Waiting for a callback given to the Target to be called to determine target dimensions. */
         WAITING_FOR_SIZE,
+        /** Finished loading media successfully. */
         COMPLETE,
+        /** Failed to load media. */
         FAILED,
+        /** Cancelled by the user, may not be restarted. */
         CANCELLED,
+        /** Temporarily paused by the system, may be restarted. */
+        PAUSED,
     }
 
     private int placeholderResourceId;
@@ -298,6 +306,17 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         }
     }
 
+    @Override
+    public boolean isPaused() {
+        return status == Status.PAUSED;
+    }
+
+    @Override
+    public void pause() {
+        clear();
+        status = Status.PAUSED;
+    }
+
     private void releaseResource(Resource resource) {
         engine.release(resource);
         this.resource = null;
@@ -317,6 +336,11 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     @Override
     public boolean isComplete() {
         return status == Status.COMPLETE;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return status == Status.CANCELLED;
     }
 
     /**
