@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements Api.Monitor {
                 .into(giphyLogoView);
 
         ListView gifList = (ListView) findViewById(R.id.gif_list);
-        adapter = new GifAdapter();
+        adapter = new GifAdapter(this);
         gifList.setAdapter(adapter);
     }
 
@@ -58,12 +58,22 @@ public class MainActivity extends Activity implements Api.Monitor {
         adapter.setResults(result.data);
     }
 
-    private class GifAdapter extends BaseAdapter {
+    private static class GifAdapter extends BaseAdapter {
+        private static final Api.GifResult[] EMPTY_RESULTS = new Api.GifResult[0];
 
-        private Api.GifResult[] results = new Api.GifResult[0];
+        private Api.GifResult[] results = EMPTY_RESULTS;
+        private Activity activity;
+
+        public GifAdapter(Activity activity) {
+            this.activity = activity;
+        }
 
         public void setResults(Api.GifResult[] results) {
-            this.results = results;
+            if (results != null) {
+                this.results = results;
+            } else {
+                this.results = EMPTY_RESULTS;
+            }
             notifyDataSetChanged();
         }
 
@@ -85,7 +95,7 @@ public class MainActivity extends Activity implements Api.Monitor {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.gif_list_item, parent, false);
+                convertView = activity.getLayoutInflater().inflate(R.layout.gif_list_item, parent, false);
             }
 
             Api.GifResult result = results[position];
@@ -94,7 +104,7 @@ public class MainActivity extends Activity implements Api.Monitor {
             }
             ImageView gifView = (ImageView) convertView.findViewById(R.id.gif_view);
 
-            Glide.with(MainActivity.this)
+            Glide.with(activity)
                     .load(result)
                     .fitCenter()
                     .into(gifView);
