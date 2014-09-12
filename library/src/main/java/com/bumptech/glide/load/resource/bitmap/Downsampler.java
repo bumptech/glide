@@ -251,7 +251,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     }
 
     private static Bitmap.Config getConfig(InputStream is, DecodeFormat format) {
-        if (format == DecodeFormat.ALWAYS_ARGB_8888) {
+        // Changing configs can cause skewing on 4.1, see issue #128.
+        if (format == DecodeFormat.ALWAYS_ARGB_8888 || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
             return Bitmap.Config.ARGB_8888;
         }
 
