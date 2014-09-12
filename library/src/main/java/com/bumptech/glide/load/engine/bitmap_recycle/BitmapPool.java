@@ -43,14 +43,53 @@ public interface BitmapPool {
     public boolean put(Bitmap bitmap);
 
     /**
-     * Returns a {@link android.graphics.Bitmap} of exactly the given width, height, and configuration,
-     * or null if no such {@link android.graphics.Bitmap} could be obtained from the pool.
+     * Returns a {@link android.graphics.Bitmap} of exactly the given width, height, and configuration, and containing
+     * only transparent pixels or null if no such {@link android.graphics.Bitmap} could be obtained from the pool.
+     *
+     * <p>
+     *     Because this method erases all pixels in the {@link Bitmap}, this method is slightly slower than
+     *     {@link #getDirty(int, int, android.graphics.Bitmap.Config)}. If the {@link android.graphics.Bitmap} is being
+     *     obtained to be used in {@link android.graphics.BitmapFactory} or in any other case where every pixel in the
+     *     {@link android.graphics.Bitmap} will always be overwritten or cleared,
+     *     {@link #getDirty(int, int, android.graphics.Bitmap.Config)} will be faster. When in doubt, use this method
+     *     to ensure correctness.
+     * </p>
+     *
+     * <pre>
+     *     Implementations can should clear out every returned Bitmap using the following:
+     *
+     * {@code
+     * bitmap.eraseColor(Color.TRANSPARENT);
+     * }
+     * </pre>
+     *
+     * @see #getDirty(int, int, android.graphics.Bitmap.Config)
      *
      * @param width The width of the desired {@link android.graphics.Bitmap}.
      * @param height The height of the desired {@link android.graphics.Bitmap}.
      * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link android.graphics.Bitmap}.
      */
     public Bitmap get(int width, int height, Bitmap.Config config);
+
+    /**
+     * Identical to {@link #get(int, int, android.graphics.Bitmap.Config)} except that any returned non-null
+     * {@link android.graphics.Bitmap} may <em>not</em> have been erased and may contain random data.
+     *
+     * <p>
+     *     Although this method is slightly more efficient than {@link #get(int, int, android.graphics.Bitmap.Config)}
+     *     it should be used with caution and only when the caller is sure that they are going to erase the
+     *     {@link android.graphics.Bitmap} entirely before writing new data to it.
+     * </p>
+     *
+     * @see #get(int, int, android.graphics.Bitmap.Config)
+     *
+     * @param width The width of the desired {@link android.graphics.Bitmap}.
+     * @param height The height of the desired {@link android.graphics.Bitmap}.
+     * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link android.graphics.Bitmap}.
+     * @return A {@link android.graphics.Bitmap} with exactly the given width, height, and config potentially containing
+     * random image data or null if no such {@link android.graphics.Bitmap} could be obtained from the pool.
+     */
+    public Bitmap getDirty(int width, int height, Bitmap.Config config);
 
     /**
      * Removes all {@link android.graphics.Bitmap}s from the pool.

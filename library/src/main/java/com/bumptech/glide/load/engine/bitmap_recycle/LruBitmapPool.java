@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 
@@ -79,9 +80,22 @@ public class LruBitmapPool implements BitmapPool {
         trimToSize(maxSize);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     @Override
     public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
+        Bitmap result = getDirty(width, height, config);
+        if (result != null) {
+            // Bitmaps in the pool contain random data that in some cases must be cleared for an image to be rendered
+            // correctly. we shouldn't force all consumers to independently erase the contents individually, so we do so
+            // here. See issue #131.
+            result.eraseColor(Color.TRANSPARENT);
+        }
+
+        return result;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    @Override
+    public synchronized Bitmap getDirty(int width, int height, Bitmap.Config config) {
         final Bitmap result = strategy.get(width, height, config);
         if (result == null) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -167,7 +181,6 @@ public class LruBitmapPool implements BitmapPool {
                         + "x" + bitmap.getHeight() + "]");
             }
             bitmaps.add(bitmap);
-
         }
 
         @Override

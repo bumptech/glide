@@ -23,6 +23,11 @@ public class BitmapPoolAdapter implements BitmapPool {
     }
 
     @Override
+    public Bitmap getDirty(int width, int height, Bitmap.Config config) {
+        return null;
+    }
+
+    @Override
     public void clearMemory() {
         // Do nothing.
     }

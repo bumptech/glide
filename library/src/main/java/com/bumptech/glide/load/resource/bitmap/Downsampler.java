@@ -127,11 +127,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      *     those of the image for the given InputStream is provided.
      * </p>
      *
-     * @param is An {@link InputStream} to the data for the image
-     * @param pool A pool of recycled bitmaps
-     * @param outWidth The width the final image should be close to
-     * @param outHeight The height the final image should be close to
-     * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null
+     * @param is An {@link InputStream} to the data for the image.
+     * @param pool A pool of recycled bitmaps.
+     * @param outWidth The width the final image should be close to.
+     * @param outHeight The height the final image should be close to.
+     * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null.
      */
     @SuppressWarnings("resource")
     // see BitmapDecoder.decode
@@ -216,7 +216,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         options.inPreferredConfig = config;
         if (options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
             if (shouldUsePool(is)) {
-                setInBitmap(options, pool.get(inWidth, inHeight, config));
+                // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
+                setInBitmap(options, pool.getDirty(inWidth, inHeight, config));
             }
         }
         return decodeStream(is, options);
