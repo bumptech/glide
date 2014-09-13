@@ -60,4 +60,26 @@ public class GlideUrlTest {
 
         assertEquals(expected, glideUrl.toString());
     }
+
+    @Test
+    public void testIssue133() throws MalformedURLException {
+        // u00e0=à
+        final String original =  "http://www.commitstrip.com/wp-content/uploads/2014/07/"
+                + "Excel-\u00E0-toutes-les-sauces-650-finalenglish.jpg";
+
+        final String escaped = "http://www.commitstrip.com/wp-content/uploads/2014/07/"
+                + "Excel-%C3%A0-toutes-les-sauces-650-finalenglish.jpg";
+
+        GlideUrl glideUrlFromString = new GlideUrl(original);
+        assertEquals(escaped, glideUrlFromString.toURL().toString());
+
+        GlideUrl glideUrlFromEscapedString = new GlideUrl(escaped);
+        assertEquals(escaped, glideUrlFromEscapedString.toURL().toString());
+
+        GlideUrl glideUrlFromUrl = new GlideUrl(new URL(original));
+        assertEquals(escaped, glideUrlFromUrl.toURL().toString());
+
+        GlideUrl glideUrlFromEscapedUrl = new GlideUrl(new URL(escaped));
+        assertEquals(escaped, glideUrlFromEscapedUrl.toURL().toString());
+    }
 }

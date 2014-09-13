@@ -1,19 +1,30 @@
 package com.bumptech.glide.load.model;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * This is a simple wrapper for strings representing http/https URLs. new URL() is an excessively expensive operation
- * that may be unnecessary if the class loading the image from the URL doesn't actually require a URL object.
+ * A wrapper for strings representing http/https URLs responsible for ensuring URLs are properly escaped and avoiding
+ * unnecessary URL instantiations for loaders that require only string urls rather than URL objects.
  *
- * Users wishing to replace the class for handling URLs must register a factory using GlideUrl.
+ * <p>
+ *  Users wishing to replace the class for handling URLs must register a factory using GlideUrl.
+ * </p>
+ *
+ * <p>
+ *     To obtain a properly escaped URL, call {@link #toURL()}. To obtain a properly escaped string URL, call
+ *     {@link #toURL()} and then {@link java.net.URL#toString()}.
+ * </p>
  */
 public class GlideUrl {
     private String stringUrl;
+    private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
+
     private URL url;
+    private URL safeUrl;
 
     public GlideUrl(URL url) {
         if (url == null) {
@@ -32,10 +43,21 @@ public class GlideUrl {
     }
 
     public URL toURL() throws MalformedURLException {
-        if (url == null) {
-            url = new URL(stringUrl);
+        return getSafeUrl();
+    }
+
+    // See http://stackoverflow.com/questions/3286067/url-encoding-in-android. Although the answer using URI would work,
+    // using it would require both decoding and encoding each string which is more complicated, slower and generates
+    // more objects than the solution below. See also issue #133.
+    private URL getSafeUrl() throws MalformedURLException {
+        if (safeUrl != null) {
+            return safeUrl;
         }
-        return url;
+        String unsafe = toString();
+        String safe = Uri.encode(unsafe, ALLOWED_URI_CHARS);
+
+        safeUrl = new URL(safe);
+        return safeUrl;
     }
 
     @Override

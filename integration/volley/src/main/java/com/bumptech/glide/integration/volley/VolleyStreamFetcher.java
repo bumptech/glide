@@ -7,24 +7,27 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.model.GlideUrl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 /**
  * A DataFetcher backed by volley for fetching images via http.
  */
 public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     private final RequestQueue requestQueue;
-    private final String url;
+    private final GlideUrl url;
     private VolleyRequestFuture<InputStream> requestFuture;
 
     @SuppressWarnings("unused")
-    public VolleyStreamFetcher(RequestQueue requestQueue, String url) {
+    public VolleyStreamFetcher(RequestQueue requestQueue, GlideUrl url) {
         this(requestQueue, url,  null);
     }
 
-    public VolleyStreamFetcher(RequestQueue requestQueue, String url, VolleyRequestFuture<InputStream> requestFuture) {
+    public VolleyStreamFetcher(RequestQueue requestQueue, GlideUrl url,
+            VolleyRequestFuture<InputStream> requestFuture) {
         this.requestQueue = requestQueue;
         this.url = url;
         this.requestFuture = requestFuture;
@@ -35,7 +38,9 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public InputStream loadData(Priority priority) throws Exception {
-        GlideRequest request = new GlideRequest(url, requestFuture, glideToVolleyPriority(priority));
+        // Make sure the string url safely encodes non ascii characters.
+        String stringUrl = url.toURL().toString();
+        GlideRequest request = new GlideRequest(stringUrl, requestFuture, glideToVolleyPriority(priority));
 
         requestFuture.setRequest(requestQueue.add(request));
 
@@ -49,7 +54,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return url;
+        return url.toString();
     }
 
     @Override

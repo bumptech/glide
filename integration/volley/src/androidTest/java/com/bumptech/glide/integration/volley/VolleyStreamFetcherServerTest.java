@@ -8,6 +8,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.model.GlideUrl;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import org.junit.After;
@@ -196,7 +197,7 @@ public class VolleyStreamFetcherServerTest {
                 return super.get();
             }
         };
-        return new VolleyStreamFetcher(requestQueue, url.toString(), requestFuture);
+        return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString()), requestFuture);
     }
 
     private static String isToString(InputStream is) throws IOException {

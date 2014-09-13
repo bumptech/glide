@@ -67,6 +67,6 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
     @Override
     public DataFetcher<InputStream> getResourceFetcher(GlideUrl url, int width, int height) {
-        return new VolleyStreamFetcher(requestQueue, url.toString(), new VolleyRequestFuture<InputStream>());
+        return new VolleyStreamFetcher(requestQueue, url, new VolleyRequestFuture<InputStream>());
     }
 }
