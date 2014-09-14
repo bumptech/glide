@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
+import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -45,6 +46,24 @@ public class GifResourceDecoderTest {
         GifHeader header = mock(GifHeader.class);
         when(parser.parseHeader()).thenReturn(header);
         when(header.getNumFrames()).thenReturn(0);
+
+        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+    }
+
+    @Test
+    public void testReturnsNullIfParsedHeaderHasFormatError() {
+        GifHeader header = mock(GifHeader.class);
+        when(parser.parseHeader()).thenReturn(header);
+        when(header.getStatus()).thenReturn(GifDecoder.STATUS_FORMAT_ERROR);
+
+        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+    }
+
+    @Test
+    public void testReturnsNullIfParsedHeaderHasOpenError() {
+        GifHeader header = mock(GifHeader.class);
+        when(parser.parseHeader()).thenReturn(header);
+        when(header.getStatus()).thenReturn(GifDecoder.STATUS_OPEN_ERROR);
 
         assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
     }

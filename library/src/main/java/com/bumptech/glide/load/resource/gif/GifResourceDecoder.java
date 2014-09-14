@@ -60,7 +60,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
 
     private GifDrawableResource decode(byte[] data, int width, int height, GifHeaderParser parser) {
         final GifHeader header = parser.parseHeader();
-        if (header.getNumFrames() <= 0) {
+        if (header.getNumFrames() <= 0 || header.getStatus() != GifDecoder.STATUS_OK) {
             // If we couldn't decode the GIF, we will end up with a frame count of 0.
             return null;
         }
