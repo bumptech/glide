@@ -38,7 +38,7 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>3.3.0</version>
+  <version>3.3.1</version>
   <type>aar</type>
 </dependency>
 <dependency>
@@ -110,7 +110,7 @@ Or with Maven:
 <dependency>
     <groupId>com.github.bumptech.glide</groupId>
     <artifactId>volley-integration</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <type>jar</type>
 </dependency>
 <dependency>
@@ -151,7 +151,7 @@ Or with Maven:
 <dependency>
     <groupId>com.github.bumptech.glide</groupId>
     <artifactId>okhttp-integration</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <type>jar</type>
 </dependency>
 <dependency>
