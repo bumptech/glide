@@ -6,6 +6,7 @@ subprojects {
             from variant.javaCompile.destinationDir
             exclude "**/R.class"
             exclude "**/BuildConfig.class"
+            baseName "glide-${project.name}-integration"
         }
         jarTask.dependsOn variant.javaCompile
         artifacts.add('archives', jarTask);
