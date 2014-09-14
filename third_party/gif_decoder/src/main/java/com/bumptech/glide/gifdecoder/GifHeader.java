@@ -11,9 +11,6 @@ import java.util.List;
 public class GifHeader {
 
     int[] gct = null;
-    /**
-     * Global status code of GIF data parsing.
-     */
     int status = GifDecoder.STATUS_OK;
     int frameCount = 0;
 
@@ -50,5 +47,12 @@ public class GifHeader {
 
     public int getNumFrames() {
         return frameCount;
+    }
+
+    /**
+     * Global status code of GIF data parsing.
+     */
+    public int getStatus() {
+        return status;
     }
 }

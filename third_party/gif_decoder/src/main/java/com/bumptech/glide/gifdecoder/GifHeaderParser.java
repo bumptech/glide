@@ -77,6 +77,12 @@ public class GifHeaderParser {
             switch (code) {
                 // Image separator.
                 case 0x2C:
+                    // The graphics control extension is optional, but will always come first if it exists. If one did
+                    // exist, there will be a non-null current frame which we should use. However if one did not exist,
+                    // the current frame will be null and we must create it here. See issue #134.
+                    if (header.currentFrame == null) {
+                        header.currentFrame = new GifFrame();
+                    }
                     readBitmap();
                     break;
                 // Extension.

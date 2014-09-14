@@ -1,4 +1,12 @@
 apply plugin: 'com.android.library'
+apply plugin: 'robolectric'
+
+dependencies {
+    androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
+    androidTestCompile 'junit:junit:4.11'
+    androidTestCompile 'org.mockito:mockito-all:1.9.5'
+}
 
 android {
     compileSdkVersion 19
