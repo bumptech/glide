@@ -50,7 +50,7 @@ Or Maven:
 
 How do I use Glide?
 -------------------
-Checkout the [GitHub wiki](https://github.com/bumptech/glide/wiki) for pages on a variety of topics, and see the [javadocs](http://bumptech.github.io/glide/javadocs/330/index.html).
+Checkout the [GitHub wiki](https://github.com/bumptech/glide/wiki) for pages on a variety of topics, and see the [javadocs](http://bumptech.github.io/glide/javadocs/latest/index.html).
 
 Simple use cases will look something like this:
 
