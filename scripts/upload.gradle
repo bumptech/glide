@@ -114,8 +114,6 @@ afterEvaluate { project ->
         def androidSdkDirectory = project.android.sdkDirectory
 
         task androidJavadocs(type: Javadoc, dependsOn: compileReleaseJava) {
-            classifier = 'javadoc'
-
             source = releaseVariants.collect { it.javaCompile.source }
             classpath = files(releaseVariants.collect { files(it.javaCompile.classpath.files,
                     project.android.bootClasspath) })
@@ -130,20 +128,22 @@ afterEvaluate { project ->
         }
 
         task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-            classifier = 'javadoc'
             from androidJavadocs.destinationDir
         }
 
         task androidSourcesJar(type: Jar) {
-            classifier = 'sources'
             from project.android.sourceSets.main.java.source
         }
     }
 
     artifacts {
         if (project.getPlugins().hasPlugin('android') || project.getPlugins().hasPlugin('android-library')) {
-            archives androidSourcesJar
-            archives androidJavadocsJar
+            archives androidSourcesJar {
+                classifier "sources"
+            }
+            archives androidJavadocsJar {
+                classifier "javadoc"
+            }
         }
     }
 }

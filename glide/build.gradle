@@ -48,13 +48,10 @@ def getAndroidJar() {
 ['release', 'debug'].each { variantName ->
 
     task("${variantName}SourceJar", type: Jar) {
-      classifier = 'sources'
       from getSourceFilesForVariant(variantName)
     }
 
     def javadocTask = task("${variantName}Javadoc", type: Javadoc) {
-        classifier = 'javadoc'
-
         source = getSourceFilesForVariant(variantName)
 
         classpath = files(getAndroidLibraryVariants(variantName).collect {
@@ -77,7 +74,6 @@ def getAndroidJar() {
     clean.dependsOn(cleanJavadocTask)
 
     def javadocJarTask = task("${variantName}JavadocJar", type: Jar) {
-      classifier = 'javadoc'
       from javadocTask.destinationDir
     }
     javadocJarTask.dependsOn(javadocTask)
@@ -99,8 +95,12 @@ getAllInternalProjects().each { project ->
 }
 
 artifacts {
-    archives releaseJavadocJar
-    archives releaseSourceJar
+    archives releaseJavadocJar {
+        classifier 'javadoc'
+    }
+    archives releaseSourceJar {
+        classifier 'sources'
+    }
 }
 
 apply from: "$rootProject.projectDir/scripts/upload.gradle"
