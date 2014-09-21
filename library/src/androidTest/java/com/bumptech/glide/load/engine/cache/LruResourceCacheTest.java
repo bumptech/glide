@@ -2,7 +2,7 @@ package com.bumptech.glide.load.engine.cache;
 
 import android.content.ComponentCallbacks2;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.engine.EngineResource;
+import com.bumptech.glide.load.engine.Resource;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -20,8 +20,8 @@ import static org.mockito.Mockito.when;
 public class LruResourceCacheTest {
     private static class TrimClearMemoryCacheHarness {
         LruResourceCache resourceCache = new LruResourceCache(100);
-        EngineResource first = mock(EngineResource.class);
-        EngineResource second = mock(EngineResource.class);
+        Resource first = mock(Resource.class);
+        Resource second = mock(Resource.class);
 
         ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
 
@@ -67,7 +67,7 @@ public class LruResourceCacheTest {
     @Test
     public void testResourceRemovedListenerIsNotifiedWhenResourceIsRemoved() {
         LruResourceCache resourceCache = new LruResourceCache(100);
-        EngineResource resource = mock(EngineResource.class);
+        Resource resource = mock(Resource.class);
         when(resource.getSize()).thenReturn(200);
 
         ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
@@ -81,17 +81,17 @@ public class LruResourceCacheTest {
     @Test
     public void testSizeIsBasedOnResource() {
         LruResourceCache resourceCache = new LruResourceCache(100);
-        EngineResource first = getResource(50);
+        Resource first = getResource(50);
         MockKey firstKey = new MockKey();
         resourceCache.put(firstKey, first);
-        EngineResource second = getResource(50);
+        Resource second = getResource(50);
         MockKey secondKey = new MockKey();
         resourceCache.put(secondKey, second);
 
         assertTrue(resourceCache.contains(firstKey));
         assertTrue(resourceCache.contains(secondKey));
 
-        EngineResource third = getResource(50);
+        Resource third = getResource(50);
         MockKey thirdKey = new MockKey();
         resourceCache.put(thirdKey, third);
 
@@ -100,8 +100,8 @@ public class LruResourceCacheTest {
         assertTrue(resourceCache.contains(thirdKey));
     }
 
-    private EngineResource getResource(int size) {
-        EngineResource resource = mock(EngineResource.class);
+    private Resource getResource(int size) {
+        Resource resource = mock(Resource.class);
         when(resource.getSize()).thenReturn(size);
         return resource;
     }

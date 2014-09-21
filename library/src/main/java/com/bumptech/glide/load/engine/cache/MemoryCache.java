@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.engine.EngineResource;
+import com.bumptech.glide.load.engine.Resource;
 
 /**
  * An interface for adding and removing resources from an in memory cache.
@@ -11,7 +11,7 @@ public interface MemoryCache {
      * An interface that will be called whenever a bitmap is removed from the cache.
      */
     public interface ResourceRemovedListener {
-        public void onResourceRemoved(EngineResource<?> removed);
+        public void onResourceRemoved(Resource<?> removed);
     }
 
     /**
@@ -31,7 +31,7 @@ public interface MemoryCache {
      *
      * @param key The key.
      */
-    public EngineResource<?> remove(Key key);
+    public Resource<?> remove(Key key);
 
     /**
      * Add bitmap to the cache with the given key.
@@ -40,7 +40,7 @@ public interface MemoryCache {
      * @param resource The {@link com.bumptech.glide.load.engine.EngineResource} to store.
      * @return The old value of key (null if key is not in map).
      */
-    public EngineResource<?> put(Key key, EngineResource<?> resource);
+    public Resource<?> put(Key key, Resource<?> resource);
 
     /**
      * Set the listener to be called when a bitmap is removed from the cache.

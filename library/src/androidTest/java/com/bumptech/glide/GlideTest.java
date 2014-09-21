@@ -17,7 +17,6 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.engine.EngineResource;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -256,7 +255,7 @@ public class GlideTest {
         requestManager.load(file).into(target);
         requestManager.load(file).into(imageView);
 
-        verify(target).onResourceReady(any(EngineResource.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());

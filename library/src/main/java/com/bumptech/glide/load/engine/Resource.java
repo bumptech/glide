@@ -27,12 +27,21 @@ public interface Resource<Z> {
      */
     int getSize();
 
-    /**
-     * A method that can be used to clean up or reuse inner resources when this resource is about to be destroyed.
+     /**
+     * Cleans up and recycles internal resources.
      *
      * <p>
-     *     Must not be called directly and otherwise is guaranteed to only be called at most once. May also never be
-     *     called.
+     *     It is only safe to call this method if there are no current resource consumers and if this method has not
+     *     yet been called. Typically this occurs at one of two times:
+     *     <ul>
+     *         <li>During a resource load when the resource is transformed or transcoded before any consumer have
+     *         ever had access to this resource</li>
+     *         <li>After all consumers have released this resource and it has been evicted from the cache</li>
+     *     </ul>
+     *
+     *     For most users of this class, the only time this method should ever be called is during transformations or
+     *     transcoders, the framework will call this method when all consumers have released this resource and it has
+     *     been evicted from the cache.
      * </p>
      */
     void recycle();

@@ -36,8 +36,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     private final ResourceRunnerFactory factory;
     private final EngineKeyFactory keyFactory;
     private final MemoryCache cache;
-    private final Map<Key, WeakReference<EngineResource>> activeResources;
-    private final ReferenceQueue<EngineResource> resourceReferenceQueue;
+    private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
+    private final ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
     private final Handler mainHandler;
 
     /**
@@ -64,11 +64,11 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     Engine(ResourceRunnerFactory factory, MemoryCache cache, DiskCache diskCache, ExecutorService resizeService,
             ExecutorService diskCacheService, Map<Key, ResourceRunner> runners, EngineKeyFactory keyFactory,
-            Map<Key, WeakReference<EngineResource>> activeResources) {
+            Map<Key, WeakReference<EngineResource<?>>> activeResources) {
         this.cache = cache;
 
         if (activeResources == null) {
-            activeResources = new HashMap<Key, WeakReference<EngineResource>>();
+            activeResources = new HashMap<Key, WeakReference<EngineResource<?>>>();
         }
         this.activeResources = activeResources;
 
@@ -88,7 +88,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
         this.factory = factory;
 
-        resourceReferenceQueue = new ReferenceQueue<EngineResource>();
+        resourceReferenceQueue = new ReferenceQueue<EngineResource<?>>();
         MessageQueue queue = Looper.myQueue();
         queue.addIdleHandler(new RefQueueIdleHandler(activeResources, resourceReferenceQueue));
         cache.setResourceRemovedListener(this);
@@ -148,7 +148,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         EngineKey key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder,
                 transcoder, sourceEncoder);
 
-        EngineResource cached = cache.remove(key);
+        EngineResource<?> cached = getFromCache(key);
         if (cached != null) {
             cached.acquire(1);
             activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
@@ -159,9 +159,9 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             return null;
         }
 
-        WeakReference<EngineResource> activeRef = activeResources.get(key);
+        WeakReference<EngineResource<?>> activeRef = activeResources.get(key);
         if (activeRef != null) {
-            EngineResource active = activeRef.get();
+            EngineResource<?> active = activeRef.get();
             if (active != null) {
                 active.acquire(1);
                 cb.onResourceReady(active);
@@ -197,6 +197,22 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         return new LoadStatus(cb, runner.getJob());
     }
 
+    @SuppressWarnings("unchecked")
+    private EngineResource<?> getFromCache(Key key) {
+        Resource<?> cached = cache.remove(key);
+
+        final EngineResource result;
+        if (cached == null) {
+            result = null;
+        } else if (cached instanceof EngineResource) {
+            // Save an object allocation if we've cached an EngineResource (the typical case).
+            result = (EngineResource) cached;
+        } else {
+            result = new EngineResource(cached);
+        }
+        return result;
+    }
+
     public void release(Resource resource) {
         if (resource instanceof EngineResource) {
             ((EngineResource) resource).release();
@@ -204,7 +220,6 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             throw new IllegalArgumentException("Cannot release anything but an EngineResource");
         }
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -227,7 +242,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     @Override
-    public void onResourceRemoved(final EngineResource resource) {
+    public void onResourceRemoved(final Resource<?> resource) {
         recycleResource(resource);
     }
 
@@ -241,7 +256,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
     }
 
-    private void recycleResource(EngineResource resource) {
+    private void recycleResource(Resource<?> resource) {
         // If a resource has sub-resources, releasing a sub resource can cause it's parent to be synchronously
         // evicted which leads to a recycle loop when the parent the releases it's children. Posting breaks this loops.
         mainHandler.obtainMessage(ResourceRecyclerCallback.RECYCLE_RESOURCE, resource).sendToTarget();
@@ -261,10 +276,11 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
     }
 
-    private static class ResourceWeakReference extends WeakReference<EngineResource> {
+    private static class ResourceWeakReference extends WeakReference<EngineResource<?>> {
         private final Key key;
 
-        public ResourceWeakReference(Key key, EngineResource r, ReferenceQueue<? super EngineResource> q) {
+        public ResourceWeakReference(Key key, EngineResource<?> r,
+                                     ReferenceQueue<? super EngineResource<?>> q) {
             super(r, q);
             this.key = key;
         }
@@ -272,11 +288,11 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     // Responsible for cleaning up the active resource map by remove weak references that have been cleared.
     private static class RefQueueIdleHandler implements MessageQueue.IdleHandler {
-        private Map<Key, WeakReference<EngineResource>> activeResources;
-        private ReferenceQueue<EngineResource> queue;
+        private Map<Key, WeakReference<EngineResource<?>>> activeResources;
+        private ReferenceQueue<EngineResource<?>> queue;
 
-        public RefQueueIdleHandler(Map<Key, WeakReference<EngineResource>> activeResources,
-                                   ReferenceQueue<EngineResource> queue) {
+        public RefQueueIdleHandler(Map<Key, WeakReference<EngineResource<?>>> activeResources,
+                                   ReferenceQueue<EngineResource<?>> queue) {
             this.activeResources = activeResources;
             this.queue = queue;
         }

@@ -1,15 +1,14 @@
 package com.bumptech.glide.load.engine.cache;
 
 import android.annotation.SuppressLint;
-
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.engine.EngineResource;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LruCache;
 
 /**
  * An LRU in memory cache for {@link com.bumptech.glide.load.engine.Resource}s.
  */
-public class LruResourceCache extends LruCache<Key, EngineResource<?>> implements MemoryCache {
+public class LruResourceCache extends LruCache<Key, Resource<?>> implements MemoryCache {
     private ResourceRemovedListener listener;
 
     /**
@@ -27,14 +26,14 @@ public class LruResourceCache extends LruCache<Key, EngineResource<?>> implement
     }
 
     @Override
-    protected void onItemEvicted(Key key, EngineResource<?> item) {
+    protected void onItemEvicted(Key key, Resource<?> item) {
         if (listener != null) {
             listener.onResourceRemoved(item);
         }
     }
 
     @Override
-    protected int getSize(EngineResource<?> item) {
+    protected int getSize(Resource<?> item) {
         return item.getSize();
     }
 
@@ -50,6 +49,5 @@ public class LruResourceCache extends LruCache<Key, EngineResource<?>> implement
             // Evict oldest half of our bitmap cache
             trimToSize(getCurrentSize() / 2);
         }
-
     }
 }
