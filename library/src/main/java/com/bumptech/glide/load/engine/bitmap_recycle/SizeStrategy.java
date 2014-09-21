@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
+import com.bumptech.glide.util.Util;
 
 import java.util.TreeMap;
 
@@ -19,7 +20,8 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public void put(Bitmap bitmap) {
-        final Key key = keyPool.get(bitmap.getAllocationByteCount());
+        int size = Util.getSize(bitmap);
+        final Key key = keyPool.get(size);
 
         groupedMap.put(key, bitmap);
 
@@ -52,7 +54,7 @@ class SizeStrategy implements LruPoolStrategy {
     public Bitmap removeLast() {
         Bitmap removed = groupedMap.removeLast();
         if (removed != null) {
-            final int removedSize = removed.getAllocationByteCount();
+            final int removedSize = Util.getSize(removed);
             decrementBitmapOfSize(removedSize);
         }
         return removed;
@@ -79,7 +81,7 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public int getSize(Bitmap bitmap) {
-        return bitmap.getAllocationByteCount();
+        return Util.getSize(bitmap);
     }
 
     @Override
@@ -97,7 +99,8 @@ class SizeStrategy implements LruPoolStrategy {
     }
 
     private static String getBitmapString(Bitmap bitmap) {
-        return getBitmapString(bitmap.getAllocationByteCount());
+        int size = Util.getSize(bitmap);
+        return getBitmapString(size);
     }
 
     private static String getBitmapString(int size) {

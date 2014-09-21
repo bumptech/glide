@@ -40,15 +40,19 @@ public class Util {
     }
 
     /**
-     * Returns the in memory size of the given {@link Bitmap}.
+     * Returns the in memory size of the given {@link Bitmap} in bytes.
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
     public static int getSize(Bitmap bitmap) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            return bitmap.getHeight() * bitmap.getRowBytes();
-        } else {
-            return bitmap.getAllocationByteCount();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
+            try {
+                return bitmap.getAllocationByteCount();
+            } catch (NullPointerException e) {
+                // Do nothing.
+            }
         }
+        return bitmap.getHeight() * bitmap.getRowBytes();
     }
 
     public static void assertMainThread() {
