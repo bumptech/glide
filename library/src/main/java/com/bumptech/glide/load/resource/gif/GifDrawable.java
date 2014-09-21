@@ -33,8 +33,12 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     private boolean isStarted;
     /** True if the drawable's resources have been recycled. */
     private boolean isRecycled;
-    /** True if the drawable is currently visible. */
-    private boolean isVisible;
+    /**
+     * True if the drawable is currently visible. Default to true because on certain platforms (at least 4.1.1),
+     * setVisible is not called on {@link android.graphics.drawable.Drawable Drawables} during
+     * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}. See issue #130.
+     */
+    private boolean isVisible = true;
     /** The number of times we've looped over all the frames in the gif. */
     private int loopCount;
     /** The number of times to loop through the gif animation. */

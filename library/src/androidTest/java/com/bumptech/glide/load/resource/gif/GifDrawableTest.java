@@ -69,6 +69,21 @@ public class GifDrawableTest {
     }
 
     @Test
+    public void testRequestsNextFrameOnStartWithoutCallToSetVisible() {
+        drawable.start();
+
+        verify(frameManager).getNextFrame(eq(drawable));
+    }
+
+    @Test
+    public void testDoesNotRequestNextFrameOnStartIfGotCallToSetVisibleWithVisibleFalse() {
+        drawable.setVisible(false, false);
+        drawable.start();
+
+        verify(frameManager, never()).getNextFrame(eq(drawable));
+    }
+
+    @Test
     public void testShouldInvalidateSelfOnRun() {
         drawable.setVisible(true, true);
         drawable.start();
