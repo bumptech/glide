@@ -13,10 +13,10 @@ import java.util.TreeMap;
  */
 @TargetApi(Build.VERSION_CODES.KITKAT)
 class SizeStrategy implements LruPoolStrategy {
-    private static final int MAX_SIZE_MULTIPLE = 4;
+    private static final int MAX_SIZE_MULTIPLE = 8;
     private final KeyPool keyPool = new KeyPool();
     private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<Key, Bitmap>();
-    private final TreeMap<Integer, Integer> sortedSizes = new TreeMap<Integer, Integer>();
+    private final TreeMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<Integer, Integer>();
 
     @Override
     public void put(Bitmap bitmap) {
@@ -31,7 +31,7 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public Bitmap get(int width, int height, Bitmap.Config config) {
-        final int size = getSize(width, height, config);
+        final int size = Util.getBitmapPixelSize(width, height, config);
         Key key = keyPool.get(size);
 
         Integer possibleSize = sortedSizes.ceilingKey(size);
@@ -76,7 +76,8 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public String logBitmap(int width, int height, Bitmap.Config config) {
-        return getBitmapString(getSize(width, height, config));
+        int size = Util.getBitmapPixelSize(width, height, config);
+        return getBitmapString(size);
     }
 
     @Override
@@ -86,16 +87,27 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public String toString() {
-        String result = "SizeStrategy:\n  " + groupedMap + "\n  SortedSizes( ";
-        boolean hadAtLeastOneKey = false;
-        for (Integer size : sortedSizes.keySet()) {
-            hadAtLeastOneKey = true;
-            result += "{" + getBitmapString(size) + ":" + sortedSizes.get(size) + "}, ";
+        return "SizeStrategy:\n  "
+                + groupedMap + "\n"
+                + "  SortedSizes" + sortedSizes;
+    }
+
+    private static class PrettyPrintTreeMap<K, V> extends TreeMap<K, V> {
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("( ");
+            for (Entry<K, V> entry : entrySet()) {
+                sb.append("{").append(entry.getKey()).append(":").append(entry.getValue()).append("}, ");
+            }
+            final String result;
+            if (!isEmpty()) {
+                result = sb.substring(0, sb.length() - 2);
+            } else {
+                result = sb.toString();
+            }
+            return result + " )";
         }
-        if (hadAtLeastOneKey) {
-            result = result.substring(0, result.length() - 2);
-        }
-        return result + " )";
     }
 
     private static String getBitmapString(Bitmap bitmap) {
@@ -105,33 +117,6 @@ class SizeStrategy implements LruPoolStrategy {
 
     private static String getBitmapString(int size) {
         return "[" + size + "]";
-    }
-
-    private static int getSize(int width, int height, Bitmap.Config config) {
-        return width * height * getBytesPerPixel(config);
-    }
-
-    private static int getBytesPerPixel(Bitmap.Config config) {
-        // a bitmap by decoding a gif has null "config" in certain environments.
-        if (config == null) {
-            return 4;
-        }
-
-        switch (config) {
-            case ARGB_8888:
-                return 4;
-            case RGB_565:
-                return 2;
-            case ARGB_4444:
-                return 2;
-            case ALPHA_8:
-                return 1;
-            default:
-                // We only use this to calculate sizes to get, so choosing 4 bytes per pixel is conservative and
-                // probably forces us to get a larger bitmap than we really need. Since we can't tell for sure, probably
-                // better safe than sorry.
-                return 4;
-        }
     }
 
     private static class KeyPool extends BaseKeyPool<Key> {

@@ -55,6 +55,32 @@ public class Util {
         return bitmap.getHeight() * bitmap.getRowBytes();
     }
 
+    public static int getBitmapPixelSize(int width, int height, Bitmap.Config config) {
+        return width * height * getBytesPerPixel(config);
+    }
+
+    private static int getBytesPerPixel(Bitmap.Config config) {
+        // A bitmap by decoding a gif has null "config" in certain environments.
+        if (config == null) {
+            config = Bitmap.Config.ARGB_8888;
+        }
+
+        int bytesPerPixel;
+        switch (config) {
+            case ALPHA_8:
+                bytesPerPixel = 1;
+                break;
+            case RGB_565:
+            case ARGB_4444:
+                bytesPerPixel = 2;
+                break;
+            case ARGB_8888:
+            default:
+                bytesPerPixel = 4;
+        }
+        return bytesPerPixel;
+    }
+
     public static void assertMainThread() {
         if (!isOnMainThread()) {
             throw new IllegalArgumentException("You must call this method on the main thread");
