@@ -15,6 +15,16 @@ public interface MemoryCache {
     }
 
     /**
+     * Returns the sum of the sizes of all the contents of the cache in bytes.
+     */
+    public int getCurrentSize();
+
+    /**
+     * Returns the current maximum size in bytes of the cache.
+     */
+    public int getMaxSize();
+
+    /**
      * Adjust the maximum size of the cache by multiplying the original size of the cache by the given multiplier.
      *
      * <p>

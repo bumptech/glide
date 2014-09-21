@@ -11,6 +11,16 @@ public class MemoryCacheAdapter implements MemoryCache {
     private ResourceRemovedListener listener;
 
     @Override
+    public int getCurrentSize() {
+        return 0;
+    }
+
+    @Override
+    public int getMaxSize() {
+        return 0;
+    }
+
+    @Override
     public void setSizeMultiplier(float multiplier) {
         // Do nothing.
     }

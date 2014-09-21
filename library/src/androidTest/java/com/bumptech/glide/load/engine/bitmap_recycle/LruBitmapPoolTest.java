@@ -147,6 +147,17 @@ public class LruBitmapPoolTest {
         assertEquals(Math.round(MAX_SIZE * sizeMultiplier) - MAX_SIZE, strategy.numRemoves);
     }
 
+    @Test
+    public void testCanGetCurrentMaxSize() {
+        assertEquals(MAX_SIZE, pool.getMaxSize());
+    }
+
+    @Test
+    public void testMaxSizeChangesAfterSizeMultiplier() {
+        pool.setSizeMultiplier(2);
+        assertEquals(2 * MAX_SIZE, pool.getMaxSize());
+    }
+
     private void fillPool(LruBitmapPool pool, int fillCount) {
         for (int i = 0; i < fillCount; i++) {
             pool.put(createMutableBitmap());

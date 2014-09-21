@@ -268,7 +268,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         @Override
         public boolean handleMessage(Message message) {
             if (message.what == RECYCLE_RESOURCE) {
-                EngineResource resource = (EngineResource) message.obj;
+                Resource resource = (Resource) message.obj;
                 resource.recycle();
                 return true;
             }
@@ -279,8 +279,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     private static class ResourceWeakReference extends WeakReference<EngineResource<?>> {
         private final Key key;
 
-        public ResourceWeakReference(Key key, EngineResource<?> r,
-                                     ReferenceQueue<? super EngineResource<?>> q) {
+        public ResourceWeakReference(Key key, EngineResource<?> r, ReferenceQueue<? super EngineResource<?>> q) {
             super(r, q);
             this.key = key;
         }
@@ -292,7 +291,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         private ReferenceQueue<EngineResource<?>> queue;
 
         public RefQueueIdleHandler(Map<Key, WeakReference<EngineResource<?>>> activeResources,
-                                   ReferenceQueue<EngineResource<?>> queue) {
+                ReferenceQueue<EngineResource<?>> queue) {
             this.activeResources = activeResources;
             this.queue = queue;
         }

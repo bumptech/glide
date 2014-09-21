@@ -222,6 +222,50 @@ public class LruCacheTest {
         verify(listener, never()).onItemRemoved(anyObject());
     }
 
+    @Test
+    public void testGetMaxSizeReturnsCurrentMaxSizeOfCache() {
+        assertEquals(SIZE, cache.getMaxSize());
+    }
+
+    @Test
+    public void testGetMaxSizeChangesIfMaxSizeChanges() {
+        int multiplier = 2;
+        cache.setSizeMultiplier(multiplier);
+
+        assertEquals(SIZE * multiplier, cache.getMaxSize());
+    }
+
+    @Test
+    public void getCurrentSizeReturnsZeroForEmptyCache() {
+        assertEquals(0, cache.getCurrentSize());
+    }
+
+    @Test
+    public void testGetCurrentSizeIncreasesAsSizeIncreases() {
+        cache.put(getKey(), new Object());
+        assertEquals(1, cache.getCurrentSize());
+        cache.put(getKey(), new Object());
+        assertEquals(2, cache.getCurrentSize());
+    }
+
+    @Test
+    public void testGetCurrentSizeDoesNotChangeWhenSizeMultiplierChangesIfNoItemsAreEvicted() {
+        cache.put(getKey(), new Object());
+        assertEquals(1, cache.getCurrentSize());
+        cache.setSizeMultiplier(2);
+        assertEquals(1, cache.getCurrentSize());
+    }
+
+    @Test
+    public void testGetCurrentSizeChangesIfItemsAreEvictedWhenSizeMultiplierChanges() {
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+        assertEquals(SIZE, cache.getCurrentSize());
+        cache.setSizeMultiplier(0.5f);
+        assertEquals(SIZE / 2, cache.getCurrentSize());
+    }
+
     private String getKey() {
         currentKey += "1";
         return currentKey;

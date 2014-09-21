@@ -49,6 +49,11 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     @Override
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    @Override
     public void setSizeMultiplier(float sizeMultiplier) {
         maxSize = Math.round(initialMaxSize * sizeMultiplier);
         evict();

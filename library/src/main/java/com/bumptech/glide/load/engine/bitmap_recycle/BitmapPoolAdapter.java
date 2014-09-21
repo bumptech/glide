@@ -8,6 +8,11 @@ import android.graphics.Bitmap;
  */
 public class BitmapPoolAdapter implements BitmapPool {
     @Override
+    public int getMaxSize() {
+        return 0;
+    }
+
+    @Override
     public void setSizeMultiplier(float sizeMultiplier) {
         // Do nothing.
     }

@@ -62,6 +62,13 @@ public class LruCache<T, Y> {
     }
 
     /**
+     * Returns the current maximum size of the cache in bytes.
+     */
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    /**
      * Returns the sum of the sizes of all items in the cache.
      */
     public int getCurrentSize() {

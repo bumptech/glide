@@ -15,9 +15,10 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.prefill.PreFillBitmapAttribute;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -91,6 +92,7 @@ public class Glide {
     private final FitCenter bitmapFitCenter;
     private final GifBitmapWrapperTransformation drawableFitCenter;
     private final Handler mainHandler;
+    private final BitmapPreFiller bitmapPreFiller;
 
     /**
      * Returns a directory with a default name in the private cache directory of the application to use to store
@@ -183,6 +185,7 @@ public class Glide {
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
         mainHandler = new Handler(Looper.getMainLooper());
+        bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool);
 
         dataLoadProviderRegistry = new DataLoadProviderRegistry();
 
@@ -292,6 +295,36 @@ public class Glide {
 
     private GenericLoaderFactory getLoaderFactory() {
         return loaderFactory;
+    }
+
+    /**
+     * Pre-fills the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} using the given sizes.
+     *
+     * <p>
+     *   Enough Bitmaps are added to completely fill the pool, so most or all of the Bitmaps currently in the pool will
+     *   be evicted. Bitmaps are allocated according to the weights of the given sizes, where each size gets
+     *   (weight / prefillWeightSum) percent of the pool to fill.
+     * </p>
+     *
+     * <p>
+     *     Note - Pre-filling is done asynchronously using and {@link android.os.MessageQueue.IdleHandler}. Any
+     *     currently running pre-fill will be cancelled and replaced by a call to this method.
+     * </p>
+     *
+     * <p>
+     *     This method should be used with caution, overly aggressive pre-filling is substantially worse than not
+     *     pre-filling at all. Pre-filling should only be started in onCreate to avoid constantly clearing and
+     *     re-filling the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}. Rotation should be carefully
+     *     considered as well. It may be worth calling this method only when no saved instance state exists so that
+     *     pre-filling only happens when the Activity is first created, rather than on every rotation.
+     * </p>
+     *
+     * @param bitmapAttributes The list of {@link com.bumptech.glide.load.engine.prefill.PreFillBitmapAttribute}s
+     *                         representing individual sizes and configurations of {@link android.graphics.Bitmap}s to
+     *                         be pre-filled.
+     */
+    public void preFillBitmapPool(PreFillBitmapAttribute... bitmapAttributes) {
+        bitmapPreFiller.preFill(bitmapAttributes);
     }
 
     /**

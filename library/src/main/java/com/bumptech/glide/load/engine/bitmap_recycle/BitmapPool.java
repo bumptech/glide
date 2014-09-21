@@ -6,6 +6,12 @@ import android.graphics.Bitmap;
  * An interface for a pool that allows users to reuse {@link android.graphics.Bitmap} objects.
  */
 public interface BitmapPool {
+
+    /**
+     * Returns the current maximum size of the pool in bytes.
+     */
+    public int getMaxSize();
+
     /**
      * Multiplies the initial size of the pool by the given multipler to dynamically and synchronously allow users to
      * adjust the size of the pool.

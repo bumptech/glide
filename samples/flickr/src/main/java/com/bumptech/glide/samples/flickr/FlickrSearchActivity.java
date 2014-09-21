@@ -2,6 +2,7 @@ package com.bumptech.glide.samples.flickr;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.prefill.PreFillBitmapAttribute;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
@@ -154,6 +156,23 @@ public class FlickrSearchActivity extends ActionBarActivity {
                 executeSearch(savedSearchString);
             }
         }
+
+        final Resources res = getResources();
+        int smallGridSize = res.getDimensionPixelSize(R.dimen.small_photo_side);
+        int mediumGridSize = res.getDimensionPixelSize(R.dimen.medium_photo_side);
+        int listHeightSize = res.getDimensionPixelSize(R.dimen.flickr_list_item_height);
+        int screenWidth = getScreenWidth();
+
+        // Weight values determined experimentally by measuring the number of incurred GCs while scrolling through
+        // the various photo grids/lists.
+        Glide.get(this).preFillBitmapPool(
+                new PreFillBitmapAttribute(smallGridSize, smallGridSize, 1),
+                new PreFillBitmapAttribute(mediumGridSize, mediumGridSize, 1),
+                new PreFillBitmapAttribute(screenWidth / 2, listHeightSize, 6));
+    }
+
+    private int getScreenWidth() {
+        return getResources().getDisplayMetrics().widthPixels;
     }
 
     @Override
