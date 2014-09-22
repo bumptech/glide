@@ -56,7 +56,7 @@ public final class BitmapPreFiller {
     }
 
     private static int getSizeInBytes(PreFillBitmapAttribute size) {
-        return Util.getBitmapPixelSize(size.getWidth(), size.getHeight(), size.getConfig());
+        return Util.getBitmapByteSize(size.getWidth(), size.getHeight(), size.getConfig());
     }
 }
 

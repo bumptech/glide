@@ -24,7 +24,7 @@ public class BitmapDrawableResource extends DrawableResource<BitmapDrawable> {
 
     @Override
     public int getSize() {
-        return Util.getSize(drawable.getBitmap());
+        return Util.getBitmapByteSize(drawable.getBitmap());
     }
 
     @Override

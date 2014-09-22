@@ -59,7 +59,7 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
 
             // Don't over fill the memory cache to avoid evicting useful resources, but make sure it's not empty so
             // we use all available space.
-            if ((memoryCache.getMaxSize() - memoryCache.getCurrentSize()) >= Util.getSize(bitmap)) {
+            if ((memoryCache.getMaxSize() - memoryCache.getCurrentSize()) >= Util.getBitmapByteSize(bitmap)) {
                 memoryCache.put(new UniqueKey(), new BitmapResource(bitmap, bitmapPool));
             } else {
                 bitmapPool.put(bitmap);
@@ -67,7 +67,7 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
 
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "allocated [" + toAllocate.getWidth() + "x" + toAllocate.getHeight() + "] "
-                        + toAllocate.getConfig() + " size: " + Util.getSize(bitmap));
+                        + toAllocate.getConfig() + " size: " + Util.getBitmapByteSize(bitmap));
             }
         }
 

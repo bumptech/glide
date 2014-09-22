@@ -20,7 +20,7 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public void put(Bitmap bitmap) {
-        int size = Util.getSize(bitmap);
+        int size = Util.getBitmapByteSize(bitmap);
         final Key key = keyPool.get(size);
 
         groupedMap.put(key, bitmap);
@@ -31,7 +31,7 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public Bitmap get(int width, int height, Bitmap.Config config) {
-        final int size = Util.getBitmapPixelSize(width, height, config);
+        final int size = Util.getBitmapByteSize(width, height, config);
         Key key = keyPool.get(size);
 
         Integer possibleSize = sortedSizes.ceilingKey(size);
@@ -54,7 +54,7 @@ class SizeStrategy implements LruPoolStrategy {
     public Bitmap removeLast() {
         Bitmap removed = groupedMap.removeLast();
         if (removed != null) {
-            final int removedSize = Util.getSize(removed);
+            final int removedSize = Util.getBitmapByteSize(removed);
             decrementBitmapOfSize(removedSize);
         }
         return removed;
@@ -76,13 +76,13 @@ class SizeStrategy implements LruPoolStrategy {
 
     @Override
     public String logBitmap(int width, int height, Bitmap.Config config) {
-        int size = Util.getBitmapPixelSize(width, height, config);
+        int size = Util.getBitmapByteSize(width, height, config);
         return getBitmapString(size);
     }
 
     @Override
     public int getSize(Bitmap bitmap) {
-        return Util.getSize(bitmap);
+        return Util.getBitmapByteSize(bitmap);
     }
 
     @Override
@@ -111,7 +111,7 @@ class SizeStrategy implements LruPoolStrategy {
     }
 
     private static String getBitmapString(Bitmap bitmap) {
-        int size = Util.getSize(bitmap);
+        int size = Util.getBitmapByteSize(bitmap);
         return getBitmapString(size);
     }
 

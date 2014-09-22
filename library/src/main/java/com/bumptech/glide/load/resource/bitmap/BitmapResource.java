@@ -24,7 +24,7 @@ public class BitmapResource implements Resource<Bitmap> {
 
     @Override
     public int getSize() {
-        return Util.getSize(bitmap);
+        return Util.getBitmapByteSize(bitmap);
     }
 
     @Override

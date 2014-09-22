@@ -6,7 +6,6 @@ import android.os.Build;
 import android.os.Looper;
 
 import java.util.ArrayDeque;
-import java.util.LinkedList;
 import java.util.Queue;
 
 /**
@@ -19,10 +18,16 @@ public class Util {
     // 20 bytes from sha-1 -> 40 chars.
     private static final char[] SHA_1_CHARS = new char[40];
 
+    /**
+     * Returns the hex string of the given byte array representing a SHA256 hash.
+     */
     public static String sha256BytesToHex(byte[] bytes) {
         return bytesToHex(bytes, SHA_256_CHARS);
     }
 
+    /**
+     * Returns the hex string of the given byte array representing a SHA1 hash.
+     */
     public static String sha1BytesToHex(byte[] bytes) {
         return bytesToHex(bytes, SHA_1_CHARS);
     }
@@ -40,10 +45,21 @@ public class Util {
     }
 
     /**
+     * Returns the allocated byte size of the given bitmap.
+     *
+     * @see #getBitmapByteSize(android.graphics.Bitmap)
+     *
+     * @deprecated
+     */
+    public static int getSize(Bitmap bitmap) {
+        return getBitmapByteSize(bitmap);
+    }
+
+    /**
      * Returns the in memory size of the given {@link Bitmap} in bytes.
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static int getSize(Bitmap bitmap) {
+    public static int getBitmapByteSize(Bitmap bitmap) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
             try {
@@ -55,7 +71,11 @@ public class Util {
         return bitmap.getHeight() * bitmap.getRowBytes();
     }
 
-    public static int getBitmapPixelSize(int width, int height, Bitmap.Config config) {
+    /**
+     * Returns the in memory size of {@link android.graphics.Bitmap} with the given width, height, and
+     * {@link android.graphics.Bitmap.Config}.
+     */
+    public static int getBitmapByteSize(int width, int height, Bitmap.Config config) {
         return width * height * getBytesPerPixel(config);
     }
 
@@ -81,32 +101,42 @@ public class Util {
         return bytesPerPixel;
     }
 
+    /**
+     * Throws an {@link java.lang.IllegalArgumentException} if called on a thread other than the main thread.
+     */
     public static void assertMainThread() {
         if (!isOnMainThread()) {
             throw new IllegalArgumentException("You must call this method on the main thread");
         }
     }
 
+    /**
+     * Throws an {@link java.lang.IllegalArgumentException} if called on the main thread.
+     */
     public static void assertBackgroundThread() {
         if (!isOnBackgroundThread()) {
             throw new IllegalArgumentException("YOu must call this method on a background thread");
         }
     }
 
+    /**
+     * Returns {@code true} if called on the main thread, {@code false} otherwise.
+     */
     public static boolean isOnMainThread() {
         return Looper.myLooper() == Looper.getMainLooper();
     }
 
+    /**
+     * Returns {@code true} if called on the main thread, {@code false} otherwise.
+     */
     public static boolean isOnBackgroundThread() {
         return !isOnMainThread();
     }
 
-    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    /**
+     * Creates a {@link java.util.Queue} of the given size using Glide's preferred implementation.
+     */
     public static <T> Queue<T> createQueue(int size) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
-            return new LinkedList<T>();
-        } else {
-            return new ArrayDeque<T>(size);
-        }
+        return new ArrayDeque<T>(size);
     }
 }

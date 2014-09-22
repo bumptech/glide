@@ -152,7 +152,7 @@ public class PreFillerHandlerTest {
     @Test
     public void testAddsBitmapsToMemoryCacheIfMemoryCacheHasEnoughSpaceRemaining() {
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        when(cache.getMaxSize()).thenReturn(Util.getSize(bitmap));
+        when(cache.getMaxSize()).thenReturn(Util.getBitmapByteSize(bitmap));
 
         PreFillBitmapAttribute size = new PreFillBitmapAttribute(bitmap.getWidth(), bitmap.getHeight(),
                 bitmap.getConfig(), 1);
@@ -188,7 +188,7 @@ public class PreFillerHandlerTest {
     @Test
     public void testAddsBitmapsToPoolIfMemoryCacheIsNotFullButCannotFitBitmap() {
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        when(cache.getMaxSize()).thenReturn(Util.getSize(bitmap) / 2);
+        when(cache.getMaxSize()).thenReturn(Util.getBitmapByteSize(bitmap) / 2);
 
         PreFillBitmapAttribute size = new PreFillBitmapAttribute(bitmap.getWidth(), bitmap.getHeight(),
                 bitmap.getConfig(), 1);

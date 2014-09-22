@@ -17,7 +17,7 @@ public class GlideBitmapDrawableResource extends DrawableResource<GlideBitmapDra
 
     @Override
     public int getSize() {
-        return Util.getSize(drawable.getBitmap());
+        return Util.getBitmapByteSize(drawable.getBitmap());
     }
 
     @Override

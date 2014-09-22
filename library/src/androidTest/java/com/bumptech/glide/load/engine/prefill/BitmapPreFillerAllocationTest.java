@@ -29,7 +29,7 @@ public class BitmapPreFillerAllocationTest {
     private static final Bitmap.Config DEFAULT_BITMAP_CONFIG = PreFillBitmapAttribute.DEFAULT_CONFIG;
     private static final Bitmap DEFAULT_BITMAP =
             Bitmap.createBitmap(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT, DEFAULT_BITMAP_CONFIG);
-    private static final int DEFAULT_BITMAP_SIZE = Util.getSize(DEFAULT_BITMAP);
+    private static final int DEFAULT_BITMAP_SIZE = Util.getBitmapByteSize(DEFAULT_BITMAP);
 
     private static final int DEFAULT_BITMAPS_IN_POOL = 10;
     private static final int DEFAULT_BITMAPS_IN_CACHE = 10;
@@ -73,13 +73,13 @@ public class BitmapPreFillerAllocationTest {
         int byteSize = 0;
         while (!allocationOrder.isEmpty()) {
             PreFillBitmapAttribute current = allocationOrder.remove();
-            byteSize += Util.getBitmapPixelSize(current.getWidth(), current.getHeight(), current.getConfig());
+            byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
         int expectedSize = 0;
         int maxSize = POOL_SIZE + CACHE_SIZE;
         for (PreFillBitmapAttribute current : sizes) {
-            int currentSize = Util.getBitmapPixelSize(current.getWidth(), current.getHeight(), current.getConfig());
+            int currentSize = Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
             expectedSize += currentSize * (maxSize / (3 * currentSize));
         }
 
@@ -99,7 +99,7 @@ public class BitmapPreFillerAllocationTest {
         int byteSize = 0;
         while (!allocationOrder.isEmpty()) {
             PreFillBitmapAttribute current = allocationOrder.remove();
-            byteSize += Util.getBitmapPixelSize(current.getWidth(), current.getHeight(), current.getConfig());
+            byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
         assertThat(byteSize, lessThanOrEqualTo(POOL_SIZE + CACHE_SIZE));
@@ -120,7 +120,7 @@ public class BitmapPreFillerAllocationTest {
         int byteSize = 0;
         while (!allocationOrder.isEmpty()) {
             PreFillBitmapAttribute current = allocationOrder.remove();
-            byteSize += Util.getBitmapPixelSize(current.getWidth(), current.getHeight(), current.getConfig());
+            byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
         assertThat(byteSize, lessThanOrEqualTo(POOL_SIZE + CACHE_SIZE));

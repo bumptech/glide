@@ -40,7 +40,7 @@ class AttributeStrategy implements LruPoolStrategy {
 
     @Override
     public int getSize(Bitmap bitmap) {
-        return Util.getSize(bitmap);
+        return Util.getBitmapByteSize(bitmap);
     }
 
     @Override
