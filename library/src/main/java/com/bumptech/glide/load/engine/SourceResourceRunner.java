@@ -143,7 +143,8 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
         if (decoded == null) {
             decoded = decodeFromSource();
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Decoded from source in " + (SystemClock.currentThreadTimeMillis() - start) + " cache");
+                Log.v(TAG, "Decoded from source in " + (SystemClock.currentThreadTimeMillis() - start) + " key: "
+                        + key);
                 start = SystemClock.currentThreadTimeMillis();
             }
         }
@@ -155,7 +156,7 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
                 decoded.recycle();
             }
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "transformed in " + (SystemClock.currentThreadTimeMillis() - start));
+                Log.v(TAG, "transformed in " + (SystemClock.currentThreadTimeMillis() - start) + " key: " + key);
             }
         }
 
@@ -167,7 +168,7 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
             start = SystemClock.currentThreadTimeMillis();
             transcoded = transcoder.transcode(transformed);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.d(TAG, "transcoded in " + (SystemClock.currentThreadTimeMillis() - start));
+                Log.d(TAG, "transcoded in " + (SystemClock.currentThreadTimeMillis() - start) + " key: " + key);
             }
         }
         return transcoded;

@@ -12,6 +12,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -32,6 +33,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -144,6 +146,35 @@ public class ViewTargetTest {
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(width), eq(height));
+    }
+
+    @Test
+    public void testSizeCallbacksAreCalledInOrderPreDraw() {
+        SizeReadyCallback[] cbs = new SizeReadyCallback[25];
+        for (int i = 0; i < cbs.length; i++) {
+            cbs[i] = mock(SizeReadyCallback.class);
+            target.getSize(cbs[i]);
+        }
+
+        int width = 100, height = 111;
+        SizedShadowView shadowView = Robolectric.shadowOf_(view);
+        shadowView.setWidth(width);
+        shadowView.setHeight(height);
+
+        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
+        shadowObserver.fireOnPreDrawListeners();
+
+        InOrder order = inOrder((Object[]) cbs);
+        for (SizeReadyCallback cb : cbs) {
+            order.verify(cb).onSizeReady(eq(width), eq(height));
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsIfCallbackIsQueuedTwice() {
+        SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        target.getSize(cb);
+        target.getSize(cb);
     }
 
     @Test

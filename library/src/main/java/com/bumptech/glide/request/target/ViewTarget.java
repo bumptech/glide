@@ -7,12 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-
 import com.bumptech.glide.request.Request;
 
 import java.lang.ref.WeakReference;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A base {@link Target} for loading {@link android.graphics.Bitmap}s into {@link View}s that provides default
@@ -112,7 +111,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
     private static class SizeDeterminer {
         private final View view;
-        private Set<SizeReadyCallback> cbs = new HashSet<SizeReadyCallback>();
+        private List<SizeReadyCallback> cbs = new ArrayList<SizeReadyCallback>();
         private SizeDeterminerLayoutListener layoutListener;
 
         public SizeDeterminer(View view) {
@@ -173,6 +172,9 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
                 }
                 cb.onSizeReady(width, height);
             } else {
+                if (cbs.contains(cb)) {
+                    throw new IllegalArgumentException("Cannot add a callback twice");
+                }
                 cbs.add(cb);
                 final ViewTreeObserver observer = view.getViewTreeObserver();
                 layoutListener = new SizeDeterminerLayoutListener(this);

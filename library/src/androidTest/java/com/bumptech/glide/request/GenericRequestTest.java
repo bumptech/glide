@@ -792,9 +792,9 @@ public class GenericRequestTest {
     }
 
     @Test
-    public void testRequestListenerIsCalledWithIsFirstImageIfRequestCoordinatorReturnsNoRequestComplete() {
+    public void testRequestListenerIsCalledWithIsFirstImageIfRequestCoordinatorReturnsNoResourceSet() {
         GenericRequest request = harness.getRequest();
-        when(harness.requestCoordinator.isAnyRequestComplete()).thenReturn(false);
+        when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(false);
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(eq(harness.result), any(Number.class), any(Target.class),
@@ -802,9 +802,9 @@ public class GenericRequestTest {
     }
 
     @Test
-    public void testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsARequestComplete() {
+    public void testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsResourceSet() {
         GenericRequest request = harness.getRequest();
-        when(harness.requestCoordinator.isAnyRequestComplete()).thenReturn(true);
+        when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(true);
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(eq(harness.result), any(Number.class), any(Target.class),

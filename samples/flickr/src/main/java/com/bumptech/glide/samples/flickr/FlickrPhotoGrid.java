@@ -166,7 +166,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
             DrawableRequestBuilder<Photo> request = Glide.with(FlickrPhotoGrid.this)
                     .load(current)
                     .centerCrop()
-                    .animate(R.anim.fade_in);
+                    .crossFade(R.anim.fade_in, 150);
 
             if (thumbnail) {
                 request.thumbnail(Glide.with(FlickrPhotoGrid.this)

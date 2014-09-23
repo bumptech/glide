@@ -37,6 +37,12 @@ public interface Request {
     public boolean isComplete();
 
     /**
+     * Returns true if a non-placeholder resource is set. For Requests that load more than one resource, isResourceSet
+     * may return true even if {@link #isComplete()}} returns false.
+     */
+    public boolean isResourceSet();
+
+    /**
      * Returns true if the request has been cancelled.
      */
     public boolean isCancelled();

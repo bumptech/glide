@@ -338,6 +338,17 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         return status == Status.COMPLETE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isResourceSet() {
+        return isComplete();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isCancelled() {
         return status == Status.CANCELLED;
@@ -428,7 +439,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     }
 
     private boolean isFirstReadyResource() {
-        return requestCoordinator == null || !requestCoordinator.isAnyRequestComplete();
+        return requestCoordinator == null || !requestCoordinator.isAnyResourceSet();
     }
 
     /**

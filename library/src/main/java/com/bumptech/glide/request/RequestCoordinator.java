@@ -24,5 +24,5 @@ public interface RequestCoordinator {
      *
      * @see Request#isComplete()
      */
-    public boolean isAnyRequestComplete();
+    public boolean isAnyResourceSet();
 }

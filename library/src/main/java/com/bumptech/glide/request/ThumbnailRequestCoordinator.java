@@ -7,6 +7,15 @@ package com.bumptech.glide.request;
 public class ThumbnailRequestCoordinator implements RequestCoordinator, Request {
     private Request full;
     private Request thumb;
+    private RequestCoordinator coordinator;
+
+    public ThumbnailRequestCoordinator() {
+        this(null);
+    }
+
+    public ThumbnailRequestCoordinator(RequestCoordinator coordinator) {
+        this.coordinator = coordinator;
+    }
 
     public void setRequests(Request full, Request thumb) {
         this.full = full;
@@ -14,14 +23,19 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     }
 
     /**
+     *
      * Returns true if the request is either the request loading the fullsize image or if the request loading the
-     * fullsize image has not yet completed.
+     * full size image has not yet completed.
      *
      * @param request {@inheritDoc}
      */
     @Override
     public boolean canSetImage(Request request) {
-        return request == full || !full.isComplete();
+        return parentCanSetImage() && (request == full || !full.isResourceSet());
+    }
+
+    private boolean parentCanSetImage() {
+        return coordinator == null || coordinator.canSetImage(this);
     }
 
     /**
@@ -32,16 +46,20 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
      */
     @Override
     public boolean canNotifyStatusChanged(Request request) {
-        return request == full && !isAnyRequestComplete();
+        return parentCanNotifyStatusChanged() && (request == full && !isAnyResourceSet());
     }
 
-    /**
-     * Returns true if either the full request has completed successfully or the thumb request has completed
-     * successfully.
-     */
+    private boolean parentCanNotifyStatusChanged() {
+        return coordinator == null || coordinator.canNotifyStatusChanged(this);
+    }
+
     @Override
-    public boolean isAnyRequestComplete() {
-        return full.isComplete() || thumb.isComplete();
+    public boolean isAnyResourceSet() {
+        return parentIsAnyResourceSet() || isResourceSet();
+    }
+
+    private boolean parentIsAnyResourceSet() {
+        return coordinator != null && coordinator.isAnyResourceSet();
     }
 
     /**
@@ -90,7 +108,12 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
      */
     @Override
     public boolean isComplete() {
-        return full.isComplete();
+        return full.isComplete() || thumb.isComplete();
+    }
+
+    @Override
+    public boolean isResourceSet() {
+        return full.isResourceSet() || thumb.isResourceSet();
     }
 
     @Override

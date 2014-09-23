@@ -71,6 +71,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -570,6 +571,48 @@ public class GlideTest {
     }
 
     @Test
+    public void testReceivesThumbnails() {
+        String full = mockUri("content://full");
+        String thumb = mockUri("content://thumb");
+        requestManager
+                .load(full)
+                .thumbnail(requestManager
+                        .load(thumb))
+                .into(target);
+
+        verify(target, times(2)).onResourceReady(any(Drawable.class), any(GlideAnimation.class));
+    }
+
+    @Test
+    public void testReceivesRecursiveThumbnails() {
+        requestManager
+                .load(mockUri("content://first"))
+                .thumbnail(requestManager
+                        .load(mockUri("content://second"))
+                        .thumbnail(requestManager
+                                .load(mockUri("content://third"))
+                                .thumbnail(requestManager
+                                        .load(mockUri("content://fourth"))
+                                )
+                        )
+                )
+                .into(target);
+        verify(target, times(4)).onResourceReady(any(Drawable.class), any(GlideAnimation.class));
+    }
+
+    @Test
+    public void testReceivesRecursiveThumbnailWithPercentage() {
+        requestManager
+                .load(mockUri("content://first"))
+                .thumbnail(requestManager
+                        .load(mockUri("content://second"))
+                        .thumbnail(0.5f)
+                )
+                .into(target);
+        verify(target, times(3)).onResourceReady(any(Drawable.class), any(GlideAnimation.class));
+    }
+
+    @Test
     public void testNullModelInGenericImageLoadDoesNotThrow() {
         requestManager.load((Double) null).into(target);
     }
@@ -646,15 +689,15 @@ public class GlideTest {
         Glide.get(getContext()).register(failModel, failResource, failFactory);
     }
 
-    private void mockUri(String uriString) {
-        mockUri(Uri.parse(uriString), null);
+    private String mockUri(String uriString) {
+        return mockUri(Uri.parse(uriString), null);
     }
 
-    private void mockUri(Uri uri) {
-        mockUri(uri, null);
+    private String mockUri(Uri uri) {
+        return mockUri(uri, null);
     }
 
-    private void mockUri(Uri uri, InputStream is) {
+    private String mockUri(Uri uri, InputStream is) {
         if (is == null) {
             is = new ByteArrayInputStream(new byte[0]);
         }
@@ -667,6 +710,7 @@ public class GlideTest {
         when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(parcelFileDescriptor);
 
         shadowContentResolver.registerAssetFileDescriptor(uri, assetFileDescriptor);
+        return uri.toString();
     }
 
     private Context getContext() {
