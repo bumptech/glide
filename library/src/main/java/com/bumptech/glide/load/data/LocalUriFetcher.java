@@ -9,7 +9,6 @@ import com.bumptech.glide.Priority;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 /**
  * A DataFetcher that uses an {@link android.content.ContentResolver} to load data from a {@link android.net.Uri}
@@ -20,8 +19,8 @@ import java.lang.ref.WeakReference;
  */
 public abstract class LocalUriFetcher<T extends Closeable> implements DataFetcher<T> {
     private static final String TAG = "LocalUriFetcher";
-    private final WeakReference<Context> contextRef;
     private final Uri uri;
+    private final Context context;
     private T data;
 
     /**
@@ -35,16 +34,12 @@ public abstract class LocalUriFetcher<T extends Closeable> implements DataFetche
      *            {@link ContentResolver#openInputStream(android.net.Uri)}
      */
     public LocalUriFetcher(Context context, Uri uri) {
-        contextRef = new WeakReference<Context>(context);
+        this.context = context.getApplicationContext();
         this.uri = uri;
     }
 
     @Override
     public final T loadData(Priority priority) throws Exception {
-        Context context = contextRef.get();
-        if (context == null) {
-            throw new NullPointerException("Context has been cleared in LocalUriFetcher uri: " + uri);
-        }
         ContentResolver contentResolver = context.getContentResolver();
         data = loadResource(uri, contentResolver);
         return data;
