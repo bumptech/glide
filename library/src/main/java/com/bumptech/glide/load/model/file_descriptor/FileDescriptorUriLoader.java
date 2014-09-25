@@ -4,13 +4,14 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.FileDescriptorAssetPathFetcher;
+import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.UriLoader;
-import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 
 /**
  * A {@link ModelLoader} For translating {@link Uri} models for local uris into {@link ParcelFileDescriptor} data.
@@ -44,5 +45,10 @@ public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> imp
     @Override
     protected DataFetcher<ParcelFileDescriptor> getLocalUriFetcher(Context context, Uri uri) {
         return new FileDescriptorLocalUriFetcher(context, uri);
+    }
+
+    @Override
+    protected DataFetcher<ParcelFileDescriptor> getAssetPathFetcher(Context context, String assetPath) {
+        return new FileDescriptorAssetPathFetcher(context.getApplicationContext().getAssets(), assetPath);
     }
 }

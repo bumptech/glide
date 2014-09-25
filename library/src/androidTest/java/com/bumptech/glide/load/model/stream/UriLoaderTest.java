@@ -33,16 +33,24 @@ public class UriLoaderTest {
     private UriLoader loader;
     private DataFetcher<InputStream> localUriFetcher;
     private ModelLoader<GlideUrl, InputStream> urlLoader;
+    private DataFetcher<InputStream> assetUriFetcher;
 
+    @SuppressWarnings("uncecked")
     @Before
     public void setUp() throws Exception {
         urlLoader = mock(ModelLoader.class);
         localUriFetcher = mock(DataFetcher.class);
+        assetUriFetcher = mock(DataFetcher.class);
 
         loader = new UriLoader<InputStream>(Robolectric.application, urlLoader) {
             @Override
             protected DataFetcher<InputStream> getLocalUriFetcher(Context context, Uri uri) {
                 return localUriFetcher;
+            }
+
+            @Override
+            protected DataFetcher<InputStream> getAssetPathFetcher(Context context, String path) {
+                return assetUriFetcher;
             }
         };
     }
@@ -66,6 +74,13 @@ public class UriLoaderTest {
         Uri contentUri = Uri.parse("content://com.bumptech.glide");
         DataFetcher dataFetcher = loader.getResourceFetcher(contentUri, IMAGE_SIDE, IMAGE_SIDE);
         assertEquals(localUriFetcher, dataFetcher);
+    }
+
+    @Test
+    public void testHandlesAssetUris() {
+        Uri assetUri = Uri.parse("file:///android_asset/assetName");
+        DataFetcher fetcher = loader.getResourceFetcher(assetUri, IMAGE_SIDE, IMAGE_SIDE);
+        assertEquals(assetUriFetcher, fetcher);
     }
 
     @Test

@@ -13,6 +13,10 @@ import com.bumptech.glide.load.data.DataFetcher;
  * @param <T> The type of data that will be retrieved for {@link android.net.Uri}s.
  */
 public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
+    private static final String ASSET_PATH_SEGMENT = "android_asset";
+    private static final String ASSET_PREFIX = ContentResolver.SCHEME_FILE + ":///" + ASSET_PATH_SEGMENT + "/";
+    private static final int ASSET_PREFIX_LENGTH = ASSET_PREFIX.length();
+
     private final Context context;
     private final ModelLoader<GlideUrl, T> urlLoader;
 
@@ -27,7 +31,12 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
 
         DataFetcher<T> result = null;
         if (isLocalUri(scheme)) {
-            result = getLocalUriFetcher(context, model);
+            if (AssetUriParser.isAssetUri(model)) {
+                String path = AssetUriParser.toAssetPath(model);
+                result = getAssetPathFetcher(context, path);
+            } else {
+                result = getLocalUriFetcher(context, model);
+            }
         } else if (urlLoader != null && ("http".equals(scheme) || "https".equals(scheme))) {
             result = urlLoader.getResourceFetcher(new GlideUrl(model.toString()), width, height);
         }
@@ -36,6 +45,8 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
     }
 
     protected abstract DataFetcher<T> getLocalUriFetcher(Context context, Uri uri);
+
+    protected abstract DataFetcher<T> getAssetPathFetcher(Context context, String path);
 
     private static boolean isLocalUri(String scheme) {
         return ContentResolver.SCHEME_FILE.equals(scheme)
