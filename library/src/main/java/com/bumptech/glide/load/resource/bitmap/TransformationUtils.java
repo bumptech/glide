@@ -57,6 +57,10 @@ public class TransformationUtils {
             result = Bitmap.createBitmap(width, height, toCrop.getConfig() == null
                         ? Bitmap.Config.ARGB_8888 : toCrop.getConfig());
         }
+
+        // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
+        TransformationUtils.setAlpha(toCrop, result);
+
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint(PAINT_FLAGS);
         canvas.drawBitmap(toCrop, m, paint);
@@ -90,6 +94,10 @@ public class TransformationUtils {
         if (toReuse == null) {
             toReuse = Bitmap.createBitmap(targetWidth, targetHeight, config);
         }
+
+        // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
+        TransformationUtils.setAlpha(toFit, toReuse);
+
         Canvas canvas = new Canvas(toReuse);
         Matrix matrix = new Matrix();
         matrix.setScale(minPercentage, minPercentage);
@@ -97,6 +105,21 @@ public class TransformationUtils {
         canvas.drawBitmap(toFit, matrix, paint);
 
         return toReuse;
+    }
+
+    /**
+     * Sets the alpha of the Bitmap we're going to re-use to the alpha of the Bitmap we're going to transform. This
+     * keeps {@link android.graphics.Bitmap#hasAlpha()}} consistent before and after the transformation for
+     * transformations that don't add or remove transparent pixels.
+     *
+     * @param toTransform The {@link android.graphics.Bitmap} that will be transformed.
+     * @param outBitmap The {@link android.graphics.Bitmap} that will be returned from the transformation.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    public static void setAlpha(Bitmap toTransform, Bitmap outBitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1 && outBitmap != null) {
+            outBitmap.setHasAlpha(toTransform.hasAlpha());
+        }
     }
 
     /**
