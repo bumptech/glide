@@ -3,6 +3,7 @@ package com.bumptech.glide.manager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.Build;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -13,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -26,6 +28,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = GlideShadowLooper.class)
@@ -33,6 +36,7 @@ public class RequestManagerRetrieverTest {
     private static final String PARENT_TAG = "parent";
     private RetrieverHarness[] harnesses;
     private RequestManagerRetriever retriever;
+    private int initialSdkVersion;
 
     @Before
     public void setUp() {
@@ -40,13 +44,21 @@ public class RequestManagerRetrieverTest {
         retriever = new RequestManagerRetriever();
 
         harnesses = new RetrieverHarness[] { new DefaultRetrieverHarness(), new SupportRetrieverHarness() };
+
+        initialSdkVersion = Build.VERSION.SDK_INT;
     }
 
     @After
     public void tearDown() {
+        setSdkVersionInt(initialSdkVersion);
+
         Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
         assertThat(retriever.pendingRequestManagerFragments.entrySet(), empty());
         assertThat(retriever.pendingSupportRequestManagerFragments.entrySet(), empty());
+    }
+
+    private void setSdkVersionInt(int version) {
+        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", version);
     }
 
     @Test
@@ -245,6 +257,56 @@ public class RequestManagerRetrieverTest {
         // expect) our message to not run immediately
         Robolectric.shadowOf(Looper.getMainLooper()).pause();
         Robolectric.buildActivity(Issue117Activity.class).create().start().resume().visible();
+    }
+
+    @Test
+    public void testDoesNotThrowIfAskedToGetManagerForActivityPreHoneycomb() {
+        setSdkVersionInt(Build.VERSION_CODES.GINGERBREAD_MR1);
+        Activity activity = mock(Activity.class);
+        when(activity.getApplicationContext()).thenReturn(Robolectric.application);
+        when(activity.getFragmentManager()).thenThrow(new NoSuchMethodError());
+
+        assertNotNull(retriever.get(activity));
+    }
+
+    @Test
+    public void testDoesNotThrowIfAskedToGetManagerForActivityPreJellYBeanMr1() {
+        setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
+        Activity spyActivity = Mockito.spy(activity);
+        when(spyActivity.isDestroyed()).thenThrow(new NoSuchMethodError());
+
+        assertNotNull(retriever.get(spyActivity));
+    }
+
+    @Test
+    public void testDoesNotThrowIfAskedToGetManagerForFragmentPreHoneyCombMr2() {
+        setSdkVersionInt(Build.VERSION_CODES.HONEYCOMB_MR1);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
+        android.app.Fragment fragment = new android.app.Fragment();
+
+        activity.getFragmentManager()
+                .beginTransaction().add(fragment, "test")
+                .commit();
+        android.app.Fragment spyFragment = Mockito.spy(fragment);
+        when(spyFragment.isDetached()).thenThrow(new NoSuchMethodError());
+
+        assertNotNull(retriever.get(spyFragment));
+    }
+
+    @Test
+    public void testDoesNotThrowIfAskedToGetManagerForFragmentPreJellyBeanMr1() {
+        setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
+        android.app.Fragment fragment = new android.app.Fragment();
+
+        activity.getFragmentManager()
+                .beginTransaction().add(fragment, "test")
+                .commit();
+        android.app.Fragment spyFragment = Mockito.spy(fragment);
+        when(spyFragment.getChildFragmentManager()).thenThrow(new NoSuchMethodError());
+
+        assertNotNull(retriever.get(spyFragment));
     }
 
     private interface RetrieverHarness {

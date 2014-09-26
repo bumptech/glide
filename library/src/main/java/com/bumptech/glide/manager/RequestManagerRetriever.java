@@ -93,14 +93,11 @@ public class RequestManagerRetriever implements Handler.Callback {
         return getApplicationManager(context);
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public RequestManager get(FragmentActivity activity) {
         if (Util.isOnBackgroundThread()) {
             return get(activity.getApplicationContext());
         } else {
-            if (Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT && activity.isDestroyed()) {
-                throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
-            }
+            assertNotDestroyed(activity);
             FragmentManager fm = activity.getSupportFragmentManager();
             return supportFragmentGet(activity, fm);
         }
@@ -121,16 +118,21 @@ public class RequestManagerRetriever implements Handler.Callback {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public RequestManager get(Activity activity) {
-        if (Util.isOnBackgroundThread()) {
+        if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
             return get(activity.getApplicationContext());
         } else {
-            if (Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT && activity.isDestroyed()) {
-                throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
-            }
+            assertNotDestroyed(activity);
             android.app.FragmentManager fm = activity.getFragmentManager();
             return fragmentGet(activity, fm);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private static void assertNotDestroyed(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && activity.isDestroyed()) {
+            throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
         }
     }
 
@@ -139,18 +141,19 @@ public class RequestManagerRetriever implements Handler.Callback {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
         }
-        if (Util.isOnBackgroundThread()) {
+        if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return get(fragment.getActivity().getApplicationContext());
         } else {
-            if (Build.VERSION_CODES.HONEYCOMB_MR2 <= Build.VERSION.SDK_INT && fragment.isDetached()) {
-                throw new IllegalArgumentException("You cannot start a load on a detached fragment");
-            }
-            if (Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT) {
-                android.app.FragmentManager fm = fragment.getChildFragmentManager();
-                return fragmentGet(fragment.getActivity(), fm);
-            } else {
-                return get(fragment.getActivity().getApplicationContext());
-            }
+            assertNotDetached(fragment);
+            android.app.FragmentManager fm = fragment.getChildFragmentManager();
+            return fragmentGet(fragment.getActivity(), fm);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private static void assertNotDetached(android.app.Fragment fragment) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2 && fragment.isDetached()) {
+            throw new IllegalArgumentException("You cannot start a load on a detached fragment");
         }
     }
 
