@@ -37,7 +37,7 @@ public class LocalUriFetcherTest {
     }
 
     @Test
-    public void testDoesNotCLoseNullData() throws IOException {
+    public void testDoesNotCloseNullData() throws IOException {
         fetcher.cleanup();
 
         verify(fetcher.closeable, never()).close();
@@ -61,6 +61,11 @@ public class LocalUriFetcherTest {
         @Override
         protected Closeable loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException {
             return closeable;
+        }
+
+        @Override
+        protected void close(Closeable data) throws IOException {
+            data.close();
         }
     }
 }

@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 
-import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -17,7 +16,7 @@ import java.io.IOException;
  * @param <T> The type of data that will obtained for the given uri (For example, {@link java.io.InputStream} or
  * {@link android.os.ParcelFileDescriptor}.
  */
-public abstract class LocalUriFetcher<T extends Closeable> implements DataFetcher<T> {
+public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
     private static final String TAG = "LocalUriFetcher";
     private final Uri uri;
     private final Context context;
@@ -49,7 +48,7 @@ public abstract class LocalUriFetcher<T extends Closeable> implements DataFetche
     public void cleanup() {
         if (data != null) {
             try {
-                data.close();
+                close(data);
             } catch (IOException e) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "failed to close data", e);
@@ -69,6 +68,25 @@ public abstract class LocalUriFetcher<T extends Closeable> implements DataFetche
         return uri.toString();
     }
 
+
+    /**
+     * Returns a concrete data type from the given {@link android.net.Uri} using the given
+     * {@link android.content.ContentResolver}.
+     *
+     * @throws FileNotFoundException
+     */
     protected abstract T loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException;
+
+    /**
+     * Closes the concrete data type if necessary.
+     *
+     * <p>
+     *     Note - We can't rely on the closeable interface because it was added after our min API level. See issue #157.
+     * </p>
+     *
+     * @param data The data to close.
+     * @throws IOException
+     */
+    protected abstract void close(T data) throws IOException;
 }
 
