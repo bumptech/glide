@@ -49,6 +49,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -79,7 +80,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = { GlideTest.ShadowFileDescriptorContentResolver.class, GlideTest.ShadowMediaMetadataRetriever.class,
-        GlideShadowLooper.class })
+        GlideShadowLooper.class, GlideTest.MutableShadowBitmap.class })
 public class GlideTest {
     private Target target = null;
     private ImageView imageView;
@@ -805,6 +806,17 @@ public class GlideTest {
         public static void reset() {
             URI_TO_INPUT_STREAMS.clear();
             URI_TO_FILE_DESCRIPTOR.clear();
+        }
+    }
+
+    @Implements(Bitmap.class)
+    public static class MutableShadowBitmap extends ShadowBitmap {
+
+        @Implementation
+        public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
+            Bitmap bitmap = ShadowBitmap.createBitmap(width, height, config);
+            Robolectric.shadowOf(bitmap).setMutable(true);
+            return bitmap;
         }
     }
 

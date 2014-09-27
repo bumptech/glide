@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
@@ -42,22 +43,45 @@ public class GifDrawableTest {
     private Drawable.Callback cb = mock(Drawable.Callback.class);
     private int frameHeight;
     private int frameWidth;
+    private Bitmap firstFrame;
+    private BitmapPool bitmapPool;
 
     @Before
     public void setUp() {
         frameWidth = 120;
         frameHeight = 450;
         gifDecoder = mock(GifDecoder.class);
-        drawable = new GifDrawable(gifDecoder, frameManager, frameWidth, frameHeight);
+        firstFrame = Bitmap.createBitmap(frameWidth, frameHeight, Bitmap.Config.RGB_565);
+        bitmapPool = mock(BitmapPool.class);
+        drawable = new GifDrawable(gifDecoder, frameManager, firstFrame, bitmapPool);
         drawable.setCallback(cb);
     }
 
     @Test
-    public void testShouldNotDrawNullBitmap() {
+    public void testShouldDrawFirstFrameBeforeAnyFrameRead() {
         Canvas canvas = mock(Canvas.class);
         drawable.draw(canvas);
 
+        verify(canvas).drawBitmap(eq(firstFrame), anyInt(), anyInt(), any(Paint.class));
+    }
+
+    @Test
+    public void testShouldNotDrawNullBitmapFrame() {
+        Canvas canvas = mock(Canvas.class);
+        drawable = new GifDrawable(gifDecoder, frameManager, firstFrame, bitmapPool);
+        drawable.onFrameRead(null, 0);
+        drawable.draw(canvas);
+
+        verify(canvas).drawBitmap(eq(firstFrame), anyInt(), anyInt(), any(Paint.class));
         verify(canvas, never()).drawBitmap((Bitmap) isNull(), anyInt(), anyInt(), any(Paint.class));
+    }
+
+    @Test
+    public void testDoesNotDrawNullFirstFrame() {
+        drawable = new GifDrawable(gifDecoder, frameManager, null, bitmapPool);
+        Canvas canvas = mock(Canvas.class);
+
+        verify(canvas, never()).drawBitmap(any(Bitmap.class), anyInt(), anyInt(), any(Paint.class));
     }
 
     @Test
@@ -80,7 +104,7 @@ public class GifDrawableTest {
         drawable.setVisible(false, false);
         drawable.start();
 
-        verify(frameManager, never()).getNextFrame(eq(drawable));
+        verify(frameManager, never()).getNextFrame(any(GifFrameManager.FrameCallback.class));
     }
 
     @Test
@@ -227,6 +251,13 @@ public class GifDrawableTest {
     }
 
     @Test
+    public void testRecycleReturnsFirstFrameToPool() {
+        drawable.recycle();
+
+        verify(bitmapPool).put(eq(firstFrame));
+    }
+
+    @Test
     public void testIsNotRecycledIfNotRecycled() {
         assertFalse(drawable.isRecycled());
     }
@@ -248,8 +279,9 @@ public class GifDrawableTest {
         GifHeader gifHeader = new GifHeader();
         Transformation<Bitmap> transformation = mock(Transformation.class);
         GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
-        drawable = new GifDrawable(Robolectric.application, provider, transformation, 100, 100, "fakeId", gifHeader,
-                new byte[0], 100, 100);
+        Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        drawable = new GifDrawable(Robolectric.application, provider, bitmapPool, transformation, 100, 100, "fakeId",
+                gifHeader, new byte[0], firstFrame);
 
         assertNotNull(drawable.getConstantState().newDrawable());
         assertNotNull(drawable.getConstantState().newDrawable(Robolectric.application.getResources()));

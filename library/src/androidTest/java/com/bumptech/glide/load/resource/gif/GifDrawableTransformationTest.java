@@ -51,6 +51,9 @@ public class GifDrawableTransformationTest {
         when(gifDrawable.getIntrinsicHeight()).thenReturn(500);
         when(resource.get()).thenReturn(gifDrawable);
 
+        Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        when(gifDrawable.getFirstFrame()).thenReturn(firstFrame);
+
         final int width = 123;
         final int height = 456;
         Bitmap expectedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -60,6 +63,6 @@ public class GifDrawableTransformationTest {
 
         transformation.transform(resource, width, height);
 
-        verify(gifDrawable).setFrameTransformation(any(Transformation.class), eq(width), eq(height));
+        verify(gifDrawable).setFrameTransformation(any(Transformation.class), eq(expectedBitmap));
     }
 }

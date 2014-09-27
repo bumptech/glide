@@ -14,6 +14,7 @@ import android.os.Build;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 
 /**
@@ -47,11 +48,13 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     /**
      * Constructor for GifDrawable.
      *
-     * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, int, int)
+     * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
      *
      * @param context A context.
      * @param bitmapProvider An {@link com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider} that can be used to
      *                       retrieve re-usable {@link android.graphics.Bitmap}s.
+     * @param bitmapPool A {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} that can be used to return
+     *                   the first frame when this drawable is recycled.
      * @param frameTransformation An {@link com.bumptech.glide.load.Transformation} that can be applied to each frame.
      * @param targetFrameWidth The desired width of the frames displayed by this drawable (the width of the view or
      *                         {@link com.bumptech.glide.request.target.Target} this drawable is being loaded into).
@@ -60,15 +63,13 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
      * @param id An id that uniquely identifies this particular gif.
      * @param gifHeader The header data for this gif.
      * @param data The full bytes of the gif.
-     * @param finalFrameWidth The final width of the frames displayed by this drawable after they have been transformed.
-     * @param finalFrameHeight The final height of the frames displayed by this drwaable after they have been
-     *                         transformed.
+     * @param firstFrame The decoded and transformed first frame of this gif.
      */
-    public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider,
+    public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider, BitmapPool bitmapPool,
             Transformation<Bitmap> frameTransformation, int targetFrameWidth, int targetFrameHeight, String id,
-            GifHeader gifHeader, byte[] data, int finalFrameWidth, int finalFrameHeight) {
+            GifHeader gifHeader, byte[] data, Bitmap firstFrame) {
         this(new GifState(id, gifHeader, data, context, frameTransformation, targetFrameWidth, targetFrameHeight,
-                bitmapProvider, finalFrameWidth, finalFrameHeight));
+                bitmapProvider, bitmapPool, firstFrame));
     }
 
     private GifDrawable(GifState state) {
@@ -76,23 +77,25 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         this.decoder = new GifDecoder(state.bitmapProvider);
         decoder.setData(state.id, state.gifHeader, state.data);
         frameManager = new GifFrameManager(state.context, decoder, state.frameTransformation, state.targetWidth,
-                state.targetHeight, state.finalFrameWidth, state.finalFrameHeight);
+                state.targetHeight, state.firstFrame.getWidth(), state.firstFrame.getHeight());
     }
 
-    // For testing.
-    GifDrawable(GifDecoder decoder, GifFrameManager frameManager, int finalFrameWidth, int finalFrameHeight) {
+    // Visible for testing.
+    GifDrawable(GifDecoder decoder, GifFrameManager frameManager, Bitmap firstFrame, BitmapPool bitmapPool) {
         this.decoder = decoder;
         this.frameManager = frameManager;
         this.state = new GifState(null);
-        state.finalFrameWidth = finalFrameWidth;
-        state.finalFrameHeight = finalFrameHeight;
+        state.bitmapPool = bitmapPool;
+        state.firstFrame = firstFrame;
     }
 
-    public void setFrameTransformation(Transformation<Bitmap> frameTransformation, int finalFrameWidth,
-            int finalFrameHeight) {
+    public Bitmap getFirstFrame() {
+        return state.firstFrame;
+    }
+
+    public void setFrameTransformation(Transformation<Bitmap> frameTransformation, Bitmap firstFrame) {
         state.frameTransformation = frameTransformation;
-        state.finalFrameWidth = finalFrameWidth;
-        state.finalFrameHeight = finalFrameHeight;
+        state.firstFrame = firstFrame;
     }
 
     public Transformation<Bitmap> getFrameTransformation() {
@@ -147,12 +150,12 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
     @Override
     public int getIntrinsicWidth() {
-        return state.finalFrameWidth;
+        return state.firstFrame.getWidth();
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return state.finalFrameHeight;
+        return state.firstFrame.getHeight();
     }
 
     @Override
@@ -167,9 +170,8 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
     @Override
     public void draw(Canvas canvas) {
-        if (currentFrame != null) {
-            canvas.drawBitmap(currentFrame, 0, 0, paint);
-        }
+        Bitmap toDraw = currentFrame != null ? currentFrame : state.firstFrame;
+        canvas.drawBitmap(toDraw, 0, 0, paint);
     }
 
     @Override
@@ -224,6 +226,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
      */
     public void recycle() {
         isRecycled = true;
+        state.bitmapPool.put(state.firstFrame);
         frameManager.clear();
     }
 
@@ -255,22 +258,22 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         String id;
         GifHeader gifHeader;
         byte[] data;
-        int finalFrameWidth;
-        int finalFrameHeight;
         Context context;
         Transformation<Bitmap> frameTransformation;
         int targetWidth;
         int targetHeight;
         GifDecoder.BitmapProvider bitmapProvider;
+        BitmapPool bitmapPool;
+        Bitmap firstFrame;
 
         public GifState(String id, GifHeader header, byte[] data, Context context,
                 Transformation<Bitmap> frameTransformation, int targetWidth, int targetHeight,
-                GifDecoder.BitmapProvider provider, int finalFrameWidth, int finalFrameHeight) {
+                GifDecoder.BitmapProvider provider, BitmapPool bitmapPool, Bitmap firstFrame) {
             this.id = id;
             gifHeader = header;
             this.data = data;
-            this.finalFrameWidth = finalFrameWidth;
-            this.finalFrameHeight = finalFrameHeight;
+            this.bitmapPool = bitmapPool;
+            this.firstFrame = firstFrame;
             this.context = context.getApplicationContext();
             this.frameTransformation = frameTransformation;
             this.targetWidth = targetWidth;
@@ -288,8 +291,8 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
                 targetWidth = original.targetWidth;
                 targetHeight = original.targetHeight;
                 bitmapProvider = original.bitmapProvider;
-                finalFrameWidth = original.finalFrameWidth;
-                finalFrameHeight = original.finalFrameHeight;
+                bitmapPool = original.bitmapPool;
+                firstFrame = original.firstFrame;
             }
         }
 

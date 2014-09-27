@@ -297,6 +297,14 @@ public class GifDecoder {
         return header.status;
     }
 
+    public void clear() {
+        id = null;
+        header = null;
+        data = null;
+        mainPixels = null;
+        mainScratch = null;
+    }
+
     public void setData(String id, GifHeader header, byte[] data) {
         this.id = id;
         this.header = header;

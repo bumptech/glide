@@ -1,7 +1,8 @@
 package com.bumptech.glide.load.resource.gif;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-
+import com.bumptech.glide.util.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,11 +42,13 @@ public class GifDrawableResourceTest {
     }
 
     @Test
-    public void testReturnsDrawableSize() {
+    public void testReturnsDrawableSizePlusFirstFrameSize() {
         final int size = 2134;
+        Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        when(drawable.getFirstFrame()).thenReturn(firstFrame);
         when(drawable.getData()).thenReturn(new byte[size]);
 
-        assertEquals(size, resource.getSize());
+        assertEquals(size + Util.getBitmapByteSize(firstFrame), resource.getSize());
     }
 
     @Test
