@@ -30,6 +30,7 @@ public class StringLoaderTest {
     private StreamStringLoader stringLoader;
     private ModelLoader<Uri, InputStream> uriLoader;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         uriLoader = mock(ModelLoader.class);
@@ -44,6 +45,17 @@ public class StringLoaderTest {
         stringLoader.getResourceFetcher(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE);
 
         verify(uriLoader).getResourceFetcher(eq(Uri.fromFile(f)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+    }
+
+    @Test
+    public void testCanHandleComplexFilePaths() {
+        assumeTrue(!Util.isWindows());
+        String testPath = "/storage/emulated/0/DCIM/Camera/IMG_20140520_100001:nopm:.jpg,mimeType=image/jpeg,"
+                + "2448x3264,orientation=0,date=Tue";
+        stringLoader.getResourceFetcher(testPath, IMAGE_SIDE, IMAGE_SIDE);
+
+        Uri expected = Uri.fromFile(new File(testPath));
+        verify(uriLoader).getResourceFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test

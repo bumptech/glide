@@ -20,12 +20,21 @@ public class StringLoader<T> implements ModelLoader<String, T> {
 
     @Override
     public DataFetcher<T> getResourceFetcher(String model, int width, int height) {
-        Uri uri = Uri.parse(model);
-
-        final String scheme = uri.getScheme();
-        if (scheme == null) {
-            uri = Uri.fromFile(new File(model));
+        Uri uri;
+        if (model.startsWith("/")) {
+            uri = toFileUri(model);
+        } else {
+            uri = Uri.parse(model);
+            final String scheme = uri.getScheme();
+            if (scheme == null) {
+                uri = toFileUri(model);
+            }
         }
+
         return uriLoader.getResourceFetcher(uri, width, height);
+    }
+
+    private static Uri toFileUri(String path) {
+        return Uri.fromFile(new File(path));
     }
 }
