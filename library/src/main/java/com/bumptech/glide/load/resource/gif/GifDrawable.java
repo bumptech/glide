@@ -126,7 +126,10 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     }
 
     private void startRunning() {
-        if (!isRunning) {
+        // If we have only a single frame, we don't want to decode it endlessly.
+        if (decoder.getFrameCount() == 1) {
+            invalidateSelf();
+        }  else if (!isRunning) {
             isRunning = true;
             frameManager.getNextFrame(this);
             invalidateSelf();
