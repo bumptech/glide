@@ -62,7 +62,7 @@ public class GifBitmapWrapperResourceDecoderTest {
         when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
         int width = 100;
         int height = 200;
-        Resource<GifDrawable> expected = mock(Resource.class);
+        Resource<GifDrawable> expected = mockGifResource();
 
         when(gifDecoder.decode(any(InputStream.class), eq(width), eq(height))).thenReturn(expected);
 
@@ -90,7 +90,7 @@ public class GifBitmapWrapperResourceDecoderTest {
         when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
         int width = 101;
         int height = 102;
-        Resource<GifDrawable> expected = mock(Resource.class);
+        Resource<GifDrawable> expected = mockGifResource();
         when(gifDecoder.decode(any(InputStream.class), eq(width), eq(height))).thenReturn(expected);
         when(bitmapDecoder.decode(any(ImageVideoWrapper.class), eq(width), eq(height)))
                 .thenReturn(mock(Resource.class));
@@ -133,6 +133,38 @@ public class GifBitmapWrapperResourceDecoderTest {
     }
 
     @Test
+    public void testReturnsBitmapWhenGifTypeButGifHasSingleFrame() throws IOException {
+        Resource<GifDrawable> gifResource = mockGifResource();
+        when(gifResource.get().getFrameCount()).thenReturn(1);
+
+        when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
+        when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifResource);
+
+        Resource<Bitmap> expected = mock(Resource.class);
+        when(bitmapDecoder.decode(any(ImageVideoWrapper.class), anyInt(), anyInt())).thenReturn(expected);
+
+        Resource<GifBitmapWrapper> result = decoder.decode(source, 100, 100);
+
+        assertEquals(expected, result.get().getBitmapResource());
+    }
+
+    @Test
+    public void testRecyclesGifResourceWhenGifTypeButGifHasSingleFrame() throws IOException {
+        Resource<GifDrawable> gifResource = mockGifResource();
+        when(gifResource.get().getFrameCount()).thenReturn(1);
+
+        when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
+        when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifResource);
+
+        Resource<Bitmap> expected = mock(Resource.class);
+        when(bitmapDecoder.decode(any(ImageVideoWrapper.class), anyInt(), anyInt())).thenReturn(expected);
+
+        decoder.decode(source, 100, 100);
+
+        verify(gifResource).recycle();
+    }
+
+    @Test
     public void testDoesNotTryToParseTypeOrDecodeNullStream() throws IOException {
         when(source.getFileDescriptor()).thenReturn(mock(ParcelFileDescriptor.class));
         when(source.getStream()).thenReturn(null);
@@ -170,5 +202,15 @@ public class GifBitmapWrapperResourceDecoderTest {
         String id = decoder.getId();
         assertThat(id, containsString(bitmapId));
         assertThat(id, containsString(gifId));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Resource<GifDrawable> mockGifResource() {
+        GifDrawable drawable = mock(GifDrawable.class);
+        // Something > 1.
+        when(drawable.getFrameCount()).thenReturn(4);
+        Resource<GifDrawable> resource = mock(Resource.class);
+        when(resource.get()).thenReturn(drawable);
+        return resource;
     }
 }

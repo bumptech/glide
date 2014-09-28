@@ -246,7 +246,7 @@ public class GifDrawableTest {
     }
 
     @Test
-    public void testGetOpacityReturnsTransparentfDecoderHasTransparency() {
+    public void testGetOpacityReturnsTransparentIfDecoderHasTransparency() {
         when(gifDecoder.isTransparent()).thenReturn(true);
 
         assertEquals(PixelFormat.TRANSPARENT, drawable.getOpacity());
@@ -257,6 +257,14 @@ public class GifDrawableTest {
         when(gifDecoder.isTransparent()).thenReturn(false);
 
         assertEquals(PixelFormat.OPAQUE, drawable.getOpacity());
+    }
+
+    @Test
+    public void testReturnsFrameCountFromDecoder() {
+        int expected = 4;
+        when(gifDecoder.getFrameCount()).thenReturn(expected);
+
+        assertEquals(expected, drawable.getFrameCount());
     }
 
     @Test

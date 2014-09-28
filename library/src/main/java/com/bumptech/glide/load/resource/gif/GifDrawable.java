@@ -106,6 +106,10 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         return state.data;
     }
 
+    public int getFrameCount() {
+        return decoder.getFrameCount();
+    }
+
     private void resetLoopCount() {
         loopCount = 0;
     }
