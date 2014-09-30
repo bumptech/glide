@@ -1,6 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
 apply plugin: 'maven'
+apply plugin: 'findbugs'
+findbugs {
+    toolVersion = "2.0.3"
+}
 
 dependencies {
     compile project(':third_party:gif_decoder')
@@ -27,5 +31,33 @@ android {
         targetSdkVersion 19
         versionCode = VERSION_CODE
         versionName = VERSION_NAME
+    }
+}
+
+afterEvaluate {
+    findbugsTestDebug {
+        enabled = false
+    }
+
+    task findbugs(type: FindBugs, dependsOn: assembleDebug) {
+
+        description 'Run findbugs'
+        group 'verification'
+
+        classes = fileTree('build/intermediates/classes/debug/')
+        source = fileTree('src/main/java')
+        classpath = files(project.configurations.compile.asPath)
+
+        effort = 'max'
+
+        excludeFilter = file("findbugs-exclude.xml")
+
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
+    check.doLast {
+        tasks.getByName("findbugs").execute()
     }
 }
