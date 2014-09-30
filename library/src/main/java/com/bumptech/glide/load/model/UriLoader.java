@@ -13,10 +13,6 @@ import com.bumptech.glide.load.data.DataFetcher;
  * @param <T> The type of data that will be retrieved for {@link android.net.Uri}s.
  */
 public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
-    private static final String ASSET_PATH_SEGMENT = "android_asset";
-    private static final String ASSET_PREFIX = ContentResolver.SCHEME_FILE + ":///" + ASSET_PATH_SEGMENT + "/";
-    private static final int ASSET_PREFIX_LENGTH = ASSET_PREFIX.length();
-
     private final Context context;
     private final ModelLoader<GlideUrl, T> urlLoader;
 

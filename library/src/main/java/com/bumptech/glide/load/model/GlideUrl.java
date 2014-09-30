@@ -42,6 +42,7 @@ public class GlideUrl {
         this.url = null;
     }
 
+
     public URL toURL() throws MalformedURLException {
         return getSafeUrl();
     }
@@ -77,28 +78,11 @@ public class GlideUrl {
             return false;
         }
 
-        GlideUrl glideUrl = (GlideUrl) o;
-        if (stringUrl != null) {
-            if (glideUrl.stringUrl != null) {
-                return stringUrl.equals(glideUrl.stringUrl);
-            } else {
-                return stringUrl.equals(glideUrl.url.toString());
-            }
-        } else {
-            if (glideUrl.stringUrl != null) {
-                return url.toString().equals(glideUrl.stringUrl);
-            } else {
-                return url.equals(glideUrl.url);
-            }
-        }
+        return toString().equals(o.toString());
     }
 
     @Override
     public int hashCode() {
-        if (stringUrl != null) {
-            return stringUrl.hashCode();
-        } else {
-            return url.toString().hashCode();
-        }
+        return toString().hashCode();
     }
 }

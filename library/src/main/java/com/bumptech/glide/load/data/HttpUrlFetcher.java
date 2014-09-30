@@ -7,6 +7,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -41,8 +42,16 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl) throws IOException {
         if (redirects >= MAXIMUM_REDIRECTS) {
             throw new IOException("Too many (> " + MAXIMUM_REDIRECTS + ") redirects!");
-        } else if (url.equals(lastUrl)) {
-            throw new IOException("In re-direct loop");
+        } else {
+            // Comparing the URLs using .equals performs additional network I/O and is generally broken.
+            // See http://michaelscharf.blogspot.com/2006/11/javaneturlequals-and-hashcode-make.html.
+            try {
+                if (lastUrl != null && url.toURI().equals(lastUrl.toURI())) {
+                    throw new IOException("In re-direct loop");
+                }
+            } catch (URISyntaxException e) {
+                // Do nothing, this is best effort.
+            }
         }
         urlConnection = connectionFactory.build(url);
         urlConnection.setConnectTimeout(2500);

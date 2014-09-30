@@ -71,18 +71,18 @@ class GroupedLinkedMap<K extends Poolable, V> {
 
     @Override
     public String toString() {
-        String result = "GroupedLinkedMap( ";
+        StringBuilder sb = new StringBuilder("GroupedLinkedMap( ");
         LinkedEntry<K, V> current = head.next;
         boolean hadAtLeastOneItem = false;
         while (current != head) {
             hadAtLeastOneItem = true;
-            result += "{" + current.key + ":" + current.size() + "}, ";
+            sb.append("{").append(current.key).append(":").append(current.size()).append("}, ");
             current = current.next;
         }
         if (hadAtLeastOneItem) {
-            result = result.substring(0, result.length() - 2);
+            sb.delete(sb.length() - 2, sb.length());
         }
-        return result + " )";
+        return sb.append(" )").toString();
     }
 
     // Make the entry the most recently used item.

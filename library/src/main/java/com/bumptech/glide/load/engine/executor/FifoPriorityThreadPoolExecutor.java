@@ -72,9 +72,37 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            FifoPriorityLoadTask that = (FifoPriorityLoadTask) o;
+
+            if (order != that.order) {
+                return false;
+            }
+            if (priority != that.priority) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = priority;
+            result = 31 * result + order;
+            return result;
+        }
+
+        @Override
         public int compareTo(FifoPriorityLoadTask<?> loadTask) {
             int result = priority - loadTask.priority;
-            if (result == 0 && loadTask != this) {
+            if (result == 0) {
                 result = order - loadTask.order;
             }
             return result;

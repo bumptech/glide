@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -52,6 +53,17 @@ public class ImageHeaderParser {
     // "II".
     private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;
     private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
+    private static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES;
+
+    static {
+        byte[] bytes = new byte[0];
+        try {
+            bytes = JPEG_EXIF_SEGMENT_PREAMBLE.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Ignore.
+        }
+        JPEG_EXIF_SEGMENT_PREAMBLE_BYTES = bytes;
+    }
 
     private static final int SEGMENT_SOS = 0xDA;
     private static final int MARKER_EOI = 0xD9;
@@ -116,9 +128,19 @@ public class ImageHeaderParser {
             return -1;
         } else {
             byte[] exifData = getExifSegment();
-            if (exifData != null && exifData.length >= JPEG_EXIF_SEGMENT_PREAMBLE.length()
-                    && new String(exifData, 0, JPEG_EXIF_SEGMENT_PREAMBLE.length())
-                        .equalsIgnoreCase(JPEG_EXIF_SEGMENT_PREAMBLE)) {
+            boolean hasJpegExifPreamble = exifData != null
+                    && exifData.length >= JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
+
+            if (hasJpegExifPreamble) {
+                for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {
+                    if (exifData[i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
+                        hasJpegExifPreamble = false;
+                        break;
+                    }
+                }
+            }
+
+            if (hasJpegExifPreamble) {
                 return parseExifSegment(new RandomAccessReader(exifData));
             } else {
                 return -1;

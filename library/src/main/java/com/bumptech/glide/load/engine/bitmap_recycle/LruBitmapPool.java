@@ -54,7 +54,7 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     @Override
-    public void setSizeMultiplier(float sizeMultiplier) {
+    public synchronized void setSizeMultiplier(float sizeMultiplier) {
         maxSize = Math.round(initialMaxSize * sizeMultiplier);
         evict();
     }
@@ -138,7 +138,7 @@ public class LruBitmapPool implements BitmapPool {
         }
     }
 
-    private void trimToSize(int size) {
+    private synchronized void trimToSize(int size) {
         while (currentSize > size) {
             final Bitmap removed = strategy.removeLast();
             tracker.remove(removed);
