@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ruleset name="PMD.rul" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+  <description>This ruleset was created from PMD.rul</description>
+
+  <rule ref="rulesets/java/basic.xml" >
+    <exclude name="AvoidBranchingStatementAsLastInLoop" />
+  </rule>
+  <rule ref="rulesets/java/braces.xml" />
+  <rule ref="rulesets/java/strings.xml" />
+
+  <rule ref="rulesets/java/design.xml" >
+    <exclude name="ConfusingTernary" />
+    <exclude name="EmptyMethodInAbstractClassShouldBeAbstract" />
+    <exclude name="AvoidSynchronizedAtMethodLevel" />
+
+    <!-- This check breaks on double checked locking which is safe in Java 6/7 -->
+    <exclude name="NonThreadSafeSingleton" />
+
+    <!-- TODO: Fix these -->
+    <exclude name="AvoidReassigningParameters" />
+    <exclude name="GodClass" />
+  </rule>
+
+  <rule ref="rulesets/java/empty.xml/EmptyCatchBlock" message="Commented blocks are ok">
+    <properties>
+      <property name="allowCommentedBlocks" value="true" />
+    </properties>
+  </rule>
+</ruleset>

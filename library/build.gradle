@@ -2,6 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
+apply plugin: 'pmd'
+
 findbugs {
     toolVersion = "2.0.3"
 }
@@ -35,10 +37,6 @@ android {
 }
 
 afterEvaluate {
-    findbugsTestDebug {
-        enabled = false
-    }
-
     task findbugs(type: FindBugs, dependsOn: assembleDebug) {
 
         description 'Run findbugs'
@@ -57,7 +55,33 @@ afterEvaluate {
             html.enabled = true
         }
     }
-    check.doLast {
-        tasks.getByName("findbugs").execute()
+
+    findbugsTestDebug {
+        enabled = false
     }
+
+    check.dependsOn('findbugs')
+
+    task pmd(type: Pmd) {
+
+        description 'Run pmd'
+        group 'verification'
+
+        // If ruleSets is not empty, it seems to contain some
+        // defaults which override rules in the ruleset file...
+        ruleSets = []
+        ruleSetFiles = files('pmd-ruleset.xml')
+        source = fileTree('src/main/java')
+
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
+
+    pmdTestDebug {
+        enabled = false
+    }
+
+    check.dependsOn('pmd')
 }
