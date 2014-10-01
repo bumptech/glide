@@ -18,21 +18,21 @@ public interface DataLoadProvider<T, Z> {
     /**
      * Returns the {@link com.bumptech.glide.load.ResourceDecoder} to use to decode the resource from the disk cache.
      */
-    public ResourceDecoder<File, Z> getCacheDecoder();
+    ResourceDecoder<File, Z> getCacheDecoder();
 
     /**
      * Returns the {@link com.bumptech.glide.load.ResourceDecoder} to use to decode the resource from the original data.
      */
-    public ResourceDecoder<T, Z> getSourceDecoder();
+    ResourceDecoder<T, Z> getSourceDecoder();
 
     /**
      * Returns the {@link com.bumptech.glide.load.Encoder} to use to write the original data to the disk cache.
      */
-    public Encoder<T> getSourceEncoder();
+    Encoder<T> getSourceEncoder();
 
     /**
      * Returns the {@link com.bumptech.glide.load.ResourceEncoder} to use to write the decoded and transformed resource
      * to the disk cache.
      */
-    public ResourceEncoder<Z> getEncoder();
+    ResourceEncoder<Z> getEncoder();
 }

@@ -84,7 +84,7 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return mediaStoreUri + mimeType + String.valueOf(dateModified) + String.valueOf(orientation);
+        return mediaStoreUri + mimeType + dateModified + orientation;
     }
 
     @Override
@@ -117,7 +117,7 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
     }
 
     interface ThumbnailQuery {
-        public Cursor query(Context context, Uri uri);
+        Cursor query(Context context, Uri uri);
     }
 
     static class ThumbnailStreamOpener {

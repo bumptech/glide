@@ -39,7 +39,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
     private final Class<ResourceType> resourceClass;
     private final RequestTracker requestTracker;
     private final RequestManager.OptionsApplier optionsApplier;
-    private Lifecycle lifecycle;
+    private final Lifecycle lifecycle;
 
     private static <A, T, Z, R> LoadProvider<A, T, Z, R> build(Glide glide, ModelLoader<A, T> modelLoader,
             Class<T> dataClass, Class<Z> resourceClass, ResourceTranscoder<Z, R> transcoder) {

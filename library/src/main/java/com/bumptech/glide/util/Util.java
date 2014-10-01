@@ -11,12 +11,16 @@ import java.util.Queue;
 /**
  * A collection of assorted utility classes.
  */
-public class Util {
+public final class Util {
     private static final char[] HEX_CHAR_ARRAY = "0123456789abcdef".toCharArray();
     // 32 bytes from sha-256 -> 64 hex chars.
     private static final char[] SHA_256_CHARS = new char[64];
     // 20 bytes from sha-1 -> 40 chars.
     private static final char[] SHA_1_CHARS = new char[40];
+
+    private Util() {
+        // Utility class.
+    }
 
     /**
      * Returns the hex string of the given byte array representing a SHA256 hash.

@@ -8,52 +8,52 @@ public interface Request {
     /**
      * Starts an asynchronous load.
      */
-    public void begin();
+    void begin();
 
     /**
      * Identical to {@link #clear()} except that the request may later be restarted.
      */
-    public void pause();
+    void pause();
 
     /**
      * Prevents any bitmaps being loaded from previous requests, releases any resources held by this request,
      * displays the current placeholder if one was provided, and marks the request as having been cancelled.
      */
-    public void clear();
+    void clear();
 
     /**
      * Returns true if this request is paused and may be restarted.
      */
-    public boolean isPaused();
+    boolean isPaused();
 
     /**
      * Returns true if this request is running and has not completed or failed.
      */
-    public boolean isRunning();
+    boolean isRunning();
 
     /**
      * Returns true if the request has completed successfully.
      */
-    public boolean isComplete();
+    boolean isComplete();
 
     /**
      * Returns true if a non-placeholder resource is set. For Requests that load more than one resource, isResourceSet
      * may return true even if {@link #isComplete()}} returns false.
      */
-    public boolean isResourceSet();
+    boolean isResourceSet();
 
     /**
      * Returns true if the request has been cancelled.
      */
-    public boolean isCancelled();
+    boolean isCancelled();
 
     /**
      * Returns true if the request has failed.
      */
-    public boolean isFailed();
+    boolean isFailed();
 
     /**
      * Recycles the request object and releases its resources.
      */
-    public void recycle();
+    void recycle();
 }

@@ -11,8 +11,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
  * and can apply it to every frame of any {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
  */
 public class GifDrawableTransformation implements Transformation<GifDrawable> {
-    private Transformation<Bitmap> wrapped;
-    private BitmapPool bitmapPool;
+    private final Transformation<Bitmap> wrapped;
+    private final BitmapPool bitmapPool;
 
     public GifDrawableTransformation(Transformation<Bitmap> wrapped, BitmapPool bitmapPool) {
         this.wrapped = wrapped;
@@ -30,7 +30,7 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
         Bitmap firstFrame = resource.get().getFirstFrame();
         Resource<Bitmap> bitmapResource = new BitmapResource(firstFrame, bitmapPool);
         Resource<Bitmap> transformed = wrapped.transform(bitmapResource, outWidth, outHeight);
-        if (bitmapResource != transformed) {
+        if (!bitmapResource.equals(transformed)) {
             bitmapResource.recycle();
         }
         Bitmap transformedFrame = transformed.get();

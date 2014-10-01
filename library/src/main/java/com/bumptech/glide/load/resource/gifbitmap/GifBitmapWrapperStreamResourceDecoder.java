@@ -12,7 +12,7 @@ import java.io.InputStream;
  * {@link com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper} from {@link java.io.InputStream} data.
  */
 public class GifBitmapWrapperStreamResourceDecoder implements ResourceDecoder<InputStream, GifBitmapWrapper> {
-    private ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder;
+    private final ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder;
 
     public GifBitmapWrapperStreamResourceDecoder(
             ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder) {

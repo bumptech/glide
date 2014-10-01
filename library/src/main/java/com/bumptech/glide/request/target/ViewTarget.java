@@ -111,7 +111,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
     private static class SizeDeterminer {
         private final View view;
-        private List<SizeReadyCallback> cbs = new ArrayList<SizeReadyCallback>();
+        private final List<SizeReadyCallback> cbs = new ArrayList<SizeReadyCallback>();
         private SizeDeterminerLayoutListener layoutListener;
 
         public SizeDeterminer(View view) {
@@ -194,7 +194,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
         private boolean isLayoutParamsSizeValid() {
             final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            return layoutParams != null && (layoutParams.width > 0 && layoutParams.height > 0);
+            return layoutParams != null && layoutParams.width > 0 && layoutParams.height > 0;
         }
 
         private static class SizeDeterminerLayoutListener implements ViewTreeObserver.OnPreDrawListener {

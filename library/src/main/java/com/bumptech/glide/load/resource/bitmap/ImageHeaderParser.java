@@ -54,6 +54,14 @@ public class ImageHeaderParser {
     private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;
     private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
     private static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES;
+    private static final int SEGMENT_SOS = 0xDA;
+    private static final int MARKER_EOI = 0xD9;
+    private static final int SEGMENT_START_ID = 0xFF;
+    private static final int EXIF_SEGMENT_TYPE = 0xE1;
+    private static final int ORIENTATION_TAG_TYPE = 0x0112;
+    private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
+
+    private final StreamReader streamReader;
 
     static {
         byte[] bytes = new byte[0];
@@ -64,18 +72,6 @@ public class ImageHeaderParser {
         }
         JPEG_EXIF_SEGMENT_PREAMBLE_BYTES = bytes;
     }
-
-    private static final int SEGMENT_SOS = 0xDA;
-    private static final int MARKER_EOI = 0xD9;
-
-    private static final int SEGMENT_START_ID = 0xFF;
-    private static final int EXIF_SEGMENT_TYPE = 0xE1;
-
-    private static final int ORIENTATION_TAG_TYPE = 0x0112;
-
-    private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
-
-    private final StreamReader streamReader;
 
     public ImageHeaderParser(InputStream is) {
         streamReader = new StreamReader(is);
@@ -286,7 +282,7 @@ public class ImageHeaderParser {
     }
 
     private static int calcTagOffset(int ifdOffset, int tagIndex) {
-        return ifdOffset + 2 + (12 * tagIndex);
+        return ifdOffset + 2 + 12 * tagIndex;
     }
 
     private static boolean handles(int imageMagicNumber) {

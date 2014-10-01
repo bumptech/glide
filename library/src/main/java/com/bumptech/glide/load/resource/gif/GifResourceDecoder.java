@@ -32,7 +32,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
 
     private final Context context;
     private final GifHeaderParserPool parserPool;
-    private BitmapPool bitmapPool;
+    private final BitmapPool bitmapPool;
     private final GifDecoderPool decoderPool;
     private final GifBitmapProvider provider;
 
@@ -162,7 +162,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     }
 
     private static class GifBitmapProvider implements GifDecoder.BitmapProvider {
-        private BitmapPool bitmapPool;
+        private final BitmapPool bitmapPool;
 
         public GifBitmapProvider(BitmapPool bitmapPool) {
             this.bitmapPool = bitmapPool;

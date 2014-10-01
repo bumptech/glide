@@ -16,7 +16,7 @@ public interface Encoder<T> {
      * @param data The data to write.
      * @param os The OutputStream to write the data to.
      */
-    public boolean encode(T data, OutputStream os);
+    boolean encode(T data, OutputStream os);
 
     /**
      * Returns an ID identifying any transformation this encoder may apply to the given data that will be mixed in to
@@ -27,5 +27,5 @@ public interface Encoder<T> {
      *     no unusual compression or downsampling) an empty string is an appropriate id.
      * </p>
      */
-    public String getId();
+    String getId();
 }

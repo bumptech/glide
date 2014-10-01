@@ -11,7 +11,7 @@ import java.util.Collection;
  * @param <T> The type of {@link com.bumptech.glide.load.engine.Resource} that will be transformed.
  */
 public class MultiTransformation<T> implements Transformation<T> {
-    private Collection<? extends Transformation<T>> transformations;
+    private final Collection<? extends Transformation<T>> transformations;
     private String id;
 
     @SafeVarargs
@@ -35,7 +35,7 @@ public class MultiTransformation<T> implements Transformation<T> {
 
         for (Transformation<T> transformation : transformations) {
             Resource<T> transformed = transformation.transform(previous, outWidth, outHeight);
-            if (transformed != previous && previous != resource && previous != null) {
+            if (previous != null && !previous.equals(resource) && !previous.equals(transformed)) {
                 previous.recycle();
             }
             previous = transformed;

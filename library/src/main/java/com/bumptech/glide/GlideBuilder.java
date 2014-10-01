@@ -21,7 +21,8 @@ import java.util.concurrent.ExecutorService;
  * A builder class for setting default structural classes for Glide to use.
  */
 public class GlideBuilder {
-    private Context context;
+    private final Context context;
+
     private Engine engine;
     private BitmapPool bitmapPool;
     private MemoryCache memoryCache;

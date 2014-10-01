@@ -20,10 +20,11 @@ import java.net.URL;
  * </p>
  */
 public class GlideUrl {
-    private String stringUrl;
     private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
 
-    private URL url;
+    private final URL url;
+    private String stringUrl;
+
     private URL safeUrl;
 
     public GlideUrl(URL url) {

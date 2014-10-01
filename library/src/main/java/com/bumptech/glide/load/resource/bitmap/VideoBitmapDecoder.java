@@ -15,12 +15,8 @@ import java.io.IOException;
  * @see android.media.MediaMetadataRetriever
  */
 public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
-    private static final DefaultFactory DEFAULT_FACTORY = new DefaultFactory();
+    private static final MediaMetadataRetrieverFactory DEFAULT_FACTORY =  new MediaMetadataRetrieverFactory();
     private MediaMetadataRetrieverFactory factory;
-
-    interface MediaMetadataRetrieverFactory {
-        public MediaMetadataRetriever build();
-    }
 
     public VideoBitmapDecoder() {
         this(DEFAULT_FACTORY);
@@ -47,8 +43,8 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
         return "VideoBitmapDecoder.com.bumptech.glide.load.resource.bitmap";
     }
 
-    private static class DefaultFactory implements MediaMetadataRetrieverFactory {
-        @Override
+    // Visible for testing.
+    static class MediaMetadataRetrieverFactory {
         public MediaMetadataRetriever build() {
             return new MediaMetadataRetriever();
         }

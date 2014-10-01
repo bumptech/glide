@@ -20,24 +20,24 @@ public interface GlideAnimation<R> {
      * {@link com.bumptech.glide.request.animation.ViewPropertyAnimation} and animated
      * {@link android.graphics.drawable.Drawable}s).
      */
-    public interface ViewAdapter {
+    interface ViewAdapter {
         /**
          * Returns the wrapped {@link android.view.View}.
          */
-        public View getView();
+        View getView();
 
         /**
          * Returns the current drawable being displayed in the view, or null if no such drawable exists (or one cannot
          * be retrieved).
          */
-        public Drawable getCurrentDrawable();
+        Drawable getCurrentDrawable();
 
         /**
          * Sets the current drawable (usually an animated drawable) to display in the wrapped view.
          *
          * @param drawable The drawable to display in the wrapped view.
          */
-        public void setDrawable(Drawable drawable);
+        void setDrawable(Drawable drawable);
     }
 
     /**
@@ -51,5 +51,5 @@ public interface GlideAnimation<R> {
      * @return True if int he process of running the animation the new resource was set on the view, false if the caller
      * needs to manually set the current resource on the view.
      */
-    public boolean animate(R current, ViewAdapter adapter);
+    boolean animate(R current, ViewAdapter adapter);
 }

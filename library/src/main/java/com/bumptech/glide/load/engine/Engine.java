@@ -83,7 +83,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         this.runners = runners;
 
         if (factory == null) {
-            factory = new DefaultResourceRunnerFactory(diskCache, new Handler(Looper.getMainLooper()),
+            factory = new ResourceRunnerFactory(diskCache, new Handler(Looper.getMainLooper()),
                     diskCacheService, resizeService);
         }
         this.factory = factory;
@@ -287,8 +287,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     // Responsible for cleaning up the active resource map by remove weak references that have been cleared.
     private static class RefQueueIdleHandler implements MessageQueue.IdleHandler {
-        private Map<Key, WeakReference<EngineResource<?>>> activeResources;
-        private ReferenceQueue<EngineResource<?>> queue;
+        private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
+        private final ReferenceQueue<EngineResource<?>> queue;
 
         public RefQueueIdleHandler(Map<Key, WeakReference<EngineResource<?>>> activeResources,
                 ReferenceQueue<EngineResource<?>> queue) {

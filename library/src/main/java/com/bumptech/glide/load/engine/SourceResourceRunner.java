@@ -152,7 +152,7 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
         Resource<Z> transformed = null;
         if (decoded != null) {
             transformed = transformation.transform(decoded, width, height);
-            if (decoded != transformed) {
+            if (!decoded.equals(transformed)) {
                 decoded.recycle();
             }
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -210,7 +210,7 @@ class SourceResourceRunner<T, Z, R> implements Runnable, Prioritized {
     }
 
     interface WriterFactory {
-        public <T> SourceWriter<T> build(Encoder<T> encoder, T data);
+        <T> SourceWriter<T> build(Encoder<T> encoder, T data);
     }
 
     static class SourceWriter<T> implements DiskCache.Writer {

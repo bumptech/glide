@@ -146,7 +146,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     private static final class PreloadTargetQueue {
         private final Queue<PreloadTarget> queue;
 
-        private PreloadTargetQueue(int size) {
+        public PreloadTargetQueue(int size) {
             queue = Util.createQueue(size);
 
             for (int i = 0; i < size; i++) {

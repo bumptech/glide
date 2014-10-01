@@ -19,7 +19,7 @@ import java.io.InputStream;
 public class MediaStoreStreamLoader implements ModelLoader<Uri, InputStream> {
     private final Context context;
     private final ModelLoader<Uri, InputStream> uriLoader;
-    private String mimeType;
+    private final String mimeType;
     private final long dateModified;
     private final int orientation;
 

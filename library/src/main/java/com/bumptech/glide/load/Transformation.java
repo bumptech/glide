@@ -30,7 +30,7 @@ public interface Transformation<T> {
      * @param outHeight The height of the view or target the resource will be displayed in.
      * @return The transformed resource.
      */
-    public abstract Resource<T> transform(Resource<T> resource, int outWidth, int outHeight);
+    Resource<T> transform(Resource<T> resource, int outWidth, int outHeight);
 
     /**
      * A method to get a unique identifier for this particular transformation that can be used as part of a cache key.
@@ -44,5 +44,5 @@ public interface Transformation<T> {
      *
      * @return A string that uniquely identifies this transformation.
      */
-    public String getId();
+    String getId();
 }

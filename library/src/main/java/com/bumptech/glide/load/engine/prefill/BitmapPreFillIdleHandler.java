@@ -22,7 +22,7 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
     // Visisble for testing.
     static final long MAX_DURATION_MILLIS = 32;
 
-    private static final Clock DEFAULT_CLOCK = new DefaultClock();
+    private static final Clock DEFAULT_CLOCK = new Clock();
 
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
@@ -83,12 +83,7 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
     }
 
     // Visible for testing.
-    interface Clock {
-        public long now();
-    }
-
-    private static class DefaultClock implements Clock {
-        @Override
+    static class Clock {
         public long now() {
             return SystemClock.currentThreadTimeMillis();
         }

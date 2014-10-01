@@ -13,6 +13,5 @@ public interface GlideAnimationFactory<R> {
      * @param isFromMemoryCache True if this will be an animation for a resource that was loaded from the memory cache.
      * @param isFirstResource True if this is the first resource to be loaded into the target.
      */
-    public GlideAnimation<R> build(boolean isFromMemoryCache, boolean isFirstResource);
-
+    GlideAnimation<R> build(boolean isFromMemoryCache, boolean isFirstResource);
 }

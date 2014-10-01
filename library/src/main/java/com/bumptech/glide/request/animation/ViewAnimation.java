@@ -14,6 +14,38 @@ import android.view.animation.AnimationUtils;
  */
 public class ViewAnimation<R> implements GlideAnimation<R> {
 
+    private final Animation animation;
+
+    /**
+     * Constructs a new ViewAnimation that will start the given {@link android.view.animation.Animation}.
+     * @param animation The animation to use.
+     */
+    public ViewAnimation(Animation animation) {
+        this.animation = animation;
+    }
+
+    /**
+     * Always clears the current animation on the view using {@link android.view.View#clearAnimation()}, then
+     * starts the {@link android.view.animation.Animation} given in the constructor using
+     * {@link android.view.View#startAnimation(android.view.animation.Animation)} and then returns {@code false} because
+     * the animation does not actually set the current resource on the view.
+     *
+     * @param current {@inheritDoc}
+     * @param adapter {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public boolean animate(R current, ViewAdapter adapter) {
+        View view = adapter.getView();
+        if (view != null) {
+            view.clearAnimation();
+
+            view.startAnimation(animation);
+        }
+
+        return false;
+    }
+
     /**
      * A {@link com.bumptech.glide.request.animation.GlideAnimationFactory} that produces ViewAnimations.
      */
@@ -56,37 +88,5 @@ public class ViewAnimation<R> implements GlideAnimation<R> {
 
             return glideAnimation;
         }
-    }
-
-    private Animation animation;
-
-    /**
-     * Constructs a new ViewAnimation that will start the given {@link android.view.animation.Animation}.
-     * @param animation The animation to use.
-     */
-    public ViewAnimation(Animation animation) {
-        this.animation = animation;
-    }
-
-    /**
-     * Always clears the current animation on the view using {@link android.view.View#clearAnimation()}, then
-     * starts the {@link android.view.animation.Animation} given in the constructor using
-     * {@link android.view.View#startAnimation(android.view.animation.Animation)} and then returns {@code false} because
-     * the animation does not actually set the current resource on the view.
-     *
-     * @param current {@inheritDoc}
-     * @param adapter {@inheritDoc}
-     * @return {@inheritDoc}
-     */
-    @Override
-    public boolean animate(R current, ViewAdapter adapter) {
-        View view = adapter.getView();
-        if (view != null) {
-            view.clearAnimation();
-
-            view.startAnimation(animation);
-        }
-
-        return false;
     }
 }

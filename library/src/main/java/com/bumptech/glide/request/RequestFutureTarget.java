@@ -36,7 +36,7 @@ import java.util.concurrent.TimeoutException;
  * @param <R> The type of the resource that will be loaded.
  */
 public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
-    private static final Waiter DEFAULT_WAITER = new DefaultWaiter();
+    private static final Waiter DEFAULT_WAITER = new Waiter();
 
     private final Handler mainHandler;
     private final int width;
@@ -256,20 +256,13 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
         // Do nothing.
     }
 
-    interface Waiter {
-        public void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException;
+    // Visible for testing.
+    static class Waiter {
 
-        public void notifyAll(Object toNotify);
-    }
-
-    private static class DefaultWaiter implements Waiter {
-
-        @Override
         public void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException {
             toWaitOn.wait(timeoutMillis);
         }
 
-        @Override
         public void notifyAll(Object toNotify) {
             toNotify.notifyAll();
         }

@@ -18,7 +18,7 @@ public interface DiskCache {
          *
          * @param file The File the Writer should write to.
          */
-        public boolean write(File file);
+        boolean write(File file);
     }
 
     /**
@@ -32,7 +32,7 @@ public interface DiskCache {
      * @param key The key in the cache.
      * @return An InputStream representing the data at key at the time get is called.
      */
-    public File get(Key key);
+    File get(Key key);
 
     /**
      * Write to a key in the cache. {@link Writer} is used so that the cache implementation can perform actions after
@@ -41,12 +41,12 @@ public interface DiskCache {
      * @param key The key to write to.
      * @param writer An interface that will write data given an OutputStream for the key.
      */
-    public void put(Key key, Writer writer);
+    void put(Key key, Writer writer);
 
     /**
      * Remove the key and value from the cache.
      *
      * @param key The key to remove.
      */
-    public void delete(Key key);
+    void delete(Key key);
 }

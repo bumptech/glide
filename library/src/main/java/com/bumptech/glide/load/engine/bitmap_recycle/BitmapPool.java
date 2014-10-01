@@ -10,7 +10,7 @@ public interface BitmapPool {
     /**
      * Returns the current maximum size of the pool in bytes.
      */
-    public int getMaxSize();
+    int getMaxSize();
 
     /**
      * Multiplies the initial size of the pool by the given multipler to dynamically and synchronously allow users to
@@ -23,7 +23,7 @@ public interface BitmapPool {
      *
      * @param sizeMultiplier The size multiplier to apply between 0 and 1.
      */
-    public void setSizeMultiplier(float sizeMultiplier);
+    void setSizeMultiplier(float sizeMultiplier);
 
     /**
      * Adds the given {@link android.graphics.Bitmap} and returns {@code true} if the {@link android.graphics.Bitmap}
@@ -46,7 +46,7 @@ public interface BitmapPool {
      *
      * @param bitmap The {@link android.graphics.Bitmap} to attempt to add.
      */
-    public boolean put(Bitmap bitmap);
+    boolean put(Bitmap bitmap);
 
     /**
      * Returns a {@link android.graphics.Bitmap} of exactly the given width, height, and configuration, and containing
@@ -75,7 +75,7 @@ public interface BitmapPool {
      * @param height The height of the desired {@link android.graphics.Bitmap}.
      * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link android.graphics.Bitmap}.
      */
-    public Bitmap get(int width, int height, Bitmap.Config config);
+    Bitmap get(int width, int height, Bitmap.Config config);
 
     /**
      * Identical to {@link #get(int, int, android.graphics.Bitmap.Config)} except that any returned non-null
@@ -95,12 +95,12 @@ public interface BitmapPool {
      * @return A {@link android.graphics.Bitmap} with exactly the given width, height, and config potentially containing
      * random image data or null if no such {@link android.graphics.Bitmap} could be obtained from the pool.
      */
-    public Bitmap getDirty(int width, int height, Bitmap.Config config);
+    Bitmap getDirty(int width, int height, Bitmap.Config config);
 
     /**
      * Removes all {@link android.graphics.Bitmap}s from the pool.
      */
-    public void clearMemory();
+    void clearMemory();
 
     /**
      * Reduces the size of the cache by evicting items based on the given level.
@@ -110,5 +110,5 @@ public interface BitmapPool {
      * @param level The level from {@link android.content.ComponentCallbacks2} to use to determine how many
      * {@link android.graphics.Bitmap}s to evict.
      */
-    public void trimMemory(int level);
+    void trimMemory(int level);
 }

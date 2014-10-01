@@ -14,7 +14,7 @@ interface DownloadOptions {
      * @param <Y> The type of Target.
      * @return The given Target.
      */
-    public <Y extends Target<File>> Y downloadOnly(Y target);
+    <Y extends Target<File>> Y downloadOnly(Y target);
 
 
     /**
@@ -25,5 +25,5 @@ interface DownloadOptions {
      * @param height The height to use to fetch the data.
      * @return A {@link java.util.concurrent.Future} that can be used to retrieve the cache File containing the data.
      */
-    public FutureTarget<File> downloadOnly(int width, int height);
+    FutureTarget<File> downloadOnly(int width, int height);
 }

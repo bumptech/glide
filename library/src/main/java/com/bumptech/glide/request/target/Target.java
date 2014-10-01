@@ -43,7 +43,7 @@ public interface Target<R> extends LifecycleListener {
      *
      * @param placeholder The placeholder drawable to optionally show, or null.
      */
-    public void onLoadStarted(Drawable placeholder);
+    void onLoadStarted(Drawable placeholder);
 
     /**
      * A lifecycle callback that is called when a load fails.
@@ -57,36 +57,36 @@ public interface Target<R> extends LifecycleListener {
      *          simply returned null).
      * @param errorDrawable The error drawable to optionally show, or null.
      */
-    public void onLoadFailed(Exception e, Drawable errorDrawable);
+    void onLoadFailed(Exception e, Drawable errorDrawable);
 
     /**
      * The method that will be called when the resource load has finished.
      *
      * @param resource the loaded resource.
      */
-    public void onResourceReady(R resource, GlideAnimation<? super R> glideAnimation);
+    void onResourceReady(R resource, GlideAnimation<? super R> glideAnimation);
 
     /**
      * A lifecycle callback that is called when a load is cancelled and its resources are freed.
      *
      * @param placeholder The placeholder drawable to optionally show, or null.
      */
-    public void onLoadCleared(Drawable placeholder);
+    void onLoadCleared(Drawable placeholder);
 
     /**
      * A method to retrieve the size of this target.
      *
      * @param cb The callback that must be called when the size of the target has been determined
      */
-    public void getSize(SizeReadyCallback cb);
+    void getSize(SizeReadyCallback cb);
 
     /**
      * Sets the current request for this target to retain, should not be called outside of Glide.
      */
-    public void setRequest(Request request);
+    void setRequest(Request request);
 
     /**
      * Retrieves the current request for this target, should not be called outside of Glide.
      */
-    public Request getRequest();
+    Request getRequest();
 }

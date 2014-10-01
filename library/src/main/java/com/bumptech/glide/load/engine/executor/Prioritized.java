@@ -8,5 +8,5 @@ public interface Prioritized {
     /**
      * Returns the priority of this task.
      */
-    public int getPriority();
+    int getPriority();
 }

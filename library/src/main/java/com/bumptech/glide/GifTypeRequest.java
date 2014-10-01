@@ -27,8 +27,8 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
     private final ModelLoader<ModelType, InputStream> streamModelLoader;
     private final Glide glide;
     private final RequestTracker requestTracker;
-    private RequestManager.OptionsApplier optionsApplier;
-    private Lifecycle lifecycle;
+    private final RequestManager.OptionsApplier optionsApplier;
+    private final Lifecycle lifecycle;
 
     private static <A, R> FixedLoadProvider<A, InputStream, GifDrawable, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader, Class<R> transcodeClass,

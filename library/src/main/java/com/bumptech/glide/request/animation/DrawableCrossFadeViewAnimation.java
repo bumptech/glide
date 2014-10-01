@@ -19,8 +19,8 @@ import android.view.animation.AnimationUtils;
 public class DrawableCrossFadeViewAnimation<T extends Drawable> implements GlideAnimation<T> {
     // 150 ms.
     public static final int DEFAULT_DURATION = 300;
-    private Animation defaultAnimation;
-    private int duration;
+    private final Animation defaultAnimation;
+    private final int duration;
 
     private static Animation getDefaultAnimation() {
         AlphaAnimation animation = new AlphaAnimation(0f, 1f);

@@ -111,7 +111,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
         Resource<R> transcoded = null;
         if (fromCache != null) {
             Resource<Z> transformed = transformation.transform(fromCache, width, height);
-            if (transformed != fromCache) {
+            if (!fromCache.equals(transformed)) {
                 fromCache.recycle();
             }
             transcoded = transcoder.transcode(transformed);

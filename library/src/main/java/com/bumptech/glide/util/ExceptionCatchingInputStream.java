@@ -15,6 +15,9 @@ public class ExceptionCatchingInputStream extends InputStream {
 
     private static final Queue<ExceptionCatchingInputStream> QUEUE = Util.createQueue(0);
 
+    private InputStream wrapped;
+    private IOException exception;
+
     public static ExceptionCatchingInputStream obtain(InputStream toWrap) {
         ExceptionCatchingInputStream result;
         synchronized (QUEUE) {
@@ -29,11 +32,10 @@ public class ExceptionCatchingInputStream extends InputStream {
 
     // Exposed for testing.
     static void clearQueue() {
-
+        while (!QUEUE.isEmpty()) {
+            QUEUE.remove();
+        }
     }
-
-    private InputStream wrapped;
-    private IOException exception;
 
     ExceptionCatchingInputStream() {
         // Do nothing.

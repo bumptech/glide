@@ -12,8 +12,8 @@ import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawableResource;
  * {@link android.graphics.Bitmap}s into {@link android.graphics.drawable.BitmapDrawable}s.
  */
 public class GlideBitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, GlideBitmapDrawable> {
-    private Resources resources;
-    private BitmapPool bitmapPool;
+    private final Resources resources;
+    private final BitmapPool bitmapPool;
 
     public GlideBitmapDrawableTranscoder(Resources resources, BitmapPool bitmapPool) {
         this.resources = resources;

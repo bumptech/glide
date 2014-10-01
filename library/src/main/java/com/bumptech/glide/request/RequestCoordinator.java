@@ -10,19 +10,19 @@ public interface RequestCoordinator {
      *
      * @param request The {@link Request} requesting permission to display a bitmap.
      */
-    public boolean canSetImage(Request request);
+    boolean canSetImage(Request request);
 
     /**
      * Returns true if the {@link Request} can display a placeholder.
      *
      * @param request The {@link Request} requesting permission to display a placeholder.
      */
-    public boolean canNotifyStatusChanged(Request request);
+    boolean canNotifyStatusChanged(Request request);
 
     /**
      * Returns true if any coordinated {@link Request} has successfully completed.
      *
      * @see Request#isComplete()
      */
-    public boolean isAnyResourceSet();
+    boolean isAnyResourceSet();
 }

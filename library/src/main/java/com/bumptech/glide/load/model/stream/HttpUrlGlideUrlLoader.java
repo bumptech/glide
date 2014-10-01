@@ -17,13 +17,13 @@ import java.io.InputStream;
  */
 public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
-    private ModelCache<GlideUrl, GlideUrl> modelCache;
+    private final ModelCache<GlideUrl, GlideUrl> modelCache;
 
     /**
      * The default factory for {@link com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader}s.
      */
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
-        private ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<GlideUrl, GlideUrl>(500);
+        private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<GlideUrl, GlideUrl>(500);
 
         @Override
         public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {
@@ -37,7 +37,7 @@ public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream>
     }
 
     public HttpUrlGlideUrlLoader() {
-        // Empty.
+        this(null);
     }
 
     public HttpUrlGlideUrlLoader(ModelCache<GlideUrl, GlideUrl> modelCache) {

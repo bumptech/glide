@@ -63,6 +63,10 @@ public class ModelCache<A, B> {
     private static final class ModelKey<A> {
         private static final Queue<ModelKey<?>> KEY_QUEUE = Util.createQueue(0);
 
+        private int height;
+        private int width;
+        private A model;
+
         public static <A> ModelKey<A> get(A model, int width, int height) {
             @SuppressWarnings("unchecked")
             ModelKey<A> modelKey = (ModelKey<A>) KEY_QUEUE.poll();
@@ -73,10 +77,6 @@ public class ModelCache<A, B> {
             modelKey.init(model, width, height);
             return modelKey;
         }
-
-        private int height;
-        private int width;
-        private A model;
 
         private ModelKey() {  }
 

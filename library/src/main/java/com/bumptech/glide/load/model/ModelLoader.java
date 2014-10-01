@@ -42,5 +42,5 @@ public interface ModelLoader<T, Y> {
      * @return A {@link DataFetcher} that can obtain the data the resource can be decoded from if the resource is not
      * cached, or null if no valid {@link com.bumptech.glide.load.data.DataFetcher} could be constructed.
      */
-    public DataFetcher<Y> getResourceFetcher(T model, int width, int height);
+    DataFetcher<Y> getResourceFetcher(T model, int width, int height);
 }

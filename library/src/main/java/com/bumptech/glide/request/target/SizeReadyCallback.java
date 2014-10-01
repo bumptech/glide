@@ -11,5 +11,5 @@ public interface SizeReadyCallback {
      * @param width The width of the target.
      * @param height The height of the target.
      */
-    public void onSizeReady(int width, int height);
+    void onSizeReady(int width, int height);
 }

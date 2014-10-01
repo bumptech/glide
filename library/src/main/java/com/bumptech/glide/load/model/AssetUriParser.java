@@ -6,10 +6,14 @@ import android.net.Uri;
 /**
  * A utility class for parsing Asset uris that look like: file:///android_asset/some/path/in/assets/folder.
  */
-class AssetUriParser {
+final class AssetUriParser {
     private static final String ASSET_PATH_SEGMENT = "android_asset";
     private static final String ASSET_PREFIX = ContentResolver.SCHEME_FILE + ":///" + ASSET_PATH_SEGMENT + "/";
     private static final int ASSET_PREFIX_LENGTH = ASSET_PREFIX.length();
+
+    private AssetUriParser() {
+        // Utility constructor.
+    }
 
     /**
      * Returns true if the given {@link android.net.Uri} matches the asset uri pattern.

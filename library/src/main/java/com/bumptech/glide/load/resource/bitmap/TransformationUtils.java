@@ -14,9 +14,13 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 /**
  * A class with methods to efficiently resize Bitmaps.
  */
-public class TransformationUtils {
+public final class TransformationUtils {
     private static final String TAG = "TransformationUtils";
     public static final int PAINT_FLAGS = Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
+
+    private TransformationUtils() {
+        // Utility class.
+    }
 
     /**
      * A potentially expensive operation to crop the given Bitmap so that it fills the given dimensions. This operation

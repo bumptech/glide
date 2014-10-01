@@ -72,7 +72,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
                 bitmapProvider, bitmapPool, firstFrame));
     }
 
-    private GifDrawable(GifState state) {
+    GifDrawable(GifState state) {
         this.state = state;
         this.decoder = new GifDecoder(state.bitmapProvider);
         decoder.setData(state.id, state.gifHeader, state.data);

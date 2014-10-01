@@ -56,6 +56,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         PAUSED,
     }
 
+    private final String tag = String.valueOf(hashCode());
+
     private int placeholderResourceId;
     private int errorResourceId;
     private Context context;
@@ -73,7 +75,6 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private GlideAnimationFactory<R> animationFactory;
     private int overrideWidth;
     private int overrideHeight;
-    private String tag = String.valueOf(hashCode());
     private DiskCacheStrategy diskCacheStrategy;
 
     private Drawable placeholderDrawable;
@@ -255,10 +256,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             target.getSize(this);
         }
 
-        if (!isComplete() && !isFailed()) {
-            if (canNotifyStatusChanged()) {
-                target.onLoadStarted(getPlaceholderDrawable());
-            }
+        if (!isComplete() && !isFailed() && canNotifyStatusChanged()) {
+            target.onLoadStarted(getPlaceholderDrawable());
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished run method in " + LogTime.getElapsedMillis(startTime));

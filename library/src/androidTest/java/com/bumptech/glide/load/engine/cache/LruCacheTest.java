@@ -43,6 +43,57 @@ public class LruCacheTest {
     }
 
     @Test
+    public void testCanPutNullItemWithoutChangingSize() {
+        String key = getKey();
+        cache.put(key, null);
+
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+
+        verify(listener, never()).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testReplacingNonNullItemWithNullItemDecreasesSize() {
+        String key = getKey();
+        cache.put(key, new Object());
+        cache.put(key, null);
+
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+
+        verify(listener, never()).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testReplacingNullItemWIthNullItemIncreasesSize() {
+        String key = getKey();
+        cache.put(key, null);
+        cache.put(key, new Object());
+
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+
+        verify(listener).onItemRemoved(anyObject());
+    }
+
+    @Test
+    public void testReplacingNonNullItemWithNonNullItemUpdatesSize() {
+        String key = getKey();
+        cache.put(key, new Object());
+        cache.put(key, new Object());
+
+        for (int i = 0; i < SIZE; i++) {
+            cache.put(getKey(), new Object());
+        }
+
+        verify(listener).onItemRemoved(anyObject());
+    }
+
+    @Test
     public void testCacheContainsAddedBitmap() {
         final String key = getKey();
         cache.put(key, new Object());

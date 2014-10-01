@@ -27,7 +27,7 @@ public interface DataFetcher<T> {
      * @param priority The priority with which the request should be completed.
      * @see #cleanup() where the data retuned will be cleaned up
      */
-    public T loadData(Priority priority) throws Exception;
+    T loadData(Priority priority) throws Exception;
 
     /**
      * Cleanup or recycle any resources used by this data fetcher. This method will be called in a finally block
@@ -39,7 +39,7 @@ public interface DataFetcher<T> {
      * </p>
      *
      */
-    public void cleanup();
+    void cleanup();
 
     /**
      * Returns a string uniquely identifying the data that this fetcher will fetch including the specific size.
@@ -54,7 +54,7 @@ public interface DataFetcher<T> {
      *     finish quickly.
      * </p>
      */
-    public String getId();
+    String getId();
 
     /**
      * A method that will be called when a load is no longer relevant and has been cancelled. This method does not need
@@ -72,5 +72,5 @@ public interface DataFetcher<T> {
      *     finish quickly.
      * </p>
      */
-    public void cancel();
+    void cancel();
 }

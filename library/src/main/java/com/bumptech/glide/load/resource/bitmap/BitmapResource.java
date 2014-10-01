@@ -9,8 +9,8 @@ import com.bumptech.glide.util.Util;
  * A resource wrapping a {@link android.graphics.Bitmap} object.
  */
 public class BitmapResource implements Resource<Bitmap> {
-    private Bitmap bitmap;
-    private BitmapPool bitmapPool;
+    private final Bitmap bitmap;
+    private final BitmapPool bitmapPool;
 
     public BitmapResource(Bitmap bitmap, BitmapPool bitmapPool) {
         this.bitmap = bitmap;

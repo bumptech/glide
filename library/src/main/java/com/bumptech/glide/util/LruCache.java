@@ -114,10 +114,15 @@ public class LruCache<T, Y> {
         }
 
         final Y result = cache.put(key, item);
-        if (result != item) {
+        if (item != null) {
             currentSize += getSize(item);
-            evict();
         }
+        if (result != null) {
+            // TODO: should we call onItemEvicted here?
+            currentSize -= getSize(result);
+        }
+        evict();
+
         return result;
     }
 

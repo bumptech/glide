@@ -18,7 +18,8 @@ import java.io.File;
  * @param <R> The type of the resource that will be transcoded from the decoded resource.
  */
 public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
-    private LoadProvider<A, T, Z, R> parent;
+    private final LoadProvider<A, T, Z, R> parent;
+
     private ResourceDecoder<File, Z> cacheDecoder;
     private ResourceDecoder<T, Z> sourceDecoder;
     private ResourceEncoder<Z> encoder;

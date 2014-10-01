@@ -22,10 +22,10 @@ public interface ModelLoaderFactory<T, Y> {
      *                  this factory's {@link ModelLoader} may depend on
      * @return A new {@link ModelLoader}
      */
-    public ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories);
+    ModelLoader<T, Y> build(Context context, GenericLoaderFactory factories);
 
     /**
      * A lifecycle method that will be called when this factory is about to replaced.
      */
-    public void teardown();
+    void teardown();
 }

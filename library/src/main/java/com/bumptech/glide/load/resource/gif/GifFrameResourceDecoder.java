@@ -8,7 +8,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 class GifFrameResourceDecoder implements ResourceDecoder<GifDecoder, Bitmap> {
-    private BitmapPool bitmapPool;
+    private final BitmapPool bitmapPool;
 
     public GifFrameResourceDecoder(BitmapPool bitmapPool) {
         this.bitmapPool = bitmapPool;

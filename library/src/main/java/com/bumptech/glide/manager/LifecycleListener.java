@@ -8,16 +8,16 @@ public interface LifecycleListener {
     /**
      * Callback for when {@link android.app.Fragment#onStart()}} or {@link android.app.Activity#onStart()} is called.
      */
-    public void onStart();
+    void onStart();
 
     /**
      * Callback for when {@link android.app.Fragment#onStop()}} or {@link android.app.Activity#onStop()}} is called.
      */
-    public void onStop();
+    void onStop();
 
     /**
      * Callback for when {@link android.app.Fragment#onDestroy()}} or {@link android.app.Activity#onDestroy()} is
      * called.
      */
-    public void onDestroy();
+    void onDestroy();
 }

@@ -134,7 +134,7 @@ class EngineJob implements ResourceCallback {
     }
 
     interface EngineResourceFactory {
-        public <R> EngineResource<R> build(Resource<R> resource);
+        <R> EngineResource<R> build(Resource<R> resource);
     }
 
     private static final class DefaultEngineResourceFactory implements EngineResourceFactory {

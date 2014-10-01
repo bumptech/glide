@@ -396,7 +396,7 @@ public class RequestManager implements LifecycleListener {
     public final class VideoModelRequest<T> {
         private final ModelLoader<T, ParcelFileDescriptor> loader;
 
-        private VideoModelRequest(ModelLoader<T, ParcelFileDescriptor> loader) {
+        VideoModelRequest(ModelLoader<T, ParcelFileDescriptor> loader) {
             this.loader = loader;
         }
 
@@ -415,7 +415,7 @@ public class RequestManager implements LifecycleListener {
     public final class ImageModelRequest<T> {
         private final ModelLoader<T, InputStream> loader;
 
-        private ImageModelRequest(ModelLoader<T, InputStream> loader) {
+        ImageModelRequest(ModelLoader<T, InputStream> loader) {
             this.loader = loader;
         }
 
@@ -437,7 +437,7 @@ public class RequestManager implements LifecycleListener {
         private final ModelLoader<A, T> modelLoader;
         private final Class<T> dataClass;
 
-        private GenericModelRequest(ModelLoader<A, T> modelLoader, Class<T> dataClass) {
+        GenericModelRequest(ModelLoader<A, T> modelLoader, Class<T> dataClass) {
             this.modelLoader = modelLoader;
             this.dataClass = dataClass;
         }
@@ -460,7 +460,7 @@ public class RequestManager implements LifecycleListener {
         public final class GenericTypeRequest {
             private final A model;
 
-            private GenericTypeRequest(A model) {
+            GenericTypeRequest(A model) {
                 this.model = model;
             }
 
@@ -490,7 +490,7 @@ public class RequestManager implements LifecycleListener {
     }
 
     private static class RequestManagerConnectivityListener implements ConnectivityMonitor.ConnectivityListener {
-        private RequestTracker requestTracker;
+        private final RequestTracker requestTracker;
 
         public RequestManagerConnectivityListener(RequestTracker requestTracker) {
             this.requestTracker = requestTracker;

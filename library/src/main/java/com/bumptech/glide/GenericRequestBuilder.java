@@ -662,10 +662,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     private <Z> Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
-        if (model == null) {
-            requestCoordinator = null;
-        }
-
         return GenericRequest.obtain(
                 loadProvider,
                 model,

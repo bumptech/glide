@@ -29,42 +29,6 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private static synchronized BitmapFactory.Options getDefaultOptions() {
-        BitmapFactory.Options decodeBitmapOptions;
-        synchronized (OPTIONS_QUEUE) {
-            decodeBitmapOptions = OPTIONS_QUEUE.poll();
-        }
-        if (decodeBitmapOptions == null) {
-            decodeBitmapOptions = new BitmapFactory.Options();
-            resetOptions(decodeBitmapOptions);
-        }
-
-        return decodeBitmapOptions;
-    }
-
-    private static void releaseOptions(BitmapFactory.Options decodeBitmapOptions) {
-        resetOptions(decodeBitmapOptions);
-        synchronized (OPTIONS_QUEUE) {
-            OPTIONS_QUEUE.offer(decodeBitmapOptions);
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private static void resetOptions(BitmapFactory.Options decodeBitmapOptions) {
-        decodeBitmapOptions.inTempStorage = null;
-        decodeBitmapOptions.inDither = false;
-        decodeBitmapOptions.inScaled = false;
-        decodeBitmapOptions.inSampleSize = 1;
-        decodeBitmapOptions.inPreferredConfig = null;
-        decodeBitmapOptions.inJustDecodeBounds = false;
-
-        if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)  {
-            decodeBitmapOptions.inBitmap = null;
-            decodeBitmapOptions.inMutable = true;
-        }
-    }
-
     /**
      * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image
      * will be greater than or equal to the given width and height.
@@ -194,7 +158,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
             if (downsampled != null) {
                 rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
 
-                if (downsampled != rotated && !pool.put(downsampled)) {
+                if (!downsampled.equals(rotated) && !pool.put(downsampled)) {
                     downsampled.recycle();
                 }
             }
@@ -214,11 +178,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         Bitmap.Config config = getConfig(is, decodeFormat);
         options.inSampleSize = sampleSize;
         options.inPreferredConfig = config;
-        if (options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
-            if (shouldUsePool(is)) {
-                // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
-                setInBitmap(options, pool.getDirty(inWidth, inHeight, config));
-            }
+        if ((options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) && shouldUsePool(is)) {
+            // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
+            setInBitmap(options, pool.getDirty(inWidth, inHeight, config));
         }
         return decodeStream(is, options);
     }
@@ -341,6 +303,42 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     private static void setInBitmap(BitmapFactory.Options options, Bitmap recycled) {
         if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
             options.inBitmap = recycled;
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private static synchronized BitmapFactory.Options getDefaultOptions() {
+        BitmapFactory.Options decodeBitmapOptions;
+        synchronized (OPTIONS_QUEUE) {
+            decodeBitmapOptions = OPTIONS_QUEUE.poll();
+        }
+        if (decodeBitmapOptions == null) {
+            decodeBitmapOptions = new BitmapFactory.Options();
+            resetOptions(decodeBitmapOptions);
+        }
+
+        return decodeBitmapOptions;
+    }
+
+    private static void releaseOptions(BitmapFactory.Options decodeBitmapOptions) {
+        resetOptions(decodeBitmapOptions);
+        synchronized (OPTIONS_QUEUE) {
+            OPTIONS_QUEUE.offer(decodeBitmapOptions);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private static void resetOptions(BitmapFactory.Options decodeBitmapOptions) {
+        decodeBitmapOptions.inTempStorage = null;
+        decodeBitmapOptions.inDither = false;
+        decodeBitmapOptions.inScaled = false;
+        decodeBitmapOptions.inSampleSize = 1;
+        decodeBitmapOptions.inPreferredConfig = null;
+        decodeBitmapOptions.inJustDecodeBounds = false;
+
+        if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)  {
+            decodeBitmapOptions.inBitmap = null;
+            decodeBitmapOptions.inMutable = true;
         }
     }
 }

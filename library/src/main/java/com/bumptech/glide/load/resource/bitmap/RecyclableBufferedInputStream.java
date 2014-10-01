@@ -17,7 +17,6 @@ package com.bumptech.glide.load.resource.bitmap;
  *  limitations under the License.
  */
 
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,18 +36,6 @@ import java.io.InputStream;
  * </pre>
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
-
-    /**
-     * An exception thrown when a mark can no longer be obeyed because the underlying buffer size is smaller than the
-     * amount of data read after the mark position.
-     */
-    public static class InvalidMarkException extends RuntimeException {
-        private static final long serialVersionUID = -4338378848813561757L;
-
-        public InvalidMarkException(String detailMessage) {
-            super(detailMessage);
-        }
-    }
 
     /**
      * The buffer containing the current bytes read from the target InputStream.
@@ -126,7 +113,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
     private int fillbuf(InputStream localIn, byte[] localBuf)
             throws IOException {
-        if (markpos == -1 || (pos - markpos >= marklimit)) {
+        if (markpos == -1 || pos - markpos >= marklimit) {
             // Mark position not set or exceeded readlimit
             int result = localIn.read(localBuf);
             if (result > 0) {
@@ -382,21 +369,31 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
         long read = count - pos;
         pos = count;
 
-        if (markpos != -1) {
-            if (byteCount <= marklimit) {
-                if (fillbuf(localIn, localBuf) == -1) {
-                    return read;
-                }
-                if (count - pos >= byteCount - read) {
-                    pos += byteCount - read;
-                    return byteCount;
-                }
-                // Couldn't get all the bytes, skip what we read.
-                read = read + count - pos;
-                pos = count;
+        if (markpos != -1 && byteCount <= marklimit) {
+            if (fillbuf(localIn, localBuf) == -1) {
                 return read;
             }
+            if (count - pos >= byteCount - read) {
+                pos += byteCount - read;
+                return byteCount;
+            }
+            // Couldn't get all the bytes, skip what we read.
+            read = read + count - pos;
+            pos = count;
+            return read;
         }
         return read + localIn.skip(byteCount - read);
+    }
+
+    /**
+     * An exception thrown when a mark can no longer be obeyed because the underlying buffer size is smaller than the
+     * amount of data read after the mark position.
+     */
+    public static class InvalidMarkException extends RuntimeException {
+        private static final long serialVersionUID = -4338378848813561757L;
+
+        public InvalidMarkException(String detailMessage) {
+            super(detailMessage);
+        }
     }
 }

@@ -110,7 +110,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     }
 
     interface HttpUrlConnectionFactory {
-        public HttpURLConnection build(URL url) throws IOException;
+        HttpURLConnection build(URL url) throws IOException;
     }
 
     private static class DefaultHttpUrlConnectionFactory implements HttpUrlConnectionFactory {

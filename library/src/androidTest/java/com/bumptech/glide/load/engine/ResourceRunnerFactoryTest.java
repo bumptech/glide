@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
-public class DefaultResourceRunnerFactoryTest {
+public class ResourceRunnerFactoryTest {
     private DefaultFactoryHarness harness;
 
     @Before
@@ -47,7 +47,7 @@ public class DefaultResourceRunnerFactoryTest {
         int width = 100;
         int height = 100;
 
-        DefaultResourceRunnerFactory factory = new DefaultResourceRunnerFactory(diskCache,
+        ResourceRunnerFactory factory = new ResourceRunnerFactory(diskCache,
                 mainHandler, diskCacheService, resizeService);
 
         ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);

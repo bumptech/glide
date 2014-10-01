@@ -46,7 +46,7 @@ class GifFrameManager {
     private DelayTarget next;
 
     public interface FrameCallback {
-        public void onFrameRead(Bitmap frame, int index);
+        void onFrameRead(Bitmap frame, int index);
     }
 
     public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation, int targetWidth,
@@ -107,7 +107,7 @@ class GifFrameManager {
         // (cached as png) frames more quickly from the gif data.
         boolean skipDiskCache = decoder.isTransparent();
 
-        long targetTime = SystemClock.uptimeMillis() + (Math.max(MIN_FRAME_DELAY, decoder.getNextDelay()));
+        long targetTime = SystemClock.uptimeMillis() + Math.max(MIN_FRAME_DELAY, decoder.getNextDelay());
         next = new DelayTarget(cb, targetTime);
         next.setFrameIndex(decoder.getCurrentFrameIndex());
 
@@ -137,8 +137,8 @@ class GifFrameManager {
     }
 
     class DelayTarget extends SimpleTarget<Bitmap> implements Runnable {
-        private FrameCallback cb;
-        private long targetTime;
+        private final FrameCallback cb;
+        private final long targetTime;
         private Bitmap resource;
         private int index;
 

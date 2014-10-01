@@ -8,7 +8,7 @@ import com.bumptech.glide.util.Util;
  * A resource wrapper for {@link com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable}.
  */
 public class GlideBitmapDrawableResource extends DrawableResource<GlideBitmapDrawable> {
-    private BitmapPool bitmapPool;
+    private final BitmapPool bitmapPool;
 
     public GlideBitmapDrawableResource(GlideBitmapDrawable drawable, BitmapPool bitmapPool) {
         super(drawable);

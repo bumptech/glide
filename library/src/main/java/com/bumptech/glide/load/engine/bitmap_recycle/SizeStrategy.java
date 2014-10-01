@@ -98,7 +98,7 @@ class SizeStrategy implements LruPoolStrategy {
             StringBuilder sb = new StringBuilder();
             sb.append("( ");
             for (Entry<K, V> entry : entrySet()) {
-                sb.append("{").append(entry.getKey()).append(":").append(entry.getValue()).append("}, ");
+                sb.append('{').append(entry.getKey()).append(':').append(entry.getValue()).append("}, ");
             }
             final String result;
             if (!isEmpty()) {
@@ -137,7 +137,7 @@ class SizeStrategy implements LruPoolStrategy {
         private final KeyPool pool;
         private int size;
 
-        private Key(KeyPool pool) {
+        Key(KeyPool pool) {
             this.pool = pool;
         }
 

@@ -12,8 +12,8 @@ import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
  * transformation to both {@link android.graphics.Bitmap}s and {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
  */
 public class GifBitmapWrapperTransformation implements Transformation<GifBitmapWrapper> {
-    private Transformation<Bitmap> bitmapTransformation;
-    private Transformation<GifDrawable> gifDataTransformation;
+    private final Transformation<Bitmap> bitmapTransformation;
+    private final Transformation<GifDrawable> gifDataTransformation;
 
     public GifBitmapWrapperTransformation(BitmapPool bitmapPool, Transformation<Bitmap> bitmapTransformation) {
         this(bitmapTransformation, new GifDrawableTransformation(bitmapTransformation, bitmapPool));
@@ -31,13 +31,13 @@ public class GifBitmapWrapperTransformation implements Transformation<GifBitmapW
         Resource<GifDrawable> gifResource = resource.get().getGifResource();
         if (bitmapResource != null && bitmapTransformation != null) {
             Resource<Bitmap> transformed = bitmapTransformation.transform(bitmapResource, outWidth, outHeight);
-            if (transformed != bitmapResource) {
+            if (!bitmapResource.equals(transformed)) {
                 GifBitmapWrapper gifBitmap = new GifBitmapWrapper(transformed, resource.get().getGifResource());
                 return new GifBitmapWrapperResource(gifBitmap);
             }
         } else if (gifResource != null && gifDataTransformation != null) {
             Resource<GifDrawable> transformed = gifDataTransformation.transform(gifResource, outWidth, outHeight);
-            if (transformed != gifResource) {
+            if (!gifResource.equals(transformed)) {
                 GifBitmapWrapper gifBitmap = new GifBitmapWrapper(resource.get().getBitmapResource(), transformed);
                 return new GifBitmapWrapperResource(gifBitmap);
             }

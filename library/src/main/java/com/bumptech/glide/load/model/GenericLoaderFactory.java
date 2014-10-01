@@ -13,9 +13,9 @@ import java.util.Map;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 // this is a general class capable of handling any generic combination
 public class GenericLoaderFactory {
-    private Map<Class/*T*/, Map<Class/*Y*/, ModelLoaderFactory/*T, Y*/>> modelClassToResourceFactories =
+    private final Map<Class/*T*/, Map<Class/*Y*/, ModelLoaderFactory/*T, Y*/>> modelClassToResourceFactories =
             new HashMap<Class, Map<Class, ModelLoaderFactory>>();
-    private Map<Class/*T*/, Map<Class/*Y*/, ModelLoader/*T, Y*/>> cachedModelLoaders =
+    private final Map<Class/*T*/, Map<Class/*Y*/, ModelLoader/*T, Y*/>> cachedModelLoaders =
             new HashMap<Class, Map<Class, ModelLoader>>();
 
     private static final ModelLoader NULL_MODEL_LOADER = new ModelLoader() {

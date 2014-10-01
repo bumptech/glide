@@ -115,7 +115,7 @@ public class GlideBitmapDrawable extends GlideDrawable {
     @Override
     public int getOpacity() {
         Bitmap bm = state.bitmap;
-        return (bm == null || bm.hasAlpha() || state.paint.getAlpha() < 255)
+        return bm == null || bm.hasAlpha() || state.paint.getAlpha() < 255
                 ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
     }
 
@@ -162,8 +162,10 @@ public class GlideBitmapDrawable extends GlideDrawable {
             paint.setAlpha(alpha);
         }
 
+        // We want to create a new Paint object so we can mutate it safely.
+        @SuppressWarnings("PMD.CompareObjectsWithEquals")
         void mutatePaint() {
-            if (paint == DEFAULT_PAINT) {
+            if (DEFAULT_PAINT == paint) {
                 paint = new Paint(DEFAULT_PAINT_FLAGS);
             }
         }

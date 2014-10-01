@@ -244,7 +244,7 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
-    public DrawableRequestBuilder<ModelType> crossFade() {
+    public final DrawableRequestBuilder<ModelType> crossFade() {
         super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GlideDrawable>());
         return this;
     }

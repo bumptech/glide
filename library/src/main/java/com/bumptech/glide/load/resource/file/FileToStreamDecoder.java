@@ -15,7 +15,7 @@ import java.io.InputStream;
  * @param <T> The type of resource that the wrapped InputStream decoder decodes.
  */
 public class FileToStreamDecoder<T> implements ResourceDecoder<File, T> {
-    private static final FileOpener DEFAULT_FILE_OPENER = new DefaultFileOpener();
+    private static final FileOpener DEFAULT_FILE_OPENER = new FileOpener();
 
     private ResourceDecoder<InputStream, T> streamDecoder;
     private final FileOpener fileOpener;
@@ -54,12 +54,8 @@ public class FileToStreamDecoder<T> implements ResourceDecoder<File, T> {
         return "";
     }
 
-    interface FileOpener {
-        public InputStream open(File file) throws FileNotFoundException;
-    }
-
-    private static class DefaultFileOpener implements FileOpener {
-        @Override
+    // Visible for testing.
+    static class FileOpener {
         public InputStream open(File file) throws FileNotFoundException {
             return new FileInputStream(file);
         }

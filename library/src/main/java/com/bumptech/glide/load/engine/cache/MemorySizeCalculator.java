@@ -24,8 +24,8 @@ public class MemorySizeCalculator {
     private final int memoryCacheSize;
 
     interface ScreenDimensions {
-        public int getWidthPixels();
-        public int getHeightPixels();
+        int getWidthPixels();
+        int getHeightPixels();
     }
 
     public MemorySizeCalculator(Context context) {
@@ -92,7 +92,7 @@ public class MemorySizeCalculator {
     }
 
     private static class DisplayMetricsScreenDimensions implements ScreenDimensions {
-        private DisplayMetrics displayMetrics;
+        private final DisplayMetrics displayMetrics;
 
         public DisplayMetricsScreenDimensions(DisplayMetrics displayMetrics) {
             this.displayMetrics = displayMetrics;

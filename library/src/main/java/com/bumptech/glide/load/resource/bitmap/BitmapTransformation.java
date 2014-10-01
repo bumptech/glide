@@ -42,14 +42,14 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
     @Override
     public final Resource<Bitmap> transform(Resource<Bitmap> resource, int outWidth, int outHeight) {
         if (outWidth <= 0 || outHeight <= 0) {
-            throw new IllegalArgumentException("Cannot appy transformation on width: " + outWidth + " or height: "
+            throw new IllegalArgumentException("Cannot apply transformation on width: " + outWidth + " or height: "
                     + outHeight + " less than or equal to zero");
         }
         Bitmap toTransform = resource.get();
         Bitmap transformed = transform(bitmapPool, toTransform, outWidth, outHeight);
 
         final Resource<Bitmap> result;
-        if (transformed == toTransform) {
+        if (toTransform.equals(transformed)) {
             result = resource;
         } else {
             result = new BitmapResource(transformed, bitmapPool);

@@ -24,7 +24,11 @@ public class DiskLruCacheWrapper implements DiskCache {
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
     private static DiskLruCacheWrapper wrapper = null;
+
     private final SafeKeyGenerator safeKeyGenerator;
+    private final File directory;
+    private final int maxSize;
+    private DiskLruCache diskLruCache;
 
     /**
      * Get a DiskCache in the given directory and size. If a disk cache has alread been created with
@@ -42,11 +46,6 @@ public class DiskLruCacheWrapper implements DiskCache {
         }
         return wrapper;
     }
-
-    private final File directory;
-    private final int maxSize;
-
-    private DiskLruCache diskLruCache;
 
     protected DiskLruCacheWrapper(File directory, int maxSize) {
         this.directory = directory;

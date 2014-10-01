@@ -19,7 +19,7 @@ class EngineResource<Z> implements Resource<Z> {
     private volatile boolean isRecycled;
 
     interface ResourceListener {
-        public void onResourceReleased(Key key, EngineResource<?> resource);
+        void onResourceReleased(Key key, EngineResource<?> resource);
     }
 
     EngineResource(Resource<Z> toWrap) {

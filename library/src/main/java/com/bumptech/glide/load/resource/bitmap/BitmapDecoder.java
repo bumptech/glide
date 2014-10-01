@@ -21,7 +21,7 @@ public interface BitmapDecoder<T> {
      * @param outHeight The target height for the returned bitmap (need not match exactly).
      * @param decodeFormat The desired configuration for the returned bitmap.
      */
-    public Bitmap decode(T resource, BitmapPool bitmapPool, int outWidth, int outHeight, DecodeFormat decodeFormat)
+    Bitmap decode(T resource, BitmapPool bitmapPool, int outWidth, int outHeight, DecodeFormat decodeFormat)
             throws Exception;
 
     /**
@@ -34,5 +34,5 @@ public interface BitmapDecoder<T> {
      *     {@link android.graphics.Bitmap.Config#ARGB_8888} as their config.
      * </p>
      */
-    public String getId();
+    String getId();
 }

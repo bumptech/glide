@@ -31,7 +31,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
      */
     @Override
     public boolean canSetImage(Request request) {
-        return parentCanSetImage() && (request == full || !full.isResourceSet());
+        return parentCanSetImage() && (request.equals(full) || !full.isResourceSet());
     }
 
     private boolean parentCanSetImage() {
@@ -46,7 +46,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
      */
     @Override
     public boolean canNotifyStatusChanged(Request request) {
-        return parentCanNotifyStatusChanged() && (request == full && !isAnyResourceSet());
+        return parentCanNotifyStatusChanged() && request.equals(full) && !isAnyResourceSet();
     }
 
     private boolean parentCanNotifyStatusChanged() {

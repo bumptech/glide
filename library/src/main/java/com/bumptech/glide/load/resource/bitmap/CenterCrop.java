@@ -21,6 +21,8 @@ public class CenterCrop extends BitmapTransformation {
         super(bitmapPool);
     }
 
+    // Bitmap doesn't implement equals, so == and .equals are equivalent here.
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     @Override
     protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
         final Bitmap toReuse = pool.get(outWidth, outHeight, toTransform.getConfig());

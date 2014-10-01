@@ -13,7 +13,7 @@ class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
     }
 
     private static class GifFrameDataFetcher implements DataFetcher<GifDecoder> {
-        private GifDecoder decoder;
+        private final GifDecoder decoder;
 
         public GifFrameDataFetcher(GifDecoder decoder) {
             this.decoder = decoder;

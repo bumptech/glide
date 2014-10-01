@@ -11,18 +11,18 @@ public interface MemoryCache {
      * An interface that will be called whenever a bitmap is removed from the cache.
      */
     public interface ResourceRemovedListener {
-        public void onResourceRemoved(Resource<?> removed);
+        void onResourceRemoved(Resource<?> removed);
     }
 
     /**
      * Returns the sum of the sizes of all the contents of the cache in bytes.
      */
-    public int getCurrentSize();
+    int getCurrentSize();
 
     /**
      * Returns the current maximum size in bytes of the cache.
      */
-    public int getMaxSize();
+    int getMaxSize();
 
     /**
      * Adjust the maximum size of the cache by multiplying the original size of the cache by the given multiplier.
@@ -34,14 +34,14 @@ public interface MemoryCache {
      *
      * @param multiplier A size multiplier >= 0.
      */
-    public void setSizeMultiplier(float multiplier);
+    void setSizeMultiplier(float multiplier);
 
     /**
      * Removes the value for the given key and returns it if present or null otherwise.
      *
      * @param key The key.
      */
-    public Resource<?> remove(Key key);
+    Resource<?> remove(Key key);
 
     /**
      * Add bitmap to the cache with the given key.
@@ -50,24 +50,24 @@ public interface MemoryCache {
      * @param resource The {@link com.bumptech.glide.load.engine.EngineResource} to store.
      * @return The old value of key (null if key is not in map).
      */
-    public Resource<?> put(Key key, Resource<?> resource);
+    Resource<?> put(Key key, Resource<?> resource);
 
     /**
      * Set the listener to be called when a bitmap is removed from the cache.
      *
      * @param listener The listener.
      */
-    public void setResourceRemovedListener(ResourceRemovedListener listener);
+    void setResourceRemovedListener(ResourceRemovedListener listener);
 
     /**
      * Evict all items from the memory cache.
      */
-    public void clearMemory();
+    void clearMemory();
 
     /**
      * Trim the memory cache to the appropriate level. Typically called on the callback onTrimMemory.
      *
      * @param level This integer represents a trim level as specified in {@link android.content.ComponentCallbacks2}.
      */
-    public void trimMemory(int level);
+    void trimMemory(int level);
 }

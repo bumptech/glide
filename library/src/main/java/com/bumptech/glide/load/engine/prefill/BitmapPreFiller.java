@@ -35,7 +35,7 @@ public final class BitmapPreFiller {
 
     // Visible for testing.
     PreFillQueue generateAllocationOrder(PreFillBitmapAttribute[] preFillSizes) {
-        final int maxSize = (memoryCache.getMaxSize() - memoryCache.getCurrentSize()) + bitmapPool.getMaxSize();
+        final int maxSize = memoryCache.getMaxSize() - memoryCache.getCurrentSize() + bitmapPool.getMaxSize();
 
         int totalWeight = 0;
         for (PreFillBitmapAttribute size : preFillSizes) {

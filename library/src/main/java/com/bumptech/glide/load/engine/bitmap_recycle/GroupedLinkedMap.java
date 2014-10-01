@@ -49,7 +49,7 @@ class GroupedLinkedMap<K extends Poolable, V> {
     public V removeLast() {
         LinkedEntry<K, V> last = head.prev;
 
-        while (last != head) {
+        while (!last.equals(head)) {
             V removed = last.removeLast();
             if (removed != null) {
                 return removed;
@@ -74,9 +74,9 @@ class GroupedLinkedMap<K extends Poolable, V> {
         StringBuilder sb = new StringBuilder("GroupedLinkedMap( ");
         LinkedEntry<K, V> current = head.next;
         boolean hadAtLeastOneItem = false;
-        while (current != head) {
+        while (!current.equals(head)) {
             hadAtLeastOneItem = true;
-            sb.append("{").append(current.key).append(":").append(current.size()).append("}, ");
+            sb.append('{').append(current.key).append(':').append(current.size()).append("}, ");
             current = current.next;
         }
         if (hadAtLeastOneItem) {

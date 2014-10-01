@@ -15,7 +15,7 @@ public interface ResourceTranscoder<Z, R> {
      *
      * @param toTranscode The resource to transcode.
      */
-    public Resource<R> transcode(Resource<Z> toTranscode);
+    Resource<R> transcode(Resource<Z> toTranscode);
 
-    public String getId();
+    String getId();
 }

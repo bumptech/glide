@@ -6,7 +6,7 @@ import com.bumptech.glide.load.engine.Resource;
  * An {@link com.bumptech.glide.load.engine.Resource} wrapping a byte array.
  */
 public class BytesResource implements Resource<byte[]> {
-    private byte[] bytes;
+    private final byte[] bytes;
 
     public BytesResource(byte[] bytes) {
         this.bytes = bytes;

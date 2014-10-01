@@ -40,7 +40,7 @@ public interface RequestListener<T, R> {
      * @return True if the listener has handled updating the target for the given exception, false to allow
      *         Glide's request to update the target.
      */
-    public abstract boolean onException(Exception e, T model, Target<R> target, boolean isFirstResource);
+    boolean onException(Exception e, T model, Target<R> target, boolean isFirstResource);
 
     /**
      * Called when a load completes successfully, immediately after
@@ -57,6 +57,5 @@ public interface RequestListener<T, R> {
      * @return True if the listener has handled setting the resource on the target (including any animations), false to
      *         allow Glide's request to update the target (again including animations).
      */
-    public abstract boolean onResourceReady(R resource, T model, Target<R> target, boolean isFromMemoryCache,
-            boolean isFirstResource);
+    boolean onResourceReady(R resource, T model, Target<R> target, boolean isFromMemoryCache, boolean isFirstResource);
 }

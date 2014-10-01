@@ -31,5 +31,5 @@ public interface FutureTarget<R> extends Future<R>, Target<R>  {
     /**
      * Safely clears the target from a background thread to release its resources.
      */
-    public void clear();
+    void clear();
 }

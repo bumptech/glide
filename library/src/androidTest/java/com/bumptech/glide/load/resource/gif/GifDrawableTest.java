@@ -349,7 +349,7 @@ public class GifDrawableTest {
 
         runLoops(loopCount, frameCount);
 
-        verify(frameManager, times((loopCount * frameCount) + 1)).getNextFrame(eq(drawable));
+        verify(frameManager, times(loopCount * frameCount + 1)).getNextFrame(eq(drawable));
     }
 
     @Test

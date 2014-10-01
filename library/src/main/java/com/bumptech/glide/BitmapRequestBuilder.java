@@ -47,11 +47,11 @@ import java.io.InputStream;
 public class BitmapRequestBuilder<ModelType, TranscodeType>
         extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> implements BitmapOptions {
     private final BitmapPool bitmapPool;
+    private final Glide glide;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     private ResourceDecoder<InputStream, Bitmap> imageDecoder;
     private ResourceDecoder<ParcelFileDescriptor, Bitmap> videoDecoder;
-    private Glide glide;
 
     BitmapRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> streamLoadProvider,

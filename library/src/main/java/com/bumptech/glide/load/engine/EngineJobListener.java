@@ -4,7 +4,7 @@ import com.bumptech.glide.load.Key;
 
 interface EngineJobListener {
 
-    public void onEngineJobComplete(Key key, EngineResource<?> resource);
+    void onEngineJobComplete(Key key, EngineResource<?> resource);
 
-    public void onEngineJobCancelled(EngineJob engineJob, Key key);
+    void onEngineJobCancelled(EngineJob engineJob, Key key);
 }

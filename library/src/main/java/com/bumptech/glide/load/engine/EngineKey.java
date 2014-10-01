@@ -5,6 +5,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.cache.StringKey;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 import java.io.UnsupportedEncodingException;
@@ -26,7 +27,7 @@ class EngineKey implements Key {
     private final Encoder sourceEncoder;
     private String stringKey;
     private int hashCode;
-    private OriginalEngineKey originalKey;
+    private StringKey originalKey;
 
     public EngineKey(String id, int width, int height, ResourceDecoder cacheDecoder, ResourceDecoder decoder,
             Transformation transformation, ResourceEncoder encoder, ResourceTranscoder transcoder,
@@ -44,7 +45,7 @@ class EngineKey implements Key {
 
     public Key getOriginalKey() {
         if (originalKey == null) {
-            originalKey = new OriginalEngineKey(id);
+            originalKey = new StringKey(id);
         }
         return originalKey;
     }

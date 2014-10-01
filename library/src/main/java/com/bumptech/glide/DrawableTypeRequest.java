@@ -32,9 +32,9 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
     private final ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Context context;
     private final Glide glide;
-    private RequestTracker requestTracker;
-    private RequestManager.OptionsApplier optionsApplier;
-    private Lifecycle lifecycle;
+    private final RequestTracker requestTracker;
+    private final RequestManager.OptionsApplier optionsApplier;
+    private final Lifecycle lifecycle;
     private final ModelType model;
 
     private static <A, Z, R> FixedLoadProvider<A, ImageVideoWrapper, Z, R> buildProvider(Glide glide,
