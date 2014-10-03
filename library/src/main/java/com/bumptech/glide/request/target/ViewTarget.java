@@ -151,6 +151,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
                 if (observer.isAlive()) {
                     observer.removeOnPreDrawListener(layoutListener);
                 }
+                layoutListener = null;
             }
         }
 
@@ -172,13 +173,16 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
                 }
                 cb.onSizeReady(width, height);
             } else {
-                if (cbs.contains(cb)) {
-                    throw new IllegalArgumentException("Cannot add a callback twice");
+                // We want to notify callbacks in the order they were added and we only expect one or two callbacks to
+                // be added a time, so a List is a reasonable choice.
+                if (!cbs.contains(cb)) {
+                    cbs.add(cb);
                 }
-                cbs.add(cb);
-                final ViewTreeObserver observer = view.getViewTreeObserver();
-                layoutListener = new SizeDeterminerLayoutListener(this);
-                observer.addOnPreDrawListener(layoutListener);
+                if (layoutListener == null) {
+                    final ViewTreeObserver observer = view.getViewTreeObserver();
+                    layoutListener = new SizeDeterminerLayoutListener(this);
+                    observer.addOnPreDrawListener(layoutListener);
+                }
             }
         }
 

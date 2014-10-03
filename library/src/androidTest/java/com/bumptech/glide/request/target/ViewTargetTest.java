@@ -27,10 +27,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewTreeObserver.OnPreDrawListener;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -170,11 +170,51 @@ public class ViewTargetTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testThrowsIfCallbackIsQueuedTwice() {
+    @Test
+    public void testDoesNotNotifyCallbackTwiceIfAddedTwice() {
         SizeReadyCallback cb = mock(SizeReadyCallback.class);
         target.getSize(cb);
         target.getSize(cb);
+
+        view.setLayoutParams(new LayoutParams(100, 100));
+
+        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
+        shadowObserver.fireOnPreDrawListeners();
+
+        verify(cb, times(1)).onSizeReady(anyInt(), anyInt());
+    }
+
+    @Test
+    public void testDoesNotAddMultipleListenersIfMultipleCallbacksAreAdded() {
+        SizeReadyCallback cb1 = mock(SizeReadyCallback.class);
+        SizeReadyCallback cb2 = mock(SizeReadyCallback.class);
+        target.getSize(cb1);
+        target.getSize(cb2);
+
+        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
+        assertThat(shadowObserver.getPreDrawListeners(), hasSize(1));
+    }
+
+    @Test
+    public void testDoesAddSecondListenerIfFirstListenerIsRemovedBeforeSecondRequest() {
+        SizeReadyCallback cb1 = mock(SizeReadyCallback.class);
+        target.getSize(cb1);
+
+        view.setLayoutParams(new LayoutParams(100, 100));
+
+        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
+        shadowObserver.fireOnPreDrawListeners();
+
+        assertThat(shadowObserver.getPreDrawListeners(), hasSize(0));
+
+        SizeReadyCallback cb2 = mock(SizeReadyCallback.class);
+        view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        target.getSize(cb2);
+
+        view.setLayoutParams(new LayoutParams(100, 100));
+        shadowObserver.fireOnPreDrawListeners();
+
+        verify(cb2).onSizeReady(anyInt(), anyInt());
     }
 
     @Test
