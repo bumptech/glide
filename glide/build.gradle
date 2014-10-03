@@ -13,7 +13,7 @@ def getAndroidCompileSdkVersion() {
 }
 
 def getInternalAndroidProjects() {
-    [':third_party:gif_decoder', ':library'].collect { project(it) }
+    [':third_party:gif_decoder', ':third_party:gif_encoder', ':library'].collect { project(it) }
 }
 def getInternalJavaProjects() {
     [':third_party:disklrucache'].collect { project(it) }
