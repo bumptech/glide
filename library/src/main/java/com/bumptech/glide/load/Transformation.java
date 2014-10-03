@@ -13,11 +13,6 @@ public interface Transformation<T> {
      * Transforms the given resource and returns the transformed resource.
      *
      * <p>
-     *     Note - Transformations should be idempotent so if given a resource that has already been transformed by
-     *     this transformation, this method must return the given resource object.
-     * </p>
-     *
-     * <p>
      *     Note - If the original resource object is not returned, the original resource will be recycled and it's
      *     internal resources may be reused. This means it is not safe to rely on the original resource or any internal
      *     state of the original resource in any new resource that is created. Usually this shouldn't occur, but if

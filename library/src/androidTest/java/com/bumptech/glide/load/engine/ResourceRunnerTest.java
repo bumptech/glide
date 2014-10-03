@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,29 +65,10 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testTransformationIsCalledIfCacheDecodeSucceeds() throws IOException {
-        harness.getRunner().run();
-
-        verify(harness.tranformation).transform(eq(harness.decoded), eq(harness.width), eq(harness.height));
-    }
-
-    @Test
-    public void testTransformationIsNotCalledIfNoSourceCache() throws IOException {
-        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
-
-        harness.getRunner().run();
-
-        verify(harness.tranformation, never()).transform(eq(harness.decoded), eq(harness.width), eq(harness.height));
-    }
-
-    @Test
     public void testTranscoderIsCalledIfCacheDecodeSucceeds() throws IOException {
-        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
-                .thenReturn(harness.transformed);
-
         harness.getRunner().run();
 
-        verify(harness.transcoder).transcode(eq(harness.transformed));
+        verify(harness.transcoder).transcode(eq(harness.decoded));
     }
 
     @Test
@@ -97,14 +77,12 @@ public class ResourceRunnerTest {
 
         harness.getRunner().run();
 
-        verify(harness.transcoder, never()).transcode(eq(harness.transformed));
+        verify(harness.transcoder, never()).transcode(eq(harness.decoded));
     }
 
     @Test
     public void testCallbackIsCalledIfCacheDecodeSucceeds() throws IOException {
-        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
-                .thenReturn(harness.transformed);
-        when(harness.transcoder.transcode(eq(harness.transformed))).thenReturn(harness.transcoded);
+        when(harness.transcoder.transcode(eq(harness.decoded))).thenReturn(harness.transcoded);
 
         harness.getRunner().run();
 
@@ -113,13 +91,11 @@ public class ResourceRunnerTest {
 
     @Test
     public void testDecodedResourceIsNotRecycledIfTranscoded() throws IOException {
-        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
-                .thenReturn(harness.transformed);
-        when(harness.transcoder.transcode(eq(harness.transformed))).thenReturn(harness.transcoded);
+        when(harness.transcoder.transcode(eq(harness.decoded))).thenReturn(harness.transcoded);
 
         harness.getRunner().run();
 
-        verify(harness.transformed, never()).recycle();
+        verify(harness.decoded, never()).recycle();
     }
 
     @Test
@@ -214,26 +190,6 @@ public class ResourceRunnerTest {
     }
 
     @Test
-    public void testDecodedResourceIsRecycledIfTransformedResourceIsDifferent() throws IOException {
-        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
-                .thenReturn(harness.transformed);
-
-        harness.getRunner().run();
-
-        verify(harness.decoded).recycle();
-    }
-
-    @Test
-    public void testDecodedResourceIsNotRecycledIfTransformedResourceIsDecodedResource() throws IOException {
-        when(harness.tranformation.transform(eq(harness.decoded), eq(harness.width), eq(harness.height)))
-                .thenReturn(harness.decoded);
-
-        harness.getRunner().run();
-
-        verify(harness.decoded, never()).recycle();
-    }
-
-    @Test
     public void testReturnsGivenPriority() {
         for (Priority priority : Priority.values()) {
             harness = new ResourceRunnerHarness();
@@ -252,14 +208,6 @@ public class ResourceRunnerTest {
 
         harness.getRunner().run();
 
-        verify(harness.resizeService).submit(eq(harness.sourceRunner));
-    }
-
-    @Test
-    public void testSubmitsSourceRunnerIfTransformationThrows() {
-        when(harness.tranformation.transform(any(Resource.class), anyInt(), anyInt()))
-                .thenThrow(new RuntimeException("test"));
-        harness.getRunner().run();
         verify(harness.resizeService).submit(eq(harness.sourceRunner));
     }
 
@@ -306,7 +254,6 @@ public class ResourceRunnerTest {
         ExecutorService diskCacheService = mock(ExecutorService.class);
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         EngineJob engineJob = mock(EngineJob.class);
-        Transformation<Object> tranformation = mock(Transformation.class);
         CacheLoader cacheLoader = mock(CacheLoader.class);
         int width = 100;
         int height = 100;
@@ -315,7 +262,6 @@ public class ResourceRunnerTest {
         Future future = mock(Future.class);
         Future sourceFuture = mock(Future.class);
         Resource<Object> decoded = mock(Resource.class);
-        Resource<Object> transformed = mock(Resource.class);
         Resource<Object> transcoded = mock(Resource.class);
 
         public ResourceRunnerHarness() {
@@ -326,7 +272,7 @@ public class ResourceRunnerTest {
         }
 
         ResourceRunner getRunner() {
-            return new ResourceRunner(key, width, height, cacheLoader, decoder, tranformation, transcoder,
+            return new ResourceRunner(key, width, height, cacheLoader, decoder, transcoder,
                     sourceRunner, diskCacheService, diskCacheStrategy, resizeService, engineJob, priority);
         }
     }

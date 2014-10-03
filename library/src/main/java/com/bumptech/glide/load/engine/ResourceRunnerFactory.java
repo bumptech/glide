@@ -42,7 +42,7 @@ class ResourceRunnerFactory {
                 cacheDecoder, fetcher, sourceEncoder, decoder, transformation, encoder, transcoder, diskCache,
                 priority, diskCacheStrategy, engineJob);
 
-        return new ResourceRunner<Z, R>(key, width, height, cacheLoader, cacheDecoder, transformation,
-                transcoder, sourceRunner, diskCacheService, diskCacheStrategy, service, engineJob, priority);
+        return new ResourceRunner<Z, R>(key, width, height, cacheLoader, cacheDecoder, transcoder, sourceRunner,
+                diskCacheService, diskCacheStrategy, service, engineJob, priority);
     }
 }

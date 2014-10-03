@@ -62,12 +62,6 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
      * Transforms the given {@link android.graphics.Bitmap} based on the given dimensions and returns the transformed
      * result.
      *
-     * <p>
-     *     Note - As with all {@link com.bumptech.glide.load.Transformation}s, this method must be idempotent. Given
-     *     bitmap A, and bitmap B == transform(A). transform(B) must always equal B.
-     *
-     * </p>
-     *
      * @param pool A {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} that can be used to obtain and
      *             return intermediate {@link Bitmap}s used in this transformation. For every
      *             {@link android.graphics.Bitmap} obtained from the pool during this transformation, a

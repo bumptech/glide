@@ -2,10 +2,8 @@ package com.bumptech.glide.load.engine;
 
 import android.os.SystemClock;
 import android.util.Log;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
@@ -25,7 +23,6 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private static final String TAG = "ResourceRunner";
 
     private final EngineKey key;
-    private final Transformation<Z> transformation;
     private final ResourceTranscoder<Z, R> transcoder;
     private final SourceResourceRunner<?, Z, R> sourceRunner;
     private final EngineJob job;
@@ -41,16 +38,14 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
     private volatile boolean isCancelled;
 
     public ResourceRunner(EngineKey key, int width, int height, CacheLoader cacheLoader,
-            ResourceDecoder<File, Z> cacheDecoder, Transformation<Z> transformation,
-            ResourceTranscoder<Z, R> transcoder, SourceResourceRunner<?, Z, R> sourceRunner,
-            ExecutorService diskCacheService, DiskCacheStrategy diskCacheStrategy, ExecutorService resizeService,
-            EngineJob job, Priority priority) {
+            ResourceDecoder<File, Z> cacheDecoder, ResourceTranscoder<Z, R> transcoder,
+            SourceResourceRunner<?, Z, R> sourceRunner, ExecutorService diskCacheService,
+            DiskCacheStrategy diskCacheStrategy, ExecutorService resizeService, EngineJob job, Priority priority) {
         this.key = key;
         this.width = width;
         this.height = height;
         this.cacheLoader = cacheLoader;
         this.cacheDecoder = cacheDecoder;
-        this.transformation = transformation;
         this.transcoder = transcoder;
         this.sourceRunner = sourceRunner;
         this.diskCacheService = diskCacheService;
@@ -110,11 +105,7 @@ class ResourceRunner<Z, R> implements Runnable, Prioritized {
 
         Resource<R> transcoded = null;
         if (fromCache != null) {
-            Resource<Z> transformed = transformation.transform(fromCache, width, height);
-            if (!fromCache.equals(transformed)) {
-                fromCache.recycle();
-            }
-            transcoded = transcoder.transcode(transformed);
+            transcoded = transcoder.transcode(fromCache);
         }
         return transcoded;
     }
