@@ -78,7 +78,7 @@ public class DrawableRequestBuilder<ModelType>
      * @return This builder object.
      */
     public DrawableRequestBuilder<ModelType> thumbnail(
-            DrawableRequestBuilder<ModelType> thumbnailRequest) {
+            DrawableRequestBuilder<?> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -88,7 +88,7 @@ public class DrawableRequestBuilder<ModelType>
      */
     @Override
     public DrawableRequestBuilder<ModelType> thumbnail(
-            GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, GlideDrawable> thumbnailRequest) {
+            GenericRequestBuilder<?, ?, ?, GlideDrawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }

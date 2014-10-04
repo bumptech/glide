@@ -148,7 +148,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      * @param thumbnailRequest The request to use to load the thumbnail.
      * @return This request builder.
      */
-    public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(BitmapRequestBuilder<ModelType, TranscodeType>
+    public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(BitmapRequestBuilder<?, TranscodeType>
             thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
@@ -427,7 +427,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(
-            GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> thumbnailRequest) {
+            GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }

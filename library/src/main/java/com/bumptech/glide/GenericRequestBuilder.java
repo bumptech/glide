@@ -60,7 +60,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private int errorId;
     private RequestListener<ModelType, TranscodeType> requestListener;
     private Float thumbSizeMultiplier;
-    private GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnailRequestBuilder;
+    private GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;
@@ -109,8 +109,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnail(
-            GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>
-                    thumbnailRequest) {
+            GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequest) {
         this.thumbnailRequestBuilder = thumbnailRequest;
 
         return this;
@@ -631,10 +630,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             // Recursive case: contains a potentially recursive thumbnail request builder.
             if (thumbnailRequestBuilder.animationFactory.equals(NoAnimation.getFactory())) {
                 thumbnailRequestBuilder.animationFactory = animationFactory;
-            }
-
-            if (thumbnailRequestBuilder.requestListener == null && requestListener != null) {
-                thumbnailRequestBuilder.requestListener = requestListener;
             }
 
             if (thumbnailRequestBuilder.priority == null) {

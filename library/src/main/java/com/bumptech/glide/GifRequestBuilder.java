@@ -52,8 +52,7 @@ public class GifRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType> thumbnail(
-            GenericRequestBuilder<ModelType, InputStream, GifDrawable, GifDrawable> thumbnailRequest) {
+    public GifRequestBuilder<ModelType> thumbnail(GenericRequestBuilder<?, ?, ?, GifDrawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -81,7 +80,7 @@ public class GifRequestBuilder<ModelType>
      * @param thumbnailRequest The request to use to load the thumbnail.
      * @return This builder object.
      */
-    public GifRequestBuilder<ModelType> thumbnail(GifRequestBuilder<ModelType> thumbnailRequest) {
+    public GifRequestBuilder<ModelType> thumbnail(GifRequestBuilder<?> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
