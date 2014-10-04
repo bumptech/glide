@@ -28,16 +28,26 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
     private final int height;
 
     /**
+     * Constructor for the target that assumes you will have called
+     * {@link com.bumptech.glide.GenericRequestBuilder#override(int, int)} on the request builder this target is given
+     * to.
+     *
+     * <p>
+     *     Requests that load into this target will throw an {@link java.lang.IllegalArgumentException} if
+     *     {@link com.bumptech.glide.GenericRequestBuilder#override(int, int)} was not called on the request builder.
+     * </p>
+     */
+    public SimpleTarget() {
+        this(-1, -1);
+    }
+
+    /**
      * Constructor for the target that takes the desired dimensions of the decoded and/or transformed resource.
      *
      * @param width The desired width of the resource.
      * @param height The desired height of the resource.
      */
     public SimpleTarget(int width, int height) {
-        if (width <= 0 || height <= 0) {
-            throw new IllegalArgumentException("Width and height must both be > 0, but given width: " + width + " and"
-                    + " height: " + height);
-        }
         this.width = width;
         this.height = height;
     }
@@ -49,6 +59,10 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
      */
     @Override
     public final void getSize(SizeReadyCallback cb) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Width and height must both be > 0, but given width: " + width + " and"
+                    + " height: " + height + ", either provide dimensions in the constructor or call override()");
+        }
         cb.onSizeReady(width, height);
     }
 }
