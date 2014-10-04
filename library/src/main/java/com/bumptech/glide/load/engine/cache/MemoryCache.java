@@ -10,7 +10,7 @@ public interface MemoryCache {
     /**
      * An interface that will be called whenever a bitmap is removed from the cache.
      */
-    public interface ResourceRemovedListener {
+    interface ResourceRemovedListener {
         void onResourceRemoved(Resource<?> removed);
     }
 

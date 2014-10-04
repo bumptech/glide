@@ -85,7 +85,7 @@ public class RequestManager implements LifecycleListener {
          * @param requestBuilder The request builder being used to construct the load.
          * @param <T> The type of the model.
          */
-        public <T> void apply(T model, GenericRequestBuilder<T, ?, ?, ?> requestBuilder);
+        <T> void apply(T model, GenericRequestBuilder<T, ?, ?, ?> requestBuilder);
     }
 
     /**
