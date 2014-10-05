@@ -8,7 +8,9 @@ import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class that manages a load by adding and removing callbacks for for the load and notifying callbacks when the
@@ -16,7 +18,7 @@ import java.util.List;
  */
 class EngineJob implements ResourceCallback {
     private static final String TAG = "EngineJob";
-    private static final EngineResourceFactory DEFAULT_FACTORY = new DefaultEngineResourceFactory();
+    private static final EngineResourceFactory DEFAULT_FACTORY = new EngineResourceFactory();
 
     private final List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
     private final EngineResourceFactory engineResourceFactory;
@@ -26,7 +28,10 @@ class EngineJob implements ResourceCallback {
     private final boolean isCacheable;
 
     private boolean isCancelled;
-    private boolean isComplete;
+    private Resource<?> resource;
+    private Exception exception;
+    // A set of callbacks that are removed while we're notifying other callbacks of a change in status.
+    private Set<ResourceCallback> ignoredCallbacks;
 
     public EngineJob(Key key, Handler mainHandler, boolean isCacheable, EngineJobListener listener) {
         this(key, mainHandler, isCacheable, listener, DEFAULT_FACTORY);
@@ -43,20 +48,46 @@ class EngineJob implements ResourceCallback {
 
     public void addCallback(ResourceCallback cb) {
         Util.assertMainThread();
-        cbs.add(cb);
+        if (resource != null) {
+            cb.onResourceReady(resource);
+        } else if (exception != null) {
+            cb.onException(exception);
+        } else {
+            cbs.add(cb);
+        }
     }
 
     public void removeCallback(ResourceCallback cb) {
         Util.assertMainThread();
-        cbs.remove(cb);
-        if (cbs.isEmpty()) {
-            cancel();
+        if (resource != null || exception != null) {
+            addIgnoredCallback(cb);
+        } else {
+            cbs.remove(cb);
+            if (cbs.isEmpty()) {
+                cancel();
+            }
         }
+    }
+
+    // We cannot remove callbacks while notifying our list of callbacks directly because doing so would cause a
+    // ConcurrentModificationException. However, we need to obey the cancellation request such that if notifying a
+    // callback early in the callbacks list cancels a callback later in the request list, the cancellation for the later
+    // request is still obeyed. Using a set of ignored callbacks allows us to avoid the exception while still meeting
+    // the requirement.
+    private void addIgnoredCallback(ResourceCallback cb) {
+        if (ignoredCallbacks == null) {
+            ignoredCallbacks = new HashSet<ResourceCallback>();
+        }
+        ignoredCallbacks.add(cb);
+    }
+
+    private boolean isInIgnoredCallbacks(ResourceCallback cb) {
+        return ignoredCallbacks != null && ignoredCallbacks.contains(cb);
     }
 
     // Exposed for testing.
     void cancel() {
-        if (isComplete || isCancelled) {
+        if (exception != null || resource != null || isCancelled) {
             return;
         }
         isCancelled = true;
@@ -84,17 +115,20 @@ class EngineJob implements ResourceCallback {
                 } else if (cbs.isEmpty()) {
                     throw new IllegalStateException("Received a resource without any callbacks to notify");
                 }
-                isComplete = true;
                 EngineResource engineResource = engineResourceFactory.build(resource);
                 engineResource.setCacheable(isCacheable);
+                EngineJob.this.resource = engineResource;
 
                 // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
                 // synchronously released by one of the callbacks.
                 engineResource.acquire(1);
-                listener.onEngineJobComplete(key, engineResource);
                 engineResource.acquire(cbs.size());
+                listener.onEngineJobComplete(key, engineResource);
+
                 for (ResourceCallback cb : cbs) {
-                    cb.onResourceReady(engineResource);
+                    if (!isInIgnoredCallbacks(cb)) {
+                        cb.onResourceReady(engineResource);
+                    }
                 }
                 // Our request is complete, so we can release the resource.
                 engineResource.release();
@@ -120,12 +154,16 @@ class EngineJob implements ResourceCallback {
                 } else if (cbs.isEmpty()) {
                     throw new IllegalStateException("Received an exception without any callbacks to notify");
                 }
-                isComplete = true;
+                exception = e;
 
                 listener.onEngineJobComplete(key, null);
+
                 for (ResourceCallback cb : cbs) {
-                    cb.onException(e);
+                    if (!isInIgnoredCallbacks(cb)) {
+                        cb.onException(e);
+                    }
                 }
+
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "finished onException in " + LogTime.getElapsedMillis(start));
                 }
@@ -133,13 +171,8 @@ class EngineJob implements ResourceCallback {
         });
     }
 
-    interface EngineResourceFactory {
-        <R> EngineResource<R> build(Resource<R> resource);
-    }
-
-    private static final class DefaultEngineResourceFactory implements EngineResourceFactory {
-
-        @Override
+    // Visible for testing.
+    static class EngineResourceFactory {
         public <R> EngineResource<R> build(Resource<R> resource) {
             return new EngineResource<R>(resource);
         }

@@ -6,6 +6,8 @@ import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLooper;
@@ -19,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -196,6 +199,128 @@ public class EngineJobTest {
         harness.getJob().onResourceReady(harness.resource);
 
         verify(harness.engineResource, times(2)).acquire(eq(1));
+    }
+
+    @Test
+    public void testNotifiesNewCallbackOfResourceIfCallbackIsAddedDuringOnResourceReady() {
+        final EngineJob job = harness.getJob();
+        final ResourceCallback existingCallback = mock(ResourceCallback.class);
+        final ResourceCallback newCallback = mock(ResourceCallback.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                job.addCallback(newCallback);
+                return null;
+            }
+        }).when(existingCallback).onResourceReady(any(Resource.class));
+
+        job.addCallback(existingCallback);
+        job.onResourceReady(harness.resource);
+
+        verify(newCallback).onResourceReady(eq(harness.engineResource));
+    }
+
+    @Test
+    public void testNotifiesNewCallbackOfExceptionIfCallbackIsAddedDuringOnException() {
+        final EngineJob job = harness.getJob();
+        final ResourceCallback existingCallback = mock(ResourceCallback.class);
+        final ResourceCallback newCallback = mock(ResourceCallback.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                job.addCallback(newCallback);
+                return null;
+            }
+        }).when(existingCallback).onException(any(Exception.class));
+
+        Exception expected = new RuntimeException();
+        job.addCallback(existingCallback);
+        job.onException(expected);
+
+        verify(newCallback).onException(eq(expected));
+    }
+
+    @Test
+    public void testRemovingCallbackDuringOnResourceReadyIsIgnoredIfCallbackHasAlreadyBeenCalled() {
+        final EngineJob job = harness.getJob();
+        final ResourceCallback cb = mock(ResourceCallback.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                job.removeCallback(cb);
+                return null;
+            }
+        }).when(cb).onResourceReady(any(Resource.class));
+
+        job.addCallback(cb);
+        job.onResourceReady(harness.resource);
+
+        verify(cb, times(1)).onResourceReady(any(Resource.class));
+    }
+
+    @Test
+    public void testRemovingCallbackDuringOnExceptionIsIgnoredIfCallbackHasAlreadyBeenCalled() {
+        final EngineJob job = harness.getJob();
+        final ResourceCallback cb = mock(ResourceCallback.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                job.removeCallback(cb);
+                return null;
+            }
+        }).when(cb).onException(any(Exception.class));
+
+        job.addCallback(cb);
+        job.onException(new RuntimeException());
+
+        verify(cb, times(1)).onException(any(Exception.class));
+    }
+
+    @Test
+    public void testRemovingCallbackDuringOnResourceReadyPreventsCallbackFromBeingCalledIfNotYetCalled() {
+        final EngineJob job = harness.getJob();
+        final ResourceCallback called = mock(ResourceCallback.class);
+        final ResourceCallback notYetCalled = mock(ResourceCallback.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                job.removeCallback(notYetCalled);
+                return null;
+            }
+        }).when(called).onResourceReady(any(Resource.class));
+
+        job.addCallback(called);
+        job.addCallback(notYetCalled);
+
+        job.onResourceReady(harness.resource);
+
+        verify(notYetCalled, never()).onResourceReady(any(Resource.class));
+    }
+
+    @Test
+    public void testRemovingCallbackDuringOnExceptionPreventsCallbackFromBeingCalledIfNotYetCalled() {
+        final EngineJob job = harness.getJob();
+        final ResourceCallback called = mock(ResourceCallback.class);
+        final ResourceCallback notYetCalled = mock(ResourceCallback.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                job.removeCallback(notYetCalled);
+                return null;
+            }
+        }).when(called).onException(any(Exception.class));
+
+        job.addCallback(called);
+        job.addCallback(notYetCalled);
+        job.onException(new RuntimeException());
+
+        verify(notYetCalled, never()).onResourceReady(any(Resource.class));
     }
 
     private static class MultiCbHarness {
