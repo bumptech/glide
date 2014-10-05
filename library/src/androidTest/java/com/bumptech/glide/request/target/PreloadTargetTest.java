@@ -1,0 +1,35 @@
+package com.bumptech.glide.request.target;
+
+import com.bumptech.glide.request.Request;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+@RunWith(RobolectricTestRunner.class)
+public class PreloadTargetTest {
+
+    @Test
+    public void testCallsSizeReadyWithGivenDimensions() {
+        int width = 1234;
+        int height = 456;
+        PreloadTarget<Object> target = PreloadTarget.obtain(width, height);
+        SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        target.getSize(cb);
+
+        verify(cb).onSizeReady(eq(width), eq(height));
+    }
+
+    @Test
+    public void testClearsTargetInOnResourceReady() {
+        Request request = mock(Request.class);
+        PreloadTarget<Object> target = PreloadTarget.obtain(100, 100);
+        target.setRequest(request);
+        target.onResourceReady(new Object(), null);
+
+        verify(request).clear();
+    }
+}

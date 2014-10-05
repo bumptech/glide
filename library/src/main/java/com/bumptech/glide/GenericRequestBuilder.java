@@ -28,6 +28,7 @@ import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.animation.NoAnimation;
 import com.bumptech.glide.request.animation.ViewAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
+import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 
@@ -596,6 +597,21 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         });
 
         return target;
+    }
+
+    /**
+     * Preloads the resource into the cache using the given width and height.
+     *
+     * <p>
+     *     Pre-loading is useful for making sure that resources you are going to to want in the near future are
+     *     available quickly.
+     * </p>
+     *
+     * @see com.bumptech.glide.ListPreloader
+     */
+    public Target<TranscodeType> preload(int width, int height) {
+        final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(width, height);
+        return into(target);
     }
 
     void applyCenterCrop() {
