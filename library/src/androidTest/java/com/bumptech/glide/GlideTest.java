@@ -441,8 +441,8 @@ public class GlideTest {
     }
 
     private void runTestIntegerDefaultLoader() {
-        int integer = 1234;
-        mockUri("android.resource://" + getContext().getPackageName() + "/" + integer);
+        int integer = android.R.drawable.star_on;
+        mockUri("android.resource://" + "android" + "/drawable/star_on");
 
         requestManager.load(integer).into(target);
         requestManager.load(integer).into(imageView);

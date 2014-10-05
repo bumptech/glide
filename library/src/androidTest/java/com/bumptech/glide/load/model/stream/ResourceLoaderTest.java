@@ -28,13 +28,12 @@ public class ResourceLoaderTest {
         ModelLoader<Uri, InputStream> streamUriLoader = mock(ModelLoader.class);
         when(streamUriLoader.getResourceFetcher(any(Uri.class), anyInt(), anyInt())).thenReturn(null);
 
-        int id = 12345;
+        int id = android.R.drawable.star_off;
 
         StreamResourceLoader resourceLoader = new StreamResourceLoader(Robolectric.application, streamUriLoader);
         resourceLoader.getResourceFetcher(id, 0, 0);
 
-        Uri contentUri = Uri.parse("android.resource://" + Robolectric.application.getPackageName() + "/" + id);
+        Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
         verify(streamUriLoader, atLeastOnce()).getResourceFetcher(eq(contentUri), anyInt(), anyInt());
     }
-
 }
