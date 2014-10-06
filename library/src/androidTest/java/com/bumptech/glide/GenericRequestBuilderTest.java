@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import android.widget.ImageView;
-
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -12,7 +11,6 @@ import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.BackgroundUtil;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,8 +36,7 @@ public class GenericRequestBuilderTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
-        new GenericRequestBuilder(null,
-                new Object(), mock(LoadProvider.class), Object.class, mock(Glide.class),
+        new GenericRequestBuilder(null, new Object(), mock(LoadProvider.class), Object.class, mock(Glide.class),
                 requestTracker, mock(Lifecycle.class));
     }
 
@@ -76,8 +73,8 @@ public class GenericRequestBuilderTest {
 
     @Test
     public void testDoesNotThrowWhenModelAndLoaderNull() {
-        new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class),
-                requestTracker, mock(Lifecycle.class));
+        new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class), requestTracker,
+                mock(Lifecycle.class));
     }
 
     @Test
@@ -159,7 +156,7 @@ public class GenericRequestBuilderTest {
         Glide glide = mock(Glide.class);
         when(glide.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(
                 mock(Target.class));
-        return new GenericRequestBuilder(Robolectric.application, null, null, Object.class,
-                glide, requestTracker, mock(Lifecycle.class));
+        return new GenericRequestBuilder(Robolectric.application, null, null, Object.class, glide, requestTracker,
+                mock(Lifecycle.class));
     }
 }

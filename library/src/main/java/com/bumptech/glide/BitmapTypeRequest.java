@@ -1,16 +1,12 @@
 package com.bumptech.glide;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
-
 import com.bumptech.glide.load.model.ImageVideoModelLoader;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
 
@@ -24,14 +20,11 @@ import java.io.InputStream;
  * @param <ModelType> The type of model to load the {@link Bitmap} or transcoded class from.
  */
 public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType, Bitmap> {
-    private final Context context;
     private final ModelType model;
     private final ModelLoader<ModelType, InputStream> streamModelLoader;
     private final ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Glide glide;
-    private final RequestTracker requestTracker;
     private final RequestManager.OptionsApplier optionsApplier;
-    private final Lifecycle lifecycle;
 
     private static <A, R> FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader,
@@ -52,22 +45,16 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
         return new FixedLoadProvider<A, ImageVideoWrapper, Bitmap, R>(modelLoader, transcoder, loadProvider);
     }
 
-    BitmapTypeRequest(Context context, ModelType model,
+    BitmapTypeRequest(GenericRequestBuilder<ModelType, ?, ?, ?> other,
             ModelLoader<ModelType, InputStream> streamModelLoader,
             ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader,
-            Glide glide, RequestTracker requestTracker, Lifecycle lifecycle,
             RequestManager.OptionsApplier optionsApplier) {
-        super(context, model,
-                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, null),
-                Bitmap.class,
-                glide, requestTracker, lifecycle);
-        this.context = context;
-        this.model = model;
+        super(buildProvider(other.glide, streamModelLoader, fileDescriptorModelLoader, Bitmap.class, null),
+                Bitmap.class, other);
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
-        this.glide = glide;
-        this.requestTracker = requestTracker;
-        this.lifecycle = lifecycle;
+        this.model = other.model;
+        this.glide = other.glide;
         this.optionsApplier = optionsApplier;
     }
 
@@ -81,9 +68,9 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
      */
     public <R> BitmapRequestBuilder<ModelType, R> transcode(ResourceTranscoder<Bitmap, R> transcoder,
             Class<R> transcodeClass) {
-        return optionsApplier.apply(model, new BitmapRequestBuilder<ModelType, R>(context, model,
+        return optionsApplier.apply(model, new BitmapRequestBuilder<ModelType, R>(
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, transcodeClass, transcoder),
-                transcodeClass, glide, requestTracker, lifecycle));
+                transcodeClass, this));
     }
 
     /**

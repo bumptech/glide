@@ -3,10 +3,9 @@ package com.bumptech.glide;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.provider.DataLoadProvider;
+import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.tests.GlideShadowLooper;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,9 +36,15 @@ public class GifTypeRequestTest {
     public void setUp() {
         optionsApplier = mock(RequestManager.OptionsApplier.class);
         when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(arg(1));
+
+        Glide glide = mock(Glide.class);
+        when(glide.buildTranscoder(any(Class.class), any(Class.class))).thenReturn(mock(ResourceTranscoder.class));
+        when(glide.buildDataProvider(any(Class.class), any(Class.class))).thenReturn(mock(DataLoadProvider.class));
+
         model = "testModel";
-        request = new GifTypeRequest<String>(Robolectric.application, model, mock(ModelLoader.class),
-                Glide.get(Robolectric.application), mock(RequestTracker.class), mock(Lifecycle.class), optionsApplier);
+        GenericRequestBuilder original = new GenericRequestBuilder(Robolectric.application, model,
+                mock(LoadProvider.class), null, glide, null, null);
+        request = new GifTypeRequest<String>(original, mock(ModelLoader.class), optionsApplier);
     }
 
     @After

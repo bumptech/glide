@@ -1,22 +1,24 @@
 package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.tests.KeyAssertions;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,8 +26,6 @@ import static org.mockito.Mockito.when;
  * Tests if {@link EngineKey} {@link Object#hashCode() hashCode} and {@link Object#equals(Object) equals}
  * and SHA-1 disk cache key are different on any difference in ID or existence of a certain workflow part.
  * Also checking whether the equals method is symmetric.
- *
- * @see #assertDifferent
  */
 public class EngineKeyTest {
     private Harness harness;
@@ -45,6 +45,7 @@ public class EngineKeyTest {
         ResourceEncoder encoder = mock(ResourceEncoder.class);
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
         Encoder sourceEncoder = mock(Encoder.class);
+        Key signature = mock(Key.class);
 
         public Harness() {
             when(cacheDecoder.getId()).thenReturn("cacheDecoder");
@@ -56,8 +57,8 @@ public class EngineKeyTest {
         }
 
         public EngineKey build() {
-            return new EngineKey(id, width, height, cacheDecoder, decoder, transformation, encoder, transcoder,
-                    sourceEncoder);
+            return new EngineKey(id, signature, width, height, cacheDecoder, decoder, transformation, encoder,
+                    transcoder, sourceEncoder);
         }
     }
 
@@ -72,7 +73,7 @@ public class EngineKeyTest {
         harness.id = harness.id + "2";
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -81,7 +82,7 @@ public class EngineKeyTest {
         harness.height += 1;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -90,7 +91,7 @@ public class EngineKeyTest {
         harness.width += 1;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -102,7 +103,7 @@ public class EngineKeyTest {
         when(harness.transformation.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -111,7 +112,7 @@ public class EngineKeyTest {
         harness.transformation = null;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -123,7 +124,7 @@ public class EngineKeyTest {
         when(harness.cacheDecoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -132,7 +133,7 @@ public class EngineKeyTest {
         harness.cacheDecoder = null;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -144,7 +145,7 @@ public class EngineKeyTest {
         when(harness.decoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -153,7 +154,7 @@ public class EngineKeyTest {
         harness.decoder = null;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -165,7 +166,7 @@ public class EngineKeyTest {
         when(harness.encoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -174,7 +175,7 @@ public class EngineKeyTest {
         harness.encoder = null;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -188,8 +189,8 @@ public class EngineKeyTest {
 
         // The transcoder doesn't affect the cached data,
         // so we don't expect the key digests to updated differently even though the transcoder id isn't the same.
-        assertDifferent(first, second, false);
-        assertDifferent(second, first, false);
+        KeyAssertions.assertDifferent(first, second, false);
+        KeyAssertions.assertDifferent(second, first, false);
     }
 
     @Test
@@ -198,8 +199,8 @@ public class EngineKeyTest {
         harness.transcoder = null;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second, false);
-        assertDifferent(second, first, false);
+        KeyAssertions.assertDifferent(first, second, false);
+        KeyAssertions.assertDifferent(second, first, false);
     }
 
     @Test
@@ -211,7 +212,7 @@ public class EngineKeyTest {
         when(harness.sourceEncoder.getId()).thenReturn(id + "2");
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
     @Test
@@ -220,27 +221,24 @@ public class EngineKeyTest {
         harness.sourceEncoder = null;
         EngineKey second = harness.build();
 
-        assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second);
     }
 
-    private static void assertDifferent(EngineKey first, EngineKey second)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        assertDifferent(first, second, true);
-        assertDifferent(second, first, true);
-    }
+    @Test
+    public void testDiffersIfSignatureDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        EngineKey first = harness.build();
+        Key signature = mock(Key.class);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                MessageDigest digest = (MessageDigest) invocationOnMock.getArguments()[0];
+                digest.update("signature".getBytes("UTF-8"));
+                return null;
+            }
+        }).when(signature).updateDiskCacheKey(any(MessageDigest.class));
+        harness.signature = signature;
+        EngineKey second = harness.build();
 
-    private static void assertDifferent(EngineKey first, EngineKey second, boolean diskCacheDiffers)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        assertNotEquals(first, second);
-        assertNotEquals(first.hashCode(), second.hashCode());
-
-        if (diskCacheDiffers) {
-            MessageDigest firstDigest = MessageDigest.getInstance("SHA-1");
-            first.updateDiskCacheKey(firstDigest);
-            MessageDigest secondDigest = MessageDigest.getInstance("SHA-1");
-            second.updateDiskCacheKey(secondDigest);
-
-            assertThat(firstDigest.digest(), not(equalTo(secondDigest.digest())));
-        }
+        KeyAssertions.assertDifferent(first, second);
     }
 }

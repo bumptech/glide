@@ -23,7 +23,7 @@ public class MediaStoreStreamLoaderTest {
         int height = 456;
         String mimeType = "video/";
         ModelLoader<Uri, InputStream> wrapped = mock(ModelLoader.class);
-        MediaStoreStreamLoader loader = new MediaStoreStreamLoader(Robolectric.application, wrapped, mimeType, 1234, 4);
+        MediaStoreStreamLoader loader = new MediaStoreStreamLoader(Robolectric.application, wrapped);
 
         loader.getResourceFetcher(uri, width, height);
         verify(wrapped).getResourceFetcher(eq(uri), eq(width), eq(height));

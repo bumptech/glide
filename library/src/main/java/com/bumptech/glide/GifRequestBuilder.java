@@ -1,11 +1,10 @@
 package com.bumptech.glide;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
-
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -14,8 +13,6 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.DrawableCrossFadeViewAnimation;
@@ -37,15 +34,10 @@ import java.io.InputStream;
 public class GifRequestBuilder<ModelType>
         extends GenericRequestBuilder<ModelType, InputStream, GifDrawable, GifDrawable>
         implements BitmapOptions, DrawableOptions {
-    private final Context context;
-    private final Glide glide;
 
-    GifRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, InputStream, GifDrawable, GifDrawable> loadProvider, Glide glide,
-            RequestTracker requestTracker, Lifecycle lifecycle) {
-        super(context, model, loadProvider, GifDrawable.class, glide, requestTracker, lifecycle);
-        this.context = context;
-        this.glide = glide;
+    GifRequestBuilder(LoadProvider<ModelType, InputStream, GifDrawable, GifDrawable> loadProvider,
+            Class<GifDrawable> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
+        super(loadProvider, transcodeClass, other);
     }
 
     /**
@@ -393,6 +385,12 @@ public class GifRequestBuilder<ModelType>
     @Override
     public GifRequestBuilder<ModelType> dontTransform() {
         super.dontTransform();
+        return this;
+    }
+
+    @Override
+    public GifRequestBuilder<ModelType> signature(Key signature) {
+        super.signature(signature);
         return this;
     }
 

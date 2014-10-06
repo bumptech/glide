@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -58,6 +59,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
 
     private final String tag = String.valueOf(hashCode());
 
+    private Key signature;
     private int placeholderResourceId;
     private int errorResourceId;
     private Context context;
@@ -89,6 +91,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
             LoadProvider<A, T, Z, R> loadProvider,
             A model,
+            Key signature,
             Context context,
             Priority priority,
             Target<R> target,
@@ -114,6 +117,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         }
         request.init(loadProvider,
                 model,
+                signature,
                 context,
                 priority,
                 target,
@@ -159,6 +163,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private void init(
             LoadProvider<A, T, Z, R> loadProvider,
             A model,
+            Key signature,
             Context context,
             Priority priority,
             Target<R> target,
@@ -179,6 +184,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             DiskCacheStrategy diskCacheStrategy) {
         this.loadProvider = loadProvider;
         this.model = model;
+        this.signature = signature;
         this.context = context;
         this.priority = priority;
         this.target = target;
@@ -421,7 +427,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(width, height, cacheDecoder, dataFetcher, sourceEncoder, decoder,
+        loadStatus = engine.load(signature, width, height, cacheDecoder, dataFetcher, sourceEncoder, decoder,
                 transformation, encoder, transcoder, priority, isMemoryCacheable, diskCacheStrategy, this);
         loadedFromMemoryCache = resource != null;
         if (Log.isLoggable(TAG, Log.VERBOSE)) {

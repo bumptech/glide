@@ -89,9 +89,6 @@ public class MediaStoreThumbFetcherTest {
     public void testContainsAllRelevantPartsInId() {
         String id = harness.get().getId();
         assertThat(id, containsString(harness.uri.toString()));
-        assertThat(id, containsString(harness.mimeType));
-        assertThat(id, containsString(String.valueOf(harness.dateModified)));
-        assertThat(id, containsString(String.valueOf(harness.orientation)));
     }
 
     @SuppressWarnings("unchecked")
@@ -100,9 +97,6 @@ public class MediaStoreThumbFetcherTest {
         DataFetcher<InputStream> defaultFetcher = mock(DataFetcher.class);
         int width = 123;
         int height = 222;
-        String mimeType = "image/jpeg";
-        long dateModified = 1234123;
-        int orientation = 9;
 
         MediaStoreThumbFetcher.ThumbnailStreamOpenerFactory factory = mock(
                 MediaStoreThumbFetcher.ThumbnailStreamOpenerFactory.class);
@@ -114,8 +108,7 @@ public class MediaStoreThumbFetcherTest {
         }
 
         public MediaStoreThumbFetcher get() {
-            return new MediaStoreThumbFetcher(Robolectric.application, uri, defaultFetcher, width, height, mimeType,
-                    dateModified, orientation, factory);
+            return new MediaStoreThumbFetcher(Robolectric.application, uri, defaultFetcher, width, height, factory);
         }
     }
 }

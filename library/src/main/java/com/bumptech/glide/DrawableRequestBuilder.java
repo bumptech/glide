@@ -5,8 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -40,16 +40,11 @@ import java.io.File;
 public class DrawableRequestBuilder<ModelType>
         extends GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, GlideDrawable>
         implements BitmapOptions, DrawableOptions {
-    private final Glide glide;
-    private final Context context;
 
     DrawableRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, GlideDrawable> loadProvider, Glide glide,
             RequestTracker requestTracker, Lifecycle lifecycle) {
         super(context, model, loadProvider, GlideDrawable.class, glide, requestTracker, lifecycle);
-        this.context = context;
-        this.glide = glide;
-
         // Default to animating.
         crossFade();
     }
@@ -399,6 +394,12 @@ public class DrawableRequestBuilder<ModelType>
     @Override
     public DrawableRequestBuilder<ModelType> dontTransform() {
         super.dontTransform();
+        return this;
+    }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> signature(Key signature) {
+        super.signature(signature);
         return this;
     }
 

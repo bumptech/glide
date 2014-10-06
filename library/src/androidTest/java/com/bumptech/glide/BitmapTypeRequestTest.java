@@ -1,13 +1,11 @@
 package com.bumptech.glide;
 
 import android.graphics.Bitmap;
-
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.provider.DataLoadProvider;
+import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.tests.GlideShadowLooper;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,10 +34,14 @@ public class BitmapTypeRequestTest {
     public void setUp() {
         optionsApplier = mock(RequestManager.OptionsApplier.class);
         when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(arg(1));
+        Glide glide = mock(Glide.class);
+        when(glide.buildTranscoder(any(Class.class), any(Class.class))).thenReturn(mock(ResourceTranscoder.class));
+        when(glide.buildDataProvider(any(Class.class), any(Class.class))).thenReturn(mock(DataLoadProvider.class));
+
         model = "testModel";
-        request = new BitmapTypeRequest(Robolectric.application, model, mock(ModelLoader.class),
-                mock(ModelLoader.class), Glide.get(Robolectric.application), mock(RequestTracker.class),
-                mock(Lifecycle.class), optionsApplier);
+        GenericRequestBuilder original = new GenericRequestBuilder(Robolectric.application, model,
+                mock(LoadProvider.class), null, glide, null, null);
+        request = new BitmapTypeRequest(original, mock(ModelLoader.class), mock(ModelLoader.class), optionsApplier);
     }
 
     @After

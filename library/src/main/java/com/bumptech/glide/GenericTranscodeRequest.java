@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -31,15 +30,10 @@ import java.io.File;
  */
 public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         extends GenericRequestBuilder<ModelType, DataType, ResourceType, ResourceType> implements DownloadOptions {
-    private final Context context;
-    private final ModelType model;
-    private final Glide glide;
     private final ModelLoader<ModelType, DataType> modelLoader;
     private final Class<DataType> dataClass;
     private final Class<ResourceType> resourceClass;
-    private final RequestTracker requestTracker;
     private final RequestManager.OptionsApplier optionsApplier;
-    private final Lifecycle lifecycle;
 
     private static <A, T, Z, R> LoadProvider<A, T, Z, R> build(Glide glide, ModelLoader<A, T> modelLoader,
             Class<T> dataClass, Class<Z> resourceClass, ResourceTranscoder<Z, R> transcoder) {
@@ -47,21 +41,27 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         return new FixedLoadProvider<A, T, Z, R>(modelLoader, transcoder, dataLoadProvider);
     }
 
-    GenericTranscodeRequest(Context context, Glide glide, ModelType model, ModelLoader<ModelType, DataType> modelLoader,
-            Class<DataType> dataClass, Class<ResourceType> resourceClass, RequestTracker requestTracker,
-            Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
-        super(context, model,
-                build(glide, modelLoader, dataClass, resourceClass, UnitTranscoder.<ResourceType>get()),
-                resourceClass, glide, requestTracker, lifecycle);
-        this.context = context;
-        this.model = model;
-        this.glide = glide;
+    GenericTranscodeRequest(
+            Class<ResourceType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other,
+            ModelLoader<ModelType, DataType> modelLoader, Class<DataType> dataClass, Class<ResourceType> resourceClass,
+            RequestManager.OptionsApplier optionsApplier) {
+        super(build(other.glide, modelLoader, dataClass, resourceClass, UnitTranscoder.<ResourceType>get()),
+                transcodeClass, other);
         this.modelLoader = modelLoader;
         this.dataClass = dataClass;
         this.resourceClass = resourceClass;
-        this.requestTracker = requestTracker;
         this.optionsApplier = optionsApplier;
-        this.lifecycle = lifecycle;
+    }
+
+    GenericTranscodeRequest(Context context, Glide glide, ModelType model, ModelLoader<ModelType, DataType> modelLoader,
+            Class<DataType> dataClass, Class<ResourceType> resourceClass, RequestTracker requestTracker,
+            Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
+        super(context, model, build(glide, modelLoader, dataClass, resourceClass, UnitTranscoder.<ResourceType>get()),
+                resourceClass, glide, requestTracker, lifecycle);
+        this.modelLoader = modelLoader;
+        this.dataClass = dataClass;
+        this.resourceClass = resourceClass;
+        this.optionsApplier = optionsApplier;
     }
 
     /**
@@ -78,8 +78,8 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
                 dataClass, resourceClass, transcoder);
 
         return optionsApplier.apply(model,
-                new GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>(context, model,
-                loadProvider, transcodeClass, glide, requestTracker, lifecycle));
+                new GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>(loadProvider,
+                        transcodeClass, this));
     }
 
     /**
@@ -101,13 +101,10 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         DataLoadProvider<DataType, File> dataLoadProvider = glide.buildDataProvider(dataClass, File.class);
         FixedLoadProvider<ModelType, DataType, File, File> fixedLoadProvider =
                 new FixedLoadProvider<ModelType, DataType, File, File>(modelLoader, transcoder, dataLoadProvider);
-        return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, DataType, File, File>(context, model,
-                fixedLoadProvider,
-                File.class, glide,
-                requestTracker, lifecycle)
+        return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, DataType, File, File>(fixedLoadProvider,
+                File.class, this))
                 .priority(Priority.LOW)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .skipMemoryCache(true));
-
+                .skipMemoryCache(true);
     }
 }

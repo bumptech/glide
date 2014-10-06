@@ -424,9 +424,9 @@ public class EngineTest {
     public void testKeyFactoryIsGivenNecessaryArguments() {
         harness.doLoad();
 
-        verify(harness.keyFactory).buildKey(eq(ID), eq(harness.width), eq(harness.height), eq(harness.cacheDecoder),
-                eq(harness.decoder), eq(harness.transformation), eq(harness.encoder), eq(harness.transcoder),
-                eq(harness.sourceEncoder));
+        verify(harness.keyFactory).buildKey(eq(ID), eq(harness.signature), eq(harness.width), eq(harness.height),
+                eq(harness.cacheDecoder), eq(harness.decoder), eq(harness.transformation), eq(harness.encoder),
+                eq(harness.transcoder), eq(harness.sourceEncoder));
     }
 
     @Test
@@ -478,6 +478,7 @@ public class EngineTest {
                 new HashMap<Key, WeakReference<EngineResource<?>>>();
         Encoder<Object> sourceEncoder = mock(Encoder.class);
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
+        Key signature = mock(Key.class);
 
         int width = 100;
         int height = 100;
@@ -490,7 +491,7 @@ public class EngineTest {
 
 
         public EngineTestHarness() {
-            when(keyFactory.buildKey(anyString(), anyInt(), anyInt(), any(ResourceDecoder.class),
+            when(keyFactory.buildKey(anyString(), any(Key.class), anyInt(), anyInt(), any(ResourceDecoder.class),
                     any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
                     any(ResourceTranscoder.class), any(Encoder.class))).thenReturn(cacheKey);
             when(fetcher.getId()).thenReturn(ID);
@@ -507,8 +508,8 @@ public class EngineTest {
         }
 
         public Engine.LoadStatus doLoad() {
-            return engine.load(width, height, cacheDecoder, fetcher, sourceEncoder, decoder, transformation, encoder,
-                    transcoder, priority, isMemoryCacheable, diskCacheStrategy, cb);
+            return engine.load(signature, width, height, cacheDecoder, fetcher, sourceEncoder, decoder, transformation,
+                    encoder, transcoder, priority, isMemoryCacheable, diskCacheStrategy, cb);
         }
     }
 }

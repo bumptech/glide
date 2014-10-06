@@ -1,14 +1,13 @@
 package com.bumptech.glide;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -22,8 +21,6 @@ import com.bumptech.glide.load.resource.bitmap.ImageVideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
@@ -47,18 +44,15 @@ import java.io.InputStream;
 public class BitmapRequestBuilder<ModelType, TranscodeType>
         extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> implements BitmapOptions {
     private final BitmapPool bitmapPool;
-    private final Glide glide;
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     private ResourceDecoder<InputStream, Bitmap> imageDecoder;
     private ResourceDecoder<ParcelFileDescriptor, Bitmap> videoDecoder;
 
-    BitmapRequestBuilder(Context context, ModelType model,
-            LoadProvider<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> streamLoadProvider,
-            Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
-        super(context, model, streamLoadProvider, transcodeClass, glide, requestTracker, lifecycle);
-        this.glide = glide;
-        this.bitmapPool = glide.getBitmapPool();
+    BitmapRequestBuilder(LoadProvider<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> loadProvider,
+            Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
+        super(loadProvider, transcodeClass, other);
+        this.bitmapPool = other.glide.getBitmapPool();
 
         imageDecoder = new StreamBitmapDecoder(bitmapPool);
         videoDecoder = new FileDescriptorBitmapDecoder(bitmapPool);
@@ -447,6 +441,12 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> dontTransform() {
         super.dontTransform();
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> signature(Key signature) {
+        super.signature(signature);
         return this;
     }
 

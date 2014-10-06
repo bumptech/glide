@@ -4,8 +4,9 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-
+import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -49,13 +50,15 @@ import java.io.File;
  * @param <TranscodeType> The type of resource the decoded resource will be transcoded to.
  */
 public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> {
-    private final Context context;
-    private final ModelType model;
+    protected final Context context;
+    protected final Glide glide;
+    protected final ModelType model;
+    protected final Class<TranscodeType> transcodeClass;
+    protected final RequestTracker requestTracker;
+    protected final Lifecycle lifecycle;
     private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
-    private final Class<TranscodeType> transcodeClass;
-    private final Glide glide;
-    private final RequestTracker requestTracker;
-    private final Lifecycle lifecycle;
+
+    private Key signature = EmptySignature.obtain();
 
     private int placeholderId;
     private int errorId;
@@ -74,9 +77,18 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private Transformation<ResourceType> transformation = UnitTransformation.get();
     private boolean isTransformationSet;
 
+    GenericRequestBuilder(LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
+            Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
+        this(other.context, other.model, loadProvider, transcodeClass, other.glide, other.requestTracker,
+                other.lifecycle);
+        this.signature = other.signature;
+    }
+
     GenericRequestBuilder(Context context, ModelType model,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
             Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
+        this.context = context;
+        this.model = model;
         this.transcodeClass = transcodeClass;
         this.glide = glide;
         this.requestTracker = requestTracker;
@@ -90,8 +102,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         if (model != null && loadProvider == null) {
             throw new NullPointerException("LoadProvider must not be null");
         }
-        this.context = context;
-        this.model = model;
     }
 
     /**
@@ -505,6 +515,28 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
+     * Sets some additional data to be mixed in to the memory and disk cache keys allowing the caller more control over
+     * when cached data is invalidated.
+     *
+     * <p>
+     *     Note - The signature does not replace the cache key, it is purely additive.
+     * </p>
+     *
+     * @see com.bumptech.glide.signature.StringSignature
+     *
+     * @param signature A unique non-null {@link com.bumptech.glide.load.Key} representing the current state of the
+     *                  model that will be mixed in to the cache key.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> signature(Key signature) {
+        if (signature == null) {
+            throw new NullPointerException("Signature must not be null");
+        }
+        this.signature = signature;
+        return this;
+    }
+
+    /**
      * Set the target the resource will be loaded into.
      *
      * @see Glide#clear(com.bumptech.glide.request.target.Target)
@@ -676,6 +708,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         return GenericRequest.obtain(
                 loadProvider,
                 model,
+                signature,
                 context,
                 priority,
                 target,

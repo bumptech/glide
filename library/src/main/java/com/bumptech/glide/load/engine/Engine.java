@@ -118,6 +118,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      *     held weakly.
      * </p>
      *
+     * @param signature A non-null unique key to be mixed into the cache key that identifies the version of the data to
+     *                  be loaded.
      * @param width The target width of the retrieved resource.
      * @param height The target height of the retrieved resource.
      * @param cacheDecoder The decoder to use to decode data already in the disk cache.
@@ -137,7 +139,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param <Z> The type of the resource that will be decoded.
      * @param <R> The type of the resource that will be transcoded from the decoded resource.
      */
-    public <T, Z, R> LoadStatus load(int width, int height, ResourceDecoder<File, Z> cacheDecoder,
+    public <T, Z, R> LoadStatus load(Key signature, int width, int height, ResourceDecoder<File, Z> cacheDecoder,
             DataFetcher<T> fetcher, Encoder<T> sourceEncoder, ResourceDecoder<T, Z> decoder,
             Transformation<Z> transformation, ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
             Priority priority, boolean isMemoryCacheable, DiskCacheStrategy diskCacheStrategy, ResourceCallback cb) {
@@ -145,8 +147,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         long startTime = LogTime.getLogTime();
 
         final String id = fetcher.getId();
-        EngineKey key = keyFactory.buildKey(id, width, height, cacheDecoder, decoder, transformation, encoder,
-                transcoder, sourceEncoder);
+        EngineKey key = keyFactory.buildKey(id, signature, width, height, cacheDecoder, decoder, transformation,
+                encoder, transcoder, sourceEncoder);
 
         EngineResource<?> cached = getFromCache(key);
         if (cached != null) {

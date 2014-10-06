@@ -5,7 +5,6 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.cache.StringKey;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 import java.io.UnsupportedEncodingException;
@@ -14,8 +13,6 @@ import java.security.MessageDigest;
 
 @SuppressWarnings("rawtypes")
 class EngineKey implements Key {
-    private static final String FORMAT = "UTF-8";
-
     private final String id;
     private final int width;
     private final int height;
@@ -25,14 +22,16 @@ class EngineKey implements Key {
     private final ResourceEncoder encoder;
     private final ResourceTranscoder transcoder;
     private final Encoder sourceEncoder;
+    private final Key signature;
     private String stringKey;
     private int hashCode;
-    private StringKey originalKey;
+    private Key originalKey;
 
-    public EngineKey(String id, int width, int height, ResourceDecoder cacheDecoder, ResourceDecoder decoder,
-            Transformation transformation, ResourceEncoder encoder, ResourceTranscoder transcoder,
-            Encoder sourceEncoder) {
+    public EngineKey(String id, Key signature, int width, int height, ResourceDecoder cacheDecoder,
+            ResourceDecoder decoder, Transformation transformation, ResourceEncoder encoder,
+            ResourceTranscoder transcoder, Encoder sourceEncoder) {
         this.id = id;
+        this.signature = signature;
         this.width = width;
         this.height = height;
         this.cacheDecoder = cacheDecoder;
@@ -45,7 +44,7 @@ class EngineKey implements Key {
 
     public Key getOriginalKey() {
         if (originalKey == null) {
-            originalKey = new StringKey(id);
+            originalKey = new OriginalKey(id, signature);
         }
         return originalKey;
     }
@@ -62,6 +61,8 @@ class EngineKey implements Key {
         EngineKey engineKey = (EngineKey) o;
 
         if (!id.equals(engineKey.id)) {
+            return false;
+        } else if (!signature.equals(engineKey.signature)) {
             return false;
         } else if (height != engineKey.height) {
             return false;
@@ -99,6 +100,7 @@ class EngineKey implements Key {
     public int hashCode() {
         if (hashCode == 0) {
             hashCode = id.hashCode();
+            hashCode = 31 * hashCode + signature.hashCode();
             hashCode = 31 * hashCode + width;
             hashCode = 31 * hashCode + height;
             hashCode = 31 * hashCode + (cacheDecoder   != null ? cacheDecoder  .getId().hashCode() : 0);
@@ -116,6 +118,7 @@ class EngineKey implements Key {
         if (stringKey == null) {
             stringKey = new StringBuilder()
                 .append(id)
+                .append(signature)
                 .append(width)
                 .append(height)
                 .append(cacheDecoder   != null ? cacheDecoder  .getId() : "")
@@ -135,13 +138,14 @@ class EngineKey implements Key {
                 .putInt(width)
                 .putInt(height)
                 .array();
-        messageDigest.update(id.getBytes(FORMAT));
+        signature.updateDiskCacheKey(messageDigest);
+        messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
         messageDigest.update(dimensions);
-        messageDigest.update((cacheDecoder   != null ? cacheDecoder  .getId() : "").getBytes(FORMAT));
-        messageDigest.update((decoder        != null ? decoder       .getId() : "").getBytes(FORMAT));
-        messageDigest.update((transformation != null ? transformation.getId() : "").getBytes(FORMAT));
-        messageDigest.update((encoder        != null ? encoder       .getId() : "").getBytes(FORMAT));
-        // transcoder is not playing in disk cache key, since it's after in the workflow
-        messageDigest.update((sourceEncoder  != null ? sourceEncoder .getId() : "").getBytes(FORMAT));
+        messageDigest.update((cacheDecoder   != null ? cacheDecoder  .getId() : "").getBytes(STRING_CHARSET_NAME));
+        messageDigest.update((decoder        != null ? decoder       .getId() : "").getBytes(STRING_CHARSET_NAME));
+        messageDigest.update((transformation != null ? transformation.getId() : "").getBytes(STRING_CHARSET_NAME));
+        messageDigest.update((encoder        != null ? encoder       .getId() : "").getBytes(STRING_CHARSET_NAME));
+        // The Transcoder is not included in the disk cache key because its result is not cached.
+        messageDigest.update((sourceEncoder  != null ? sourceEncoder .getId() : "").getBytes(STRING_CHARSET_NAME));
     }
 }

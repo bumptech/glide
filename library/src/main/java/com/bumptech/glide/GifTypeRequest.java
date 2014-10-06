@@ -1,13 +1,9 @@
 package com.bumptech.glide;
 
-import android.content.Context;
-
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.FixedLoadProvider;
 
@@ -22,13 +18,8 @@ import java.io.InputStream;
  *           transcoded class from.
  */
 public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
-    private final Context context;
-    private final ModelType model;
     private final ModelLoader<ModelType, InputStream> streamModelLoader;
-    private final Glide glide;
-    private final RequestTracker requestTracker;
     private final RequestManager.OptionsApplier optionsApplier;
-    private final Lifecycle lifecycle;
 
     private static <A, R> FixedLoadProvider<A, InputStream, GifDrawable, R> buildProvider(Glide glide,
             ModelLoader<A, InputStream> streamModelLoader, Class<R> transcodeClass,
@@ -45,17 +36,11 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
         return new FixedLoadProvider<A, InputStream, GifDrawable, R>(streamModelLoader, transcoder, dataLoadProvider);
     }
 
-    GifTypeRequest(Context context, ModelType model, ModelLoader<ModelType, InputStream> streamModelLoader, Glide glide,
-            RequestTracker requestTracker, Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
-        super(context, model, buildProvider(glide, streamModelLoader, GifDrawable.class, null),  glide,
-                requestTracker, lifecycle);
-        this.context = context;
-        this.model = model;
+    GifTypeRequest(GenericRequestBuilder<ModelType, ?, ?, ?> other,
+            ModelLoader<ModelType, InputStream> streamModelLoader, RequestManager.OptionsApplier optionsApplier) {
+        super(buildProvider(other.glide, streamModelLoader, GifDrawable.class, null), GifDrawable.class, other);
         this.streamModelLoader = streamModelLoader;
-        this.glide = glide;
-        this.requestTracker = requestTracker;
         this.optionsApplier = optionsApplier;
-        this.lifecycle = lifecycle;
 
         // Default to animating.
         crossFade();
@@ -77,8 +62,8 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
             ResourceTranscoder<GifDrawable, R> transcoder, Class<R> transcodeClass) {
         FixedLoadProvider<ModelType, InputStream, GifDrawable, R> provider = buildProvider(glide, streamModelLoader,
                 transcodeClass, transcoder);
-        return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, InputStream, GifDrawable, R>(context,
-                model, provider, transcodeClass, glide, requestTracker, lifecycle));
+        return optionsApplier.apply(model,
+                new GenericRequestBuilder<ModelType, InputStream, GifDrawable, R>(provider, transcodeClass, this));
     }
 
     /**

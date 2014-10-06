@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreStreamLoader;
@@ -36,7 +35,7 @@ import java.util.UUID;
  */
 public class RequestManager implements LifecycleListener {
     private final Context context;
-    private Lifecycle lifecycle;
+    private final Lifecycle lifecycle;
     private final RequestTracker requestTracker;
     private final Glide glide;
     private final OptionsApplier optionsApplier;
@@ -167,98 +166,111 @@ public class RequestManager implements LifecycleListener {
     }
 
     /**
-     * Use the given generic model loader to load the given generic data class.
+     * Returns a request builder that uses the given {@link com.bumptech.glide.load.model.ModelLoader} to fetch a
+     * generic data type.
+     *
      * <p>
      *     Warning - This is an experimental api that may change without a change in major version.
      * </p>
+     *
      * @param modelLoader The {@link ModelLoader} class to use to load the model.
      * @param dataClass The type of data the {@link ModelLoader} will load.
      * @param <A> The type of the model to be loaded.
      * @param <T> The type of the data to be loaded from the mode.
-     * @return A {@link GenericModelRequest} to set options for the load and ultimately the target to load the model
-     * into.
      */
     public <A, T> GenericModelRequest<A, T> using(ModelLoader<A, T> modelLoader, Class<T> dataClass) {
         return new GenericModelRequest<A, T>(modelLoader, dataClass);
     }
 
     /**
-     * Set the {@link ModelLoader} to use for for a new load where the model loader translates from a model to an
-     * {@link InputStream} resource for loading images.
+     * Returns a request builder that uses the given {@link com.bumptech.glide.load.model.stream.StreamModelLoader} to
+     * fetch an {@link InputStream} for loading images.
      *
      * @param modelLoader The model loader to use.
      * @param <T> The type of the model.
-     * @return A new {@link ImageModelRequest}.
      */
     public <T> ImageModelRequest<T> using(final StreamModelLoader<T> modelLoader) {
         return new ImageModelRequest<T>(modelLoader);
     }
 
     /**
-     * A convenience method to use a {@link StreamByteArrayLoader} to decode an image from a byte array.
+     * Returns a request builder that uses the given
+     * {@link com.bumptech.glide.load.model.stream.StreamByteArrayLoader} to fetch an {@link java.io.InputStream} for
+     * loading Bitmaps.
      *
      * @param modelLoader The byte array loader.
-     * @return A new {@link ImageModelRequest}.
      */
     public ImageModelRequest<byte[]> using(StreamByteArrayLoader modelLoader) {
         return new ImageModelRequest<byte[]>(modelLoader);
     }
 
     /**
-     * Set the {@link ModelLoader} to use for a new load where the model loader translates from a model to an
-     * {@link ParcelFileDescriptor} resource for loading video thumbnails.
+     * Returns a new request builder that uses the given {@link ModelLoader} to fetch a
+     * {@link ParcelFileDescriptor} for loading video thumbnails.
      *
      * @param modelLoader The model loader to use.
      * @param <T> The type of the model.
-     * @return A new {@link VideoModelRequest}.
      */
     public <T> VideoModelRequest<T> using(final FileDescriptorModelLoader<T> modelLoader) {
         return new VideoModelRequest<T>(modelLoader);
     }
 
     /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link String} to load
-     * the image represented by the given {@link String}. Defaults to
-     * {@link com.bumptech.glide.load.model.stream.StreamStringLoader.Factory} and
-     * {@link com.bumptech.glide.load.model.stream.StreamStringLoader} to load the given model.
+     * Returns a request builder to load the data represented by the given {@link String} using an empty
+     * signature.
      *
-     * @see #using(StreamModelLoader)
+     * <p>
+     *     Note - this method caches data using only the given String as the cache key. If the data is a Uri outside of
+     *     your control, or you otherwise expect the data represented by the given String to change without the String
+     *     identifier changing, Consider using
+     *     {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)} to mixin a signature
+     *     you create that identifies the data currently at the given String that will invalidate the cache if that data
+     *     changes. Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
+     *     {@link com.bumptech.glide.DrawableRequestBuilder#skipMemoryCache(boolean)} may be appropriate.
+     * </p>
      *
-     * @param string The string representing the image. Must be either a path, or a uri handled by
-     *      {@link com.bumptech.glide.load.model.stream.StreamUriLoader}
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
-     * into.
+     * @see com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)
+     *
+     * @param string A file path, or a uri or url handled by {@link com.bumptech.glide.load.model.UriLoader}.
      */
     public DrawableTypeRequest<String> load(String string) {
         return loadGeneric(string);
     }
 
     /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link Uri} to load the
-     * image at the given uri. Defaults to {@link com.bumptech.glide.load.model.stream.StreamUriLoader.Factory} and
-     * {@link com.bumptech.glide.load.model.stream.StreamUriLoader}.
+     * Returns a request builder to load the data represented by the given {@link Uri} using an empty signature.
      *
-     * @see #using(StreamModelLoader)
+     * <p>
+     *     Note - this method caches data at Uris using only the Uri itself as the cache key. The data represented by
+     *     Uris from some content providers may change without the Uri changing, which means using this method
+     *     can lead to displaying stale data. Consider using
+     *     {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)} to mixin a signature
+     *     you create based on the data at the given Uri that will invalidate the cache if that data changes.
+     *     Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
+     *     {@link com.bumptech.glide.DrawableRequestBuilder#skipMemoryCache(boolean)} may be appropriate.
+     * </p>
      *
-     * @param uri The uri representing the image. Must be a uri handled by
-     *      {@link com.bumptech.glide.load.model.stream.StreamUriLoader}
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
-     * into.
+     * @see #using(com.bumptech.glide.load.model.stream.StreamModelLoader)
+     * @see #loadFromMediaStore(android.net.Uri)
+     * @see #loadFromMediaStore(android.net.Uri, String, long, int)
+     * @see com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)
+     *
+     * @param uri The Uri representing the image. Must be of a type handled by
+     *      {@link com.bumptech.glide.load.model.UriLoader}.
      */
     public DrawableTypeRequest<Uri> load(Uri uri) {
         return loadGeneric(uri);
     }
 
     /**
-     * Use {@link android.provider.MediaStore.Images.Thumbnails} and
-     * {@link android.provider.MediaStore.Video.Thumbnails} to retrieve pre-generated thumbnails for the given uri.
+     * Returns a request builder that uses {@link android.provider.MediaStore.Images.Thumbnails} and
+     * {@link android.provider.MediaStore.Video.Thumbnails} to retrieve pre-generated thumbnails for the given uri if
+     * available and uses the given additional data to build a unique signature for cache invalidation.
      *
-     * <p>
-     *  Falls back to the registered {@link com.bumptech.glide.load.model.ModelLoaderFactory} registered for
-     *  {@link Uri}s if the given uri is not a media store uri or if no pre-generated thumbnail exists for the given
-     *  uri. In addition, mixes the given mimeType, dateModified, and orientation into the cache key to detect and
-     *  invalidate thumbnails if content is changed locally.
-     * </p>
+     * @see #loadFromMediaStore(android.net.Uri)
+     * @see #load(android.net.Uri)
+     * @see com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)
+     * @see com.bumptech.glide.signature.MediaStoreSignature
      *
      * @param uri The uri representing the media.
      * @param mimeType The mime type of the media store media. Ok to default to empty string "". See
@@ -269,88 +281,140 @@ public class RequestManager implements LifecycleListener {
      *      {@link android.provider.MediaStore.Video.VideoColumns#DATE_MODIFIED}.
      * @param orientation The orientation of the media store media. Ok to default to 0. See
      *      {@link android.provider.MediaStore.Images.ImageColumns#ORIENTATION}.
-     * @return A new {@link DrawableRequestBuilder} to set options for the load and ultimately the target to load the
-     *      uri into.
      */
     public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri, String mimeType, long dateModified, int orientation) {
-        ModelLoader<Uri, InputStream> genericStreamLoader = Glide.buildStreamModelLoader(uri, context);
-        ModelLoader<Uri, InputStream> mediaStoreLoader = new MediaStoreStreamLoader(context, genericStreamLoader,
-                mimeType, dateModified, orientation);
-        ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader = Glide.buildFileDescriptorModelLoader(uri,
-                context);
-        return optionsApplier.apply(uri, new DrawableTypeRequest<Uri>(uri, mediaStoreLoader, fileDescriptorModelLoader,
-                context, glide, requestTracker, lifecycle, optionsApplier));
+        // TODO: create a signature from the given arguments.
+        return loadFromMediaStore(uri);
     }
 
     /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link File} to load
-     * the image represented by the given {@link File}. Defaults to
+     * Returns a request builder that uses {@link android.provider.MediaStore.Images.Thumbnails} and
+     * {@link android.provider.MediaStore.Video.Thumbnails} to retrieve pre-generated thumbnails for the given uri.
+     *
+     * <p>
+     *  Falls back to the registered {@link com.bumptech.glide.load.model.ModelLoaderFactory} registered for
+     *  {@link Uri}s if the given uri is not a media store uri or if no pre-generated thumbnail exists for the given
+     *  uri.
+     * </p>
+     *
+     * <p>
+     *     Note - This method by default caches data using the given Uri as the key. Since content in the media store
+     *     can change at any time, you should use
+     *     {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)} to mix in some
+     *     additional data identifying the current state of the Uri, preferably using
+     *     {@link com.bumptech.glide.signature.MediaStoreSignature}. Alternatively consider avoiding the memory and
+     *     disk caches entirely using
+     *     {@link GenericRequestBuilder#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)}
+     *     and {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
+     *     {@link com.bumptech.glide.GenericRequestBuilder#skipMemoryCache(boolean)}.
+     * </p>
+     *
+     * @see #loadFromMediaStore(android.net.Uri, String, long, int)
+     * @see #load(android.net.Uri)
+     * @see com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)
+     * @see com.bumptech.glide.signature.MediaStoreSignature
+     *
+     * @param uri The uri representing the media.
+     */
+    public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri) {
+        ModelLoader<Uri, InputStream> genericStreamLoader = Glide.buildStreamModelLoader(uri, context);
+        ModelLoader<Uri, InputStream> mediaStoreLoader = new MediaStoreStreamLoader(context, genericStreamLoader);
+        ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader = Glide.buildFileDescriptorModelLoader(uri,
+                context);
+
+        return optionsApplier.apply(uri, new DrawableTypeRequest<Uri>(uri, mediaStoreLoader,
+                fileDescriptorModelLoader, context, glide, requestTracker, lifecycle, optionsApplier));
+    }
+
+    /**
+     * Returns a request builder that uses the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently
+     * registered for {@link File} to load the image represented by the given {@link File}. Defaults to
      * {@link com.bumptech.glide.load.model.stream.StreamFileLoader.Factory} and
      * {@link com.bumptech.glide.load.model.stream.StreamFileLoader} to load the given model.
      *
+     *  <p>
+     *     Note - this method caches data for Files using only the file path itself as the cache key. The data in the
+     *     File can change so using this method can lead to displaying stale data. If you expect the data in the File to
+     *     change, Consider using
+     *     {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)} to mixin a signature
+     *     you create that identifies the data currently in the File that will invalidate the cache if that data
+     *     changes. Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
+     *     {@link com.bumptech.glide.DrawableRequestBuilder#skipMemoryCache(boolean)} may be appropriate.
+     * </p>
+     *
+     * @see #load(java.io.File)
      * @see #using(StreamModelLoader)
      *
      * @param file The File containing the image
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
-     * into.
      */
     public DrawableTypeRequest<File> load(File file) {
         return loadGeneric(file);
     }
 
     /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link Integer} to load
-     * the image represented by the given {@link Integer} resource id. Defaults to
-     * {@link com.bumptech.glide.load.model.stream.StreamResourceLoader.Factory} and
+     * Returns a request builder that uses the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently
+     * registered for {@link Integer} to load the image represented by the given {@link Integer} resource id. Defaults
+     * to {@link com.bumptech.glide.load.model.stream.StreamResourceLoader.Factory} and
      * {@link com.bumptech.glide.load.model.stream.StreamResourceLoader} to load the given model.
      *
+     * <p>
+     *     By default this method adds a version code based signature to the cache key used to cache this resource in
+     *     Glide. This signature is sufficient to guarantee that end users will see the most up to date versions of
+     *     your Drawables, but during development if you do not increment your version code before each install and
+     *     you replace a Drawable with different data without changing the Drawable name, you may see inconsistent
+     *     cached data. To get around this, consider using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE}
+     *     via {@link GenericRequestBuilder#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)}
+     *     during development, and re-enabling the default
+     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT} for release builds.
+     * </p>
+     *
+     * @see #load(Integer)
      * @see #using(StreamModelLoader)
      *
      * @param resourceId the id of the resource containing the image
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
-     * into.
      */
     public DrawableTypeRequest<Integer> load(Integer resourceId) {
         return loadGeneric(resourceId);
     }
 
     /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered for {@link URL} to load the
-     * image represented by the given {@link URL}. Defaults to
+     * Returns a request builder that uses the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently
+     * registered for {@link URL} to load the image represented by the given {@link URL}. Defaults to
      * {@link com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader} and
      * {@link com.bumptech.glide.load.data.HttpUrlFetcher} to load the given model.
      *
      * @see #using(StreamModelLoader)
      *
      * @param url The URL representing the image.
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the model
-     * into.
      */
     public DrawableTypeRequest<URL> load(URL url) {
         return loadGeneric(url);
     }
 
     /**
-     * Use a new {@link StreamByteArrayLoader} to load an image from the given model.
+     * Returns a request builder that uses a {@link StreamByteArrayLoader} to load an image from the given byte array.
      *
      * @see #load(byte[])
      *
      * @param model The data to load.
      * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
-     *           (url, filepath etc). If there is no suitable id, use {@link #load(byte[])} instaed.
+     *           (url, filepath etc). If there is no suitable id, use {@link #load(byte[])} instead.
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
     public DrawableTypeRequest<byte[]> load(byte[] model, final String id) {
         final StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
+        // TODO: just use signature instead of id here?
         return optionsApplier.apply(model,
                 new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker, lifecycle,
                         optionsApplier));
     }
 
     /**
-     * Use a new {@link StreamByteArrayLoader} to load an image from the given model. Suitable when there is no
-     * simple id that represents the given data.
+     * Returns a request builder that uses {@link StreamByteArrayLoader} to load an image from the given byte array.
+     * Suitable when there is no simple id that represents the given data.
+     *
+     * @see #load(byte[], String)
      *
      * @param model the data to load.
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
@@ -361,14 +425,14 @@ public class RequestManager implements LifecycleListener {
     }
 
     /**
-     * Use the {@link com.bumptech.glide.load.model.ModelLoaderFactory}s currently registered for the given model type
-     * for {@link InputStream}s and {@link ParcelFileDescriptor}s to load a thumbnail from either the image or the video
-     * represented by the given model.
+     * Returns a request builder that uses the {@link com.bumptech.glide.load.model.ModelLoaderFactory}s currently
+     * registered for the given model Class for {@link InputStream}s and {@link ParcelFileDescriptor}s to load a
+     * thumbnail from either the image or the video represented by the given model.
+     *
+     * @see #load(Object)
      *
      * @param model The model the load.
      * @param <T> The type of the model to load.
-     * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
-     * into.
      */
     public <T> DrawableTypeRequest<T> load(T model) {
         return loadGeneric(model);
@@ -401,8 +465,8 @@ public class RequestManager implements LifecycleListener {
         }
 
         public DrawableTypeRequest<T> load(T model) {
-            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, null, loader, context, glide,
-                    requestTracker, lifecycle, optionsApplier));
+            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, null, loader, context,
+                    glide, requestTracker, lifecycle, optionsApplier));
         }
     }
 
@@ -420,8 +484,8 @@ public class RequestManager implements LifecycleListener {
         }
 
         public DrawableTypeRequest<T> load(T model) {
-            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, loader, null, context, glide,
-                    requestTracker, lifecycle, optionsApplier));
+            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, loader, null, context,
+                    glide, requestTracker, lifecycle, optionsApplier));
         }
     }
 
@@ -486,7 +550,6 @@ public class RequestManager implements LifecycleListener {
             }
             return builder;
         }
-
     }
 
     private static class RequestManagerConnectivityListener implements ConnectivityMonitor.ConnectivityListener {
