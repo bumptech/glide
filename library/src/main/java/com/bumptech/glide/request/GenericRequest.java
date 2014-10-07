@@ -4,10 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -23,7 +20,6 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
-import java.io.File;
 import java.util.Queue;
 
 /**
@@ -416,19 +412,13 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             onException(new Exception("Got null fetcher from model loader"));
             return;
         }
-
-        ResourceDecoder<File, Z> cacheDecoder = loadProvider.getCacheDecoder();
-        Encoder<T> sourceEncoder = loadProvider.getSourceEncoder();
-        ResourceDecoder<T, Z> decoder = loadProvider.getSourceDecoder();
-        ResourceEncoder<Z> encoder = loadProvider.getEncoder();
         ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
-
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(signature, width, height, cacheDecoder, dataFetcher, sourceEncoder, decoder,
-                transformation, encoder, transcoder, priority, isMemoryCacheable, diskCacheStrategy, this);
+        loadStatus = engine.load(signature, width, height, dataFetcher, loadProvider, transformation, transcoder,
+                priority, isMemoryCacheable, diskCacheStrategy, this);
         loadedFromMemoryCache = resource != null;
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));

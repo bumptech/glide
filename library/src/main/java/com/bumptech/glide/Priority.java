@@ -9,5 +9,5 @@ public enum Priority {
     IMMEDIATE,
     HIGH,
     NORMAL,
-    LOW,
+    LOW, priority,
 }

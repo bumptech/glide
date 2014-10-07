@@ -5,22 +5,18 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.util.Log;
-
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
-import java.io.File;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -32,10 +28,11 @@ import java.util.concurrent.ExecutorService;
  */
 public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener, EngineResource.ResourceListener {
     private static final String TAG = "Engine";
-    private final Map<Key, ResourceRunner> runners;
-    private final ResourceRunnerFactory factory;
+    private final Map<Key, EngineJob> jobs;
     private final EngineKeyFactory keyFactory;
     private final MemoryCache cache;
+    private final DiskCache diskCache;
+    private final EngineJobFactory engineJobFactory;
     private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
     private final ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
     private final Handler mainHandler;
@@ -59,13 +56,15 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     public Engine(MemoryCache memoryCache, DiskCache diskCache, ExecutorService resizeService,
             ExecutorService diskCacheService) {
-        this(null, memoryCache, diskCache, resizeService, diskCacheService, null, null, null);
+        this(memoryCache, diskCache, resizeService, diskCacheService, null, null, null, null);
     }
 
-    Engine(ResourceRunnerFactory factory, MemoryCache cache, DiskCache diskCache, ExecutorService resizeService,
-            ExecutorService diskCacheService, Map<Key, ResourceRunner> runners, EngineKeyFactory keyFactory,
-            Map<Key, WeakReference<EngineResource<?>>> activeResources) {
+    // Visible for testing.
+    Engine(MemoryCache cache, DiskCache diskCache, ExecutorService resizeService,
+            ExecutorService diskCacheService, Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
+            Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory) {
         this.cache = cache;
+        this.diskCache = diskCache;
 
         if (activeResources == null) {
             activeResources = new HashMap<Key, WeakReference<EngineResource<?>>>();
@@ -77,16 +76,15 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
         this.keyFactory = keyFactory;
 
-        if (runners == null) {
-            runners = new HashMap<Key, ResourceRunner>();
+        if (jobs == null) {
+            jobs = new HashMap<Key, EngineJob>();
         }
-        this.runners = runners;
+        this.jobs = jobs;
 
-        if (factory == null) {
-            factory = new ResourceRunnerFactory(diskCache, new Handler(Looper.getMainLooper()),
-                    diskCacheService, resizeService);
+        if (engineJobFactory == null) {
+            engineJobFactory = new EngineJobFactory(diskCacheService, resizeService, this);
         }
-        this.factory = factory;
+        this.engineJobFactory = engineJobFactory;
 
         resourceReferenceQueue = new ReferenceQueue<EngineResource<?>>();
         MessageQueue queue = Looper.myQueue();
@@ -122,12 +120,9 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      *                  be loaded.
      * @param width The target width of the retrieved resource.
      * @param height The target height of the retrieved resource.
-     * @param cacheDecoder The decoder to use to decode data already in the disk cache.
      * @param fetcher The fetcher to use to retrieve data not in the disk cache.
-     * @param sourceEncoder The encoder to use to encode any retrieved data directly to cache.
-     * @param decoder The decoder to use to decode any retrieved data not in cache.
+     * @param loadProvider The load provider containing various encoders and decoders use to decode and encode data.
      * @param transformation The transformation to use to transform the decoded resource.
-     * @param encoder The encoder to to use to write the decoded and transformed resource to the disk cache.
      * @param transcoder The transcoder to use to transcode the decoded and transformed resource.
      * @param priority The priority with which the request should run.
      * @param isMemoryCacheable True if the transcoded resource can be cached in memory.
@@ -139,16 +134,16 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      * @param <Z> The type of the resource that will be decoded.
      * @param <R> The type of the resource that will be transcoded from the decoded resource.
      */
-    public <T, Z, R> LoadStatus load(Key signature, int width, int height, ResourceDecoder<File, Z> cacheDecoder,
-            DataFetcher<T> fetcher, Encoder<T> sourceEncoder, ResourceDecoder<T, Z> decoder,
-            Transformation<Z> transformation, ResourceEncoder<Z> encoder, ResourceTranscoder<Z, R> transcoder,
+    public <T, Z, R> LoadStatus load(Key signature, int width, int height, DataFetcher<T> fetcher,
+            DataLoadProvider<T, Z> loadProvider, Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder,
             Priority priority, boolean isMemoryCacheable, DiskCacheStrategy diskCacheStrategy, ResourceCallback cb) {
         Util.assertMainThread();
         long startTime = LogTime.getLogTime();
 
         final String id = fetcher.getId();
-        EngineKey key = keyFactory.buildKey(id, signature, width, height, cacheDecoder, decoder, transformation,
-                encoder, transcoder, sourceEncoder);
+        EngineKey key = keyFactory.buildKey(id, signature, width, height, loadProvider.getCacheDecoder(),
+                loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),
+                transcoder, loadProvider.getSourceEncoder());
 
         EngineResource<?> cached = getFromCache(key);
         if (cached != null) {
@@ -176,27 +171,27 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             }
         }
 
-        ResourceRunner current = runners.get(key);
+        EngineJob current = jobs.get(key);
         if (current != null) {
-            EngineJob job = current.getJob();
-            job.addCallback(cb);
+            current.addCallback(cb);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "added to existing load in " + LogTime.getElapsedMillis(startTime));
             }
-            return new LoadStatus(cb, job);
+            return new LoadStatus(cb, current);
         }
 
-        long start = LogTime.getLogTime();
-        ResourceRunner<Z, R> runner = factory.build(key, width, height, cacheDecoder, fetcher, sourceEncoder, decoder,
-                transformation, encoder, transcoder, priority, isMemoryCacheable, diskCacheStrategy, this);
-        runner.getJob().addCallback(cb);
-        runners.put(key, runner);
-        runner.queue();
+        EngineJob engineJob = engineJobFactory.build(key, isMemoryCacheable);
+        DecodeJob<T, Z, R> decodeJob = new DecodeJob<T, Z, R>(key, width, height, fetcher, loadProvider, transformation,
+                transcoder, diskCache, diskCacheStrategy, priority);
+        EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, priority);
+        jobs.put(key, engineJob);
+        engineJob.addCallback(cb);
+        engineJob.start(runnable);
+
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "queued new load in " + LogTime.getElapsedMillis(start));
             Log.v(TAG, "finished load in engine in " + LogTime.getElapsedMillis(startTime));
         }
-        return new LoadStatus(cb, runner.getJob());
+        return new LoadStatus(cb, engineJob);
     }
 
     @SuppressWarnings("unchecked")
@@ -231,15 +226,15 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             resource.setResourceListener(key, this);
             activeResources.put(key, new ResourceWeakReference(key, resource, resourceReferenceQueue));
         }
-        runners.remove(key);
+        // TODO: should this check that the engine job is still current?
+        jobs.remove(key);
     }
 
     @Override
     public void onEngineJobCancelled(EngineJob engineJob, Key key) {
-        ResourceRunner runner = runners.get(key);
-        if (runner.getJob() == engineJob) {
-            runners.remove(key);
-            runner.cancel();
+        EngineJob current = jobs.get(key);
+        if (engineJob.equals(current)) {
+            jobs.remove(key);
         }
     }
 
@@ -306,6 +301,24 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             }
 
             return true;
+        }
+    }
+
+    // Visible for testing.
+    static class EngineJobFactory {
+        private final ExecutorService diskCacheService;
+        private final ExecutorService resizeService;
+        private final EngineJobListener listener;
+
+        public EngineJobFactory(ExecutorService diskCacheService, ExecutorService resizeService,
+                EngineJobListener listener) {
+            this.diskCacheService = diskCacheService;
+            this.resizeService = resizeService;
+            this.listener = listener;
+        }
+
+        public EngineJob build(Key key, boolean isMemoryCacheable) {
+            return new EngineJob(key, diskCacheService, resizeService, isMemoryCacheable, listener);
         }
     }
 }

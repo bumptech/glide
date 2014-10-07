@@ -16,6 +16,8 @@ import org.robolectric.shadows.ShadowLooper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -119,6 +121,7 @@ public class EngineJobTest {
     @Test
     public void testListenerNotifiedOfCancelOnCancel() {
         EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
         job.cancel();
 
         verify(harness.listener).onEngineJobCancelled(eq(job), eq(harness.key));
@@ -127,6 +130,7 @@ public class EngineJobTest {
     @Test
     public void testOnResourceReadyNotDeliveredAfterCancel() {
         EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
         job.cancel();
 
         job.onResourceReady(harness.resource);
@@ -140,6 +144,7 @@ public class EngineJobTest {
         for (Exception exception : list(new RuntimeException("test"), null)) {
             harness = new EngineJobHarness();
             EngineJob job = harness.getJob();
+            job.start(harness.engineRunnable);
             job.cancel();
 
             job.onException(exception);
@@ -152,6 +157,7 @@ public class EngineJobTest {
     @Test
     public void testRemovingAllCallbacksCancelsRunner() {
         EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
         job.removeCallback(harness.cb);
 
         assertTrue(job.isCancelled());
@@ -187,10 +193,22 @@ public class EngineJobTest {
     @Test
     public void testDoesNotNotifyCancelledIfAlreadyCancelled() {
         EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
         job.cancel();
         job.cancel();
 
         verify(harness.listener, times(1)).onEngineJobCancelled(eq(job), eq(harness.key));
+    }
+
+    @Test
+    public void testDoesNotNotifyCancelledIfReceivedException() {
+        EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
+        job.onException(new Exception());
+        job.cancel();
+
+        verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
+        verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
     }
 
     @Test
@@ -199,6 +217,7 @@ public class EngineJobTest {
         shadowLooper.pause();
 
         EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
         job.onResourceReady(harness.resource);
         job.cancel();
         shadowLooper.runOneTask();
@@ -372,13 +391,62 @@ public class EngineJobTest {
         verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
     }
 
+    @Test
+    public void testCancelsFutureFromDiskCacheServiceIfCancelledAfterStartButBeforeSourceSubmit() {
+        Future future = mock(Future.class);
+        when(harness.diskCacheService.submit(eq(harness.engineRunnable))).thenReturn(future);
+
+        EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
+        job.cancel();
+
+        verify(future).cancel(eq(true));
+    }
+
+    @Test
+    public void testCancelsFutureFromSourceServiceIfCancelledAfterSourceSubmit() {
+        Future future = mock(Future.class);
+        when(harness.sourceService.submit(eq(harness.engineRunnable))).thenReturn(future);
+
+        EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
+        job.submitForSource(harness.engineRunnable);
+        job.cancel();
+
+        verify(future).cancel(eq(true));
+    }
+
+    @Test
+    public void testCancelsEngineRunnableOnCancel() {
+        EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
+        job.cancel();
+
+        verify(harness.engineRunnable).cancel();
+    }
+
+    @Test
+    public void testSubmitsRunnableToSourceServiceOnSubmitForSource() {
+        EngineJob job = harness.getJob();
+        job.submitForSource(harness.engineRunnable);
+
+        verify(harness.sourceService).submit(eq(harness.engineRunnable));
+    }
+
+    @Test
+    public void testSubimtsRunnableToDiskCacheServiceOnStart() {
+        EngineJob job = harness.getJob();
+        job.start(harness.engineRunnable);
+
+        verify(harness.diskCacheService).submit(eq(harness.engineRunnable));
+    }
+
     private static <T> List<T> list(T... items) {
         return Arrays.asList(items);
     }
 
     private static class MultiCbHarness {
         Key key = mock(Key.class);
-        Handler mainHandler = new Handler();
         Resource<Object> resource = mock(Resource.class);
         EngineResource<Object> engineResource = mock(EngineResource.class);
         EngineJobListener listener = mock(EngineJobListener.class);
@@ -387,10 +455,12 @@ public class EngineJobTest {
         List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
         EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
         EngineJob job;
+        ExecutorService diskCacheService = mock(ExecutorService.class);
+        ExecutorService sourceService = mock(ExecutorService.class);
 
         public MultiCbHarness() {
             when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
-            job = new EngineJob(key, mainHandler, isCacheable, listener, factory);
+            job = new EngineJob(key, diskCacheService, sourceService, isCacheable, listener, factory);
             for (int i = 0; i < numCbs; i++) {
                 cbs.add(mock(ResourceCallback.class));
             }
@@ -409,11 +479,14 @@ public class EngineJobTest {
         Resource<Object> resource = mock(Resource.class);
         EngineResource<Object> engineResource = mock(EngineResource.class);
         EngineJobListener listener = mock(EngineJobListener.class);
+        ExecutorService diskCacheService = mock(ExecutorService.class);
+        ExecutorService sourceService = mock(ExecutorService.class);
         boolean isCacheable = true;
+        EngineRunnable engineRunnable = mock(EngineRunnable.class);
 
         public EngineJob getJob() {
             when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
-            EngineJob result = new EngineJob(key, mainHandler, isCacheable, listener, factory);
+            EngineJob result = new EngineJob(key, diskCacheService, sourceService, isCacheable, listener, factory);
             result.addCallback(cb);
             return result;
         }
