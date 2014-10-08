@@ -40,8 +40,11 @@ public class DataLoadProviderRegistry {
      */
     @SuppressWarnings("unchecked")
     public <T, Z> DataLoadProvider<T, Z> get(Class<T> dataClass, Class<Z> resourceClass) {
-        GET_KEY.set(dataClass, resourceClass);
-        DataLoadProvider<?, ?> result = providers.get(GET_KEY);
+        DataLoadProvider<?, ?> result;
+        synchronized (GET_KEY) {
+            GET_KEY.set(dataClass, resourceClass);
+            result = providers.get(GET_KEY);
+        }
         if (result == null) {
             result = EmptyDataLoadProvider.get();
         }
