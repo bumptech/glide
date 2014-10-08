@@ -28,8 +28,13 @@ class EngineJob implements ResourceCallback {
     private final boolean isCacheable;
 
     private boolean isCancelled;
+
+    // Either resource or exception (particularly exception) may be returned to us null, so use booleans to track if
+    // we've received them instead of relying on them to be non-null. See issue #180.
     private Resource<?> resource;
+    private boolean hasResource;
     private Exception exception;
+    private boolean hasException;
     // A set of callbacks that are removed while we're notifying other callbacks of a change in status.
     private Set<ResourceCallback> ignoredCallbacks;
 
@@ -48,9 +53,9 @@ class EngineJob implements ResourceCallback {
 
     public void addCallback(ResourceCallback cb) {
         Util.assertMainThread();
-        if (resource != null) {
+        if (hasResource) {
             cb.onResourceReady(resource);
-        } else if (exception != null) {
+        } else if (hasException) {
             cb.onException(exception);
         } else {
             cbs.add(cb);
@@ -59,7 +64,7 @@ class EngineJob implements ResourceCallback {
 
     public void removeCallback(ResourceCallback cb) {
         Util.assertMainThread();
-        if (resource != null || exception != null) {
+        if (hasResource || hasException) {
             addIgnoredCallback(cb);
         } else {
             cbs.remove(cb);
@@ -87,7 +92,7 @@ class EngineJob implements ResourceCallback {
 
     // Exposed for testing.
     void cancel() {
-        if (exception != null || resource != null || isCancelled) {
+        if (hasException || hasResource || isCancelled) {
             return;
         }
         isCancelled = true;
@@ -117,6 +122,7 @@ class EngineJob implements ResourceCallback {
                 }
                 EngineResource engineResource = engineResourceFactory.build(resource);
                 engineResource.setCacheable(isCacheable);
+                hasResource = true;
                 EngineJob.this.resource = engineResource;
 
                 // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
@@ -154,6 +160,7 @@ class EngineJob implements ResourceCallback {
                 } else if (cbs.isEmpty()) {
                     throw new IllegalStateException("Received an exception without any callbacks to notify");
                 }
+                hasException = true;
                 exception = e;
 
                 listener.onEngineJobComplete(key, null);
