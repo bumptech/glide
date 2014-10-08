@@ -47,7 +47,6 @@ public final class ApplicationVersionSignature {
             // Should never happen.
             e.printStackTrace();
         }
-
         final String versionCode;
         if (pInfo != null) {
             versionCode = String.valueOf(pInfo.versionCode);

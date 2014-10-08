@@ -5,6 +5,10 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.ApplicationVersionSignature;
+import com.bumptech.glide.signature.MediaStoreSignature;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreStreamLoader;
@@ -15,6 +19,7 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.signature.StringSignature;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
@@ -283,8 +288,9 @@ public class RequestManager implements LifecycleListener {
      *      {@link android.provider.MediaStore.Images.ImageColumns#ORIENTATION}.
      */
     public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri, String mimeType, long dateModified, int orientation) {
-        // TODO: create a signature from the given arguments.
-        return loadFromMediaStore(uri);
+        Key signature = new MediaStoreSignature(mimeType, dateModified, orientation);
+        return (DrawableTypeRequest<Uri>) loadFromMediaStore(uri)
+                .signature(signature);
     }
 
     /**
@@ -370,11 +376,14 @@ public class RequestManager implements LifecycleListener {
      *
      * @see #load(Integer)
      * @see #using(StreamModelLoader)
+     * @see com.bumptech.glide.signature.ApplicationVersionSignature
+     * @see com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)
      *
      * @param resourceId the id of the resource containing the image
      */
     public DrawableTypeRequest<Integer> load(Integer resourceId) {
-        return loadGeneric(resourceId);
+        return (DrawableTypeRequest<Integer>) loadGeneric(resourceId)
+                .signature(ApplicationVersionSignature.obtain(context));
     }
 
     /**
@@ -394,6 +403,13 @@ public class RequestManager implements LifecycleListener {
     /**
      * Returns a request builder that uses a {@link StreamByteArrayLoader} to load an image from the given byte array.
      *
+     * @deprecated Use {@link #load(byte[])} along with
+     * {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)}} instead.
+     *
+     * <p>
+     *     Note - This method does not cache results in either the disk cache or the memory cache.
+     * </p>
+     *
      * @see #load(byte[])
      *
      * @param model The data to load.
@@ -402,12 +418,12 @@ public class RequestManager implements LifecycleListener {
      * @return A {@link DrawableTypeRequest} to set options for the load and ultimately the target to load the image
      * into.
      */
+    @Deprecated
     public DrawableTypeRequest<byte[]> load(byte[] model, final String id) {
-        final StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
-        // TODO: just use signature instead of id here?
-        return optionsApplier.apply(model,
-                new DrawableTypeRequest<byte[]>(model, loader, null, context, glide, requestTracker, lifecycle,
-                        optionsApplier));
+        return (DrawableTypeRequest<byte[]>) loadGeneric(model)
+                .signature(new StringSignature(id))
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true /*skipMemoryCache*/);
     }
 
     /**
@@ -421,7 +437,10 @@ public class RequestManager implements LifecycleListener {
      * into.
      */
     public DrawableTypeRequest<byte[]> load(byte[] model) {
-        return load(model, UUID.randomUUID().toString());
+        return (DrawableTypeRequest<byte[]>) loadGeneric(model)
+                .signature(new StringSignature(UUID.randomUUID().toString()))
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true /*skipMemoryCache*/);
     }
 
     /**

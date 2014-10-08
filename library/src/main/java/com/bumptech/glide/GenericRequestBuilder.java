@@ -82,6 +82,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         this(other.context, other.model, loadProvider, transcodeClass, other.glide, other.requestTracker,
                 other.lifecycle);
         this.signature = other.signature;
+        this.diskCacheStrategy = other.diskCacheStrategy;
+        this.isCacheable = other.isCacheable;
     }
 
     GenericRequestBuilder(Context context, ModelType model,

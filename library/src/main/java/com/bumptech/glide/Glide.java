@@ -30,6 +30,7 @@ import com.bumptech.glide.load.model.file_descriptor.FileDescriptorResourceLoade
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorStringLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorUriLoader;
 import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
+import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
 import com.bumptech.glide.load.model.stream.StreamFileLoader;
 import com.bumptech.glide.load.model.stream.StreamResourceLoader;
 import com.bumptech.glide.load.model.stream.StreamStringLoader;
@@ -217,6 +218,7 @@ public class Glide {
         register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
         register(URL.class, InputStream.class, new StreamUrlLoader.Factory());
         register(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
+        register(byte[].class, InputStream.class, new StreamByteArrayLoader.Factory());
 
         transcoderRegistry.register(Bitmap.class, GlideBitmapDrawable.class,
                 new GlideBitmapDrawableTranscoder(context.getResources(), bitmapPool));
