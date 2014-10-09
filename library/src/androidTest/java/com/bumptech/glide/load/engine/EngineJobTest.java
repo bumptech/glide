@@ -301,7 +301,6 @@ public class EngineJobTest {
     @Test
     public void testRemovingCallbackDuringOnResourceReadyPreventsCallbackFromBeingCalledIfNotYetCalled() {
         final EngineJob job = harness.getJob();
-        final ResourceCallback called = mock(ResourceCallback.class);
         final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
         doAnswer(new Answer() {
@@ -310,14 +309,34 @@ public class EngineJobTest {
                 job.removeCallback(notYetCalled);
                 return null;
             }
-        }).when(called).onResourceReady(any(Resource.class));
+        }).when(harness.cb).onResourceReady(any(Resource.class));
 
-        job.addCallback(called);
         job.addCallback(notYetCalled);
 
         job.onResourceReady(harness.resource);
 
         verify(notYetCalled, never()).onResourceReady(any(Resource.class));
+    }
+
+    @Test
+    public void testRemovingCallbackDuringOnResourceReadyPreventsResourceFromBeingAcquiredForCallback() {
+        final EngineJob job = harness.getJob();
+        final ResourceCallback notYetCalled = mock(ResourceCallback.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                job.removeCallback(notYetCalled);
+                return null;
+            }
+        }).when(harness.cb).onResourceReady(any(Resource.class));
+
+        job.addCallback(notYetCalled);
+
+        job.onResourceReady(harness.resource);
+
+        // Once for notifying, once for called.
+        verify(harness.engineResource, times(2)).acquire();
     }
 
     @Test
