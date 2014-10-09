@@ -99,21 +99,21 @@ public class EngineJobTest {
     }
 
     @Test
-    public void testResourceSetCacheableCalledWhenIsCacheableOnReady() {
+    public void testResourceIsCacheableWhenIsCacheableOnReady() {
         harness.isCacheable = true;
         harness.getJob().onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
-        verify(harness.engineResource).setCacheable(eq(harness.isCacheable));
+        verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
     }
 
     @Test
-    public void testResourceSetCacheableCalledWhenNotIsCacheableOnReady() {
+    public void testResourceIsCacheableWhenNotIsCacheableOnReady() {
         harness.isCacheable = false;
         harness.getJob().onResourceReady(harness.resource);
 
         Robolectric.runUiThreadTasks();
-        verify(harness.engineResource).setCacheable(eq(harness.isCacheable));
+        verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
     }
 
     @Test
@@ -319,26 +319,6 @@ public class EngineJobTest {
 
         verify(notYetCalled, never()).onResourceReady(any(Resource.class));
     }
-//
-//    @Test
-//    public void testRemovingCallbackDuringOnResourceReadyPreventsResourceFromBeingAcquiredForCallback() {
-//        final EngineJob job = harness.getJob();
-//        final ResourceCallback called = mock(ResourceCallback.class);
-//        final ResourceCallback notYetCalled = mock(ResourceCallback.class);
-//
-//        doAnswer(new Answer() {
-//            @Override
-//            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-//                job.removeCallback(notYetCalled);
-//                return null;
-//            }
-//        }).when(called).onResourceReady(any(Resource.class));
-//
-//        job.addCallback(called);
-//        job.addCallback(notYetCalled);
-//
-//        job.onResourceReady(harness.resource);
-//    }
 
     @Test
     public void testRemovingCallbackDuringOnExceptionPreventsCallbackFromBeingCalledIfNotYetCalled() {
@@ -390,7 +370,7 @@ public class EngineJobTest {
         EngineJob job;
 
         public MultiCbHarness() {
-            when(factory.build(eq(resource))).thenReturn(engineResource);
+            when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
             job = new EngineJob(key, mainHandler, isCacheable, listener, factory);
             for (int i = 0; i < numCbs; i++) {
                 cbs.add(mock(ResourceCallback.class));
@@ -403,6 +383,7 @@ public class EngineJobTest {
 
     @SuppressWarnings("unchecked")
     private static class EngineJobHarness {
+        EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
         Key key = mock(Key.class);
         Handler mainHandler = new Handler();
         ResourceCallback cb = mock(ResourceCallback.class);
@@ -412,8 +393,7 @@ public class EngineJobTest {
         boolean isCacheable = true;
 
         public EngineJob getJob() {
-            EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
-            when(factory.build(eq(resource))).thenReturn(engineResource);
+            when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
             EngineJob result = new EngineJob(key, mainHandler, isCacheable, listener, factory);
             result.addCallback(cb);
             return result;

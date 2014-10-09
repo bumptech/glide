@@ -208,7 +208,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             // Save an object allocation if we've cached an EngineResource (the typical case).
             result = (EngineResource) cached;
         } else {
-            result = new EngineResource(cached);
+            result = new EngineResource(cached, true /*isCacheable*/);
         }
         return result;
     }

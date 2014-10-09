@@ -26,7 +26,7 @@ public class EngineResourceTest {
     @Before
     public void setUp() {
         resource = mock(Resource.class);
-        engineResource = new EngineResource<Object>(resource);
+        engineResource = new EngineResource<Object>(resource, true /*isCacheable*/);
         listener = mock(EngineResource.ResourceListener.class);
         engineResource.setResourceListener(cacheKey, listener);
     }
@@ -138,9 +138,9 @@ public class EngineResourceTest {
 
     @Test
     public void testCanSetAndGetIsCacheable() {
-        engineResource.setCacheable(true);
+        engineResource = new EngineResource<Object>(mock(Resource.class), true);
         assertTrue(engineResource.isCacheable());
-        engineResource.setCacheable(false);
+        engineResource = new EngineResource<Object>(mock(Resource.class), false);
         assertFalse(engineResource.isCacheable());
     }
 }

@@ -11,9 +11,9 @@ import com.bumptech.glide.load.Key;
  */
 class EngineResource<Z> implements Resource<Z> {
     private final Resource<Z> resource;
+    private final boolean isCacheable;
     private ResourceListener listener;
     private Key key;
-    private boolean isCacheable;
     private int acquired;
     private boolean isRecycled;
 
@@ -21,17 +21,14 @@ class EngineResource<Z> implements Resource<Z> {
         void onResourceReleased(Key key, EngineResource<?> resource);
     }
 
-    EngineResource(Resource<Z> toWrap) {
+    EngineResource(Resource<Z> toWrap, boolean isCacheable) {
         resource = toWrap;
+        this.isCacheable = isCacheable;
     }
 
     void setResourceListener(Key key, ResourceListener listener) {
         this.key = key;
         this.listener = listener;
-    }
-
-    void setCacheable(boolean isCacheable) {
-        this.isCacheable = isCacheable;
     }
 
     boolean isCacheable() {

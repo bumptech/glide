@@ -371,7 +371,7 @@ public class EngineTest {
 
     @Test
     public void testResourceIsNotAddedToCacheOnReleasedIfNotCacheable() {
-        harness.resource.setCacheable(false);
+        when(harness.resource.isCacheable()).thenReturn(false);
         harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
 
         verify(harness.cache, never()).put(eq(harness.cacheKey), eq(harness.resource));
@@ -380,7 +380,7 @@ public class EngineTest {
     @Test
     public void testResourceIsRecycledIfNotCacheableWhenReleased() {
         ShadowLooper shadowLooper = Robolectric.shadowOf(Looper.getMainLooper());
-        harness.resource.setCacheable(true);
+        when(harness.resource.isCacheable()).thenReturn(false);
         shadowLooper.pause();
         harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
         verify(harness.resource, never()).recycle();

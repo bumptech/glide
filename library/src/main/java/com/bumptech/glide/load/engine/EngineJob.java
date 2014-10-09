@@ -120,8 +120,7 @@ class EngineJob implements ResourceCallback {
                 } else if (cbs.isEmpty()) {
                     throw new IllegalStateException("Received a resource without any callbacks to notify");
                 }
-                EngineResource engineResource = engineResourceFactory.build(resource);
-                engineResource.setCacheable(isCacheable);
+                EngineResource engineResource = engineResourceFactory.build(resource, isCacheable);
                 hasResource = true;
                 EngineJob.this.resource = engineResource;
 
@@ -180,8 +179,8 @@ class EngineJob implements ResourceCallback {
 
     // Visible for testing.
     static class EngineResourceFactory {
-        public <R> EngineResource<R> build(Resource<R> resource) {
-            return new EngineResource<R>(resource);
+        public <R> EngineResource<R> build(Resource<R> resource, boolean isMemoryCacheable) {
+            return new EngineResource<R>(resource, isMemoryCacheable);
         }
     }
 }
