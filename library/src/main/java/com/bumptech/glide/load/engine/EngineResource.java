@@ -14,9 +14,8 @@ class EngineResource<Z> implements Resource<Z> {
     private ResourceListener listener;
     private Key key;
     private boolean isCacheable;
-
-    private volatile int acquired;
-    private volatile boolean isRecycled;
+    private int acquired;
+    private boolean isRecycled;
 
     interface ResourceListener {
         void onResourceReleased(Key key, EngineResource<?> resource);
@@ -69,27 +68,22 @@ class EngineResource<Z> implements Resource<Z> {
      *     begin using the wrapped resource. It is always safer to call acquire more often than necessary. Generally
      *     external users should never call this method, the framework will take care of this for you.
      * </p>
-     *
-     * @param times The number of consumers that have just started using the resource.
      */
-    void acquire(int times) {
+    void acquire() {
         if (isRecycled) {
             throw new IllegalStateException("Cannot acquire a recycled resource");
-        }
-        if (times <= 0) {
-            throw new IllegalArgumentException("Must acquire a number of times >= 0");
         }
         if (!Looper.getMainLooper().equals(Looper.myLooper())) {
             throw new IllegalThreadStateException("Must call acquire on the main thread");
         }
-        acquired += times;
+        ++acquired;
     }
 
     /**
      * Decrements the number of consumers using the wrapped resource. Must be called on the main thread.
      *
      * <p>
-     *     This must only be called when a consumer that called the {@link #acquire(int)} method is now done with the
+     *     This must only be called when a consumer that called the {@link #acquire()} method is now done with the
      *     resource. Generally external users should never callthis method, the framework will take care of this for
      *     you.
      * </p>

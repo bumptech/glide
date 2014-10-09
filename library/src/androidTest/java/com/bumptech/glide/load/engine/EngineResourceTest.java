@@ -33,7 +33,7 @@ public class EngineResourceTest {
 
     @Test
     public void testCanAcquireAndRelease() {
-        engineResource.acquire(1);
+        engineResource.acquire();
         engineResource.release();
 
         verify(listener).onResourceReleased(cacheKey, engineResource);
@@ -41,7 +41,8 @@ public class EngineResourceTest {
 
     @Test
     public void testCanAcquireMultipleTimesAndRelease() {
-        engineResource.acquire(2);
+        engineResource.acquire();
+        engineResource.acquire();
         engineResource.release();
         engineResource.release();
 
@@ -64,7 +65,7 @@ public class EngineResourceTest {
 
     @Test
     public void testRecyclesWrappedResourceWhenRecycled() {
-        engineResource.acquire(1);
+        engineResource.acquire();
         engineResource.release();
         engineResource.recycle();
         verify(resource).recycle();
@@ -83,14 +84,14 @@ public class EngineResourceTest {
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfRecycledWhileAcquired() {
-        engineResource.acquire(1);
+        engineResource.acquire();
         engineResource.recycle();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfAcquiredAfterRecycled() {
         engineResource.recycle();
-        engineResource.acquire(1);
+        engineResource.acquire();
     }
 
     @Test
@@ -99,7 +100,7 @@ public class EngineResourceTest {
             @Override
             public void run() {
                 try {
-                    engineResource.acquire(1);
+                    engineResource.acquire();
                 } catch (IllegalThreadStateException e) {
                     return;
                 }
@@ -112,7 +113,7 @@ public class EngineResourceTest {
 
     @Test
     public void testThrowsIfReleasedOnBackgroundThread() throws InterruptedException {
-        engineResource.acquire(1);
+        engineResource.acquire();
         Thread otherThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -128,19 +129,9 @@ public class EngineResourceTest {
         otherThread.join();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testThrowsIfAcquiredWithTimesEqualToZero() {
-        engineResource.acquire(0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testThrowsIfAcquiredWithTimesLessThanToZero() {
-        engineResource.acquire(-1);
-    }
-
     @Test(expected = IllegalStateException.class)
     public void testThrowsIfReleasedMoreThanAcquired() {
-        engineResource.acquire(1);
+        engineResource.acquire();
         engineResource.release();
         engineResource.release();
     }

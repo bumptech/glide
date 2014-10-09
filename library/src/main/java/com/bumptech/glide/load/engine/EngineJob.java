@@ -127,12 +127,12 @@ class EngineJob implements ResourceCallback {
 
                 // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
                 // synchronously released by one of the callbacks.
-                engineResource.acquire(1);
-                engineResource.acquire(cbs.size());
+                engineResource.acquire();
                 listener.onEngineJobComplete(key, engineResource);
 
                 for (ResourceCallback cb : cbs) {
                     if (!isInIgnoredCallbacks(cb)) {
+                        engineResource.acquire();
                         cb.onResourceReady(engineResource);
                     }
                 }

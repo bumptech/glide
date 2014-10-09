@@ -158,7 +158,7 @@ public class EngineTest {
 
         harness.doLoad();
 
-        verify(harness.resource).acquire(eq(1));
+        verify(harness.resource).acquire();
     }
 
     @Test
@@ -245,7 +245,7 @@ public class EngineTest {
 
         harness.doLoad();
 
-        verify(harness.resource).acquire(1);
+        verify(harness.resource).acquire();
     }
 
     @Test

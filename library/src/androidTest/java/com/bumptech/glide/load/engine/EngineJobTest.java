@@ -6,6 +6,7 @@ import com.bumptech.glide.request.ResourceCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
@@ -22,6 +23,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -78,14 +80,18 @@ public class EngineJobTest {
     public void testAcquiresResourceOncePerCallback() {
         MultiCbHarness harness = new MultiCbHarness();
         harness.job.onResourceReady(harness.resource);
-        verify(harness.engineResource).acquire(eq(harness.numCbs));
+
+        // Acquired once and then released while notifying.
+        InOrder order = inOrder(harness.engineResource);
+        order.verify(harness.engineResource, times(harness.numCbs + 1)).acquire();
+        order.verify(harness.engineResource, times(1)).release();
     }
 
     @Test
     public void testListenerNotifiedJobCompleteOnException() {
         for (Exception exception : list(new Exception("test"), null)) {
             harness = new EngineJobHarness();
-            harness.getJob().onException(new Exception("test"));
+            harness.getJob().onException(exception);
 
             Robolectric.runUiThreadTasks();
             verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
@@ -166,7 +172,7 @@ public class EngineJobTest {
         harness.getJob().onResourceReady(harness.resource);
 
         // Once while notifying and once for single callback.
-        verify(harness.engineResource, times(2)).acquire(eq(1));
+        verify(harness.engineResource, times(2)).acquire();
     }
 
     @Test
@@ -205,7 +211,7 @@ public class EngineJobTest {
         harness.isCacheable = false;
         harness.getJob().onResourceReady(harness.resource);
 
-        verify(harness.engineResource, times(2)).acquire(eq(1));
+        verify(harness.engineResource, times(2)).acquire();
     }
 
     @Test
@@ -313,6 +319,26 @@ public class EngineJobTest {
 
         verify(notYetCalled, never()).onResourceReady(any(Resource.class));
     }
+//
+//    @Test
+//    public void testRemovingCallbackDuringOnResourceReadyPreventsResourceFromBeingAcquiredForCallback() {
+//        final EngineJob job = harness.getJob();
+//        final ResourceCallback called = mock(ResourceCallback.class);
+//        final ResourceCallback notYetCalled = mock(ResourceCallback.class);
+//
+//        doAnswer(new Answer() {
+//            @Override
+//            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+//                job.removeCallback(notYetCalled);
+//                return null;
+//            }
+//        }).when(called).onResourceReady(any(Resource.class));
+//
+//        job.addCallback(called);
+//        job.addCallback(notYetCalled);
+//
+//        job.onResourceReady(harness.resource);
+//    }
 
     @Test
     public void testRemovingCallbackDuringOnExceptionPreventsCallbackFromBeingCalledIfNotYetCalled() {

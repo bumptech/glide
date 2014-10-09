@@ -150,7 +150,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
         EngineResource<?> cached = getFromCache(key);
         if (cached != null) {
-            cached.acquire(1);
+            cached.acquire();
             activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
             cb.onResourceReady(cached);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -163,7 +163,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         if (activeRef != null) {
             EngineResource<?> active = activeRef.get();
             if (active != null) {
-                active.acquire(1);
+                active.acquire();
                 cb.onResourceReady(active);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "loaded resource from active resources in " + LogTime.getElapsedMillis(startTime));
