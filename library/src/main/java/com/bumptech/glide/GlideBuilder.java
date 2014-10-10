@@ -27,7 +27,7 @@ public class GlideBuilder {
     private BitmapPool bitmapPool;
     private MemoryCache memoryCache;
     private DiskCache diskCache;
-    private ExecutorService resizeService;
+    private ExecutorService sourceService;
     private ExecutorService diskCacheService;
 
     public GlideBuilder(Context context) {
@@ -86,7 +86,7 @@ public class GlideBuilder {
      * @return This builder.
      */
     public GlideBuilder setResizeService(ExecutorService service) {
-        this.resizeService = service;
+        this.sourceService = service;
         return this;
     }
 
@@ -117,9 +117,9 @@ public class GlideBuilder {
     }
 
     Glide createGlide() {
-        if (resizeService == null) {
+        if (sourceService == null) {
             final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
-            resizeService = new FifoPriorityThreadPoolExecutor(cores);
+            sourceService = new FifoPriorityThreadPoolExecutor(cores);
         }
         if (diskCacheService == null) {
             diskCacheService = new FifoPriorityThreadPoolExecutor(1);
@@ -149,7 +149,7 @@ public class GlideBuilder {
         }
 
         if (engine == null) {
-            engine = new Engine(memoryCache, diskCache, resizeService, diskCacheService);
+            engine = new Engine(memoryCache, diskCache, diskCacheService, sourceService);
         }
 
         return new Glide(engine, memoryCache, bitmapPool, context);

@@ -46,7 +46,6 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
 
     private volatile Future<?> future;
 
-
     public EngineJob(Key key, ExecutorService diskCacheService, ExecutorService sourceService, boolean isCacheable,
             EngineJobListener listener) {
         this(key, diskCacheService, sourceService, isCacheable, listener, DEFAULT_FACTORY);

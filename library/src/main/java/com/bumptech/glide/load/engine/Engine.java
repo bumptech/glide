@@ -54,14 +54,14 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
     }
 
-    public Engine(MemoryCache memoryCache, DiskCache diskCache, ExecutorService resizeService,
-            ExecutorService diskCacheService) {
-        this(memoryCache, diskCache, resizeService, diskCacheService, null, null, null, null);
+    public Engine(MemoryCache memoryCache, DiskCache diskCache, ExecutorService diskCacheService,
+            ExecutorService sourceService) {
+        this(memoryCache, diskCache, diskCacheService, sourceService, null, null, null, null);
     }
 
     // Visible for testing.
-    Engine(MemoryCache cache, DiskCache diskCache, ExecutorService resizeService,
-            ExecutorService diskCacheService, Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
+    Engine(MemoryCache cache, DiskCache diskCache, ExecutorService diskCacheService, ExecutorService sourceService,
+            Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
             Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory) {
         this.cache = cache;
         this.diskCache = diskCache;
@@ -82,7 +82,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         this.jobs = jobs;
 
         if (engineJobFactory == null) {
-            engineJobFactory = new EngineJobFactory(diskCacheService, resizeService, this);
+            engineJobFactory = new EngineJobFactory(diskCacheService, sourceService, this);
         }
         this.engineJobFactory = engineJobFactory;
 
@@ -307,18 +307,18 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     // Visible for testing.
     static class EngineJobFactory {
         private final ExecutorService diskCacheService;
-        private final ExecutorService resizeService;
+        private final ExecutorService sourceService;
         private final EngineJobListener listener;
 
-        public EngineJobFactory(ExecutorService diskCacheService, ExecutorService resizeService,
+        public EngineJobFactory(ExecutorService diskCacheService, ExecutorService sourceService,
                 EngineJobListener listener) {
             this.diskCacheService = diskCacheService;
-            this.resizeService = resizeService;
+            this.sourceService = sourceService;
             this.listener = listener;
         }
 
         public EngineJob build(Key key, boolean isMemoryCacheable) {
-            return new EngineJob(key, diskCacheService, resizeService, isMemoryCacheable, listener);
+            return new EngineJob(key, diskCacheService, sourceService, isMemoryCacheable, listener);
         }
     }
 }
