@@ -4,10 +4,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.ImageView;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +14,7 @@ import static com.bumptech.glide.request.animation.GlideAnimation.ViewAdapter;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +32,7 @@ public class DrawableCrossFadeViewAnimationTest {
     public void testStartsDefaultAnimationIfNoPreviousDrawableIsNotSet() {
         when(harness.adapter.getView()).thenReturn(harness.view);
         harness.animation.animate(harness.current, harness.adapter);
-        verify(harness.view).startAnimation(any(Animation.class));
+        verify(harness.defaultAnimation).animate(eq(harness.current), eq(harness.adapter));
     }
 
     @Test
@@ -69,7 +67,7 @@ public class DrawableCrossFadeViewAnimationTest {
         Drawable current = new ColorDrawable(Color.GRAY);
         ViewAdapter adapter = mock(ViewAdapter.class);
         ImageView view = mock(ImageView.class);
-        Animation defaultAnimation = new AlphaAnimation(0f, 1f);
+        GlideAnimation<Drawable> defaultAnimation = mock(GlideAnimation.class);
         int duration = 200;
         DrawableCrossFadeViewAnimation<Drawable> animation = new DrawableCrossFadeViewAnimation<Drawable>(
                 defaultAnimation, duration);

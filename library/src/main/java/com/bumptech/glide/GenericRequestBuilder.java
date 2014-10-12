@@ -366,9 +366,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param animationId The resource id of the animation to run
      * @return This request builder.
      */
-    // This is safe because the view animation doesn't care about the resource type it receives.
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
-            int animationId) {
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(int animationId) {
         return animate(new ViewAnimation.ViewAnimationFactory<TranscodeType>(context, animationId));
     }
 
@@ -376,12 +374,18 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * Sets an animation to run on the wrapped target when a resource load finishes. Will only be run if the resource
      * was loaded asynchronously (ie was not in the memory cache)
      *
+     * @see #animate(int)
+     * @see #animate(com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator)
+     *
+     * @deprecated If this builder is used for multiple loads, using this method will result in multiple view's being
+     * asked to start an animation using a single {@link android.view.animation.Animation} object which results in
+     * views animating repeatedly. Use {@link #animate(int)} or
+     * {@link #animate(com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator)}.
      * @param animation The animation to run
      * @return This request builder.
      */
-    // This is safe because the view animation doesn't care about the resource type it receives.
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
-            Animation animation) {
+    @Deprecated
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(Animation animation) {
         return animate(new ViewAnimation.ViewAnimationFactory<TranscodeType>(animation));
     }
 
@@ -393,7 +397,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param animator The {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} to run.
      * @return This request builder.
      */
-    // This is safe because the view property animation doesn't care about the resource type it receives.
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             ViewPropertyAnimation.Animator animator) {
         return animate(new ViewPropertyAnimation.ViewPropertyAnimationFactory<TranscodeType>(animator));

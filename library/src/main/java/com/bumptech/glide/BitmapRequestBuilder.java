@@ -331,6 +331,8 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> animate(Animation animation) {
         super.animate(animation);

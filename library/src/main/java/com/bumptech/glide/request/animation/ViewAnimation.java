@@ -14,14 +14,13 @@ import android.view.animation.AnimationUtils;
  */
 public class ViewAnimation<R> implements GlideAnimation<R> {
 
-    private final Animation animation;
+    private final AnimationFactory animationFactory;
 
     /**
      * Constructs a new ViewAnimation that will start the given {@link android.view.animation.Animation}.
-     * @param animation The animation to use.
      */
-    public ViewAnimation(Animation animation) {
-        this.animation = animation;
+    ViewAnimation(AnimationFactory animationFactory) {
+        this.animationFactory = animationFactory;
     }
 
     /**
@@ -39,7 +38,7 @@ public class ViewAnimation<R> implements GlideAnimation<R> {
         View view = adapter.getView();
         if (view != null) {
             view.clearAnimation();
-
+            Animation animation = animationFactory.build();
             view.startAnimation(animation);
         }
 
@@ -50,18 +49,19 @@ public class ViewAnimation<R> implements GlideAnimation<R> {
      * A {@link com.bumptech.glide.request.animation.GlideAnimationFactory} that produces ViewAnimations.
      */
     public static class ViewAnimationFactory<R> implements GlideAnimationFactory<R> {
-        private Animation animation;
-        private Context context;
-        private int animationId;
+        private final AnimationFactory animationFactory;
         private GlideAnimation<R> glideAnimation;
 
         public ViewAnimationFactory(Animation animation) {
-            this.animation = animation;
+            this(new ConcreteAnimationFactory(animation));
         }
 
         public ViewAnimationFactory(Context context, int animationId) {
-            this.context = context;
-            this.animationId = animationId;
+            this(new ResourceAnimationFactory(context, animationId));
+        }
+
+        ViewAnimationFactory(AnimationFactory animationFactory) {
+            this.animationFactory = animationFactory;
         }
 
         /**
@@ -80,13 +80,42 @@ public class ViewAnimation<R> implements GlideAnimation<R> {
             }
 
             if (glideAnimation == null) {
-                if (animation == null) {
-                    animation = AnimationUtils.loadAnimation(context, animationId);
-                }
-                glideAnimation = new ViewAnimation<R>(animation);
+                glideAnimation = new ViewAnimation<R>(animationFactory);
             }
 
             return glideAnimation;
         }
+    }
+
+    private static class ConcreteAnimationFactory implements AnimationFactory {
+        private final Animation animation;
+
+        public ConcreteAnimationFactory(Animation animation) {
+            this.animation = animation;
+        }
+
+        @Override
+        public Animation build() {
+            return animation;
+        }
+    }
+
+    private static class ResourceAnimationFactory implements AnimationFactory {
+        private final Context context;
+        private final int animationId;
+
+        public ResourceAnimationFactory(Context context, int animationId) {
+            this.context = context.getApplicationContext();
+            this.animationId = animationId;
+        }
+
+        @Override
+        public Animation build() {
+            return AnimationUtils.loadAnimation(context, animationId);
+        }
+    }
+
+    interface AnimationFactory {
+        Animation build();
     }
 }

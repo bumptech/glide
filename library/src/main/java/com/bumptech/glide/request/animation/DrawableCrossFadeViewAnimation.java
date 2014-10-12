@@ -3,10 +3,8 @@ package com.bumptech.glide.request.animation;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 /**
  * A cross fade {@link GlideAnimation} for {@link android.graphics.drawable.Drawable}s
@@ -19,14 +17,8 @@ import android.view.animation.AnimationUtils;
 public class DrawableCrossFadeViewAnimation<T extends Drawable> implements GlideAnimation<T> {
     // 150 ms.
     public static final int DEFAULT_DURATION = 300;
-    private final Animation defaultAnimation;
+    private final GlideAnimation<T> defaultAnimation;
     private final int duration;
-
-    private static Animation getDefaultAnimation() {
-        AlphaAnimation animation = new AlphaAnimation(0f, 1f);
-        animation.setDuration(DEFAULT_DURATION / 2);
-        return animation;
-    }
 
     /**
      * A factory class that produces a new {@link GlideAnimation} that varies depending
@@ -41,28 +33,28 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
      * </p>
      */
     public static class DrawableCrossFadeFactory<T extends Drawable> implements GlideAnimationFactory<T> {
-        private Context context;
-        private int defaultAnimationId;
-        private Animation defaultAnimation;
-        private int duration;
+        private final ViewAnimation.ViewAnimationFactory<T> animationFactory;
+        private final int duration;
         private DrawableCrossFadeViewAnimation<T> animation;
 
         public DrawableCrossFadeFactory() {
-            this(getDefaultAnimation(), DEFAULT_DURATION);
+            this(DEFAULT_DURATION);
         }
 
         public DrawableCrossFadeFactory(int duration) {
-            this(getDefaultAnimation(), duration);
+            this(new ViewAnimation.ViewAnimationFactory<T>(new DefaultAnimationFactory()), duration);
         }
 
         public DrawableCrossFadeFactory(Context context, int defaultAnimationId, int duration) {
-            this.context = context;
-            this.defaultAnimationId = defaultAnimationId;
-            this.duration = duration;
+            this(new ViewAnimation.ViewAnimationFactory<T>(context, defaultAnimationId), duration);
         }
 
         public DrawableCrossFadeFactory(Animation defaultAnimation, int duration) {
-            this.defaultAnimation = defaultAnimation;
+            this(new ViewAnimation.ViewAnimationFactory<T>(defaultAnimation), duration);
+        }
+
+        DrawableCrossFadeFactory(ViewAnimation.ViewAnimationFactory<T> animationFactory, int duration) {
+            this.animationFactory = animationFactory;
             this.duration = duration;
         }
 
@@ -73,9 +65,7 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
             }
 
             if (animation == null) {
-                if (defaultAnimation == null) {
-                    defaultAnimation = AnimationUtils.loadAnimation(context, defaultAnimationId);
-                }
+                GlideAnimation<T> defaultAnimation = animationFactory.build(false, isFirstResource);
                 animation = new DrawableCrossFadeViewAnimation<T>(defaultAnimation, duration);
             }
 
@@ -86,12 +76,10 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
     /**
      * Constructor that takes a default animation and a duration in milliseconds that the cross fade animation should
      * last.
-     * @param defaultAnimation The default animation that will run if there is nothing to cross fade from when a new
-     *                         {@link android.graphics.drawable.Drawable} is set.
      * @param duration The duration that the cross fade animation should run if there is something to cross fade from
      *                 when a new {@link android.graphics.drawable.Drawable} is set.
      */
-    public DrawableCrossFadeViewAnimation(Animation defaultAnimation, int duration) {
+    public DrawableCrossFadeViewAnimation(GlideAnimation<T> defaultAnimation, int duration) {
         this.defaultAnimation = defaultAnimation;
         this.duration = duration;
     }
@@ -119,11 +107,18 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
             adapter.setDrawable(transitionDrawable);
             return true;
         } else {
-            View view = adapter.getView();
-            if (view != null) {
-                view.startAnimation(defaultAnimation);
-            }
+            defaultAnimation.animate(current, adapter);
             return false;
+        }
+    }
+
+    private static class DefaultAnimationFactory implements ViewAnimation.AnimationFactory {
+
+        @Override
+        public Animation build() {
+            AlphaAnimation animation = new AlphaAnimation(0f, 1f);
+            animation.setDuration(DEFAULT_DURATION / 2);
+            return animation;
         }
     }
 }

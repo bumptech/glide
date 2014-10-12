@@ -245,6 +245,7 @@ public class GifRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @Override
     public GifRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
         super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(animation, duration));
@@ -282,6 +283,8 @@ public class GifRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     @Override
     public GifRequestBuilder<ModelType> animate(Animation animation) {
         super.animate(animation);

@@ -1,8 +1,7 @@
 package com.bumptech.glide.request.animation;
 
-import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageView;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,19 +16,19 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class ViewAnimationTest {
-    private AlphaAnimation animation;
-    private ViewAnimation viewAnimation;
+    private ViewAnimation<Object> viewAnimation;
     private ViewAdapter adapter;
     private ImageView view;
+    private ViewAnimation.AnimationFactory animationFactory;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        animation = new AlphaAnimation(0f, 1f);
+        animationFactory = mock(ViewAnimation.AnimationFactory.class);
         view = mock(ImageView.class);
         adapter = mock(ViewAdapter.class);
         when(adapter.getView()).thenReturn(view);
-        viewAnimation = new ViewAnimation(animation);
+        viewAnimation = new ViewAnimation<Object>(animationFactory);
     }
 
     @Test
@@ -46,7 +45,10 @@ public class ViewAnimationTest {
 
     @Test
     public void testStartsAnimationOnAnimate() {
+        Animation animation = mock(Animation.class);
+        when(animationFactory.build()).thenReturn(animation);
         viewAnimation.animate(null, adapter);
+        verify(view).clearAnimation();
         verify(view).startAnimation(eq(animation));
     }
 }

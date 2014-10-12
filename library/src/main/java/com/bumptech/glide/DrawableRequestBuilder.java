@@ -257,6 +257,7 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     public DrawableRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
         super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GlideDrawable>(animation, duration));
         return this;
@@ -301,6 +302,8 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     @Override
     public DrawableRequestBuilder<ModelType> animate(Animation animation) {
         super.animate(animation);
