@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-
 import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
@@ -64,14 +63,10 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
         thumbnailRequest = Glide.with(this)
                 .from(Photo.class)
-                .priority(Priority.HIGH)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
 
-        preloadRequest = thumbnail ? thumbnailRequest : Glide.with(this)
-                .from(Photo.class)
-                .priority(Priority.HIGH)
-                .centerCrop();
+        preloadRequest = thumbnail ? thumbnailRequest.clone().priority(Priority.HIGH) : fullRequest;
 
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
         grid = (GridView) result.findViewById(R.id.images);

@@ -12,7 +12,6 @@ import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.Priority;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ public class MainActivity extends Activity implements Api.Monitor {
     private static final String TAG = "GiphyActivity";
 
     private GifAdapter adapter;
-    private DrawableRequestBuilder<Api.GifResult> preloadRequest;
+    private DrawableRequestBuilder<Api.GifResult> fullRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +43,9 @@ public class MainActivity extends Activity implements Api.Monitor {
         ListView gifList = (ListView) findViewById(R.id.gif_list);
         GiphyPreloader preloader = new GiphyPreloader(2);
 
-        DrawableRequestBuilder<Api.GifResult> fullRequest = Glide.with(this)
+        fullRequest = Glide.with(this)
                 .from(Api.GifResult.class)
                 .fitCenter();
-
-        preloadRequest = Glide.with(this)
-                .from(Api.GifResult.class)
-                .fitCenter()
-                .priority(Priority.HIGH);
 
         adapter = new GifAdapter(this, preloader, fullRequest);
         gifList.setAdapter(adapter);
@@ -99,7 +93,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         @Override
         protected GenericRequestBuilder getRequestBuilder(Api.GifResult item) {
-            return preloadRequest.load(item);
+            return fullRequest.load(item);
         }
     }
 

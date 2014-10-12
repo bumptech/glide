@@ -404,6 +404,11 @@ public class GifRequestBuilder<ModelType>
     }
 
     @Override
+    public GifRequestBuilder<ModelType> clone() {
+        return (GifRequestBuilder<ModelType>) super.clone();
+    }
+
+    @Override
     void applyFitCenter() {
         fitCenter();
     }

@@ -44,18 +44,17 @@ import java.io.File;
  * @param <ResourceType> The type of the resource that will be loaded.
  * @param <TranscodeType> The type of resource the decoded resource will be transcoded to.
  */
-public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> {
+public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> implements Cloneable {
     protected final Class<ModelType> modelClass;
     protected final Context context;
     protected final Glide glide;
     protected final Class<TranscodeType> transcodeClass;
     protected final RequestTracker requestTracker;
     protected final Lifecycle lifecycle;
-    private final ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
-
-    private Key signature = EmptySignature.obtain();
+    private ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
 
     private ModelType model;
+    private Key signature = EmptySignature.obtain();
     // model may occasionally be null, so to enforce that load() was called, set a boolean rather than relying on model
     // not to be null.
     private boolean isModelSet;
@@ -80,11 +79,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
         this(other.context, other.modelClass, loadProvider, transcodeClass, other.glide, other.requestTracker,
                 other.lifecycle);
+        this.model = other.model;
+        this.isModelSet = other.isModelSet;
         this.signature = other.signature;
         this.diskCacheStrategy = other.diskCacheStrategy;
         this.isCacheable = other.isCacheable;
-        this.model = other.model;
-        this.isModelSet = other.isModelSet;
     }
 
     GenericRequestBuilder(Context context, Class<ModelType> modelClass,
@@ -560,6 +559,28 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
+     * Returns a copy of this request builder with all of the options set so far on this builder.
+     *
+     * <p>
+     *     This method returns a "deep" copy in that all non-immutable arguments are copied such that changes to one
+     *     builder will not affect the other builder. However, in addition to immutable arguments, the current model
+     *     is not copied copied so changes to the model will affect both builders.
+     * </p>
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> clone() {
+        try {
+            GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> clone =
+                    (GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>) super.clone();
+            clone.loadProvider = loadProvider != null ? loadProvider.clone() : null;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Set the target the resource will be loaded into.
      *
      * @see Glide#clear(com.bumptech.glide.request.target.Target)
@@ -729,7 +750,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         }
     }
 
-    private <Z> Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
+    private Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         return GenericRequest.obtain(
                 loadProvider,

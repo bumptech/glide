@@ -45,6 +45,7 @@ import java.io.InputStream;
 public class BitmapRequestBuilder<ModelType, TranscodeType>
         extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> implements BitmapOptions {
     private final BitmapPool bitmapPool;
+
     private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
     private ResourceDecoder<InputStream, Bitmap> imageDecoder;
@@ -459,6 +460,11 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     public BitmapRequestBuilder<ModelType, TranscodeType> load(ModelType model) {
         super.load(model);
         return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> clone() {
+        return (BitmapRequestBuilder<ModelType, TranscodeType>) super.clone();
     }
 
     /**

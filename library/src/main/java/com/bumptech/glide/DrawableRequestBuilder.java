@@ -412,6 +412,11 @@ public class DrawableRequestBuilder<ModelType>
         return this;
     }
 
+    @Override
+    public DrawableRequestBuilder<ModelType> clone() {
+        return (DrawableRequestBuilder<ModelType>) super.clone();
+    }
+
     /**
      * {@inheritDoc}
      *

@@ -11,12 +11,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
@@ -36,7 +34,6 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     private ListView list;
     private DrawableRequestBuilder<Photo> fullRequest;
     private DrawableRequestBuilder<Photo> thumbRequest;
-    private DrawableRequestBuilder<Photo> preloadRequest;
 
     public static FlickrPhotoList newInstance() {
         return new FlickrPhotoList();
@@ -67,17 +64,10 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
                 .placeholder(new ColorDrawable(Color.GRAY))
                 .centerCrop();
 
-        preloadRequest = Glide.with(FlickrPhotoList.this)
-                .from(Photo.class)
-                .placeholder(new ColorDrawable(Color.GRAY))
-                .centerCrop()
-                .priority(Priority.HIGH);
-
         thumbRequest = Glide.with(FlickrPhotoList.this)
                 .from(Photo.class)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
-
 
         if (savedInstanceState != null) {
             int index = savedInstanceState.getInt(STATE_POSITION_INDEX);
@@ -139,7 +129,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
 
         @Override
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
-            return preloadRequest
+            return fullRequest
                     .thumbnail(thumbRequest.load(item))
                     .load(item);
         }

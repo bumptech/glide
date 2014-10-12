@@ -30,6 +30,7 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.request.Request;
@@ -674,6 +675,38 @@ public class GlideTest {
     public void testByteData() {
         byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
         requestManager.load(data).into(target);
+    }
+
+    @Test
+    public void testClone() throws IOException {
+        GlideDrawable firstResult = mock(GlideDrawable.class);
+        Resource<GlideDrawable> firstResource = mock(Resource.class);
+        when(firstResource.get()).thenReturn(firstResult);
+        ResourceTranscoder<GifBitmapWrapper, GlideDrawable> firstTranscoder = mock(ResourceTranscoder.class);
+        when(firstTranscoder.transcode(any(Resource.class))).thenReturn(firstResource);
+        when(firstTranscoder.getId()).thenReturn("transcoder1");
+
+        GlideDrawable secondResult = mock(GlideDrawable.class);
+        Resource<GlideDrawable> secondResource = mock(Resource.class);
+        when(secondResource.get()).thenReturn(secondResult);
+        ResourceTranscoder<GifBitmapWrapper, GlideDrawable> secondTranscoder = mock(ResourceTranscoder.class);
+        when(secondTranscoder.transcode(any(Resource.class))).thenReturn(secondResource);
+        when(secondTranscoder.getId()).thenReturn("transcoder2");
+
+        DrawableRequestBuilder<String> firstRequest = requestManager.from(String.class).transcoder(firstTranscoder)
+                .override(100, 100);
+        DrawableRequestBuilder<String> secondRequest = firstRequest.clone().transcoder(secondTranscoder);
+
+        Target firstTarget = mock(Target.class);
+        Target secondTarget = mock(Target.class);
+
+        String fakeUri = mockUri("content://fakeUri");
+
+        firstRequest.load(fakeUri).into(firstTarget);
+        verify(firstTarget).onResourceReady(eq(firstResult), any(GlideAnimation.class));
+
+        secondRequest.load(fakeUri).into(secondTarget);
+        verify(secondTarget).onResourceReady(eq(secondResult), any(GlideAnimation.class));
     }
 
     @SuppressWarnings("unchecked")

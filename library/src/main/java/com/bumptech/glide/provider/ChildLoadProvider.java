@@ -17,7 +17,7 @@ import java.io.File;
  * @param <Z> The type of the resource that will be decoded from the data.
  * @param <R> The type of the resource that will be transcoded from the decoded resource.
  */
-public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
+public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R>, Cloneable {
     private final LoadProvider<A, T, Z, R> parent;
 
     private ResourceDecoder<File, Z> cacheDecoder;
@@ -139,6 +139,16 @@ public class ChildLoadProvider<A, T, Z, R> implements LoadProvider<A, T, Z, R> {
             return transcoder;
         } else {
             return parent.getTranscoder();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ChildLoadProvider<A, T, Z, R> clone() {
+        try {
+            return (ChildLoadProvider<A, T, Z, R>) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
     }
 }
