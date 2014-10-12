@@ -559,7 +559,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         return this;
     }
 
-
     /**
      * Set the target the resource will be loaded into.
      *

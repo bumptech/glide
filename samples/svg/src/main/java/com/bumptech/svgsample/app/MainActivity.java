@@ -1,13 +1,15 @@
 package com.bumptech.svgsample.app;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.graphics.drawable.PictureDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.StreamEncoder;
@@ -23,8 +25,9 @@ import java.io.InputStream;
 public class MainActivity extends Activity {
     private static final String TAG = "SVGActivity";
 
-    ImageView imageViewRes;
-    ImageView imageViewNet;
+    private ImageView imageViewRes;
+    private ImageView imageViewNet;
+    private GenericRequestBuilder<Uri, InputStream, SVG, PictureDrawable> requestBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,19 @@ public class MainActivity extends Activity {
 
         imageViewRes = (ImageView) findViewById(R.id.svg_image_view1);
         imageViewNet = (ImageView) findViewById(R.id.svg_image_view2);
+
+        requestBuilder = Glide.with(this)
+                .using(Glide.buildStreamModelLoader(Uri.class, this), InputStream.class)
+                .from(Uri.class)
+                .as(SVG.class)
+                .transcode(new SvgDrawableTranscoder(), PictureDrawable.class)
+                .sourceEncoder(new StreamEncoder())
+                .cacheDecoder(new FileToStreamDecoder<SVG>(new SvgDecoder()))
+                .decoder(new SvgDecoder())
+                .placeholder(R.drawable.image_loading)
+                .error(R.drawable.image_error)
+                .animate(android.R.anim.fade_in)
+                .listener(new SvgSoftwareLayerSetter<Uri>());
     }
 
     @Override
@@ -77,38 +93,22 @@ public class MainActivity extends Activity {
     }
 
     private void loadRes() {
-        Glide.with(this)
-                .using(Glide.buildStreamModelLoader(Integer.class, this), InputStream.class)
-                .load(R.raw.android_toy_h)
-                .as(SVG.class)
-                .transcode(new SvgDrawableTranscoder(), PictureDrawable.class)
+        Uri uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/"
+                + R.raw.android_toy_h);
+        requestBuilder
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                         // SVG cannot be serialized so it's not worth to cache it
                         // and the getResources() should be fast enough when acquiring the InputStream
-                .decoder(new SvgDecoder())
-                .placeholder(R.drawable.image_loading)
-                .error(R.drawable.image_error)
-                .animate(android.R.anim.fade_in)
-                .listener(new SvgSoftwareLayerSetter<Integer>())
+                .load(uri)
                 .into(imageViewRes);
     }
 
     private void loadNet() {
-        Glide.with(this)
-                .using(Glide.buildStreamModelLoader(String.class, this), InputStream.class)
-                .load("http://www.clker.com/cliparts/u/Z/2/b/a/6/android-toy-h.svg")
-                .as(SVG.class)
-                .transcode(new SvgDrawableTranscoder(), PictureDrawable.class)
+        Uri uri = Uri.parse("http://www.clker.com/cliparts/u/Z/2/b/a/6/android-toy-h.svg");
+        requestBuilder
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         // SVG cannot be serialized so it's not worth to cache it
-                .sourceEncoder(new StreamEncoder())
-                        // however loading from the network can be cached via StreamEncoder
-                .cacheDecoder(new FileToStreamDecoder<SVG>(new SvgDecoder()))
-                .decoder(new SvgDecoder())
-                .placeholder(R.drawable.image_loading)
-                .error(R.drawable.image_error)
-                .animate(android.R.anim.fade_in)
-                .listener(new SvgSoftwareLayerSetter<String>())
+                .load(uri)
                 .into(imageViewNet);
     }
 }

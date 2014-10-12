@@ -474,6 +474,12 @@ public class Glide {
      */
     public static <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
             Context context) {
+         if (modelClass == null) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unable to load null model, setting placeholder only");
+            }
+            return null;
+        }
         return Glide.get(context).getLoaderFactory().buildModelLoader(modelClass, resourceClass, context);
     }
 
@@ -492,13 +498,7 @@ public class Glide {
      */
     @SuppressWarnings("unchecked")
     public static <T, Y> ModelLoader<T, Y> buildModelLoader(T model, Class<Y> resourceClass, Context context) {
-        if (model == null) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unable to load null model, setting placeholder only");
-            }
-            return null;
-        }
-        return buildModelLoader((Class<T>) model.getClass(), resourceClass, context);
+        return buildModelLoader(model != null ? (Class<T>) model.getClass() : null, resourceClass, context);
     }
 
     /**

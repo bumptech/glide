@@ -12,9 +12,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
@@ -32,6 +34,9 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     private List<Photo> currentPhotos;
     private FlickrListPreloader preloader;
     private ListView list;
+    private DrawableRequestBuilder<Photo> fullRequest;
+    private DrawableRequestBuilder<Photo> thumbRequest;
+    private DrawableRequestBuilder<Photo> preloadRequest;
 
     public static FlickrPhotoList newInstance() {
         return new FlickrPhotoList();
@@ -56,6 +61,23 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
         if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
         }
+
+        fullRequest = Glide.with(FlickrPhotoList.this)
+                .from(Photo.class)
+                .placeholder(new ColorDrawable(Color.GRAY))
+                .centerCrop();
+
+        preloadRequest = Glide.with(FlickrPhotoList.this)
+                .from(Photo.class)
+                .placeholder(new ColorDrawable(Color.GRAY))
+                .centerCrop()
+                .priority(Priority.HIGH);
+
+        thumbRequest = Glide.with(FlickrPhotoList.this)
+                .from(Photo.class)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+
 
         if (savedInstanceState != null) {
             int index = savedInstanceState.getInt(STATE_POSITION_INDEX);
@@ -117,14 +139,9 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
 
         @Override
         protected GenericRequestBuilder getRequestBuilder(Photo item) {
-            return Glide.with(FlickrPhotoList.this)
-                    .load(item)
-                    .centerCrop()
-                    .thumbnail(Glide.with(FlickrPhotoList.this)
-                        .load(item)
-                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                        .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE)
-                    );
+            return preloadRequest
+                    .thumbnail(thumbRequest.load(item))
+                    .load(item);
         }
     }
 
@@ -178,15 +195,9 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            Glide.with(FlickrPhotoList.this)
+            fullRequest
+                    .thumbnail(thumbRequest.load(current))
                     .load(current)
-                    .placeholder(new ColorDrawable(Color.GRAY))
-                    .centerCrop()
-                    .crossFade(R.anim.fade_in, 150)
-                    .thumbnail(Glide.with(FlickrPhotoList.this)
-                            .load(current)
-                            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                            .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
                     .into(viewHolder.imageView);
 
             viewHolder.titleText.setText(current.getTitle());

@@ -8,9 +8,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.Priority;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ public class MainActivity extends Activity implements Api.Monitor {
     private static final String TAG = "GiphyActivity";
 
     private GifAdapter adapter;
+    private DrawableRequestBuilder<Api.GifResult> preloadRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +44,16 @@ public class MainActivity extends Activity implements Api.Monitor {
         ListView gifList = (ListView) findViewById(R.id.gif_list);
         GiphyPreloader preloader = new GiphyPreloader(2);
 
-        adapter = new GifAdapter(this, preloader);
+        DrawableRequestBuilder<Api.GifResult> fullRequest = Glide.with(this)
+                .from(Api.GifResult.class)
+                .fitCenter();
+
+        preloadRequest = Glide.with(this)
+                .from(Api.GifResult.class)
+                .fitCenter()
+                .priority(Priority.HIGH);
+
+        adapter = new GifAdapter(this, preloader, fullRequest);
         gifList.setAdapter(adapter);
         gifList.setOnScrollListener(preloader);
     }
@@ -87,9 +99,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         @Override
         protected GenericRequestBuilder getRequestBuilder(Api.GifResult item) {
-            return Glide.with(MainActivity.this)
-                    .load(item)
-                    .fitCenter();
+            return preloadRequest.load(item);
         }
     }
 
@@ -98,12 +108,15 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         private final Activity activity;
         private final GiphyPreloader preloader;
+        private DrawableRequestBuilder<Api.GifResult> requestBuilder;
 
         private Api.GifResult[] results = EMPTY_RESULTS;
 
-        public GifAdapter(Activity activity, GiphyPreloader preloader) {
+        public GifAdapter(Activity activity, GiphyPreloader preloader,
+                DrawableRequestBuilder<Api.GifResult> requestBuilder) {
             this.activity = activity;
             this.preloader = preloader;
+            this.requestBuilder = requestBuilder;
         }
 
         public void setResults(Api.GifResult[] results) {
@@ -142,9 +155,8 @@ public class MainActivity extends Activity implements Api.Monitor {
             }
             final ImageView gifView = (ImageView) convertView.findViewById(R.id.gif_view);
 
-            Glide.with(activity)
+            requestBuilder
                     .load(result)
-                    .fitCenter()
                     .into(gifView);
 
             if (preloader.dimensions == null) {
