@@ -62,6 +62,10 @@ public class Util {
             @SuppressWarnings("unchecked")
             @Override
             public T answer(InvocationOnMock invocation) {
+                if (argumentIndex >= invocation.getArguments().length) {
+                    throw new IllegalArgumentException("Cannot invoke argument " + argumentIndex
+                            + " greater than arguments length " + invocation.getArguments().length);
+                }
                 return (T) invocation.getArguments()[argumentIndex];
             }
         };

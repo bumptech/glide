@@ -62,8 +62,8 @@ public class GifTypeRequest<ModelType> extends GifRequestBuilder<ModelType> {
             ResourceTranscoder<GifDrawable, R> transcoder, Class<R> transcodeClass) {
         FixedLoadProvider<ModelType, InputStream, GifDrawable, R> provider = buildProvider(glide, streamModelLoader,
                 transcodeClass, transcoder);
-        return optionsApplier.apply(model,
-                new GenericRequestBuilder<ModelType, InputStream, GifDrawable, R>(provider, transcodeClass, this));
+        return optionsApplier.apply(new GenericRequestBuilder<ModelType, InputStream, GifDrawable, R>(provider,
+                transcodeClass, this));
     }
 
     /**

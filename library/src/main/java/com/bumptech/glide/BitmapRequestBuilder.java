@@ -455,6 +455,12 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> load(ModelType model) {
+        super.load(model);
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      *

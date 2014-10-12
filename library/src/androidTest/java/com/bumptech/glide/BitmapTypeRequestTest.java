@@ -16,7 +16,6 @@ import org.robolectric.annotation.Config;
 
 import static com.bumptech.glide.tests.Util.arg;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -26,20 +25,18 @@ import static org.mockito.Mockito.when;
 @Config(shadows = GlideShadowLooper.class)
 public class BitmapTypeRequestTest {
     private RequestManager.OptionsApplier optionsApplier;
-    private String model;
     private BitmapTypeRequest request;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         optionsApplier = mock(RequestManager.OptionsApplier.class);
-        when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(arg(1));
+        when(optionsApplier.apply(any(GenericRequestBuilder.class))).thenAnswer(arg(0));
         Glide glide = mock(Glide.class);
         when(glide.buildTranscoder(any(Class.class), any(Class.class))).thenReturn(mock(ResourceTranscoder.class));
         when(glide.buildDataProvider(any(Class.class), any(Class.class))).thenReturn(mock(DataLoadProvider.class));
 
-        model = "testModel";
-        GenericRequestBuilder original = new GenericRequestBuilder(Robolectric.application, model,
+        GenericRequestBuilder original = new GenericRequestBuilder(Robolectric.application, Object.class,
                 mock(LoadProvider.class), null, glide, null, null);
         request = new BitmapTypeRequest(original, mock(ModelLoader.class), mock(ModelLoader.class), optionsApplier);
     }
@@ -52,19 +49,19 @@ public class BitmapTypeRequestTest {
     @Test
     public void testAppliesDefaultOptionsOnToBytes() {
         BitmapRequestBuilder builder = request.toBytes();
-        verify(optionsApplier).apply(eq(model), eq(builder));
+        verify(optionsApplier).apply(eq(builder));
     }
 
     @Test
     public void testAppliesDefaultOptionsOnToBytesWithArgs() {
         BitmapRequestBuilder builder = request.toBytes(Bitmap.CompressFormat.PNG, 2);
-        verify(optionsApplier).apply(eq(model), eq(builder));
+        verify(optionsApplier).apply(eq(builder));
     }
 
     @Test
     public void testAppliesDefaultOptionsOnTranscode() {
         ResourceTranscoder<Bitmap, Object> transcoder = mock(ResourceTranscoder.class);
         BitmapRequestBuilder builder = request.transcode(transcoder, Object.class);
-        verify(optionsApplier).apply(eq(model), eq(builder));
+        verify(optionsApplier).apply(eq(builder));
     }
 }

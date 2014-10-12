@@ -85,11 +85,10 @@ public class RequestManager implements LifecycleListener {
         /**
          * Allows the implementor to apply some options to the given request.
          *
-         * @param model The model that is being loaded.
          * @param requestBuilder The request builder being used to construct the load.
          * @param <T> The type of the model.
          */
-        <T> void apply(T model, GenericRequestBuilder<T, ?, ?, ?> requestBuilder);
+        <T> void apply(GenericRequestBuilder<T, ?, ?, ?> requestBuilder);
     }
 
     /**
@@ -328,8 +327,9 @@ public class RequestManager implements LifecycleListener {
         ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader = Glide.buildFileDescriptorModelLoader(uri,
                 context);
 
-        return optionsApplier.apply(uri, new DrawableTypeRequest<Uri>(uri, mediaStoreLoader,
-                fileDescriptorModelLoader, context, glide, requestTracker, lifecycle, optionsApplier));
+        return (DrawableTypeRequest<Uri>) optionsApplier.apply(new DrawableTypeRequest<Uri>(Uri.class, mediaStoreLoader,
+                fileDescriptorModelLoader, context, glide, requestTracker, lifecycle, optionsApplier))
+                .load(uri);
     }
 
     /**
@@ -461,6 +461,7 @@ public class RequestManager implements LifecycleListener {
         return loadGeneric(model);
     }
 
+    @SuppressWarnings("unchecked")
     private <T> DrawableTypeRequest<T> loadGeneric(T model) {
         ModelLoader<T, InputStream> streamModelLoader = Glide.buildStreamModelLoader(model, context);
         ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
@@ -470,8 +471,16 @@ public class RequestManager implements LifecycleListener {
                     + " which there is a registered ModelLoader, if you are using a custom model, you must first call"
                     + " Glide#register with a ModelLoaderFactory for your custom model class");
         }
-        return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, streamModelLoader,
-                fileDescriptorModelLoader, context, glide, requestTracker, lifecycle, optionsApplier));
+
+        return (DrawableTypeRequest<T>) optionsApplier.apply(
+                new DrawableTypeRequest<T>(getSafeClass(model), streamModelLoader, fileDescriptorModelLoader, context,
+                        glide, requestTracker, lifecycle, optionsApplier))
+                .load(model);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> getSafeClass(T model) {
+        return model != null ? (Class<T>) model.getClass() : null;
     }
 
     /**
@@ -488,8 +497,9 @@ public class RequestManager implements LifecycleListener {
         }
 
         public DrawableTypeRequest<T> load(T model) {
-            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, null, loader, context,
-                    glide, requestTracker, lifecycle, optionsApplier));
+            return (DrawableTypeRequest<T>) optionsApplier.apply(new DrawableTypeRequest<T>(getSafeClass(model), null,
+                    loader, context, glide, requestTracker, lifecycle, optionsApplier))
+                    .load(model);
         }
     }
 
@@ -507,8 +517,9 @@ public class RequestManager implements LifecycleListener {
         }
 
         public DrawableTypeRequest<T> load(T model) {
-            return optionsApplier.apply(model, new DrawableTypeRequest<T>(model, loader, null, context,
-                    glide, requestTracker, lifecycle, optionsApplier));
+            return (DrawableTypeRequest<T>) optionsApplier.apply(new DrawableTypeRequest<T>(getSafeClass(model), loader,
+                    null, context, glide, requestTracker, lifecycle, optionsApplier))
+                    .load(model);
         }
     }
 
@@ -559,17 +570,19 @@ public class RequestManager implements LifecycleListener {
              * @return This request builder.
              */
             public <Z> GenericTranscodeRequest<A, T, Z> as(Class<Z> resourceClass) {
-                return optionsApplier.apply(model, new GenericTranscodeRequest<A, T, Z>(context, glide, model,
-                        modelLoader, dataClass, resourceClass, requestTracker, lifecycle, optionsApplier));
+                return (GenericTranscodeRequest<A, T, Z>) optionsApplier.apply(
+                        new GenericTranscodeRequest<A, T, Z>(context, glide, getSafeClass(model), modelLoader,
+                                dataClass, resourceClass, requestTracker, lifecycle, optionsApplier))
+                        .load(model);
             }
         }
     }
 
     class OptionsApplier {
 
-        public <A, X extends GenericRequestBuilder<A, ?, ?, ?>> X apply(A model, X builder) {
+        public <A, X extends GenericRequestBuilder<A, ?, ?, ?>> X apply(X builder) {
             if (options != null) {
-                options.apply(model, builder);
+                options.apply(builder);
             }
             return builder;
         }

@@ -36,13 +36,13 @@ public class GenericRequestBuilderTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
-        new GenericRequestBuilder(null, new Object(), mock(LoadProvider.class), Object.class, mock(Glide.class),
+        new GenericRequestBuilder(null, Object.class, mock(LoadProvider.class), Object.class, mock(Glide.class),
                 requestTracker, mock(Lifecycle.class));
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfNonNullModelAndNullLoadProvider() {
-        new GenericRequestBuilder(Robolectric.application, new Object(), null, Object.class, mock(Glide.class),
+        new GenericRequestBuilder(Robolectric.application, Object.class, null, Object.class, mock(Glide.class),
                 requestTracker, mock(Lifecycle.class));
     }
 
@@ -157,6 +157,6 @@ public class GenericRequestBuilderTest {
         when(glide.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(
                 mock(Target.class));
         return new GenericRequestBuilder(Robolectric.application, null, null, Object.class, glide, requestTracker,
-                mock(Lifecycle.class));
+                mock(Lifecycle.class)).load(null);
     }
 }

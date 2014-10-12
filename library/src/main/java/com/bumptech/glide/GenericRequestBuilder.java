@@ -38,11 +38,6 @@ import java.io.File;
 /**
  * A generic class that can handle setting options and staring loads for generic resource types.
  *
- * <p>
- *     Warning - It is <em>not</em> safe to use this builder after calling <code>into()</code>, it may be pooled and
- *     reused.
- * </p>
- *
  * @param <ModelType> The type of model representing the resource.
  * @param <DataType> The data type that the resource {@link com.bumptech.glide.load.model.ModelLoader} will provide that
  *                  can be decoded by the {@link com.bumptech.glide.load.ResourceDecoder}.
@@ -50,9 +45,9 @@ import java.io.File;
  * @param <TranscodeType> The type of resource the decoded resource will be transcoded to.
  */
 public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> {
+    protected final Class<ModelType> modelClass;
     protected final Context context;
     protected final Glide glide;
-    protected final ModelType model;
     protected final Class<TranscodeType> transcodeClass;
     protected final RequestTracker requestTracker;
     protected final Lifecycle lifecycle;
@@ -60,6 +55,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     private Key signature = EmptySignature.obtain();
 
+    private ModelType model;
+    // model may occasionally be null, so to enforce that load() was called, set a boolean rather than relying on model
+    // not to be null.
+    private boolean isModelSet;
     private int placeholderId;
     private int errorId;
     private RequestListener<ModelType, TranscodeType> requestListener;
@@ -79,18 +78,20 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     GenericRequestBuilder(LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
             Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
-        this(other.context, other.model, loadProvider, transcodeClass, other.glide, other.requestTracker,
+        this(other.context, other.modelClass, loadProvider, transcodeClass, other.glide, other.requestTracker,
                 other.lifecycle);
         this.signature = other.signature;
         this.diskCacheStrategy = other.diskCacheStrategy;
         this.isCacheable = other.isCacheable;
+        this.model = other.model;
+        this.isModelSet = other.isModelSet;
     }
 
-    GenericRequestBuilder(Context context, ModelType model,
+    GenericRequestBuilder(Context context, Class<ModelType> modelClass,
             LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
             Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
         this.context = context;
-        this.model = model;
+        this.modelClass = modelClass;
         this.transcodeClass = transcodeClass;
         this.glide = glide;
         this.requestTracker = requestTracker;
@@ -101,7 +102,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         if (context == null) {
             throw new NullPointerException("Context can't be null");
         }
-        if (model != null && loadProvider == null) {
+        if (modelClass != null && loadProvider == null) {
             throw new NullPointerException("LoadProvider must not be null");
         }
     }
@@ -542,6 +543,24 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
+     * Sets the specific model to load data for.
+     *
+     * <p>
+     *      This method must be called at least once before {@link #into(com.bumptech.glide.request.target.Target)} is
+     *      called.
+     * </p>
+     *
+     * @param model The model to load data for, or null.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> load(ModelType model) {
+        this.model = model;
+        isModelSet = true;
+        return this;
+    }
+
+
+    /**
      * Set the target the resource will be loaded into.
      *
      * @see Glide#clear(com.bumptech.glide.request.target.Target)
@@ -553,6 +572,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         Util.assertMainThread();
         if (target == null) {
             throw new IllegalArgumentException("You must pass in a non null Target");
+        }
+        if (!isModelSet) {
+            throw new IllegalArgumentException("You must first set a model (try #load())");
         }
 
         Request previous = target.getRequest();

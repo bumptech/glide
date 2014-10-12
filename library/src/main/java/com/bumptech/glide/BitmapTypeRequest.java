@@ -20,7 +20,6 @@ import java.io.InputStream;
  * @param <ModelType> The type of model to load the {@link Bitmap} or transcoded class from.
  */
 public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType, Bitmap> {
-    private final ModelType model;
     private final ModelLoader<ModelType, InputStream> streamModelLoader;
     private final ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final Glide glide;
@@ -53,7 +52,6 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
                 Bitmap.class, other);
         this.streamModelLoader = streamModelLoader;
         this.fileDescriptorModelLoader = fileDescriptorModelLoader;
-        this.model = other.model;
         this.glide = other.glide;
         this.optionsApplier = optionsApplier;
     }
@@ -68,7 +66,7 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
      */
     public <R> BitmapRequestBuilder<ModelType, R> transcode(ResourceTranscoder<Bitmap, R> transcoder,
             Class<R> transcodeClass) {
-        return optionsApplier.apply(model, new BitmapRequestBuilder<ModelType, R>(
+        return optionsApplier.apply(new BitmapRequestBuilder<ModelType, R>(
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, transcodeClass, transcoder),
                 transcodeClass, this));
     }

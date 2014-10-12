@@ -77,7 +77,7 @@ public class RequestManagerTest {
                 .load(model)
                 .as(Bitmap.class);
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class RequestManagerTest {
         DrawableTypeRequest<String> builder = manager.using(modelLoader)
                 .load(model);
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class RequestManagerTest {
         DrawableTypeRequest<byte[]> builder = manager.using(loader)
                 .load(model);
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -107,21 +107,21 @@ public class RequestManagerTest {
         DrawableTypeRequest<String> builder = manager.using(modelLoader)
                 .load(model);
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
     public void testAppliesDefaultOptionsToLoadString() {
         String model = "fake";
         DrawableTypeRequest<String> builder = manager.load(model);
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
     public void testAppliesDefaultOptionsToLoadUri() {
         Uri uri = Uri.EMPTY;
         DrawableTypeRequest<Uri> builder = manager.load(uri);
-        verify(options).apply(eq(uri), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class RequestManagerTest {
         Uri uri = Uri.EMPTY;
         DrawableTypeRequest<Uri> builder = manager.loadFromMediaStore(uri, "image/jpeg", 123L, 0);
 
-        verify(options).apply(eq(uri), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class RequestManagerTest {
         int id = 123;
         DrawableTypeRequest<Integer> builder = manager.load(id);
 
-        verify(options).apply(eq(id), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class RequestManagerTest {
         Double model = 2.2;
         DrawableTypeRequest<Double> builder = manager.load(model);
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
         Glide.get(Robolectric.application).unregister(Double.class, InputStream.class);
     }
 
@@ -157,7 +157,7 @@ public class RequestManagerTest {
         URL url = new URL("http://www.google.com");
         DrawableTypeRequest<URL> builder = manager.load(url);
 
-        verify(options).apply(eq(url), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -165,7 +165,7 @@ public class RequestManagerTest {
         byte[] model = new byte[] { 1, 2, 4 };
         DrawableTypeRequest<byte[]> builder = manager.load(model, "fakeId");
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -173,7 +173,7 @@ public class RequestManagerTest {
         byte[] model = new byte[] { 5, 9, 23 };
         DrawableTypeRequest<byte[]> builder = manager.load(model);
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
     }
 
     @Test
@@ -184,7 +184,7 @@ public class RequestManagerTest {
         Float model = 23.2f;
         DrawableTypeRequest<Float> builder = manager.load(model);
 
-        verify(options).apply(eq(model), eq(builder));
+        verify(options).apply(eq(builder));
         Glide.get(Robolectric.application).unregister(Float.class, InputStream.class);
     }
 

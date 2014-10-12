@@ -398,6 +398,12 @@ public class GifRequestBuilder<ModelType>
     }
 
     @Override
+    public GifRequestBuilder<ModelType> load(ModelType model) {
+        super.load(model);
+        return this;
+    }
+
+    @Override
     void applyFitCenter() {
         fitCenter();
     }

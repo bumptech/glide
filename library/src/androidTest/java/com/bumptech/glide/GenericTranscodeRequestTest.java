@@ -15,7 +15,6 @@ import org.robolectric.annotation.Config;
 
 import static com.bumptech.glide.tests.Util.arg;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,17 +24,15 @@ import static org.mockito.Mockito.when;
 @Config(shadows = GlideShadowLooper.class)
 public class GenericTranscodeRequestTest {
     private RequestManager.OptionsApplier optionsApplier;
-    private String model;
     private GenericTranscodeRequest<String, Object, Object> request;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         optionsApplier = mock(RequestManager.OptionsApplier.class);
-        when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(arg(1));
-        model = "testModel";
+        when(optionsApplier.apply(any(GenericRequestBuilder.class))).thenAnswer(arg(0));
         request = new GenericTranscodeRequest<String, Object, Object>(Robolectric.application,
-                Glide.get(Robolectric.application), model, mock(ModelLoader.class), Object.class,
+                Glide.get(Robolectric.application), String.class, mock(ModelLoader.class), Object.class,
                 Object.class, mock(RequestTracker.class), mock(Lifecycle.class), optionsApplier);
     }
 
@@ -48,6 +45,6 @@ public class GenericTranscodeRequestTest {
     public void testTranscodeAppliesDefaultOptions() {
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         GenericRequestBuilder<String, Object, Object, Object> builder = request.transcode(transcoder, Object.class);
-        verify(optionsApplier).apply(eq(model), eq(builder));
+        verify(optionsApplier).apply(eq(builder));
     }
 }

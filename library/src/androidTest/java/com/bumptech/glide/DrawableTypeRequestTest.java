@@ -14,7 +14,6 @@ import org.robolectric.annotation.Config;
 
 import static com.bumptech.glide.tests.Util.arg;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -31,9 +30,8 @@ public class DrawableTypeRequestTest {
     @Before
     public void setUp() {
         optionsApplier = mock(RequestManager.OptionsApplier.class);
-        when(optionsApplier.apply(anyObject(), any(GenericRequestBuilder.class))).thenAnswer(arg(1));
-        model = "testModel";
-        request = new DrawableTypeRequest<String>(model, mock(ModelLoader.class),
+        when(optionsApplier.apply(any(GenericRequestBuilder.class))).thenAnswer(arg(0));
+        request = new DrawableTypeRequest<String>(String.class, mock(ModelLoader.class),
                 mock(ModelLoader.class), Robolectric.application, Glide.get(Robolectric.application),
                 mock(RequestTracker.class), mock(Lifecycle.class), optionsApplier);
     }
@@ -46,12 +44,12 @@ public class DrawableTypeRequestTest {
     @Test
     public void testDefaultOptionsAreAppliedOnAsBitmap() {
         BitmapTypeRequest<String> builder = request.asBitmap();
-        verify(optionsApplier).apply(eq(model), eq(builder));
+        verify(optionsApplier).apply(eq(builder));
     }
 
     @Test
     public void testDefaultOptionsAreAppliedOnAsGif() {
         GifTypeRequest<String> builder = request.asGif();
-        verify(optionsApplier).apply(eq(model), eq(builder));
+        verify(optionsApplier).apply(eq(builder));
     }
 }

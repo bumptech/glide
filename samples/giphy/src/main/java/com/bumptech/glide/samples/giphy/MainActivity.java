@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * The primary activity in the Giphy sample that allows users to view trending animated GIFs from Giphy's api.
  */

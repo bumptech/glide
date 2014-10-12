@@ -41,10 +41,10 @@ public class DrawableRequestBuilder<ModelType>
         extends GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, GlideDrawable>
         implements BitmapOptions, DrawableOptions {
 
-    DrawableRequestBuilder(Context context, ModelType model,
+    DrawableRequestBuilder(Context context, Class<ModelType> modelClass,
             LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, GlideDrawable> loadProvider, Glide glide,
             RequestTracker requestTracker, Lifecycle lifecycle) {
-        super(context, model, loadProvider, GlideDrawable.class, glide, requestTracker, lifecycle);
+        super(context, modelClass, loadProvider, GlideDrawable.class, glide, requestTracker, lifecycle);
         // Default to animating.
         crossFade();
     }
@@ -403,6 +403,12 @@ public class DrawableRequestBuilder<ModelType>
     @Override
     public DrawableRequestBuilder<ModelType> signature(Key signature) {
         super.signature(signature);
+        return this;
+    }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> load(ModelType model) {
+        super.load(model);
         return this;
     }
 

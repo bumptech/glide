@@ -53,11 +53,11 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         this.optionsApplier = optionsApplier;
     }
 
-    GenericTranscodeRequest(Context context, Glide glide, ModelType model, ModelLoader<ModelType, DataType> modelLoader,
-            Class<DataType> dataClass, Class<ResourceType> resourceClass, RequestTracker requestTracker,
-            Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
-        super(context, model, build(glide, modelLoader, dataClass, resourceClass, UnitTranscoder.<ResourceType>get()),
-                resourceClass, glide, requestTracker, lifecycle);
+    GenericTranscodeRequest(Context context, Glide glide, Class<ModelType> modelClass,
+            ModelLoader<ModelType, DataType> modelLoader, Class<DataType> dataClass, Class<ResourceType> resourceClass,
+            RequestTracker requestTracker, Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
+        super(context, modelClass, build(glide, modelLoader, dataClass, resourceClass,
+                        UnitTranscoder.<ResourceType>get()), resourceClass, glide, requestTracker, lifecycle);
         this.modelLoader = modelLoader;
         this.dataClass = dataClass;
         this.resourceClass = resourceClass;
@@ -77,9 +77,8 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider = build(glide, modelLoader,
                 dataClass, resourceClass, transcoder);
 
-        return optionsApplier.apply(model,
-                new GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>(loadProvider,
-                        transcodeClass, this));
+        return optionsApplier.apply(new GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>(
+                loadProvider, transcodeClass, this));
     }
 
     /**
@@ -101,7 +100,7 @@ public class GenericTranscodeRequest<ModelType, DataType, ResourceType>
         DataLoadProvider<DataType, File> dataLoadProvider = glide.buildDataProvider(dataClass, File.class);
         FixedLoadProvider<ModelType, DataType, File, File> fixedLoadProvider =
                 new FixedLoadProvider<ModelType, DataType, File, File>(modelLoader, transcoder, dataLoadProvider);
-        return optionsApplier.apply(model, new GenericRequestBuilder<ModelType, DataType, File, File>(fixedLoadProvider,
+        return optionsApplier.apply(new GenericRequestBuilder<ModelType, DataType, File, File>(fixedLoadProvider,
                 File.class, this))
                 .priority(Priority.LOW)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
