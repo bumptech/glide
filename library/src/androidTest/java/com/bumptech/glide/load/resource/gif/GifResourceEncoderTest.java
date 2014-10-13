@@ -8,12 +8,14 @@ import com.bumptech.glide.gifencoder.AnimatedGifEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.UnitTransformation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 import static org.junit.Assert.assertEquals;
@@ -24,6 +26,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -234,6 +237,23 @@ public class GifResourceEncoderTest {
         InOrder order = inOrder(frameResource, gifEncoder);
         order.verify(gifEncoder).addFrame(eq(expected));
         order.verify(frameResource).recycle();
+    }
+
+    @Test
+    public void testWritesBytesDirectlyToDiskIfTransformationIsUnitTransformation() throws IOException {
+        when(gifDrawable.getFrameTransformation()).thenReturn(UnitTransformation.<Bitmap>get());
+        byte[] expected = "expected".getBytes();
+        when(gifDrawable.getData()).thenReturn(expected);
+
+        OutputStream os = mock(OutputStream.class);
+
+        encoder.encode(resource, os);
+
+        verify(os).write(eq(expected));
+
+        verify(gifEncoder, never()).start(any(OutputStream.class));
+        verify(parser, never()).setData(any(byte[].class));
+        verify(parser, never()).parseHeader();
     }
 
     @Test

@@ -10,9 +10,11 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.util.LogTime;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -42,6 +44,11 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
         long startTime = LogTime.getLogTime();
 
         GifDrawable drawable = resource.get();
+        Transformation<Bitmap> transformation = drawable.getFrameTransformation();
+        if (transformation instanceof UnitTransformation) {
+            return writeDataDirect(drawable.getData(), os);
+        }
+
         GifDecoder decoder = decodeHeaders(drawable.getData());
 
         AnimatedGifEncoder encoder = factory.buildEncoder();
@@ -49,7 +56,6 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
             return false;
         }
 
-        Transformation<Bitmap> transformation = drawable.getFrameTransformation();
         for (int i = 0; i < decoder.getFrameCount(); i++) {
             Bitmap currentFrame = decoder.getNextFrame();
             Resource<Bitmap> transformedResource = getTransformedFrame(currentFrame, transformation, drawable);
@@ -75,6 +81,19 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
         }
 
         return result;
+    }
+
+    private boolean writeDataDirect(byte[] data, OutputStream os) {
+        boolean success = true;
+        try {
+            os.write(data);
+        } catch (IOException e) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Failed to write data to output stream in GifResourceEncoder", e);
+            }
+            success = false;
+        }
+        return success;
     }
 
     private GifDecoder decodeHeaders(byte[] data) {
