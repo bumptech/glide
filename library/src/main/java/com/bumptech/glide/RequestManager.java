@@ -394,8 +394,12 @@ public class RequestManager implements LifecycleListener {
      *
      * @see #using(StreamModelLoader)
      *
+     * @deprecated The {@link java.net.URL} class has
+     * <a href="http://goo.gl/c4hHNu">a number of performance problems</a> and should generally be avoided when
+     * possible. Prefer {@link #load(android.net.Uri)} or {@link #load(String)}.
      * @param url The URL representing the image.
      */
+    @Deprecated
     public DrawableTypeRequest<URL> load(URL url) {
         return loadGeneric(url);
     }
@@ -403,8 +407,6 @@ public class RequestManager implements LifecycleListener {
     /**
      * Returns a request builder that uses a {@link StreamByteArrayLoader} to load an image from the given byte array.
      *
-     * @deprecated Use {@link #load(byte[])} along with
-     * {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)}} instead.
      *
      * <p>
      *     Note - This method does not cache results in either the disk cache or the memory cache.
@@ -412,6 +414,8 @@ public class RequestManager implements LifecycleListener {
      *
      * @see #load(byte[])
      *
+     * @deprecated Use {@link #load(byte[])} along with
+     * {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)} instead.
      * @param model The data to load.
      * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
      *           (url, filepath etc). If there is no suitable id, use {@link #load(byte[])} instead.
