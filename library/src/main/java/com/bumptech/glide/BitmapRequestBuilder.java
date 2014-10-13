@@ -20,6 +20,7 @@ import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.ImageVideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
+import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
@@ -216,8 +217,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * Sets the preferred format for {@link Bitmap}s decoded in this request. Defaults to
      * {@link DecodeFormat#PREFER_RGB_565}. This replaces any previous calls to {@link #imageDecoder(ResourceDecoder)},
-     * {@link #videoDecoder(ResourceDecoder)} and {@link #decoder(ResourceDecoder)} with default decoders with the
-     * appropriate options set.
+     * {@link #videoDecoder(ResourceDecoder)}, {@link #decoder(ResourceDecoder)} and
+     * {@link #cacheDecoder(com.bumptech.glide.load.ResourceDecoder)}} with default decoders with the appropriate
+     * options set.
      *
      * <p>
      *     Note - If using a {@link Transformation} that expect bitmaps to support transparency, this should always be
@@ -234,6 +236,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         this.decodeFormat = format;
         imageDecoder = new StreamBitmapDecoder(downsampler, bitmapPool, format);
         videoDecoder = new FileDescriptorBitmapDecoder(new VideoBitmapDecoder(), bitmapPool, format);
+        super.cacheDecoder(new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(downsampler, bitmapPool, format)));
         super.decoder(new ImageVideoBitmapDecoder(imageDecoder, videoDecoder));
         return this;
     }
