@@ -84,23 +84,42 @@ public final class TransformationUtils {
      */
     public static Bitmap fitCenter(Bitmap toFit, BitmapPool pool, int width, int height) {
         if (toFit.getWidth() == width && toFit.getHeight() == height) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "requested target size matches input, returning input");
+            }
             return toFit;
         }
         final float widthPercentage = width / (float) toFit.getWidth();
         final float heightPercentage = height / (float) toFit.getHeight();
         final float minPercentage = Math.min(widthPercentage, heightPercentage);
 
-        final int targetWidth = Math.round(minPercentage * toFit.getWidth());
-        final int targetHeight = Math.round(minPercentage * toFit.getHeight());
+        // take the floor of the target width/height, not round. If the matrix
+        // passed into drawBitmap rounds differently, we want to slightly
+        // overdraw, not underdraw, to avoid artifacts from bitmap reuse.
+        final int targetWidth = (int) (minPercentage * toFit.getWidth());
+        final int targetHeight = (int) (minPercentage * toFit.getHeight());
+
+        if (toFit.getWidth() == targetWidth && toFit.getHeight() == targetHeight) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "adjusted target size matches input, returning input");
+            }
+            return toFit;
+        }
 
         Bitmap.Config config = toFit.getConfig() != null ? toFit.getConfig() : Bitmap.Config.ARGB_8888;
         Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
         if (toReuse == null) {
             toReuse = Bitmap.createBitmap(targetWidth, targetHeight, config);
         }
-
         // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
         TransformationUtils.setAlpha(toFit, toReuse);
+
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "request: " + width + "x" + height);
+            Log.v(TAG, "toFit:   " + toFit.getWidth() + "x" + toFit.getHeight());
+            Log.v(TAG, "toReuse: " + toReuse.getWidth() + "x" + toReuse.getHeight());
+            Log.v(TAG, "minPct:   " + minPercentage);
+        }
 
         Canvas canvas = new Canvas(toReuse);
         Matrix matrix = new Matrix();

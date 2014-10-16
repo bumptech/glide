@@ -100,6 +100,17 @@ public class TransformationUtilsTest {
         assertBitmapFitsExactlyWithinBounds(maxSide, transformed);
     }
 
+    // Test for Issue #195.
+    @Test
+    public void testFitCenterUsesFloorInsteadofRoundingForOutputBitmapSize() {
+        Bitmap toTransform = Bitmap.createBitmap(1230, 1640, Bitmap.Config.RGB_565);
+
+        Bitmap transformed = TransformationUtils.fitCenter(toTransform, mock(BitmapPool.class), 1075, 1366);
+
+        assertEquals(1024, transformed.getWidth());
+        assertEquals(1366, transformed.getHeight());
+    }
+
     @Test
     public void testCenterCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlphaAndOutBitmapIsReused() {
         Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
