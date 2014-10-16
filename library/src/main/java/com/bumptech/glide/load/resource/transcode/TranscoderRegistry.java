@@ -44,8 +44,11 @@ public class TranscoderRegistry {
             // we know they're the same type (Z and R)
             return (ResourceTranscoder<Z, R>) UnitTranscoder.get();
         }
-        GET_KEY.set(decodedClass, transcodedClass);
-        ResourceTranscoder<?, ?> result = factories.get(GET_KEY);
+        final ResourceTranscoder<?, ?> result;
+        synchronized (GET_KEY) {
+            GET_KEY.set(decodedClass, transcodedClass);
+            result = factories.get(GET_KEY);
+        }
         if (result == null) {
             throw new IllegalArgumentException("No transcoder registered for " + decodedClass + " and "
                     + transcodedClass);
