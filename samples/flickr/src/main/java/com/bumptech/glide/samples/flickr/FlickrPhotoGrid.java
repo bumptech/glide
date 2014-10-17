@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -172,6 +173,14 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
                     .load(current)
                     .thumbnail(thumbnail ? thumbnailRequest.load(current) : null)
                     .into(imageView);
+
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = FullscreenActivity.getIntent(getActivity(), current);
+                    startActivity(intent);
+                }
+            });
 
             return imageView;
         }

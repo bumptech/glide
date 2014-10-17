@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -189,6 +190,14 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
                     .thumbnail(thumbRequest.load(current))
                     .load(current)
                     .into(viewHolder.imageView);
+
+            viewHolder.imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+               public void onClick(View view) {
+                    Intent intent = FullscreenActivity.getIntent(getActivity(), current);
+                    startActivity(intent);
+                }
+            });
 
             viewHolder.titleText.setText(current.getTitle());
             return view;

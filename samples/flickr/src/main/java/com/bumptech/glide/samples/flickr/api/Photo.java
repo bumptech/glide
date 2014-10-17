@@ -1,12 +1,26 @@
 package com.bumptech.glide.samples.flickr.api;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * A POJO representing a JSON object returned from Flickr's api representing a single image.
  */
-public class Photo {
+public class Photo implements Parcelable {
+    public static final Creator<Photo> CREATOR = new Creator<Photo>() {
+        @Override
+        public Photo createFromParcel(Parcel parcel) {
+            return new Photo(parcel);
+        }
+
+        @Override
+        public Photo[] newArray(int i) {
+            return new Photo[i];
+        }
+    };
+
     private final String id;
     private final String owner;
     private final String title;
@@ -15,6 +29,7 @@ public class Photo {
     private final String secret;
     private String partialUrl = null;
 
+
     public Photo(JSONObject jsonPhoto) throws JSONException {
         this.id = jsonPhoto.getString("id");
         this.owner = jsonPhoto.getString("owner");
@@ -22,6 +37,25 @@ public class Photo {
         this.server = jsonPhoto.getString("server");
         this.farm = jsonPhoto.getString("farm");
         this.secret = jsonPhoto.getString("secret");
+    }
+
+    private Photo(Parcel in) {
+        id = in.readString();
+        owner = in.readString();
+        title = in.readString();
+        server = in.readString();
+        farm = in.readString();
+        secret = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(owner);
+        parcel.writeString(title);
+        parcel.writeString(server);
+        parcel.writeString(farm);
+        parcel.writeString(secret);
     }
 
     public String getPartialUrl() {
@@ -98,5 +132,10 @@ public class Photo {
         result = 31 * result + farm.hashCode();
         result = 31 * result + secret.hashCode();
         return result;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }

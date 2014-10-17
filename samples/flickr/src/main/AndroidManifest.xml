@@ -21,6 +21,8 @@
         </intent-filter>
       </activity>
 
+    <activity android:name=".FullscreenActivity" />
+
   </application>
 
 </manifest>
