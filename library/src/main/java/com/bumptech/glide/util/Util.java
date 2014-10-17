@@ -55,6 +55,7 @@ public final class Util {
      *
      * @deprecated
      */
+    @Deprecated
     public static int getSize(Bitmap bitmap) {
         return getBitmapByteSize(bitmap);
     }
