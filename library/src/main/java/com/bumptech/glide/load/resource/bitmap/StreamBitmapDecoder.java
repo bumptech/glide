@@ -27,7 +27,15 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     }
 
     public StreamBitmapDecoder(BitmapPool bitmapPool) {
-        this(Downsampler.AT_LEAST, bitmapPool, DecodeFormat.PREFER_RGB_565);
+        this(bitmapPool, DecodeFormat.DEFAULT);
+    }
+
+    public StreamBitmapDecoder(Context context, DecodeFormat decodeFormat) {
+        this(Glide.get(context).getBitmapPool(), decodeFormat);
+    }
+
+    public StreamBitmapDecoder(BitmapPool bitmapPool, DecodeFormat decodeFormat) {
+        this(Downsampler.AT_LEAST, bitmapPool, decodeFormat);
     }
 
     public StreamBitmapDecoder(Downsampler downsampler, BitmapPool bitmapPool, DecodeFormat decodeFormat) {

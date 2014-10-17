@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
 
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -23,9 +24,9 @@ public class FileDescriptorBitmapDataLoadProvider implements DataLoadProvider<Pa
     private final BitmapEncoder encoder;
     private final Encoder<ParcelFileDescriptor> sourceEncoder;
 
-    public FileDescriptorBitmapDataLoadProvider(BitmapPool bitmapPool) {
-        cacheDecoder = new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(bitmapPool));
-        sourceDecoder = new FileDescriptorBitmapDecoder(bitmapPool);
+    public FileDescriptorBitmapDataLoadProvider(BitmapPool bitmapPool, DecodeFormat decodeFormat) {
+        cacheDecoder = new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(bitmapPool, decodeFormat));
+        sourceDecoder = new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat);
         encoder = new BitmapEncoder();
         sourceEncoder = NullEncoder.get();
     }

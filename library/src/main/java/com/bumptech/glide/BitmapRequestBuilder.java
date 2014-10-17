@@ -47,7 +47,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     private final BitmapPool bitmapPool;
 
     private Downsampler downsampler = Downsampler.AT_LEAST;
-    private DecodeFormat decodeFormat = DecodeFormat.PREFER_RGB_565;
+    private DecodeFormat decodeFormat;
     private ResourceDecoder<InputStream, Bitmap> imageDecoder;
     private ResourceDecoder<ParcelFileDescriptor, Bitmap> videoDecoder;
 
@@ -55,9 +55,10 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
             Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
         super(loadProvider, transcodeClass, other);
         this.bitmapPool = other.glide.getBitmapPool();
+        this.decodeFormat =  other.glide.getDecodeFormat();
 
-        imageDecoder = new StreamBitmapDecoder(bitmapPool);
-        videoDecoder = new FileDescriptorBitmapDecoder(bitmapPool);
+        imageDecoder = new StreamBitmapDecoder(bitmapPool, decodeFormat);
+        videoDecoder = new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat);
     }
 
     /**

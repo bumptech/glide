@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.prefill.PreFillBitmapAttribute;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -85,6 +86,7 @@ public class Glide {
     private final Engine engine;
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
+    private final DecodeFormat decodeFormat;
     private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     private final TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
     private final DataLoadProviderRegistry dataLoadProviderRegistry;
@@ -181,24 +183,30 @@ public class Glide {
         glide = null;
     }
 
-    Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context) {
+    Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context, DecodeFormat decodeFormat) {
         this.engine = engine;
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
+        this.decodeFormat = decodeFormat;
         mainHandler = new Handler(Looper.getMainLooper());
         bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool);
 
         dataLoadProviderRegistry = new DataLoadProviderRegistry();
 
-        dataLoadProviderRegistry.register(InputStream.class, Bitmap.class,
-                new StreamBitmapDataLoadProvider(bitmapPool));
-        dataLoadProviderRegistry.register(ParcelFileDescriptor.class, Bitmap.class,
-                new FileDescriptorBitmapDataLoadProvider(bitmapPool));
+        StreamBitmapDataLoadProvider streamBitmapLoadProvider =
+                new StreamBitmapDataLoadProvider(bitmapPool, decodeFormat);
+        dataLoadProviderRegistry.register(InputStream.class, Bitmap.class, streamBitmapLoadProvider);
 
-        ImageVideoDataLoadProvider imageVideoDataLoadProvider = new ImageVideoDataLoadProvider(bitmapPool);
+        FileDescriptorBitmapDataLoadProvider fileDescriptorLoadProvider =
+                new FileDescriptorBitmapDataLoadProvider(bitmapPool, decodeFormat);
+        dataLoadProviderRegistry.register(ParcelFileDescriptor.class, Bitmap.class, fileDescriptorLoadProvider);
+
+        ImageVideoDataLoadProvider imageVideoDataLoadProvider =
+                new ImageVideoDataLoadProvider(streamBitmapLoadProvider, fileDescriptorLoadProvider);
         dataLoadProviderRegistry.register(ImageVideoWrapper.class, Bitmap.class, imageVideoDataLoadProvider);
 
-        GifDrawableLoadProvider gifDrawableLoadProvider = new GifDrawableLoadProvider(context, bitmapPool);
+        GifDrawableLoadProvider gifDrawableLoadProvider =
+                new GifDrawableLoadProvider(context, bitmapPool, decodeFormat);
         dataLoadProviderRegistry.register(InputStream.class, GifDrawable.class, gifDrawableLoadProvider);
 
         dataLoadProviderRegistry.register(ImageVideoWrapper.class, GifBitmapWrapper.class,
@@ -293,6 +301,10 @@ public class Glide {
 
     Handler getMainHandler() {
         return mainHandler;
+    }
+
+    DecodeFormat getDecodeFormat() {
+        return decodeFormat;
     }
 
     private GenericLoaderFactory getLoaderFactory() {

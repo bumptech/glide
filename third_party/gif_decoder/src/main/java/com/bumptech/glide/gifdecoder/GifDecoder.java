@@ -113,6 +113,7 @@ public class GifDecoder {
     private GifHeaderParser parser = new GifHeaderParser();
     private Bitmap previousImage;
     private boolean savePrevious;
+    private Bitmap.Config config;
 
     /**
      * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs from constantly
@@ -149,6 +150,10 @@ public class GifDecoder {
 
     public byte[] getData() {
         return data;
+    }
+
+    public void setPreferredConfig(Bitmap.Config config) {
+        this.config = config;
     }
 
     /**
@@ -625,8 +630,16 @@ public class GifDecoder {
         return n;
     }
 
+    private Bitmap.Config getPreferredConfig() {
+        if (config == Bitmap.Config.RGB_565 && !header.isTransparent) {
+            return Bitmap.Config.RGB_565;
+        } else {
+            return Bitmap.Config.ARGB_8888;
+        }
+    }
+
     private Bitmap getNextBitmap() {
-        Bitmap.Config targetConfig = header.isTransparent ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+        Bitmap.Config targetConfig = getPreferredConfig();
         Bitmap result = bitmapProvider.obtain(header.width, header.height, targetConfig);
         if (result == null) {
             result = Bitmap.createBitmap(header.width, header.height, targetConfig);

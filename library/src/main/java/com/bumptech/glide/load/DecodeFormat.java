@@ -1,5 +1,7 @@
 package com.bumptech.glide.load;
 
+import android.os.Build;
+
 /**
  * Options for setting the value of {@link android.graphics.Bitmap#getConfig()} for {@link android.graphics.Bitmap}s
  * returned by a {@link com.bumptech.glide.load.resource.bitmap.BitmapDecoder}.
@@ -25,5 +27,9 @@ public enum DecodeFormat {
      * {@link android.graphics.Bitmap.Config#RGB_565} for {@link android.graphics.Bitmap#getConfig()}.
      *
      */
-    PREFER_RGB_565,
+    PREFER_RGB_565;
+
+    /** The default value for DecodeFormat. */
+    public static final DecodeFormat DEFAULT = Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT
+            ? ALWAYS_ARGB_8888 : PREFER_RGB_565;
 }

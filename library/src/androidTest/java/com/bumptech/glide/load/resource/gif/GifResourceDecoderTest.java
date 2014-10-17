@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
@@ -54,7 +55,8 @@ public class GifResourceDecoderTest {
         decoderPool = mock(GifResourceDecoder.GifDecoderPool.class);
         when(decoderPool.obtain(any(GifDecoder.BitmapProvider.class))).thenReturn(gifDecoder);
 
-        decoder = new GifResourceDecoder(Robolectric.application, bitmapPool, parserPool, decoderPool);
+        decoder = new GifResourceDecoder(Robolectric.application, bitmapPool, DecodeFormat.PREFER_RGB_565,
+                parserPool, decoderPool);
     }
 
     @Test
@@ -95,6 +97,23 @@ public class GifResourceDecoderTest {
         }
 
         verify(parserPool).release(eq(parser));
+    }
+
+
+    @Test
+    public void testSetsPreferredConfigOnDecoderBeforeDecoding() {
+        when(gifHeader.getNumFrames()).thenReturn(1);
+        when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
+        when(gifDecoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+
+        decoder = new GifResourceDecoder(Robolectric.application, mock(BitmapPool.class), DecodeFormat.ALWAYS_ARGB_8888,
+                parserPool, decoderPool);
+
+        decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
+
+        InOrder order = inOrder(gifDecoder);
+        order.verify(gifDecoder).setPreferredConfig(eq(Bitmap.Config.ARGB_8888));
+        order.verify(gifDecoder).getNextFrame();
     }
 
     @Test

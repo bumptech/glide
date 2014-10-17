@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.os.Build;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
@@ -29,6 +30,7 @@ public class GlideBuilder {
     private DiskCache diskCache;
     private ExecutorService sourceService;
     private ExecutorService diskCacheService;
+    private DecodeFormat decodeFormat;
 
     public GlideBuilder(Context context) {
         this.context = context.getApplicationContext();
@@ -110,6 +112,29 @@ public class GlideBuilder {
         return this;
     }
 
+    /**
+     * Sets the {@link com.bumptech.glide.load.DecodeFormat} that will be the default format for all the default
+     * decoders that can change the {@link android.graphics.Bitmap.Config} of the {@link android.graphics.Bitmap}s they
+     * decode.
+     *
+     * <p>
+     *     Decode format is always a suggestion, not a requirement. See {@link com.bumptech.glide.load.DecodeFormat} for
+     *     more details.
+     * </p>
+     *
+     * <p>
+     *     If you instantiate and use a custom decoder, it will use
+     *     {@link com.bumptech.glide.load.DecodeFormat#DEFAULT} as its default.
+     * </p>
+     *
+     * @param decodeFormat The format to use.
+     * @return This builder.
+     */
+    public GlideBuilder setDecodeFormat(DecodeFormat decodeFormat) {
+        this.decodeFormat = decodeFormat;
+        return this;
+    }
+
     // For testing.
     GlideBuilder setEngine(Engine engine) {
         this.engine = engine;
@@ -152,6 +177,10 @@ public class GlideBuilder {
             engine = new Engine(memoryCache, diskCache, diskCacheService, sourceService);
         }
 
-        return new Glide(engine, memoryCache, bitmapPool, context);
+        if (decodeFormat == null) {
+            decodeFormat = DecodeFormat.DEFAULT;
+        }
+
+        return new Glide(engine, memoryCache, bitmapPool, context, decodeFormat);
     }
 }

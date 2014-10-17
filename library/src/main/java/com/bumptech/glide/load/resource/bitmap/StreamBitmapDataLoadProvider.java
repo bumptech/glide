@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -23,9 +24,9 @@ public class StreamBitmapDataLoadProvider implements DataLoadProvider<InputStrea
     private final StreamEncoder sourceEncoder;
     private final FileToStreamDecoder<Bitmap> cacheDecoder;
 
-    public StreamBitmapDataLoadProvider(BitmapPool bitmapPool) {
+    public StreamBitmapDataLoadProvider(BitmapPool bitmapPool, DecodeFormat decodeFormat) {
         sourceEncoder = new StreamEncoder();
-        decoder = new StreamBitmapDecoder(bitmapPool);
+        decoder = new StreamBitmapDecoder(bitmapPool, decodeFormat);
         encoder = new BitmapEncoder();
         cacheDecoder = new FileToStreamDecoder<Bitmap>(decoder);
     }
