@@ -3,7 +3,9 @@ package com.bumptech.glide.load.resource.gifbitmap;
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
+import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -25,21 +27,23 @@ public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVid
 
     private final ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder;
     private final ResourceDecoder<InputStream, GifDrawable> gifDecoder;
+    private final BitmapPool bitmapPool;
     private final ImageTypeParser parser;
     private final BufferedStreamFactory streamFactory;
     private String id;
 
     public GifBitmapWrapperResourceDecoder(ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder,
-            ResourceDecoder<InputStream, GifDrawable> gifDecoder) {
-        this(bitmapDecoder, gifDecoder, DEFAULT_PARSER, DEFAULT_STREAM_FACTORY);
+            ResourceDecoder<InputStream, GifDrawable> gifDecoder, BitmapPool bitmapPool) {
+        this(bitmapDecoder, gifDecoder, bitmapPool, DEFAULT_PARSER, DEFAULT_STREAM_FACTORY);
     }
 
     // Visible for testing.
     GifBitmapWrapperResourceDecoder(ResourceDecoder<ImageVideoWrapper, Bitmap> bitmapDecoder,
-            ResourceDecoder<InputStream, GifDrawable> gifDecoder, ImageTypeParser parser,
+            ResourceDecoder<InputStream, GifDrawable> gifDecoder, BitmapPool bitmapPool, ImageTypeParser parser,
             BufferedStreamFactory streamFactory) {
         this.bitmapDecoder = bitmapDecoder;
         this.gifDecoder = gifDecoder;
+        this.bitmapPool = bitmapPool;
         this.parser = parser;
         this.streamFactory = streamFactory;
     }
@@ -61,32 +65,33 @@ public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVid
     }
 
     private GifBitmapWrapper decode(ImageVideoWrapper source, int width, int height, byte[] bytes) throws IOException {
-        GifBitmapWrapper result = null;
-        InputStream bis = null;
+        final GifBitmapWrapper result;
         if (source.getStream() != null) {
-            bis = streamFactory.build(source.getStream(), bytes);
-            bis.mark(MARK_LIMIT_BYTES);
-            ImageHeaderParser.ImageType type = parser.parse(bis);
-            bis.reset();
-
-            if (type == ImageHeaderParser.ImageType.GIF) {
-                result = decodeGifWrapper(bis, width, height);
-            }
+            result = decodeStream(source, width, height, bytes);
+        } else {
+            result = decodeBitmapWrapper(source, width, height);
         }
+        return result;
+    }
 
+    private GifBitmapWrapper decodeStream(ImageVideoWrapper source, int width, int height, byte[] bytes)
+            throws IOException {
+        InputStream bis = streamFactory.build(source.getStream(), bytes);
+        bis.mark(MARK_LIMIT_BYTES);
+        ImageHeaderParser.ImageType type = parser.parse(bis);
+        bis.reset();
+
+        GifBitmapWrapper result = null;
+        if (type == ImageHeaderParser.ImageType.GIF) {
+            result = decodeGifWrapper(bis, width, height);
+        }
+        // Decoding the gif may fail even if the type matches.
         if (result == null) {
-             // We can only reset the buffered InputStream, so to start from the beginning of the stream, we need to
-             // pass in a new source containing the buffered stream rather than the original stream.
-            final ImageVideoWrapper wrapperToDecode;
-            if (bis != null) {
-                wrapperToDecode = new ImageVideoWrapper(bis, source.getFileDescriptor());
-            } else {
-                wrapperToDecode = source;
-            }
-
-            result = decodeBitmapWrapper(wrapperToDecode, width, height);
+            // We can only reset the buffered InputStream, so to start from the beginning of the stream, we need to
+            // pass in a new source containing the buffered stream rather than the original stream.
+            ImageVideoWrapper forBitmapDecoder = new ImageVideoWrapper(bis, source.getFileDescriptor());
+            result = decodeBitmapWrapper(forBitmapDecoder, width, height);
         }
-
         return result;
     }
 
@@ -99,12 +104,11 @@ public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVid
             // instead. Returning a Bitmap incurs the cost of allocating the GifDrawable as well as the normal
             // Bitmap allocation, but since we can encode the Bitmap out as a JPEG, future decodes will be
             // efficient.
-            // TODO: fix the degenerate case where we cache only the source and so are constantly decoding both a GIF
-            // and a Bitmap.
             if (drawable.getFrameCount() > 1) {
-                result = new GifBitmapWrapper(null, gifResource);
+                result = new GifBitmapWrapper(null /*bitmapResource*/, gifResource);
             } else {
-                gifResource.recycle();
+                Resource<Bitmap> bitmapResource = new BitmapResource(drawable.getFirstFrame(), bitmapPool);
+                result = new GifBitmapWrapper(bitmapResource, null /*gifResource*/);
             }
         }
         return result;

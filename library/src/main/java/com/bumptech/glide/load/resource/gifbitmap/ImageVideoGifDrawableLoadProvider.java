@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
@@ -25,14 +26,15 @@ public class ImageVideoGifDrawableLoadProvider implements DataLoadProvider<Image
     private final Encoder<ImageVideoWrapper> sourceEncoder;
 
     public ImageVideoGifDrawableLoadProvider(DataLoadProvider<ImageVideoWrapper, Bitmap> bitmapProvider,
-            DataLoadProvider<InputStream, GifDrawable> gifProvider) {
-        cacheDecoder = new FileToStreamDecoder<GifBitmapWrapper>(new GifBitmapWrapperStreamResourceDecoder(
-                new GifBitmapWrapperResourceDecoder(
-                    bitmapProvider.getSourceDecoder(),
-                    gifProvider.getSourceDecoder())));
-        sourceDecoder = new GifBitmapWrapperResourceDecoder(
+            DataLoadProvider<InputStream, GifDrawable> gifProvider, BitmapPool bitmapPool) {
+
+        final GifBitmapWrapperResourceDecoder decoder = new GifBitmapWrapperResourceDecoder(
                 bitmapProvider.getSourceDecoder(),
-                gifProvider.getSourceDecoder());
+                gifProvider.getSourceDecoder(),
+                bitmapPool
+        );
+        cacheDecoder = new FileToStreamDecoder<GifBitmapWrapper>(new GifBitmapWrapperStreamResourceDecoder(decoder));
+        sourceDecoder = decoder;
         encoder = new GifBitmapWrapperResourceEncoder(bitmapProvider.getEncoder(), gifProvider.getEncoder());
 
         //TODO: what about the gif provider?

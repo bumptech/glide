@@ -17,7 +17,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
  * public class FillSpace extends BaseBitmapTransformation {
  *     {@literal @Override}
  *     public Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
- *         if (toTransform.getWidth() == outWidth && toTransform.getHeight == outHeight) {
+ *         if (toTransform.getWidth() == outWidth && toTransform.getHeight() == outHeight) {
  *             return toTransform;
  *         }
  *

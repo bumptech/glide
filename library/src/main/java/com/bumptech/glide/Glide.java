@@ -202,7 +202,7 @@ public class Glide {
         dataLoadProviderRegistry.register(InputStream.class, GifDrawable.class, gifDrawableLoadProvider);
 
         dataLoadProviderRegistry.register(ImageVideoWrapper.class, GifBitmapWrapper.class,
-                new ImageVideoGifDrawableLoadProvider(imageVideoDataLoadProvider, gifDrawableLoadProvider));
+                new ImageVideoGifDrawableLoadProvider(imageVideoDataLoadProvider, gifDrawableLoadProvider, bitmapPool));
 
         dataLoadProviderRegistry.register(InputStream.class, File.class, new StreamFileDataLoadProvider());
 

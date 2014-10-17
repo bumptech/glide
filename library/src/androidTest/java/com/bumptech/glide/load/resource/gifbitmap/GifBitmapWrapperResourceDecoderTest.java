@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -28,6 +29,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +50,8 @@ public class GifBitmapWrapperResourceDecoderTest {
         gifDecoder = mock(ResourceDecoder.class);
         parser = mock(GifBitmapWrapperResourceDecoder.ImageTypeParser.class);
         streamFactory = mock(GifBitmapWrapperResourceDecoder.BufferedStreamFactory.class);
-        decoder = new GifBitmapWrapperResourceDecoder(bitmapDecoder, gifDecoder, parser, streamFactory);
+        decoder = new GifBitmapWrapperResourceDecoder(bitmapDecoder, gifDecoder, mock(BitmapPool.class), parser,
+                streamFactory);
 
         source = mock(ImageVideoWrapper.class);
         InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -134,34 +137,45 @@ public class GifBitmapWrapperResourceDecoderTest {
 
     @Test
     public void testReturnsBitmapWhenGifTypeButGifHasSingleFrame() throws IOException {
+        Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         Resource<GifDrawable> gifResource = mockGifResource();
         when(gifResource.get().getFrameCount()).thenReturn(1);
+        when(gifResource.get().getFirstFrame()).thenReturn(firstFrame);
 
         when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
         when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifResource);
-
-        Resource<Bitmap> expected = mock(Resource.class);
-        when(bitmapDecoder.decode(any(ImageVideoWrapper.class), anyInt(), anyInt())).thenReturn(expected);
 
         Resource<GifBitmapWrapper> result = decoder.decode(source, 100, 100);
 
-        assertEquals(expected, result.get().getBitmapResource());
+        assertEquals(firstFrame, result.get().getBitmapResource().get());
     }
 
     @Test
-    public void testRecyclesGifResourceWhenGifTypeButGifHasSingleFrame() throws IOException {
+    public void testDoesNotCallBitmapDecoderWhenGifTypeButGifHasSingleFrame() throws IOException {
+        Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        Resource<GifDrawable> gifResource = mockGifResource();
+        when(gifResource.get().getFrameCount()).thenReturn(1);
+        when(gifResource.get().getFirstFrame()).thenReturn(firstFrame);
+
+        when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
+        when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifResource);
+
+        decoder.decode(source, 100, 100);
+
+        verify(bitmapDecoder, never()).decode(any(ImageVideoWrapper.class), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testDoesNotRecycleGifResourceWhenGifTypeButGifHasSingleFrame() throws IOException {
         Resource<GifDrawable> gifResource = mockGifResource();
         when(gifResource.get().getFrameCount()).thenReturn(1);
 
         when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
         when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifResource);
 
-        Resource<Bitmap> expected = mock(Resource.class);
-        when(bitmapDecoder.decode(any(ImageVideoWrapper.class), anyInt(), anyInt())).thenReturn(expected);
-
         decoder.decode(source, 100, 100);
 
-        verify(gifResource).recycle();
+        verify(gifResource, never()).recycle();
     }
 
     @Test
