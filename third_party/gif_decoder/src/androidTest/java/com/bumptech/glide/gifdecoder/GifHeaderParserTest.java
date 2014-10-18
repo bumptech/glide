@@ -13,6 +13,7 @@ import java.nio.ByteOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for {@link com.bumptech.glide.gifdecoder.GifHeaderParser}.
@@ -62,10 +63,58 @@ public class GifHeaderParserTest {
 
     @Test
     public void testCanReadImageDescriptorWithoutGraphicalExtension() {
-        ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH
-                + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + 4).order(ByteOrder.LITTLE_ENDIAN);
+        final int lzwMinCodeSize = 2;
+        ByteBuffer buffer = ByteBuffer.allocate(
+                GifBytesTestUtil.HEADER_LENGTH
+                + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+                + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize)
+        ).order(ByteOrder.LITTLE_ENDIAN);
         GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
-        GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1);
+        GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
+        GifBytesTestUtil.writeFakeImageData(buffer, lzwMinCodeSize);
+
+        parser.setData(buffer.array());
+        GifHeader header = parser.parseHeader();
+        assertEquals(1, header.width);
+        assertEquals(1, header.height);
+        assertEquals(1, header.frameCount);
+        assertNotNull(header.frames.get(0));
+    }
+
+    @Test
+    public void testSetsFrameLocalColorTableToNullIfNoColorTable() {
+        final int lzwMinCodeSize = 2;
+        ByteBuffer buffer = ByteBuffer.allocate(
+                GifBytesTestUtil.HEADER_LENGTH
+                + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+                + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize)
+        ).order(ByteOrder.LITTLE_ENDIAN);
+        GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+        GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
+        GifBytesTestUtil.writeFakeImageData(buffer, lzwMinCodeSize);
+
+        parser.setData(buffer.array());
+        GifHeader header = parser.parseHeader();
+        assertEquals(1, header.width);
+        assertEquals(1, header.height);
+        assertEquals(1, header.frameCount);
+        assertNotNull(header.frames.get(0));
+        assertNull(header.frames.get(0).lct);
+    }
+
+    @Test
+    public void testSetsFrameLocalColorTableIfHasColorTable() {
+        final int lzwMinCodeSize = 2;
+        final int numColors = 4;
+        ByteBuffer buffer = ByteBuffer.allocate(
+                GifBytesTestUtil.HEADER_LENGTH
+                + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+                + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize)
+                + GifBytesTestUtil.getColorTableLength(numColors)
+        ).order(ByteOrder.LITTLE_ENDIAN);
+        GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+        GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, true /*hasLct*/, numColors);
+        GifBytesTestUtil.writeColorTable(buffer, numColors);
         GifBytesTestUtil.writeFakeImageData(buffer, 2);
 
         parser.setData(buffer.array());
@@ -74,6 +123,32 @@ public class GifHeaderParserTest {
         assertEquals(1, header.height);
         assertEquals(1, header.frameCount);
         assertNotNull(header.frames.get(0));
+
+        GifFrame frame = header.frames.get(0);
+        assertNotNull(frame.lct);
+    }
+
+    @Test
+    public void testCanParseMultipleFrames() {
+        final int lzwMinCodeSize = 2;
+        final int expectedFrames = 3;
+
+        final int frameSize = GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+                + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize);
+        ByteBuffer buffer = ByteBuffer.allocate(
+                GifBytesTestUtil.HEADER_LENGTH + expectedFrames * frameSize
+        ).order(ByteOrder.LITTLE_ENDIAN);
+
+        GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+        for (int i = 0; i < expectedFrames; i++) {
+            GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0 /*numColors*/);
+            GifBytesTestUtil.writeFakeImageData(buffer, 2);
+        }
+
+        parser.setData(buffer.array());
+        GifHeader header = parser.parseHeader();
+        assertEquals(expectedFrames, header.frameCount);
+        assertEquals(expectedFrames, header.frames.size());
     }
 
     private InputStream openResource(String imageName) throws IOException {

@@ -11,6 +11,15 @@ public class GifBytesTestUtil {
     // Length in bytes.
     public static final int IMAGE_DESCRIPTOR_LENGTH = 10;
 
+    public static int getColorTableLength(int numColors) {
+        return 3 * numColors;
+    }
+
+    public static int getImageDataSize(int lzwMinCodeSize) {
+        // TODO: fill this out.
+        return 4;
+    }
+
     public static void writeFakeImageData(ByteBuffer out, int lzwMinCodeSize) {
         // 1 for lzwMinCodeSize, 1 for length, 1 for min content, 1 for block terminator.
         verifyRemaining(out, 4);
@@ -25,16 +34,40 @@ public class GifBytesTestUtil {
         out.put((byte) 0x00);
     }
 
+    public static void writeColorTable(ByteBuffer out, int numColors) {
+        verifyRemaining(out, getColorTableLength(numColors));
+        for (int i = 0; i < numColors; i++) {
+            out.put((byte) (0xFF0000 & i));
+            out.put((byte) (0x00FF00 & i));
+            out.put((byte) (0x0000FF & i));
+        }
+    }
+
     public static void writeImageDescriptor(ByteBuffer out, int imageLeft, int imageTop, int imageWidth,
-            int imageHeight) {
+            int imageHeight, boolean hasLct, int numColors) {
         verifyRemaining(out, IMAGE_DESCRIPTOR_LENGTH);
         verifyShortValues(imageLeft, imageTop, imageWidth, imageHeight);
 
+        final byte packed;
+        if (hasLct) {
+            int size = log2(numColors) - 1;
+            packed = (byte) (0x80 | size);
+        } else {
+            packed = 0x00;
+        }
+
         // Image separator
         out.put((byte) 0x2C);
+        out
+                .putShort((short) imageLeft)
+                .putShort((short) imageTop)
+                .putShort((short) imageWidth)
+                .putShort((short) imageHeight)
+                .put(packed);
+    }
 
-        out.putShort((short) imageLeft).putShort((short) imageTop).putShort((short) imageWidth)
-                .putShort((short) imageHeight);
+    private static int log2(int num) {
+        return (int) Math.round(Math.log(num) / Math.log(2));
     }
 
     public static void writeHeaderAndLsd(ByteBuffer out, int width, int height, boolean hasGct, int gctSize) {
