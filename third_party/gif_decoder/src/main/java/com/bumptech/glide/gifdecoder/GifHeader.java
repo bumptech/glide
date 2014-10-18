@@ -34,7 +34,6 @@ public class GifHeader {
     int pixelAspect;
     //TODO: this is set both during reading the header and while decoding frames...
     int bgColor;
-    boolean isTransparent;
     int loopCount;
 
     public int getHeight() {

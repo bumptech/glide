@@ -143,7 +143,6 @@ public class GifHeaderParser {
             header.currentFrame.dispose = 1;
         }
         header.currentFrame.transparency = (packed & 1) != 0;
-        header.isTransparent |= header.currentFrame.transparency;
         // Delay in milliseconds.
         header.currentFrame.delay = readShort() * 10;
         // Transparent color index

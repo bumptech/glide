@@ -24,8 +24,9 @@ package com.bumptech.glide.gifdecoder;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -142,10 +143,6 @@ public class GifDecoder {
 
     public int getHeight() {
         return header.height;
-    }
-
-    public boolean isTransparent() {
-        return header.isTransparent;
     }
 
     public byte[] getData() {
@@ -323,6 +320,7 @@ public class GifDecoder {
         rawData.rewind();
         rawData.order(ByteOrder.LITTLE_ENDIAN);
 
+
         // No point in specially saving an old frame if we're never going to use it.
         savePrevious = false;
         for (GifFrame frame : header.frames) {
@@ -458,7 +456,7 @@ public class GifDecoder {
             }
         }
 
-        //Copy pixels into previous image
+        // Copy pixels into previous image
         if (savePrevious && currentFrame.dispose == DISPOSAL_UNSPECIFIED || currentFrame.dispose == DISPOSAL_NONE) {
             if (previousImage == null) {
                 previousImage = getNextBitmap();
@@ -631,8 +629,10 @@ public class GifDecoder {
     }
 
     private Bitmap.Config getPreferredConfig() {
-        if (config == Bitmap.Config.RGB_565 && !header.isTransparent) {
-            return Bitmap.Config.RGB_565;
+        // We can't tell if a gif has transparency to decode a partial frame on top of a previous frame, or if the final
+        // frame will actually have transparent pixels, so we must always use a format that supports transparency.
+        if (config == Bitmap.Config.RGB_565 || config == Bitmap.Config.ARGB_4444) {
+            return Bitmap.Config.ARGB_4444;
         } else {
             return Bitmap.Config.ARGB_8888;
         }
@@ -643,10 +643,15 @@ public class GifDecoder {
         Bitmap result = bitmapProvider.obtain(header.width, header.height, targetConfig);
         if (result == null) {
             result = Bitmap.createBitmap(header.width, header.height, targetConfig);
-        } else {
-            // If we're reusing a bitmap it may have other things drawn in it which we need to remove.
-            result.eraseColor(Color.TRANSPARENT);
         }
+        setAlpha(result);
         return result;
+    }
+
+    @TargetApi(12)
+    private static void setAlpha(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= 12) {
+            bitmap.setHasAlpha(true);
+        }
     }
 }

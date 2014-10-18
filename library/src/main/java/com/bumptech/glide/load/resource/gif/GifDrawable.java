@@ -197,7 +197,8 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
     @Override
     public int getOpacity() {
-        return decoder.isTransparent() ? PixelFormat.TRANSPARENT : PixelFormat.OPAQUE;
+        // We can't tell, so default to transparent to be safe.
+        return PixelFormat.TRANSPARENT;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)

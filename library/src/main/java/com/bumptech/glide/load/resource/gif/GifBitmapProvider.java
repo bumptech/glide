@@ -14,6 +14,6 @@ class GifBitmapProvider implements GifDecoder.BitmapProvider {
 
     @Override
     public Bitmap obtain(int width, int height, Bitmap.Config config) {
-        return bitmapPool.get(width, height, config);
+        return bitmapPool.getDirty(width, height, config);
     }
 }
