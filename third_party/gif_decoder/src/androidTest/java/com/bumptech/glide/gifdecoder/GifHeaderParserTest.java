@@ -4,9 +4,7 @@ import com.bumptech.glide.gifdecoder.test.GifBytesTestUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -53,7 +51,7 @@ public class GifHeaderParserTest {
 
     @Test
     public void testCanParseHeaderOfTestImageWithoutGraphicalExtension() throws IOException {
-        byte[] data = readResourceData("gif_without_graphical_control_extension.gif");
+        byte[] data = TestUtil.readResourceData("gif_without_graphical_control_extension.gif");
         parser.setData(data);
         GifHeader header = parser.parseHeader();
         assertEquals(1, header.frameCount);
@@ -151,31 +149,9 @@ public class GifHeaderParserTest {
         assertEquals(expectedFrames, header.frames.size());
     }
 
-    private InputStream openResource(String imageName) throws IOException {
-        return getClass().getResourceAsStream("/" + imageName);
-    }
-
-    private byte[] readResourceData(String imageName) {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        InputStream is = null;
-        try {
-            is = openResource(imageName);
-            int read;
-            while ((read = is.read(buffer)) != -1) {
-                os.write(buffer, 0, read);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore.
-                }
-            }
-        }
-        return os.toByteArray();
+    @Test(expected = IllegalStateException.class)
+    public void testThrowsIfParseHeaderCalledBeforeSetData() {
+        GifHeaderParser parser = new GifHeaderParser();
+        parser.parseHeader();
     }
 }

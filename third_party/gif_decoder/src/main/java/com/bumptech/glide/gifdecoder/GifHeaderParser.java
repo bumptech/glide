@@ -45,6 +45,9 @@ public class GifHeaderParser {
     }
 
     public GifHeader parseHeader() {
+        if (rawData == null) {
+            throw new IllegalStateException("You must call setData() before parseHeader()");
+        }
         if (err()) {
             return header;
         }

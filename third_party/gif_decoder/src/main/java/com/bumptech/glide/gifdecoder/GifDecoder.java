@@ -69,6 +69,10 @@ public class GifDecoder {
      */
     public static final int STATUS_OPEN_ERROR = 2;
     /**
+     * Unable to fully decode the current frame.
+     */
+    public static final int STATUS_PARTIAL_DECODE = 3;
+    /**
      * max decoder pixel stack size.
      */
     private static final int MAX_STACK_SIZE = 4096;
@@ -89,6 +93,8 @@ public class GifDecoder {
      * GIF Disposal Method meaning clear canvas to frame before last.
      */
     private static final int DISPOSAL_PREVIOUS = 3;
+
+    private static final int NULL_CODE = -1;
 
     // Global File Header values and parsing flags.
     // Active color table.
@@ -115,6 +121,7 @@ public class GifDecoder {
     private Bitmap previousImage;
     private boolean savePrevious;
     private Bitmap.Config config;
+    private int status = STATUS_OK;
 
     /**
      * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs from constantly
@@ -151,6 +158,18 @@ public class GifDecoder {
 
     public void setPreferredConfig(Bitmap.Config config) {
         this.config = config;
+    }
+
+    /**
+     * Returns the current status of the decoder.
+     *
+     * <p>
+     *     Status will update per frame to allow the caller to tell whether or not the current frame was decoded
+     *     successfully and/or completely. Format and open failures persist across frames.
+     * </p>
+     */
+    public int getStatus() {
+        return status;
     }
 
     /**
@@ -223,8 +242,12 @@ public class GifDecoder {
      */
     public Bitmap getNextFrame() {
         if (header.frameCount <= 0 || framePointer < 0) {
+            status = STATUS_FORMAT_ERROR;
+        }
+        if (status == STATUS_FORMAT_ERROR || status == STATUS_OPEN_ERROR) {
             return null;
         }
+        status = STATUS_OK;
 
         GifFrame frame = header.frames.get(framePointer);
 
@@ -247,7 +270,7 @@ public class GifDecoder {
         if (act == null) {
             Log.w(TAG, "No Valid Color Table");
             // No color table defined.
-            header.status = STATUS_FORMAT_ERROR;
+            status = STATUS_FORMAT_ERROR;
             return null;
         }
 
@@ -285,7 +308,7 @@ public class GifDecoder {
                 Log.w(TAG, "Error reading data from stream", e);
             }
         } else {
-            header.status = STATUS_OPEN_ERROR;
+            status = STATUS_OPEN_ERROR;
         }
 
         try {
@@ -296,7 +319,7 @@ public class GifDecoder {
             Log.w(TAG, "Error closing stream", e);
         }
 
-        return header.status;
+        return status;
     }
 
     public void clear() {
@@ -315,6 +338,7 @@ public class GifDecoder {
         this.id = id;
         this.header = header;
         this.data = data;
+        this.status = STATUS_OK;
         // Initialize the raw data buffer.
         rawData = ByteBuffer.wrap(data);
         rawData.rewind();
@@ -364,7 +388,7 @@ public class GifDecoder {
             }
         }
 
-        return header.status;
+        return status;
     }
 
     /**
@@ -479,7 +503,6 @@ public class GifDecoder {
             rawData.position(frame.bufferFrameStart);
         }
 
-        int nullCode = -1;
         int npix = (frame == null) ? header.width * header.height : frame.iw * frame.ih;
         int available, clear, codeMask, codeSize, endOfInformation, inCode, oldCode, bits, code, count, i, datum,
                 dataSize, first, top, bi, pi;
@@ -503,7 +526,7 @@ public class GifDecoder {
         clear = 1 << dataSize;
         endOfInformation = clear + 1;
         available = clear + 2;
-        oldCode = nullCode;
+        oldCode = NULL_CODE;
         codeSize = dataSize + 1;
         codeMask = (1 << codeSize) - 1;
         for (code = 0; code < clear; code++) {
@@ -515,73 +538,84 @@ public class GifDecoder {
         // Decode GIF pixel stream.
         datum = bits = count = first = top = pi = bi = 0;
         for (i = 0; i < npix; ) {
-            if (top == 0) {
-                if (bits < codeSize) {
-                    // Load bytes until there are enough bits for a code.
-                    if (count == 0) {
-                        // Read a new data block.
-                        count = readBlock();
-                        if (count <= 0) {
-                            break;
-                        }
-                        bi = 0;
-                    }
-                    datum += (((int) block[bi]) & 0xff) << bits;
-                    bits += 8;
-                    bi++;
-                    count--;
-                    continue;
+            // Load bytes until there are enough bits for a code.
+            if (count == 0) {
+                // Read a new data block.
+                count = readBlock();
+                if (count <= 0) {
+                    status = STATUS_PARTIAL_DECODE;
+                    break;
                 }
+                bi = 0;
+            }
+
+            datum += (((int) block[bi]) & 0xff) << bits;
+            bits += 8;
+            bi++;
+            count--;
+
+            while (bits >= codeSize) {
                 // Get the next code.
                 code = datum & codeMask;
                 datum >>= codeSize;
                 bits -= codeSize;
+
                 // Interpret the code.
-                if ((code > available) || (code == endOfInformation)) {
-                    break;
-                }
                 if (code == clear) {
                     // Reset decoder.
                     codeSize = dataSize + 1;
                     codeMask = (1 << codeSize) - 1;
                     available = clear + 2;
-                    oldCode = nullCode;
+                    oldCode = NULL_CODE;
                     continue;
                 }
-                if (oldCode == nullCode) {
+
+                if (code > available) {
+                    status = STATUS_PARTIAL_DECODE;
+                    break;
+                }
+
+                if (code == endOfInformation) {
+                    break;
+                }
+
+                if (oldCode == NULL_CODE) {
                     pixelStack[top++] = suffix[code];
                     oldCode = code;
                     first = code;
                     continue;
                 }
                 inCode = code;
-                if (code == available) {
+                if (code >= available) {
                     pixelStack[top++] = (byte) first;
                     code = oldCode;
                 }
-                while (code > clear) {
+                while (code >= clear) {
                     pixelStack[top++] = suffix[code];
                     code = prefix[code];
                 }
                 first = ((int) suffix[code]) & 0xff;
-                // Add a new string to the string table.
-                if (available >= MAX_STACK_SIZE) {
-                    break;
-                }
                 pixelStack[top++] = (byte) first;
-                prefix[available] = (short) oldCode;
-                suffix[available] = (byte) first;
-                available++;
-                if (((available & codeMask) == 0) && (available < MAX_STACK_SIZE)) {
-                    codeSize++;
-                    codeMask += available;
+
+                // Add a new string to the string table.
+                if (available < MAX_STACK_SIZE) {
+                    prefix[available] = (short) oldCode;
+                    suffix[available] = (byte) first;
+                    available++;
+                    if (((available & codeMask) == 0) && (available < MAX_STACK_SIZE)) {
+                        codeSize++;
+                        codeMask += available;
+                    }
                 }
                 oldCode = inCode;
+
+                while (top > 0) {
+                    // Pop a pixel off the pixel stack.
+                    top--;
+                    mainPixels[pi++] = pixelStack[top];
+                    i++;
+                }
             }
-            // Pop a pixel off the pixel stack.
-            top--;
-            mainPixels[pi++] = pixelStack[top];
-            i++;
         }
 
         // Clear missing pixels.
@@ -598,7 +632,7 @@ public class GifDecoder {
         try {
             curByte = rawData.get() & 0xFF;
         } catch (Exception e) {
-            header.status = STATUS_FORMAT_ERROR;
+            status = STATUS_FORMAT_ERROR;
         }
         return curByte;
     }
@@ -622,7 +656,7 @@ public class GifDecoder {
                 }
             } catch (Exception e) {
                 Log.w(TAG, "Error Reading Block", e);
-                header.status = STATUS_FORMAT_ERROR;
+                status = STATUS_FORMAT_ERROR;
             }
         }
         return n;
