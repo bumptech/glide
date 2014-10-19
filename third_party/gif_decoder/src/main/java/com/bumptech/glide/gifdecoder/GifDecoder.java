@@ -96,6 +96,8 @@ public class GifDecoder {
 
     private static final int NULL_CODE = -1;
 
+    private static final int INITIAL_FRAME_POINTER = -1;
+
     // Global File Header values and parsing flags.
     // Active color table.
     private int[] act;
@@ -104,7 +106,10 @@ public class GifDecoder {
     private ByteBuffer rawData;
 
     // Raw data read working array.
-    private byte[] block = new byte[256];
+    private final byte[] block = new byte[256];
+
+    private GifHeaderParser parser;
+
     // LZW decoder working arrays.
     private short[] prefix;
     private byte[] suffix;
@@ -112,16 +117,15 @@ public class GifDecoder {
     private byte[] mainPixels;
     private int[] mainScratch;
 
-    private int framePointer = -1;
+    private int framePointer;
     private byte[] data;
     private GifHeader header;
     private String id;
     private BitmapProvider bitmapProvider;
-    private GifHeaderParser parser = new GifHeaderParser();
     private Bitmap previousImage;
     private boolean savePrevious;
     private Bitmap.Config config;
-    private int status = STATUS_OK;
+    private int status;
 
     /**
      * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs from constantly
@@ -339,6 +343,7 @@ public class GifDecoder {
         this.header = header;
         this.data = data;
         this.status = STATUS_OK;
+        framePointer = INITIAL_FRAME_POINTER;
         // Initialize the raw data buffer.
         rawData = ByteBuffer.wrap(data);
         rawData.rewind();
@@ -359,6 +364,13 @@ public class GifDecoder {
         mainScratch = new int[header.width * header.height];
     }
 
+    private GifHeaderParser getHeaderParser() {
+        if (parser == null) {
+            parser = new GifHeaderParser();
+        }
+        return parser;
+    }
+
     /**
      * Reads GIF image from byte array.
      *
@@ -367,7 +379,7 @@ public class GifDecoder {
      */
     public int read(byte[] data) {
         this.data = data;
-        this.header = parser.setData(data).parseHeader();
+        this.header = getHeaderParser().setData(data).parseHeader();
         if (data != null) {
             // Initialize the raw data buffer.
             rawData = ByteBuffer.wrap(data);

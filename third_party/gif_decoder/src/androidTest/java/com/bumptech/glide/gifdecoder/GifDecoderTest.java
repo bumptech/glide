@@ -39,6 +39,55 @@ public class GifDecoderTest {
         assertEquals(GifDecoder.STATUS_OK, decoder.getStatus());
     }
 
+    @Test
+    public void testFrameIndexStartsAtNegativeOne() {
+        GifHeader gifheader = new GifHeader();
+        gifheader.frameCount = 4;
+        byte[] data = new byte[0];
+        GifDecoder decoder = new GifDecoder(provider);
+        decoder.setData(gifheader, data);
+        assertEquals(-1, decoder.getCurrentFrameIndex());
+    }
+
+    @Test
+    public void testAdvanceIncrementsFrameIndex() {
+        GifHeader gifheader = new GifHeader();
+        gifheader.frameCount = 4;
+        byte[] data = new byte[0];
+        GifDecoder decoder = new GifDecoder(provider);
+        decoder.setData(gifheader, data);
+        decoder.advance();
+        assertEquals(0, decoder.getCurrentFrameIndex());
+    }
+
+    @Test
+    public void testAdvanceWrapsIndexBackToZero() {
+        GifHeader gifheader = new GifHeader();
+        gifheader.frameCount = 2;
+        byte[] data = new byte[0];
+        GifDecoder decoder = new GifDecoder(provider);
+        decoder.setData(gifheader, data);
+        decoder.advance();
+        decoder.advance();
+        decoder.advance();
+        assertEquals(0, decoder.getCurrentFrameIndex());
+    }
+
+    @Test
+    public void testSettingDataResetsFramePointer() {
+        GifHeader gifheader = new GifHeader();
+        gifheader.frameCount = 4;
+        byte[] data = new byte[0];
+        GifDecoder decoder = new GifDecoder(provider);
+        decoder.setData(gifheader, data);
+        decoder.advance();
+        decoder.advance();
+        assertEquals(1, decoder.getCurrentFrameIndex());
+
+        decoder.setData(gifheader, data);
+        assertEquals(-1, decoder.getCurrentFrameIndex());
+    }
+
     private static class MockProvider implements GifDecoder.BitmapProvider {
 
         @Override
