@@ -67,7 +67,8 @@ public class GifDrawableTest {
     public void testShouldNotDrawNullBitmapFrame() {
         Canvas canvas = mock(Canvas.class);
         drawable = new GifDrawable(gifDecoder, frameManager, firstFrame, bitmapPool);
-        drawable.onFrameRead(null, 0);
+        drawable.onFrameRead(0);
+        when(frameManager.getCurrentFrame()).thenReturn(null);
         drawable.draw(canvas);
 
         verify(canvas).drawBitmap(eq(firstFrame), anyInt(), anyInt(), any(Paint.class));
@@ -80,6 +81,17 @@ public class GifDrawableTest {
         Canvas canvas = mock(Canvas.class);
 
         verify(canvas, never()).drawBitmap(any(Bitmap.class), anyInt(), anyInt(), any(Paint.class));
+    }
+
+    @Test
+    public void testDoesDrawCurrentFrameIfOneIsAvailable() {
+        Canvas canvas = mock(Canvas.class);
+        Bitmap currentFrame = Bitmap.createBitmap(100123, 123141, Bitmap.Config.ARGB_4444);
+        when(frameManager.getCurrentFrame()).thenReturn(currentFrame);
+
+        drawable.draw(canvas);
+        verify(canvas).drawBitmap(eq(currentFrame), anyInt(), anyInt(), any(Paint.class));
+        verify(canvas, never()).drawBitmap(eq(firstFrame), anyInt(), anyInt(), any(Paint.class));
     }
 
     @Test
@@ -156,7 +168,7 @@ public class GifDrawableTest {
     @Test
     public void testStartsLoadingNextFrameWhenCurrentFinishes() {
         drawable.setIsRunning(true);
-        drawable.onFrameRead(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), 0);
+        drawable.onFrameRead(0);
 
         verify(frameManager).getNextFrame(eq(drawable));
     }
@@ -164,7 +176,7 @@ public class GifDrawableTest {
     @Test
     public void testInvalidatesSelfWhenFrameReady() {
         drawable.setIsRunning(true);
-        drawable.onFrameRead(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), 0);
+        drawable.onFrameRead(0);
 
         verify(cb).invalidateDrawable(eq(drawable));
     }
@@ -172,7 +184,7 @@ public class GifDrawableTest {
     @Test
     public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfNotRunning() {
         drawable.setIsRunning(false);
-        drawable.onFrameRead(Bitmap.createBitmap(10, 100, Bitmap.Config.ARGB_8888), 0);
+        drawable.onFrameRead(0);
 
         verify(frameManager, never()).getNextFrame(eq(drawable));
     }
@@ -181,7 +193,7 @@ public class GifDrawableTest {
     public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfHasNoCallback() {
         drawable.setIsRunning(true);
         drawable.setCallback(null);
-        drawable.onFrameRead(Bitmap.createBitmap(1, 2, Bitmap.Config.ARGB_8888), 0);
+        drawable.onFrameRead(0);
 
         verify(frameManager, never()).getNextFrame(eq(drawable));
     }
@@ -190,7 +202,7 @@ public class GifDrawableTest {
     public void testStopsWhenCurrentFrameFinishesIfHasNoCallback() {
         drawable.setIsRunning(true);
         drawable.setCallback(null);
-        drawable.onFrameRead(Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888), 0);
+        drawable.onFrameRead(0);
 
         assertFalse(drawable.isRunning());
     }
@@ -382,13 +394,13 @@ public class GifDrawableTest {
         drawable.setVisible(true, true);
         drawable.start();
 
-        drawable.onFrameRead(getBitmap(), 0);
-        drawable.onFrameRead(getBitmap(), 1);
+        drawable.onFrameRead(0);
+        drawable.onFrameRead(1);
 
         drawable.start();
 
-        drawable.onFrameRead(getBitmap(), 0);
-        drawable.onFrameRead(getBitmap(), 1);
+        drawable.onFrameRead(0);
+        drawable.onFrameRead(1);
 
         verify(frameManager, times(4)).getNextFrame(eq(drawable));
         assertFalse(drawable.isRunning());
@@ -437,10 +449,23 @@ public class GifDrawableTest {
         verify(frameManager, times(frameCount * loopCount)).getNextFrame(eq(drawable));
     }
 
+    @Test
+    public void testDoesNotDrawFrameAfterRecycle() {
+        Bitmap bitmap = Bitmap.createBitmap(100, 112341, Bitmap.Config.RGB_565);
+        drawable.setVisible(true, true);
+        drawable.start();
+        when(frameManager.getCurrentFrame()).thenReturn(bitmap);
+        drawable.onFrameRead(1);
+        drawable.recycle();
+        Canvas canvas = mock(Canvas.class);
+        drawable.draw(canvas);
+        verify(canvas, never()).drawBitmap(any(Bitmap.class), anyInt(), anyInt(), any(Paint.class));
+    }
+
     private void runLoops(int loopCount, int frameCount) {
         for (int loop = 0; loop < loopCount; loop++) {
             for (int frame = 0; frame < frameCount; frame++) {
-                drawable.onFrameRead(getBitmap(), frame);
+                drawable.onFrameRead(frame);
             }
         }
     }

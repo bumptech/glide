@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -35,7 +36,7 @@ class GifFrameManager {
     private DelayTarget next;
 
     public interface FrameCallback {
-        void onFrameRead(Bitmap frame, int index);
+        void onFrameRead(int index);
     }
 
     public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation, int targetWidth,
@@ -92,6 +93,10 @@ class GifFrameManager {
                 .into(next);
     }
 
+    public Bitmap getCurrentFrame() {
+        return current != null ? current.resource : null;
+    }
+
     public void clear() {
         if (current != null) {
             mainHandler.removeCallbacks(current);
@@ -127,11 +132,16 @@ class GifFrameManager {
 
         @Override
         public void run() {
-            cb.onFrameRead(resource, index);
+            cb.onFrameRead(index);
             if (current != null) {
                 Glide.clear(current);
             }
             current = this;
+        }
+
+        @Override
+        public void onLoadCleared(Drawable placeholder) {
+            resource = null;
         }
     }
 }

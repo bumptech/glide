@@ -26,8 +26,6 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     private final GifState state;
     private final GifDecoder decoder;
 
-    /** The current frame to draw, or null if no frame has been loaded yet. */
-    private Bitmap currentFrame;
     /** True if the drawable is currently animating. */
     private boolean isRunning;
     /** True if the drawable should animate while visible. */
@@ -181,6 +179,10 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
     @Override
     public void draw(Canvas canvas) {
+        if (isRecycled) {
+            return;
+        }
+        Bitmap currentFrame = frameManager.getCurrentFrame();
         Bitmap toDraw = currentFrame != null ? currentFrame : state.firstFrame;
         canvas.drawBitmap(toDraw, 0, 0, paint);
     }
@@ -203,7 +205,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
-    public void onFrameRead(Bitmap frame, int frameIndex) {
+    public void onFrameRead(int frameIndex) {
         if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT && getCallback() == null) {
             stop();
             return;
@@ -212,10 +214,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
             return;
         }
 
-        if (frame != null) {
-            currentFrame = frame;
-            invalidateSelf();
-        }
+        invalidateSelf();
 
         if (frameIndex == decoder.getFrameCount() - 1) {
             loopCount++;
