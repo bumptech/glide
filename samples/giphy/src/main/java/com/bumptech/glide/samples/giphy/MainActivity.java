@@ -1,6 +1,7 @@
 package com.bumptech.glide.samples.giphy;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +13,7 @@ import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class MainActivity extends Activity implements Api.Monitor {
     private static final String TAG = "GiphyActivity";
 
     private GifAdapter adapter;
-    private DrawableRequestBuilder<Api.GifResult> fullRequest;
+    private DrawableRequestBuilder<Api.GifResult> gifItemRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,6 @@ public class MainActivity extends Activity implements Api.Monitor {
         setContentView(R.layout.activity_main);
 
         Glide.get(this).register(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
-        Api.get().getTrending();
 
         ImageView giphyLogoView = (ImageView) findViewById(R.id.giphy_logo_view);
         Glide.with(this)
@@ -43,11 +44,12 @@ public class MainActivity extends Activity implements Api.Monitor {
         ListView gifList = (ListView) findViewById(R.id.gif_list);
         GiphyPreloader preloader = new GiphyPreloader(2);
 
-        fullRequest = Glide.with(this)
+        gifItemRequest = Glide.with(this)
                 .from(Api.GifResult.class)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .fitCenter();
 
-        adapter = new GifAdapter(this, preloader, fullRequest);
+        adapter = new GifAdapter(this, preloader, gifItemRequest);
         gifList.setAdapter(adapter);
         gifList.setOnScrollListener(preloader);
     }
@@ -56,6 +58,9 @@ public class MainActivity extends Activity implements Api.Monitor {
     protected void onStart() {
         super.onStart();
         Api.get().addMonitor(this);
+        if (adapter.getCount() == 0) {
+            Api.get().getTrending();
+        }
     }
 
     @Override
@@ -93,7 +98,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         @Override
         protected GenericRequestBuilder getRequestBuilder(Api.GifResult item) {
-            return fullRequest.load(item);
+            return gifItemRequest.load(item);
         }
     }
 
@@ -143,11 +148,18 @@ public class MainActivity extends Activity implements Api.Monitor {
                 convertView = activity.getLayoutInflater().inflate(R.layout.gif_list_item, parent, false);
             }
 
-            Api.GifResult result = results[position];
+            final Api.GifResult result = results[position];
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "load result: " + result);
             }
             final ImageView gifView = (ImageView) convertView.findViewById(R.id.gif_view);
+            gifView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent fullscreenIntent = FullscreenActivity.getIntent(activity, result);
+                    activity.startActivity(fullscreenIntent);
+                }
+            });
 
             requestBuilder
                     .load(result)

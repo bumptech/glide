@@ -19,7 +19,7 @@ import java.util.HashSet;
  * A java wrapper for Giphy's http api based on https://github.com/Giphy/GiphyAPI.
  */
 public final class Api {
-    private static Api api = null;
+    private static volatile Api api = null;
     private static final String BETA_KEY = "dc6zaTOxFJmzC";
     private static final String BASE_URL = "http://api.giphy.com";
     private static final String SEARCH_PATH = "/v1/gifs/search";

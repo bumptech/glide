@@ -2,7 +2,6 @@ package com.bumptech.glide.samples.giphy;
 
 import android.content.Context;
 import android.text.TextUtils;
-
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -55,6 +54,5 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
     private static int getDifference(Api.GifImage gifImage, int width, int height) {
         return Math.abs(width - gifImage.width) + Math.abs(height - gifImage.height);
-
     }
 }
