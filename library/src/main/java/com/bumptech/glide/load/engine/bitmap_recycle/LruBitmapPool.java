@@ -19,6 +19,7 @@ import java.util.Set;
  */
 public class LruBitmapPool implements BitmapPool {
     private static final String TAG = "LruBitmapPool";
+    private static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.ARGB_8888;
 
     private final LruPoolStrategy strategy;
     private final int initialMaxSize;
@@ -101,7 +102,9 @@ public class LruBitmapPool implements BitmapPool {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     @Override
     public synchronized Bitmap getDirty(int width, int height, Bitmap.Config config) {
-        final Bitmap result = strategy.get(width, height, config);
+        // Config will be null for non public config types, which can lead to transformations naively passing in
+        // null as the requested config here. See issue #194.
+        final Bitmap result = strategy.get(width, height, config != null ? config : DEFAULT_CONFIG);
         if (result == null) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Missing bitmap=" + strategy.logBitmap(width, height, config));

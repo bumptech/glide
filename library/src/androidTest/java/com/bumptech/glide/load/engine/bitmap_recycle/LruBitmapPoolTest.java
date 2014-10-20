@@ -20,6 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class LruBitmapPoolTest {
@@ -106,6 +110,30 @@ public class LruBitmapPoolTest {
         for (int trimLevel : new int[] { TRIM_MEMORY_MODERATE, TRIM_MEMORY_COMPLETE }) {
             testTrimMemory(MAX_SIZE, trimLevel, MAX_SIZE);
         }
+    }
+
+    @Test
+    public void testPassesArgb888ToStrategyAsConfigForRequestsWithNullConfigsOnGet() {
+        LruPoolStrategy strategy = mock(LruPoolStrategy.class);
+        LruBitmapPool pool = new LruBitmapPool(100, strategy);
+
+        Bitmap expected = createMutableBitmap();
+        when(strategy.get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888))).thenReturn(expected);
+        Bitmap result = pool.get(100, 100, null);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testPassesArgb8888ToStrategyAsConfigForRequestsWithNullConfigsOnGetDirty() {
+        LruPoolStrategy strategy = mock(LruPoolStrategy.class);
+        LruBitmapPool pool = new LruBitmapPool(100, strategy);
+
+        Bitmap expected = createMutableBitmap();
+        when(strategy.get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888))).thenReturn(expected);
+        Bitmap result = pool.getDirty(100, 100, null);
+
+        assertEquals(expected, result);
     }
 
     private void testTrimMemory(int fillSize, int trimLevel, int expectedSize) {
