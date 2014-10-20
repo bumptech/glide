@@ -15,6 +15,6 @@ Adapted from:
 http://show.docjava.com/book/cgij/exportToHTML/ip/gif/stills/GifDecoder.java.html
 
 Local Modifications:
-Broke headers and frames out into separate files and added ability to share 
-headers between multiple decoders. Added interface for reusing bitmaps each 
-frame.  
+Broke headers and frames out into separate files and added ability to share
+headers between multiple decoders. Added interface for reusing bitmaps each
+frame. Bugfixes.

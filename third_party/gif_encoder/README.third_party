@@ -11,3 +11,4 @@ http://members.ozemail.com.au/~dekker/NEUQUANT.HTML
 
 Local Modifications:
 Converted BufferedImage to Android's Bitmap class, split apart classes into individual files.
+Support setting transIndex based on the presence of transparent pixels in the Bitmap.
