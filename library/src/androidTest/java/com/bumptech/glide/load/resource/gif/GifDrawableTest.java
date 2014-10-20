@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
@@ -23,7 +24,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -60,7 +60,7 @@ public class GifDrawableTest {
         Canvas canvas = mock(Canvas.class);
         drawable.draw(canvas);
 
-        verify(canvas).drawBitmap(eq(firstFrame), anyInt(), anyInt(), any(Paint.class));
+        verify(canvas).drawBitmap(eq(firstFrame), anyRect(), anyRect(), anyPaint());
     }
 
     @Test
@@ -71,8 +71,8 @@ public class GifDrawableTest {
         when(frameManager.getCurrentFrame()).thenReturn(null);
         drawable.draw(canvas);
 
-        verify(canvas).drawBitmap(eq(firstFrame), anyInt(), anyInt(), any(Paint.class));
-        verify(canvas, never()).drawBitmap((Bitmap) isNull(), anyInt(), anyInt(), any(Paint.class));
+        verify(canvas).drawBitmap(eq(firstFrame), anyRect(), anyRect(), anyPaint());
+        verify(canvas, never()).drawBitmap((Bitmap) isNull(), anyRect(), anyRect(), anyPaint());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class GifDrawableTest {
         drawable = new GifDrawable(gifDecoder, frameManager, null, bitmapPool);
         Canvas canvas = mock(Canvas.class);
 
-        verify(canvas, never()).drawBitmap(any(Bitmap.class), anyInt(), anyInt(), any(Paint.class));
+        verify(canvas, never()).drawBitmap(any(Bitmap.class), anyRect(), anyRect(), anyPaint());
     }
 
     @Test
@@ -90,8 +90,8 @@ public class GifDrawableTest {
         when(frameManager.getCurrentFrame()).thenReturn(currentFrame);
 
         drawable.draw(canvas);
-        verify(canvas).drawBitmap(eq(currentFrame), anyInt(), anyInt(), any(Paint.class));
-        verify(canvas, never()).drawBitmap(eq(firstFrame), anyInt(), anyInt(), any(Paint.class));
+        verify(canvas).drawBitmap(eq(currentFrame), anyRect(), anyRect(), anyPaint());
+        verify(canvas, never()).drawBitmap(eq(firstFrame), anyRect(), anyRect(), anyPaint());
     }
 
     @Test
@@ -459,7 +459,15 @@ public class GifDrawableTest {
         drawable.recycle();
         Canvas canvas = mock(Canvas.class);
         drawable.draw(canvas);
-        verify(canvas, never()).drawBitmap(any(Bitmap.class), anyInt(), anyInt(), any(Paint.class));
+        verify(canvas, never()).drawBitmap(any(Bitmap.class), anyRect(), anyRect(), anyPaint());
+    }
+
+    private static Paint anyPaint() {
+        return any(Paint.class);
+    }
+
+    private static Rect anyRect() {
+        return any(Rect.class);
     }
 
     private void runLoops(int loopCount, int frameCount) {

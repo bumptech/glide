@@ -8,9 +8,11 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 
+import android.view.Gravity;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
@@ -22,6 +24,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
  */
 public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameCallback {
     private final Paint paint = new Paint();
+    private final Rect destRect = new Rect();
     private final GifFrameManager frameManager;
     private final GifState state;
     private final GifDecoder decoder;
@@ -42,6 +45,8 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     private int loopCount;
     /** The number of times to loop through the gif animation. */
     private int maxLoopCount = LOOP_FOREVER;
+
+    private boolean applyGravity;
 
     /**
      * Constructor for GifDrawable.
@@ -178,13 +183,25 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     }
 
     @Override
+    protected void onBoundsChange(Rect bounds) {
+        super.onBoundsChange(bounds);
+        applyGravity = true;
+    }
+
+    @Override
     public void draw(Canvas canvas) {
         if (isRecycled) {
             return;
         }
+
+        if (applyGravity) {
+            Gravity.apply(GifState.GRAVITY, getIntrinsicWidth(), getIntrinsicHeight(), getBounds(), destRect);
+            applyGravity = false;
+        }
+
         Bitmap currentFrame = frameManager.getCurrentFrame();
         Bitmap toDraw = currentFrame != null ? currentFrame : state.firstFrame;
-        canvas.drawBitmap(toDraw, 0, 0, paint);
+        canvas.drawBitmap(toDraw, null, destRect, paint);
     }
 
     @Override
@@ -266,6 +283,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     }
 
     static class GifState extends ConstantState {
+        private static final int GRAVITY = Gravity.FILL;
         String id;
         GifHeader gifHeader;
         byte[] data;
