@@ -1,7 +1,9 @@
 package com.bumptech.glide.tests;
 
+import android.os.Build;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.Robolectric;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,4 +72,9 @@ public class Util {
             }
         };
     }
+
+    public static void setSdkVersionInt(int version) {
+        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", version);
+    }
+
 }

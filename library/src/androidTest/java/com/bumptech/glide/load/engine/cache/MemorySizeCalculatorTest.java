@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.cache;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+import com.bumptech.glide.tests.Util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,12 +31,9 @@ public class MemorySizeCalculatorTest {
 
     @After
     public void tearDown() {
-        setSdkVersionInt(initialSdkVersion);
+        Util.setSdkVersionInt(initialSdkVersion);
     }
 
-    private void setSdkVersionInt(int version) {
-        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", version);
-    }
 
     @Test
     public void testDefaultMemoryCacheSizeIsTwiceScreenSize() {
@@ -103,7 +101,7 @@ public class MemorySizeCalculatorTest {
         final int normalMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         final int normalBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-        setSdkVersionInt(10);
+        Util.setSdkVersionInt(10);
 
         final int smallMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         final int smallBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();

@@ -3,11 +3,11 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import android.os.Build;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.Util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +32,7 @@ public class BitmapResourceTest {
 
     @After
     public void tearDown() {
-        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", currentBuildVersion);
+        Util.setSdkVersionInt(currentBuildVersion);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class BitmapResourceTest {
 
     @Test
     public void testSizeIsBasedOnDimensPreKitKat() {
-        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", 18);
+        Util.setSdkVersionInt(18);
         assertEquals(harness.bitmap.getWidth() * harness.bitmap.getHeight() * 4, harness.resource.getSize());
     }
 

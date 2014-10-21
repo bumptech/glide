@@ -100,11 +100,15 @@ class GifFrameManager {
         if (current != null) {
             mainHandler.removeCallbacks(current);
             Glide.clear(current);
+            current = null;
         }
         if (next != null) {
             mainHandler.removeCallbacks(next);
             Glide.clear(next);
+            next = null;
         }
+
+        decoder.resetFrameIndex();
     }
 
     class DelayTarget extends SimpleTarget<Bitmap> implements Runnable {

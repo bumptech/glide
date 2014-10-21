@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.tests.Util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,15 +51,11 @@ public class RequestManagerRetrieverTest {
 
     @After
     public void tearDown() {
-        setSdkVersionInt(initialSdkVersion);
+        Util.setSdkVersionInt(initialSdkVersion);
 
         Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
         assertThat(retriever.pendingRequestManagerFragments.entrySet(), empty());
         assertThat(retriever.pendingSupportRequestManagerFragments.entrySet(), empty());
-    }
-
-    private void setSdkVersionInt(int version) {
-        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", version);
     }
 
     @Test
@@ -261,7 +258,7 @@ public class RequestManagerRetrieverTest {
 
     @Test
     public void testDoesNotThrowIfAskedToGetManagerForActivityPreHoneycomb() {
-        setSdkVersionInt(Build.VERSION_CODES.GINGERBREAD_MR1);
+        Util.setSdkVersionInt(Build.VERSION_CODES.GINGERBREAD_MR1);
         Activity activity = mock(Activity.class);
         when(activity.getApplicationContext()).thenReturn(Robolectric.application);
         when(activity.getFragmentManager()).thenThrow(new NoSuchMethodError());
@@ -271,7 +268,7 @@ public class RequestManagerRetrieverTest {
 
     @Test
     public void testDoesNotThrowIfAskedToGetManagerForActivityPreJellYBeanMr1() {
-        setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
+        Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
         Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
         Activity spyActivity = Mockito.spy(activity);
         when(spyActivity.isDestroyed()).thenThrow(new NoSuchMethodError());
@@ -281,7 +278,7 @@ public class RequestManagerRetrieverTest {
 
     @Test
     public void testDoesNotThrowIfAskedToGetManagerForFragmentPreHoneyCombMr2() {
-        setSdkVersionInt(Build.VERSION_CODES.HONEYCOMB_MR1);
+        Util.setSdkVersionInt(Build.VERSION_CODES.HONEYCOMB_MR1);
         Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
         android.app.Fragment fragment = new android.app.Fragment();
 
@@ -296,7 +293,7 @@ public class RequestManagerRetrieverTest {
 
     @Test
     public void testDoesNotThrowIfAskedToGetManagerForFragmentPreJellyBeanMr1() {
-        setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
+        Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
         Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
         android.app.Fragment fragment = new android.app.Fragment();
 

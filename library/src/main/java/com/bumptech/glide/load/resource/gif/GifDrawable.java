@@ -133,6 +133,22 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     public void stop() {
         isStarted = false;
         stopRunning();
+
+        // On APIs > honeycomb we know our drawable is not being displayed anymore when it's callback is cleared and so
+        // we can use the absence of a callback as an indication that it's ok to clear our temporary data. Prior to
+        // honeycomb we can't tell if our callback is null and instead eagerly reset to avoid holding on to resources we
+        // no longer need.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            reset();
+        }
+    }
+
+    /**
+     * Clears temporary data and resets the drawable back to the first frame.
+     */
+    private void reset() {
+        frameManager.clear();
+        invalidateSelf();
     }
 
     private void startRunning() {
@@ -222,8 +238,9 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void onFrameRead(int frameIndex) {
-        if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT && getCallback() == null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getCallback() == null) {
             stop();
+            reset();
             return;
         }
         if (!isRunning) {

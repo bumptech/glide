@@ -11,7 +11,10 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.BitmapToGlideDrawableTranscoder;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
 
 /**
@@ -19,6 +22,7 @@ import com.google.gson.Gson;
  */
 public class FullscreenActivity extends Activity {
     private static final String EXTRA_RESULT_JSON = "result_json";
+    private GifDrawable gifDrawable;
 
     public static Intent getIntent(Context context, Api.GifResult result) {
         Intent intent = new Intent(context, FullscreenActivity.class);
@@ -42,6 +46,14 @@ public class FullscreenActivity extends Activity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("giphy_url", result.images.original.url);
                 clipboard.setPrimaryClip(clip);
+
+                if (gifDrawable != null) {
+                    if (gifDrawable.isRunning()) {
+                        gifDrawable.stop();
+                    } else {
+                        gifDrawable.start();
+                    }
+                }
             }
         });
 
@@ -54,6 +66,24 @@ public class FullscreenActivity extends Activity {
                         .transcode(new BitmapToGlideDrawableTranscoder(this), GlideDrawable.class)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 )
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target,
+                            boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target,
+                            boolean isFromMemoryCache, boolean isFirstResource) {
+                        if (resource instanceof GifDrawable) {
+                            gifDrawable = (GifDrawable) resource;
+                        } else {
+                            gifDrawable = null;
+                        }
+                        return false;
+                    }
+                })
                 .into(gifView);
     }
 }

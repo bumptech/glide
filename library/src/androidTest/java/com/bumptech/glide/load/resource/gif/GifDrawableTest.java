@@ -6,12 +6,15 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.tests.Util;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +46,7 @@ public class GifDrawableTest {
     private int frameWidth;
     private Bitmap firstFrame;
     private BitmapPool bitmapPool;
+    private int initialSdkVersion;
 
     @Before
     public void setUp() {
@@ -53,6 +57,12 @@ public class GifDrawableTest {
         bitmapPool = mock(BitmapPool.class);
         drawable = new GifDrawable(gifDecoder, frameManager, firstFrame, bitmapPool);
         drawable.setCallback(cb);
+        initialSdkVersion = Build.VERSION.SDK_INT;
+    }
+
+    @After
+    public void tearDown() {
+        Util.setSdkVersionInt(initialSdkVersion);
     }
 
     @Test
@@ -199,12 +209,44 @@ public class GifDrawableTest {
     }
 
     @Test
-    public void testStopsWhenCurrentFrameFinishesIfHasNoCallback() {
+    public void testStopsWhenCurrentFrameFinishesIfHasNoCallbackAndIsAtLeastAtHoneycomb() {
         drawable.setIsRunning(true);
         drawable.setCallback(null);
         drawable.onFrameRead(0);
 
         assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testDoesNotStopWhenCurrentFrameFinishesIfHasNoCallbackAndIsPreHoneycomb() {
+        Util.setSdkVersionInt(10);
+
+        drawable.setIsRunning(true);
+        drawable.setCallback(null);
+        drawable.onFrameRead(0);
+
+        assertTrue(drawable.isRunning());
+    }
+
+    @Test
+    public void testResetsFrameManagerWhenCurrentFinishesIfHasNoCallbackAndIsAtLeastAtHoneycomb() {
+        drawable.setIsRunning(true);
+        drawable.setCallback(null);
+        drawable.onFrameRead(0);
+
+
+        verify(frameManager).clear();
+    }
+
+    @Test
+    public void testDoesNotResetFrameManagerWhenCurrentFinishesIfHasNoCallbackPreHoneycomb() {
+        Util.setSdkVersionInt(10);
+
+        drawable.setIsRunning(true);
+        drawable.setCallback(null);
+        drawable.onFrameRead(0);
+
+        verify(frameManager, never()).clear();
     }
 
     @Test
@@ -222,6 +264,26 @@ public class GifDrawableTest {
         drawable.setVisible(false, true);
 
         assertFalse(drawable.isRunning());
+    }
+
+    @Test
+    public void testDoesNotResetOnStopIfAtLeastAtHoneycomb() {
+        drawable.start();
+        drawable.stop();
+
+        verify(frameManager, never()).clear();
+        // invalidate once from start.
+        verify(cb, times(1)).invalidateDrawable(eq(drawable));
+    }
+
+    @Test
+    public void testDoesResetOnStopIfPreHoneycomb() {
+        Util.setSdkVersionInt(10);
+        drawable.start();
+        drawable.stop();
+
+        verify(frameManager).clear();
+        verify(cb, times(2)).invalidateDrawable(eq(drawable));
     }
 
     @Test
