@@ -17,10 +17,7 @@ import com.bumptech.glide.util.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Queue;
-import java.util.UUID;
 
 /**
  * An {@link com.bumptech.glide.load.ResourceDecoder} that decodes
@@ -87,18 +84,17 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
             return null;
         }
 
-        String id = getGifId(data);
-        Bitmap firstFrame = decodeFirstFrame(decoder, id, header, data);
+        Bitmap firstFrame = decodeFirstFrame(decoder, header, data);
         Transformation<Bitmap> unitTransformation = UnitTransformation.get();
 
-        GifDrawable gifDrawable = new GifDrawable(context, provider, bitmapPool, unitTransformation, width, height, id,
+        GifDrawable gifDrawable = new GifDrawable(context, provider, bitmapPool, unitTransformation, width, height,
                 header, data, firstFrame);
 
         return new GifDrawableResource(gifDrawable);
     }
 
-    private Bitmap decodeFirstFrame(GifDecoder decoder, String id, GifHeader header, byte[] data) {
-        decoder.setData(id, header, data);
+    private Bitmap decodeFirstFrame(GifDecoder decoder, GifHeader header, byte[] data) {
+        decoder.setData(header, data);
         decoder.advance();
         return decoder.getNextFrame();
     }
@@ -106,20 +102,6 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     @Override
     public String getId() {
         return "";
-    }
-
-    // A best effort attempt to get a unique id that can be used as a cache key for frames of the decoded GIF.
-    private static String getGifId(byte[] data) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            digest.update(data);
-            return Util.sha1BytesToHex(digest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            if (Log.isLoggable(TAG, Log.WARN)) {
-                Log.w(TAG, "Missing sha1 algorithm?", e);
-            }
-        }
-        return UUID.randomUUID().toString();
     }
 
     private static byte[] inputStreamToBytes(InputStream is) {

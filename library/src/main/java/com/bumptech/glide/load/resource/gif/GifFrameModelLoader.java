@@ -31,7 +31,7 @@ class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
 
         @Override
         public String getId() {
-            return decoder.getId() + decoder.getCurrentFrameIndex();
+            return String.valueOf(decoder.getCurrentFrameIndex());
         }
 
         @Override

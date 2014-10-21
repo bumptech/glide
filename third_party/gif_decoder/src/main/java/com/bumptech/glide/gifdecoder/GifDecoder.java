@@ -120,7 +120,6 @@ public class GifDecoder {
     private int framePointer;
     private byte[] data;
     private GifHeader header;
-    private String id;
     private BitmapProvider bitmapProvider;
     private Bitmap previousImage;
     private boolean savePrevious;
@@ -141,6 +140,11 @@ public class GifDecoder {
          * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link android.graphics.Bitmap}.
          */
         public Bitmap obtain(int width, int height, Bitmap.Config config);
+
+        /**
+         * Releases the given Bitmap back to the pool.
+         */
+        public void release(Bitmap bitmap);
     }
 
     public GifDecoder(BitmapProvider provider) {
@@ -235,10 +239,6 @@ public class GifDecoder {
         return header.loopCount;
     }
 
-    public String getId() {
-        return id;
-    }
-
     /**
      * Get the next frame in the animation sequence.
      *
@@ -327,19 +327,17 @@ public class GifDecoder {
     }
 
     public void clear() {
-        id = null;
         header = null;
         data = null;
         mainPixels = null;
         mainScratch = null;
+        if (previousImage != null) {
+            bitmapProvider.release(previousImage);
+        }
+        previousImage = null;
     }
 
     public void setData(GifHeader header, byte[] data) {
-        setData(null, header, data);
-    }
-
-    public void setData(String id, GifHeader header, byte[] data) {
-        this.id = id;
         this.header = header;
         this.data = data;
         this.status = STATUS_OK;
@@ -496,8 +494,8 @@ public class GifDecoder {
         if (savePrevious && currentFrame.dispose == DISPOSAL_UNSPECIFIED || currentFrame.dispose == DISPOSAL_NONE) {
             if (previousImage == null) {
                 previousImage = getNextBitmap();
-                previousImage.setPixels(dest, 0, width, 0, 0, width, height);
             }
+            previousImage.setPixels(dest, 0, width, 0, 0, width, height);
         }
 
         // Set pixels for current image.

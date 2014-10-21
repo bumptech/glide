@@ -127,7 +127,7 @@ public class GifResourceDecoderTest {
 
         InOrder order = inOrder(decoderPool, gifDecoder);
         order.verify(decoderPool).obtain(any(GifDecoder.BitmapProvider.class));
-        order.verify(gifDecoder).setData(any(String.class), eq(gifHeader), eq(data));
+        order.verify(gifDecoder).setData(eq(gifHeader), eq(data));
         order.verify(gifDecoder).advance();
         order.verify(gifDecoder).getNextFrame();
         order.verify(decoderPool).release(eq(gifDecoder));

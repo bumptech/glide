@@ -96,5 +96,10 @@ public class GifDecoderTest {
             Robolectric.shadowOf(result).setMutable(true);
             return result;
         }
+
+        @Override
+        public void release(Bitmap bitmap) {
+            // Do nothing.
+        }
     }
 }

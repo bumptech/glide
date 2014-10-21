@@ -307,8 +307,8 @@ public class GifDrawableTest {
         Transformation<Bitmap> transformation = mock(Transformation.class);
         GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
         Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        drawable = new GifDrawable(Robolectric.application, provider, bitmapPool, transformation, 100, 100, "fakeId",
-                gifHeader, new byte[0], firstFrame);
+        drawable = new GifDrawable(Robolectric.application, provider, bitmapPool, transformation, 100, 100,  gifHeader,
+                new byte[0], firstFrame);
 
         assertNotNull(drawable.getConstantState().newDrawable());
         assertNotNull(drawable.getConstantState().newDrawable(Robolectric.application.getResources()));

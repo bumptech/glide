@@ -151,7 +151,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
             cb.onResourceReady(cached);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "loaded resource from cache in " + LogTime.getElapsedMillis(startTime));
+                logWithTimeAndKey("Loaded resource from cache", startTime, key);
             }
             return null;
         }
@@ -163,7 +163,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
                 active.acquire();
                 cb.onResourceReady(active);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "loaded resource from active resources in " + LogTime.getElapsedMillis(startTime));
+                    logWithTimeAndKey("Loaded resource from active resources", startTime, key);
                 }
                 return null;
             } else {
@@ -175,7 +175,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         if (current != null) {
             current.addCallback(cb);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "added to existing load in " + LogTime.getElapsedMillis(startTime));
+                logWithTimeAndKey("Added to existing load", startTime, key);
             }
             return new LoadStatus(cb, current);
         }
@@ -189,9 +189,13 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         engineJob.start(runnable);
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "finished load in engine in " + LogTime.getElapsedMillis(startTime));
+            logWithTimeAndKey("Started new load", startTime, key);
         }
         return new LoadStatus(cb, engineJob);
+    }
+
+    private static void logWithTimeAndKey(String log, long startTime, Key key) {
+        Log.v(TAG, log + " in " + LogTime.getElapsedMillis(startTime) + "ms, key: " + key);
     }
 
     @SuppressWarnings("unchecked")
