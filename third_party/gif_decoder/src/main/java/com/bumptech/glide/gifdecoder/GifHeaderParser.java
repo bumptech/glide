@@ -16,6 +16,11 @@ import static com.bumptech.glide.gifdecoder.GifDecoder.STATUS_FORMAT_ERROR;
 public class GifHeaderParser {
     public static final String TAG = "GifHeaderParser";
 
+    // The minimum frame delay in hundredths of a second.
+    static final int MIN_FRAME_DELAY = 3;
+    // The default frame delay in hundredths of a second for GIFs with frame delays less than the minimum.
+    static final int DEFAULT_FRAME_DELAY = 10;
+
     private static final int MAX_BLOCK_SIZE = 256;
     // Raw data read working array.
     private final byte[] block = new byte[MAX_BLOCK_SIZE];
@@ -147,7 +152,12 @@ public class GifHeaderParser {
         }
         header.currentFrame.transparency = (packed & 1) != 0;
         // Delay in milliseconds.
-        header.currentFrame.delay = readShort() * 10;
+        int delayInHundredthsOfASecond = readShort();
+        // TODO: consider allowing -1 to indicate show forever.
+        if (delayInHundredthsOfASecond < MIN_FRAME_DELAY) {
+            delayInHundredthsOfASecond = DEFAULT_FRAME_DELAY;
+        }
+        header.currentFrame.delay = delayInHundredthsOfASecond * 10;
         // Transparent color index
         header.currentFrame.transIndex = read();
         // Block terminator

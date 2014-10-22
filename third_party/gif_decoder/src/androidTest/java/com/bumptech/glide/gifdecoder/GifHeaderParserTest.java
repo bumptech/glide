@@ -79,6 +79,72 @@ public class GifHeaderParserTest {
         assertNotNull(header.frames.get(0));
     }
 
+    private static ByteBuffer writeHeaderWithGceAndFrameDelay(short frameDelay) {
+        final int lzwMinCodeSize = 2;
+        ByteBuffer buffer = ByteBuffer.allocate(
+                GifBytesTestUtil.HEADER_LENGTH
+                + GifBytesTestUtil.GRAPHICS_CONTROL_EXTENSION_LENGTH
+                + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+                + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize)
+        ).order(ByteOrder.LITTLE_ENDIAN);
+        GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+        GifBytesTestUtil.writeGraphicsControlExtension(buffer, frameDelay);
+        GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
+        GifBytesTestUtil.writeFakeImageData(buffer, lzwMinCodeSize);
+        return buffer;
+    }
+
+    @Test
+    public void testCanParseFrameDelay() {
+        final short frameDelay = 50;
+        ByteBuffer buffer = writeHeaderWithGceAndFrameDelay(frameDelay);
+
+        parser.setData(buffer.array());
+        GifHeader header = parser.parseHeader();
+        GifFrame frame = header.frames.get(0);
+
+        // Convert delay in 100ths of a second to ms.
+        assertEquals(frameDelay * 10, frame.delay);
+    }
+
+    @Test
+    public void testSetsDefaultFrameDelayIfFrameDelayIsZero() {
+        ByteBuffer buffer = writeHeaderWithGceAndFrameDelay((short) 0);
+
+        parser.setData(buffer.array());
+        GifHeader header = parser.parseHeader();
+        GifFrame frame = header.frames.get(0);
+
+        // Convert delay in 100ths of a second to ms.
+        assertEquals(GifHeaderParser.DEFAULT_FRAME_DELAY * 10, frame.delay);
+    }
+
+    @Test
+    public void testSetsDefaultFrameDelayIfFrameDelayIsLessThanMinimum() {
+        final short frameDelay = GifHeaderParser.MIN_FRAME_DELAY - 1;
+        ByteBuffer buffer = writeHeaderWithGceAndFrameDelay(frameDelay);
+
+        parser.setData(buffer.array());
+        GifHeader header = parser.parseHeader();
+        GifFrame frame = header.frames.get(0);
+
+        // Convert delay in 100ths of a second to ms.
+        assertEquals(GifHeaderParser.DEFAULT_FRAME_DELAY * 10, frame.delay);
+    }
+
+    @Test
+    public void testObeysFrameDelayIfFrameDelayIsAtMinimum() {
+        final short frameDelay = GifHeaderParser.MIN_FRAME_DELAY;
+        ByteBuffer buffer = writeHeaderWithGceAndFrameDelay(frameDelay);
+
+        parser.setData(buffer.array());
+        GifHeader header = parser.parseHeader();
+        GifFrame frame = header.frames.get(0);
+
+        // Convert delay in 100ths of a second to ms.
+        assertEquals(frameDelay * 10, frame.delay);
+    }
+
     @Test
     public void testSetsFrameLocalColorTableToNullIfNoColorTable() {
         final int lzwMinCodeSize = 2;

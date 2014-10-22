@@ -10,6 +10,8 @@ public class GifBytesTestUtil {
     public static final int HEADER_LENGTH = 13;
     // Length in bytes.
     public static final int IMAGE_DESCRIPTOR_LENGTH = 10;
+    // Length in bytes.
+    public static final int GRAPHICS_CONTROL_EXTENSION_LENGTH = 8;
 
     public static int getColorTableLength(int numColors) {
         return 3 * numColors;
@@ -102,6 +104,29 @@ public class GifBytesTestUtil {
 
         // Pixel aspect ratio.
         out.put((byte) 0);
+    }
+
+    public static void writeGraphicsControlExtension(ByteBuffer out, int delayTime) {
+        verifyRemaining(out, GRAPHICS_CONTROL_EXTENSION_LENGTH);
+        verifyShortValues(delayTime);
+
+        // Extension inducer (constant).
+        out.put((byte) 0x21);
+        // Graphic control label (constant).
+        out.put((byte) 0xF9);
+        // Block size (constant).
+        out.put((byte) 0x04);
+        // Packed (disposal method, user input, transparent color flag)
+        out.put((byte) 0x00);
+
+        // Frame delay in 100ths of a second.
+        out.putShort((short) delayTime);
+
+        // Transparent color index.
+        out.put((byte) 0x00);
+
+        // Block terminator (constant).
+        out.put((byte) 0x00);
     }
 
     private static void verifyRemaining(ByteBuffer buffer, int expected) {

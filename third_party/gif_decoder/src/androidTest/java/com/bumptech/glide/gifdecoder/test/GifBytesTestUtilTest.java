@@ -19,7 +19,7 @@ public class GifBytesTestUtilTest {
 
         byte[] expected = new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x00, 0x08, 0x00, 0x10, 0x20, 0x00, 0x00};
 
-        assertArrayEquals(expected, buffer.array());
+        assertEquals(expected, buffer);
     }
 
     @Test
@@ -30,7 +30,7 @@ public class GifBytesTestUtilTest {
         byte[] expected = new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x00, 0x08, 0x00, 0x10, (byte) 0xA4, 0x00,
                 0x00};
 
-        assertArrayEquals(expected, buffer.array());
+        assertEquals(expected, buffer);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class GifBytesTestUtilTest {
                 0x00
         };
 
-        assertArrayEquals(expected, buffer.array());
+        assertEquals(expected, buffer);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class GifBytesTestUtilTest {
                 packedField
         };
 
-        assertArrayEquals(expected, buffer.array());
+        assertEquals(expected, buffer);
     }
 
     @Test
@@ -102,8 +102,7 @@ public class GifBytesTestUtilTest {
         };
 
 
-        assertArrayEquals("expected=" + Arrays.toString(expected) + " received=" + Arrays.toString(buffer.array()),
-                expected, buffer.array());
+        assertEquals(expected, buffer);
     }
 
     @Test
@@ -113,6 +112,37 @@ public class GifBytesTestUtilTest {
 
         byte[] expected = new byte[] { 0x02, 0x01, 0x01, 0x00 };
 
-        assertArrayEquals(expected, buffer.array());
+        assertEquals(expected, buffer);
+    }
+
+    @Test
+    public void testWritesGraphicsControlExtension() {
+        short delay = 20;
+        ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.GRAPHICS_CONTROL_EXTENSION_LENGTH);
+        byte[] expected = new byte[] {
+                // Extension inducer.
+                0x21,
+                // Graphic control label.
+                (byte) 0xF9,
+                // Block size.
+                0x04,
+                // Packed byte.
+                0x00,
+                // Frame delay.
+                0x00,
+                0x14,
+                // Transparent color index.
+                0x00,
+                // block terminator.
+                0x00
+        };
+
+        GifBytesTestUtil.writeGraphicsControlExtension(buffer, delay);
+        assertEquals(expected, buffer);
+    }
+
+    private static void assertEquals(byte[] expected, ByteBuffer buffer) {
+        assertArrayEquals("expected=" + Arrays.toString(expected) + " received=" + Arrays.toString(buffer.array()),
+                expected, buffer.array());
     }
 }

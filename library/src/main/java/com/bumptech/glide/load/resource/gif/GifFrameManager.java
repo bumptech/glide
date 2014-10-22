@@ -22,8 +22,6 @@ import java.security.MessageDigest;
 import java.util.UUID;
 
 class GifFrameManager {
-    /** 60fps is {@value #MIN_FRAME_DELAY}ms per frame. */
-    private static final long MIN_FRAME_DELAY = 1000 / 60;
     private final GifFrameModelLoader frameLoader;
     private final GifFrameResourceDecoder frameResourceDecoder;
     private final GifDecoder decoder;
@@ -73,7 +71,7 @@ class GifFrameManager {
     public void getNextFrame(FrameCallback cb) {
         decoder.advance();
 
-        long targetTime = SystemClock.uptimeMillis() + Math.max(MIN_FRAME_DELAY, decoder.getNextDelay());
+        long targetTime = SystemClock.uptimeMillis() + decoder.getNextDelay();
         next = new DelayTarget(cb, targetTime);
         next.setFrameIndex(decoder.getCurrentFrameIndex());
 

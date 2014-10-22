@@ -202,7 +202,7 @@ public class GifDecoder {
     }
 
     /**
-     * Gets display duration for the upcoming frame.
+     * Gets display duration for the upcoming frame in ms.
      */
     public int getNextDelay() {
         if (header.frameCount <= 0 || framePointer < 0) {
