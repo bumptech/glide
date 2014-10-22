@@ -181,7 +181,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         this.loadProvider = loadProvider;
         this.model = model;
         this.signature = signature;
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.priority = priority;
         this.target = target;
         this.sizeMultiplier = sizeMultiplier;

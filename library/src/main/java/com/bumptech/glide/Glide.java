@@ -82,7 +82,7 @@ public class Glide {
     private static final String TAG = "Glide";
     private static volatile Glide glide;
 
-    private final GenericLoaderFactory loaderFactory = new GenericLoaderFactory();
+    private final GenericLoaderFactory loaderFactory;
     private final Engine engine;
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
@@ -188,6 +188,7 @@ public class Glide {
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
         this.decodeFormat = decodeFormat;
+        loaderFactory = new GenericLoaderFactory(context);
         mainHandler = new Handler(Looper.getMainLooper());
         bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool);
 
@@ -492,7 +493,7 @@ public class Glide {
             }
             return null;
         }
-        return Glide.get(context).getLoaderFactory().buildModelLoader(modelClass, resourceClass, context);
+        return Glide.get(context).getLoaderFactory().buildModelLoader(modelClass, resourceClass);
     }
 
     /**

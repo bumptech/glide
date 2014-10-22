@@ -22,8 +22,7 @@ public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescripto
     public static class Factory implements ModelLoaderFactory<String, ParcelFileDescriptor> {
         @Override
         public ModelLoader<String, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
-            return new FileDescriptorStringLoader(factories.buildModelLoader(Uri.class, ParcelFileDescriptor.class,
-                    context));
+            return new FileDescriptorStringLoader(factories.buildModelLoader(Uri.class, ParcelFileDescriptor.class));
         }
 
         @Override

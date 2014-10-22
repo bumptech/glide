@@ -52,7 +52,7 @@ public class RequestManager implements LifecycleListener {
 
     RequestManager(Context context, final Lifecycle lifecycle, RequestTracker requestTracker,
             ConnectivityMonitorFactory factory) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.lifecycle = lifecycle;
         this.requestTracker = requestTracker;
         this.glide = Glide.get(context);

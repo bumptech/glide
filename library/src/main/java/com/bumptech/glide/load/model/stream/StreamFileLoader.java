@@ -22,7 +22,7 @@ public class StreamFileLoader extends FileLoader<InputStream> implements StreamM
     public static class Factory implements ModelLoaderFactory<File, InputStream> {
         @Override
         public ModelLoader<File, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new StreamFileLoader(factories.buildModelLoader(Uri.class, InputStream.class, context));
+            return new StreamFileLoader(factories.buildModelLoader(Uri.class, InputStream.class));
         }
 
         @Override

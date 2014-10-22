@@ -25,7 +25,7 @@ public class FileDescriptorUriLoader extends UriLoader<ParcelFileDescriptor> imp
         @Override
         public ModelLoader<Uri, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
             return new FileDescriptorUriLoader(context, factories.buildModelLoader(GlideUrl.class,
-                    ParcelFileDescriptor.class, context));
+                    ParcelFileDescriptor.class));
         }
 
         @Override

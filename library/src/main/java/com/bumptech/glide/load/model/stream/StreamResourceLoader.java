@@ -22,7 +22,7 @@ public class StreamResourceLoader extends ResourceLoader<InputStream> implements
 
         @Override
         public ModelLoader<Integer, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new StreamResourceLoader(context, factories.buildModelLoader(Uri.class, InputStream.class, context));
+            return new StreamResourceLoader(context, factories.buildModelLoader(Uri.class, InputStream.class));
         }
 
         @Override

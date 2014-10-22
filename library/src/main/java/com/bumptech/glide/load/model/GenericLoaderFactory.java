@@ -30,6 +30,12 @@ public class GenericLoaderFactory {
         }
     };
 
+    private final Context context;
+
+    public GenericLoaderFactory(Context context) {
+       this.context = context.getApplicationContext();
+    }
+
     /**
      * Removes and returns the registered {@link ModelLoaderFactory} for the given model and resource classes. Returns
      * null if no such factory is registered. Clears all cached model loaders.
@@ -92,13 +98,30 @@ public class GenericLoaderFactory {
      * {@link ModelLoader} or building a new a new {@link ModelLoader} using registered {@link ModelLoaderFactory}s.
      * Returns null if no {@link ModelLoaderFactory} is registered for the given classes.
      *
+     * @deprecated Use {@link #buildModelLoader(Class, Class)} instead.
+     * @param modelClass The model class.
+     * @param resourceClass The resource class.
+     * @param context Unused
+     * @param <T> The type of the model.
+     * @param <Y> The type of the resource.
+     */
+    @Deprecated
+    public synchronized <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
+            Context context) {
+        return buildModelLoader(modelClass, resourceClass);
+    }
+
+    /**
+     * Returns a {@link ModelLoader} for the given model and resource classes by either returning a cached
+     * {@link ModelLoader} or building a new a new {@link ModelLoader} using registered {@link ModelLoaderFactory}s.
+     * Returns null if no {@link ModelLoaderFactory} is registered for the given classes.
+     *
      * @param modelClass The model class.
      * @param resourceClass The resource class.
      * @param <T> The type of the model.
      * @param <Y> The type of the resource.
      */
-    public synchronized <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
-                                                                  Context context) {
+    public synchronized <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass) {
         ModelLoader<T, Y> result = getCachedLoader(modelClass, resourceClass);
         if (result != null) {
             // We've already tried to create a model loader and can't with the currently registered set of factories,
@@ -151,7 +174,6 @@ public class GenericLoaderFactory {
         if (resourceToFactories != null) {
             result = resourceToFactories.get(resourceClass);
         }
-
 
         if (result == null) {
             for (Class<? super T> registeredModelClass : modelClassToResourceFactories.keySet()) {
