@@ -524,6 +524,17 @@ public class GifDrawableTest {
         verify(canvas, never()).drawBitmap(any(Bitmap.class), anyRect(), anyRect(), anyPaint());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfSetFrameTransformationIsCalledWithANullFrame() {
+        drawable.setFrameTransformation(mock(Transformation.class), null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfConstructedWIthNullFirstFrame() {
+        new GifDrawable(Robolectric.application, mock(GifDecoder.BitmapProvider.class), mock(BitmapPool.class),
+                mock(Transformation.class), 100, 100, mock(GifHeader.class), new byte[0], null);
+    }
+
     private static Paint anyPaint() {
         return any(Paint.class);
     }

@@ -110,6 +110,7 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
 
     private Resource<Bitmap> getTransformedFrame(Bitmap currentFrame, Transformation<Bitmap> transformation,
             GifDrawable drawable) {
+        // TODO: what if current frame is null?
         Resource<Bitmap> bitmapResource = factory.buildFrameResource(currentFrame, bitmapPool);
         Resource<Bitmap> transformedResource = transformation.transform(bitmapResource,
                 drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());

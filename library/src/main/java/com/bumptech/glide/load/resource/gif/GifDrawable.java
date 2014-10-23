@@ -96,6 +96,9 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     }
 
     public void setFrameTransformation(Transformation<Bitmap> frameTransformation, Bitmap firstFrame) {
+        if (firstFrame == null) {
+            throw new NullPointerException("The first frame of the GIF must not be null");
+        }
         state.frameTransformation = frameTransformation;
         state.firstFrame = firstFrame;
     }
@@ -313,6 +316,9 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         public GifState(GifHeader header, byte[] data, Context context,
                 Transformation<Bitmap> frameTransformation, int targetWidth, int targetHeight,
                 GifDecoder.BitmapProvider provider, BitmapPool bitmapPool, Bitmap firstFrame) {
+            if (firstFrame == null) {
+                throw new NullPointerException("The first frame of the GIF must not be null");
+            }
             gifHeader = header;
             this.data = data;
             this.bitmapPool = bitmapPool;
