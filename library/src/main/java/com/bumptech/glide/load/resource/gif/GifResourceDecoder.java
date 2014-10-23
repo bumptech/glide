@@ -156,6 +156,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
         }
 
         public synchronized void release(GifHeaderParser parser) {
+            parser.clear();
             pool.offer(parser);
         }
     }

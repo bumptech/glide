@@ -42,6 +42,11 @@ public class GifHeaderParser {
         return this;
     }
 
+    public void clear() {
+        rawData = null;
+        header = null;
+    }
+
     private void reset() {
         rawData = null;
         Arrays.fill(block, (byte) 0);
