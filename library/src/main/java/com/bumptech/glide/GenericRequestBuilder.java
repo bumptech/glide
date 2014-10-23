@@ -380,7 +380,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @deprecated If this builder is used for multiple loads, using this method will result in multiple view's being
      * asked to start an animation using a single {@link android.view.animation.Animation} object which results in
      * views animating repeatedly. Use {@link #animate(int)} or
-     * {@link #animate(com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator)}.
+     * {@link #animate(com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator)}. Scheduled to be removed in
+     * Glide 4.0.
      * @param animation The animation to run
      * @return This request builder.
      */

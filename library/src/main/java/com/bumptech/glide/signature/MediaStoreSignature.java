@@ -15,6 +15,18 @@ public class MediaStoreSignature implements Key {
     private final long dateModified;
     private final int orientation;
 
+    /**
+     * Constructor for {@link com.bumptech.glide.signature.MediaStoreSignature}.
+     *
+     * @param mimeType The mime type of the media store media. Ok to default to empty string "". See
+     *      {@link android.provider.MediaStore.Images.ImageColumns#MIME_TYPE} or
+     *      {@link android.provider.MediaStore.Video.VideoColumns#MIME_TYPE}.
+     * @param dateModified The date modified time of the media store media. Ok to default to 0. See
+     *      {@link android.provider.MediaStore.Images.ImageColumns#DATE_MODIFIED} or
+     *      {@link android.provider.MediaStore.Video.VideoColumns#DATE_MODIFIED}.
+     * @param orientation The orientation of the media store media. Ok to default to 0. See
+     *      {@link android.provider.MediaStore.Images.ImageColumns#ORIENTATION}.
+     */
     public MediaStoreSignature(String mimeType, long dateModified, int orientation) {
         this.mimeType = mimeType;
         this.dateModified = dateModified;

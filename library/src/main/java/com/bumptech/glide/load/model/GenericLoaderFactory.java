@@ -98,7 +98,7 @@ public class GenericLoaderFactory {
      * {@link ModelLoader} or building a new a new {@link ModelLoader} using registered {@link ModelLoaderFactory}s.
      * Returns null if no {@link ModelLoaderFactory} is registered for the given classes.
      *
-     * @deprecated Use {@link #buildModelLoader(Class, Class)} instead.
+     * @deprecated Use {@link #buildModelLoader(Class, Class)} instead. Scheduled to be removed in Glide 4.0.
      * @param modelClass The model class.
      * @param resourceClass The resource class.
      * @param context Unused

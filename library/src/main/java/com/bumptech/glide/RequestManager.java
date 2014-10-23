@@ -297,6 +297,10 @@ public class RequestManager implements LifecycleListener {
      * @see com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)
      * @see com.bumptech.glide.signature.MediaStoreSignature
      *
+     * @deprecated Use {@link #loadFromMediaStore(android.net.Uri)},
+     * {@link com.bumptech.glide.signature.MediaStoreSignature}, and
+     * {@link com.bumptech.glide.DrawableRequestBuilder#signature(com.bumptech.glide.load.Key)} instead. Scheduled to be
+     * removed in Glide 4.0.
      * @param uri The uri representing the media.
      * @param mimeType The mime type of the media store media. Ok to default to empty string "". See
      *      {@link android.provider.MediaStore.Images.ImageColumns#MIME_TYPE} or
@@ -307,6 +311,7 @@ public class RequestManager implements LifecycleListener {
      * @param orientation The orientation of the media store media. Ok to default to 0. See
      *      {@link android.provider.MediaStore.Images.ImageColumns#ORIENTATION}.
      */
+    @Deprecated
     public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri, String mimeType, long dateModified, int orientation) {
         Key signature = new MediaStoreSignature(mimeType, dateModified, orientation);
         return (DrawableTypeRequest<Uri>) loadFromMediaStore(uri).signature(signature);
@@ -481,7 +486,8 @@ public class RequestManager implements LifecycleListener {
      * @see #load(byte[])
      *
      * @deprecated Use {@link #load(byte[])} along with
-     * {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)} instead.
+     * {@link com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)} instead. Scheduled to be
+     * removed in Glide 4.0.
      * @param model The data to load.
      * @param id A unique id that identifies the image represented by the model suitable for use as a cache key
      *           (url, filepath etc). If there is no suitable id, use {@link #load(byte[])} instead.

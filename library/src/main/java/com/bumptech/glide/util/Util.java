@@ -53,7 +53,8 @@ public final class Util {
      *
      * @see #getBitmapByteSize(android.graphics.Bitmap)
      *
-     * @deprecated
+     * @deprecated Use {@link #getBitmapByteSize(android.graphics.Bitmap)} instead. Scheduled to be removed in Glide
+     * 4.0.
      */
     @Deprecated
     public static int getSize(Bitmap bitmap) {

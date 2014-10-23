@@ -41,6 +41,7 @@ interface DrawableOptions {
      * asked to start an animation using a single {@link android.view.animation.Animation} object which results in
      * views animating repeatedly. Use {@link #crossFade(int, int)}} instead, or be sure to call this method once
      * per call to {@link com.bumptech.glide.GenericRequestBuilder#load(Object)} to avoid re-using animation objects.
+     * Scheduled to be removed in Glide 4.0.
      * @param animation The Animation to use if no placeholder is set.
      * @param duration The duration of the cross fade animation.
      * @return This request builder.
