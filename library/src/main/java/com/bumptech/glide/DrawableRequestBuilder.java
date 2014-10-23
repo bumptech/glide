@@ -350,7 +350,8 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public DrawableRequestBuilder<ModelType> listener(RequestListener<ModelType, GlideDrawable> requestListener) {
+    public DrawableRequestBuilder<ModelType> listener(
+            RequestListener<? super ModelType, GlideDrawable> requestListener) {
         super.listener(requestListener);
         return this;
     }

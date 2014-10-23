@@ -60,7 +60,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private boolean isModelSet;
     private int placeholderId;
     private int errorId;
-    private RequestListener<ModelType, TranscodeType> requestListener;
+    private RequestListener<? super ModelType, TranscodeType> requestListener;
     private Float thumbSizeMultiplier;
     private GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequestBuilder;
     private Float sizeMultiplier = 1f;
@@ -474,7 +474,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> listener(
-            RequestListener<ModelType, TranscodeType> requestListener) {
+            RequestListener<? super ModelType, TranscodeType> requestListener) {
         this.requestListener = requestListener;
 
         return this;

@@ -341,7 +341,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> listener(
-            RequestListener<ModelType, GifDrawable> requestListener) {
+            RequestListener<? super ModelType, GifDrawable> requestListener) {
         super.listener(requestListener);
         return this;
     }

@@ -391,7 +391,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> listener(
-            RequestListener<ModelType, TranscodeType> requestListener) {
+            RequestListener<? super ModelType, TranscodeType> requestListener) {
         super.listener(requestListener);
         return this;
     }

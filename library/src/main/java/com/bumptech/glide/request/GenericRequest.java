@@ -67,7 +67,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private boolean isMemoryCacheable;
     private Priority priority;
     private Target<R> target;
-    private RequestListener<A, R> requestListener;
+    private RequestListener<? super A, R> requestListener;
     private float sizeMultiplier;
     private Engine engine;
     private GlideAnimationFactory<R> animationFactory;
@@ -96,7 +96,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             int placeholderResourceId,
             Drawable errorDrawable,
             int errorResourceId,
-            RequestListener<A, R> requestListener,
+            RequestListener<? super A, R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
             Transformation<Z> transformation,
@@ -168,7 +168,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             int placeholderResourceId,
             Drawable errorDrawable,
             int errorResourceId,
-            RequestListener<A, R> requestListener,
+            RequestListener<? super A, R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
             Transformation<Z> transformation,
