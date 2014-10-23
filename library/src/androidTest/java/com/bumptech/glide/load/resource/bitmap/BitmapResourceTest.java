@@ -71,6 +71,21 @@ public class BitmapResourceTest {
         assertTrue(harness.bitmap.isRecycled());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfBitmapIsNull() {
+        new BitmapResource(null, mock(BitmapPool.class));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfBitmapPoolIsNull() {
+        new BitmapResource(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfBitmapAndBitmapPoolAreNull() {
+        new BitmapResource(null, null);
+    }
+
     private static class BitmapResourceHarness {
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         BitmapPool bitmapPool = mock(BitmapPool.class);

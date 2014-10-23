@@ -22,4 +22,9 @@ public class BytesResourceTest {
         assertEquals(bytes.length, resource.getSize());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfGivenNullBytes() {
+        new BytesResource(null);
+    }
+
 }

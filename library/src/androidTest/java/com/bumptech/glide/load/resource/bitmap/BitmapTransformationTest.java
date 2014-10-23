@@ -78,7 +78,7 @@ public class BitmapTransformationTest {
                 assertEquals(expected, toTransform);
                 assertEquals(expectedWidth, outWidth);
                 assertEquals(expectedHeight, outHeight);
-                return null;
+                return expected;
             }
 
             @Override

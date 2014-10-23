@@ -54,6 +54,21 @@ public class DrawableResourceTest {
         verify(constantState).newDrawable();
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfDrawableIsNull() {
+        new DrawableResource<TestDrawable>(null) {
+            @Override
+            public int getSize() {
+                return 0;
+            }
+
+            @Override
+            public void recycle() {
+
+            }
+        };
+    }
+
     /** Just to have a type to test with which is not directly Drawable */
     private static class TestDrawable extends Drawable {
         @Override

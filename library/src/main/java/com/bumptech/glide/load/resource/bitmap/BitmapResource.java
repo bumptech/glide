@@ -13,6 +13,12 @@ public class BitmapResource implements Resource<Bitmap> {
     private final BitmapPool bitmapPool;
 
     public BitmapResource(Bitmap bitmap, BitmapPool bitmapPool) {
+        if (bitmap == null) {
+            throw new NullPointerException("Bitmap must not be null");
+        }
+        if (bitmapPool == null) {
+            throw new NullPointerException("BitmapPool must not be null");
+        }
         this.bitmap = bitmap;
         this.bitmapPool = bitmapPool;
     }

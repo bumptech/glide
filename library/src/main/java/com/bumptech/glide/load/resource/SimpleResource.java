@@ -13,6 +13,9 @@ public class SimpleResource<T> implements Resource<T> {
     protected final T data;
 
     public SimpleResource(T data) {
+        if (data == null) {
+            throw new NullPointerException("Data must not be null");
+        }
         this.data = data;
     }
 

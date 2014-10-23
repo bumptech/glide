@@ -53,4 +53,9 @@ public class GifBitmapWrapperResourceTest {
 
         verify(gifDataResource).recycle();
     }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfGivenWrapperIsNull() {
+        new GifBitmapWrapperResource(null);
+    }
 }

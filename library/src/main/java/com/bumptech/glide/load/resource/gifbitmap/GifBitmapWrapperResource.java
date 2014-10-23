@@ -11,6 +11,9 @@ public class GifBitmapWrapperResource implements Resource<GifBitmapWrapper> {
     private final GifBitmapWrapper data;
 
     public GifBitmapWrapperResource(GifBitmapWrapper data) {
+        if (data == null) {
+            throw new NullPointerException("Data must not be null");
+        }
         this.data = data;
     }
 

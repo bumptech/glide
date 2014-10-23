@@ -27,5 +27,10 @@ public class SimpleResourceTest {
         assertEquals(object, resource.get());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfGivenNullData() {
+        new SimpleResource<Object>(null);
+    }
+
     private static class Anything { }
 }

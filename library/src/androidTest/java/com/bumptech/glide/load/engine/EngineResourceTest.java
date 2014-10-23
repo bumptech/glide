@@ -136,6 +136,11 @@ public class EngineResourceTest {
         engineResource.release();
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfWrappedResourceIsNull() {
+        new EngineResource<Object>(null, false);
+    }
+
     @Test
     public void testCanSetAndGetIsCacheable() {
         engineResource = new EngineResource<Object>(mock(Resource.class), true);

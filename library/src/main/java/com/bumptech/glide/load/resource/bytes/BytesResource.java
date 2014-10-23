@@ -9,6 +9,9 @@ public class BytesResource implements Resource<byte[]> {
     private final byte[] bytes;
 
     public BytesResource(byte[] bytes) {
+        if (bytes == null) {
+            throw new NullPointerException("Bytes must not be null");
+        }
         this.bytes = bytes;
     }
 

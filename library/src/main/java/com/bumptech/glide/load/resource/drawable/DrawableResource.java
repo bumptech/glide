@@ -18,6 +18,9 @@ public abstract class DrawableResource<T extends Drawable> implements Resource<T
     private boolean returnedOriginalDrawable;
 
     public DrawableResource(T drawable) {
+        if (drawable == null) {
+            throw new NullPointerException("Drawable must not be null!");
+        }
         this.drawable = drawable;
     }
 

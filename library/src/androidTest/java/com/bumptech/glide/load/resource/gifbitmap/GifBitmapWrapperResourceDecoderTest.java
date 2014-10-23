@@ -172,6 +172,7 @@ public class GifBitmapWrapperResourceDecoderTest {
 
         when(parser.parse(eq(bis))).thenReturn(ImageHeaderParser.ImageType.GIF);
         when(gifDecoder.decode(any(InputStream.class), anyInt(), anyInt())).thenReturn(gifResource);
+        when(gifResource.get().getFirstFrame()).thenReturn(Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565));
 
         decoder.decode(source, 100, 100);
 
