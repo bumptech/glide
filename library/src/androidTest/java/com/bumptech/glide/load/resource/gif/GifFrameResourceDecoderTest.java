@@ -12,6 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,5 +38,12 @@ public class GifFrameResourceDecoderTest {
         when(gifDecoder.getNextFrame()).thenReturn(expected);
 
         assertEquals(expected, resourceDecoder.decode(gifDecoder, 100, 100).get());
+    }
+
+    @Test
+    public void testReturnsNullIfGifDecoderReturnsNullFrame() {
+        when(gifDecoder.getNextFrame()).thenReturn(null);
+
+        assertNull(resourceDecoder.decode(gifDecoder, 100, 100));
     }
 }

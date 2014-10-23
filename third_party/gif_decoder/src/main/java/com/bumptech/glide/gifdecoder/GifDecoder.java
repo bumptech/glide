@@ -250,9 +250,15 @@ public class GifDecoder {
      */
     public Bitmap getNextFrame() {
         if (header.frameCount <= 0 || framePointer < 0) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "unable to decode frame, frameCount=" + header.frameCount + " framePointer=" + framePointer);
+            }
             status = STATUS_FORMAT_ERROR;
         }
         if (status == STATUS_FORMAT_ERROR || status == STATUS_OPEN_ERROR) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unable to decode frame, status=" + status);
+            }
             return null;
         }
         status = STATUS_OK;
@@ -276,7 +282,9 @@ public class GifDecoder {
             act[frame.transIndex] = 0;
         }
         if (act == null) {
-            Log.w(TAG, "No Valid Color Table");
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "No Valid Color Table");
+            }
             // No color table defined.
             status = STATUS_FORMAT_ERROR;
             return null;

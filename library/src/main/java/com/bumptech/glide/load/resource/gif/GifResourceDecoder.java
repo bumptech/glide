@@ -85,6 +85,10 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
         }
 
         Bitmap firstFrame = decodeFirstFrame(decoder, header, data);
+        if (firstFrame == null) {
+            return null;
+        }
+
         Transformation<Bitmap> unitTransformation = UnitTransformation.get();
 
         GifDrawable gifDrawable = new GifDrawable(context, provider, bitmapPool, unitTransformation, width, height,

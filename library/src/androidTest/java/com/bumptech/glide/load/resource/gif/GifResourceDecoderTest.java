@@ -99,7 +99,6 @@ public class GifResourceDecoderTest {
         verify(parserPool).release(eq(parser));
     }
 
-
     @Test
     public void testSetsPreferredConfigOnDecoderBeforeDecoding() {
         when(gifHeader.getNumFrames()).thenReturn(1);
@@ -144,6 +143,26 @@ public class GifResourceDecoderTest {
         } catch (RuntimeException e) {
             // Expected.
         }
+
+        verify(decoderPool).release(eq(gifDecoder));
+    }
+
+    @Test
+    public void testReturnsNullIfGifDecoderFailsToDecodeFirstFrame() {
+        when(gifHeader.getNumFrames()).thenReturn(1);
+        when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
+        when(gifDecoder.getNextFrame()).thenReturn(null);
+
+        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+    }
+
+    @Test
+    public void testReturnsGifDecoderToPoolWhenGifDecoderReturnsNullFirstFrame() {
+        when(gifHeader.getNumFrames()).thenReturn(1);
+        when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
+        when(gifDecoder.getNextFrame()).thenReturn(null);
+
+        decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
 
         verify(decoderPool).release(eq(gifDecoder));
     }
