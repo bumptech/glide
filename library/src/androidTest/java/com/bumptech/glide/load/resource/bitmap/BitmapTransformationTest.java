@@ -12,6 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -127,4 +128,23 @@ public class BitmapTransformationTest {
         transformation.transform(mock(Resource.class), 100, -1);
     }
 
+    @Test
+    public void testReturnsNullIfTransformReturnsNull() {
+        BitmapTransformation transform = new BitmapTransformation(bitmapPool) {
+
+            @Override
+            public String getId() {
+                return null;
+            }
+
+            @Override
+            protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+                return null;
+            }
+        };
+
+        Resource<Bitmap> resource = mock(Resource.class);
+        when(resource.get()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
+        assertNull(transform.transform(resource, 100, 100));
+    }
 }

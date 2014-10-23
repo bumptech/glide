@@ -52,7 +52,7 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
         if (toTransform.equals(transformed)) {
             result = resource;
         } else {
-            result = new BitmapResource(transformed, bitmapPool);
+            result = BitmapResource.obtain(transformed, bitmapPool);
         }
 
         return result;

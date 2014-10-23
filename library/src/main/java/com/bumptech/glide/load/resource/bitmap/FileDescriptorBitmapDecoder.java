@@ -42,11 +42,7 @@ public class FileDescriptorBitmapDecoder implements ResourceDecoder<ParcelFileDe
     @Override
     public Resource<Bitmap> decode(ParcelFileDescriptor source, int width, int height) throws IOException {
         Bitmap bitmap = bitmapDecoder.decode(source, bitmapPool, width, height, decodeFormat);
-        if (bitmap == null) {
-            return null;
-        } else {
-            return new BitmapResource(bitmap, bitmapPool);
-        }
+        return BitmapResource.obtain(bitmap, bitmapPool);
     }
 
     @Override

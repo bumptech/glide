@@ -47,11 +47,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     @Override
     public Resource<Bitmap> decode(InputStream source, int width, int height) {
         Bitmap bitmap = downsampler.decode(source, bitmapPool, width, height, decodeFormat);
-        if (bitmap == null) {
-            return null;
-        } else {
-            return new BitmapResource(bitmap, bitmapPool);
-        }
+        return BitmapResource.obtain(bitmap, bitmapPool);
     }
 
     @Override
