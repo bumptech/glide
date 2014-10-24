@@ -63,6 +63,9 @@ class EngineRunnable implements Runnable, Prioritized {
         }
 
         if (isCancelled) {
+            if (resource != null) {
+                resource.recycle();
+            }
             return;
         }
 

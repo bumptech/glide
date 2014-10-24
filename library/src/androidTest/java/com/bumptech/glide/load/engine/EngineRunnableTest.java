@@ -194,4 +194,35 @@ public class EngineRunnableTest {
 
         verify(manager, never()).onException(any(Exception.class));
     }
+
+    @Test
+    public void testDoesNotNotifyManagerOfSuccessIfCancelled() throws Exception {
+        runnable.run();
+        when(job.decodeFromSource()).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                runnable.cancel();
+                return mock(Resource.class);
+            }
+        });
+        runnable.run();
+
+        verify(manager, never()).onResourceReady(any(Resource.class));
+    }
+
+    @Test
+    public void testRecyclesResourceIfAvailableWhenCancelled() throws Exception {
+        final Resource resource = mock(Resource.class);
+        runnable.run();
+        when(job.decodeFromSource()).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                runnable.cancel();
+                return resource;
+            }
+        });
+        runnable.run();
+
+        verify(resource).recycle();
+    }
 }
