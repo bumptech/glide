@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.Looper;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
@@ -20,10 +19,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowLooper;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -352,13 +349,9 @@ public class EngineTest {
 
     @Test
     public void testResourceIsRecycledIfNotCacheableWhenReleased() {
-        ShadowLooper shadowLooper = Robolectric.shadowOf(Looper.getMainLooper());
         when(harness.resource.isCacheable()).thenReturn(false);
-        shadowLooper.pause();
         harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
-        verify(harness.resource, never()).recycle();
-        shadowLooper.runOneTask();
-        verify(harness.resource).recycle();
+        verify(harness.resourceRecycler).recycle(eq(harness.resource));
     }
 
     @Test
@@ -377,13 +370,8 @@ public class EngineTest {
 
     @Test
     public void testResourceIsRecycledWhenRemovedFromCache() {
-        ShadowLooper shadowLooper = Robolectric.shadowOf(Looper.getMainLooper());
-        shadowLooper.pause();
         harness.engine.onResourceRemoved(harness.resource);
-        // We expect the release to be posted
-        verify(harness.resource, never()).recycle();
-        shadowLooper.runOneTask();
-        verify(harness.resource).recycle();
+        verify(harness.resourceRecycler).recycle(eq(harness.resource));
     }
 
     @Test
@@ -401,7 +389,6 @@ public class EngineTest {
                 eq(harness.cacheDecoder), eq(harness.decoder), eq(harness.transformation), eq(harness.encoder),
                 eq(harness.transcoder), eq(harness.sourceEncoder));
     }
-
 
     @Test
     public void testFactoryIsGivenNecessaryArguments() {
@@ -449,6 +436,7 @@ public class EngineTest {
         boolean isMemoryCacheable;
         Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
         DataLoadProvider<Object, Object> loadProvider = mock(DataLoadProvider.class);
+        ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
 
         public EngineTestHarness() {
             when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
@@ -464,7 +452,7 @@ public class EngineTest {
             job = mock(EngineJob.class);
 
             engine = new Engine(cache, mock(DiskCache.class), mock(ExecutorService.class),
-                    mock(ExecutorService.class), jobs, keyFactory, activeResources, engineJobFactory);
+                    mock(ExecutorService.class), jobs, keyFactory, activeResources, engineJobFactory, resourceRecycler);
 
             when(engineJobFactory.build(eq(cacheKey), eq(isMemoryCacheable))).thenReturn(job);
         }

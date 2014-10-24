@@ -1,8 +1,6 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.MessageQueue;
 import android.util.Log;
 import com.bumptech.glide.Priority;
@@ -35,7 +33,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     private final EngineJobFactory engineJobFactory;
     private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
     private final ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
-    private final Handler mainHandler;
+    private final ResourceRecycler resourceRecycler;
 
     /**
      * Allows a request to indicate it no longer is interested in a given load.
@@ -56,13 +54,14 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     public Engine(MemoryCache memoryCache, DiskCache diskCache, ExecutorService diskCacheService,
             ExecutorService sourceService) {
-        this(memoryCache, diskCache, diskCacheService, sourceService, null, null, null, null);
+        this(memoryCache, diskCache, diskCacheService, sourceService, null, null, null, null, null);
     }
 
     // Visible for testing.
     Engine(MemoryCache cache, DiskCache diskCache, ExecutorService diskCacheService, ExecutorService sourceService,
             Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
-            Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory) {
+            Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory,
+            ResourceRecycler resourceRecycler) {
         this.cache = cache;
         this.diskCache = diskCache;
 
@@ -86,12 +85,15 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
         this.engineJobFactory = engineJobFactory;
 
+        if (resourceRecycler == null) {
+            resourceRecycler = new ResourceRecycler();
+        }
+        this.resourceRecycler = resourceRecycler;
+
         resourceReferenceQueue = new ReferenceQueue<EngineResource<?>>();
         MessageQueue queue = Looper.myQueue();
         queue.addIdleHandler(new RefQueueIdleHandler(activeResources, resourceReferenceQueue));
         cache.setResourceRemovedListener(this);
-
-        mainHandler = new Handler(Looper.getMainLooper(), new ResourceRecyclerCallback());
     }
 
     /**
@@ -244,7 +246,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     @Override
     public void onResourceRemoved(final Resource<?> resource) {
-        recycleResource(resource);
+        resourceRecycler.recycle(resource);
     }
 
     @Override
@@ -253,27 +255,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         if (resource.isCacheable()) {
             cache.put(cacheKey, resource);
         } else {
-            recycleResource(resource);
-        }
-    }
-
-    private void recycleResource(Resource<?> resource) {
-        // If a resource has sub-resources, releasing a sub resource can cause it's parent to be synchronously
-        // evicted which leads to a recycle loop when the parent the releases it's children. Posting breaks this loops.
-        mainHandler.obtainMessage(ResourceRecyclerCallback.RECYCLE_RESOURCE, resource).sendToTarget();
-    }
-
-    private static class ResourceRecyclerCallback implements Handler.Callback {
-        public static final int RECYCLE_RESOURCE = 1;
-
-        @Override
-        public boolean handleMessage(Message message) {
-            if (message.what == RECYCLE_RESOURCE) {
-                Resource resource = (Resource) message.obj;
-                resource.recycle();
-                return true;
-            }
-            return false;
+            resourceRecycler.recycle(resource);
         }
     }
 
