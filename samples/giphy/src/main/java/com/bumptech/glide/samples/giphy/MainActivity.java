@@ -1,6 +1,9 @@
 package com.bumptech.glide.samples.giphy;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -156,6 +159,11 @@ public class MainActivity extends Activity implements Api.Monitor {
             gifView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    ClipboardManager clipboard =
+                            (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("giphy_url", result.images.fixed_height_downsampled.url);
+                    clipboard.setPrimaryClip(clip);
+
                     Intent fullscreenIntent = FullscreenActivity.getIntent(activity, result);
                     activity.startActivity(fullscreenIntent);
                 }
