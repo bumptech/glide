@@ -73,8 +73,8 @@ public class LruBitmapPool implements BitmapPool {
         puts++;
         currentSize += size;
 
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Put bitmap in pool=" + strategy.logBitmap(bitmap));
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "Put bitmap in pool=" + strategy.logBitmap(bitmap));
         }
         dump();
 
@@ -118,8 +118,8 @@ public class LruBitmapPool implements BitmapPool {
                 result.setHasAlpha(true);
             }
         }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Get bitmap=" + strategy.logBitmap(width, height, config));
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "Get bitmap=" + strategy.logBitmap(width, height, config));
         }
         dump();
 
