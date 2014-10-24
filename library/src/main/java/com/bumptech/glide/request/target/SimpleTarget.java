@@ -44,8 +44,8 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
     /**
      * Constructor for the target that takes the desired dimensions of the decoded and/or transformed resource.
      *
-     * @param width The desired width of the resource.
-     * @param height The desired height of the resource.
+     * @param width The width in pixels of the desired resource.
+     * @param height The height in pixels of the desired resource.
      */
     public SimpleTarget(int width, int height) {
         this.width = width;

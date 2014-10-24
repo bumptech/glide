@@ -30,8 +30,8 @@ public final class TransformationUtils {
      * @param recycled A mutable Bitmap with dimensions width and height that we can load the cropped portion of toCrop
      *                 into.
      * @param toCrop The Bitmap to resize.
-     * @param width The width of the final Bitmap.
-     * @param height The height of the final Bitmap.
+     * @param width The width in pixels of the final Bitmap.
+     * @param height The height in pixels of the final Bitmap.
      * @return The resized Bitmap (will be recycled if recycled is not null).
      */
     public static Bitmap centerCrop(Bitmap recycled, Bitmap toCrop, int width, int height) {
@@ -77,8 +77,8 @@ public final class TransformationUtils {
      *
      * @param toFit The Bitmap to shrink.
      * @param pool The BitmapPool to try to reuse a bitmap from.
-     * @param width The width the final image will fit within.
-     * @param height The height the final image will fit within.
+     * @param width The width in pixels the final image will fit within.
+     * @param height The height in pixels the final image will fit within.
      * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or height matches the
      * given dimensions and toFit fits within the given dimensions
      */

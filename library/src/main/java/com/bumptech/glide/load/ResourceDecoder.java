@@ -26,8 +26,8 @@ public interface ResourceDecoder<T, Z> {
      * </p>
      *
      * @param source The data the resource should be decoded from.
-     * @param width The ideal width of the decoded resource.
-     * @param height The ideal height of the decoded resource.
+     * @param width The ideal width in pixels of the decoded resource.
+     * @param height The ideal height in pixels of the decoded resource.
      * @throws IOException
      */
     Resource<Z> decode(T source, int width, int height) throws IOException;

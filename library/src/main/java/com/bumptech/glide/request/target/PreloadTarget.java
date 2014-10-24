@@ -14,8 +14,8 @@ public final class PreloadTarget<Z> extends SimpleTarget<Z> {
     /**
      * Returns a PreloadTarget.
      *
-     * @param width The width of the desired resourece.
-     * @param height The height of the desired resource.
+     * @param width The width in pixels of the desired resource.
+     * @param height The height in pixels of the desired resource.
      * @param <Z> The type of the desired resource.
      */
     public static <Z> PreloadTarget<Z> obtain(int width, int height) {

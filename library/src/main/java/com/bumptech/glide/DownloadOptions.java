@@ -21,8 +21,8 @@ interface DownloadOptions {
      * Loads the original unmodified data into the cache and returns a {@link java.util.concurrent.Future} that can be
      * used to retrieve the cache File containing the data.
      *
-     * @param width The width to use to fetch the data.
-     * @param height The height to use to fetch the data.
+     * @param width The width in pixels to use to fetch the data.
+     * @param height The height in pixels to use to fetch the data.
      * @return A {@link java.util.concurrent.Future} that can be used to retrieve the cache File containing the data.
      */
     FutureTarget<File> downloadOnly(int width, int height);

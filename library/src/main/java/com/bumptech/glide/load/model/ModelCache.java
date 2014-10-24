@@ -35,8 +35,8 @@ public class ModelCache<A, B> {
      * Get a value.
      *
      * @param model The model.
-     * @param width The width of the view the image is being loaded into.
-     * @param height The height of the view the image is being loaded into.
+     * @param width The width in pixels of the view the image is being loaded into.
+     * @param height The height in pixels of the view the image is being loaded into.
      *
      * @return The cached result, or null.
      */
@@ -51,8 +51,8 @@ public class ModelCache<A, B> {
      * Add a value.
      *
      * @param model The model.
-     * @param width The width of the view the image is being loaded into.
-     * @param height The height of the view the image is being loaded into.
+     * @param width The width in pixels of the view the image is being loaded into.
+     * @param height The height in pixels of the view the image is being loaded into.
      * @param value The value to store.
      */
     public void put(A model, int width, int height, B value) {

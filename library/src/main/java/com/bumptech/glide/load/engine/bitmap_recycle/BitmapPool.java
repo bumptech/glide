@@ -71,8 +71,8 @@ public interface BitmapPool {
      *
      * @see #getDirty(int, int, android.graphics.Bitmap.Config)
      *
-     * @param width The width of the desired {@link android.graphics.Bitmap}.
-     * @param height The height of the desired {@link android.graphics.Bitmap}.
+     * @param width The width in pixels of the desired {@link android.graphics.Bitmap}.
+     * @param height The height in pixels of the desired {@link android.graphics.Bitmap}.
      * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link android.graphics.Bitmap}.
      */
     Bitmap get(int width, int height, Bitmap.Config config);
@@ -89,8 +89,8 @@ public interface BitmapPool {
      *
      * @see #get(int, int, android.graphics.Bitmap.Config)
      *
-     * @param width The width of the desired {@link android.graphics.Bitmap}.
-     * @param height The height of the desired {@link android.graphics.Bitmap}.
+     * @param width The width in pixels of the desired {@link android.graphics.Bitmap}.
+     * @param height The height in pixels of the desired {@link android.graphics.Bitmap}.
      * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link android.graphics.Bitmap}.
      * @return A {@link android.graphics.Bitmap} with exactly the given width, height, and config potentially containing
      * random image data or null if no such {@link android.graphics.Bitmap} could be obtained from the pool.

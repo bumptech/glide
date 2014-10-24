@@ -503,8 +503,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * thumbnails, and should only be used when you both need a very specific sized image and when it is impossible or
      * impractical to return that size from {@link Target#getSize(com.bumptech.glide.request.target.SizeReadyCallback)}.
      *
-     * @param width The width to use to load the resource.
-     * @param height The height to use to load the resource.
+     * @param width The width in pixels to use to load the resource.
+     * @param height The height in pixels to use to load the resource.
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> override(int width, int height) {
@@ -652,10 +652,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     /**
      * Returns a future that can be used to do a blocking get on a background thread.
      *
-     * @param width The desired width (note this will be overriden by {@link #override(int, int)} if
-     *              previously called.
-     * @param height The desired height (note this will be overriden by {@link #override(int, int)}}
-     *               if previously called.
+     * @param width The desired width in pixels (note this will be overriden by {@link #override(int, int)} if
+     *              previously called).
+     * @param height The desired height in pixels (note this will be overriden by {@link #override(int, int)}}
+     *               if previously called).
      *
      * @see Glide#clear(com.bumptech.glide.request.FutureTarget)
      *

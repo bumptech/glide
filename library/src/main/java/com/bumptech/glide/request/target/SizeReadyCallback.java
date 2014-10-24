@@ -8,8 +8,8 @@ public interface SizeReadyCallback {
     /**
      * A callback called on the main thread.
      *
-     * @param width The width of the target.
-     * @param height The height of the target.
+     * @param width The width in pixels of the target.
+     * @param height The height in pixels of the target.
      */
     void onSizeReady(int width, int height);
 }

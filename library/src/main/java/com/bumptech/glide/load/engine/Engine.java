@@ -120,8 +120,8 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
      *
      * @param signature A non-null unique key to be mixed into the cache key that identifies the version of the data to
      *                  be loaded.
-     * @param width The target width of the retrieved resource.
-     * @param height The target height of the retrieved resource.
+     * @param width The target width in pixels of the desired resource.
+     * @param height The target height in pixels of the desired resource.
      * @param fetcher The fetcher to use to retrieve data not in the disk cache.
      * @param loadProvider The load provider containing various encoders and decoders use to decode and encode data.
      * @param transformation The transformation to use to transform the decoded resource.
