@@ -248,7 +248,7 @@ public class GifDecoder {
      *
      * @return Bitmap representation of frame.
      */
-    public Bitmap getNextFrame() {
+    public synchronized Bitmap getNextFrame() {
         if (header.frameCount <= 0 || framePointer < 0) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "unable to decode frame, frameCount=" + header.frameCount + " framePointer=" + framePointer);
@@ -263,23 +263,28 @@ public class GifDecoder {
         }
         status = STATUS_OK;
 
-        GifFrame frame = header.frames.get(framePointer);
+        GifFrame currentFrame = header.frames.get(framePointer);
+        GifFrame previousFrame = null;
+        int previousIndex = framePointer - 1;
+        if (previousIndex >= 0) {
+            previousFrame = header.frames.get(previousIndex);
+        }
 
         // Set the appropriate color table.
-        if (frame.lct == null) {
+        if (currentFrame.lct == null) {
             act = header.gct;
         } else {
-            act = frame.lct;
-            if (header.bgIndex == frame.transIndex) {
+            act = currentFrame.lct;
+            if (header.bgIndex == currentFrame.transIndex) {
                 header.bgColor = 0;
             }
         }
 
         int save = 0;
-        if (frame.transparency) {
-            save = act[frame.transIndex];
+        if (currentFrame.transparency) {
+            save = act[currentFrame.transIndex];
             // Set transparent color if specified.
-            act[frame.transIndex] = 0;
+            act[currentFrame.transIndex] = 0;
         }
         if (act == null) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -291,11 +296,11 @@ public class GifDecoder {
         }
 
         // Transfer pixel data to image.
-        Bitmap result = setPixels(framePointer);
+        Bitmap result = setPixels(currentFrame, previousFrame);
 
         // Reset the transparent pixel in the color table
-        if (frame.transparency) {
-            act[frame.transIndex] = save;
+        if (currentFrame.transparency) {
+            act[currentFrame.transIndex] = save;
         }
 
         return result;
@@ -416,13 +421,8 @@ public class GifDecoder {
     /**
      * Creates new frame image from current data (and previous frames as specified by their disposition codes).
      */
-    private Bitmap setPixels(int frameIndex) {
-        GifFrame currentFrame = header.frames.get(frameIndex);
-        GifFrame previousFrame = null;
-        int previousIndex = frameIndex - 1;
-        if (previousIndex >= 0) {
-            previousFrame = header.frames.get(previousIndex);
-        }
+    private Bitmap setPixels(GifFrame currentFrame, GifFrame previousFrame) {
+
         int width = header.width;
         int height = header.height;
 
