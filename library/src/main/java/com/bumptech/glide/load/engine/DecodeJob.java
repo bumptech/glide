@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.SystemClock;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
@@ -10,6 +9,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.DataLoadProvider;
+import com.bumptech.glide.util.LogTime;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -67,8 +67,17 @@ class DecodeJob<A, T, Z> {
             return null;
         }
 
+        long startTime = LogTime.getLogTime();
         Resource<T> transformed = loadFromCache(resultKey);
-        return transcode(transformed);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Decoded transformed from cache", startTime);
+        }
+        startTime = LogTime.getLogTime();
+        Resource<Z> result = transcode(transformed);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Transcoded transformed from cache", startTime);
+        }
+        return result;
     }
 
     /**
@@ -82,7 +91,11 @@ class DecodeJob<A, T, Z> {
             return null;
         }
 
+        long startTime = LogTime.getLogTime();
         Resource<T> decoded = loadFromCache(resultKey.getOriginalKey());
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Decoded source from cache", startTime);
+        }
         return transformEncodeAndTranscode(decoded);
     }
 
@@ -108,23 +121,42 @@ class DecodeJob<A, T, Z> {
     }
 
     private Resource<Z> transformEncodeAndTranscode(Resource<T> decoded) {
+        long startTime = LogTime.getLogTime();
         Resource<T> transformed = transform(decoded);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Transformed resource from source", startTime);
+        }
+
         writeTransformedToCache(transformed);
-        return transcode(transformed);
+
+        startTime = LogTime.getLogTime();
+        Resource<Z> result = transcode(transformed);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Transcoded transformed from source", startTime);
+        }
+        return result;
     }
 
     private void writeTransformedToCache(Resource<T> transformed) {
         if (transformed == null || !diskCacheStrategy.cacheResult()) {
             return;
         }
+        long startTime = LogTime.getLogTime();
         SourceWriter<Resource<T>> writer = new SourceWriter<Resource<T>>(loadProvider.getEncoder(), transformed);
         diskCache.put(resultKey, writer);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Wrote transformed from source to cache", startTime);
+        }
     }
 
     private Resource<T> decodeSource() throws Exception {
         Resource<T> decoded = null;
         try {
+            long startTime = LogTime.getLogTime();
             final A data = fetcher.loadData(priority);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                logWithTimeAndKey("Fetched data", startTime);
+            }
             if (isCancelled) {
                 return null;
             }
@@ -140,15 +172,29 @@ class DecodeJob<A, T, Z> {
         if (diskCacheStrategy.cacheSource()) {
             decoded = cacheAndDecodeSourceData(data);
         } else {
+            long startTime = LogTime.getLogTime();
             decoded = loadProvider.getSourceDecoder().decode(data, width, height);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                logWithTimeAndKey("Decoded from source", startTime);
+            }
         }
         return decoded;
     }
 
     private Resource<T> cacheAndDecodeSourceData(A data) throws IOException {
+        long startTime = LogTime.getLogTime();
         SourceWriter<A> writer = new SourceWriter<A>(loadProvider.getSourceEncoder(), data);
         diskCache.put(resultKey.getOriginalKey(), writer);
-        return loadFromCache(resultKey.getOriginalKey());
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Wrote source to cache", startTime);
+        }
+
+        startTime = LogTime.getLogTime();
+        Resource<T> result = loadFromCache(resultKey.getOriginalKey());
+        if (Log.isLoggable(TAG, Log.VERBOSE) && result != null) {
+            logWithTimeAndKey("Decoded source from cache", startTime);
+        }
+        return result;
     }
 
     private Resource<T> loadFromCache(Key key) throws IOException {
@@ -199,7 +245,6 @@ class DecodeJob<A, T, Z> {
 
         @Override
         public boolean write(File file) {
-            long start = SystemClock.currentThreadTimeMillis();
             boolean success = false;
             OutputStream os = null;
             try {
@@ -218,10 +263,11 @@ class DecodeJob<A, T, Z> {
                     }
                 }
             }
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "wrote to disk cache in " + (SystemClock.currentThreadTimeMillis() - start));
-            }
             return success;
         }
+    }
+
+    private void logWithTimeAndKey(String message, long startTime) {
+        Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + resultKey);
     }
 }
