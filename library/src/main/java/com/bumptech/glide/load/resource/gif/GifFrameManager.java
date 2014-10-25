@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Encoder;
@@ -22,16 +23,13 @@ import java.security.MessageDigest;
 import java.util.UUID;
 
 class GifFrameManager {
-    private final GifFrameModelLoader frameLoader;
-    private final GifFrameResourceDecoder frameResourceDecoder;
     private final GifDecoder decoder;
     private final Handler mainHandler;
-    private final Context context;
-    private final Encoder<GifDecoder> sourceEncoder;
-    private final Transformation<Bitmap>[] transformation;
     private final int targetWidth;
     private final int targetHeight;
     private final FrameSignature signature;
+    private final GenericRequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap> requestBuilder;
+    private boolean isLoadInProgress;
     private DelayTarget current;
     private DelayTarget next;
 
@@ -52,23 +50,34 @@ class GifFrameManager {
             throw new NullPointerException("Transformation must not be null");
         }
 
-        this.context = context;
-        this.frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
         this.decoder = decoder;
         this.mainHandler = mainHandler;
-        this.transformation = new Transformation[] {transformation};
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
-        this.frameLoader = new GifFrameModelLoader();
-        this.sourceEncoder = NullEncoder.get();
         this.signature = new FrameSignature();
-    }
 
-    Transformation<Bitmap> getTransformation() {
-        return transformation[0];
+        GifFrameResourceDecoder frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
+        GifFrameModelLoader frameLoader = new GifFrameModelLoader();
+        Encoder<GifDecoder> sourceEncoder = NullEncoder.get();
+
+        requestBuilder = Glide.with(context)
+                .using(frameLoader, GifDecoder.class)
+                .from(GifDecoder.class)
+                .as(Bitmap.class)
+                .signature(signature)
+                .sourceEncoder(sourceEncoder)
+                .decoder(frameResourceDecoder)
+                .transform(transformation)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE);
     }
 
     public void getNextFrame(FrameCallback cb) {
+        if (isLoadInProgress) {
+            return;
+        }
+        isLoadInProgress = true;
+
         decoder.advance();
 
         long targetTime = SystemClock.uptimeMillis() + decoder.getNextDelay();
@@ -77,16 +86,8 @@ class GifFrameManager {
 
         // Use an incrementing signature to make sure we never hit an active resource that matches one of our frames.
         signature.increment();
-        Glide.with(context)
-                .using(frameLoader, GifDecoder.class)
+        requestBuilder
                 .load(decoder)
-                .as(Bitmap.class)
-                .signature(signature)
-                .sourceEncoder(sourceEncoder)
-                .decoder(frameResourceDecoder)
-                .transform(transformation)
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(next);
     }
 
@@ -95,14 +96,15 @@ class GifFrameManager {
     }
 
     public void clear() {
+        isLoadInProgress = false;
         if (current != null) {
-            mainHandler.removeCallbacks(current);
             Glide.clear(current);
+            mainHandler.removeCallbacks(current);
             current = null;
         }
         if (next != null) {
-            mainHandler.removeCallbacks(next);
             Glide.clear(next);
+            mainHandler.removeCallbacks(next);
             next = null;
         }
 
@@ -133,6 +135,7 @@ class GifFrameManager {
 
         @Override
         public void run() {
+            isLoadInProgress = false;
             cb.onFrameRead(index);
             if (current != null) {
                 Glide.clear(current);
