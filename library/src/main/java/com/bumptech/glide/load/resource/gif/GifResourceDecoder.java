@@ -7,7 +7,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -31,7 +30,6 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     private final Context context;
     private final GifHeaderParserPool parserPool;
     private final BitmapPool bitmapPool;
-    private final DecodeFormat decodeFormat;
     private final GifDecoderPool decoderPool;
     private final GifBitmapProvider provider;
 
@@ -39,24 +37,15 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
         this(context, Glide.get(context).getBitmapPool());
     }
 
-    public GifResourceDecoder(Context context, DecodeFormat decodeFormat) {
-        this(context, Glide.get(context).getBitmapPool(), decodeFormat);
-    }
-
     public GifResourceDecoder(Context context, BitmapPool bitmapPool) {
-        this(context, bitmapPool, DecodeFormat.DEFAULT);
-    }
-
-    public GifResourceDecoder(Context context, BitmapPool bitmapPool, DecodeFormat decodeFormat) {
-        this(context, bitmapPool, decodeFormat, PARSER_POOL, DECODER_POOL);
+        this(context, bitmapPool, PARSER_POOL, DECODER_POOL);
     }
 
     // Visible for testing.
-    GifResourceDecoder(Context context, BitmapPool bitmapPool, DecodeFormat decodeFormat,
-            GifHeaderParserPool parserPool, GifDecoderPool decoderPool) {
+    GifResourceDecoder(Context context, BitmapPool bitmapPool, GifHeaderParserPool parserPool,
+            GifDecoderPool decoderPool) {
         this.context = context;
         this.bitmapPool = bitmapPool;
-        this.decodeFormat = decodeFormat;
         this.decoderPool = decoderPool;
         this.provider = new GifBitmapProvider(bitmapPool);
         this.parserPool = parserPool;
@@ -67,8 +56,6 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
         byte[] data = inputStreamToBytes(source);
         final GifHeaderParser parser = parserPool.obtain(data);
         final GifDecoder decoder = decoderPool.obtain(provider);
-        decoder.setPreferredConfig(decodeFormat == DecodeFormat.PREFER_RGB_565
-                ? Bitmap.Config.RGB_565 : Bitmap.Config.ARGB_8888);
         try {
             return decode(data, width, height, parser, decoder);
         } finally {

@@ -98,6 +98,11 @@ public class GifDecoder {
 
     private static final int INITIAL_FRAME_POINTER = -1;
 
+    // We can't tell if a gif has transparency to decode a partial frame on top of a previous frame, or if the final
+    // frame will actually have transparent pixels, so we must always use a format that supports transparency. We can't
+    // use ARGB_4444 because of framework issues drawing onto ARGB_4444 Bitmaps using Canvas.
+    private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
+
     // Global File Header values and parsing flags.
     // Active color table.
     private int[] act;
@@ -123,7 +128,6 @@ public class GifDecoder {
     private BitmapProvider bitmapProvider;
     private Bitmap previousImage;
     private boolean savePrevious;
-    private Bitmap.Config config;
     private int status;
 
     /**
@@ -162,10 +166,6 @@ public class GifDecoder {
 
     public byte[] getData() {
         return data;
-    }
-
-    public void setPreferredConfig(Bitmap.Config config) {
-        this.config = config;
     }
 
     /**
@@ -684,21 +684,10 @@ public class GifDecoder {
         return n;
     }
 
-    private Bitmap.Config getPreferredConfig() {
-        // We can't tell if a gif has transparency to decode a partial frame on top of a previous frame, or if the final
-        // frame will actually have transparent pixels, so we must always use a format that supports transparency.
-        if (config == Bitmap.Config.RGB_565 || config == Bitmap.Config.ARGB_4444) {
-            return Bitmap.Config.ARGB_4444;
-        } else {
-            return Bitmap.Config.ARGB_8888;
-        }
-    }
-
     private Bitmap getNextBitmap() {
-        Bitmap.Config targetConfig = getPreferredConfig();
-        Bitmap result = bitmapProvider.obtain(header.width, header.height, targetConfig);
+        Bitmap result = bitmapProvider.obtain(header.width, header.height, BITMAP_CONFIG);
         if (result == null) {
-            result = Bitmap.createBitmap(header.width, header.height, targetConfig);
+            result = Bitmap.createBitmap(header.width, header.height, BITMAP_CONFIG);
         }
         setAlpha(result);
         return result;
