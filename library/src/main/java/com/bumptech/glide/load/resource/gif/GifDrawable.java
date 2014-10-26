@@ -78,8 +78,8 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         this.state = state;
         this.decoder = new GifDecoder(state.bitmapProvider);
         decoder.setData(state.gifHeader, state.data);
-        frameManager = new GifFrameManager(state.context, decoder, state.frameTransformation, state.targetWidth,
-                state.targetHeight);
+        frameManager = new GifFrameManager(state.context, decoder, state.targetWidth, state.targetHeight);
+        frameManager.setFrameTransformation(state.frameTransformation);
     }
 
     // Visible for testing.
@@ -99,8 +99,12 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         if (firstFrame == null) {
             throw new NullPointerException("The first frame of the GIF must not be null");
         }
+        if (frameTransformation == null) {
+            throw new NullPointerException("The frame transformation must not be null");
+        }
         state.frameTransformation = frameTransformation;
         state.firstFrame = firstFrame;
+        frameManager.setFrameTransformation(frameTransformation);
     }
 
     public GifDecoder getDecoder() {

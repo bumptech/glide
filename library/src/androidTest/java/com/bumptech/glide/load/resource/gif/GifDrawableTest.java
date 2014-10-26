@@ -524,9 +524,23 @@ public class GifDrawableTest {
         verify(canvas, never()).drawBitmap(any(Bitmap.class), anyRect(), anyRect(), anyPaint());
     }
 
+    @Test
+    public void testSetsFrameTransformationOnFrameManager() {
+        Transformation<Bitmap> transformation = mock(Transformation.class);
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        drawable.setFrameTransformation(transformation, bitmap);
+
+        verify(frameManager).setFrameTransformation(eq(transformation));
+    }
+
     @Test(expected = NullPointerException.class)
     public void testThrowsIfSetFrameTransformationIsCalledWithANullFrame() {
         drawable.setFrameTransformation(mock(Transformation.class), null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testThrowsIfSetFrameTransformationIsCalledWithANullTransformation() {
+        drawable.setFrameTransformation(null, Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
     }
 
     @Test(expected = NullPointerException.class)

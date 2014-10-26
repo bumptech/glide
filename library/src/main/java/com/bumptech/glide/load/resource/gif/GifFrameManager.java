@@ -15,6 +15,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.NullEncoder;
+import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
@@ -32,23 +33,19 @@ class GifFrameManager {
     private boolean isLoadInProgress;
     private DelayTarget current;
     private DelayTarget next;
+    private Transformation<Bitmap> transformation = UnitTransformation.get();
 
     public interface FrameCallback {
         void onFrameRead(int index);
     }
 
-    public GifFrameManager(Context context, GifDecoder decoder, Transformation<Bitmap> transformation, int targetWidth,
-            int targetHeight) {
-        this(context, Glide.get(context).getBitmapPool(), decoder, new Handler(Looper.getMainLooper()), transformation,
-                targetWidth, targetHeight);
+    public GifFrameManager(Context context, GifDecoder decoder, int targetWidth, int targetHeight) {
+        this(context, Glide.get(context).getBitmapPool(), decoder, new Handler(Looper.getMainLooper()), targetWidth,
+                targetHeight);
     }
 
-    @SuppressWarnings("unchecked")
     public GifFrameManager(Context context, BitmapPool bitmapPool, GifDecoder decoder, Handler mainHandler,
-            Transformation<Bitmap> transformation, int targetWidth, int targetHeight) {
-        if (transformation == null) {
-            throw new NullPointerException("Transformation must not be null");
-        }
+                           int targetWidth, int targetHeight) {
 
         this.decoder = decoder;
         this.mainHandler = mainHandler;
@@ -67,11 +64,18 @@ class GifFrameManager {
                 .signature(signature)
                 .sourceEncoder(sourceEncoder)
                 .decoder(frameResourceDecoder)
-                .transform(transformation)
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE);
     }
 
+    public void setFrameTransformation(Transformation<Bitmap> transformation) {
+        if (transformation == null) {
+            throw new NullPointerException("Transformation must not be null");
+        }
+        this.transformation = transformation;
+    }
+
+    @SuppressWarnings("unchecked")
     public void getNextFrame(FrameCallback cb) {
         if (isLoadInProgress) {
             return;
@@ -88,6 +92,7 @@ class GifFrameManager {
         signature.increment();
         requestBuilder
                 .load(decoder)
+                .transform(transformation)
                 .into(next);
     }
 
