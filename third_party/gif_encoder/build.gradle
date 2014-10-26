@@ -5,7 +5,7 @@ android {
     buildToolsVersion '19.1.0'
 
     defaultConfig {
-        applicationId 'com.bumptech.glide.gifencod:'
+        applicationId 'com.bumptech.glide.gifencoder'
         minSdkVersion 10
         targetSdkVersion 19
     }
