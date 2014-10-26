@@ -25,8 +25,8 @@ public class StreamEncoder implements Encoder<InputStream> {
             }
             return true;
         } catch (IOException e) {
-            if (Log.isLoggable(TAG, Log.WARN)) {
-                Log.w(TAG, "Failed to encode data onto the OutputStream", e);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Failed to encode data onto the OutputStream", e);
             }
             return false;
         } finally {
