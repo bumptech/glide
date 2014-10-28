@@ -143,7 +143,14 @@ class GifFrameManager {
             isLoadInProgress = false;
             cb.onFrameRead(index);
             if (current != null) {
-                Glide.clear(current);
+                // TODO: figure out why this is necessary and fix it. See issue #219.
+                final DelayTarget recycleCurrent = current;
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.clear(recycleCurrent);
+                    }
+                });
             }
             current = this;
         }
