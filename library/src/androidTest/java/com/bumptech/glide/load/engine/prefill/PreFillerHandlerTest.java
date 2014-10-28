@@ -10,6 +10,7 @@ import com.bumptech.glide.util.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
@@ -27,8 +28,10 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,10 +53,6 @@ public class PreFillerHandlerTest {
     }
 
     private BitmapPreFillIdleHandler getHandler(Map<PreFillBitmapAttribute, Integer> allocationOrder) {
-        int total = 0;
-        for (Integer count : allocationOrder.values()) {
-            total += count;
-        }
         return new BitmapPreFillIdleHandler(pool, cache, new PreFillQueue(allocationOrder), clock);
     }
 
@@ -159,8 +158,7 @@ public class PreFillerHandlerTest {
         Map<PreFillBitmapAttribute, Integer> allocationOrder = new HashMap<PreFillBitmapAttribute, Integer>();
         allocationOrder.put(size, 1);
 
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        handler.queueIdle();
+        getHandler(allocationOrder).queueIdle();
 
         verify(cache).put(any(Key.class), any(Resource.class));
         verify(pool, never()).put(any(Bitmap.class));
@@ -177,8 +175,7 @@ public class PreFillerHandlerTest {
         Map<PreFillBitmapAttribute, Integer> allocationOrder = new HashMap<PreFillBitmapAttribute, Integer>();
         allocationOrder.put(size, 1);
 
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        handler.queueIdle();
+        getHandler(allocationOrder).queueIdle();
 
         verify(cache, never()).put(any(Key.class), any(Resource.class));
         verify(pool).put(eq(bitmap));
@@ -195,12 +192,53 @@ public class PreFillerHandlerTest {
         Map<PreFillBitmapAttribute, Integer> allocationOrder = new HashMap<PreFillBitmapAttribute, Integer>();
         allocationOrder.put(size, 1);
 
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        handler.queueIdle();
+        getHandler(allocationOrder).queueIdle();
 
         verify(cache, never()).put(any(Key.class), any(Resource.class));
         verify(pool).put(eq(bitmap));
         assertThat(addedBitmaps, contains(bitmap));
+    }
+
+    @Test
+    public void testDoesAGetFromPoolBeforeAddingForEachSize() {
+        Bitmap first = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+        PreFillBitmapAttribute firstSize = new PreFillBitmapAttribute(first.getWidth(), first.getHeight(),
+                first.getConfig(), 1);
+
+        Bitmap second = Bitmap.createBitmap(200, 200, Bitmap.Config.RGB_565);
+        PreFillBitmapAttribute secondSize = new PreFillBitmapAttribute(second.getWidth(), second.getHeight(),
+                second.getConfig(), 1);
+
+        Map<PreFillBitmapAttribute, Integer> allocationOrder = new HashMap<PreFillBitmapAttribute, Integer>();
+        allocationOrder.put(firstSize, 1);
+        allocationOrder.put(secondSize, 1);
+
+        getHandler(allocationOrder).queueIdle();
+
+        InOrder firstOrder = inOrder(pool);
+        firstOrder.verify(pool).get(eq(first.getWidth()), eq(first.getHeight()), eq(first.getConfig()));
+        firstOrder.verify(pool).put(eq(first));
+
+        InOrder secondOrder = inOrder(pool);
+        secondOrder.verify(pool).get(eq(second.getWidth()), eq(second.getHeight()), eq(second.getConfig()));
+        secondOrder.verify(pool).put(eq(second));
+    }
+
+    @Test
+    public void testDoesNotGetMoreThanOncePerSize() {
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+        PreFillBitmapAttribute size = new PreFillBitmapAttribute(bitmap.getWidth(), bitmap.getHeight(),
+                bitmap.getConfig(), 1);
+
+        final int numBitmaps = 5;
+        Map<PreFillBitmapAttribute, Integer> allocationOrder = new HashMap<PreFillBitmapAttribute, Integer>();
+        allocationOrder.put(size, numBitmaps);
+
+        getHandler(allocationOrder).queueIdle();
+
+        InOrder order = inOrder(pool);
+        order.verify(pool).get(eq(bitmap.getWidth()), eq(bitmap.getHeight()), eq(bitmap.getConfig()));
+        order.verify(pool, times(numBitmaps)).put(eq(bitmap));
     }
 
     private static class AddBitmapPoolAnswer implements Answer<Boolean> {

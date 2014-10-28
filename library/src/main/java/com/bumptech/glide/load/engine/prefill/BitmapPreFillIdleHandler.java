@@ -12,6 +12,8 @@ import com.bumptech.glide.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A class that allocates {@link android.graphics.Bitmap Bitmaps} when the main thread runs out of messages so that the
@@ -28,6 +30,8 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
     private final MemoryCache memoryCache;
     private final PreFillQueue toPrefill;
     private final Clock clock;
+    private final Set<PreFillBitmapAttribute> seenAttributes =
+        new HashSet<PreFillBitmapAttribute>();
 
     private boolean isCancelled;
 
@@ -62,6 +66,13 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
             if ((memoryCache.getMaxSize() - memoryCache.getCurrentSize()) >= Util.getBitmapByteSize(bitmap)) {
                 memoryCache.put(new UniqueKey(), BitmapResource.obtain(bitmap, bitmapPool));
             } else {
+                if (seenAttributes.add(toAllocate)) {
+                  Bitmap fromPool = bitmapPool.get(toAllocate.getWidth(), toAllocate.getHeight(),
+                      toAllocate.getConfig());
+                    if (fromPool != null) {
+                        bitmapPool.put(fromPool);
+                    }
+                }
                 bitmapPool.put(bitmap);
             }
 
