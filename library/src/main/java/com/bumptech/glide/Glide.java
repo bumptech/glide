@@ -17,7 +17,7 @@ import android.view.View;
 import android.widget.ImageView;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.prefill.PreFillBitmapAttribute;
+import com.bumptech.glide.load.engine.prefill.PreFillType;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
@@ -190,7 +190,7 @@ public class Glide {
         this.decodeFormat = decodeFormat;
         loaderFactory = new GenericLoaderFactory(context);
         mainHandler = new Handler(Looper.getMainLooper());
-        bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool);
+        bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
         dataLoadProviderRegistry = new DataLoadProviderRegistry();
 
@@ -334,12 +334,12 @@ public class Glide {
      *     pre-filling only happens when the Activity is first created, rather than on every rotation.
      * </p>
      *
-     * @param bitmapAttributes The list of {@link com.bumptech.glide.load.engine.prefill.PreFillBitmapAttribute}s
-     *                         representing individual sizes and configurations of {@link android.graphics.Bitmap}s to
-     *                         be pre-filled.
+     * @param bitmapAttributeBuilders The list of
+     *     {@link com.bumptech.glide.load.engine.prefill.PreFillType.Builder Builders} representing
+     *     individual sizes and configurations of {@link android.graphics.Bitmap}s to be pre-filled.
      */
-    public void preFillBitmapPool(PreFillBitmapAttribute... bitmapAttributes) {
-        bitmapPreFiller.preFill(bitmapAttributes);
+    public void preFillBitmapPool(PreFillType.Builder... bitmapAttributeBuilders) {
+        bitmapPreFiller.preFill(bitmapAttributeBuilders);
     }
 
     /**

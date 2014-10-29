@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.util.Util;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class BitmapPreFillerAllocationTest {
     private static final int DEFAULT_BITMAP_WIDTH = 100;
     private static final int DEFAULT_BITMAP_HEIGHT = 50;
-    private static final Bitmap.Config DEFAULT_BITMAP_CONFIG = PreFillBitmapAttribute.DEFAULT_CONFIG;
+    private static final Bitmap.Config DEFAULT_BITMAP_CONFIG = PreFillType.DEFAULT_CONFIG;
     private static final Bitmap DEFAULT_BITMAP =
             Bitmap.createBitmap(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT, DEFAULT_BITMAP_CONFIG);
     private static final int DEFAULT_BITMAP_SIZE = Util.getBitmapByteSize(DEFAULT_BITMAP);
@@ -47,14 +48,16 @@ public class BitmapPreFillerAllocationTest {
         cache = mock(MemoryCache.class);
         when(cache.getMaxSize()).thenReturn(CACHE_SIZE);
 
-        bitmapPreFiller = new BitmapPreFiller(cache, pool);
+        bitmapPreFiller = new BitmapPreFiller(cache, pool, DecodeFormat.DEFAULT);
     }
 
     @Test
     public void testAllocationOrderContainsEnoughSizesToFillPoolAndMemoryCache() {
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[]{
-                        new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                new PreFillType[] {
+                        new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                                .setConfig(DEFAULT_BITMAP_CONFIG)
+                                .build()
                 }
         );
 
@@ -63,22 +66,28 @@ public class BitmapPreFillerAllocationTest {
 
     @Test
     public void testAllocationOrderThatDoesNotFitExactlyIntoGivenSizeRoundsDown() {
-        PreFillBitmapAttribute[] sizes = new PreFillBitmapAttribute[] {
-                new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT),
-                new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT),
-                new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
+        PreFillType[] sizes = new PreFillType[] {
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build(),
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build(),
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build(),
         };
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(sizes);
 
         int byteSize = 0;
         while (!allocationOrder.isEmpty()) {
-            PreFillBitmapAttribute current = allocationOrder.remove();
+            PreFillType current = allocationOrder.remove();
             byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
         int expectedSize = 0;
         int maxSize = POOL_SIZE + CACHE_SIZE;
-        for (PreFillBitmapAttribute current : sizes) {
+        for (PreFillType current : sizes) {
             int currentSize = Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
             expectedSize += currentSize * (maxSize / (3 * currentSize));
         }
@@ -89,16 +98,22 @@ public class BitmapPreFillerAllocationTest {
     @Test
     public void testAllocationOrderDoesNotOverFillWithMultipleSizes() {
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[] {
-                        new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT),
-                        new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT),
-                        new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
+                new PreFillType[] {
+                        new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                                .setConfig(DEFAULT_BITMAP_CONFIG)
+                                .build(),
+                        new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
+                                .setConfig(DEFAULT_BITMAP_CONFIG)
+                                .build(),
+                        new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
+                                .setConfig(DEFAULT_BITMAP_CONFIG)
+                                .build()
                 }
         );
 
         int byteSize = 0;
         while (!allocationOrder.isEmpty()) {
-            PreFillBitmapAttribute current = allocationOrder.remove();
+            PreFillType current = allocationOrder.remove();
             byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
@@ -108,18 +123,24 @@ public class BitmapPreFillerAllocationTest {
     @Test
     public void testAllocationOrderDoesNotOverFillWithMultipleSizesAndWeights() {
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[]{
-                        new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT,
-                                DEFAULT_BITMAP_CONFIG, 4),
-                        new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT),
-                        new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 3,
-                                DEFAULT_BITMAP_CONFIG, 3)
+                new PreFillType[]{
+                        new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                                .setConfig(DEFAULT_BITMAP_CONFIG)
+                                .setWeight(4)
+                                .build(),
+                        new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
+                                .setConfig(DEFAULT_BITMAP_CONFIG)
+                                .build(),
+                        new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 3)
+                                .setConfig(DEFAULT_BITMAP_CONFIG)
+                                .setWeight(3)
+                                .build()
                 }
         );
 
         int byteSize = 0;
         while (!allocationOrder.isEmpty()) {
-            PreFillBitmapAttribute current = allocationOrder.remove();
+            PreFillType current = allocationOrder.remove();
             byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
@@ -129,13 +150,15 @@ public class BitmapPreFillerAllocationTest {
     @Test
     public void testAllocationOrderContainsSingleSizeIfSingleSizeIsProvided() {
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[] {
-                    new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                new PreFillType[] {
+                    new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                            .setConfig(DEFAULT_BITMAP_CONFIG)
+                            .build()
                 }
         );
 
         while (!allocationOrder.isEmpty()) {
-            PreFillBitmapAttribute size = allocationOrder.remove();
+            PreFillType size = allocationOrder.remove();
             assertEquals(DEFAULT_BITMAP_WIDTH, size.getWidth());
             assertEquals(DEFAULT_BITMAP_HEIGHT, size.getHeight());
             assertEquals(DEFAULT_BITMAP_CONFIG, size.getConfig());
@@ -144,16 +167,20 @@ public class BitmapPreFillerAllocationTest {
 
     @Test
     public void testAllocationOrderSplitsEvenlyBetweenEqualSizesWithEqualWeights() {
-        PreFillBitmapAttribute smallWidth = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT);
-        PreFillBitmapAttribute smallHeight = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH,
-                DEFAULT_BITMAP_HEIGHT / 2);
+        PreFillType smallWidth = new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
+                .setConfig(DEFAULT_BITMAP_CONFIG)
+                .build();
+        PreFillType smallHeight =
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build();
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[] { smallWidth, smallHeight, }
+                new PreFillType[] { smallWidth, smallHeight, }
         );
 
         int numSmallWidth = 0, numSmallHeight = 0;
         while (!allocationOrder.isEmpty()) {
-            PreFillBitmapAttribute current = allocationOrder.remove();
+            PreFillType current = allocationOrder.remove();
             if (smallWidth.equals(current)) {
                 numSmallWidth++;
             } else if (smallHeight.equals(current)) {
@@ -168,15 +195,21 @@ public class BitmapPreFillerAllocationTest {
 
     @Test
     public void testAllocationOrderSplitsByteSizeEvenlyBetweenUnEqualSizesWithEqualWeights() {
-        PreFillBitmapAttribute smallWidth = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT);
-        PreFillBitmapAttribute normal = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT);
+        PreFillType smallWidth =
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build();
+        PreFillType normal =
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build();
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[] { smallWidth, normal }
+                new PreFillType[] { smallWidth, normal }
         );
 
         int numSmallWidth = 0, numNormal = 0;
         while (!allocationOrder.isEmpty()) {
-            PreFillBitmapAttribute current = allocationOrder.remove();
+            PreFillType current = allocationOrder.remove();
             if (smallWidth.equals(current)) {
                 numSmallWidth++;
             } else if (normal.equals(current)) {
@@ -191,17 +224,21 @@ public class BitmapPreFillerAllocationTest {
 
     @Test
     public void testAllocationOrderSplitsByteSizeUnevenlyBetweenEqualSizesWithUnequalWeights() {
-        PreFillBitmapAttribute doubleWeight = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH / 2,
-                DEFAULT_BITMAP_HEIGHT, DEFAULT_BITMAP_CONFIG, 2);
-        PreFillBitmapAttribute normal = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2,
-                DEFAULT_BITMAP_CONFIG, 1);
+        PreFillType doubleWeight =
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .setWeight(2)
+                        .build();
+        PreFillType normal = new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
+                .setConfig(DEFAULT_BITMAP_CONFIG)
+                .build();
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[] { doubleWeight, normal }
+                new PreFillType[] { doubleWeight, normal }
         );
 
         int numDoubleWeight = 0, numNormal = 0;
         while (!allocationOrder.isEmpty()) {
-            PreFillBitmapAttribute current = allocationOrder.remove();
+            PreFillType current = allocationOrder.remove();
             if (doubleWeight.equals(current)) {
                 numDoubleWeight++;
             } else if (normal.equals(current)) {
@@ -218,20 +255,25 @@ public class BitmapPreFillerAllocationTest {
     public void testAllocationOrderRoundRobinsDifferentSizes() {
         when(pool.getMaxSize()).thenReturn(DEFAULT_BITMAP_SIZE);
         when(cache.getMaxSize()).thenReturn(DEFAULT_BITMAP_SIZE);
-        PreFillBitmapAttribute smallWidth = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT);
-        PreFillBitmapAttribute smallHeight = new PreFillBitmapAttribute(DEFAULT_BITMAP_WIDTH,
-                DEFAULT_BITMAP_HEIGHT / 2);
+        PreFillType smallWidth =
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build();
+        PreFillType smallHeight =
+                new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
+                        .setConfig(DEFAULT_BITMAP_CONFIG)
+                        .build();
 
         PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(
-                new PreFillBitmapAttribute[] { smallWidth, smallHeight, }
+                new PreFillType[] { smallWidth, smallHeight, }
         );
 
-        List<PreFillBitmapAttribute> attributes = new ArrayList<PreFillBitmapAttribute>();
+        List<PreFillType> attributes = new ArrayList<PreFillType>();
         while (!allocationOrder.isEmpty()) {
             attributes.add(allocationOrder.remove());
         }
 
-        CombinableMatcher.CombinableEitherMatcher<Iterable<? extends PreFillBitmapAttribute>> either =
+        CombinableMatcher.CombinableEitherMatcher<Iterable<? extends PreFillType>> either =
                 either(contains(smallWidth, smallHeight, smallWidth, smallHeight));
         assertThat(attributes, either.or(contains(smallHeight, smallWidth, smallHeight, smallWidth)));
     }

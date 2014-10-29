@@ -6,23 +6,23 @@ import java.util.Map;
 
 final class PreFillQueue {
 
-    private final Map<PreFillBitmapAttribute, Integer> bitmapsPerType;
-    private final List<PreFillBitmapAttribute> keyList;
+    private final Map<PreFillType, Integer> bitmapsPerType;
+    private final List<PreFillType> keyList;
     private int bitmapsRemaining;
     private int keyIndex;
 
-    public PreFillQueue(Map<PreFillBitmapAttribute, Integer> bitmapsPerType) {
+    public PreFillQueue(Map<PreFillType, Integer> bitmapsPerType) {
         this.bitmapsPerType = bitmapsPerType;
         // We don't particularly care about the initial order.
-        keyList = new ArrayList<PreFillBitmapAttribute>(bitmapsPerType.keySet());
+        keyList = new ArrayList<PreFillType>(bitmapsPerType.keySet());
 
         for (Integer count : bitmapsPerType.values()) {
             bitmapsRemaining += count;
         }
     }
 
-    public PreFillBitmapAttribute remove() {
-        PreFillBitmapAttribute result = keyList.get(keyIndex);
+    public PreFillType remove() {
+        PreFillType result = keyList.get(keyIndex);
 
         Integer countForResult = bitmapsPerType.get(result);
         if (countForResult == 1) {

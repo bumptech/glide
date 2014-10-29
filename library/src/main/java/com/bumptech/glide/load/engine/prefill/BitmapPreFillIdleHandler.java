@@ -30,8 +30,8 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
     private final MemoryCache memoryCache;
     private final PreFillQueue toPrefill;
     private final Clock clock;
-    private final Set<PreFillBitmapAttribute> seenAttributes =
-        new HashSet<PreFillBitmapAttribute>();
+    private final Set<PreFillType> seenAttributes =
+        new HashSet<PreFillType>();
 
     private boolean isCancelled;
 
@@ -57,7 +57,7 @@ final class BitmapPreFillIdleHandler implements MessageQueue.IdleHandler {
     public boolean queueIdle() {
         long start = clock.now();
         while (!toPrefill.isEmpty() && (clock.now() - start) < MAX_DURATION_MILLIS) {
-            PreFillBitmapAttribute toAllocate = toPrefill.remove();
+            PreFillType toAllocate = toPrefill.remove();
             Bitmap bitmap = Bitmap.createBitmap(toAllocate.getWidth(), toAllocate.getHeight(),
                     toAllocate.getConfig());
 
