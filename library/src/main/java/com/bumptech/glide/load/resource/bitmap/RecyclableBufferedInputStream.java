@@ -17,6 +17,8 @@ package com.bumptech.glide.load.resource.bitmap;
  *  limitations under the License.
  */
 
+import android.util.Log;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +38,7 @@ import java.io.InputStream;
  * </pre>
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
+    private static final String TAG = "BufferedIs";
 
     /**
      * The buffer containing the current bytes read from the target InputStream.
@@ -133,6 +136,9 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             int newLength = localBuf.length * 2;
             if (newLength > marklimit) {
                 newLength = marklimit;
+            }
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "allocate buffer of length: " + newLength);
             }
             byte[] newbuf = new byte[newLength];
             System.arraycopy(localBuf, 0, newbuf, 0, localBuf.length);
@@ -333,6 +339,12 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             throw new InvalidMarkException("Mark has been invalidated");
         }
         pos = markpos;
+        // TODO: This is a violation of the API because it requires that you call mark() once per call to reset().
+        // We reset markpos to -1 so that after reset is called, we no longer continue to allocate larger and larger
+        // buffers. If we don't do this, we continually allocate new buffers so that the entire stream is held in memory
+        // at once. We could use a fixed size buffer, but that limits our mark size. In practice requiring users to
+        // call mark once per call to reset seems to work. See issue #225.
+        markpos = -1;
     }
 
     /**

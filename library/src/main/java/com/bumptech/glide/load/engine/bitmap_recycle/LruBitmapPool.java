@@ -63,6 +63,10 @@ public class LruBitmapPool implements BitmapPool {
     @Override
     public synchronized boolean put(Bitmap bitmap) {
         if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Reject bitmap from pool=" + strategy.logBitmap(bitmap) + " is mutable="
+                        + bitmap.isMutable());
+            }
             return false;
         }
 
