@@ -134,14 +134,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
             final int inHeight = inDimens[1];
 
             final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
-            final int sampleSize;
-            if (degreesToRotate == 90 || degreesToRotate == 270) {
-                // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
-                // decreased to near our target's height and the image height is decreased to near our target width.
-                sampleSize = getSampleSize(inHeight, inWidth, outWidth, outHeight);
-            } else {
-                sampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
-            }
+            final int sampleSize = getRoundedSampleSize(degreesToRotate, inWidth, inHeight, outWidth, outHeight);
 
             final Bitmap downsampled =
                     downsampleWithSize(stream, options, pool, inWidth, inHeight, sampleSize, decodeFormat);
@@ -172,6 +165,26 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         }
     }
 
+    private int getRoundedSampleSize(int degreesToRotate, int inWidth, int inHeight, int outWidth, int outHeight) {
+        final int exactSampleSize;
+        if (degreesToRotate == 90 || degreesToRotate == 270) {
+            // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
+            // decreased to near our target's height and the image height is decreased to near our target width.
+            exactSampleSize = getSampleSize(inHeight, inWidth, outWidth, outHeight);
+        } else {
+            exactSampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
+        }
+
+        // BitmapFactory only accepts powers of 2, so it will round down to the nearest power of two that is less than
+        // or equal to the sample size we provide. Because we need to estimate the final image width and height to
+        // re-use Bitmaps, we mirror BitmapFactory's calculation here. For bug, see issue #224. For algorithm see
+        // http://stackoverflow.com/a/17379704/800716.
+        final int powerOfTwoSampleSize = exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize - 1);
+
+        // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code than 0.
+        return Math.max(1, powerOfTwoSampleSize);
+    }
+
     protected Bitmap downsampleWithSize(InputStream is, BitmapFactory.Options options,
             BitmapPool pool, int inWidth, int inHeight, int sampleSize, DecodeFormat decodeFormat) {
         // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
@@ -179,8 +192,10 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         options.inSampleSize = sampleSize;
         options.inPreferredConfig = config;
         if ((options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) && shouldUsePool(is)) {
+            int targetWidth = (int) Math.ceil(inWidth / (double) sampleSize);
+            int targetHeight = (int) Math.ceil(inHeight / (double) sampleSize);
             // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
-            setInBitmap(options, pool.getDirty(inWidth, inHeight, config));
+            setInBitmap(options, pool.getDirty(targetWidth, targetHeight, config));
         }
         return decodeStream(is, options);
     }
