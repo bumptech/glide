@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
+import android.os.Handler;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -23,11 +24,12 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -36,24 +38,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class BitmapPreFillIdleHandlerTest {
-    private BitmapPreFillIdleHandler.Clock clock;
+public class BitmapPreFillRunnerTest {
+    private BitmapPreFillRunner.Clock clock;
     private BitmapPool pool;
     private MemoryCache cache;
     private List<Bitmap> addedBitmaps = new ArrayList<Bitmap>();
+    private Handler mainHandler;
 
     @Before
     public void setUp() {
-        clock = mock(BitmapPreFillIdleHandler.Clock.class);
+        clock = mock(BitmapPreFillRunner.Clock.class);
 
         pool = mock(BitmapPool.class);
         when(pool.put(any(Bitmap.class))).thenAnswer(new AddBitmapPoolAnswer(addedBitmaps));
         cache = mock(MemoryCache.class);
         when(cache.put(any(Key.class), any(Resource.class))).thenAnswer(new AddBitmapCacheAnswer(addedBitmaps));
+        mainHandler = mock(Handler.class);
     }
 
-    private BitmapPreFillIdleHandler getHandler(Map<PreFillType, Integer> allocationOrder) {
-        return new BitmapPreFillIdleHandler(pool, cache, new PreFillQueue(allocationOrder), clock);
+    private BitmapPreFillRunner getHandler(Map<PreFillType, Integer> allocationOrder) {
+        return new BitmapPreFillRunner(pool, cache, new PreFillQueue(allocationOrder), clock, mainHandler);
     }
 
     @Test
@@ -64,8 +68,8 @@ public class BitmapPreFillIdleHandlerTest {
         final int toAdd = 3;
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, toAdd);
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        handler.queueIdle();
+        BitmapPreFillRunner handler = getHandler(allocationOrder);
+        handler.run();
 
         Bitmap expected = Bitmap.createBitmap(size.getWidth(), size.getHeight(), size.getConfig());
         assertThat(addedBitmaps, contains(expected, expected, expected));
@@ -90,9 +94,8 @@ public class BitmapPreFillIdleHandlerTest {
         HashMap<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(smallWidth, 2);
         allocationOrder.put(smallHeight, 2);
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        handler.queueIdle();
-
+        BitmapPreFillRunner handler = getHandler(allocationOrder);
+        handler.run();
 
         Bitmap[] expectedBitmaps = new Bitmap[expectedOrder.length];
         for (int i = 0; i < expectedBitmaps.length; i++) {
@@ -116,48 +119,87 @@ public class BitmapPreFillIdleHandlerTest {
                 .build();
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, 3);
-        when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillIdleHandler.MAX_DURATION_MILLIS);
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        handler.queueIdle();
+        when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
+        BitmapPreFillRunner handler = getHandler(allocationOrder);
+        handler.run();
 
         assertThat(addedBitmaps, hasSize(1));
 
-        handler.queueIdle();
+        handler.run();
 
         assertThat(addedBitmaps, hasSize(3));
     }
 
     @Test
-    public void testPreFillHandlerReturnsFalseFromQueueIdleIfHasNoBitmapsToAllocate() {
-        BitmapPreFillIdleHandler handler = getHandler(new HashMap<PreFillType, Integer>());
-        assertFalse(handler.queueIdle());
+    public void testPreFillHandlerDoesNotPostIfHasNoBitmapsToAllocate() {
+        BitmapPreFillRunner handler = getHandler(new HashMap<PreFillType, Integer>());
+        handler.run();
+        verify(mainHandler, never()).postDelayed(any(Runnable.class), anyInt());
     }
 
     @Test
-    public void testPreFillHandlerReturnsTrueFromQueueIdleIfHasBitmapsToAllocate() {
+    public void testPreFillHandlerPostsIfHasBitmapsToAllocateAfterRunning() {
         PreFillType size = new PreFillType.Builder(1)
                 .setConfig(Bitmap.Config.ARGB_8888)
                 .build();
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, 2);
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillIdleHandler.MAX_DURATION_MILLIS);
-        assertTrue(handler.queueIdle());
+        BitmapPreFillRunner handler = getHandler(allocationOrder);
+        when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
+
+        handler.run();
+        verify(mainHandler).postDelayed(eq(handler), anyLong());
     }
 
     @Test
-    public void testPreFillHandlerReturnsFalseFromQueueIdleIfHasBitmapsButIsCancelled() {
+    public void testPreFillHandlerPostsWithBackoffIfHasBitmapsToAllocateAfterRunning() {
+        PreFillType size = new PreFillType.Builder(1)
+                .setConfig(Bitmap.Config.ARGB_8888)
+                .build();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        allocationOrder.put(size, 100);
+
+        BitmapPreFillRunner handler = getHandler(allocationOrder);
+        when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
+
+        handler.run();
+        verify(mainHandler).postDelayed(eq(handler), eq(BitmapPreFillRunner.INITIAL_BACKOFF_MS));
+
+        when(clock.now()).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS).thenReturn(
+                BitmapPreFillRunner.MAX_DURATION_MS
+                        + BitmapPreFillRunner.INITIAL_BACKOFF_MS * BitmapPreFillRunner.BACKOFF_RATIO);
+
+        handler.run();
+
+        verify(mainHandler).postDelayed(eq(handler),
+                eq(BitmapPreFillRunner.INITIAL_BACKOFF_MS * BitmapPreFillRunner.BACKOFF_RATIO));
+
+        when(clock.now()).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
+        handler.run();
+        when(clock.now()).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
+        handler.run();
+        when(clock.now()).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
+        handler.run();
+        when(clock.now()).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
+        handler.run();
+
+        verify(mainHandler, atLeastOnce()).postDelayed(eq(handler), eq(BitmapPreFillRunner.MAX_BACKOFF_MS));
+    }
+
+    @Test
+    public void testPreFillHandlerDoesNotPostIfHasBitmapsButIsCancelled() {
         PreFillType size = new PreFillType.Builder(1)
                 .setConfig(Bitmap.Config.ARGB_8888)
                 .build();
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, 2);
 
-        BitmapPreFillIdleHandler handler = getHandler(allocationOrder);
-        when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillIdleHandler.MAX_DURATION_MILLIS);
+        BitmapPreFillRunner handler = getHandler(allocationOrder);
+        when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
         handler.cancel();
-        handler.queueIdle();
-        assertFalse(handler.queueIdle());
+        handler.run();
+
+        verify(mainHandler, never()).postDelayed(any(Runnable.class), anyLong());
     }
 
     @Test
@@ -171,7 +213,7 @@ public class BitmapPreFillIdleHandlerTest {
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, 1);
 
-        getHandler(allocationOrder).queueIdle();
+        getHandler(allocationOrder).run();
 
         verify(cache).put(any(Key.class), any(Resource.class));
         verify(pool, never()).put(any(Bitmap.class));
@@ -189,7 +231,7 @@ public class BitmapPreFillIdleHandlerTest {
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, 1);
 
-        getHandler(allocationOrder).queueIdle();
+        getHandler(allocationOrder).run();
 
         verify(cache, never()).put(any(Key.class), any(Resource.class));
         verify(pool).put(eq(bitmap));
@@ -207,7 +249,7 @@ public class BitmapPreFillIdleHandlerTest {
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, 1);
 
-        getHandler(allocationOrder).queueIdle();
+        getHandler(allocationOrder).run();
 
         verify(cache, never()).put(any(Key.class), any(Resource.class));
         verify(pool).put(eq(bitmap));
@@ -230,7 +272,7 @@ public class BitmapPreFillIdleHandlerTest {
         allocationOrder.put(firstSize, 1);
         allocationOrder.put(secondSize, 1);
 
-        getHandler(allocationOrder).queueIdle();
+        getHandler(allocationOrder).run();
 
         InOrder firstOrder = inOrder(pool);
         firstOrder.verify(pool).get(eq(first.getWidth()), eq(first.getHeight()), eq(first.getConfig()));
@@ -252,7 +294,7 @@ public class BitmapPreFillIdleHandlerTest {
         Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
         allocationOrder.put(size, numBitmaps);
 
-        getHandler(allocationOrder).queueIdle();
+        getHandler(allocationOrder).run();
 
         InOrder order = inOrder(pool);
         order.verify(pool).get(eq(bitmap.getWidth()), eq(bitmap.getHeight()), eq(bitmap.getConfig()));

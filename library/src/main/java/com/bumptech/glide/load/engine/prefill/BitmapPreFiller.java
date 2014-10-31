@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.os.Looper;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -19,8 +20,9 @@ public final class BitmapPreFiller {
     private final MemoryCache memoryCache;
     private final BitmapPool bitmapPool;
     private final DecodeFormat defaultFormat;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
-    private BitmapPreFillIdleHandler current;
+    private BitmapPreFillRunner current;
 
     public BitmapPreFiller(MemoryCache memoryCache, BitmapPool bitmapPool, DecodeFormat defaultFormat) {
         this.memoryCache = memoryCache;
@@ -44,8 +46,8 @@ public final class BitmapPreFiller {
         }
 
         PreFillQueue allocationOrder = generateAllocationOrder(bitmapAttributes);
-        current = new BitmapPreFillIdleHandler(bitmapPool, memoryCache, allocationOrder);
-        Looper.myQueue().addIdleHandler(current);
+        current = new BitmapPreFillRunner(bitmapPool, memoryCache, allocationOrder);
+        handler.post(current);
     }
 
     // Visible for testing.
