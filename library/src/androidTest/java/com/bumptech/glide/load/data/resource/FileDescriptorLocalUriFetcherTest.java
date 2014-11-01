@@ -19,7 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = { ContentResolverShadow.class })
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = { ContentResolverShadow.class })
 public class FileDescriptorLocalUriFetcherTest {
 
     @Test

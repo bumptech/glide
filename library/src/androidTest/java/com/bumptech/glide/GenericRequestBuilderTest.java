@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.mockito.Matchers.any;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class GenericRequestBuilderTest {
     private RequestTracker requestTracker;
 

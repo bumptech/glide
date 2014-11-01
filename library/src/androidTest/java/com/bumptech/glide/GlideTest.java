@@ -80,8 +80,8 @@ import static org.mockito.Mockito.when;
  * Tests for the {@link Glide} interface and singleton.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = { GlideTest.ShadowFileDescriptorContentResolver.class, GlideTest.ShadowMediaMetadataRetriever.class,
-        GlideShadowLooper.class, GlideTest.MutableShadowBitmap.class })
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = { GlideTest.ShadowFileDescriptorContentResolver.class,
+        GlideTest.ShadowMediaMetadataRetriever.class, GlideShadowLooper.class, GlideTest.MutableShadowBitmap.class })
 public class GlideTest {
     private Target target = null;
     private ImageView imageView;

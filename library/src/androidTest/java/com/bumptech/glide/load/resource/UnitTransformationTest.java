@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource;
 
 import com.bumptech.glide.load.engine.Resource;
-
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

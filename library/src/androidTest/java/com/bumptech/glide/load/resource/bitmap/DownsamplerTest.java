@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class DownsamplerTest {
     private File tempFile;
 

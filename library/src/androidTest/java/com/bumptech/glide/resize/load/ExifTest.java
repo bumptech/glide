@@ -4,6 +4,7 @@ import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class ExifTest {
 
     private InputStream open(String imageName) throws IOException {

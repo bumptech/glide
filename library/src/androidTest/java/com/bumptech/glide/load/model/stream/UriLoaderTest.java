@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.verify;
  * Tests for the {@link StreamUriLoader} class.
  */
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class UriLoaderTest {
     // Not a magic number, just arbitrary non zero.
     private static final int IMAGE_SIDE = 120;

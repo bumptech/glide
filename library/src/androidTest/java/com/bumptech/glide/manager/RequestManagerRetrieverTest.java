@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerRetrieverTest {
     private static final String PARENT_TAG = "parent";
     private RetrieverHarness[] harnesses;
@@ -41,12 +41,12 @@ public class RequestManagerRetrieverTest {
 
     @Before
     public void setUp() {
-        // Clear out static state.
         retriever = new RequestManagerRetriever();
 
         harnesses = new RetrieverHarness[] { new DefaultRetrieverHarness(), new SupportRetrieverHarness() };
 
         initialSdkVersion = Build.VERSION.SDK_INT;
+        Util.setSdkVersionInt(18);
     }
 
     @After

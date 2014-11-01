@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = { TransformationUtilsTest.AlphaShadowBitmap.class })
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = { TransformationUtilsTest.AlphaShadowBitmap.class })
 public class TransformationUtilsTest {
 
     @Test

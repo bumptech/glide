@@ -1,13 +1,14 @@
 package com.bumptech.glide.load.resource.gifbitmap;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifBitmapResourceEncoderTest {
     private ResourceEncoder<Bitmap> bitmapEncoder;
     private ResourceEncoder<GifDrawable> gifEncoder;

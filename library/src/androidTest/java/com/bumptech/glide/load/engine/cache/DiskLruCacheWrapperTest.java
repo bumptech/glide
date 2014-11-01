@@ -2,12 +2,12 @@ package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.Util;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class DiskLruCacheWrapperTest {
     private DiskLruCacheWrapper cache;
     private byte[] data;

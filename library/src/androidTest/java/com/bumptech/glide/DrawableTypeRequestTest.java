@@ -20,10 +20,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
 public class DrawableTypeRequestTest {
     private DrawableTypeRequest<String> request;
-    private String model;
     private RequestManager.OptionsApplier optionsApplier;
 
     @SuppressWarnings("unchecked")

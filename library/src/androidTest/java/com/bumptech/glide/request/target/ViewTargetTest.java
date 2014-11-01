@@ -5,10 +5,8 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +38,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = { ViewTargetTest.SizedShadowView.class, ViewTargetTest.PreDrawShadowViewTreeObserver.class })
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = { ViewTargetTest.SizedShadowView.class,
+        ViewTargetTest.PreDrawShadowViewTreeObserver.class })
 public class ViewTargetTest {
     private View view;
     private ViewTarget target;

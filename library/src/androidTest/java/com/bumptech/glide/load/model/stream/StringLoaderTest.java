@@ -3,12 +3,12 @@ package com.bumptech.glide.load.model.stream;
 import android.net.Uri;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.tests.Util;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
  * Tests for the {@link StreamStringLoader} class.
  */
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class StringLoaderTest {
     // Not a magic number, just an arbitrary non zero value.
     private static final int IMAGE_SIDE = 100;

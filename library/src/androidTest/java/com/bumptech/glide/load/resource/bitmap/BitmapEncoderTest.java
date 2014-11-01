@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = { BitmapEncoderTest.AlphaShadowBitmap.class })
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = { BitmapEncoderTest.AlphaShadowBitmap.class })
 public class BitmapEncoderTest {
     private EncoderHarness harness;
 

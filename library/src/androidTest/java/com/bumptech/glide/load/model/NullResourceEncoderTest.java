@@ -2,7 +2,6 @@ package com.bumptech.glide.load.model;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.NullResourceEncoder;
-
 import org.junit.Before;
 import org.junit.Test;
 

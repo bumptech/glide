@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.file;
 
 import com.bumptech.glide.load.engine.Resource;
-
 import org.junit.Before;
 import org.junit.Test;
 

@@ -6,7 +6,6 @@ import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.GlideShadowLooper;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
 public class GifResourceDecoderTest {
     private GifResourceDecoder decoder;
     private GifHeaderParser parser;

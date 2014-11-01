@@ -3,7 +3,6 @@ package com.bumptech.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -17,7 +16,6 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerTest {
     private RequestManager manager;
     private ConnectivityMonitor connectivityMonitor;

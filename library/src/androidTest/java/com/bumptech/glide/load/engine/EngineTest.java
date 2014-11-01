@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = { GlideShadowLooper.class })
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = { GlideShadowLooper.class })
 public class EngineTest {
     private static final String ID = "asdf";
     private EngineTestHarness harness;

@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 //TODO: add a test for bitmap size using getAllocationByteSize when robolectric supports kitkat.
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class BitmapResourceTest {
     private int currentBuildVersion;
     private BitmapResourceHarness harness;

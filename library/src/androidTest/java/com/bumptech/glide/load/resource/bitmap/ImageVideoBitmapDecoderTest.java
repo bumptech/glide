@@ -2,14 +2,15 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class ImageVideoBitmapDecoderTest {
     private ImageVideoDecoderHarness harness;
 
