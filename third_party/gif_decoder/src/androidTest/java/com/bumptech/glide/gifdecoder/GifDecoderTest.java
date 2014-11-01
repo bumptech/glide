@@ -1,6 +1,7 @@
 package com.bumptech.glide.gifdecoder;
 
 import android.graphics.Bitmap;
+import com.bumptech.glide.gifdecoder.test.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
  * Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifDecoderTest {
 
     private MockProvider provider;

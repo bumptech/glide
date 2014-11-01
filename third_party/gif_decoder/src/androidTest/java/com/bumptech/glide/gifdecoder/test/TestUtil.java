@@ -1,10 +1,13 @@
-package com.bumptech.glide.gifdecoder;
+package com.bumptech.glide.gifdecoder.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-final class TestUtil {
+/**
+ * Utility methods for GifDecoder tests.
+ */
+public final class TestUtil {
 
     private TestUtil() {
         // Utility class.

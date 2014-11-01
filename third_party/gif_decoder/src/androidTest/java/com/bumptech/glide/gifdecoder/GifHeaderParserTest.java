@@ -1,6 +1,7 @@
 package com.bumptech.glide.gifdecoder;
 
 import com.bumptech.glide.gifdecoder.test.GifBytesTestUtil;
+import com.bumptech.glide.gifdecoder.test.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 
