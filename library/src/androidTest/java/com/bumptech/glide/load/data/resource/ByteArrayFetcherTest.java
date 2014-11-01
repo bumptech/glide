@@ -3,11 +3,14 @@ package com.bumptech.glide.load.data.resource;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.ByteArrayFetcher;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(JUnit4.class)
 public class ByteArrayFetcherTest {
 
     @Test

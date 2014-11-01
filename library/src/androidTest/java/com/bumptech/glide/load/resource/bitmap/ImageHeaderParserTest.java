@@ -1,6 +1,8 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.io.InputStream;
 import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 import static org.junit.Assert.assertEquals;
 
+@RunWith(JUnit4.class)
 public class ImageHeaderParserTest {
 
     private static final byte[] PNG_HEADER_WITH_IHDR_CHUNK = new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0xd, 0xa, 0x1a,

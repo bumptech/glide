@@ -4,6 +4,8 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -18,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(JUnit4.class)
 public class FileToStreamDecoderTest {
 
     private ResourceDecoder<InputStream, Object> streamDecoder;

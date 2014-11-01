@@ -2,6 +2,8 @@ package com.bumptech.glide.load.resource;
 
 import com.bumptech.glide.load.engine.Resource;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayOutputStream;
 
@@ -9,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 
+@RunWith(JUnit4.class)
 public class NullResourceEncoderTest {
 
     @Test

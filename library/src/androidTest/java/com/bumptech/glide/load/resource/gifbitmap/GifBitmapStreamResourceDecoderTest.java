@@ -5,6 +5,8 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ImageVideoWrapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -19,6 +21,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(JUnit4.class)
 public class GifBitmapStreamResourceDecoderTest {
     ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> gifBitmapDecoder;
     private GifBitmapWrapperStreamResourceDecoder decoder;

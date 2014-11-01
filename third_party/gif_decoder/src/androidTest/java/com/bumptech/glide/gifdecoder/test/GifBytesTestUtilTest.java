@@ -1,6 +1,8 @@
 package com.bumptech.glide.gifdecoder.test;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -10,6 +12,7 @@ import static org.junit.Assert.assertArrayEquals;
 /**
  * Tests for {@link com.bumptech.glide.gifdecoder.test.GifBytesTestUtil}.
  */
+@RunWith(JUnit4.class)
 public class GifBytesTestUtilTest {
 
     @Test

@@ -2,12 +2,15 @@ package com.bumptech.glide.load.model.stream;
 
 import com.bumptech.glide.load.data.DataFetcher;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@RunWith(JUnit4.class)
 public class StreamByteArrayLoaderTest {
 
     @Test

@@ -2,6 +2,8 @@ package com.bumptech.glide.load;
 
 import com.bumptech.glide.load.engine.Resource;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 
@@ -14,6 +16,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(JUnit4.class)
 public class MultiTransformationTest {
     @Test
     public void testReturnsConcatenatedTransformationIds() {

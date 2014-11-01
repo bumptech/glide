@@ -9,6 +9,8 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.tests.KeyAssertions;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.when;
  * and SHA-1 disk cache key are different on any difference in ID or existence of a certain workflow part.
  * Also checking whether the equals method is symmetric.
  */
+@RunWith(JUnit4.class)
 public class EngineKeyTest {
     private Harness harness;
 
