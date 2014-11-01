@@ -7,17 +7,18 @@ repositories {
 dependencies {
     compile project(':glide')
 
-    compile 'com.squareup.okhttp:okhttp:2.0.+'
+    compile "com.squareup.okhttp:okhttp:${OK_HTTP_VERSION}"
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId 'com.bumptech.glide.integration.okhttp'
-        minSdkVersion 10
-        targetSdkVersion 19
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
         versionCode = VERSION_CODE
         versionName = VERSION_NAME
     }

@@ -2,21 +2,21 @@ apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
 
 dependencies {
-    androidTestCompile 'com.android.support:support-v4:19.1.0'
-    androidTestCompile 'org.hamcrest:hamcrest-core:1.3'
-    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-    androidTestCompile 'junit:junit:4.11'
-    androidTestCompile 'org.mockito:mockito-all:1.9.5'
-    androidTestCompile 'org.robolectric:robolectric:2.4-SNAPSHOT'
+    androidTestCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
+    androidTestCompile "org.hamcrest:hamcrest-core:${HAMCREST_VERSION}"
+    androidTestCompile "org.hamcrest:hamcrest-library:${HAMCREST_VERSION}"
+    androidTestCompile "junit:junit:${JUNIT_VERSION}"
+    androidTestCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
+    androidTestCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId 'com.bumptech.glide.gifdecoder'
-        minSdkVersion 10
-        targetSdkVersion 19
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
     }
 }

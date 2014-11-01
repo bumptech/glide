@@ -6,13 +6,13 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.giphy'
         minSdkVersion 14
-        targetSdkVersion 19
+        targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
         versionName '1.0.0'
     }
