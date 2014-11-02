@@ -27,6 +27,7 @@ subprojects { project ->
 
     checkstyle {
         configFile = new File(rootDir, 'checkstyle.xml')
+        configProperties.checkStyleConfigDir = rootProject.rootDir
     }
 
     task checkstyle(type: Checkstyle) {
