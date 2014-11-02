@@ -28,6 +28,7 @@ import java.io.OutputStream;
  */
 class DecodeJob<A, T, Z> {
     private static final String TAG = "DecodeJob";
+    private static final FileOpener DEFAULT_FILE_OPENER = new FileOpener();
 
     private final EngineKey resultKey;
     private final int width;
@@ -39,11 +40,21 @@ class DecodeJob<A, T, Z> {
     private final DiskCacheStrategy diskCacheStrategy;
     private final DiskCache diskCache;
     private final Priority priority;
+    private final FileOpener fileOpener;
+
     private volatile boolean isCancelled;
 
     public DecodeJob(EngineKey resultKey, int width, int height, DataFetcher<A> fetcher,
             DataLoadProvider<A, T> loadProvider, Transformation<T> transformation, ResourceTranscoder<T, Z> transcoder,
             DiskCache diskCache, DiskCacheStrategy diskCacheStrategy, Priority priority) {
+        this(resultKey, width, height, fetcher, loadProvider, transformation, transcoder, diskCache, diskCacheStrategy,
+                priority, DEFAULT_FILE_OPENER);
+    }
+
+    // Visible for testing.
+    DecodeJob(EngineKey resultKey, int width, int height, DataFetcher<A> fetcher,
+            DataLoadProvider<A, T> loadProvider, Transformation<T> transformation, ResourceTranscoder<T, Z> transcoder,
+            DiskCache diskCache, DiskCacheStrategy diskCacheStrategy, Priority priority, FileOpener fileOpener) {
         this.resultKey = resultKey;
         this.width = width;
         this.height = height;
@@ -54,6 +65,7 @@ class DecodeJob<A, T, Z> {
         this.diskCacheStrategy = diskCacheStrategy;
         this.diskCache = diskCache;
         this.priority = priority;
+        this.fileOpener = fileOpener;
     }
 
     /**
@@ -233,12 +245,16 @@ class DecodeJob<A, T, Z> {
         return transcoder.transcode(transformed);
     }
 
-    static class SourceWriter<T> implements DiskCache.Writer {
+    private void logWithTimeAndKey(String message, long startTime) {
+        Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + resultKey);
+    }
 
-        private final Encoder<T> encoder;
-        private final T data;
+    class SourceWriter<DataType> implements DiskCache.Writer {
 
-        public SourceWriter(Encoder<T> encoder, T data) {
+        private final Encoder<DataType> encoder;
+        private final DataType data;
+
+        public SourceWriter(Encoder<DataType> encoder, DataType data) {
             this.encoder = encoder;
             this.data = data;
         }
@@ -248,7 +264,7 @@ class DecodeJob<A, T, Z> {
             boolean success = false;
             OutputStream os = null;
             try {
-                os = new BufferedOutputStream(new FileOutputStream(file));
+                os = fileOpener.open(file);
                 success = encoder.encode(data, os);
             } catch (FileNotFoundException e) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -267,7 +283,9 @@ class DecodeJob<A, T, Z> {
         }
     }
 
-    private void logWithTimeAndKey(String message, long startTime) {
-        Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + resultKey);
+    static class FileOpener {
+        public OutputStream open(File file) throws FileNotFoundException {
+            return new BufferedOutputStream(new FileOutputStream(file));
+        }
     }
 }

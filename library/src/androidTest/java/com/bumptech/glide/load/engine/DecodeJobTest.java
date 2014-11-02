@@ -19,6 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -44,7 +45,7 @@ public class DecodeJobTest {
     private Harness harness;
 
     @Before
-    public void setUp() {
+    public void setUp() throws FileNotFoundException {
         harness = new Harness();
     }
 
@@ -594,15 +595,17 @@ public class DecodeJobTest {
         ResourceEncoder<Object> resultEncoder = mock(ResourceEncoder.class);
         ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
         Encoder<Object> sourceEncoder = mock(Encoder.class);
+        DecodeJob.FileOpener fileOpener = mock(DecodeJob.FileOpener.class);
 
         DiskCacheStrategy diskCacheStrategy;
 
-        public Harness() {
+        public Harness() throws FileNotFoundException {
             this(DiskCacheStrategy.RESULT);
         }
 
-        public Harness(DiskCacheStrategy diskCacheStrategy) {
+        public Harness(DiskCacheStrategy diskCacheStrategy) throws FileNotFoundException {
             this.diskCacheStrategy = diskCacheStrategy;
+            when(fileOpener.open(any(File.class))).thenReturn(mock(OutputStream.class));
             when(key.getOriginalKey()).thenReturn(originalKey);
             when(transcoder.transcode(eq(resource))).thenReturn(resource);
             when(transformation.transform(eq(resource), eq(width), eq(height))).thenReturn(resource);
@@ -614,7 +617,7 @@ public class DecodeJobTest {
 
         public DecodeJob<Object, Object, Object> getJob() {
             return new DecodeJob<Object, Object, Object>(key, width, height, dataFetcher, loadProvider, transformation,
-                    transcoder, diskCache, diskCacheStrategy, priority);
+                    transcoder, diskCache, diskCacheStrategy, priority, fileOpener);
         }
     }
 
