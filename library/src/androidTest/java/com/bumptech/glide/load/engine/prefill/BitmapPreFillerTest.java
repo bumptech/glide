@@ -9,6 +9,7 @@ import org.hamcrest.core.CombinableMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -21,12 +22,16 @@ import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
-public class BitmapPreFillerAllocationTest {
+public class BitmapPreFillerTest {
     private static final int DEFAULT_BITMAP_WIDTH = 100;
     private static final int DEFAULT_BITMAP_HEIGHT = 50;
     private static final Bitmap.Config DEFAULT_BITMAP_CONFIG = PreFillType.DEFAULT_CONFIG;
@@ -278,5 +283,28 @@ public class BitmapPreFillerAllocationTest {
         CombinableMatcher.CombinableEitherMatcher<Iterable<? extends PreFillType>> either =
                 either(contains(smallWidth, smallHeight, smallWidth, smallHeight));
         assertThat(attributes, either.or(contains(smallHeight, smallWidth, smallHeight, smallWidth)));
+    }
+
+    @Test
+    public void testSetsConfigOnBuildersToDefaultIfNotSet() {
+        PreFillType.Builder builder = mock(PreFillType.Builder.class);
+        when(builder.build()).thenReturn(new PreFillType.Builder(100).setConfig(Bitmap.Config.RGB_565).build());
+
+        bitmapPreFiller.preFill(builder);
+
+        InOrder order = inOrder(builder);
+        order.verify(builder).setConfig(Bitmap.Config.RGB_565);
+        order.verify(builder).build();
+    }
+
+    @Test
+    public void testDoesNotSetConfigOnBuildersIfConfigIsAlreadySet() {
+        PreFillType.Builder builder = mock(PreFillType.Builder.class);
+
+        when(builder.getConfig()).thenReturn(Bitmap.Config.ARGB_4444);
+        when(builder.build()).thenReturn(new PreFillType.Builder(100).setConfig(Bitmap.Config.ARGB_4444).build());
+        bitmapPreFiller.preFill(builder);
+
+        verify(builder, never()).setConfig(any(Bitmap.Config.class));
     }
 }

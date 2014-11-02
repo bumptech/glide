@@ -56,7 +56,8 @@ class AttributeStrategy implements LruPoolStrategy {
         return "[" + width + "x" + height + "], " + config;
     }
 
-    private static class KeyPool extends BaseKeyPool<Key> {
+    // Visible for testing.
+    static class KeyPool extends BaseKeyPool<Key> {
         public Key get(int width, int height, Bitmap.Config config) {
             Key result = get();
             result.init(width, height, config);
@@ -69,7 +70,8 @@ class AttributeStrategy implements LruPoolStrategy {
         }
     }
 
-    private static class Key implements Poolable {
+    // Visible for testing.
+    static class Key implements Poolable {
         private final KeyPool pool;
         private int width;
         private int height;
@@ -88,26 +90,13 @@ class AttributeStrategy implements LruPoolStrategy {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
+            if (o instanceof Key) {
+                Key other = (Key) o;
+                return width == other.width
+                        && height == other.height
+                        && config == other.config;
             }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            Key key = (Key) o;
-
-            if (height != key.height) {
-                return false;
-            }
-            if (width != key.width) {
-                return false;
-            }
-            if (config != key.config) {
-                return false;
-            }
-
-            return true;
+            return false;
         }
 
         @Override

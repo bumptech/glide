@@ -30,15 +30,6 @@ public final class PreFillType {
         if (config == null) {
             throw new NullPointerException("Config must not be null");
         }
-        if (width <= 0) {
-            throw new IllegalArgumentException("Width must be > 0");
-        }
-        if (height <= 0) {
-            throw new IllegalArgumentException("Height must be > 0");
-        }
-        if (weight <= 0) {
-            throw new IllegalArgumentException("Weight must be > 0");
-        }
 
         this.width = width;
         this.height = height;
@@ -76,18 +67,14 @@ public final class PreFillType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if (o == null || getClass() != o.getClass()) {
-            return false;
+        if (o instanceof PreFillType) {
+            PreFillType other = (PreFillType) o;
+            return height == other.height
+                    && width == other.width
+                    && weight == other.weight
+                    && config == other.config;
         }
-
-        PreFillType size = (PreFillType) o;
-
-        return height == size.height
-                && weight == size.weight
-                && width == size.width
-                && config == size.config;
+        return false;
     }
 
     @Override
@@ -112,7 +99,7 @@ public final class PreFillType {
     /**
      * Builder for {@link PreFillType}.
      */
-    public static final class Builder {
+    public static class Builder {
         private final int width;
         private final int height;
 
@@ -133,6 +120,12 @@ public final class PreFillType {
          * @param height The height in pixels of the Bitmaps to prefill.
          */
         public Builder(int width, int height) {
+            if (width <= 0) {
+                throw new IllegalArgumentException("Width must be > 0");
+            }
+            if (height <= 0) {
+                throw new IllegalArgumentException("Height must be > 0");
+            }
             this.width = width;
             this.height = height;
         }

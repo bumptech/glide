@@ -34,7 +34,7 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
 
     @Override
     protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-        return new FifoPriorityLoadTask<T>(runnable, value, ordering.getAndIncrement());
+        return new LoadTask<T>(runnable, value, ordering.getAndIncrement());
     }
 
     /**
@@ -57,11 +57,12 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         }
     }
 
-    private static class FifoPriorityLoadTask<T> extends FutureTask<T> implements Comparable<FifoPriorityLoadTask<?>> {
+    // Visible for testing.
+    static class LoadTask<T> extends FutureTask<T> implements Comparable<LoadTask<?>> {
         private final int priority;
         private final int order;
 
-        public FifoPriorityLoadTask(Runnable runnable, T result, int order) {
+        public LoadTask(Runnable runnable, T result, int order) {
             super(runnable, result);
             if (!(runnable instanceof Prioritized)) {
                 throw new IllegalArgumentException("FifoPriorityThreadPoolExecutor must be given Runnables that "
@@ -71,25 +72,14 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
             this.order = order;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
+            if (o instanceof LoadTask) {
+                LoadTask<Object> other = (LoadTask<Object>) o;
+                return order == other.order && priority == other.priority;
             }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            FifoPriorityLoadTask that = (FifoPriorityLoadTask) o;
-
-            if (order != that.order) {
-                return false;
-            }
-            if (priority != that.priority) {
-                return false;
-            }
-
-            return true;
+            return false;
         }
 
         @Override
@@ -100,7 +90,7 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
         }
 
         @Override
-        public int compareTo(FifoPriorityLoadTask<?> loadTask) {
+        public int compareTo(LoadTask<?> loadTask) {
             int result = priority - loadTask.priority;
             if (result == 0) {
                 result = order - loadTask.order;

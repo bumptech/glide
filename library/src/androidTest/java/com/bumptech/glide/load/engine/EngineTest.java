@@ -397,6 +397,18 @@ public class EngineTest {
         verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(harness.isMemoryCacheable));
     }
 
+    @Test
+    public void testReleaseReleasesEngineResource() {
+        EngineResource<Object> engineResource = mock(EngineResource.class);
+        harness.engine.release(engineResource);
+        verify(engineResource).release();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsIfAskedToReleaseNonEngineResource() {
+        harness.engine.release(mock(Resource.class));
+    }
+
     @Test(expected = RuntimeException.class)
     public void testThrowsIfLoadCalledOnBackgroundThread() throws InterruptedException {
         BackgroundUtil.testInBackground(new BackgroundUtil.BackgroundTester() {

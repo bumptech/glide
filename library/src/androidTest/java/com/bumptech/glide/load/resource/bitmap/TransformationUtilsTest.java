@@ -1,11 +1,13 @@
-package com.bumptech.glide.util;
+package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import org.hamcrest.core.CombinableMatcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -18,10 +20,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -102,13 +106,34 @@ public class TransformationUtilsTest {
 
     // Test for Issue #195.
     @Test
-    public void testFitCenterUsesFloorInsteadofRoundingForOutputBitmapSize() {
+    public void testFitCenterUsesFloorInsteadOfRoundingForOutputBitmapSize() {
         Bitmap toTransform = Bitmap.createBitmap(1230, 1640, Bitmap.Config.RGB_565);
 
         Bitmap transformed = TransformationUtils.fitCenter(toTransform, mock(BitmapPool.class), 1075, 1366);
 
         assertEquals(1024, transformed.getWidth());
         assertEquals(1366, transformed.getHeight());
+    }
+
+    @Test
+    public void testFitCenterReturnsGivenBitmapIfGivenBitmapMatchesExactly() {
+        Bitmap toFit = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
+        Bitmap transformed = TransformationUtils.fitCenter(toFit, null, toFit.getWidth(), toFit.getHeight());
+        assertTrue(toFit == transformed);
+    }
+
+    @Test
+    public void testFitCenterReturnsGivenBitmapIfGivenBitmapWidthMatchesExactly() {
+        Bitmap toFit = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
+        Bitmap transformed = TransformationUtils.fitCenter(toFit, null, toFit.getWidth(), toFit.getHeight() * 2);
+        assertTrue(toFit == transformed);
+    }
+
+    @Test
+    public void testFitCenterReturnsGivenBitmapIfGivenBitmapHeightMatchesExactly() {
+        Bitmap toFit = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
+        Bitmap transformed = TransformationUtils.fitCenter(toFit, null, toFit.getWidth() * 2, toFit.getHeight());
+        assertTrue(toFit == transformed);
     }
 
     @Test
@@ -245,6 +270,94 @@ public class TransformationUtilsTest {
         // See https://code.google.com/p/hamcrest/issues/detail?id=82.
         CombinableMatcher.CombinableEitherMatcher<Integer> eitherMatcher = either(equalTo(width));
         assertThat("one side must match maxSide", maxSide, eitherMatcher.or(equalTo(height)));
+    }
+
+    @Test
+    public void testGetExifOrientationDegrees() {
+        assertEquals(0, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_NORMAL));
+        assertEquals(90, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_TRANSPOSE));
+        assertEquals(90, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_ROTATE_90));
+        assertEquals(180, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_ROTATE_180));
+        assertEquals(180, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_FLIP_VERTICAL));
+        assertEquals(270, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_TRANSVERSE));
+        assertEquals(270, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_ROTATE_270));
+    }
+
+    @Test
+    public void testRotateImage() {
+        Bitmap toRotate = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
+
+        Bitmap zero = TransformationUtils.rotateImage(toRotate, 0);
+        assertTrue(toRotate == zero);
+
+        Bitmap ninety = TransformationUtils.rotateImage(toRotate, 90);
+        assertTrue(Robolectric.shadowOf(ninety).getDescription().contains("rotate=90.0"));
+        assertEquals(toRotate.getWidth(), toRotate.getHeight());
+    }
+
+    @Test
+    public void testRotateImageExifReturnsGivenBitmapIfRotationIsNormal() {
+        BitmapPool bitmapPool = mock(BitmapPool.class);
+        Bitmap toRotate = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
+        assertEquals(toRotate,
+                TransformationUtils.rotateImageExif(toRotate, bitmapPool, ExifInterface.ORIENTATION_NORMAL));
+    }
+
+    @Test
+    public void testRotateImageExifReturnsGivenBitmapIfRotationIsUndefined() {
+        BitmapPool bitmapPool = mock(BitmapPool.class);
+        Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+        assertEquals(toRotate,
+                TransformationUtils.rotateImageExif(toRotate, bitmapPool, ExifInterface.ORIENTATION_UNDEFINED));
+    }
+
+    @Test
+    public void testRotateImageExifHandlesEmptyBitmapPool() {
+        Bitmap toRotate = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_4444);
+        BitmapPool bitmapPool = mock(BitmapPool.class);
+        assertNotNull(TransformationUtils.rotateImageExif(toRotate, bitmapPool, ExifInterface.ORIENTATION_ROTATE_90));
+    }
+
+    @Test
+    public void testInitializeMatrixSetsScaleIfFlipHorizontal() {
+        Matrix matrix = mock(Matrix.class);
+        TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_FLIP_HORIZONTAL, matrix);
+        verify(matrix).setScale(-1, 1);
+    }
+
+    @Test
+    public void testInitializeMatrixSetsScaleAndRotateIfFlipVertical() {
+        Matrix matrix = mock(Matrix.class);
+        TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_FLIP_VERTICAL, matrix);
+        verify(matrix).setRotate(180);
+        verify(matrix).postScale(-1, 1);
+    }
+
+    @Test
+    public void testInitializeMatrixSetsScaleAndRotateIfTranspose() {
+        Matrix matrix = mock(Matrix.class);
+        TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_TRANSPOSE, matrix);
+        verify(matrix).setRotate(90);
+        verify(matrix).postScale(-1, 1);
+    }
+
+    @Test
+    public void testInitializeMatrixSetsScaleAndRotateIfTransverse() {
+        Matrix matrix = mock(Matrix.class);
+        TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_TRANSVERSE, matrix);
+        verify(matrix).setRotate(-90);
+        verify(matrix).postScale(-1, 1);
+    }
+
+    @Test
+    public void testInitializeMatrixSetsRotateOnRotation() {
+        Matrix matrix = mock(Matrix.class);
+        TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_ROTATE_90, matrix);
+        verify(matrix).setRotate(90);
+        TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_ROTATE_180, matrix);
+        verify(matrix).setRotate(180);
+        TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_ROTATE_270, matrix);
+        verify(matrix).setRotate(-90);
     }
 
     @Implements(Bitmap.class)

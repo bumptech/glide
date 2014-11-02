@@ -149,22 +149,18 @@ public final class TransformationUtils {
      * Returns a matrix with rotation set based on Exif orientation tag.
      * If the orientation is undefined or 0 null is returned.
      *
+     * @deprecated No longer used by Glide, scheduled to be removed in Glide 4.0
      * @param pathToOriginal Path to original image file that may have exif data.
      * @return  A rotation in degrees based on exif orientation
      */
     @TargetApi(Build.VERSION_CODES.ECLAIR)
+    @Deprecated
     public static int getOrientation(String pathToOriginal) {
         int degreesToRotate = 0;
         try {
             ExifInterface exif = new ExifInterface(pathToOriginal);
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
-                degreesToRotate = 90;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
-                degreesToRotate = 180;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
-                degreesToRotate = 270;
-            }
+            return getExifOrientationDegrees(orientation);
         } catch (Exception e) {
             if (Log.isLoggable(TAG, Log.ERROR)) {
                 Log.e(TAG, "Unable to get orientation for image with path=" + pathToOriginal, e);
@@ -177,10 +173,12 @@ public final class TransformationUtils {
      * This is an expensive operation that copies the image in place with the pixels rotated.
      * If possible rather use getOrientationMatrix, and set that as the imageMatrix on an ImageView.
      *
+     * @deprecated No longer used by Glide, scheduled to be removed in Glide 4.0
      * @param pathToOriginal Path to original image file that may have exif data.
      * @param imageToOrient Image Bitmap to orient.
      * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
      */
+    @Deprecated
     public static Bitmap orientImage(String pathToOriginal, Bitmap imageToOrient) {
         int degreesToRotate = getOrientation(pathToOriginal);
         return rotateImage(imageToOrient, degreesToRotate);
@@ -255,7 +253,36 @@ public final class TransformationUtils {
      * @return The rotated and/or flipped image or toOrient if no rotation or flip was necessary.
      */
     public static Bitmap rotateImageExif(Bitmap toOrient, BitmapPool pool, int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_NORMAL
+                || exifOrientation == ExifInterface.ORIENTATION_UNDEFINED) {
+            return toOrient;
+        }
         final Matrix matrix = new Matrix();
+        initializeMatrixForRotation(exifOrientation, matrix);
+
+        // From Bitmap.createBitmap.
+        final RectF newRect = new RectF(0, 0, toOrient.getWidth(), toOrient.getHeight());
+        matrix.mapRect(newRect);
+
+        final int newWidth = Math.round(newRect.width());
+        final int newHeight = Math.round(newRect.height());
+
+        Bitmap result = pool.get(newWidth, newHeight, toOrient.getConfig());
+        if (result == null) {
+            result = Bitmap.createBitmap(newWidth, newHeight, toOrient.getConfig());
+        }
+
+        matrix.postTranslate(-newRect.left, -newRect.top);
+
+        final Canvas canvas = new Canvas(result);
+        final Paint paint = new Paint(PAINT_FLAGS);
+        canvas.drawBitmap(toOrient, matrix, paint);
+
+        return result;
+    }
+
+    // Visible for testing.
+    static void initializeMatrixForRotation(int exifOrientation, Matrix matrix) {
         switch (exifOrientation) {
             case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
                 matrix.setScale(-1, 1);
@@ -281,29 +308,8 @@ public final class TransformationUtils {
             case ExifInterface.ORIENTATION_ROTATE_270:
                 matrix.setRotate(-90);
                 break;
-            // case ExifInterface.ORIENTATION_NORMAL
             default:
-                return toOrient;
+                // Do nothing.
         }
-
-        // From Bitmap.createBitmap.
-        final RectF newRect = new RectF(0, 0, toOrient.getWidth(), toOrient.getHeight());
-        matrix.mapRect(newRect);
-
-        final int newWidth = Math.round(newRect.width());
-        final int newHeight = Math.round(newRect.height());
-
-        Bitmap result = pool.get(newWidth, newHeight, toOrient.getConfig());
-        if (result == null) {
-            result = Bitmap.createBitmap(newWidth, newHeight, toOrient.getConfig());
-        }
-
-        matrix.postTranslate(-newRect.left, -newRect.top);
-
-        final Canvas canvas = new Canvas(result);
-        final Paint paint = new Paint(PAINT_FLAGS);
-        canvas.drawBitmap(toOrient, matrix, paint);
-
-        return result;
     }
 }

@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine.executor;
 
+import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor.LoadTask;
+import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -14,6 +16,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -69,12 +73,58 @@ public class FifoPriorityThreadPoolExecutorTest {
         assertThat(executedOrder, contains(executionOrder));
     }
 
+    @Test
+    public void testLoadTaskEquality() {
+        new EqualsTester()
+                .addEqualityGroup(
+                        new LoadTask<Object>(new MockRunnable(10), new Object(), 1),
+                        new LoadTask<Object>(new MockRunnable(10), new Object(), 1))
+                .addEqualityGroup(
+                        new LoadTask<Object>(new MockRunnable(5), new Object(), 1)
+                )
+                .addEqualityGroup(
+                        new LoadTask<Object>(new MockRunnable(10), new Object(), 3)
+                )
+                .testEquals();
+    }
+
+    @Test
+    public void testLoadTaskCompareToPrefersHigherPriority() {
+        LoadTask<Object> first = new LoadTask<Object>(new MockRunnable(10), new Object(), 10);
+        LoadTask<Object> second = new LoadTask<Object>(new MockRunnable(0), new Object(), 10);
+
+        assertTrue(first.compareTo(second) > 0);
+        assertTrue(second.compareTo(first) < 0);
+    }
+
+    @Test
+    public void testLoadTaskCompareToFallsBackToOrderIfPriorityIsEqual() {
+        LoadTask<Object> first = new LoadTask<Object>(new MockRunnable(0), new Object(), 2);
+        LoadTask<Object> second = new LoadTask<Object>(new MockRunnable(0), new Object(), 1);
+
+        assertTrue(first.compareTo(second) > 0);
+        assertTrue(second.compareTo(first) < 0);
+    }
+
+    @Test
+    public void testLoadTaskCompareToReturnsZeroIfPriorityAndOrderAreEqual() {
+        LoadTask<Object> first = new LoadTask<Object>(new MockRunnable(0), new Object(), 1);
+        LoadTask<Object> second = new LoadTask<Object>(new MockRunnable(0), new Object(), 1);
+
+        assertEquals(0, first.compareTo(second));
+        assertEquals(0, second.compareTo(first));
+    }
+
     private static class MockRunnable implements Runnable, Prioritized {
         private final int priority;
         private final OnRun onRun;
 
         public interface OnRun {
             public void onRun(int priority);
+        }
+
+        public MockRunnable(int priority) {
+            this(priority, mock(OnRun.class));
         }
 
         public MockRunnable(int priority, OnRun onRun) {

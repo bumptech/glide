@@ -60,14 +60,15 @@ public class ModelCache<A, B> {
         cache.put(key, value);
     }
 
-    private static final class ModelKey<A> {
+    // Visible for testing.
+    static final class ModelKey<A> {
         private static final Queue<ModelKey<?>> KEY_QUEUE = Util.createQueue(0);
 
         private int height;
         private int width;
         private A model;
 
-        public static <A> ModelKey<A> get(A model, int width, int height) {
+        static <A> ModelKey<A> get(A model, int width, int height) {
             @SuppressWarnings("unchecked")
             ModelKey<A> modelKey = (ModelKey<A>) KEY_QUEUE.poll();
             if (modelKey == null) {
@@ -92,26 +93,11 @@ public class ModelCache<A, B> {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
+            if (o instanceof ModelKey) {
+                ModelKey other = (ModelKey) o;
+                return width == other.width && height == other.height && model.equals(other.model);
             }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            ModelKey<?> modelKey = (ModelKey<?>) o;
-
-            if (height != modelKey.height) {
-                return false;
-            }
-            if (width != modelKey.width) {
-                return false;
-            }
-            if (!model.equals(modelKey.model)) {
-                return false;
-            }
-
-            return true;
+            return false;
         }
 
         @Override

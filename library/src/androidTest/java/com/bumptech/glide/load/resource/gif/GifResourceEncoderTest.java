@@ -63,6 +63,7 @@ public class GifResourceEncoderTest {
 
         gifDrawable = mock(GifDrawable.class);
         when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
+        when(gifDrawable.getData()).thenReturn(new byte[0]);
 
         when(resource.get()).thenReturn(gifDrawable);
 
