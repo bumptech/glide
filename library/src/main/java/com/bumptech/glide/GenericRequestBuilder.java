@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.MultiTransformation;
@@ -27,10 +26,12 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.animation.NoAnimation;
-import com.bumptech.glide.request.animation.ViewAnimation;
+import com.bumptech.glide.request.animation.ViewAnimationFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
+import com.bumptech.glide.request.animation.ViewPropertyAnimationFactory;
 import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
@@ -367,7 +368,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(int animationId) {
-        return animate(new ViewAnimation.ViewAnimationFactory<TranscodeType>(context, animationId));
+        return animate(new ViewAnimationFactory<TranscodeType>(context, animationId));
     }
 
     /**
@@ -387,7 +388,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     @Deprecated
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(Animation animation) {
-        return animate(new ViewAnimation.ViewAnimationFactory<TranscodeType>(animation));
+        return animate(new ViewAnimationFactory<TranscodeType>(animation));
     }
 
     /**
@@ -400,7 +401,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             ViewPropertyAnimation.Animator animator) {
-        return animate(new ViewPropertyAnimation.ViewPropertyAnimationFactory<TranscodeType>(animator));
+        return animate(new ViewPropertyAnimationFactory<TranscodeType>(animator));
     }
 
     GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(

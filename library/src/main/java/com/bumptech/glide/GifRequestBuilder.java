@@ -15,7 +15,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.animation.DrawableCrossFadeViewAnimation;
+import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 
 import java.io.File;
@@ -229,7 +229,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> crossFade() {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>());
+        super.animate(new DrawableCrossFadeFactory<GifDrawable>());
         return this;
     }
 
@@ -238,7 +238,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> crossFade(int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(duration));
+        super.animate(new DrawableCrossFadeFactory<GifDrawable>(duration));
         return this;
     }
 
@@ -248,7 +248,7 @@ public class GifRequestBuilder<ModelType>
     @Deprecated
     @Override
     public GifRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(animation, duration));
+        super.animate(new DrawableCrossFadeFactory<GifDrawable>(animation, duration));
         return this;
     }
 
@@ -257,7 +257,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GifDrawable>(context, animationId,
+        super.animate(new DrawableCrossFadeFactory<GifDrawable>(context, animationId,
                 duration));
         return this;
     }

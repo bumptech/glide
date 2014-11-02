@@ -21,7 +21,7 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.animation.DrawableCrossFadeViewAnimation;
+import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
 
@@ -242,7 +242,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public final DrawableRequestBuilder<ModelType> crossFade() {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GlideDrawable>());
+        super.animate(new DrawableCrossFadeFactory<GlideDrawable>());
         return this;
     }
 
@@ -250,7 +250,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GlideDrawable>(duration));
+        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(duration));
         return this;
     }
 
@@ -259,7 +259,7 @@ public class DrawableRequestBuilder<ModelType>
      */
     @Deprecated
     public DrawableRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GlideDrawable>(animation, duration));
+        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(animation, duration));
         return this;
     }
 
@@ -267,7 +267,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeViewAnimation.DrawableCrossFadeFactory<GlideDrawable>(context, animationId,
+        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(context, animationId,
                 duration));
         return this;
     }
