@@ -9,3 +9,4 @@ script: 'travis_retry ./gradlew build --parallel'
 
 after_success:
 - scripts/travis-sonatype-publish.sh
+- ./gradlew jacocoTestReport coveralls

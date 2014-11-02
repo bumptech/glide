@@ -10,6 +10,7 @@ buildscript {
     dependencies {
         classpath "org.robolectric:robolectric-gradle-plugin:${ROBOLECTRIC_GRADLE_VERSION}"
         classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
+        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${COVERALLS_GRADLE_VERSION}"
     }
 }
 

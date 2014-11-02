@@ -3,9 +3,17 @@ apply plugin: 'robolectric'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
 apply plugin: 'pmd'
+apply plugin: 'jacoco'
+apply plugin: 'com.github.kt3k.coveralls'
 
 findbugs {
     toolVersion = "2.0.3"
+}
+jacoco {
+    toolVersion = "0.7.1.201405082137"
+}
+coveralls {
+    jacocoReportPath = 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
 }
 
 dependencies {
@@ -35,6 +43,12 @@ android {
 
         versionCode = VERSION_CODE
         versionName = VERSION_NAME
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
     }
 }
 
@@ -86,4 +100,29 @@ afterEvaluate {
     }
 
     check.dependsOn('pmd')
+
+    task jacocoTestReport(type:JacocoReport, dependsOn: testDebug) {
+        def coverageSourceDirs = ['src/main/java']
+        group = "Reporting"
+
+        description = "Generate Jacoco coverage reports"
+
+        classDirectories = fileTree(
+                dir: 'build/intermediates/classes/debug',
+                excludes: ['**/R.class',
+                           '**/R$*.class',
+                           '**/*$ViewInjector*.*',
+                           '**/BuildConfig.*',
+                           '**/Manifest*.*']
+        )
+
+        additionalSourceDirs = files(coverageSourceDirs)
+        sourceDirectories = files(coverageSourceDirs)
+        executionData = files('build/jacoco/testDebug.exec')
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
 }
