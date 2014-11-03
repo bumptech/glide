@@ -1,7 +1,7 @@
 package com.bumptech.glide.gifdecoder;
 
 import com.bumptech.glide.gifdecoder.test.GifBytesTestUtil;
-import com.bumptech.glide.gifdecoder.test.TestUtil;
+import com.bumptech.glide.testutil.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +55,7 @@ public class GifHeaderParserTest {
 
     @Test
     public void testCanParseHeaderOfTestImageWithoutGraphicalExtension() throws IOException {
-        byte[] data = TestUtil.readResourceData("gif_without_graphical_control_extension.gif");
+        byte[] data = TestUtil.resourceToBytes(getClass(), "gif_without_graphical_control_extension.gif");
         parser.setData(data);
         GifHeader header = parser.parseHeader();
         assertEquals(1, header.frameCount);

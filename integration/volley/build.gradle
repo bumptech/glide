@@ -9,6 +9,7 @@ dependencies {
     compile project(':glide')
     compile "com.mcxiaoke.volley:library:${VOLLEY_VERSION}"
 
+    androidTestCompile project(":testutil")
     androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"
     androidTestCompile "junit:junit:${JUNIT_VERSION}"
     androidTestCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"

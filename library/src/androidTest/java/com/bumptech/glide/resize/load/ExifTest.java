@@ -1,6 +1,7 @@
 package com.bumptech.glide.resize.load;
 
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
+import com.bumptech.glide.testutil.TestResourceUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -17,7 +18,7 @@ import static org.junit.Assert.assertNull;
 public class ExifTest {
 
     private InputStream open(String imageName) throws IOException {
-        return getClass().getResourceAsStream("/exif-orientation-examples/" + imageName);
+        return TestResourceUtil.openResource(getClass(), "exif-orientation-examples/" + imageName);
     }
 
     private void assertOrientation(String filePrefix, int expectedOrientation) {

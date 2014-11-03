@@ -39,6 +39,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.testutil.TestResourceUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -778,7 +779,7 @@ public class GlideTest {
 
 
     private InputStream openResource(String imageName) throws IOException {
-        return getClass().getResourceAsStream("/" + imageName);
+        return TestResourceUtil.openResource(getClass(), imageName);
     }
 
     private static class CallCallback implements Answer<Void> {

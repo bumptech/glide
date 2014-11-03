@@ -1,13 +1,15 @@
 package com.bumptech.glide.gifdecoder;
 
 import android.graphics.Bitmap;
-import com.bumptech.glide.gifdecoder.test.TestUtil;
+import com.bumptech.glide.testutil.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,8 +29,8 @@ public class GifDecoderTest {
     }
 
     @Test
-    public void testCanDecodeFramesFromTestGif() {
-        byte[] data = TestUtil.readResourceData("partial_gif_decode.gif");
+    public void testCanDecodeFramesFromTestGif() throws IOException {
+        byte[] data = TestUtil.resourceToBytes(getClass(), "partial_gif_decode.gif");
         GifHeaderParser headerParser = new GifHeaderParser();
         headerParser.setData(data);
         GifHeader header = headerParser.parseHeader();

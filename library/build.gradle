@@ -22,6 +22,7 @@ dependencies {
     compile project(':third_party:disklrucache')
     compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
 
+    androidTestCompile project(':testutil')
     androidTestCompile 'com.google.guava:guava-testlib:18.0'
     androidTestCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
     androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"

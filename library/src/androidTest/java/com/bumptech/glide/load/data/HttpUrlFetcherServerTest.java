@@ -2,6 +2,7 @@ package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.testutil.TestUtil;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
@@ -12,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -59,7 +59,7 @@ public class HttpUrlFetcherServerTest {
                 .setResponseCode(200));
         HttpUrlFetcher fetcher = getFetcher();
         InputStream is = fetcher.loadData(Priority.HIGH);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.NORMAL);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
 
         mockWebServer.takeRequest();
         RecordedRequest second = mockWebServer.takeRequest();
@@ -119,7 +119,7 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200).setBody(expected));
 
         InputStream is = getFetcher().loadData(Priority.NORMAL);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
 
         assertThat(mockWebServer.takeRequest().getPath()).contains(DEFAULT_PATH);
         for (int i = 0; i < numRedirects; i++) {
@@ -212,15 +212,5 @@ public class HttpUrlFetcherServerTest {
     private HttpUrlFetcher getFetcher() {
         URL url = mockWebServer.getUrl(DEFAULT_PATH);
         return new HttpUrlFetcher(new GlideUrl(url));
-    }
-
-    private static String isToString(InputStream is) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = is.read(buffer)) != -1) {
-            os.write(buffer, 0, read);
-        }
-        return new String(os.toByteArray());
     }
 }

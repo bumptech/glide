@@ -9,5 +9,6 @@ include ':samples:svg'
 include ':integration'
 include ':integration:volley'
 include ':integration:okhttp'
+include ':testutil'
 
 rootProject.name = 'glide-parent'

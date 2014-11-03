@@ -9,6 +9,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.testutil.TestUtil;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import org.junit.After;
@@ -22,7 +23,6 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowSystemClock;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
@@ -65,7 +65,7 @@ public class VolleyStreamFetcherServerTest {
                 .setResponseCode(200));
         DataFetcher<InputStream> fetcher = getFetcher();
         InputStream is = fetcher.loadData(Priority.HIGH);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class VolleyStreamFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class VolleyStreamFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class VolleyStreamFetcherServerTest {
             .setResponseCode(200).setBody(expected));
 
         InputStream is = getFetcher().loadData(Priority.NORMAL);
-        assertEquals(expected, isToString(is));
+        assertEquals(expected, TestUtil.isToString(is));
 
         assertThat(mockWebServer.takeRequest().getPath()).contains(DEFAULT_PATH);
         for (int i = 0; i < numRedirects; i++) {
@@ -196,16 +196,6 @@ public class VolleyStreamFetcherServerTest {
             }
         };
         return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString()), requestFuture);
-    }
-
-    private static String isToString(InputStream is) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = is.read(buffer)) != -1) {
-            os.write(buffer, 0, read);
-        }
-        return new String(os.toByteArray());
     }
 
     /** A shadow clock that doesn't rely on running on an Android thread with a Looper. */

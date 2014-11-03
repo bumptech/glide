@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
 
 dependencies {
+    androidTestCompile project(':testutil')
     androidTestCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
     androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"
     androidTestCompile "junit:junit:${JUNIT_VERSION}"
