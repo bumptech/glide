@@ -17,12 +17,10 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
@@ -86,7 +84,7 @@ public class GlideBitmapDrawableTest {
     @Test
     public void testConstantStateReturnsNewGlideBitmapDrawable() {
         Drawable newDrawable = drawable.getConstantState().newDrawable();
-        assertThat(newDrawable, instanceOf(GlideBitmapDrawable.class));
+        assertThat(newDrawable).isInstanceOf(GlideBitmapDrawable.class);
     }
 
     @Test
@@ -98,7 +96,7 @@ public class GlideBitmapDrawableTest {
     @Test
     public void testMutatedDrawableIsGlideBitmapDrawable() {
         Drawable newDrawable = drawable.mutate();
-        assertThat(newDrawable, instanceOf(GlideBitmapDrawable.class));
+        assertThat(newDrawable).isInstanceOf(GlideBitmapDrawable.class);
     }
 
     @Test
@@ -118,7 +116,7 @@ public class GlideBitmapDrawableTest {
         Drawable mutated = drawable.mutate();
         mutated.draw(canvas);
 
-        assertThat(mutated.getBounds(), equalTo(bounds));
+        assertEquals(bounds, mutated.getBounds());
         verify(canvas, times(2)).drawBitmap(eq(bitmap), isNull(Rect.class), eq(bounds), any(Paint.class));
     }
 
@@ -134,7 +132,7 @@ public class GlideBitmapDrawableTest {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Paint paint = (Paint) invocation.getArguments()[3];
-                assertThat(paint.getAlpha(), equalTo(1));
+                assertEquals(1, paint.getAlpha());
                 return null;
             }
         }).when(canvas).drawBitmap(any(Bitmap.class), any(Rect.class), any(Rect.class), any(Paint.class));
@@ -156,7 +154,7 @@ public class GlideBitmapDrawableTest {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Paint paint = (Paint) invocation.getArguments()[3];
-                assertThat(paint.getColorFilter(), equalTo(originalColorFilter));
+                assertEquals(originalColorFilter, paint.getColorFilter());
                 return null;
             }
         }).when(canvas).drawBitmap(any(Bitmap.class), any(Rect.class), any(Rect.class), any(Paint.class));

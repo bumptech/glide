@@ -6,9 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -24,7 +22,7 @@ public class KeyAssertions {
         assertEquals(first, second);
         assertEquals(first.hashCode(), second.hashCode());
 
-        assertThat(getDigest(first), equalTo(getDigest(second)));
+        assertThat(getDigest(first)).isEqualTo(getDigest(second));
     }
 
     public static void assertDifferent(Key first, Key second)
@@ -44,7 +42,7 @@ public class KeyAssertions {
             MessageDigest secondDigest = MessageDigest.getInstance("SHA-1");
             second.updateDiskCacheKey(secondDigest);
 
-            assertThat(getDigest(first), not(equalTo(getDigest(second))));
+            assertNotEquals(getDigest(first), getDigest(second));
         }
     }
 

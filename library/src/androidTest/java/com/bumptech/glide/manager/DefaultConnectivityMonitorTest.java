@@ -16,9 +16,7 @@ import org.robolectric.shadows.ShadowNetworkInfo;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -41,7 +39,7 @@ public class DefaultConnectivityMonitorTest {
     public void testRegistersReceiverOnStart() {
         monitor.onStart();
 
-        assertThat(getConnectivityReceivers(), hasSize(1));
+        assertThat(getConnectivityReceivers()).hasSize(1);
     }
 
     @Test
@@ -49,7 +47,7 @@ public class DefaultConnectivityMonitorTest {
         monitor.onStart();
         monitor.onStart();
 
-        assertThat(getConnectivityReceivers(), hasSize(1));
+        assertThat(getConnectivityReceivers()).hasSize(1);
     }
 
     @Test
@@ -57,7 +55,7 @@ public class DefaultConnectivityMonitorTest {
         monitor.onStart();
         monitor.onStop();
 
-        assertThat(getConnectivityReceivers(), empty());
+        assertThat(getConnectivityReceivers()).isEmpty();
     }
 
     @Test
@@ -65,7 +63,7 @@ public class DefaultConnectivityMonitorTest {
         monitor.onStop();
         monitor.onStop();
 
-        assertThat(getConnectivityReceivers(), empty());
+        assertThat(getConnectivityReceivers()).isEmpty();
     }
 
     @Test

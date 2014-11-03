@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import org.hamcrest.core.CombinableMatcher;
+import com.google.common.collect.Range;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -14,14 +14,10 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
 
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -257,19 +253,17 @@ public class TransformationUtilsTest {
         double originalAspectRatio = (double) original.getWidth() / (double) original.getHeight();
         double transformedAspectRatio = (double) transformed.getWidth() / (double) transformed.getHeight();
 
-        assertThat("nearly identical aspect ratios", transformedAspectRatio, closeTo(originalAspectRatio, 0.05));
+        assertThat(transformedAspectRatio).isIn(Range.open(originalAspectRatio - 0.05f, originalAspectRatio + 0.05f));
     }
 
     private static void assertBitmapFitsExactlyWithinBounds(int maxSide, Bitmap bitmap) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
 
-        assertThat("width", width, lessThanOrEqualTo(maxSide));
-        assertThat("height", height, lessThanOrEqualTo(maxSide));
+        assertThat(width).isIn(Range.atMost(maxSide));
+        assertThat(height).isIn(Range.atMost(maxSide));
 
-        // See https://code.google.com/p/hamcrest/issues/detail?id=82.
-        CombinableMatcher.CombinableEitherMatcher<Integer> eitherMatcher = either(equalTo(width));
-        assertThat("one side must match maxSide", maxSide, eitherMatcher.or(equalTo(height)));
+        assertTrue("one side must match maxSide", width == maxSide || height == maxSide);
     }
 
     @Test

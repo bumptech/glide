@@ -10,8 +10,7 @@ import org.junit.runners.JUnit4;
 
 import java.io.InputStream;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
 @RunWith(JUnit4.class)
@@ -28,6 +27,6 @@ public class HttpUrlGlideUrlLoaderTest {
     @Test
     public void testReturnsValidFetcher() {
         DataFetcher<InputStream> result = loader.getResourceFetcher(model, 100, 100);
-        assertThat(result, instanceOf(HttpUrlFetcher.class));
+        assertThat(result).isInstanceOf(HttpUrlFetcher.class);
     }
 }

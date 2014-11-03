@@ -20,10 +20,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.equalTo;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -61,7 +59,7 @@ public class HttpUrlFetcherServerTest {
                 .setResponseCode(200));
         HttpUrlFetcher fetcher = getFetcher();
         InputStream is = fetcher.loadData(Priority.HIGH);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
     }
 
     @Test
@@ -74,7 +72,7 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
     }
 
     @Test
@@ -87,7 +85,7 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
     }
 
     @Test
@@ -100,11 +98,11 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.NORMAL);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
 
         mockWebServer.takeRequest();
         RecordedRequest second = mockWebServer.takeRequest();
-        assertThat(second.getPath(), endsWith("/redirect"));
+        assertThat(second.getPath()).endsWith("/redirect");
     }
 
     @Test
@@ -121,11 +119,11 @@ public class HttpUrlFetcherServerTest {
             .setResponseCode(200).setBody(expected));
 
         InputStream is = getFetcher().loadData(Priority.NORMAL);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
 
-        assertThat(mockWebServer.takeRequest().getPath(), containsString(DEFAULT_PATH));
+        assertThat(mockWebServer.takeRequest().getPath()).contains(DEFAULT_PATH);
         for (int i = 0; i < numRedirects; i++) {
-            assertThat(mockWebServer.takeRequest().getPath(), containsString(redirectBase + i));
+            assertThat(mockWebServer.takeRequest().getPath()).contains(redirectBase + i);
         }
     }
 

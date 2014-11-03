@@ -12,9 +12,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -233,7 +232,7 @@ public class ListPreloaderTest {
 
         preloader.onScroll(null, 1, 10, 30);
 
-        assertThat(loadedObjects, containsInAnyOrder(objects.toArray()));
+        assertThat(loadedObjects).containsAllIn(objects);
     }
 
     private static class ListPreloaderAdapter extends ListPreloader<Object> {

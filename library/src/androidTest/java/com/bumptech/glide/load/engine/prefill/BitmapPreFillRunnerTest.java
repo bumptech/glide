@@ -22,9 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -74,7 +72,7 @@ public class BitmapPreFillRunnerTest {
         handler.run();
 
         Bitmap expected = Bitmap.createBitmap(size.getWidth(), size.getHeight(), size.getConfig());
-        assertThat(addedBitmaps, contains(expected, expected, expected));
+        assertThat(addedBitmaps).containsExactly(expected, expected, expected);
     }
 
     @Test
@@ -111,7 +109,7 @@ public class BitmapPreFillRunnerTest {
             current = addedBitmaps.get(i);
         }
 
-        assertThat(addedBitmaps, hasSize(4));
+        assertThat(addedBitmaps).hasSize(4);
     }
 
     @Test
@@ -125,11 +123,11 @@ public class BitmapPreFillRunnerTest {
         BitmapPreFillRunner handler = getHandler(allocationOrder);
         handler.run();
 
-        assertThat(addedBitmaps, hasSize(1));
+        assertThat(addedBitmaps).hasSize(1);
 
         handler.run();
 
-        assertThat(addedBitmaps, hasSize(3));
+        assertThat(addedBitmaps).hasSize(3);
     }
 
     @Test
@@ -219,7 +217,7 @@ public class BitmapPreFillRunnerTest {
 
         verify(cache).put(any(Key.class), any(Resource.class));
         verify(pool, never()).put(any(Bitmap.class));
-        assertThat(addedBitmaps, contains(bitmap));
+        assertThat(addedBitmaps).containsExactly(bitmap);
     }
 
     @Test
@@ -237,7 +235,7 @@ public class BitmapPreFillRunnerTest {
 
         verify(cache, never()).put(any(Key.class), any(Resource.class));
         verify(pool).put(eq(bitmap));
-        assertThat(addedBitmaps, contains(bitmap));
+        assertThat(addedBitmaps).containsExactly(bitmap);
     }
 
     @Test
@@ -255,7 +253,7 @@ public class BitmapPreFillRunnerTest {
 
         verify(cache, never()).put(any(Key.class), any(Resource.class));
         verify(pool).put(eq(bitmap));
-        assertThat(addedBitmaps, contains(bitmap));
+        assertThat(addedBitmaps).containsExactly(bitmap);
     }
 
     @Test

@@ -13,9 +13,8 @@ import org.robolectric.annotation.Config;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static org.hamcrest.Matchers.containsString;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -90,7 +89,7 @@ public class MediaStoreThumbFetcherTest {
     @Test
     public void testContainsAllRelevantPartsInId() {
         String id = harness.get().getId();
-        assertThat(id, containsString(harness.uri.toString()));
+        assertThat(id).contains(harness.uri.toString());
     }
 
     @SuppressWarnings("unchecked")

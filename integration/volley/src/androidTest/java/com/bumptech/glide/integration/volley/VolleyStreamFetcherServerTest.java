@@ -29,10 +29,8 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -67,7 +65,7 @@ public class VolleyStreamFetcherServerTest {
                 .setResponseCode(200));
         DataFetcher<InputStream> fetcher = getFetcher();
         InputStream is = fetcher.loadData(Priority.HIGH);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
     }
 
     @Test
@@ -80,7 +78,7 @@ public class VolleyStreamFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
     }
 
     @Test
@@ -93,7 +91,7 @@ public class VolleyStreamFetcherServerTest {
             .setResponseCode(200)
             .setBody(expected));
         InputStream is = getFetcher().loadData(Priority.LOW);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
     }
 
     @Test
@@ -110,11 +108,11 @@ public class VolleyStreamFetcherServerTest {
             .setResponseCode(200).setBody(expected));
 
         InputStream is = getFetcher().loadData(Priority.NORMAL);
-        assertThat(isToString(is), equalTo(expected));
+        assertEquals(expected, isToString(is));
 
-        assertThat(mockWebServer.takeRequest().getPath(), containsString(DEFAULT_PATH));
+        assertThat(mockWebServer.takeRequest().getPath()).contains(DEFAULT_PATH);
         for (int i = 0; i < numRedirects; i++) {
-            assertThat(mockWebServer.takeRequest().getPath(), containsString(redirectBase + i));
+            assertThat(mockWebServer.takeRequest().getPath()).contains(redirectBase + i);
         }
     }
 
@@ -128,7 +126,7 @@ public class VolleyStreamFetcherServerTest {
             getFetcher().loadData(Priority.NORMAL);
             fail("Didn't get expected IOException");
         } catch (ExecutionException e) {
-            assertThat(e.getCause(), instanceOf(VolleyError.class));
+            assertThat(e.getCause()).isInstanceOf(VolleyError.class);
         }
     }
 
@@ -139,7 +137,7 @@ public class VolleyStreamFetcherServerTest {
             getFetcher().loadData(Priority.LOW);
             fail("Failed to get expected exception");
         } catch (ExecutionException e) {
-            assertThat(e.getCause(), instanceOf(NoConnectionError.class));
+            assertThat(e.getCause()).isInstanceOf(NoConnectionError.class);
         }
     }
 
@@ -154,8 +152,8 @@ public class VolleyStreamFetcherServerTest {
             getFetcher().loadData(Priority.NORMAL);
             fail("Failed to get expected exception");
         } catch (ExecutionException e) {
-            assertThat(e.getCause(), instanceOf(NoConnectionError.class));
-            assertThat(e.getCause().getCause(), instanceOf(ProtocolException.class));
+            assertThat(e.getCause()).isInstanceOf(NoConnectionError.class);
+            assertThat(e.getCause().getCause()).isInstanceOf(ProtocolException.class);
         }
     }
 
@@ -167,7 +165,7 @@ public class VolleyStreamFetcherServerTest {
             getFetcher().loadData(Priority.NORMAL);
             fail("Failed to get expected exception");
         } catch (ExecutionException e) {
-            assertThat(e.getCause(), instanceOf(ServerError.class));
+            assertThat(e.getCause()).isInstanceOf(ServerError.class);
         }
     }
 
@@ -178,7 +176,7 @@ public class VolleyStreamFetcherServerTest {
             getFetcher().loadData(Priority.LOW);
             fail("Failed to get expected exception");
         } catch (ExecutionException e) {
-            assertThat(e.getCause(), instanceOf(ServerError.class));
+            assertThat(e.getCause()).isInstanceOf(ServerError.class);
         }
     }
 

@@ -25,8 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewTreeObserver.OnPreDrawListener;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyInt;
@@ -191,7 +190,7 @@ public class ViewTargetTest {
         target.getSize(cb2);
 
         PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
-        assertThat(shadowObserver.getPreDrawListeners(), hasSize(1));
+        assertThat(shadowObserver.getPreDrawListeners()).hasSize(1);
     }
 
     @Test
@@ -204,7 +203,7 @@ public class ViewTargetTest {
         PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
-        assertThat(shadowObserver.getPreDrawListeners(), hasSize(0));
+        assertThat(shadowObserver.getPreDrawListeners()).hasSize(0);
 
         SizeReadyCallback cb2 = mock(SizeReadyCallback.class);
         view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -225,7 +224,7 @@ public class ViewTargetTest {
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb, never()).onSizeReady(anyInt(), anyInt());
-        assertThat(shadowObserver.getPreDrawListeners(), hasSize(1));
+        assertThat(shadowObserver.getPreDrawListeners()).hasSize(1);
     }
 
     @Test

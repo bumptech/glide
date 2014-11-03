@@ -16,8 +16,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
@@ -37,7 +36,7 @@ public class ImageViewTargetFactoryTest {
         Bitmap bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
         Target<Bitmap> target = factory.buildTarget(view, Bitmap.class);
         target.onResourceReady(bitmap, null);
-        assertThat(target, instanceOf(BitmapImageViewTarget.class));
+        assertThat(target).isInstanceOf(BitmapImageViewTarget.class);
     }
 
     @Test
@@ -45,7 +44,7 @@ public class ImageViewTargetFactoryTest {
         GlideDrawable glideDrawable = mock(GlideDrawable.class);
         Target<GlideDrawable> target = factory.buildTarget(view, GlideDrawable.class);
         target.onResourceReady(glideDrawable, null);
-        assertThat(target, instanceOf(GlideDrawableImageViewTarget.class));
+        assertThat(target).isInstanceOf(GlideDrawableImageViewTarget.class);
     }
 
     @Test
@@ -53,7 +52,7 @@ public class ImageViewTargetFactoryTest {
         GifDrawable gifDrawable = mock(GifDrawable.class);
         Target target = factory.buildTarget(view, GifDrawable.class);
         target.onResourceReady(gifDrawable, null);
-        assertThat(target, instanceOf(GlideDrawableImageViewTarget.class));
+        assertThat(target).isInstanceOf(GlideDrawableImageViewTarget.class);
     }
 
     @Test
@@ -61,7 +60,7 @@ public class ImageViewTargetFactoryTest {
         GlideBitmapDrawable drawable = mock(GlideBitmapDrawable.class);
         Target target = factory.buildTarget(view, GlideBitmapDrawable.class);
         target.onResourceReady(drawable, null);
-        assertThat(target, instanceOf(GlideDrawableImageViewTarget.class));
+        assertThat(target).isInstanceOf(GlideDrawableImageViewTarget.class);
     }
 
     @Test
@@ -71,14 +70,14 @@ public class ImageViewTargetFactoryTest {
 
         Target target = factory.buildTarget(view, BitmapDrawable.class);
         target.onResourceReady(drawable, null);
-        assertThat(target, instanceOf(DrawableImageViewTarget.class));
+        assertThat(target).isInstanceOf(DrawableImageViewTarget.class);
     }
 
     @Test
     public void testReturnsTargetForDrawables() {
         Target<Drawable> target = factory.buildTarget(view, Drawable.class);
         target.onResourceReady(new ColorDrawable(Color.RED), null);
-        assertThat(target, instanceOf(DrawableImageViewTarget.class));
+        assertThat(target).isInstanceOf(DrawableImageViewTarget.class);
     }
 
     @Test(expected = IllegalArgumentException.class)

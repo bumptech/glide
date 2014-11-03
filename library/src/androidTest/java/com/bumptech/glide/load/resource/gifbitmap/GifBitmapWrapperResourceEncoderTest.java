@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +34,7 @@ public class GifBitmapWrapperResourceEncoderTest {
         when(gifEncoder.getId()).thenReturn(gifId);
 
         String id = encoder.getId();
-        assertThat(id, containsString(bitmapId));
-        assertThat(id, containsString(gifId));
+        assertThat(id).contains(bitmapId);
+        assertThat(id).contains(gifId);
     }
 }

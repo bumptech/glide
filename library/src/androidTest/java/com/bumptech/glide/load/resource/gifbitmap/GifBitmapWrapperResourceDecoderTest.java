@@ -21,10 +21,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.hamcrest.Matchers.containsString;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -217,8 +216,8 @@ public class GifBitmapWrapperResourceDecoderTest {
         when(gifDecoder.getId()).thenReturn(gifId);
 
         String id = decoder.getId();
-        assertThat(id, containsString(bitmapId));
-        assertThat(id, containsString(gifId));
+        assertThat(id).contains(bitmapId);
+        assertThat(id).contains(gifId);
     }
 
     @SuppressWarnings("unchecked")

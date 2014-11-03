@@ -15,8 +15,7 @@ import org.robolectric.shadows.ShadowBitmap;
 import java.io.ByteArrayOutputStream;
 
 import static com.bumptech.glide.tests.Util.assertClassHasValidId;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -90,7 +89,7 @@ public class BitmapEncoderTest {
     }
 
     private static void assertContains(String string, String expected) {
-        assertThat(string, containsString(expected));
+        assertThat(string).contains(expected);
     }
 
     @SuppressWarnings("unchecked")

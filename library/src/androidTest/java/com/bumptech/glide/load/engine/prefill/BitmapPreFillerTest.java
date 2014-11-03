@@ -5,7 +5,7 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.util.Util;
-import org.hamcrest.core.CombinableMatcher;
+import com.google.common.collect.Range;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,10 +16,7 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -124,7 +121,7 @@ public class BitmapPreFillerTest {
             byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
-        assertThat(byteSize, lessThanOrEqualTo(POOL_SIZE + CACHE_SIZE));
+        assertThat(byteSize).isIn(Range.atMost(POOL_SIZE + CACHE_SIZE));
     }
 
     @Test
@@ -151,7 +148,7 @@ public class BitmapPreFillerTest {
             byteSize += Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
         }
 
-        assertThat(byteSize, lessThanOrEqualTo(POOL_SIZE + CACHE_SIZE));
+        assertThat(byteSize).isIn(Range.atMost(POOL_SIZE + CACHE_SIZE));
     }
 
     @Test
@@ -280,9 +277,12 @@ public class BitmapPreFillerTest {
             attributes.add(allocationOrder.remove());
         }
 
-        CombinableMatcher.CombinableEitherMatcher<Iterable<? extends PreFillType>> either =
-                either(contains(smallWidth, smallHeight, smallWidth, smallHeight));
-        assertThat(attributes, either.or(contains(smallHeight, smallWidth, smallHeight, smallWidth)));
+        // Either width, height, width, height or height, width, height, width.
+        try {
+            assertThat(attributes).containsExactly(smallWidth, smallHeight, smallWidth, smallHeight).inOrder();
+        } catch (AssertionError e) {
+            assertThat(attributes).containsExactly(smallHeight, smallWidth, smallHeight, smallWidth).inOrder();
+        }
     }
 
     @Test

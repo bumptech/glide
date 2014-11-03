@@ -13,9 +13,8 @@ import org.robolectric.annotation.Config;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
-import static org.hamcrest.Matchers.containsString;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -96,7 +95,7 @@ public class GifBitmapResourceEncoderTest {
         String bitmapId = "bitmapId";
         when(bitmapEncoder.getId()).thenReturn(bitmapId);
         String id = encoder.getId();
-        assertThat(id, containsString(gifId));
-        assertThat(id, containsString(bitmapId));
+        assertThat(id).contains(gifId);
+        assertThat(id).contains(bitmapId);
     }
 }

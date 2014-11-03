@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -47,8 +46,8 @@ public class ImageVideoWrapperEncoderTest {
 
         String id = encoder.getId();
 
-        assertThat(id, containsString(streamId));
-        assertThat(id, containsString(fileId));
+        assertThat(id).contains(streamId);
+        assertThat(id).contains(fileId);
     }
 
     @Test

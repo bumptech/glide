@@ -22,8 +22,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -54,8 +53,8 @@ public class RequestManagerRetrieverTest {
         Util.setSdkVersionInt(initialSdkVersion);
 
         Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
-        assertThat(retriever.pendingRequestManagerFragments.entrySet(), empty());
-        assertThat(retriever.pendingSupportRequestManagerFragments.entrySet(), empty());
+        assertThat(retriever.pendingRequestManagerFragments).isEmpty();
+        assertThat(retriever.pendingSupportRequestManagerFragments).isEmpty();
     }
 
     @Test

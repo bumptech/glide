@@ -16,10 +16,9 @@ import java.util.List;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
-import static org.hamcrest.Matchers.empty;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -51,7 +50,7 @@ public class LruBitmapPoolTest {
         Bitmap bitmap = createMutableBitmap();
         Robolectric.shadowOf(bitmap).setMutable(false);
         pool.put(bitmap);
-        assertThat(strategy.bitmaps, empty());
+        assertThat(strategy.bitmaps).isEmpty();
     }
 
     @Test

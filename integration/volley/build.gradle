@@ -9,8 +9,7 @@ dependencies {
     compile project(':glide')
     compile "com.mcxiaoke.volley:library:${VOLLEY_VERSION}"
 
-    androidTestCompile "org.hamcrest:hamcrest-core:${HAMCREST_VERSION}"
-    androidTestCompile "org.hamcrest:hamcrest-library:${HAMCREST_VERSION}"
+    androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"
     androidTestCompile "junit:junit:${JUNIT_VERSION}"
     androidTestCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
     androidTestCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
