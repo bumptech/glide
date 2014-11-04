@@ -17,6 +17,8 @@ package com.bumptech.glide.load.resource.bitmap;
  *  limitations under the License.
  */
 
+import android.util.Log;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,32 +38,33 @@ import java.io.InputStream;
  * </pre>
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
+    private static final String TAG = "BufferedIs";
 
     /**
      * The buffer containing the current bytes read from the target InputStream.
      */
-    protected volatile byte[] buf;
+    private volatile byte[] buf;
 
     /**
      * The total number of bytes inside the byte array {@code buf}.
      */
-    protected int count;
+    private int count;
 
     /**
      * The current limit, which when passed, invalidates the current mark.
      */
-    protected int marklimit;
+    private int marklimit;
 
     /**
      * The currently marked position. -1 indicates no mark has been set or the
      * mark has been invalidated.
      */
-    protected int markpos = -1;
+    private int markpos = -1;
 
     /**
      * The current position within the byte array {@code buf}.
      */
-    protected int pos;
+    private int pos;
 
     public RecyclableBufferedInputStream(InputStream in, byte[] buffer) {
         super(in);
@@ -92,6 +95,17 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
     private static IOException streamClosed() throws IOException {
         throw new IOException("BufferedInputStream is closed");
+    }
+
+    /**
+     * Reduces the mark limit to match the current buffer length to prevent the buffer from
+     * continuing to increase in size.
+     *
+     * <p>Subsequent calls to {@link #mark(int)} will be obeyed and may cause the buffer size
+     * to increase.
+     */
+    public synchronized void fixMarkLimit() {
+        marklimit = buf.length;
     }
 
     /**
@@ -133,6 +147,9 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
             int newLength = localBuf.length * 2;
             if (newLength > marklimit) {
                 newLength = marklimit;
+            }
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "allocate buffer of length: " + newLength);
             }
             byte[] newbuf = new byte[newLength];
             System.arraycopy(localBuf, 0, newbuf, 0, localBuf.length);

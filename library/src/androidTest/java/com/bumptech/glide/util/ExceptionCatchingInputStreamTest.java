@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,12 +25,12 @@ import static org.mockito.Mockito.when;
 @RunWith(JUnit4.class)
 public class ExceptionCatchingInputStreamTest {
 
-    private InputStream wrapped;
+    private RecyclableBufferedInputStream wrapped;
     private ExceptionCatchingInputStream is;
 
     @Before
     public void setUp() throws Exception {
-        wrapped = mock(InputStream.class);
+        wrapped = mock(RecyclableBufferedInputStream.class);
         is = new ExceptionCatchingInputStream();
         is.setInputStream(wrapped);
     }
@@ -91,6 +92,13 @@ public class ExceptionCatchingInputStreamTest {
     public void testCallsResetOnWrapped() throws IOException {
         is.reset();
         verify(wrapped).reset();
+    }
+
+
+    @Test
+    public void testFixMarkLimitCallsFixMarkLimitOnWrappedStream() {
+        is.fixMarkLimit();
+        verify(wrapped).fixMarkLimit();
     }
 
     @Test
