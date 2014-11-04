@@ -2,6 +2,7 @@ package com.bumptech.glide.manager;
 
 import android.annotation.SuppressLint;
 import android.support.v4.app.Fragment;
+
 import com.bumptech.glide.RequestManager;
 
 /**

@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.okhttp;
 
 import android.content.Context;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;

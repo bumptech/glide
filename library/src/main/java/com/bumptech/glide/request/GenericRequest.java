@@ -3,6 +3,7 @@ package com.bumptech.glide.request;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;

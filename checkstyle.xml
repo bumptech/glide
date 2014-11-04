@@ -86,6 +86,15 @@
             <property name="illegalPkgs" value="org.mockito.internal" />
             <message key="import.illegal" value="Import from illegal package - {0}. Use org.mockito.Matchers to instantiate argument matchers; or org.hamcrest.Matchers for assertThat." />
         </module>
+        <module name="ImportOrder">
+          <!-- Checks for out of order import statements. -->
+
+           <property name="severity" value="error"/>
+           <property name="groups" value="com.google,*,java,javax"/>
+           <!-- This ensures that static imports go first. -->
+           <property name="option" value="top"/>
+           <property name="tokens" value="STATIC_IMPORT, IMPORT"/>
+         </module>
 
         <!-- Checks for whitespace. -->
         <!-- See http://checkstyle.sourceforge.net/config_whitespace.html -->

@@ -1,8 +1,9 @@
 package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
-import com.bumptech.glide.load.model.GlideUrl;
+
 import com.bumptech.glide.load.model.GenericLoaderFactory;
+import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.UrlLoader;

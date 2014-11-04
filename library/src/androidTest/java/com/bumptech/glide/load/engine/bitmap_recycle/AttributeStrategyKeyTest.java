@@ -1,19 +1,22 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-import android.graphics.Bitmap;
-import com.bumptech.glide.load.engine.bitmap_recycle.AttributeStrategy.Key;
-import com.google.common.testing.EqualsTester;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
+import com.google.common.testing.EqualsTester;
+
+import android.graphics.Bitmap;
+
+import com.bumptech.glide.load.engine.bitmap_recycle.AttributeStrategy.Key;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)

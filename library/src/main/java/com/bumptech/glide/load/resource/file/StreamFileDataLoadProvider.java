@@ -1,12 +1,12 @@
 package com.bumptech.glide.load.resource.file;
 
-import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.resource.NullResourceEncoder;
+import com.bumptech.glide.provider.DataLoadProvider;
 
 import java.io.File;
 import java.io.InputStream;

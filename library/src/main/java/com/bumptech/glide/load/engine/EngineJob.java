@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
 import android.os.Message;
+
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.Util;

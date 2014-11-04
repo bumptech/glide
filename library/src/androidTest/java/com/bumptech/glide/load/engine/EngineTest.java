@@ -1,33 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Encoder;
-import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.engine.cache.MemoryCache;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.DataLoadProvider;
-import com.bumptech.glide.request.ResourceCallback;
-import com.bumptech.glide.tests.BackgroundUtil;
-import com.bumptech.glide.tests.GlideShadowLooper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -43,6 +15,35 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.provider.DataLoadProvider;
+import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.tests.BackgroundUtil;
+import com.bumptech.glide.tests.GlideShadowLooper;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = { GlideShadowLooper.class })

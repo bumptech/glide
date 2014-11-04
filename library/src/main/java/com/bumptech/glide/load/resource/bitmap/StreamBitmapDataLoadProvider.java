@@ -3,13 +3,13 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
+import com.bumptech.glide.provider.DataLoadProvider;
 
 import java.io.File;
 import java.io.InputStream;

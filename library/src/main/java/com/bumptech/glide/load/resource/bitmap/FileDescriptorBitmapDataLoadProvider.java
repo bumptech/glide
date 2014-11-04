@@ -4,13 +4,13 @@ import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
 
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.NullEncoder;
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
+import com.bumptech.glide.provider.DataLoadProvider;
 
 import java.io.File;
 

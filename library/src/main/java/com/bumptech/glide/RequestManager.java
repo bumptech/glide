@@ -5,10 +5,9 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.ApplicationVersionSignature;
-import com.bumptech.glide.signature.MediaStoreSignature;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreStreamLoader;
@@ -19,6 +18,8 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.signature.ApplicationVersionSignature;
+import com.bumptech.glide.signature.MediaStoreSignature;
 import com.bumptech.glide.signature.StringSignature;
 import com.bumptech.glide.util.Util;
 

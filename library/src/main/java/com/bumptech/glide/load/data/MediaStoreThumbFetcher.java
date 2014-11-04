@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+
 import com.bumptech.glide.Priority;
 
 import java.io.File;

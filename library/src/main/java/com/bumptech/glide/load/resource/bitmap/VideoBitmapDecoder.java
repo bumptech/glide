@@ -3,8 +3,9 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.io.IOException;
 

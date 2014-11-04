@@ -1,13 +1,15 @@
 package com.bumptech.glide.load.engine.prefill;
 
-import android.graphics.Bitmap;
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.testing.EqualsTester;
+
+import android.graphics.Bitmap;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)

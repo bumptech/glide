@@ -2,6 +2,7 @@ package com.bumptech.glide.load.data;
 
 import android.content.res.AssetManager;
 import android.util.Log;
+
 import com.bumptech.glide.Priority;
 
 import java.io.IOException;

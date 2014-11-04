@@ -11,7 +11,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 
 /**
  * A DataFetcher backed by volley for fetching images via http.

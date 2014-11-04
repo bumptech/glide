@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;

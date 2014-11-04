@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+
 import com.bumptech.glide.Priority;
 
 import java.io.FileNotFoundException;

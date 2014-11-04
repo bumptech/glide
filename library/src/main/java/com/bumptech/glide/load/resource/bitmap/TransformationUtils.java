@@ -9,6 +9,7 @@ import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.util.Log;
+
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 /**

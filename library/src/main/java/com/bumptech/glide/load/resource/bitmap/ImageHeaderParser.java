@@ -1,5 +1,11 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.GIF;
+import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.JPEG;
+import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.PNG;
+import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.PNG_A;
+import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.UNKNOWN;
+
 import android.util.Log;
 
 import java.io.IOException;
@@ -7,12 +13,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.GIF;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.JPEG;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.PNG;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.PNG_A;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.UNKNOWN;
 
 /**
  * A class for parsing the exif orientation and other data from an image header.

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.File;

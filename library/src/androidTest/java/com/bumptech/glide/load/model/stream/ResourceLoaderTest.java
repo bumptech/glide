@@ -1,15 +1,5 @@
 package com.bumptech.glide.load.model.stream;
 
-import android.net.Uri;
-import com.bumptech.glide.load.model.ModelLoader;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.io.InputStream;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -17,6 +7,18 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import android.net.Uri;
+
+import com.bumptech.glide.load.model.ModelLoader;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+import java.io.InputStream;
 
 /**
  * Tests for the {@link StreamResourceLoader} class.

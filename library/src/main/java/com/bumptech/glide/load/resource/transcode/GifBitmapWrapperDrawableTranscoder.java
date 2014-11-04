@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.transcode;
 
 import android.graphics.Bitmap;
+
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;

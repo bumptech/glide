@@ -1,5 +1,8 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -7,9 +10,6 @@ import org.junit.runners.JUnit4;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
 public class ImageHeaderParserTest {

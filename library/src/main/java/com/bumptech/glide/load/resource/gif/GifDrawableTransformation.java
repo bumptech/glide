@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.graphics.Bitmap;
+
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;

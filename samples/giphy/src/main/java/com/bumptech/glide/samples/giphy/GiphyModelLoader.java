@@ -2,6 +2,7 @@ package com.bumptech.glide.samples.giphy;
 
 import android.content.Context;
 import android.text.TextUtils;
+
 import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;

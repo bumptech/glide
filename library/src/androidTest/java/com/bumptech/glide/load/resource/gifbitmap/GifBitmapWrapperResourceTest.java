@@ -1,17 +1,19 @@
 package com.bumptech.glide.load.resource.gifbitmap;
 
-import android.graphics.Bitmap;
-import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import android.graphics.Bitmap;
+
+import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class GifBitmapWrapperResourceTest {

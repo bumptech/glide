@@ -1,6 +1,11 @@
 package com.bumptech.glide.integration.volley;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import android.os.SystemClock;
+
 import com.android.volley.NoConnectionError;
 import com.android.volley.RequestQueue;
 import com.android.volley.ServerError;
@@ -12,6 +17,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.testutil.TestUtil;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +34,6 @@ import java.io.InputStream;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Tests {@link com.bumptech.glide.integration.volley.VolleyStreamFetcher} against server responses.

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data;
 
 import android.text.TextUtils;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
 

@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.os.ParcelFileDescriptor;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;

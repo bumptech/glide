@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model;
 
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 

@@ -1,6 +1,19 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
+import static com.google.common.truth.Truth.assertThat;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.graphics.Bitmap;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,18 +25,6 @@ import org.robolectric.shadows.ShadowBitmap;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)

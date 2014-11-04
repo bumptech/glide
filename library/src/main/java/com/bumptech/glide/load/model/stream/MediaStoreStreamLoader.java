@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.MediaStoreThumbFetcher;
 import com.bumptech.glide.load.model.ModelLoader;

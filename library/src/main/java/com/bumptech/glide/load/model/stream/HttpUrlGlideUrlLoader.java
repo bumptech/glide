@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.HttpUrlFetcher;
 import com.bumptech.glide.load.model.GenericLoaderFactory;

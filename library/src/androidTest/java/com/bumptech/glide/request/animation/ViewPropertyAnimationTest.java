@@ -1,14 +1,5 @@
 package com.bumptech.glide.request.animation;
 
-import android.view.View;
-import android.widget.ImageView;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
 import static com.bumptech.glide.request.animation.GlideAnimation.ViewAdapter;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
@@ -17,6 +8,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import android.view.View;
+import android.widget.ImageView;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)

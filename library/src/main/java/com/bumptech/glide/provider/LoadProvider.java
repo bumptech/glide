@@ -1,7 +1,7 @@
 package com.bumptech.glide.provider;
 
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 /**
  * An extension of {@link com.bumptech.glide.provider.DataLoadProvider} that also allows a

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.content.Context;
+
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.util.HashMap;

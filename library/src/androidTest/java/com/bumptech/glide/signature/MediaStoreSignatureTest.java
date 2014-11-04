@@ -1,6 +1,7 @@
 package com.bumptech.glide.signature;
 
 import com.bumptech.glide.tests.KeyAssertions;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
