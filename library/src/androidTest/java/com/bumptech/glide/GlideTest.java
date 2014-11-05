@@ -51,6 +51,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.Resetter;
 import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.ByteArrayInputStream;
@@ -807,7 +808,7 @@ public class GlideTest {
     // one content resolver shadow in one part of the test and a different one in a different part of the test. Each
     // one ends up with different registered uris, which causes tests to fail. We shouldn't need to do this, but
     // using static maps seems to fix the issue.
-    @Implements(value = ContentResolver.class, resetStaticState = true)
+    @Implements(value = ContentResolver.class)
     public static class ShadowFileDescriptorContentResolver {
         private static final Map<Uri, AssetFileDescriptor> URI_TO_FILE_DESCRIPTOR =
                 new HashMap<Uri, AssetFileDescriptor>();
@@ -837,6 +838,7 @@ public class GlideTest {
             return URI_TO_FILE_DESCRIPTOR.get(uri);
         }
 
+        @Resetter
         public static void reset() {
             URI_TO_INPUT_STREAMS.clear();
             URI_TO_FILE_DESCRIPTOR.clear();
