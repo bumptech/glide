@@ -50,7 +50,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         gifItemRequest = Glide.with(this)
                 .from(Api.GifResult.class)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .fitCenter();
 
         adapter = new GifAdapter(this, preloader, gifItemRequest);
