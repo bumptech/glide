@@ -171,6 +171,10 @@ public void onCreate() {
 }
 ```
 
+Android SDK Version
+-------------------
+Glide requires a minimum sdk version of 10.
+
 License
 -------
 BSD, part MIT and Apache 2.0. See LICENSE file for details.
