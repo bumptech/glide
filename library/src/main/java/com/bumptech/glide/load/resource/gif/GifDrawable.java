@@ -75,6 +75,10 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     }
 
     GifDrawable(GifState state) {
+        if (state == null) {
+            throw new NullPointerException("GifState must not be null");
+        }
+
         this.state = state;
         this.decoder = new GifDecoder(state.bitmapProvider);
         decoder.setData(state.gifHeader, state.data);

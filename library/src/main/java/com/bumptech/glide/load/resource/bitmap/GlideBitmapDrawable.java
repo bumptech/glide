@@ -29,6 +29,10 @@ public class GlideBitmapDrawable extends GlideDrawable {
     }
 
     GlideBitmapDrawable(Resources res, BitmapState state) {
+        if (state == null) {
+            throw new NullPointerException("BitmapState must not be null");
+        }
+
         this.state = state;
         final int targetDensity;
         if (res != null) {
