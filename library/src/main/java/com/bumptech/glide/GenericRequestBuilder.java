@@ -734,6 +734,12 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 thumbnailRequestBuilder.priority = getThumbnailPriority();
             }
 
+            if (overrideWidth > 0 && overrideHeight > 0
+                && thumbnailRequestBuilder.overrideWidth < 0
+                && thumbnailRequestBuilder.overrideHeight < 0) {
+              thumbnailRequestBuilder.override(overrideWidth, overrideHeight);
+            }
+
             ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
             Request fullRequest = obtainRequest(target, sizeMultiplier, priority, coordinator);
             // Recursively generate thumbnail requests.
