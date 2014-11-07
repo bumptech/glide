@@ -58,7 +58,9 @@
         <module name="MemberName">
             <property name="format" value="^[a-z][a-zA-Z0-9_\$]*$" />
         </module>
-        <module name="MethodName" />
+        <module name="MethodName" >
+            <property name="format" value="^[a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$"/>
+        </module>
         <module name="PackageName" />
         <module name="ParameterName" />
         <module name="StaticVariableName" />
