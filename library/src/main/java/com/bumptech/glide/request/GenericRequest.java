@@ -438,6 +438,12 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         return requestCoordinator == null || !requestCoordinator.isAnyResourceSet();
     }
 
+    private void notifyLoadSuccess() {
+      if (requestCoordinator != null) {
+        requestCoordinator.onRequestSuccess(this);
+      }
+    }
+
     /**
      * A callback method that should never be invoked directly.
      */
@@ -488,6 +494,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
 
         status = Status.COMPLETE;
         this.resource = resource;
+        notifyLoadSuccess();
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("Resource ready in " + LogTime.getElapsedMillis(startTime) + " size: "

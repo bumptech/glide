@@ -2,6 +2,7 @@ package com.bumptech.glide.request;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -266,4 +267,40 @@ public class ThumbnailRequestCoordinatorTest {
         assertTrue(coordinator.isResourceSet());
     }
 
+    @Test
+    public void testClearsThumbRequestOnFullRequestComplete_withNullParent() {
+        coordinator.onRequestSuccess(full);
+        verify(thumb).clear();
+    }
+
+    @Test
+    public void testNotifiesParentOnFullRequestComplete_withNonNullParent() {
+        coordinator = new ThumbnailRequestCoordinator(parent);
+        coordinator.setRequests(full, thumb);
+        coordinator.onRequestSuccess(full);
+        verify(parent).onRequestSuccess(eq(coordinator));
+    }
+
+    @Test
+    public void testDoesNotClearThumbRequestOnFullRequestComplete_withNonNullParent() {
+        coordinator = new ThumbnailRequestCoordinator(parent);
+        coordinator.setRequests(full, thumb);
+        coordinator.onRequestSuccess(full);
+        verify(thumb, never()).clear();
+    }
+
+    @Test
+    public void testDoesNotClearThumbOnThumbRequestComplete() {
+        coordinator.onRequestSuccess(thumb);
+        verify(thumb, never()).clear();
+    }
+
+    @Test
+    public void testDoesNotNotifyParentOnThumbRequestComplete() {
+        coordinator = new ThumbnailRequestCoordinator(parent);
+        coordinator.setRequests(full, thumb);
+        coordinator.onRequestSuccess(thumb);
+
+        verify(parent, never()).onRequestSuccess(any(Request.class));
+    }
 }

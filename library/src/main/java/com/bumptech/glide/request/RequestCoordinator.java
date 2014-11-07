@@ -25,4 +25,9 @@ public interface RequestCoordinator {
      * @see Request#isComplete()
      */
     boolean isAnyResourceSet();
+
+    /**
+     * Must be called when a request coordinated by this object completes successfully.
+     */
+    void onRequestSuccess(Request request);
 }

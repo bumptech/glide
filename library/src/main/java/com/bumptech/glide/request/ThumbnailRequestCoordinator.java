@@ -58,6 +58,18 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
         return parentIsAnyResourceSet() || isResourceSet();
     }
 
+    @Override
+    public void onRequestSuccess(Request request) {
+      if (request.equals(thumb)) {
+        return;
+      }
+      if (coordinator == null) {
+        thumb.clear();
+      } else {
+        coordinator.onRequestSuccess(this);
+      }
+    }
+
     private boolean parentIsAnyResourceSet() {
         return coordinator != null && coordinator.isAnyResourceSet();
     }
