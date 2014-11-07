@@ -129,10 +129,12 @@ afterEvaluate { project ->
 
         task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
             from androidJavadocs.destinationDir
+            baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
         }
 
         task androidSourcesJar(type: Jar) {
             from project.android.sourceSets.main.java.source
+            baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
         }
     }
 
