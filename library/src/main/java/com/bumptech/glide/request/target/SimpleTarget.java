@@ -24,6 +24,9 @@ package com.bumptech.glide.request.target;
  * @param <Z> The type of resource that this target will receive.
  */
 public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
+    /** A constant indicating an invalid pixel size. */
+    protected static final int INVALID_SIZE = -1;
+
     private final int width;
     private final int height;
 
@@ -38,7 +41,7 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
      * </p>
      */
     public SimpleTarget() {
-        this(-1, -1);
+        this(INVALID_SIZE, INVALID_SIZE);
     }
 
     /**
