@@ -1,10 +1,6 @@
 buildscript {
     repositories {
         jcenter()
-        // TODO: remove this when robolectric 2.4 is released.
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
-        }
     }
 
     dependencies {
@@ -17,10 +13,6 @@ buildscript {
 subprojects { project ->
     repositories {
         jcenter()
-        // TODO: remove this when robolectric 2.4 is released.
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
-        }
     }
 
     apply plugin: 'checkstyle'
