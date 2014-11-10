@@ -22,12 +22,12 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 /**
  * An animated {@link android.graphics.drawable.Drawable} that plays the frames of an animated GIF.
  */
-public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameCallback {
-    private final Paint paint = new Paint();
+public class GifDrawable extends GlideDrawable implements GifFrameLoader.FrameCallback {
+    private final Paint paint;
     private final Rect destRect = new Rect();
-    private final GifFrameManager frameManager;
     private final GifState state;
     private final GifDecoder decoder;
+    private final GifFrameLoader frameLoader;
 
     /** True if the drawable is currently animating. */
     private boolean isRunning;
@@ -81,16 +81,17 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
         this.state = state;
         this.decoder = new GifDecoder(state.bitmapProvider);
+        this.paint = new Paint();
         decoder.setData(state.gifHeader, state.data);
-        frameManager = new GifFrameManager(state.context, decoder, state.targetWidth, state.targetHeight);
-        frameManager.setFrameTransformation(state.frameTransformation);
+        frameLoader = new GifFrameLoader(state.context, this, decoder, state.targetWidth, state.targetHeight);
     }
 
     // Visible for testing.
-    GifDrawable(GifDecoder decoder, GifFrameManager frameManager, Bitmap firstFrame, BitmapPool bitmapPool) {
+    GifDrawable(GifDecoder decoder, GifFrameLoader frameLoader, Bitmap firstFrame, BitmapPool bitmapPool, Paint paint) {
         this.decoder = decoder;
-        this.frameManager = frameManager;
+        this.frameLoader = frameLoader;
         this.state = new GifState(null);
+        this.paint = paint;
         state.bitmapPool = bitmapPool;
         state.firstFrame = firstFrame;
     }
@@ -108,7 +109,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
         }
         state.frameTransformation = frameTransformation;
         state.firstFrame = firstFrame;
-        frameManager.setFrameTransformation(frameTransformation);
+        frameLoader.setFrameTransformation(frameTransformation);
     }
 
     public GifDecoder getDecoder() {
@@ -158,7 +159,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
      * Clears temporary data and resets the drawable back to the first frame.
      */
     private void reset() {
-        frameManager.clear();
+        frameLoader.clear();
         invalidateSelf();
     }
 
@@ -168,13 +169,14 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
             invalidateSelf();
         }  else if (!isRunning) {
             isRunning = true;
-            frameManager.getNextFrame(this);
+            frameLoader.start();
             invalidateSelf();
         }
     }
 
     private void stopRunning() {
         isRunning = false;
+        frameLoader.stop();
     }
 
     @Override
@@ -225,7 +227,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
             applyGravity = false;
         }
 
-        Bitmap currentFrame = frameManager.getCurrentFrame();
+        Bitmap currentFrame = frameLoader.getCurrentFrame();
         Bitmap toDraw = currentFrame != null ? currentFrame : state.firstFrame;
         canvas.drawBitmap(toDraw, null, destRect, paint);
     }
@@ -248,13 +250,10 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
-    public void onFrameRead(int frameIndex) {
+    public void onFrameReady(int frameIndex) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getCallback() == null) {
             stop();
             reset();
-            return;
-        }
-        if (!isRunning) {
             return;
         }
 
@@ -266,8 +265,6 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
 
         if (maxLoopCount != LOOP_FOREVER && loopCount >= maxLoopCount) {
             stop();
-        } else {
-            frameManager.getNextFrame(this);
         }
     }
 
@@ -282,7 +279,8 @@ public class GifDrawable extends GlideDrawable implements GifFrameManager.FrameC
     public void recycle() {
         isRecycled = true;
         state.bitmapPool.put(state.firstFrame);
-        frameManager.clear();
+        frameLoader.clear();
+        frameLoader.stop();
     }
 
     // For testing.
