@@ -8,13 +8,13 @@ import android.widget.RemoteViews;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
 
+
+/**
+ * This class is used in order to display downloaded Bitmap inside an ImageView
+ * of an AppWidget through RemoteViews.
+ * @param <Z> Generic type of resource.
+ */
 public class AppWidgetTarget<Z> extends SimpleTarget<Z> {
-
-
-    /**
-     * This class is used in order to display downloaded Bitmap inside an ImageView
-     * of an AppWidget through RemoteViews.
-     */
 
     private int[] widgetIds;
     private ComponentName componentName;
@@ -36,13 +36,13 @@ public class AppWidgetTarget<Z> extends SimpleTarget<Z> {
      *                    because of RemoteViews limitations.)
      * @param widgetIds   The int[] that contains the widget ids of an application.
      */
-    public AppWidgetTarget(Context context,RemoteViews remoteViews,
+    public AppWidgetTarget(Context context, RemoteViews remoteViews,
                            int viewId, int width, int height, int... widgetIds) {
         super(width, height);
-        if(widgetIds == null){
+        if (widgetIds == null) {
             throw new NullPointerException("WidgetIds can not be null!");
         }
-        if(remoteViews == null){
+        if (remoteViews == null) {
             throw new NullPointerException("RemoteViews object can not be null!");
         }
         this.context = context;
@@ -61,8 +61,8 @@ public class AppWidgetTarget<Z> extends SimpleTarget<Z> {
      * @param viewId      The id of the ImageView view that will load the image.
      * @param widgetIds   The int[] that contains the widget ids of an application.
      */
-    public AppWidgetTarget(Context context,RemoteViews remoteViews, int viewId, int... widgetIds) {
-        this(context,remoteViews,viewId,-1,-1,widgetIds);
+    public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int... widgetIds) {
+        this(context, remoteViews, viewId, -1, -1, widgetIds);
     }
 
     /**
@@ -79,13 +79,13 @@ public class AppWidgetTarget<Z> extends SimpleTarget<Z> {
      *                    because of RemoteViews limitations.)
      * @param componentName   The ComponentName that refers to our AppWidget.
      */
-    public AppWidgetTarget(Context context,RemoteViews remoteViews,
+    public AppWidgetTarget(Context context, RemoteViews remoteViews,
                            int viewId, int width, int height, ComponentName componentName) {
         super(width, height);
-        if(componentName == null){
+        if (componentName == null) {
             throw new NullPointerException("ComponentName can not be null!");
         }
-        if(remoteViews == null){
+        if (remoteViews == null) {
             throw new NullPointerException("RemoteViews object can not be null!");
         }
         this.context = context;
@@ -104,9 +104,9 @@ public class AppWidgetTarget<Z> extends SimpleTarget<Z> {
      * @param viewId      The id of the ImageView view that will load the image.
      * @param componentName   The ComponentName that refers to our AppWidget.
      */
-    public AppWidgetTarget(Context context,RemoteViews remoteViews,
+    public AppWidgetTarget(Context context, RemoteViews remoteViews,
                            int viewId, ComponentName componentName) {
-        this(context,remoteViews,viewId,-1,-1,componentName);
+        this(context, remoteViews, viewId, -1, -1, componentName);
     }
 
     /**
@@ -114,10 +114,10 @@ public class AppWidgetTarget<Z> extends SimpleTarget<Z> {
      */
     public void update() {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.context);
-        if(this.componentName != null){
-            appWidgetManager.updateAppWidget(this.componentName,this.remoteViews);
-        }else{
-            appWidgetManager.updateAppWidget(this.widgetIds,this.remoteViews);
+        if (this.componentName != null) {
+            appWidgetManager.updateAppWidget(this.componentName, this.remoteViews);
+        } else {
+            appWidgetManager.updateAppWidget(this.widgetIds, this.remoteViews);
         }
     }
 

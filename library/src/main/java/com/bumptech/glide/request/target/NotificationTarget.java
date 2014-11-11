@@ -3,21 +3,19 @@ package com.bumptech.glide.request.target;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.widget.RemoteViews;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
 
+/**
+ * This class is used to display downloaded Bitmap inside an ImageView
+ * of a Notification through RemoteViews.
+ * @param <Z> Generic type of resource.
+ */
 public class NotificationTarget<Z> extends SimpleTarget<Z> {
 
-
-    /**
-     * This class is used to display downloaded Bitmap inside an ImageView
-     * of a Notification through RemoteViews.
-     */
     private final RemoteViews remoteViews;
     private final Context context;
     private final int notificationId;
@@ -46,12 +44,12 @@ public class NotificationTarget<Z> extends SimpleTarget<Z> {
                               int width,
                               int height,
                               Notification notification,
-                              int notificationId){
-        super(width,height);
-        if(notification == null){
+                              int notificationId) {
+        super(width, height);
+        if (notification == null) {
             throw new NullPointerException("Notification object can not be null!");
         }
-        if(remoteViews == null){
+        if (remoteViews == null) {
             throw new NullPointerException("RemoteViews object can not be null!");
         }
         this.context = context;
@@ -67,7 +65,7 @@ public class NotificationTarget<Z> extends SimpleTarget<Z> {
     private void update() {
         NotificationManager manager = (NotificationManager)
                 this.context.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(this.notificationId,this.notification);
+        manager.notify(this.notificationId, this.notification);
     }
 
     @Override
