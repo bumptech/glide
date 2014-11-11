@@ -4,15 +4,19 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
 
-public abstract class AppWidgetTarget<Z> extends BaseTarget<Z> {
+public class AppWidgetTarget<Z> extends SimpleTarget<Z> {
+
+
+    /**
+     * This class is used in order to display downloaded Bitmap inside an ImageView
+     * of an AppWidget through RemoteViews.
+     */
 
     private int[] widgetIds;
-    private final int width, height;
     private ComponentName componentName;
     private final RemoteViews remoteViews;
     private final Context context;
@@ -26,11 +30,15 @@ public abstract class AppWidgetTarget<Z> extends BaseTarget<Z> {
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
      * @param viewId      The id of the ImageView view that will load the image.
-     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set because of RemoteViews limitations.)
-     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set because of RemoteViews limitations.)
+     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set
+     *                    because of RemoteViews limitations.)
+     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set
+     *                    because of RemoteViews limitations.)
      * @param widgetIds   The int[] that contains the widget ids of an application.
      */
-    public AppWidgetTarget(Context context,RemoteViews remoteViews, int viewId, int width, int height, int... widgetIds) {
+    public AppWidgetTarget(Context context,RemoteViews remoteViews,
+                           int viewId, int width, int height, int... widgetIds) {
+        super(width, height);
         if(widgetIds == null){
             throw new NullPointerException("WidgetIds can not be null!");
         }
@@ -40,8 +48,6 @@ public abstract class AppWidgetTarget<Z> extends BaseTarget<Z> {
         this.context = context;
         this.remoteViews = remoteViews;
         this.viewId = viewId;
-        this.width = width;
-        this.height = height;
         this.widgetIds = widgetIds;
     }
 
@@ -67,11 +73,15 @@ public abstract class AppWidgetTarget<Z> extends BaseTarget<Z> {
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
      * @param viewId      The id of the ImageView view that will load the image.
-     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set because of RemoteViews limitations.)
-     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set because of RemoteViews limitations.)
+     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set
+     *                    because of RemoteViews limitations.)
+     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set
+     *                    because of RemoteViews limitations.)
      * @param componentName   The ComponentName that refers to our AppWidget.
      */
-    public AppWidgetTarget(Context context,RemoteViews remoteViews, int viewId, int width, int height, ComponentName componentName) {
+    public AppWidgetTarget(Context context,RemoteViews remoteViews,
+                           int viewId, int width, int height, ComponentName componentName) {
+        super(width, height);
         if(componentName == null){
             throw new NullPointerException("ComponentName can not be null!");
         }
@@ -81,8 +91,6 @@ public abstract class AppWidgetTarget<Z> extends BaseTarget<Z> {
         this.context = context;
         this.remoteViews = remoteViews;
         this.viewId = viewId;
-        this.width = width;
-        this.height = height;
         this.componentName = componentName;
     }
 
@@ -96,7 +104,8 @@ public abstract class AppWidgetTarget<Z> extends BaseTarget<Z> {
      * @param viewId      The id of the ImageView view that will load the image.
      * @param componentName   The ComponentName that refers to our AppWidget.
      */
-    public AppWidgetTarget(Context context,RemoteViews remoteViews, int viewId, ComponentName componentName) {
+    public AppWidgetTarget(Context context,RemoteViews remoteViews,
+                           int viewId, ComponentName componentName) {
         this(context,remoteViews,viewId,-1,-1,componentName);
     }
 
@@ -118,8 +127,4 @@ public abstract class AppWidgetTarget<Z> extends BaseTarget<Z> {
         this.update();
     }
 
-    @Override
-    public void getSize(SizeReadyCallback cb) {
-        cb.onSizeReady(this.width, this.height);
-    }
 }

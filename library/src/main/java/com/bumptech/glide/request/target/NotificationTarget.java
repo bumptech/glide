@@ -11,9 +11,13 @@ import android.widget.RemoteViews;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
 
-public abstract class NotificationTarget<Z> extends BaseTarget<Z> {
+public class NotificationTarget<Z> extends SimpleTarget<Z> {
 
-    private final int width, height;
+
+    /**
+     * This class is used to display downloaded Bitmap inside an ImageView
+     * of a Notification through RemoteViews.
+     */
     private final RemoteViews remoteViews;
     private final Context context;
     private final int notificationId;
@@ -29,8 +33,10 @@ public abstract class NotificationTarget<Z> extends BaseTarget<Z> {
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
      * @param viewId      The id of the ImageView view that will load the image.
-     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set because of RemoteViews limitations.)
-     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set because of RemoteViews limitations.)
+     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set
+     *                    because of RemoteViews limitations.)
+     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set
+     *                    because of RemoteViews limitations.)
      * @param notification The Notification object that we want to update.
      * @param notificationId The notificationId of the Notification that we want to load the Bitmap.
      */
@@ -41,6 +47,7 @@ public abstract class NotificationTarget<Z> extends BaseTarget<Z> {
                               int height,
                               Notification notification,
                               int notificationId){
+        super(width,height);
         if(notification == null){
             throw new NullPointerException("Notification object can not be null!");
         }
@@ -49,8 +56,6 @@ public abstract class NotificationTarget<Z> extends BaseTarget<Z> {
         }
         this.context = context;
         this.viewId = viewId;
-        this.width = width;
-        this.height = height;
         this.notification = notification;
         this.notificationId = notificationId;
         this.remoteViews = remoteViews;
@@ -60,7 +65,8 @@ public abstract class NotificationTarget<Z> extends BaseTarget<Z> {
      * Updates the Notification after the Bitmap resource is loaded.
      */
     private void update() {
-        NotificationManager manager = (NotificationManager) this.context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager manager = (NotificationManager)
+                this.context.getSystemService(Context.NOTIFICATION_SERVICE);
         manager.notify(this.notificationId,this.notification);
     }
 
@@ -70,8 +76,4 @@ public abstract class NotificationTarget<Z> extends BaseTarget<Z> {
         this.update();
     }
 
-    @Override
-    public void getSize(SizeReadyCallback cb) {
-        cb.onSizeReady(this.width,this.height);
-    }
 }
