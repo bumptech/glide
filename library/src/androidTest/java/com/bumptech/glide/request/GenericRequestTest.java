@@ -433,6 +433,15 @@ public class GenericRequestTest {
     }
 
     @Test
+    public void testDoesNotNotifyTargetTwiceIfClearedTwiceInARow() {
+        GenericRequest request = harness.getRequest();
+        request.clear();
+        request.clear();
+
+        verify(harness.target, times(1)).onLoadCleared(any(Drawable.class));
+    }
+
+    @Test
     public void testResourceIsNotCompleteWhenAskingCoordinatorIfCanSetImage() {
         RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
         doAnswer(new Answer() {

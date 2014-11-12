@@ -46,10 +46,12 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         WAITING_FOR_SIZE,
         /** Finished loading media successfully. */
         COMPLETE,
-        /** Failed to load media. */
+        /** Failed to load media, may be restarted. */
         FAILED,
         /** Cancelled by the user, may not be restarted. */
         CANCELLED,
+        /** Cleared by the user with a placeholder set, may not be restarted. */
+        CLEARED,
         /** Temporarily paused by the system, may be restarted. */
         PAUSED,
     }
@@ -298,6 +300,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     @Override
     public void clear() {
         Util.assertMainThread();
+        if (status == Status.CLEARED) {
+            return;
+        }
         cancel();
         // Resource must be released before canNotifyStatusChanged is called.
         if (resource != null) {
@@ -306,6 +311,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         if (canNotifyStatusChanged()) {
             target.onLoadCleared(getPlaceholderDrawable());
         }
+        // Must be after cancel().
+        status = Status.CLEARED;
     }
 
     @Override
@@ -353,7 +360,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
      */
     @Override
     public boolean isCancelled() {
-        return status == Status.CANCELLED;
+        return status == Status.CANCELLED || status == Status.CLEARED;
     }
 
     /**

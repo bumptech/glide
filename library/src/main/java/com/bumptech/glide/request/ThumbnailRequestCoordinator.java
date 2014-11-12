@@ -60,14 +60,13 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
 
     @Override
     public void onRequestSuccess(Request request) {
-      if (request.equals(thumb)) {
-        return;
-      }
-      if (coordinator == null) {
+        if (request.equals(thumb)) {
+            return;
+        }
+        if (coordinator != null) {
+            coordinator.onRequestSuccess(this);
+        }
         thumb.clear();
-      } else {
-        coordinator.onRequestSuccess(this);
-      }
     }
 
     private boolean parentIsAnyResourceSet() {

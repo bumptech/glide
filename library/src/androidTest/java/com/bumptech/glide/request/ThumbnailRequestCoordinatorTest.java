@@ -282,11 +282,11 @@ public class ThumbnailRequestCoordinatorTest {
     }
 
     @Test
-    public void testDoesNotClearThumbRequestOnFullRequestComplete_withNonNullParent() {
+    public void testClearsThumbRequestOnFullRequestComplete_withNonNullParent() {
         coordinator = new ThumbnailRequestCoordinator(parent);
         coordinator.setRequests(full, thumb);
         coordinator.onRequestSuccess(full);
-        verify(thumb, never()).clear();
+        verify(thumb).clear();
     }
 
     @Test
