@@ -29,7 +29,6 @@ class GifFrameManager {
     private final Handler mainHandler;
     private final int targetWidth;
     private final int targetHeight;
-    private final FrameSignature signature;
     private final GenericRequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap> requestBuilder;
     private boolean isLoadInProgress;
     private DelayTarget current;
@@ -52,8 +51,11 @@ class GifFrameManager {
         this.mainHandler = mainHandler;
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
-        this.signature = new FrameSignature();
 
+        // GifFrameModelLoader only uses the frame index as the cache/load key, so we mix in an additional signature
+        // here to make sure that this GIF's frames are always loaded independently of other frames. Without the
+        // signature, frames at the same index from two different GIFs would be treated as the same image load.
+        FrameSignature signature = new FrameSignature();
         GifFrameResourceDecoder frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
         GifFrameModelLoader frameLoader = new GifFrameModelLoader();
         Encoder<GifDecoder> sourceEncoder = NullEncoder.get();
@@ -89,8 +91,6 @@ class GifFrameManager {
         next = new DelayTarget(cb, targetTime);
         next.setFrameIndex(decoder.getCurrentFrameIndex());
 
-        // Use an incrementing signature to make sure we never hit an active resource that matches one of our frames.
-        signature.increment();
         requestBuilder
                 .load(decoder)
                 .transform(transformation)
@@ -164,30 +164,24 @@ class GifFrameManager {
 
     private static class FrameSignature implements Key {
         private final UUID uuid;
-        private int id;
 
         public FrameSignature() {
             this.uuid = UUID.randomUUID();
         }
 
-        public void increment() {
-            id++;
-        }
 
         @Override
         public boolean equals(Object o) {
             if (o instanceof FrameSignature) {
                 FrameSignature other = (FrameSignature) o;
-                return other.uuid.equals(uuid) && id == other.id;
+                return other.uuid.equals(uuid);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            int result = uuid.hashCode();
-            result = 31 * result + id;
-            return result;
+            return uuid.hashCode();
         }
 
         @Override
