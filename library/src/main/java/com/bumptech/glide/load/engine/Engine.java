@@ -148,29 +148,31 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
                 loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),
                 transcoder, loadProvider.getSourceEncoder());
 
-        EngineResource<?> cached = getFromCache(key);
-        if (cached != null) {
-            cached.acquire();
-            activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
-            cb.onResourceReady(cached);
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                logWithTimeAndKey("Loaded resource from cache", startTime, key);
-            }
-            return null;
-        }
-
-        WeakReference<EngineResource<?>> activeRef = activeResources.get(key);
-        if (activeRef != null) {
-            EngineResource<?> active = activeRef.get();
-            if (active != null) {
-                active.acquire();
-                cb.onResourceReady(active);
+        if (isMemoryCacheable) {
+            EngineResource<?> cached = getFromCache(key);
+            if (cached != null) {
+                cached.acquire();
+                activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
+                cb.onResourceReady(cached);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    logWithTimeAndKey("Loaded resource from active resources", startTime, key);
+                    logWithTimeAndKey("Loaded resource from cache", startTime, key);
                 }
                 return null;
-            } else {
-                activeResources.remove(key);
+            }
+
+            WeakReference<EngineResource<?>> activeRef = activeResources.get(key);
+            if (activeRef != null) {
+                EngineResource<?> active = activeRef.get();
+                if (active != null) {
+                    active.acquire();
+                    cb.onResourceReady(active);
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        logWithTimeAndKey("Loaded resource from active resources", startTime, key);
+                    }
+                    return null;
+                } else {
+                    activeResources.remove(key);
+                }
             }
         }
 
@@ -231,7 +233,10 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         // A null resource indicates that the load failed, usually due to an exception.
         if (resource != null) {
             resource.setResourceListener(key, this);
-            activeResources.put(key, new ResourceWeakReference(key, resource, resourceReferenceQueue));
+
+            if (resource.isCacheable()) {
+                activeResources.put(key, new ResourceWeakReference(key, resource, resourceReferenceQueue));
+            }
         }
         // TODO: should this check that the engine job is still current?
         jobs.remove(key);

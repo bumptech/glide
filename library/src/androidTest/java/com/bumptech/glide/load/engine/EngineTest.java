@@ -183,12 +183,33 @@ public class EngineTest {
     }
 
     @Test
-    public void testCacheIsChecked() {
+    public void testActiveResourcesIsNotCheckedIfNotMemoryCacheable() {
+        harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource<?>>(harness.resource));
+
+        harness.isMemoryCacheable = false;
+        harness.doLoad();
+
+        verify(harness.resource, never()).acquire();
+        verify(harness.job).start(any(EngineRunnable.class));
+    }
+
+    @Test
+    public void testCacheIsCheckedIfMemoryCacheable() {
         when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
 
         harness.doLoad();
 
         verify(harness.cb).onResourceReady(eq(harness.resource));
+    }
+
+    @Test
+    public void testCacheIsNotCheckedIfNotMemoryCacheable() {
+        when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
+
+        harness.isMemoryCacheable = false;
+        harness.doLoad();
+
+        verify(harness.job).start(any(EngineRunnable.class));
     }
 
     @Test
@@ -199,7 +220,6 @@ public class EngineTest {
 
         verify(harness.cb).onResourceReady(eq(harness.resource));
     }
-
 
     @Test
     public void testHandlesNonEngineResourcesFromCacheIfPresent() {
@@ -285,6 +305,7 @@ public class EngineTest {
 
     @Test
     public void testResourceIsAddedToActiveResourcesOnEngineComplete() {
+        when(harness.resource.isCacheable()).thenReturn(true);
         harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
 
         WeakReference<EngineResource<?>> resourceRef = harness.activeResources.get(harness.cacheKey);
@@ -298,6 +319,13 @@ public class EngineTest {
     }
 
     @Test
+    public void testDoesNotPutResourceThatIsNotCacheableInActiveResourcesOnEngineComplete() {
+        when(harness.resource.isCacheable()).thenReturn(false);
+        harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
+        assertThat(harness.activeResources).doesNotContainKey(harness.cacheKey);
+    }
+
+    @Test
     public void testRunnerIsRemovedFromRunnersOnEngineNotifiedJobCancel() {
         harness.doLoad();
 
@@ -305,7 +333,6 @@ public class EngineTest {
 
         assertThat(harness.jobs).doesNotContainKey(harness.cacheKey);
     }
-
 
     @Test
     public void testJobIsNotRemovedFromJobsIfOldJobIsCancelled() {
@@ -442,7 +469,7 @@ public class EngineTest {
         MemoryCache cache = mock(MemoryCache.class);
         EngineJob job;
         Engine engine;
-        boolean isMemoryCacheable;
+        boolean isMemoryCacheable = true;
         Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
         DataLoadProvider<Object, Object> loadProvider = mock(DataLoadProvider.class);
         ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
@@ -463,10 +490,10 @@ public class EngineTest {
             engine = new Engine(cache, mock(DiskCache.class), mock(ExecutorService.class),
                     mock(ExecutorService.class), jobs, keyFactory, activeResources, engineJobFactory, resourceRecycler);
 
-            when(engineJobFactory.build(eq(cacheKey), eq(isMemoryCacheable))).thenReturn(job);
         }
 
         public Engine.LoadStatus doLoad() {
+            when(engineJobFactory.build(eq(cacheKey), eq(isMemoryCacheable))).thenReturn(job);
             return engine.load(signature, width, height, fetcher, loadProvider, transformation, transcoder, priority,
                     isMemoryCacheable, diskCacheStrategy, cb);
         }
