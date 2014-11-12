@@ -148,32 +148,22 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
                 loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),
                 transcoder, loadProvider.getSourceEncoder());
 
-        if (isMemoryCacheable) {
-            EngineResource<?> cached = getFromCache(key);
-            if (cached != null) {
-                cached.acquire();
-                activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
-                cb.onResourceReady(cached);
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    logWithTimeAndKey("Loaded resource from cache", startTime, key);
-                }
-                return null;
+        EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
+        if (cached != null) {
+            cb.onResourceReady(cached);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                logWithTimeAndKey("Loaded resource from cache", startTime, key);
             }
+            return null;
+        }
 
-            WeakReference<EngineResource<?>> activeRef = activeResources.get(key);
-            if (activeRef != null) {
-                EngineResource<?> active = activeRef.get();
-                if (active != null) {
-                    active.acquire();
-                    cb.onResourceReady(active);
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        logWithTimeAndKey("Loaded resource from active resources", startTime, key);
-                    }
-                    return null;
-                } else {
-                    activeResources.remove(key);
-                }
+        EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
+        if (active != null) {
+            cb.onResourceReady(active);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                logWithTimeAndKey("Loaded resource from active resources", startTime, key);
             }
+            return null;
         }
 
         EngineJob current = jobs.get(key);
@@ -203,8 +193,40 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         Log.v(TAG, log + " in " + LogTime.getElapsedMillis(startTime) + "ms, key: " + key);
     }
 
+    private EngineResource<?> loadFromActiveResources(Key key, boolean isMemoryCacheable) {
+        if (!isMemoryCacheable) {
+            return null;
+        }
+
+        EngineResource<?> active = null;
+        WeakReference<EngineResource<?>> activeRef = activeResources.get(key);
+        if (activeRef != null) {
+            active = activeRef.get();
+            if (active != null) {
+                active.acquire();
+            } else {
+                activeResources.remove(key);
+            }
+        }
+
+        return active;
+    }
+
+    private EngineResource<?> loadFromCache(Key key, boolean isMemoryCacheable) {
+        if (!isMemoryCacheable) {
+            return null;
+        }
+
+        EngineResource<?> cached = getEngineResourceFromCache(key);
+        if (cached != null) {
+            cached.acquire();
+            activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
+        }
+        return cached;
+    }
+
     @SuppressWarnings("unchecked")
-    private EngineResource<?> getFromCache(Key key) {
+    private EngineResource<?> getEngineResourceFromCache(Key key) {
         Resource<?> cached = cache.remove(key);
 
         final EngineResource result;
