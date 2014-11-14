@@ -24,15 +24,16 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsCalledIncreasing() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
-            protected List<Object> getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 called.set(true);
                 assertEquals(11, start);
                 assertEquals(21, end);
-                return super.getItems(start, end);
+                return super.getPreloadItems(start, end);
             }
         };
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, 10);
         preloader.onScroll(null, 1, 10, 30);
         assertTrue(called.get());
     }
@@ -45,35 +46,36 @@ public class ListPreloaderTest {
             objects.add(new Object());
         }
 
-        ListPreloader preloader = new ListPreloader(toPreload) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             int expectedPosition;
+
             @Override
-            protected int[] getDimensions(Object item) {
-                return new int[] { 10, 10 };
+            public int[] getPreloadDimensions(Object item, int pos) {
+                return new int[]{10, 10};
             }
 
             @Override
-            protected List getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 return objects;
             }
 
             @Override
-            protected BitmapRequestBuilder getRequestBuilder(Object item) {
+            public BitmapRequestBuilder getPreloadRequestBuilder(Object item, int pos) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition++;
                 return mock(BitmapRequestBuilder.class);
             }
         };
-
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, toPreload);
         preloader.onScroll(null, 1, 10, 30);
     }
 
     @Test
     public void testGetItemsIsCalledDecreasing() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
-            protected List<Object> getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 // Ignore the preload caused from us starting at the end
                 if (start == 40) {
                     return Collections.emptyList();
@@ -81,9 +83,10 @@ public class ListPreloaderTest {
                 called.set(true);
                 assertEquals(19, start);
                 assertEquals(29, end);
-                return super.getItems(start, end);
+                return super.getPreloadItems(start, end);
             }
         };
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, 10);
         preloader.onScroll(null, 30, 10, 40);
         preloader.onScroll(null, 29, 10, 40);
         assertTrue(called.get());
@@ -97,29 +100,30 @@ public class ListPreloaderTest {
             objects.add(new Object());
         }
 
-        ListPreloader preloader = new ListPreloader(toPreload) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             int expectedPosition = toPreload - 1;
+
             @Override
-            protected int[] getDimensions(Object item) {
-                return new int[] { 10, 10 };
+            public int[] getPreloadDimensions(Object item, int pos) {
+                return new int[]{10, 10};
             }
 
             @Override
-            protected List getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 if (start == 40) {
-                    return  Collections.emptyList();
+                    return Collections.emptyList();
                 }
                 return objects;
             }
 
             @Override
-            protected BitmapRequestBuilder getRequestBuilder(Object item) {
+            public BitmapRequestBuilder getPreloadRequestBuilder(Object item, int pos) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition--;
                 return mock(BitmapRequestBuilder.class);
             }
         };
-
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, toPreload);
         preloader.onScroll(null, 30, 10, 40);
         preloader.onScroll(null, 29, 10, 40);
     }
@@ -127,15 +131,16 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsNeverCalledWithEndGreaterThanTotalItems() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
-            protected List<Object> getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 called.set(true);
                 assertEquals(26, start);
                 assertEquals(30, end);
-                return super.getItems(start, end);
+                return super.getPreloadItems(start, end);
             }
         };
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, 10);
         preloader.onScroll(null, 16, 10, 30);
         assertTrue(called.get());
     }
@@ -143,18 +148,20 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsNeverCalledWithStartLessThanZero() {
         final AtomicBoolean called = new AtomicBoolean(false);
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
-            protected List<Object> getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 if (start == 17) {
                     return Collections.emptyList();
                 }
                 called.set(true);
                 assertEquals(0, start);
                 assertEquals(6, end);
-                return super.getItems(start, end);
+                return super.getPreloadItems(start, end);
             }
         };
+
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, 10);
         preloader.onScroll(null, 7, 10, 30);
         preloader.onScroll(null, 6, 10, 30);
         assertTrue(called.get());
@@ -163,9 +170,9 @@ public class ListPreloaderTest {
     @Test
     public void testDontPreloadItemsRepeatedlyWhileIncreasing() {
         final AtomicInteger called = new AtomicInteger();
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
-            protected List<Object> getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 final int current = called.getAndIncrement();
                 if (current == 0) {
                     assertEquals(11, start);
@@ -174,10 +181,11 @@ public class ListPreloaderTest {
                     assertEquals(21, start);
                     assertEquals(24, end);
                 }
-                return super.getItems(start, end);
+                return super.getPreloadItems(start, end);
             }
         };
 
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, 10);
         preloader.onScroll(null, 1, 10, 30);
         preloader.onScroll(null, 4, 10, 30);
 
@@ -187,9 +195,9 @@ public class ListPreloaderTest {
     @Test
     public void testDontPreloadItemsRepeatedlyWhileDecreasing() {
         final AtomicInteger called = new AtomicInteger();
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
-            protected List<Object> getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 if (start == 30) {
                     return Collections.emptyList();
                 }
@@ -201,10 +209,11 @@ public class ListPreloaderTest {
                     assertEquals(7, start);
                     assertEquals(10, end);
                 }
-                return super.getItems(start, end);
+                return super.getPreloadItems(start, end);
             }
         };
 
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, 10);
         preloader.onScroll(null, 21, 10, 30);
         preloader.onScroll(null, 20, 10, 30);
         preloader.onScroll(null, 17, 10, 30);
@@ -217,45 +226,43 @@ public class ListPreloaderTest {
         objects.add(new Object());
         objects.add(new Object());
         final HashSet<Object> loadedObjects = new HashSet<Object>();
-        ListPreloaderAdapter preloader = new ListPreloaderAdapter(10) {
+        ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
-            protected List<Object> getItems(int start, int end) {
+            public List<Object> getPreloadItems(int start, int end) {
                 return objects;
             }
 
             @Override
-            protected GenericRequestBuilder getRequestBuilder(Object item) {
+            public GenericRequestBuilder getPreloadRequestBuilder(Object item, int pos) {
                 loadedObjects.add(item);
-                return super.getRequestBuilder(item);
+                return super.getPreloadRequestBuilder(item, pos);
             }
         };
-
+        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, 10);
         preloader.onScroll(null, 1, 10, 30);
-
         assertThat(loadedObjects).containsAllIn(objects);
     }
 
-    private static class ListPreloaderAdapter extends ListPreloader<Object> {
+    private static class ListPreloaderAdapter implements ListPreloader.PreloadModelProvider<Object> {
 
-        public ListPreloaderAdapter(int maxPreload) {
-            super(maxPreload);
+        public ListPreloaderAdapter() {
         }
 
         @Override
-        protected int[] getDimensions(Object item) {
-            return new int[] { 100, 100 };
-        }
-
-        @Override
-        protected List<Object> getItems(int start, int end) {
+        public List<Object> getPreloadItems(int start, int end) {
             ArrayList<Object> result = new ArrayList<Object>(end - start);
             Collections.fill(result, new Object());
             return result;
         }
 
         @Override
-        protected GenericRequestBuilder getRequestBuilder(Object item) {
+        public GenericRequestBuilder getPreloadRequestBuilder(Object item, int position) {
             return mock(BitmapRequestBuilder.class);
+        }
+
+        @Override
+        public int[] getPreloadDimensions(Object item, int position) {
+            return new int[]{100, 100};
         }
     }
 }
