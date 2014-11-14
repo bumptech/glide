@@ -141,7 +141,9 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
                 TextView titleView = (TextView) view.findViewById(R.id.title_view);
                 viewHolder = new ViewHolder(imageView, titleView);
                 view.setTag(viewHolder);
-                photoDimens = new int[]{imageView.getWidth(), imageView.getHeight()};
+                if(photoDimens == null){
+                    photoDimens = new int[]{imageView.getWidth(), imageView.getHeight()};
+                }
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
