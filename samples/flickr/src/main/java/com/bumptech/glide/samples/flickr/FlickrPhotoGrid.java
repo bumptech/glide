@@ -106,7 +106,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         }
     }
 
-    private class PhotoAdapter extends BaseAdapter implements ListPreloader.PreloadModelProvider<Photo>{
+    private class PhotoAdapter extends BaseAdapter implements ListPreloader.PreloadModelProvider<Photo> {
         private final int[] dimens = new int[] { photoSize, photoSize };
         private List<Photo> photos = new ArrayList<Photo>(0);
         private final LayoutInflater inflater;
