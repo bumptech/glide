@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/third_party/disklrucache/disklrucache.iml" filepath="$PROJECT_DIR$/third_party/disklrucache/disklrucache.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/flickr/flickr.iml" filepath="$PROJECT_DIR$/samples/flickr/flickr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/third_party/gif_decoder/gif_decoder.iml" filepath="$PROJECT_DIR$/third_party/gif_decoder/gif_decoder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/third_party/gif_encoder/gif_encoder.iml" filepath="$PROJECT_DIR$/third_party/gif_encoder/gif_encoder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/giphy/giphy.iml" filepath="$PROJECT_DIR$/samples/giphy/giphy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/glide/glide.iml" filepath="$PROJECT_DIR$/glide/glide.iml" />
+      <module fileurl="file://$PROJECT_DIR$/glide-parent.iml" filepath="$PROJECT_DIR$/glide-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/integration/integration.iml" filepath="$PROJECT_DIR$/integration/integration.iml" />
+      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
+      <module fileurl="file://$PROJECT_DIR$/integration/okhttp/okhttp.iml" filepath="$PROJECT_DIR$/integration/okhttp/okhttp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/svg/svg.iml" filepath="$PROJECT_DIR$/samples/svg/svg.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testutil/testutil.iml" filepath="$PROJECT_DIR$/testutil/testutil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/third_party/third_party.iml" filepath="$PROJECT_DIR$/third_party/third_party.iml" />
+      <module fileurl="file://$PROJECT_DIR$/integration/volley/volley.iml" filepath="$PROJECT_DIR$/integration/volley/volley.iml" />
+    </modules>
+  </component>
+</project>
