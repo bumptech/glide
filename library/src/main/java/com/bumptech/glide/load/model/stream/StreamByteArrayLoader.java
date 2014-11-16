@@ -31,7 +31,7 @@ public class StreamByteArrayLoader implements StreamModelLoader<byte[]> {
     }
 
     @Override
-    public DataFetcher<InputStream> getResourceFetcher(byte[] model, int width, int height) {
+    public DataFetcher<InputStream> getDataFetcher(byte[] model, int width, int height) {
         return new ByteArrayFetcher(model, id);
     }
 

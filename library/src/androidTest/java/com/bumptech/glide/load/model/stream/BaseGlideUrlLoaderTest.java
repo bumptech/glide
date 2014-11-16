@@ -43,13 +43,13 @@ public class BaseGlideUrlLoaderTest {
     @Test
     public void testReturnsNullIfUrlIsNull() {
         urlLoader.resultUrl = null;
-        assertNull(urlLoader.getResourceFetcher(new Object(), 100, 100));
+        assertNull(urlLoader.getDataFetcher(new Object(), 100, 100));
     }
 
     @Test
     public void testReturnsNullIfUrlIsEmpty() {
         urlLoader.resultUrl = "    ";
-        assertNull(urlLoader.getResourceFetcher(new Object(), 100, 100));
+        assertNull(urlLoader.getDataFetcher(new Object(), 100, 100));
     }
 
     @Test
@@ -61,9 +61,9 @@ public class BaseGlideUrlLoaderTest {
         when(modelCache.get(eq(model), eq(width), eq(height))).thenReturn(expectedUrl);
         DataFetcher<InputStream> expectedFetcher = mock(DataFetcher.class);
 
-        when(wrapped.getResourceFetcher(eq(expectedUrl), eq(width), eq(height))).thenReturn(expectedFetcher);
+        when(wrapped.getDataFetcher(eq(expectedUrl), eq(width), eq(height))).thenReturn(expectedFetcher);
 
-        assertEquals(expectedFetcher, urlLoader.getResourceFetcher(model, width, height));
+        assertEquals(expectedFetcher, urlLoader.getDataFetcher(model, width, height));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class BaseGlideUrlLoaderTest {
 
         urlLoader.resultUrl = "fakeUrl";
         final DataFetcher<InputStream> expected = mock(DataFetcher.class);
-        when(wrapped.getResourceFetcher(any(GlideUrl.class), eq(width), eq(height))).thenAnswer(
+        when(wrapped.getDataFetcher(any(GlideUrl.class), eq(width), eq(height))).thenAnswer(
                 new Answer<DataFetcher<InputStream>>() {
                     @Override
                     public DataFetcher<InputStream> answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -83,7 +83,7 @@ public class BaseGlideUrlLoaderTest {
 
                     }
                 });
-        assertEquals(expected, urlLoader.getResourceFetcher(new Object(), width, height));
+        assertEquals(expected, urlLoader.getDataFetcher(new Object(), width, height));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class BaseGlideUrlLoaderTest {
             }
         }).when(modelCache).put(eq(model), eq(width), eq(height), any(GlideUrl.class));
 
-        urlLoader.getResourceFetcher(model, width, height);
+        urlLoader.getDataFetcher(model, width, height);
 
         verify(modelCache).put(eq(model), eq(width), eq(height), any(GlideUrl.class));
     }
@@ -116,9 +116,9 @@ public class BaseGlideUrlLoaderTest {
         int height = 789;
 
         DataFetcher<InputStream> expected = mock(DataFetcher.class);
-        when(wrapped.getResourceFetcher(any(GlideUrl.class), eq(width), eq(height))).thenReturn(expected);
+        when(wrapped.getDataFetcher(any(GlideUrl.class), eq(width), eq(height))).thenReturn(expected);
 
-        assertEquals(expected, urlLoader.getResourceFetcher(new Object(), width, height));
+        assertEquals(expected, urlLoader.getDataFetcher(new Object(), width, height));
     }
 
     private class TestLoader extends BaseGlideUrlLoader<Object> {

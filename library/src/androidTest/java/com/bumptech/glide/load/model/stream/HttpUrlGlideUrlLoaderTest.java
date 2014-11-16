@@ -27,7 +27,7 @@ public class HttpUrlGlideUrlLoaderTest {
     }
     @Test
     public void testReturnsValidFetcher() {
-        DataFetcher<InputStream> result = loader.getResourceFetcher(model, 100, 100);
+        DataFetcher<InputStream> result = loader.getDataFetcher(model, 100, 100);
         assertThat(result).isInstanceOf(HttpUrlFetcher.class);
     }
 }

@@ -31,6 +31,11 @@ public class FileToStreamDecoder<T> implements ResourceDecoder<File, T> {
     }
 
     @Override
+    public boolean handles(File source) {
+        return true;
+    }
+
+    @Override
     public Resource<T> decode(File source, int width, int height) throws IOException {
         InputStream is = null;
         Resource<T> result = null;

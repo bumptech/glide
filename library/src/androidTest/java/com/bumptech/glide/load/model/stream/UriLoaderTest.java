@@ -62,45 +62,45 @@ public class UriLoaderTest {
     @Test
     public void testHandlesFileUris() throws IOException {
         Uri fileUri = Uri.fromFile(new File("f"));
-        DataFetcher dataFetcher = loader.getResourceFetcher(fileUri, IMAGE_SIDE, IMAGE_SIDE);
+        DataFetcher dataFetcher = loader.getDataFetcher(fileUri, IMAGE_SIDE, IMAGE_SIDE);
         assertEquals(localUriFetcher, dataFetcher);
     }
 
     @Test
     public void testHandlesResourceUris() throws IOException {
         Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
-        DataFetcher dataFetcher = loader.getResourceFetcher(resourceUri, IMAGE_SIDE, IMAGE_SIDE);
+        DataFetcher dataFetcher = loader.getDataFetcher(resourceUri, IMAGE_SIDE, IMAGE_SIDE);
         assertEquals(localUriFetcher, dataFetcher);
     }
 
     @Test
     public void testHandlesContentUris() {
         Uri contentUri = Uri.parse("content://com.bumptech.glide");
-        DataFetcher dataFetcher = loader.getResourceFetcher(contentUri, IMAGE_SIDE, IMAGE_SIDE);
+        DataFetcher dataFetcher = loader.getDataFetcher(contentUri, IMAGE_SIDE, IMAGE_SIDE);
         assertEquals(localUriFetcher, dataFetcher);
     }
 
     @Test
     public void testHandlesAssetUris() {
         Uri assetUri = Uri.parse("file:///android_asset/assetName");
-        DataFetcher fetcher = loader.getResourceFetcher(assetUri, IMAGE_SIDE, IMAGE_SIDE);
+        DataFetcher fetcher = loader.getDataFetcher(assetUri, IMAGE_SIDE, IMAGE_SIDE);
         assertEquals(assetUriFetcher, fetcher);
     }
 
     @Test
     public void testHandlesHttpUris() throws MalformedURLException {
         Uri httpUri = Uri.parse("http://www.google.com");
-        loader.getResourceFetcher(httpUri, IMAGE_SIDE, IMAGE_SIDE);
+        loader.getDataFetcher(httpUri, IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(urlLoader).getResourceFetcher(eq(new GlideUrl(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(urlLoader).getDataFetcher(eq(new GlideUrl(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test
     public void testHandlesHttpsUris() throws MalformedURLException {
         Uri httpsUri = Uri.parse("https://www.google.com");
-        loader.getResourceFetcher(httpsUri, IMAGE_SIDE, IMAGE_SIDE);
+        loader.getDataFetcher(httpsUri, IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(urlLoader).getResourceFetcher(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(urlLoader).getDataFetcher(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     // Test for https://github.com/bumptech/glide/issues/71.
@@ -109,8 +109,8 @@ public class UriLoaderTest {
         Uri mostlyInvalidHttpUri =
                 Uri.parse("http://myserver_url.com:80http://myserver_url.com/webapp/images/no_image.png?size=100");
 
-        loader.getResourceFetcher(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE);
-        verify(urlLoader).getResourceFetcher(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE),
-                eq(IMAGE_SIDE));
+        loader.getDataFetcher(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE);
+        verify(urlLoader).getDataFetcher(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE), eq
+                (IMAGE_SIDE));
     }
 }

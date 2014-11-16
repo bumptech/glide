@@ -7,14 +7,12 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
@@ -23,7 +21,6 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
@@ -44,7 +41,7 @@ import java.io.InputStream;
  * @param <TranscodeType> The type of the transcoded resource that the target will receive
  */
 public class BitmapRequestBuilder<ModelType, TranscodeType>
-        extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> implements BitmapOptions {
+        extends GenericRequestBuilder<ModelType, Bitmap, TranscodeType> implements BitmapOptions {
     private final BitmapPool bitmapPool;
 
     private Downsampler downsampler = Downsampler.AT_LEAST;
@@ -52,9 +49,8 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     private ResourceDecoder<InputStream, Bitmap> imageDecoder;
     private ResourceDecoder<ParcelFileDescriptor, Bitmap> videoDecoder;
 
-    BitmapRequestBuilder(LoadProvider<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> loadProvider,
-            Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
-        super(loadProvider, transcodeClass, other);
+    BitmapRequestBuilder(Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?> other) {
+        super(Bitmap.class, transcodeClass, other);
         this.bitmapPool = other.glide.getBitmapPool();
         this.decodeFormat =  other.glide.getDecodeFormat();
 
@@ -164,11 +160,12 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * {@inheritDoc}
      */
-    @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> decoder(ResourceDecoder<ImageVideoWrapper, Bitmap> decoder) {
-        super.decoder(decoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public BitmapRequestBuilder<ModelType, TranscodeType> decoder(ResourceDecoder<ImageVideoWrapper, Bitmap> decoder) {
+//        super.decoder(decoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}
@@ -429,7 +426,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> thumbnail(
-            GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequest) {
+            GenericRequestBuilder<?, ?, TranscodeType> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -437,11 +434,12 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     /**
      * {@inheritDoc}
      */
-    @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
-        super.sourceEncoder(sourceEncoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public BitmapRequestBuilder<ModelType, TranscodeType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
+//        super.sourceEncoder(sourceEncoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}

@@ -46,7 +46,7 @@ public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream>
     }
 
     @Override
-    public DataFetcher<InputStream> getResourceFetcher(GlideUrl model, int width, int height) {
+    public DataFetcher<InputStream> getDataFetcher(GlideUrl model, int width, int height) {
         // GlideUrls memoize parsed URLs so caching them saves a few object instantiations and time spent parsing urls.
         GlideUrl url = model;
         if (modelCache != null) {

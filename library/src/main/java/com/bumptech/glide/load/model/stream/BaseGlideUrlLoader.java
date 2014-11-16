@@ -39,7 +39,7 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
     }
 
     @Override
-    public DataFetcher<InputStream> getResourceFetcher(T model, int width, int height) {
+    public DataFetcher<InputStream> getDataFetcher(T model, int width, int height) {
         GlideUrl result = null;
         if (modelCache != null) {
             result = modelCache.get(model, width, height);
@@ -58,7 +58,7 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
             }
         }
 
-        return concreteLoader.getResourceFetcher(result, width, height);
+        return concreteLoader.getDataFetcher(result, width, height);
     }
 
     /**

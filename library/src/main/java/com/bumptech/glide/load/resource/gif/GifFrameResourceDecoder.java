@@ -16,6 +16,11 @@ class GifFrameResourceDecoder implements ResourceDecoder<GifDecoder, Bitmap> {
     }
 
     @Override
+    public boolean handles(GifDecoder source) {
+        return true;
+    }
+
+    @Override
     public Resource<Bitmap> decode(GifDecoder source, int width, int height) {
         Bitmap bitmap = source.getNextFrame();
         return BitmapResource.obtain(bitmap, bitmapPool);

@@ -49,6 +49,11 @@ public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVid
         this.streamFactory = streamFactory;
     }
 
+    @Override
+    public boolean handles(ImageVideoWrapper source) {
+        throw new UnsupportedOperationException();
+    }
+
     @SuppressWarnings("resource")
     // @see ResourceDecoder.decode
     @Override

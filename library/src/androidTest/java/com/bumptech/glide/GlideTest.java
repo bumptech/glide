@@ -130,7 +130,7 @@ public class GlideTest {
         when(mockStreamFetcher.getId()).thenReturn("fakeId");
         when(mockStreamFetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
         ModelLoader<GlideUrl, InputStream> mockUrlLoader = mock(ModelLoader.class);
-        when(mockUrlLoader.getResourceFetcher(any(GlideUrl.class), anyInt(), anyInt())).thenReturn(mockStreamFetcher);
+        when(mockUrlLoader.getDataFetcher(any(GlideUrl.class), anyInt(), anyInt())).thenReturn(mockStreamFetcher);
         ModelLoaderFactory<GlideUrl, InputStream> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
         when(mockUrlLoaderFactory.build(any(Context.class), any(GenericLoaderFactory.class)))
                 .thenReturn(mockUrlLoader);
@@ -209,7 +209,7 @@ public class GlideTest {
         when(dataFetcher.loadData(any(Priority.class))).thenReturn(expected);
         when(dataFetcher.getId()).thenReturn("id");
         ModelLoader<GlideUrl, File> modelLoader = mock(ModelLoader.class);
-        when(modelLoader.getResourceFetcher(eq(glideUrl), anyInt(), anyInt()))
+        when(modelLoader.getDataFetcher(eq(glideUrl), anyInt(), anyInt()))
                 .thenReturn(dataFetcher);
 
         Resource<File> expectedResource = mock(Resource.class);
@@ -719,7 +719,7 @@ public class GlideTest {
         when(failFetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
         when(failFetcher.getId()).thenReturn("fakeId");
         ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
-        when(failLoader.getResourceFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
+        when(failLoader.getDataFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
         ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
         when(failFactory.build(any(Context.class), any(GenericLoaderFactory.class))).thenReturn(failLoader);
 
@@ -774,7 +774,7 @@ public class GlideTest {
             // Do nothing.
         }
         when(fetcher.getId()).thenReturn(UUID.randomUUID().toString());
-        when(modelLoader.getResourceFetcher(any(modelClass), anyInt(), anyInt()))
+        when(modelLoader.getDataFetcher(any(modelClass), anyInt(), anyInt()))
                 .thenReturn(fetcher);
 
         return modelLoader;

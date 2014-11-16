@@ -41,6 +41,12 @@ public class FileDescriptorBitmapDecoder implements ResourceDecoder<ParcelFileDe
     }
 
     @Override
+    public boolean handles(ParcelFileDescriptor source) {
+        // TODO: fixme.
+        return true;
+    }
+
+    @Override
     public Resource<Bitmap> decode(ParcelFileDescriptor source, int width, int height) throws IOException {
         Bitmap bitmap = bitmapDecoder.decode(source, bitmapPool, width, height, decodeFormat);
         return BitmapResource.obtain(bitmap, bitmapPool);

@@ -30,14 +30,14 @@ public class ResourceLoaderTest {
     @Test
     public void testCanHandleId() {
         ModelLoader<Uri, InputStream> streamUriLoader = mock(ModelLoader.class);
-        when(streamUriLoader.getResourceFetcher(any(Uri.class), anyInt(), anyInt())).thenReturn(null);
+        when(streamUriLoader.getDataFetcher(any(Uri.class), anyInt(), anyInt())).thenReturn(null);
 
         int id = android.R.drawable.star_off;
 
         StreamResourceLoader resourceLoader = new StreamResourceLoader(Robolectric.application, streamUriLoader);
-        resourceLoader.getResourceFetcher(id, 0, 0);
+        resourceLoader.getDataFetcher(id, 0, 0);
 
         Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
-        verify(streamUriLoader, atLeastOnce()).getResourceFetcher(eq(contentUri), anyInt(), anyInt());
+        verify(streamUriLoader, atLeastOnce()).getDataFetcher(eq(contentUri), anyInt(), anyInt());
     }
 }

@@ -13,7 +13,7 @@ interface DrawableOptions {
      *
      * @return This request builder.
      */
-     GenericRequestBuilder<?, ?, ?, ?> crossFade();
+     GenericRequestBuilder<?, ?, ?> crossFade();
 
     /**
      * Applies a cross fade transformation that fades from the placeholder to the loaded
@@ -25,7 +25,7 @@ interface DrawableOptions {
      * @param duration The duration of the cross fade and initial fade in.
      * @return This request builder.
      */
-    GenericRequestBuilder<?, ?, ?, ?> crossFade(int duration);
+    GenericRequestBuilder<?, ?, ?> crossFade(int duration);
 
 
     /**
@@ -47,7 +47,7 @@ interface DrawableOptions {
      * @return This request builder.
      */
     @Deprecated
-    GenericRequestBuilder<?, ?, ?, ?> crossFade(Animation animation, int duration);
+    GenericRequestBuilder<?, ?, ?> crossFade(Animation animation, int duration);
 
     /**
      * Applies a cross fade transformation that des from the placeholder to the loaded
@@ -61,5 +61,5 @@ interface DrawableOptions {
      * @param duration The duration of the cross fade animation.
      * @return This request builder.
      */
-    GenericRequestBuilder<?, ?, ?, ?> crossFade(int animationId, int duration);
+    GenericRequestBuilder<?, ?, ?> crossFade(int animationId, int duration);
 }

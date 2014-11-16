@@ -23,7 +23,7 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
     }
 
     @Override
-    public final DataFetcher<T> getResourceFetcher(Uri model, int width, int height) {
+    public final DataFetcher<T> getDataFetcher(Uri model, int width, int height) {
         final String scheme = model.getScheme();
 
         DataFetcher<T> result = null;
@@ -35,7 +35,7 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
                 result = getLocalUriFetcher(context, model);
             }
         } else if (urlLoader != null && ("http".equals(scheme) || "https".equals(scheme))) {
-            result = urlLoader.getResourceFetcher(new GlideUrl(model.toString()), width, height);
+            result = urlLoader.getDataFetcher(new GlideUrl(model.toString()), width, height);
         }
 
         return result;

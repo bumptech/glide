@@ -31,7 +31,7 @@ class GifFrameLoader {
 
     private boolean isRunning = false;
     private boolean isLoadPending = false;
-    private GenericRequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap> requestBuilder;
+    private GenericRequestBuilder<GifDecoder, Bitmap, Bitmap> requestBuilder;
     private DelayTarget current;
     private boolean isCleared;
 
@@ -45,7 +45,7 @@ class GifFrameLoader {
     }
 
     GifFrameLoader(FrameCallback callback, GifDecoder gifDecoder, Handler handler,
-            GenericRequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap>  requestBuilder) {
+            GenericRequestBuilder<GifDecoder, Bitmap, Bitmap>  requestBuilder) {
         if (handler == null) {
             handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
         }
@@ -167,7 +167,7 @@ class GifFrameLoader {
         }
     }
 
-    private static GenericRequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap> getRequestBuilder(Context context,
+    private static GenericRequestBuilder<GifDecoder, Bitmap, Bitmap> getRequestBuilder(Context context,
             GifDecoder gifDecoder, int width, int height, BitmapPool bitmapPool) {
         GifFrameResourceDecoder frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
         GifFrameModelLoader frameLoader = new GifFrameModelLoader();

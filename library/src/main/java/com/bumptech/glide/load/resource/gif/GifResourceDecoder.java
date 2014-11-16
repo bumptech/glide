@@ -53,6 +53,12 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     }
 
     @Override
+    public boolean handles(InputStream source) {
+        // TODO: fixme.
+        return true;
+    }
+
+    @Override
     public GifDrawableResource decode(InputStream source, int width, int height) {
         byte[] data = inputStreamToBytes(source);
         final GifHeaderParser parser = parserPool.obtain(data);

@@ -19,7 +19,7 @@ public class StreamByteArrayLoaderTest {
         StreamByteArrayLoader loader = new StreamByteArrayLoader();
 
         byte[] data = new byte[10];
-        DataFetcher<InputStream> fetcher = loader.getResourceFetcher(data, -1, -1);
+        DataFetcher<InputStream> fetcher = loader.getDataFetcher(data, -1, -1);
         assertNotNull(fetcher);
     }
 
@@ -28,6 +28,6 @@ public class StreamByteArrayLoaderTest {
         String id = "testId";
         StreamByteArrayLoader loader = new StreamByteArrayLoader(id);
 
-        assertEquals(id, loader.getResourceFetcher(new byte[0], 1, 1).getId());
+        assertEquals(id, loader.getDataFetcher(new byte[0], 1, 1).getId());
     }
 }

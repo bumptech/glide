@@ -6,27 +6,18 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.ImageVideoWrapper;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
-
-import java.io.File;
 
 /**
  * A class for creating a request to load a {@link GlideDrawable}.
@@ -39,13 +30,12 @@ import java.io.File;
  * @param <ModelType> The type of model that will be loaded into the target.
  */
 public class DrawableRequestBuilder<ModelType>
-        extends GenericRequestBuilder<ModelType, ImageVideoWrapper, GifBitmapWrapper, GlideDrawable>
+        extends GenericRequestBuilder<ModelType, GlideDrawable, GlideDrawable>
         implements BitmapOptions, DrawableOptions {
 
-    DrawableRequestBuilder(Context context, Class<ModelType> modelClass,
-            LoadProvider<ModelType, ImageVideoWrapper, GifBitmapWrapper, GlideDrawable> loadProvider, Glide glide,
-            RequestTracker requestTracker, Lifecycle lifecycle) {
-        super(context, modelClass, loadProvider, GlideDrawable.class, glide, requestTracker, lifecycle);
+    DrawableRequestBuilder(Context context, Class<ModelType> modelClass, Glide glide, RequestTracker requestTracker,
+            Lifecycle lifecycle) {
+        super(context, modelClass, GlideDrawable.class, GlideDrawable.class, glide, requestTracker, lifecycle);
         // Default to animating.
         crossFade();
     }
@@ -84,7 +74,7 @@ public class DrawableRequestBuilder<ModelType>
      */
     @Override
     public DrawableRequestBuilder<ModelType> thumbnail(
-            GenericRequestBuilder<?, ?, ?, GlideDrawable> thumbnailRequest) {
+            GenericRequestBuilder<?, ?, GlideDrawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -110,29 +100,32 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
-    @Override
-    public DrawableRequestBuilder<ModelType> decoder(ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> decoder) {
-        super.decoder(decoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public DrawableRequestBuilder<ModelType> decoder(ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> decoder) {
+//        super.decoder(decoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public DrawableRequestBuilder<ModelType> cacheDecoder(ResourceDecoder<File, GifBitmapWrapper> cacheDecoder) {
-        super.cacheDecoder(cacheDecoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public DrawableRequestBuilder<ModelType> cacheDecoder(ResourceDecoder<File, GifBitmapWrapper> cacheDecoder) {
+//        super.cacheDecoder(cacheDecoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public DrawableRequestBuilder<ModelType> encoder(ResourceEncoder<GifBitmapWrapper> encoder) {
-        super.encoder(encoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public DrawableRequestBuilder<ModelType> encoder(ResourceEncoder<GifBitmapWrapper> encoder) {
+//        super.encoder(encoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}
@@ -176,7 +169,9 @@ public class DrawableRequestBuilder<ModelType>
      */
     @SuppressWarnings("unchecked")
     public DrawableRequestBuilder<ModelType> centerCrop() {
-        return transform(glide.getDrawableCenterCrop());
+        // TODO: fixme.
+//        return transform(glide.getDrawableCenterCrop());
+        return this;
     }
 
     /**
@@ -191,7 +186,9 @@ public class DrawableRequestBuilder<ModelType>
      */
     @SuppressWarnings("unchecked")
     public DrawableRequestBuilder<ModelType> fitCenter() {
-        return transform(glide.getDrawableFitCenter());
+        // TODO: fixme.
+//        return transform(glide.getDrawableFitCenter());
+        return this;
     }
 
     /**
@@ -211,7 +208,9 @@ public class DrawableRequestBuilder<ModelType>
         for (int i = 0; i < bitmapTransformations.length; i++) {
             transformations[i] = new GifBitmapWrapperTransformation(glide.getBitmapPool(), bitmapTransformations[i]);
         }
-        return transform(transformations);
+        // TODO: fixme.
+        return this;
+//        return transform(transformations);
     }
 
 
@@ -223,21 +222,23 @@ public class DrawableRequestBuilder<ModelType>
      * @see #centerCrop()
      * @see #fitCenter()
      */
-    @Override
-    public DrawableRequestBuilder<ModelType> transform(Transformation<GifBitmapWrapper>... transformation) {
-        super.transform(transformation);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public DrawableRequestBuilder<ModelType> transform(Transformation<GifBitmapWrapper>... transformation) {
+//        super.transform(transformation);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public DrawableRequestBuilder<ModelType> transcoder(
-            ResourceTranscoder<GifBitmapWrapper, GlideDrawable> transcoder) {
-        super.transcoder(transcoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public DrawableRequestBuilder<ModelType> transcoder(
+//            ResourceTranscoder<GifBitmapWrapper, GlideDrawable> transcoder) {
+//        super.transcoder(transcoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}
@@ -387,11 +388,12 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
-    @Override
-    public DrawableRequestBuilder<ModelType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
-        super.sourceEncoder(sourceEncoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public DrawableRequestBuilder<ModelType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
+//        super.sourceEncoder(sourceEncoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}

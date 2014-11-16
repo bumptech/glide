@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -14,13 +13,11 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * A class for creating a request to load an animated gif.
@@ -33,19 +30,18 @@ import java.io.InputStream;
  * @param <ModelType> The type of model that will be loaded into the target.
  */
 public class GifRequestBuilder<ModelType>
-        extends GenericRequestBuilder<ModelType, InputStream, GifDrawable, GifDrawable>
+        extends GenericRequestBuilder<ModelType, GifDrawable, GifDrawable>
         implements BitmapOptions, DrawableOptions {
 
-    GifRequestBuilder(LoadProvider<ModelType, InputStream, GifDrawable, GifDrawable> loadProvider,
-            Class<GifDrawable> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
-        super(loadProvider, transcodeClass, other);
+    GifRequestBuilder(GenericRequestBuilder<ModelType, ?, ?> other) {
+        super(GifDrawable.class, GifDrawable.class, other);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType> thumbnail(GenericRequestBuilder<?, ?, ?, GifDrawable> thumbnailRequest) {
+    public GifRequestBuilder<ModelType> thumbnail(GenericRequestBuilder<?, ?, GifDrawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -99,12 +95,13 @@ public class GifRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
-    @Override
-    public GifRequestBuilder<ModelType> decoder(
-            ResourceDecoder<InputStream, GifDrawable> decoder) {
-        super.decoder(decoder);
-        return this;
-    }
+    // TODO: fixme
+//    @Override
+//    public GifRequestBuilder<ModelType> decoder(
+//            ResourceDecoder<InputStream, GifDrawable> decoder) {
+//        super.decoder(decoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}
@@ -377,11 +374,12 @@ public class GifRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
-    @Override
-    public GifRequestBuilder<ModelType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
-        super.sourceEncoder(sourceEncoder);
-        return this;
-    }
+    // TODO: fixme.
+//    @Override
+//    public GifRequestBuilder<ModelType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
+//        super.sourceEncoder(sourceEncoder);
+//        return this;
+//    }
 
     /**
      * {@inheritDoc}

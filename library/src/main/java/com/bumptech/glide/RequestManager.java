@@ -103,7 +103,7 @@ public class RequestManager implements LifecycleListener {
          * @param requestBuilder The request builder being used to construct the load.
          * @param <T> The type of the model.
          */
-        <T> void apply(GenericRequestBuilder<T, ?, ?, ?> requestBuilder);
+        <T> void apply(GenericRequestBuilder<T, ?, ?> requestBuilder);
     }
 
     /**
@@ -303,36 +303,6 @@ public class RequestManager implements LifecycleListener {
     }
 
     /**
-     * Returns a request builder that uses {@link android.provider.MediaStore.Images.Thumbnails} and
-     * {@link android.provider.MediaStore.Video.Thumbnails} to retrieve pre-generated thumbnails for the given uri if
-     * available and uses the given additional data to build a unique signature for cache invalidation.
-     *
-     * @see #loadFromMediaStore(android.net.Uri)
-     * @see #load(android.net.Uri)
-     * @see com.bumptech.glide.GenericRequestBuilder#signature(com.bumptech.glide.load.Key)
-     * @see com.bumptech.glide.signature.MediaStoreSignature
-     *
-     * @deprecated Use {@link #loadFromMediaStore(android.net.Uri)},
-     * {@link com.bumptech.glide.signature.MediaStoreSignature}, and
-     * {@link com.bumptech.glide.DrawableRequestBuilder#signature(com.bumptech.glide.load.Key)} instead. Scheduled to be
-     * removed in Glide 4.0.
-     * @param uri The uri representing the media.
-     * @param mimeType The mime type of the media store media. Ok to default to empty string "". See
-     *      {@link android.provider.MediaStore.Images.ImageColumns#MIME_TYPE} or
-     *      {@link android.provider.MediaStore.Video.VideoColumns#MIME_TYPE}.
-     * @param dateModified The date modified time of the media store media. Ok to default to 0. See
-     *      {@link android.provider.MediaStore.Images.ImageColumns#DATE_MODIFIED} or
-     *      {@link android.provider.MediaStore.Video.VideoColumns#DATE_MODIFIED}.
-     * @param orientation The orientation of the media store media. Ok to default to 0. See
-     *      {@link android.provider.MediaStore.Images.ImageColumns#ORIENTATION}.
-     */
-    @Deprecated
-    public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri, String mimeType, long dateModified, int orientation) {
-        Key signature = new MediaStoreSignature(mimeType, dateModified, orientation);
-        return (DrawableTypeRequest<Uri>) loadFromMediaStore(uri).signature(signature);
-    }
-
-    /**
      * Returns a request builder to load the given media store {@link android.net.Uri}.
      *
      * @see #fromMediaStore()
@@ -340,9 +310,10 @@ public class RequestManager implements LifecycleListener {
      *
      * @param uri The uri representing the media.
      */
-    public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri) {
-        return (DrawableTypeRequest<Uri>) fromMediaStore().load(uri);
-    }
+    // TODO: fixme.
+//    public DrawableTypeRequest<Uri> loadFromMediaStore(Uri uri) {
+//        return (DrawableTypeRequest<Uri>) fromMediaStore().load(uri);
+//    }
 
     /**
      * Returns a request builder that uses {@link android.provider.MediaStore.Images.Thumbnails} and
@@ -372,15 +343,16 @@ public class RequestManager implements LifecycleListener {
      * @see #load(android.net.Uri)
      * @see com.bumptech.glide.signature.MediaStoreSignature
      */
-    public DrawableTypeRequest<Uri> fromMediaStore() {
-        ModelLoader<Uri, InputStream> genericStreamLoader = Glide.buildStreamModelLoader(Uri.class, context);
-        ModelLoader<Uri, InputStream> mediaStoreLoader = new MediaStoreStreamLoader(context, genericStreamLoader);
-        ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader =
-                Glide.buildFileDescriptorModelLoader(Uri.class, context);
-
-        return optionsApplier.apply(new DrawableTypeRequest<Uri>(Uri.class, mediaStoreLoader,
-                fileDescriptorModelLoader, context, glide, requestTracker, lifecycle, optionsApplier));
-    }
+    // TODO: fixme.
+//    public DrawableTypeRequest<Uri> fromMediaStore() {
+//        ModelLoader<Uri, InputStream> genericStreamLoader = Glide.buildStreamModelLoader(Uri.class, context);
+//        ModelLoader<Uri, InputStream> mediaStoreLoader = new MediaStoreStreamLoader(context, genericStreamLoader);
+//        ModelLoader<Uri, ParcelFileDescriptor> fileDescriptorModelLoader =
+//                Glide.buildFileDescriptorModelLoader(Uri.class, context);
+//
+//        return optionsApplier.apply(new DrawableTypeRequest<Uri>(Uri.class, mediaStoreLoader,
+//                fileDescriptorModelLoader, context, glide, requestTracker, lifecycle, optionsApplier));
+//    }
 
     /**
      * Returns a request builder to load the given {@link File}.
@@ -595,8 +567,7 @@ public class RequestManager implements LifecycleListener {
         }
 
         return optionsApplier.apply(
-                new DrawableTypeRequest<T>(modelClass, streamModelLoader, fileDescriptorModelLoader, context,
-                        glide, requestTracker, lifecycle, optionsApplier));
+                new DrawableTypeRequest<T>(modelClass, context, glide, requestTracker, lifecycle, optionsApplier));
     }
 
     @SuppressWarnings("unchecked")
@@ -618,8 +589,8 @@ public class RequestManager implements LifecycleListener {
         }
 
         public DrawableTypeRequest<T> load(T model) {
-            return (DrawableTypeRequest<T>) optionsApplier.apply(new DrawableTypeRequest<T>(getSafeClass(model), null,
-                    loader, context, glide, requestTracker, lifecycle, optionsApplier))
+            return (DrawableTypeRequest<T>) optionsApplier.apply(new DrawableTypeRequest<T>(getSafeClass(model),
+                    context, glide, requestTracker, lifecycle, optionsApplier))
                     .load(model);
         }
     }
@@ -644,8 +615,8 @@ public class RequestManager implements LifecycleListener {
          * @param modelClass The class of model to load images from.
          */
         public DrawableTypeRequest<T> from(Class<T> modelClass) {
-            return optionsApplier.apply(new DrawableTypeRequest<T>(modelClass, loader, null, context, glide,
-                    requestTracker, lifecycle, optionsApplier));
+            return optionsApplier.apply(new DrawableTypeRequest<T>(modelClass, context, glide, requestTracker,
+                    lifecycle, optionsApplier));
         }
 
         /**
@@ -723,14 +694,13 @@ public class RequestManager implements LifecycleListener {
             /**
              * Sets the resource class that will be loaded.
              *
-             * @param resourceClass The class of the resource that will be loaded.
              * @param <Z> The type of the resource that will be loaded.
              * @return This request builder.
              */
-            public <Z> GenericTranscodeRequest<A, T, Z> as(Class<Z> resourceClass) {
-                GenericTranscodeRequest<A, T, Z> result =
-                        optionsApplier.apply(new GenericTranscodeRequest<A, T, Z>(context, glide, modelClass,
-                                modelLoader, dataClass, resourceClass, requestTracker, lifecycle, optionsApplier));
+            public <Z> GenericTranscodeRequest<A, Z> as(Class<Z> resourceClass) {
+                GenericTranscodeRequest<A, Z> result =
+                        optionsApplier.apply(new GenericTranscodeRequest<A, Z>(context, glide, modelClass,
+                                resourceClass, requestTracker, lifecycle, optionsApplier));
                 if (providedModel) {
                     result.load(model);
                 }
@@ -741,7 +711,7 @@ public class RequestManager implements LifecycleListener {
 
     class OptionsApplier {
 
-        public <A, X extends GenericRequestBuilder<A, ?, ?, ?>> X apply(X builder) {
+        public <A, X extends GenericRequestBuilder<A, ?, ?>> X apply(X builder) {
             if (options != null) {
                 options.apply(builder);
             }

@@ -28,12 +28,12 @@ public class ResourceLoader<T> implements ModelLoader<Integer, T> {
     }
 
     @Override
-    public DataFetcher<T> getResourceFetcher(Integer model, int width, int height) {
+    public DataFetcher<T> getDataFetcher(Integer model, int width, int height) {
         Uri uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
                 + resources.getResourcePackageName(model) + '/'
                 + resources.getResourceTypeName(model) + '/'
                 + resources.getResourceEntryName(model));
 
-        return uriLoader.getResourceFetcher(uri, width, height);
+        return uriLoader.getDataFetcher(uri, width, height);
     }
 }

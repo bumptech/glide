@@ -96,7 +96,7 @@ public class GenericRequestTest {
 
         public RequestHarness() {
             modelLoader = mock(ModelLoader.class);
-            when(modelLoader.getResourceFetcher(any(Number.class), anyInt(), anyInt()))
+            when(modelLoader.getDataFetcher(any(Number.class), anyInt(), anyInt()))
                     .thenReturn(mock(DataFetcher.class));
             when(loadProvider.getModelLoader()).thenReturn(modelLoader);
             when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
@@ -916,7 +916,7 @@ public class GenericRequestTest {
     @Test
     public void testOnSizeReadyWithNullDataFetcherCallsOnException() {
         GenericRequest request = harness.getRequest();
-        when(harness.modelLoader.getResourceFetcher(any(Number.class), anyInt(), anyInt())).thenReturn(null);
+        when(harness.modelLoader.getDataFetcher(any(Number.class), anyInt(), anyInt())).thenReturn(null);
         request.begin();
         request.onSizeReady(100, 100);
 

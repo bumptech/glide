@@ -30,13 +30,13 @@ public class GifFrameModelLoaderTest {
         int frameIndex = 124;
         when(decoder.getCurrentFrameIndex()).thenReturn(frameIndex);
 
-        String fetcherId = loader.getResourceFetcher(decoder, 1, 2).getId();
+        String fetcherId = loader.getDataFetcher(decoder, 1, 2).getId();
 
         assertThat(fetcherId).contains(String.valueOf(frameIndex));
     }
 
     @Test
     public void testAlwaysReturnsGivenDecoderFromFetcher() throws Exception {
-        assertEquals(decoder, loader.getResourceFetcher(decoder, 100, 100).loadData(Priority.NORMAL));
+        assertEquals(decoder, loader.getDataFetcher(decoder, 100, 100).loadData(Priority.NORMAL));
     }
 }

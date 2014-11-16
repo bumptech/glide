@@ -24,6 +24,12 @@ public class NullDecoder<T, Z> implements ResourceDecoder<T, Z> {
     }
 
     @Override
+    public boolean handles(T source) {
+        // TODO: fixme.
+        return true;
+    }
+
+    @Override
     public Resource<Z> decode(T source, int width, int height) {
         return null;
     }

@@ -28,6 +28,11 @@ public class ImageVideoBitmapDecoder implements ResourceDecoder<ImageVideoWrappe
         this.fileDescriptorDecoder = fileDescriptorDecoder;
     }
 
+    @Override
+    public boolean handles(ImageVideoWrapper source) {
+        throw new UnsupportedOperationException();
+    }
+
     @SuppressWarnings("resource")
     // @see ResourceDecoder.decode
     @Override

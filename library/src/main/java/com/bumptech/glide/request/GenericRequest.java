@@ -7,13 +7,11 @@ import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -58,12 +56,14 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
 
     private final String tag = String.valueOf(hashCode());
 
+    private Class<Z> resourceClass;
+    private RequestContext requestContext;
+    private ResourceTranscoder<Z, R> transcoder;
     private Key signature;
     private int placeholderResourceId;
     private int errorResourceId;
     private Context context;
     private Transformation<Z> transformation;
-    private LoadProvider<A, T, Z, R> loadProvider;
     private RequestCoordinator requestCoordinator;
     private A model;
     private Class<R> transcodeClass;
@@ -88,8 +88,11 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private Status status;
 
     public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
-            LoadProvider<A, T, Z, R> loadProvider,
             A model,
+            Class<Z> resourceClass,
+            Class<R> transcodeClass,
+            RequestContext requestContext,
+            ResourceTranscoder<Z, R> transcoder,
             Key signature,
             Context context,
             Priority priority,
@@ -103,7 +106,6 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             RequestCoordinator requestCoordinator,
             Engine engine,
             Transformation<Z> transformation,
-            Class<R> transcodeClass,
             boolean isMemoryCacheable,
             GlideAnimationFactory<R> animationFactory,
             int overrideWidth,
@@ -114,8 +116,12 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         if (request == null) {
             request = new GenericRequest<A, T, Z, R>();
         }
-        request.init(loadProvider,
+        request.init(
                 model,
+                resourceClass,
+                transcodeClass,
+                requestContext,
+                transcoder,
                 signature,
                 context,
                 priority,
@@ -129,7 +135,6 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
                 requestCoordinator,
                 engine,
                 transformation,
-                transcodeClass,
                 isMemoryCacheable,
                 animationFactory,
                 overrideWidth,
@@ -142,26 +147,12 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         // just create, instances are reused with recycle/init
     }
 
-    @Override
-    public void recycle() {
-        loadProvider = null;
-        model = null;
-        context = null;
-        target = null;
-        placeholderDrawable = null;
-        errorDrawable = null;
-        requestListener = null;
-        requestCoordinator = null;
-        transformation = null;
-        animationFactory = null;
-        loadedFromMemoryCache = false;
-        loadStatus = null;
-        REQUEST_POOL.offer(this);
-    }
-
     private void init(
-            LoadProvider<A, T, Z, R> loadProvider,
             A model,
+            Class<Z> resourceClass,
+            Class<R> transcodeClass,
+            RequestContext requestContext,
+            ResourceTranscoder<Z, R> transcoder,
             Key signature,
             Context context,
             Priority priority,
@@ -175,15 +166,17 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             RequestCoordinator requestCoordinator,
             Engine engine,
             Transformation<Z> transformation,
-            Class<R> transcodeClass,
             boolean isMemoryCacheable,
             GlideAnimationFactory<R> animationFactory,
             int overrideWidth,
             int overrideHeight,
             DiskCacheStrategy diskCacheStrategy) {
-        this.loadProvider = loadProvider;
         this.model = model;
+        this.resourceClass = resourceClass;
+        this.requestContext = requestContext;
+        this.transcoder = transcoder;
         this.signature = signature;
+        this.context = context;
         this.context = context.getApplicationContext();
         this.priority = priority;
         this.target = target;
@@ -207,28 +200,45 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
         // simply skip our sanity checks in that unusual case.
         if (model != null) {
-            check("ModelLoader", loadProvider.getModelLoader(), "try .using(ModelLoader)");
-            check("Transcoder", loadProvider.getTranscoder(), "try .as*(Class).transcode(ResourceTranscoder)");
+            // TODO: is this still necessary?
+//            check("ModelLoader", loadProvider.getModelLoader(), "try .using(ModelLoader)");
+//            check("Transcoder", loadProvider.getTranscoder(), "try .as*(Class).transcode(ResourceTranscoder)");
             check("Transformation", transformation, "try .transform(UnitTransformation.get())");
-            if (diskCacheStrategy.cacheSource()) {
-                check("SourceEncoder", loadProvider.getSourceEncoder(),
-                        "try .sourceEncoder(Encoder) or .diskCacheStrategy(NONE/RESULT)");
-            } else {
-                check("SourceDecoder", loadProvider.getSourceDecoder(),
-                        "try .decoder/.imageDecoder/.videoDecoder(ResourceDecoder) or .diskCacheStrategy(ALL/SOURCE)");
-            }
-            if (diskCacheStrategy.cacheSource() || diskCacheStrategy.cacheResult()) {
-                // TODO if(resourceClass.isAssignableFrom(InputStream.class) it is possible to wrap sourceDecoder
-                // and use it instead of cacheDecoder: new FileToStreamDecoder<Z>(sourceDecoder)
-                // in that case this shouldn't throw
-                check("CacheDecoder", loadProvider.getCacheDecoder(),
-                        "try .cacheDecoder(ResouceDecoder) or .diskCacheStrategy(NONE)");
-            }
-            if (diskCacheStrategy.cacheResult()) {
-                check("Encoder", loadProvider.getEncoder(),
-                        "try .encode(ResourceEncoder) or .diskCacheStrategy(NONE/SOURCE)");
-            }
+//            if (diskCacheStrategy.cacheSource()) {
+//                check("SourceEncoder", loadProvider.getSourceEncoder(),
+//                        "try .sourceEncoder(Encoder) or .diskCacheStrategy(NONE/RESULT)");
+//            } else {
+//                check("SourceDecoder", loadProvider.getSourceDecoder(),
+//                      "try .decoder/.imageDecoder/.videoDecoder(ResourceDecoder) or .diskCacheStrategy(ALL/SOURCE)");
+//            }
+//            if (diskCacheStrategy.cacheSource() || diskCacheStrategy.cacheResult()) {
+//                // TODO if(resourceClass.isAssignableFrom(InputStream.class) it is possible to wrap sourceDecoder
+//                // and use it instead of cacheDecoder: new FileToStreamDecoder<Z>(sourceDecoder)
+//                // in that case this shouldn't throw
+//                check("CacheDecoder", loadProvider.getCacheDecoder(),
+//                        "try .cacheDecoder(ResouceDecoder) or .diskCacheStrategy(NONE)");
+//            }
+//            if (diskCacheStrategy.cacheResult()) {
+//                check("Encoder", loadProvider.getEncoder(),
+//                        "try .encode(ResourceEncoder) or .diskCacheStrategy(NONE/SOURCE)");
+//            }
         }
+    }
+
+    @Override
+    public void recycle() {
+        model = null;
+        context = null;
+        target = null;
+        placeholderDrawable = null;
+        errorDrawable = null;
+        requestListener = null;
+        requestCoordinator = null;
+        transformation = null;
+        animationFactory = null;
+        loadedFromMemoryCache = false;
+        loadStatus = null;
+        REQUEST_POOL.offer(this);
     }
 
     private static void check(String name, Object object, String suggestion) {
@@ -413,20 +423,18 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
 
-        ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
-        final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
+        DataFetcherSet fetchers = requestContext.getDataFetchers(model, width, height);
 
-        if (dataFetcher == null) {
-            onException(new Exception("Got null fetcher from model loader"));
+        if (fetchers.isEmpty()) {
+            onException(new Exception("Failed to obtain fetchers from model loader registry"));
             return;
         }
-        ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(signature, width, height, dataFetcher, loadProvider, transformation, transcoder,
-                priority, isMemoryCacheable, diskCacheStrategy, this);
+        loadStatus = engine.load(resourceClass, transcodeClass, signature, width, height, fetchers, requestContext,
+                transformation, transcoder, priority, isMemoryCacheable, diskCacheStrategy, this);
         loadedFromMemoryCache = resource != null;
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));

@@ -7,11 +7,11 @@ import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.DataLoadProvider;
+import com.bumptech.glide.request.RequestContext;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
@@ -124,8 +124,6 @@ public class Engine implements EngineJobListener,
      *                  be loaded.
      * @param width The target width in pixels of the desired resource.
      * @param height The target height in pixels of the desired resource.
-     * @param fetcher The fetcher to use to retrieve data not in the disk cache.
-     * @param loadProvider The load provider containing various encoders and decoders use to decode and encode data.
      * @param transformation The transformation to use to transform the decoded resource.
      * @param transcoder The transcoder to use to transcode the decoded and transformed resource.
      * @param priority The priority with which the request should run.
@@ -138,16 +136,16 @@ public class Engine implements EngineJobListener,
      * @param <Z> The type of the resource that will be decoded.
      * @param <R> The type of the resource that will be transcoded from the decoded resource.
      */
-    public <T, Z, R> LoadStatus load(Key signature, int width, int height, DataFetcher<T> fetcher,
-            DataLoadProvider<T, Z> loadProvider, Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder,
-            Priority priority, boolean isMemoryCacheable, DiskCacheStrategy diskCacheStrategy, ResourceCallback cb) {
+    public <T, Z, R> LoadStatus load(Class<Z> resourceClass, Class<R> transcodeClass, Key signature, int width,
+            int height, DataFetcherSet fetchers, RequestContext requestContext,
+            Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder, Priority priority,
+            boolean isMemoryCacheable, DiskCacheStrategy diskCacheStrategy, ResourceCallback cb) {
         Util.assertMainThread();
         long startTime = LogTime.getLogTime();
 
-        final String id = fetcher.getId();
-        EngineKey key = keyFactory.buildKey(id, signature, width, height, loadProvider.getCacheDecoder(),
-                loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),
-                transcoder, loadProvider.getSourceEncoder());
+        final String id = fetchers.getId();
+        EngineKey key = keyFactory.buildKey(id, signature, width, height, transformation, resourceClass,
+                transcodeClass);
 
         EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
         if (cached != null) {
@@ -177,8 +175,8 @@ public class Engine implements EngineJobListener,
         }
 
         EngineJob engineJob = engineJobFactory.build(key, isMemoryCacheable);
-        DecodeJob<T, Z, R> decodeJob = new DecodeJob<T, Z, R>(key, width, height, fetcher, loadProvider, transformation,
-                transcoder, diskCacheProvider, diskCacheStrategy, priority);
+        DecodeJob<Z, R> decodeJob = new DecodeJob<Z, R>(resourceClass, key, width, height, fetchers, requestContext,
+                transformation, transcoder, diskCacheProvider, diskCacheStrategy, priority);
         EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, priority);
         jobs.put(key, engineJob);
         engineJob.addCallback(cb);

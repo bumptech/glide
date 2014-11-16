@@ -12,6 +12,8 @@ import java.io.IOException;
  */
 public interface ResourceDecoder<T, Z> {
 
+    boolean handles(T source);
+
     /**
      * Returns a decoded resource from the given data or null if no resource could be decoded.
      * <p>

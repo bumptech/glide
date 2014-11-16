@@ -29,7 +29,7 @@ public class MediaStoreStreamLoaderTest {
         ModelLoader<Uri, InputStream> wrapped = mock(ModelLoader.class);
         MediaStoreStreamLoader loader = new MediaStoreStreamLoader(Robolectric.application, wrapped);
 
-        loader.getResourceFetcher(uri, width, height);
-        verify(wrapped).getResourceFetcher(eq(uri), eq(width), eq(height));
+        loader.getDataFetcher(uri, width, height);
+        verify(wrapped).getDataFetcher(eq(uri), eq(width), eq(height));
     }
 }

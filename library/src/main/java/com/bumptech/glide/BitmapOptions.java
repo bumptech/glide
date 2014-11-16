@@ -2,8 +2,8 @@ package com.bumptech.glide;
 
 interface BitmapOptions {
 
-    GenericRequestBuilder<?, ?, ?, ?> fitCenter();
+    GenericRequestBuilder<?, ?, ?> fitCenter();
 
-    GenericRequestBuilder<?, ?, ?, ?> centerCrop();
+    GenericRequestBuilder<?, ?, ?> centerCrop();
 
 }

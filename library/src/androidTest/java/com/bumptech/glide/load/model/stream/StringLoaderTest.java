@@ -45,9 +45,9 @@ public class StringLoaderTest {
         // TODO on windows it will fail with schema being the drive letter (C:\... -> C)
         assumeTrue(!Util.isWindows());
         File f = Robolectric.application.getCacheDir();
-        stringLoader.getResourceFetcher(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE);
+        stringLoader.getDataFetcher(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(uriLoader).getResourceFetcher(eq(Uri.fromFile(f)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(uriLoader).getDataFetcher(eq(Uri.fromFile(f)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test
@@ -55,50 +55,50 @@ public class StringLoaderTest {
         assumeTrue(!Util.isWindows());
         String testPath = "/storage/emulated/0/DCIM/Camera/IMG_20140520_100001:nopm:.jpg,mimeType=image/jpeg,"
                 + "2448x3264,orientation=0,date=Tue";
-        stringLoader.getResourceFetcher(testPath, IMAGE_SIDE, IMAGE_SIDE);
+        stringLoader.getDataFetcher(testPath, IMAGE_SIDE, IMAGE_SIDE);
 
         Uri expected = Uri.fromFile(new File(testPath));
-        verify(uriLoader).getResourceFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(uriLoader).getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test
     public void testHandlesFileUris() throws IOException {
         File f = Robolectric.application.getCacheDir();
-        stringLoader.getResourceFetcher(Uri.fromFile(f)
+        stringLoader.getDataFetcher(Uri.fromFile(f)
                 .toString(), IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(uriLoader).getResourceFetcher(eq(Uri.fromFile(f)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(uriLoader).getDataFetcher(eq(Uri.fromFile(f)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test
     public void testHandlesResourceUris() throws IOException {
         Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
-        stringLoader.getResourceFetcher(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE);
+        stringLoader.getDataFetcher(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(uriLoader).getResourceFetcher(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(uriLoader).getDataFetcher(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test
     public void testHandlesHttp() {
         String url = "http://www.google.com";
-        stringLoader.getResourceFetcher(url, IMAGE_SIDE, IMAGE_SIDE);
+        stringLoader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(uriLoader).getResourceFetcher(eq(Uri.parse(url)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(uriLoader).getDataFetcher(eq(Uri.parse(url)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test
     public void testHandlesHttps() {
         String url = "https://www.google.com";
-        stringLoader.getResourceFetcher(url, IMAGE_SIDE, IMAGE_SIDE);
+        stringLoader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(uriLoader).getResourceFetcher(eq(Uri.parse(url)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(uriLoader).getDataFetcher(eq(Uri.parse(url)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 
     @Test
     public void testHandlesContent() {
         String content = "content://com.bumptech.glide";
-        stringLoader.getResourceFetcher(content, IMAGE_SIDE, IMAGE_SIDE);
+        stringLoader.getDataFetcher(content, IMAGE_SIDE, IMAGE_SIDE);
 
-        verify(uriLoader).getResourceFetcher(eq(Uri.parse(content)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        verify(uriLoader).getDataFetcher(eq(Uri.parse(content)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
     }
 }

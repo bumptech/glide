@@ -4,8 +4,12 @@ import android.content.Context;
 
 import com.bumptech.glide.load.data.DataFetcher;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Maintains a map of model class to factory to retrieve a {@link ModelLoaderFactory} and/or a {@link ModelLoader}
@@ -14,6 +18,7 @@ import java.util.Map;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 // this is a general class capable of handling any generic combination
 public class GenericLoaderFactory {
+    private final Map<Class, Set<Class>> modelClassToRegisteredDataClass = new HashMap<Class, Set<Class>>();
     private final Map<Class/*T*/, Map<Class/*Y*/, ModelLoaderFactory/*T, Y*/>> modelClassToResourceFactories =
             new HashMap<Class, Map<Class, ModelLoaderFactory>>();
     private final Map<Class/*T*/, Map<Class/*Y*/, ModelLoader/*T, Y*/>> cachedModelLoaders =
@@ -21,7 +26,7 @@ public class GenericLoaderFactory {
 
     private static final ModelLoader NULL_MODEL_LOADER = new ModelLoader() {
         @Override
-        public DataFetcher getResourceFetcher(Object model, int width, int height) {
+        public DataFetcher getDataFetcher(Object model, int width, int height) {
             throw new NoSuchMethodError("This should never be called!");
         }
 
@@ -42,17 +47,22 @@ public class GenericLoaderFactory {
      * null if no such factory is registered. Clears all cached model loaders.
      *
      * @param modelClass The model class.
-     * @param resourceClass The resource class.
+     * @param dataClass The data class.
      * @param <T> The type of the model the class.
      * @param <Y> The type of the resource class.
      */
-    public synchronized <T, Y> ModelLoaderFactory<T, Y> unregister(Class<T> modelClass, Class<Y> resourceClass) {
+    public synchronized <T, Y> ModelLoaderFactory<T, Y> unregister(Class<T> modelClass, Class<Y> dataClass) {
         cachedModelLoaders.clear();
+
+        Set<Class> dataClasses = modelClassToRegisteredDataClass.get(modelClass);
+        if (dataClasses != null) {
+            dataClasses.remove(dataClass);
+        }
 
         ModelLoaderFactory/*T, Y*/ result = null;
         Map<Class/*Y*/, ModelLoaderFactory/*T, Y*/> resourceToFactories = modelClassToResourceFactories.get(modelClass);
         if (resourceToFactories != null) {
-            result = resourceToFactories.remove(resourceClass);
+            result = resourceToFactories.remove(dataClass);
         }
         return result;
     }
@@ -71,6 +81,13 @@ public class GenericLoaderFactory {
     public synchronized <T, Y> ModelLoaderFactory<T, Y> register(Class<T> modelClass, Class<Y> resourceClass,
             ModelLoaderFactory<T, Y> factory) {
         cachedModelLoaders.clear();
+
+        Set<Class> dataClasses = modelClassToRegisteredDataClass.get(modelClass);
+        if (dataClasses == null) {
+            dataClasses = new HashSet<Class>();
+            modelClassToRegisteredDataClass.put(modelClass, dataClasses);
+        }
+        dataClasses.add(resourceClass);
 
         Map<Class/*Y*/, ModelLoaderFactory/*T, Y*/> resourceToFactories = modelClassToResourceFactories.get(modelClass);
         if (resourceToFactories == null) {
@@ -94,22 +111,14 @@ public class GenericLoaderFactory {
         return previous;
     }
 
-    /**
-     * Returns a {@link ModelLoader} for the given model and resource classes by either returning a cached
-     * {@link ModelLoader} or building a new a new {@link ModelLoader} using registered {@link ModelLoaderFactory}s.
-     * Returns null if no {@link ModelLoaderFactory} is registered for the given classes.
-     *
-     * @deprecated Use {@link #buildModelLoader(Class, Class)} instead. Scheduled to be removed in Glide 4.0.
-     * @param modelClass The model class.
-     * @param resourceClass The resource class.
-     * @param context Unused
-     * @param <T> The type of the model.
-     * @param <Y> The type of the resource.
-     */
-    @Deprecated
-    public synchronized <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
-            Context context) {
-        return buildModelLoader(modelClass, resourceClass);
+    public synchronized <T> List<ModelLoader<T, ?>> buildModelLoaders(Class<T> modelClass) {
+        // TODO: priority?
+        List<ModelLoader<T, ?>> modelLoaders = new ArrayList<ModelLoader<T, ?>>();
+        Set<Class> dataClasses = modelClassToRegisteredDataClass.get(modelClass);
+        for (Class dataClass : dataClasses) {
+            modelLoaders.add(buildModelLoader(modelClass, dataClass));
+        }
+        return modelLoaders;
     }
 
     /**

@@ -20,7 +20,7 @@ public class StringLoader<T> implements ModelLoader<String, T> {
     }
 
     @Override
-    public DataFetcher<T> getResourceFetcher(String model, int width, int height) {
+    public DataFetcher<T> getDataFetcher(String model, int width, int height) {
         Uri uri;
         if (model.startsWith("/")) {
             uri = toFileUri(model);
@@ -32,7 +32,7 @@ public class StringLoader<T> implements ModelLoader<String, T> {
             }
         }
 
-        return uriLoader.getResourceFetcher(uri, width, height);
+        return uriLoader.getDataFetcher(uri, width, height);
     }
 
     private static Uri toFileUri(String path) {

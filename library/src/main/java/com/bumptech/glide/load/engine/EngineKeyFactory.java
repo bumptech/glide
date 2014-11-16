@@ -1,20 +1,16 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 class EngineKeyFactory {
 
     @SuppressWarnings("rawtypes")
-    public EngineKey buildKey(String id, Key signature, int width, int height, ResourceDecoder cacheDecoder,
-            ResourceDecoder sourceDecoder, Transformation transformation, ResourceEncoder encoder,
-            ResourceTranscoder transcoder, Encoder sourceEncoder) {
-        return new EngineKey(id, signature, width, height, cacheDecoder, sourceDecoder, transformation, encoder,
-                transcoder, sourceEncoder);
+    public EngineKey buildKey(String id, Key signature, int width, int height, Transformation transformation,
+            Class<?> resourceClass, Class<?> transcodeClass) {
+        // TODO: what if I request a bitmap for an animated GIF, cache just the Bitmap, and then ask for the animated
+        // gif?
+        return new EngineKey(id, signature, width, height, transformation, resourceClass, transcodeClass);
     }
 
 }

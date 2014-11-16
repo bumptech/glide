@@ -21,7 +21,7 @@ public class FileLoader<T> implements ModelLoader<File, T> {
     }
 
     @Override
-    public DataFetcher<T> getResourceFetcher(File model, int width, int height) {
-        return uriLoader.getResourceFetcher(Uri.fromFile(model), width, height);
+    public DataFetcher<T> getDataFetcher(File model, int width, int height) {
+        return uriLoader.getDataFetcher(Uri.fromFile(model), width, height);
     }
 }

@@ -8,7 +8,7 @@ import com.bumptech.glide.load.model.ModelLoader;
 class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
 
     @Override
-    public DataFetcher<GifDecoder> getResourceFetcher(GifDecoder model, int width, int height) {
+    public DataFetcher<GifDecoder> getDataFetcher(GifDecoder model, int width, int height) {
         return new GifFrameDataFetcher(model);
     }
 

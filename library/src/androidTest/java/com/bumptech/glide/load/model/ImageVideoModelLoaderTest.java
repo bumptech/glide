@@ -50,7 +50,7 @@ public class ImageVideoModelLoaderTest {
         when(harness.streamFetcher.getId()).thenReturn(expected);
         when(harness.fileDescriptorFetcher.getId()).thenReturn(expected);
 
-        String id = harness.getLoader().getResourceFetcher(model, 1, 2).getId();
+        String id = harness.getLoader().getDataFetcher(model, 1, 2).getId();
 
         assertEquals(expected, id);
     }
@@ -62,7 +62,7 @@ public class ImageVideoModelLoaderTest {
         when(harness.fileDescriptorFetcher.getId()).thenReturn(expected);
         harness.streamModelLoader = null;
 
-        String id = harness.getLoader().getResourceFetcher(model, 1, 2).getId();
+        String id = harness.getLoader().getDataFetcher(model, 1, 2).getId();
 
         assertEquals(expected, id);
     }
@@ -74,7 +74,7 @@ public class ImageVideoModelLoaderTest {
         when(harness.streamFetcher.getId()).thenReturn(expected);
         harness.fileDescriptorModelLoader = null;
 
-        String id = harness.getLoader().getResourceFetcher(model, 1, 2).getId();
+        String id = harness.getLoader().getDataFetcher(model, 1, 2).getId();
 
         assertEquals(expected, id);
     }
@@ -86,15 +86,15 @@ public class ImageVideoModelLoaderTest {
 
         when(harness.streamFetcher.loadData(any(Priority.class))).thenReturn(stream);
         when(harness.streamModelLoader
-                .getResourceFetcher(any(Uri.class), anyInt(), anyInt()))
+                .getDataFetcher(any(Uri.class), anyInt(), anyInt()))
                 .thenReturn(harness.streamFetcher);
         when(harness.fileDescriptorFetcher.loadData(any(Priority.class))).thenReturn(fileDescriptor);
         when(harness.fileDescriptorModelLoader
-                .getResourceFetcher(any(Uri.class), anyInt(), anyInt()))
+                .getDataFetcher(any(Uri.class), anyInt(), anyInt()))
                 .thenReturn(harness.fileDescriptorFetcher);
 
         ImageVideoWrapper wrapper = harness.getLoader()
-                .getResourceFetcher(new Object(), 100, 100)
+                .getDataFetcher(new Object(), 100, 100)
                 .loadData(Priority.LOW);
 
         assertEquals(stream, wrapper.getStream());
@@ -105,14 +105,14 @@ public class ImageVideoModelLoaderTest {
     public void testHandlesNullStreamModelLoaderInGetResourceFetcher() {
         harness.streamModelLoader = null;
 
-        assertNotNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
+        assertNotNull(harness.getLoader().getDataFetcher(new Object(), 100, 100));
     }
 
     @Test
     public void testHandlesNullFileDescriptorModelLoaderInGetResourceFetcher() {
         harness.fileDescriptorFetcher = null;
 
-        assertNotNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
+        assertNotNull(harness.getLoader().getDataFetcher(new Object(), 100, 100));
     }
 
     @Test
@@ -178,27 +178,27 @@ public class ImageVideoModelLoaderTest {
 
     @Test
     public void testReturnsNullFetcherIfBothStreamAndFileDescriptorLoadersReturnNullFetchers() throws Exception {
-        when(harness.streamModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
-        when(harness.fileDescriptorModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+        when(harness.streamModelLoader.getDataFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+        when(harness.fileDescriptorModelLoader.getDataFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
 
-        assertNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
+        assertNull(harness.getLoader().getDataFetcher(new Object(), 100, 100));
     }
 
     @Test
     public void testReturnsNullFetcherIfStreamModelLoaderIsNullAndFileModelLoaderReturnsNullFetcher() throws Exception {
         harness.streamModelLoader = null;
-        when(harness.fileDescriptorModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+        when(harness.fileDescriptorModelLoader.getDataFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
 
-        assertNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
+        assertNull(harness.getLoader().getDataFetcher(new Object(), 100, 100));
     }
 
     @Test
     public void testReturnsNullFetcherIfFileDescriptorModelLoaderIsNullAndStreamModelLoaderReturnsNullFetcher()
             throws Exception {
         harness.fileDescriptorModelLoader = null;
-        when(harness.streamModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
+        when(harness.streamModelLoader.getDataFetcher(anyObject(), anyInt(), anyInt())).thenReturn(null);
 
-        assertNull(harness.getLoader().getResourceFetcher(new Object(), 100, 100));
+        assertNull(harness.getLoader().getDataFetcher(new Object(), 100, 100));
     }
 
     @Test(expected = IOException.class)
@@ -235,14 +235,14 @@ public class ImageVideoModelLoaderTest {
         String firstStreamId = "firstStream";
         when(harness.streamFetcher.getId()).thenReturn(firstStreamId);
 
-        String firstId = harness.getLoader().getResourceFetcher(first, 1, 2).getId();
+        String firstId = harness.getLoader().getDataFetcher(first, 1, 2).getId();
         assertEquals(firstStreamId, firstId);
 
         Object second = new Object();
         String secondFileDescriptorId = "secondStream";
         when(harness.streamFetcher.getId()).thenReturn(secondFileDescriptorId);
 
-        String secondId = harness.getLoader().getResourceFetcher(second, 1, 2).getId();
+        String secondId = harness.getLoader().getDataFetcher(second, 1, 2).getId();
         assertEquals(secondFileDescriptorId, secondId);
     }
 
@@ -254,8 +254,8 @@ public class ImageVideoModelLoaderTest {
         DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher = mock(DataFetcher.class);
 
         public ImageVideoLoaderHarness() {
-            when(streamModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt())).thenReturn(streamFetcher);
-            when(fileDescriptorModelLoader.getResourceFetcher(anyObject(), anyInt(), anyInt()))
+            when(streamModelLoader.getDataFetcher(anyObject(), anyInt(), anyInt())).thenReturn(streamFetcher);
+            when(fileDescriptorModelLoader.getDataFetcher(anyObject(), anyInt(), anyInt()))
                     .thenReturn(fileDescriptorFetcher);
         }
 

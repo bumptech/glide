@@ -1,23 +1,13 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.load.model.ImageVideoModelLoader;
-import com.bumptech.glide.load.model.ImageVideoWrapper;
-import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.provider.DataLoadProvider;
-import com.bumptech.glide.provider.FixedLoadProvider;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * A class for creating a load request that loads either an animated GIF drawable or a Bitmap drawable directly, or
@@ -28,38 +18,12 @@ import java.io.InputStream;
  * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
  */
 public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<ModelType> implements DownloadOptions {
-    private final ModelLoader<ModelType, InputStream> streamModelLoader;
-    private final ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader;
     private final RequestManager.OptionsApplier optionsApplier;
 
-    private static <A, Z, R> FixedLoadProvider<A, ImageVideoWrapper, Z, R> buildProvider(Glide glide,
-            ModelLoader<A, InputStream> streamModelLoader,
-            ModelLoader<A, ParcelFileDescriptor> fileDescriptorModelLoader, Class<Z> resourceClass,
-            Class<R> transcodedClass,
-            ResourceTranscoder<Z, R> transcoder) {
-        if (streamModelLoader == null && fileDescriptorModelLoader == null) {
-            return null;
-        }
-
-        if (transcoder == null) {
-            transcoder = glide.buildTranscoder(resourceClass, transcodedClass);
-        }
-        DataLoadProvider<ImageVideoWrapper, Z> dataLoadProvider = glide.buildDataProvider(ImageVideoWrapper.class,
-                resourceClass);
-        ImageVideoModelLoader<A> modelLoader = new ImageVideoModelLoader<A>(streamModelLoader,
-                fileDescriptorModelLoader);
-        return new FixedLoadProvider<A, ImageVideoWrapper, Z, R>(modelLoader, transcoder, dataLoadProvider);
-    }
-
-    DrawableTypeRequest(Class<ModelType> modelClass, ModelLoader<ModelType, InputStream> streamModelLoader,
-            ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide,
-            RequestTracker requestTracker, Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
-        super(context, modelClass,
-                buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class,
-                        GlideDrawable.class, null),
-                glide, requestTracker, lifecycle);
-        this.streamModelLoader = streamModelLoader;
-        this.fileDescriptorModelLoader = fileDescriptorModelLoader;
+    DrawableTypeRequest(Class<ModelType> modelClass,
+            Context context, Glide glide, RequestTracker requestTracker, Lifecycle lifecycle,
+            RequestManager.OptionsApplier optionsApplier) {
+        super(context, modelClass, glide, requestTracker, lifecycle);
         this.optionsApplier = optionsApplier;
     }
 
@@ -69,8 +33,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
      * @return A new request builder for loading a {@link android.graphics.Bitmap}
      */
     public BitmapTypeRequest<ModelType> asBitmap() {
-        return optionsApplier.apply(new BitmapTypeRequest<ModelType>(this, streamModelLoader,
-                fileDescriptorModelLoader, optionsApplier));
+        return optionsApplier.apply(new BitmapTypeRequest<ModelType>(this,  optionsApplier));
     }
 
     /**
@@ -86,7 +49,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
      * @return A new request builder for loading a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
      */
     public GifTypeRequest<ModelType> asGif() {
-        return optionsApplier.apply(new GifTypeRequest<ModelType>(this, streamModelLoader, optionsApplier));
+        return optionsApplier.apply(new GifTypeRequest<ModelType>(this, optionsApplier));
     }
 
     /**
@@ -103,8 +66,8 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
         return getDownloadOnlyRequest().downloadOnly(width, height);
     }
 
-    private GenericTranscodeRequest<ModelType, InputStream, File> getDownloadOnlyRequest() {
-        return optionsApplier.apply(new GenericTranscodeRequest<ModelType, InputStream, File>(File.class, this,
-                streamModelLoader, InputStream.class, File.class, optionsApplier));
+    private GenericTranscodeRequest<ModelType, File> getDownloadOnlyRequest() {
+        return optionsApplier.apply(new GenericTranscodeRequest<ModelType, File>(File.class, File.class, this,
+                optionsApplier));
     }
 }

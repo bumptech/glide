@@ -19,7 +19,7 @@ public class UrlLoader<T> implements ModelLoader<URL, T> {
     }
 
     @Override
-    public DataFetcher<T> getResourceFetcher(URL model, int width, int height) {
-        return glideUrlLoader.getResourceFetcher(new GlideUrl(model), width, height);
+    public DataFetcher<T> getDataFetcher(URL model, int width, int height) {
+        return glideUrlLoader.getDataFetcher(new GlideUrl(model), width, height);
     }
 }

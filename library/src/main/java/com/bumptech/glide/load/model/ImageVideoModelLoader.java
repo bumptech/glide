@@ -33,14 +33,14 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
     }
 
     @Override
-    public DataFetcher<ImageVideoWrapper> getResourceFetcher(A model, int width, int height) {
+    public DataFetcher<ImageVideoWrapper> getDataFetcher(A model, int width, int height) {
         DataFetcher<InputStream> streamFetcher = null;
         if (streamLoader != null) {
-            streamFetcher = streamLoader.getResourceFetcher(model, width, height);
+            streamFetcher = streamLoader.getDataFetcher(model, width, height);
         }
         DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher = null;
         if (fileDescriptorLoader != null) {
-            fileDescriptorFetcher = fileDescriptorLoader.getResourceFetcher(model, width, height);
+            fileDescriptorFetcher = fileDescriptorLoader.getDataFetcher(model, width, height);
         }
 
         if (streamFetcher != null || fileDescriptorFetcher != null) {

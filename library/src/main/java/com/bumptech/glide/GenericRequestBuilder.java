@@ -16,8 +16,6 @@ import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.provider.ChildLoadProvider;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.GenericRequest;
 import com.bumptech.glide.request.Request;
@@ -41,22 +39,19 @@ import java.io.File;
  * A generic class that can handle setting options and staring loads for generic resource types.
  *
  * @param <ModelType> The type of model representing the resource.
- * @param <DataType> The data type that the resource {@link com.bumptech.glide.load.model.ModelLoader} will provide that
- *                  can be decoded by the {@link com.bumptech.glide.load.ResourceDecoder}.
  * @param <ResourceType> The type of the resource that will be loaded.
  * @param <TranscodeType> The type of resource the decoded resource will be transcoded to.
  */
-public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> implements Cloneable {
+public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> implements Cloneable {
     protected final Class<ModelType> modelClass;
     protected final Context context;
     protected final Glide glide;
+    protected final Class<ResourceType> resourceClass;
     protected final Class<TranscodeType> transcodeClass;
     protected final RequestTracker requestTracker;
     protected final Lifecycle lifecycle;
-    private ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider;
 
     private ModelType model;
-    private Key signature = EmptySignature.obtain();
     // model may occasionally be null, so to enforce that load() was called, set a boolean rather than relying on model
     // not to be null.
     private boolean isModelSet;
@@ -64,22 +59,24 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private int errorId;
     private RequestListener<? super ModelType, TranscodeType> requestListener;
     private Float thumbSizeMultiplier;
-    private GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequestBuilder;
-    private Float sizeMultiplier = 1f;
+    private GenericRequestBuilder<?, ?, TranscodeType> thumbnailRequestBuilder;
     private Drawable placeholderDrawable;
     private Drawable errorPlaceholder;
-    private Priority priority = null;
-    private boolean isCacheable = true;
-    private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
-    private int overrideHeight = -1;
-    private int overrideWidth = -1;
-    private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
-    private Transformation<ResourceType> transformation = UnitTransformation.get();
     private boolean isTransformationSet;
 
-    GenericRequestBuilder(LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
-            Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
-        this(other.context, other.modelClass, loadProvider, transcodeClass, other.glide, other.requestTracker,
+    private Priority priority = null;
+    private boolean isCacheable = true;
+    private Float sizeMultiplier = 1f;
+    private int overrideHeight = -1;
+    private int overrideWidth = -1;
+    private Key signature = EmptySignature.obtain();
+    private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
+    private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
+    private Transformation<ResourceType> transformation = UnitTransformation.get();
+
+    GenericRequestBuilder(Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass,
+            GenericRequestBuilder<ModelType, ?, ?> other) {
+        this(other.context, other.modelClass, resourceClass, transcodeClass, other.glide, other.requestTracker,
                 other.lifecycle);
         this.model = other.model;
         this.isModelSet = other.isModelSet;
@@ -88,24 +85,23 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         this.isCacheable = other.isCacheable;
     }
 
-    GenericRequestBuilder(Context context, Class<ModelType> modelClass,
-            LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
+    GenericRequestBuilder(Context context, Class<ModelType> modelClass, Class<ResourceType> resourceClass,
             Class<TranscodeType> transcodeClass, Glide glide, RequestTracker requestTracker, Lifecycle lifecycle) {
         this.context = context;
         this.modelClass = modelClass;
+        this.resourceClass = resourceClass;
         this.transcodeClass = transcodeClass;
         this.glide = glide;
         this.requestTracker = requestTracker;
         this.lifecycle = lifecycle;
-        this.loadProvider = loadProvider != null
-                ? new ChildLoadProvider<ModelType, DataType, ResourceType, TranscodeType>(loadProvider) : null;
 
         if (context == null) {
             throw new NullPointerException("Context can't be null");
         }
-        if (modelClass != null && loadProvider == null) {
-            throw new NullPointerException("LoadProvider must not be null");
-        }
+        // TODO: FIXME.
+//        if (modelClass != null && loadProvider == null) {
+//            throw new NullPointerException("LoadProvider must not be null");
+//        }
     }
 
     /**
@@ -123,8 +119,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param thumbnailRequest The request to use to load the thumbnail.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnail(
-            GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequest) {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> thumbnail(
+            GenericRequestBuilder<?, ?, TranscodeType> thumbnailRequest) {
         this.thumbnailRequestBuilder = thumbnailRequest;
 
         return this;
@@ -155,7 +151,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the thumbnail.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnail(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> thumbnail(
             float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
@@ -173,7 +169,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading the resource.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> sizeMultiplier(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> sizeMultiplier(
             float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
@@ -193,15 +189,16 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param decoder The {@link com.bumptech.glide.load.ResourceDecoder} to use to decode the resource.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> decoder(
-            ResourceDecoder<DataType, ResourceType> decoder) {
-        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
-        // ignore the decoder.
-        if (loadProvider != null) {
-            loadProvider.setSourceDecoder(decoder);
-        }
-
-        return this;
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> decoder(
+            ResourceDecoder<?, ResourceType> decoder) {
+        throw new UnsupportedOperationException();
+//        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
+//        // ignore the decoder.
+//        if (loadProvider != null) {
+//            loadProvider.setSourceDecoder(decoder);
+//        }
+//
+//        return this;
     }
 
     /**
@@ -214,15 +211,16 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param cacheDecoder The decoder to use.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> cacheDecoder(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> cacheDecoder(
             ResourceDecoder<File, ResourceType> cacheDecoder) {
-        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
-        // ignore the decoder.
-        if (loadProvider != null) {
-            loadProvider.setCacheDecoder(cacheDecoder);
-        }
-
-        return this;
+        throw new UnsupportedOperationException();
+//        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
+//        // ignore the decoder.
+//        if (loadProvider != null) {
+//            loadProvider.setCacheDecoder(cacheDecoder);
+//        }
+//
+//        return this;
     }
 
     /**
@@ -234,13 +232,14 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param sourceEncoder The encoder to use.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> sourceEncoder(
-            Encoder<DataType> sourceEncoder) {
-        if (loadProvider != null) {
-            loadProvider.setSourceEncoder(sourceEncoder);
-        }
-
-        return this;
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> sourceEncoder(
+            Encoder<?> sourceEncoder) {
+        throw new UnsupportedOperationException();
+//        if (loadProvider != null) {
+//            loadProvider.setSourceEncoder(sourceEncoder);
+//        }
+//
+//        return this;
     }
 
     /**
@@ -259,7 +258,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param strategy The strategy to use.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>  diskCacheStrategy(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType>  diskCacheStrategy(
             DiskCacheStrategy strategy) {
         this.diskCacheStrategy = strategy;
 
@@ -279,15 +278,16 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param encoder The encoder to use.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> encoder(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> encoder(
             ResourceEncoder<ResourceType> encoder) {
-        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
-        // ignore the encoder.
-        if (loadProvider != null) {
-            loadProvider.setEncoder(encoder);
-        }
-
-        return this;
+        throw new UnsupportedOperationException();
+//        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
+//        // ignore the encoder.
+//        if (loadProvider != null) {
+//            loadProvider.setEncoder(encoder);
+//        }
+//
+//        return this;
     }
 
     /**
@@ -296,7 +296,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param priority A priority.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> priority(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> priority(
             Priority priority) {
         this.priority = priority;
 
@@ -310,7 +310,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param transformations the transformations to apply in order.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transform(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> transform(
             Transformation<ResourceType>... transformations) {
         isTransformationSet = true;
         if (transformations.length == 1) {
@@ -328,7 +328,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     @SuppressWarnings("unchecked")
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> dontTransform() {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> dontTransform() {
         Transformation<ResourceType> transformation = UnitTransformation.get();
         return transform(transformation);
     }
@@ -343,20 +343,21 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param transcoder The transcoder to use.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> transcoder(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> transcoder(
             ResourceTranscoder<ResourceType, TranscodeType> transcoder) {
-        if (loadProvider != null) {
-            loadProvider.setTranscoder(transcoder);
-        }
-
-        return this;
+        throw new UnsupportedOperationException();
+//        if (loadProvider != null) {
+//            loadProvider.setTranscoder(transcoder);
+//        }
+//
+//        return this;
     }
 
     /**
      * Removes any existing animation set on the builder. Will be overridden by subsequent calls that set an animation.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> dontAnimate() {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> dontAnimate() {
         GlideAnimationFactory<TranscodeType> animation = NoAnimation.getFactory();
         return animate(animation);
     }
@@ -368,7 +369,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param animationId The resource id of the animation to run
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(int animationId) {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> animate(int animationId) {
         return animate(new ViewAnimationFactory<TranscodeType>(context, animationId));
     }
 
@@ -388,7 +389,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     @Deprecated
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(Animation animation) {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> animate(Animation animation) {
         return animate(new ViewAnimationFactory<TranscodeType>(animation));
     }
 
@@ -400,12 +401,12 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param animator The {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} to run.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> animate(
             ViewPropertyAnimation.Animator animator) {
         return animate(new ViewPropertyAnimationFactory<TranscodeType>(animator));
     }
 
-    GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
+    GenericRequestBuilder<ModelType, ResourceType, TranscodeType> animate(
             GlideAnimationFactory<TranscodeType> animationFactory) {
         if (animationFactory == null) {
             throw new NullPointerException("Animation factory must not be null!");
@@ -422,7 +423,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param resourceId The id of the resource to use as a placeholder
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> placeholder(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> placeholder(
             int resourceId) {
         this.placeholderId = resourceId;
 
@@ -435,7 +436,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param drawable The drawable to display as a placeholder.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> placeholder(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> placeholder(
             Drawable drawable) {
         this.placeholderDrawable = drawable;
 
@@ -448,7 +449,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param resourceId The id of the resource to use as a placeholder.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> error(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> error(
             int resourceId) {
         this.errorId = resourceId;
 
@@ -461,7 +462,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param drawable The drawable to display.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> error(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> error(
             Drawable drawable) {
         this.errorPlaceholder = drawable;
 
@@ -476,7 +477,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param requestListener The request listener to use.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> listener(
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> listener(
             RequestListener<? super ModelType, TranscodeType> requestListener) {
         this.requestListener = requestListener;
 
@@ -494,7 +495,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param skip True to allow the resource to skip the memory cache.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> skipMemoryCache(boolean skip) {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> skipMemoryCache(boolean skip) {
         this.isCacheable = !skip;
 
         return this;
@@ -509,7 +510,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param height The height in pixels to use to load the resource.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> override(int width, int height) {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> override(int width, int height) {
         if (!Util.isValidDimensions(width, height)) {
             throw new IllegalArgumentException("Width and height must be Target#SIZE_ORIGINAL or > 0");
         }
@@ -533,7 +534,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      *                  model that will be mixed in to the cache key.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> signature(Key signature) {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> signature(Key signature) {
         if (signature == null) {
             throw new NullPointerException("Signature must not be null");
         }
@@ -552,7 +553,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @param model The model to load data for, or null.
      * @return This request builder.
      */
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> load(ModelType model) {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> load(ModelType model) {
         this.model = model;
         isModelSet = true;
         return this;
@@ -569,11 +570,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     @SuppressWarnings("unchecked")
     @Override
-    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> clone() {
+    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> clone() {
         try {
-            GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> clone =
-                    (GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType>) super.clone();
-            clone.loadProvider = loadProvider != null ? loadProvider.clone() : null;
+            GenericRequestBuilder<ModelType, ResourceType, TranscodeType> clone =
+                    (GenericRequestBuilder<ModelType, ResourceType, TranscodeType>) super.clone();
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -779,8 +779,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
         return GenericRequest.obtain(
-                loadProvider,
                 model,
+                resourceClass,
+                transcodeClass,
+                glide.getRequestContext(),
+                glide.buildTranscoder(resourceClass, transcodeClass),
                 signature,
                 context,
                 priority,
@@ -794,7 +797,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 requestCoordinator,
                 glide.getEngine(),
                 transformation,
-                transcodeClass,
                 isCacheable,
                 animationFactory,
                 overrideWidth,
