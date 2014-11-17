@@ -7,7 +7,6 @@ import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.util.Util;
 
-import java.util.List;
 import java.util.Queue;
 
 /**
@@ -25,6 +24,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     private final int maxPreload;
     private final PreloadTargetQueue preloadTargetQueue;
     private final PreloadModelProvider<T> preloadModelProvider;
+    private final PreloadSizeProvider<T> preloadDimensionProvider;
 
     private int lastEnd;
     private int lastStart;
@@ -34,22 +34,17 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     private boolean isIncreasing = true;
 
     /**
-     * @param <U>
+     * An implementation of PreloadModelProvider should provide all the models that should be preloaded.
+     * @param <U> The type of the model being preloaded.
      */
     public interface PreloadModelProvider<U> {
 
         /**
-         * Returns a list of all models that need to be loaded for the list to display adapter items
-         * {@code start - end}.
-         * A list of any size can be returned so there can be multiple models per adapter position.
-         * @param start The smallest adapter position. Will be {@code >= 0 && < adapter.getCount() &&
-         *              <= end}
-         * @param end   The largest adapter position. Will be {@code >= 0 && < adapter.getCount && >=
-         *              start}
-         * @return A non null list of all models for adapter positions between {@code start} and
-         * {@code end}.
+         * Returns a models that need to be loaded to display adapter item.
+         * @param position The position of the model in the adapter
+         * @return A nun null model that need to be loaded to display adapter item
          */
-        List<U> getPreloadItems(int start, int end);
+        U getPreloadItem(int position);
 
         /**
          * Returns a glide request for a given item. Must exactly match the request used to load the
@@ -60,22 +55,30 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
          * @return A non null {@link BitmapRequestBuilder}.
          */
         GenericRequestBuilder getPreloadRequestBuilder(U item, int position);
+    }
+
+    /**
+     * @param <T>
+     */
+    public interface PreloadSizeProvider<T> {
 
         /**
-         * Returns the dimensions of the view in the list where the resources will be displayed.
+         * Returns the size of the view in the list where the resources will be displayed.
          * <p>
          * Note - The dimensions returned here must precisely match those of the view in the list.
          * </p>
-         * @param item A model
+         * @param item     A model
          * @param position The position of the model in the adapter
          * @return The dimensions of the view where the item will be displayed
          */
-        int[] getPreloadDimensions(U item, int position);
+        int[] getPreloadSize(T item, int position);
     }
 
 
-    public ListPreloader(PreloadModelProvider<T> preloadModelProvider, int maxPreload) {
+    public ListPreloader(PreloadModelProvider<T> preloadModelProvider,
+                         PreloadSizeProvider<T> preloadDimensionProvider, int maxPreload) {
         this.preloadModelProvider = preloadModelProvider;
+        this.preloadDimensionProvider = preloadDimensionProvider;
         this.maxPreload = maxPreload;
         preloadTargetQueue = new PreloadTargetQueue(maxPreload + 1);
     }
@@ -102,51 +105,21 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      * <p>
      * Note - The dimensions returned here must precisely match those of the view in the list.
      * </p>
-     * @param item A model
-     * @return The dimensions of the view where the item will be displayed
-     */
-    protected int[] getDimensions(T item) {
-        return getDimensions(item, -1);
-    }
-
-    /**
-     * Returns the dimensions of the view in the list where the resources will be displayed.
-     * <p>
-     * Note - The dimensions returned here must precisely match those of the view in the list.
-     * </p>
      * @param item     A model
      * @param position of the model
      * @return The dimensions of the view where the item will be displayed
      */
     protected int[] getDimensions(T item, int position) {
-        return this.preloadModelProvider.getPreloadDimensions(item, position);
+        return this.preloadDimensionProvider.getPreloadSize(item, position);
     }
 
     /**
-     * Returns a list of all models that need to be loaded for the list to display adapter items
-     * {@code start - end}.
-     * A list of any size can be returned so there can be multiple models per adapter position.
-     * @param start The smallest adapter position. Will be {@code >= 0 && < adapter.getCount() &&
-     *              <= end}
-     * @param end   The largest adapter position. Will be {@code >= 0 && < adapter.getCount && >=
-     *              start}
-     * @return A non null list of all models for adapter positions between {@code start} and
-     * {@code end}.
+     * Returns a models that need to be loaded to display adapter item.
+     * @param position The position of the model in the adapter
+     * @return A nun null model that need to be loaded to display adapter item
      */
-    protected List<T> getItems(int start, int end) {
-        return this.preloadModelProvider.getPreloadItems(start, end);
-    }
-
-    /**
-     * Returns a glide request for a given item. Must exactly match the request used to load the
-     * resource in the list.
-     * The target and context will be provided by the preloader.
-     * @param item The model to load.
-     * @return A non null {@link BitmapRequestBuilder}.
-     */
-    @SuppressWarnings("rawtypes")
-    protected GenericRequestBuilder getRequestBuilder(T item) {
-        return getRequestBuilder(item, -1);
+    protected T getItem(int position) {
+        return this.preloadModelProvider.getPreloadItem(position);
     }
 
     /**
@@ -182,18 +155,16 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
         }
         end = Math.min(totalItemCount, end);
         start = Math.min(totalItemCount, Math.max(0, start));
-        List<T> items = getItems(start, end);
 
         if (from < to) {
             // Increasing
-            final int numItems = items.size();
-            for (int i = 0; i < numItems; i++) {
-                preloadItem(items, i);
+            for (int i = start; i < end; i++) {
+                preloadItem(getItem(i), i);
             }
         } else {
             // Decreasing
-            for (int i = items.size() - 1; i >= 0; i--) {
-                preloadItem(items, i);
+            for (int i = end - 1; i >= start; i--) {
+                preloadItem(getItem(i), i);
             }
         }
 
@@ -202,11 +173,10 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     @SuppressWarnings("unchecked")
-    private void preloadItem(List<T> items, int position) {
-        final T item = items.get(position);
-        final int[] dimensions = getDimensions(item);
+    private void preloadItem(T item, int position) {
+        final int[] dimensions = getDimensions(item, position);
         if (dimensions != null) {
-            getRequestBuilder(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
+            getRequestBuilder(item, position).into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
         }
     }
 

@@ -18,10 +18,9 @@ import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The primary activity in the Giphy sample that allows users to view trending animated GIFs from Giphy's api.
@@ -31,6 +30,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
     private GifAdapter adapter;
     private DrawableRequestBuilder<Api.GifResult> gifItemRequest;
+    private ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +52,10 @@ public class MainActivity extends Activity implements Api.Monitor {
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .fitCenter();
 
-        adapter = new GifAdapter(this, gifItemRequest);
+        preloadSizeProvider = new ViewPreloadSizeProvider<Api.GifResult>();
+        adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);
         gifList.setAdapter(adapter);
-        ListPreloader<Api.GifResult> preloader = new ListPreloader<Api.GifResult>(adapter, 2);
+        ListPreloader<Api.GifResult> preloader = new ListPreloader<Api.GifResult>(adapter, preloadSizeProvider, 2);
         gifList.setOnScrollListener(preloader);
     }
 
@@ -83,13 +84,15 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         private final Activity activity;
         private DrawableRequestBuilder<Api.GifResult> requestBuilder;
+        private ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider;
 
         private Api.GifResult[] results = EMPTY_RESULTS;
-        private int[] dimensions = null;
 
-        public GifAdapter(Activity activity, DrawableRequestBuilder<Api.GifResult> requestBuilder) {
+        public GifAdapter(Activity activity, DrawableRequestBuilder<Api.GifResult> requestBuilder,
+                          ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider) {
             this.activity = activity;
             this.requestBuilder = requestBuilder;
+            this.preloadSizeProvider = preloadSizeProvider;
         }
 
         public void setResults(Api.GifResult[] results) {
@@ -144,30 +147,19 @@ public class MainActivity extends Activity implements Api.Monitor {
                     .load(result)
                     .into(gifView);
 
-            if (dimensions == null) {
-                dimensions = new int[]{gifView.getWidth(), gifView.getHeight()};
-            }
+            preloadSizeProvider.setView(gifView);
 
             return convertView;
         }
 
         @Override
-        public List<Api.GifResult> getPreloadItems(int start, int end) {
-            List<Api.GifResult> items = new ArrayList<Api.GifResult>(end - start);
-            for (int i = start; i < end; i++) {
-                items.add(getItem(i));
-            }
-            return items;
+        public Api.GifResult getPreloadItem(int position) {
+            return getItem(position);
         }
 
         @Override
         public GenericRequestBuilder getPreloadRequestBuilder(Api.GifResult item, int position) {
             return requestBuilder.load(item);
-        }
-
-        @Override
-        public int[] getPreloadDimensions(Api.GifResult item, int position) {
-            return dimensions;
         }
     }
 }
