@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 /**
  * A {@link com.bumptech.glide.ListPreloader.PreloadSizeProvider} with a fixed width and height.
- * @param <T>
+ * @param <T> The type of the model the size should be provided for.
  */
 public class FixedPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProvider<T> {
 
@@ -23,7 +23,7 @@ public class FixedPreloadSizeProvider<T> implements ListPreloader.PreloadSizePro
     }
 
     @Override
-    public int[] getPreloadSize(T item, int position) {
+    public int[] getPreloadSize(T item) {
         return Arrays.copyOf(this.size, this.size.length);
     }
 }

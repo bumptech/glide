@@ -21,6 +21,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The primary activity in the Giphy sample that allows users to view trending animated GIFs from Giphy's api.
@@ -153,12 +155,16 @@ public class MainActivity extends Activity implements Api.Monitor {
         }
 
         @Override
-        public Api.GifResult getPreloadItem(int position) {
-            return getItem(position);
+        public List<Api.GifResult> getPreloadItems(int start, int end) {
+            List<Api.GifResult> items = new ArrayList<Api.GifResult>(end - start);
+            for (int i = start; i < end; i++) {
+                items.add(getItem(i));
+        }
+            return items;
         }
 
         @Override
-        public GenericRequestBuilder getPreloadRequestBuilder(Api.GifResult item, int position) {
+        public GenericRequestBuilder getPreloadRequestBuilder(Api.GifResult item) {
             return requestBuilder.load(item);
         }
     }

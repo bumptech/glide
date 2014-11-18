@@ -166,12 +166,12 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
         }
 
         @Override
-        public Photo getPreloadItem(int position) {
-            return photos.get(position);
+        public List<Photo> getPreloadItems(int start, int end) {
+            return photos.subList(start, end);
         }
 
         @Override
-        public GenericRequestBuilder getPreloadRequestBuilder(Photo item, int position) {
+        public GenericRequestBuilder getPreloadRequestBuilder(Photo item) {
             return fullRequest
                     .thumbnail(thumbRequest.load(item))
                     .load(item);
