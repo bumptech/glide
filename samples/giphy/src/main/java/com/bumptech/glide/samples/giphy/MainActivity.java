@@ -18,6 +18,7 @@ import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
     private GifAdapter adapter;
     private DrawableRequestBuilder<Api.GifResult> gifItemRequest;
+    private ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,15 +48,16 @@ public class MainActivity extends Activity implements Api.Monitor {
                 .into(giphyLogoView);
 
         ListView gifList = (ListView) findViewById(R.id.gif_list);
-        GiphyPreloader preloader = new GiphyPreloader(2);
 
         gifItemRequest = Glide.with(this)
                 .from(Api.GifResult.class)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .fitCenter();
 
-        adapter = new GifAdapter(this, preloader, gifItemRequest);
+        preloadSizeProvider = new ViewPreloadSizeProvider<Api.GifResult>();
+        adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);
         gifList.setAdapter(adapter);
+        ListPreloader<Api.GifResult> preloader = new ListPreloader<Api.GifResult>(adapter, preloadSizeProvider, 2);
         gifList.setOnScrollListener(preloader);
     }
 
@@ -78,48 +81,20 @@ public class MainActivity extends Activity implements Api.Monitor {
         adapter.setResults(result.data);
     }
 
-    private class GiphyPreloader extends ListPreloader<Api.GifResult> {
-
-        private int[] dimensions;
-
-        public GiphyPreloader(int maxPreload) {
-            super(maxPreload);
-        }
-
-        @Override
-        protected int[] getDimensions(Api.GifResult item) {
-            return dimensions;
-        }
-
-        @Override
-        protected List<Api.GifResult> getItems(int start, int end) {
-            List<Api.GifResult> items = new ArrayList<Api.GifResult>(end - start);
-            for (int i = start; i < end; i++) {
-                items.add(adapter.getItem(i));
-            }
-            return items;
-        }
-
-        @Override
-        protected GenericRequestBuilder getRequestBuilder(Api.GifResult item) {
-            return gifItemRequest.load(item);
-        }
-    }
-
-    private static class GifAdapter extends BaseAdapter {
+    private static class GifAdapter extends BaseAdapter implements ListPreloader.PreloadModelProvider<Api.GifResult> {
         private static final Api.GifResult[] EMPTY_RESULTS = new Api.GifResult[0];
 
         private final Activity activity;
-        private final GiphyPreloader preloader;
         private DrawableRequestBuilder<Api.GifResult> requestBuilder;
+        private ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider;
 
         private Api.GifResult[] results = EMPTY_RESULTS;
 
-        public GifAdapter(Activity activity, GiphyPreloader preloader,
-                DrawableRequestBuilder<Api.GifResult> requestBuilder) {
+        public GifAdapter(Activity activity, DrawableRequestBuilder<Api.GifResult> requestBuilder,
+                          ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider) {
             this.activity = activity;
-            this.preloader = preloader;
             this.requestBuilder = requestBuilder;
+            this.preloadSizeProvider = preloadSizeProvider;
         }
 
         public void setResults(Api.GifResult[] results) {
@@ -174,20 +149,23 @@ public class MainActivity extends Activity implements Api.Monitor {
                     .load(result)
                     .into(gifView);
 
-            if (preloader.dimensions == null) {
-                gifView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (gifView.getWidth() > 0 && gifView.getHeight() > 0) {
-                            preloader.dimensions = new int[2];
-                            preloader.dimensions[0] = gifView.getWidth();
-                            preloader.dimensions[1] = gifView.getHeight();
-                        }
-                    }
-                });
-            }
+            preloadSizeProvider.setView(gifView);
 
             return convertView;
+        }
+
+        @Override
+        public List<Api.GifResult> getPreloadItems(int start, int end) {
+            List<Api.GifResult> items = new ArrayList<Api.GifResult>(end - start);
+            for (int i = start; i < end; i++) {
+                items.add(getItem(i));
+        }
+            return items;
+        }
+
+        @Override
+        public GenericRequestBuilder getPreloadRequestBuilder(Api.GifResult item) {
+            return requestBuilder.load(item);
         }
     }
 }

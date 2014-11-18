@@ -14,17 +14,18 @@ import java.util.Queue;
  * Loads a few resources ahead in the direction of scrolling in any {@link AbsListView} so that images are in the memory
  * cache just before the corresponding view in created in the list. Gives the appearance of an infinitely large image
  * cache, depending on scrolling speed, cpu speed, and cache size.
- *
  * <p>
- *  Must be set using {@link AbsListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener)}, or have its
- *  corresponding methods called from another {@link android.widget.AbsListView.OnScrollListener} to function.
+ * Must be set using {@link AbsListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener)}, or have its
+ * corresponding methods called from another {@link android.widget.AbsListView.OnScrollListener} to function.
  * </p>
- *
  * @param <T> The type of the model being displayed in the list.
  */
-public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
+public class ListPreloader<T> implements AbsListView.OnScrollListener {
+
     private final int maxPreload;
     private final PreloadTargetQueue preloadTargetQueue;
+    private final PreloadModelProvider<T> preloadModelProvider;
+    private final PreloadSizeProvider<T> preloadDimensionProvider;
 
     private int lastEnd;
     private int lastStart;
@@ -34,11 +35,57 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     private boolean isIncreasing = true;
 
     /**
-     * Constructor for the preloader.
-     *
-     * @param maxPreload The maximum number of items in the list to load ahead (corresponds to adapter positions).
+     * An implementation of PreloadModelProvider should provide all the models that should be preloaded.
+     * @param <U> The type of the model being preloaded.
      */
-    public ListPreloader(int maxPreload) {
+    public interface PreloadModelProvider<U> {
+
+        /**
+         * Returns a list of all models that need to be loaded for the list to display adapter items
+         * {@code start - end}.
+         * A list of any size can be returned so there can be multiple models per adapter position.
+         * @param start The smallest adapter position. Will be {@code >= 0 && < adapter.getCount() &&
+         *              <= end}
+         * @param end   The largest adapter position. Will be {@code >= 0 && < adapter.getCount && >=
+         *              start}
+         * @return A non null list of all models for adapter positions between {@code start} and
+         * {@code end}.
+         */
+        List<U> getPreloadItems(int start, int end);
+
+        /**
+         * Returns a glide request for a given item. Must exactly match the request used to load the
+         * resource in the list.
+         * The target and context will be provided by the preloader.
+         * @param item The model to load.
+         * @return A non null {@link BitmapRequestBuilder}.
+         */
+        GenericRequestBuilder getPreloadRequestBuilder(U item);
+    }
+
+    /**
+     * An implementation of PreloadSizeProvider should provide the size of the view in the list where the resources
+     * will be displayed.
+     * @param <T> The type of the model the size should be provided for.
+     */
+    public interface PreloadSizeProvider<T> {
+
+        /**
+         * Returns the size of the view in the list where the resources will be displayed.
+         * <p>
+         * Note - The dimensions returned here must precisely match those of the view in the list.
+         * </p>
+         * @param item A model
+         * @return The dimensions of the view where the item will be displayed
+         */
+        int[] getPreloadSize(T item);
+    }
+
+
+    public ListPreloader(PreloadModelProvider<T> preloadModelProvider,
+                         PreloadSizeProvider<T> preloadDimensionProvider, int maxPreload) {
+        this.preloadModelProvider = preloadModelProvider;
+        this.preloadDimensionProvider = preloadDimensionProvider;
         this.maxPreload = maxPreload;
         preloadTargetQueue = new PreloadTargetQueue(maxPreload + 1);
     }
@@ -49,7 +96,8 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     @Override
-    public void onScroll(AbsListView absListView, int firstVisible, int visibleCount, int totalCount) {
+    public void onScroll(AbsListView absListView, int firstVisible, int visibleCount,
+                         int totalCount) {
         totalItemCount = totalCount;
         if (firstVisible > lastFirstVisible) {
             preload(firstVisible + visibleCount, true);
@@ -60,34 +108,43 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     /**
-     * Returns the dimensions of the view in the list where the resources will be displayed.
+     * Returns the size of the view in the list where the resources will be displayed.
      * <p>
-     *     Note - The dimensions returned here must precisely match those of the view in the list.
+     * Note - The size returned here must precisely match those of the view in the list.
      * </p>
      * @param item A model
-     * @return The dimensions of the view where the item will be displayed
+     * @return The size of the view where the item will be displayed
      */
-    protected abstract int[] getDimensions(T item);
+    protected int[] getSize(T item) {
+        return this.preloadDimensionProvider.getPreloadSize(item);
+    }
 
     /**
-     * Returns a list of all models that need to be loaded for the list to display adapter items {@code start - end}.
+     * Returns a list of all models that need to be loaded for the list to display adapter items
+     * {@code start - end}.
      * A list of any size can be returned so there can be multiple models per adapter position.
-     *
-     * @param start The smallest adapter position. Will be {@code >= 0 && < adapter.getCount() && <= end}
-     * @param end The largest adapter position. Will be {@code >= 0 && < adapter.getCount && >= start}
-     * @return A non null list of all models for adapter positions between {@code start} and {@code end}.
+     * @param start The smallest adapter position. Will be {@code >= 0 && < adapter.getCount() &&
+     *              <= end}
+     * @param end   The largest adapter position. Will be {@code >= 0 && < adapter.getCount && >=
+     *              start}
+     * @return A non null list of all models for adapter positions between {@code start} and
+     * {@code end}.
      */
-    protected abstract List<T> getItems(int start, int end);
+    protected List<T> getItems(int start, int end) {
+        return this.preloadModelProvider.getPreloadItems(start, end);
+    }
 
     /**
-     * Returns a glide request for a given item. Must exactly match the request used to load the resource in the list.
+     * Returns a glide request for a given item. Must exactly match the request used to load the
+     * resource in the list.
      * The target and context will be provided by the preloader.
-     *
      * @param item The model to load.
      * @return A non null {@link BitmapRequestBuilder}.
      */
     @SuppressWarnings("rawtypes")
-    protected abstract GenericRequestBuilder getRequestBuilder(T item);
+    protected GenericRequestBuilder getRequestBuilder(T item) {
+        return this.preloadModelProvider.getPreloadRequestBuilder(item);
+    }
 
     private void preload(int start, boolean increasing) {
         if (isIncreasing != increasing) {
@@ -131,7 +188,7 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
     @SuppressWarnings("unchecked")
     private void preloadItem(List<T> items, int position) {
         final T item = items.get(position);
-        final int[] dimensions = getDimensions(item);
+        final int[] dimensions = getSize(item);
         if (dimensions != null) {
             getRequestBuilder(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
         }
@@ -168,7 +225,8 @@ public abstract class ListPreloader<T> implements AbsListView.OnScrollListener {
         private int photoWidth;
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation<? super Object> glideAnimation) {
+        public void onResourceReady(Object resource,
+                                    GlideAnimation<? super Object> glideAnimation) {
             // Do nothing.
         }
 

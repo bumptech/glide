@@ -20,6 +20,7 @@ import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +33,11 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     private static final String STATE_POSITION_OFFSET = "state_position_offset";
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
-    private FlickrListPreloader preloader;
+    private ListPreloader<Photo> preloader;
     private ListView list;
     private DrawableRequestBuilder<Photo> fullRequest;
     private DrawableRequestBuilder<Photo> thumbRequest;
+    private ViewPreloadSizeProvider<Photo> preloadSizeProvider;
 
     public static FlickrPhotoList newInstance() {
         return new FlickrPhotoList();
@@ -55,7 +57,8 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
         list = (ListView) result.findViewById(R.id.flickr_photo_list);
         adapter = new FlickrPhotoListAdapter();
         list.setAdapter(adapter);
-        preloader = new FlickrListPreloader(5);
+        preloadSizeProvider = new ViewPreloadSizeProvider<Photo>();
+        preloader = new ListPreloader<Photo>(adapter, preloadSizeProvider, 5);
         list.setOnScrollListener(preloader);
         if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
@@ -102,42 +105,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
         }
     }
 
-    private class FlickrListPreloader extends ListPreloader<Photo> {
-        private int[] photoDimens = null;
-
-        public FlickrListPreloader(int maxPreload) {
-            super(maxPreload);
-        }
-
-        public boolean isDimensSet() {
-            return photoDimens != null;
-        }
-
-        public void setDimens(int width, int height) {
-            if (photoDimens == null) {
-                photoDimens = new int[] { width, height };
-            }
-        }
-
-        @Override
-        protected int[] getDimensions(Photo item) {
-            return photoDimens;
-        }
-
-        @Override
-        protected List<Photo> getItems(int start, int end) {
-            return currentPhotos.subList(start, end);
-        }
-
-        @Override
-        protected GenericRequestBuilder getRequestBuilder(Photo item) {
-            return fullRequest
-                    .thumbnail(thumbRequest.load(item))
-                    .load(item);
-        }
-    }
-
-    private class FlickrPhotoListAdapter extends BaseAdapter {
+    private class FlickrPhotoListAdapter extends BaseAdapter implements ListPreloader.PreloadModelProvider<Photo> {
         private final LayoutInflater inflater;
         private List<Photo> photos = new ArrayList<Photo>(0);
 
@@ -175,14 +143,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
                 TextView titleView = (TextView) view.findViewById(R.id.title_view);
                 viewHolder = new ViewHolder(imageView, titleView);
                 view.setTag(viewHolder);
-                if (!preloader.isDimensSet()) {
-                    imageView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            preloader.setDimens(imageView.getWidth(), imageView.getHeight());
-                        }
-                    });
-                }
+                preloadSizeProvider.setView(imageView);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
@@ -194,7 +155,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
 
             viewHolder.imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
-               public void onClick(View view) {
+                public void onClick(View view) {
                     Intent intent = FullscreenActivity.getIntent(getActivity(), current);
                     startActivity(intent);
                 }
@@ -202,6 +163,18 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
 
             viewHolder.titleText.setText(current.getTitle());
             return view;
+        }
+
+        @Override
+        public List<Photo> getPreloadItems(int start, int end) {
+            return photos.subList(start, end);
+        }
+
+        @Override
+        public GenericRequestBuilder getPreloadRequestBuilder(Photo item) {
+            return fullRequest
+                    .thumbnail(thumbRequest.load(item))
+                    .load(item);
         }
     }
 }

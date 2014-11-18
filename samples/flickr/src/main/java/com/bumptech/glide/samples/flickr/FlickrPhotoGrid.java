@@ -18,6 +18,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
+import com.bumptech.glide.util.FixedPreloadSizeProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +74,12 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
         grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
-        final FlickrPreloader preloader = new FlickrPreloader(args.getInt(PRELOAD_KEY));
-        grid.setOnScrollListener(preloader);
+        final FixedPreloadSizeProvider<Photo> preloadSizeProvider = new FixedPreloadSizeProvider(photoSize,
+                                                                                                 photoSize);
         adapter = new PhotoAdapter();
+        final ListPreloader<Photo> preloader = new ListPreloader<Photo>(adapter, preloadSizeProvider,
+                                                                        args.getInt(PRELOAD_KEY));
+        grid.setOnScrollListener(preloader);
         grid.setAdapter(adapter);
         if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
@@ -106,30 +110,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         }
     }
 
-    private class FlickrPreloader extends ListPreloader<Photo> {
-        private final int[] dimens = new int[] { photoSize, photoSize };
-
-        public FlickrPreloader(int toPreload) {
-            super(toPreload);
-        }
-
-        @Override
-        protected int[] getDimensions(Photo item) {
-            return dimens;
-        }
-
-        @Override
-        protected List<Photo> getItems(int start, int end) {
-            return currentPhotos.subList(start, end);
-        }
-
-        @Override
-        protected GenericRequestBuilder getRequestBuilder(Photo item) {
-            return preloadRequest.load(item);
-        }
-    }
-
-    private class PhotoAdapter extends BaseAdapter {
+    private class PhotoAdapter extends BaseAdapter implements ListPreloader.PreloadModelProvider<Photo> {
         private List<Photo> photos = new ArrayList<Photo>(0);
         private final LayoutInflater inflater;
 
@@ -184,6 +165,16 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
             });
 
             return imageView;
+        }
+
+        @Override
+        public List<Photo> getPreloadItems(int start, int end) {
+            return photos.subList(start, end);
+        }
+
+        @Override
+        public GenericRequestBuilder getPreloadRequestBuilder(Photo item) {
+            return preloadRequest.load(item);
         }
     }
 }
