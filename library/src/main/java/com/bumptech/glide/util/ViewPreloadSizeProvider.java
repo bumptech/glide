@@ -12,20 +12,25 @@ import java.util.Arrays;
 /**
  * A {@link com.bumptech.glide.ListPreloader.PreloadSizeProvider} that will extract the preload size from a given
  * {@link android.view.View}.
+ *
  * @param <T> The type of the model the size should be provided for.
  */
 public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProvider<T>, SizeReadyCallback {
     private int[] size = null;
     private SizeViewTarget viewTarget;
 
+    /**
+     * Constructor that does nothing by default and requires users to call {@link #setView(android.view.View)} when a
+     * View is available to initialize the dimensions returned by this class.
+     */
     public ViewPreloadSizeProvider() {
         // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     /**
-     * A {@link com.bumptech.glide.ListPreloader.PreloadSizeProvider} that will extract the preload size from a given
-     * {@link android.view.View}.
-     * @param view A not null View the size will be extracted async with an {@link android.view.ViewTreeObserver
+     * Constructor that will extract the preload size from a given {@link android.view.View}.
+     *
+     * @param view A not null View the size will be extracted from async using an {@link android.view.ViewTreeObserver
      *             .OnPreDrawListener}
      */
     public ViewPreloadSizeProvider(View view) {
@@ -48,7 +53,8 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
     }
 
     /**
-     * Set the {@link android.view.View} the size will be extracted.
+     * Sets the {@link android.view.View} the size will be extracted.
+     *
      * @param view A not null View the size will be extracted async with an {@link android.view.ViewTreeObserver
      *             .OnPreDrawListener}
      */

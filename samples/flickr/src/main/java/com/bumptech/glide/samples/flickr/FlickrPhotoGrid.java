@@ -72,15 +72,18 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         preloadRequest = thumbnail ? thumbnailRequest.clone().priority(Priority.HIGH) : fullRequest;
 
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
+
         grid = (GridView) result.findViewById(R.id.images);
         grid.setColumnWidth(photoSize);
-        final FixedPreloadSizeProvider<Photo> preloadSizeProvider = new FixedPreloadSizeProvider(photoSize,
-                                                                                                 photoSize);
         adapter = new PhotoAdapter();
-        final ListPreloader<Photo> preloader = new ListPreloader<Photo>(adapter, preloadSizeProvider,
-                                                                        args.getInt(PRELOAD_KEY));
-        grid.setOnScrollListener(preloader);
         grid.setAdapter(adapter);
+
+        final FixedPreloadSizeProvider<Photo> preloadSizeProvider =
+                new FixedPreloadSizeProvider<Photo>(photoSize, photoSize);
+        final ListPreloader<Photo> preloader =
+                new ListPreloader<Photo>(adapter, preloadSizeProvider, args.getInt(PRELOAD_KEY));
+        grid.setOnScrollListener(preloader);
+
         if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
         }

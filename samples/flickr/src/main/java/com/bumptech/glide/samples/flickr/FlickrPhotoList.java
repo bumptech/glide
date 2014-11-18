@@ -29,11 +29,11 @@ import java.util.List;
  * A fragment that shows cropped image thumbnails half the width of the screen in a scrolling list.
  */
 public class FlickrPhotoList extends Fragment implements PhotoViewer {
+    private static final int PRELOAD_AHEAD_ITEMS = 5;
     private static final String STATE_POSITION_INDEX = "state_position_index";
     private static final String STATE_POSITION_OFFSET = "state_position_offset";
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
-    private ListPreloader<Photo> preloader;
     private ListView list;
     private DrawableRequestBuilder<Photo> fullRequest;
     private DrawableRequestBuilder<Photo> thumbRequest;
@@ -57,9 +57,11 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
         list = (ListView) result.findViewById(R.id.flickr_photo_list);
         adapter = new FlickrPhotoListAdapter();
         list.setAdapter(adapter);
+
         preloadSizeProvider = new ViewPreloadSizeProvider<Photo>();
-        preloader = new ListPreloader<Photo>(adapter, preloadSizeProvider, 5);
+        ListPreloader<Photo> preloader = new ListPreloader<Photo>(adapter, preloadSizeProvider, PRELOAD_AHEAD_ITEMS);
         list.setOnScrollListener(preloader);
+
         if (currentPhotos != null) {
             adapter.setPhotos(currentPhotos);
         }
