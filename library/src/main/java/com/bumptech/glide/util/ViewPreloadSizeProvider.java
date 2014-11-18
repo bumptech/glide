@@ -12,7 +12,7 @@ import java.util.Arrays;
 /**
  * A {@link com.bumptech.glide.ListPreloader.PreloadSizeProvider} that will extract the preload size from a given
  * {@link android.view.View}.
- * @param <T>
+ * @param <T> The type of the model the size should be provided for.
  */
 public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProvider<T>, SizeReadyCallback {
     private int[] size = null;
@@ -33,7 +33,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
     }
 
     @Override
-    public int[] getPreloadSize(T item, int position) {
+    public int[] getPreloadSize(T item) {
         if (size == null) {
             return null;
         } else {
