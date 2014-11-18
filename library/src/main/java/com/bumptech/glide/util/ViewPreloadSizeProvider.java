@@ -49,19 +49,23 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
     @Override
     public void onSizeReady(int width, int height) {
         this.size = new int[]{width, height};
-        this.viewTarget = null;
     }
 
     /**
      * Sets the {@link android.view.View} the size will be extracted.
      *
+     * <p>
+     *     Note - only the first call to this method will be obeyed, subsequent requests will be ignored.
+     * </p>
+     *
      * @param view A not null View the size will be extracted async with an {@link android.view.ViewTreeObserver
      *             .OnPreDrawListener}
      */
     public void setView(View view) {
-        if (this.viewTarget == null) {
-            this.viewTarget = new SizeViewTarget(view, this);
+        if (this.viewTarget != null) {
+            return;
         }
+        this.viewTarget = new SizeViewTarget(view, this);
     }
 
     private static final class SizeViewTarget extends ViewTarget<View, Object> {
