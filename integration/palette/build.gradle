@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    jcenter()
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        applicationId 'com.bumptech.glide.integration.palette'
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionCode = VERSION_CODE
+        versionName = VERSION_NAME
+    }
+}
+
+dependencies {
+    compile project(':library')
+
+    compile 'com.android.support:palette-v7:21.0.0'
+}

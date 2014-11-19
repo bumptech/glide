@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+
+repositories {
+    mavenCentral()
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        applicationId 'com.bumptech.swatchsample.app'
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionCode 1
+        versionName '1.0'
+    }
+}
+
+dependencies {
+    compile project(':library')
+    compile project(':integration:palette')
+
+    compile 'com.android.support:gridlayout-v7:21.0.0'
+}
+
+task run(type: Exec, dependsOn: 'installDebug') {
+    description 'Installs the APK and runs the main activity: "gradlew :samples:???:run"'
+    commandLine "${android.sdkDirectory}/platform-tools/adb", 'shell', 'am', 'start', '-n', 'com.bumptech.palettesample.app/.MainActivity'
+}

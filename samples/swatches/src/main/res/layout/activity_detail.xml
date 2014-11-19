@@ -1,0 +1,148 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:ignore="Overdraw"
+    tools:background="#0ff"
+    tools:context=".MainActivity"
+    >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="60"
+        >
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:scaleType="centerCrop"
+            tools:src="#ffffff"
+            tools:ignore="ContentDescription"
+            />
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginBottom="24dp"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:textStyle="bold"
+            android:padding="24dp"
+            android:gravity="end"
+            tools:text="Title"
+            tools:background="#4880"
+            />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/swatches"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="40"
+        android:padding="@dimen/activity_margin"
+        android:orientation="vertical"
+        tools:ignore="HardcodedText,NestedWeights"
+        >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:id="@+id/vibrant"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/margin"
+                android:gravity="center"
+                android:text="Vibrant"
+                tools:background="#f00"
+                />
+
+            <TextView
+                android:id="@+id/muted"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/margin"
+                android:gravity="center"
+                android:text="Muted"
+                tools:background="#4a4"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:id="@+id/darkVibrant"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/margin"
+                android:gravity="center"
+                android:text="Vibrant Dark"
+                tools:background="#800"
+                />
+
+            <TextView
+                android:id="@+id/darkMuted"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/margin"
+                android:gravity="center"
+                android:text="Muted Dark"
+                tools:background="#464"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:id="@+id/lightVibrant"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/margin"
+                android:gravity="center"
+                android:text="Vibrant Light"
+                tools:background="#f44"
+                />
+
+            <TextView
+                android:id="@+id/lightMuted"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/margin"
+                android:gravity="center"
+                android:text="Muted Light"
+                tools:background="#8a8"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
