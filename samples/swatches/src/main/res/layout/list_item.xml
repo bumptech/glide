@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/margin"
+    tools:background="#8f0000"
+    >
+
+    <FrameLayout
+        android:id="@+id/imageContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="@dimen/margin"
+        >
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            tools:ignore="ContentDescription"
+            tools:src="#ffffff"
+            />
+
+        <TextView
+            android:id="@+id/count"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/margin"
+            android:textSize="12dp"
+            android:gravity="center"
+            android:minEms="3"
+            tools:background="#00ffff"
+            tools:text="999"
+            tools:textColor="#000000"
+            tools:ignore="SpUsage"
+            />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@id/imageContainer"
+        android:layout_toRightOf="@id/imageContainer"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        tools:background="#80ff0000"
+        tools:text="Title Text"
+        tools:textColor="#00ff00"
+        />
+
+    <TextView
+        android:id="@+id/bodyText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin"
+        android:layout_below="@id/titleText"
+        android:layout_toEndOf="@id/imageContainer"
+        android:layout_toRightOf="@id/imageContainer"
+        tools:text="Body Text"
+        tools:textColor="#ffff00"
+        />
+</RelativeLayout>
