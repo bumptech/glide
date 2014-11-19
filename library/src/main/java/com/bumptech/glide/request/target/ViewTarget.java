@@ -1,10 +1,13 @@
 package com.bumptech.glide.request.target;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Point;
+import android.os.Build;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
@@ -58,7 +61,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     /**
      * Determines the size of the view by first checking {@link android.view.View#getWidth()} and
      * {@link android.view.View#getHeight()}. If one or both are zero, it then checks the view's
-     * {@link android.view.ViewGroup.LayoutParams}. If one or both of the params width and height are less than or
+     * {@link LayoutParams}. If one or both of the params width and height are less than or
      * equal to zero, it then adds an {@link android.view.ViewTreeObserver.OnPreDrawListener} which waits until the view
      * has been measured before calling the callback with the view's drawn width and height.
      *
@@ -111,9 +114,14 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
 
     private static class SizeDeterminer {
+        // Some negative sizes (WRAP_CONTENT) are valid, 0 is never valid.
+        private static final int PENDING_SIZE = 0;
+
         private final View view;
         private final List<SizeReadyCallback> cbs = new ArrayList<SizeReadyCallback>();
+
         private SizeDeterminerLayoutListener layoutListener;
+        private Point displayDimens;
 
         public SizeDeterminer(View view) {
             this.view = view;
@@ -131,48 +139,31 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
                 return;
             }
 
-            boolean calledCallback = true;
-            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            if (isViewSizeValid()) {
-                notifyCbs(view.getWidth(), view.getHeight());
-            } else if (isLayoutParamsSizeValid()) {
-                notifyCbs(layoutParams.width, layoutParams.height);
-            } else {
-                calledCallback = false;
+            int currentWidth = getViewWidthOrParam();
+            int currentHeight = getViewHeightOrParam();
+            if (!isSizeValid(currentWidth) || !isSizeValid(currentHeight)) {
+                return;
             }
 
-            if (calledCallback) {
-                // Keep a reference to the layout listener and remove it here
-                // rather than having the observer remove itself because the observer
-                // we add the listener to will be almost immediately merged into
-                // another observer and will therefore never be alive. If we instead
-                // keep a reference to the listener and remove it here, we get the
-                // current view tree observer and should succeed.
-                ViewTreeObserver observer = view.getViewTreeObserver();
-                if (observer.isAlive()) {
-                    observer.removeOnPreDrawListener(layoutListener);
-                }
-                layoutListener = null;
+            notifyCbs(currentWidth, currentHeight);
+            // Keep a reference to the layout listener and remove it here
+            // rather than having the observer remove itself because the observer
+            // we add the listener to will be almost immediately merged into
+            // another observer and will therefore never be alive. If we instead
+            // keep a reference to the listener and remove it here, we get the
+            // current view tree observer and should succeed.
+            ViewTreeObserver observer = view.getViewTreeObserver();
+            if (observer.isAlive()) {
+                observer.removeOnPreDrawListener(layoutListener);
             }
+            layoutListener = null;
         }
 
         public void getSize(SizeReadyCallback cb) {
-            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            if (isViewSizeValid()) {
-                cb.onSizeReady(view.getWidth(), view.getHeight());
-            } else if (isLayoutParamsSizeValid()) {
-                cb.onSizeReady(layoutParams.width, layoutParams.height);
-            } else if (isUsingWrapContent()) {
-                WindowManager windowManager =
-                        (WindowManager) view.getContext().getSystemService(Context.WINDOW_SERVICE);
-                Display display = windowManager.getDefaultDisplay();
-                @SuppressWarnings("deprecation") final int width = display.getWidth(), height = display.getHeight();
-                if (Log.isLoggable(TAG, Log.WARN)) {
-                    Log.w(TAG, "Trying to load image into ImageView using WRAP_CONTENT, defaulting to screen"
-                            + " dimensions: [" + width + "x" + height + "]. Give the view an actual width and height "
-                            + " for better performance.");
-                }
-                cb.onSizeReady(width, height);
+            int currentWidth = getViewWidthOrParam();
+            int currentHeight = getViewHeightOrParam();
+            if (isSizeValid(currentWidth) && isSizeValid(currentHeight)) {
+                cb.onSizeReady(currentWidth, currentHeight);
             } else {
                 // We want to notify callbacks in the order they were added and we only expect one or two callbacks to
                 // be added a time, so a List is a reasonable choice.
@@ -187,19 +178,56 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
             }
         }
 
-        private boolean isViewSizeValid() {
-            return view.getWidth() > 0 && view.getHeight() > 0;
+        private int getViewHeightOrParam() {
+            final LayoutParams layoutParams = view.getLayoutParams();
+            if (isSizeValid(view.getHeight())) {
+                return view.getHeight();
+            } else if (layoutParams != null) {
+                return getSizeForParam(layoutParams.height, true /*isHeight*/);
+            } else {
+                return PENDING_SIZE;
+            }
         }
 
-        private boolean isUsingWrapContent() {
-            final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            return layoutParams != null && (layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT
-                    || layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT);
+        private int getViewWidthOrParam() {
+            final LayoutParams layoutParams = view.getLayoutParams();
+            if (isSizeValid(view.getWidth())) {
+                return view.getWidth();
+            } else if (layoutParams != null) {
+                return getSizeForParam(layoutParams.width, false /*isHeight*/);
+            } else {
+                return PENDING_SIZE;
+            }
         }
 
-        private boolean isLayoutParamsSizeValid() {
-            final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            return layoutParams != null && layoutParams.width > 0 && layoutParams.height > 0;
+        private int getSizeForParam(int param, boolean isHeight) {
+            if (param == LayoutParams.WRAP_CONTENT) {
+                Point displayDimens = getDisplayDimens();
+                return isHeight ? displayDimens.y : displayDimens.x;
+            } else {
+                return param;
+            }
+        }
+
+        @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+        @SuppressWarnings("deprecation")
+        private Point getDisplayDimens() {
+            if (displayDimens != null) {
+                return displayDimens;
+            }
+            WindowManager windowManager = (WindowManager) view.getContext().getSystemService(Context.WINDOW_SERVICE);
+            Display display = windowManager.getDefaultDisplay();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+                displayDimens = new Point();
+                display.getSize(displayDimens);
+            } else {
+                displayDimens = new Point(display.getWidth(), display.getHeight());
+            }
+            return displayDimens;
+        }
+
+        private boolean isSizeValid(int size) {
+            return size > 0 || size == LayoutParams.WRAP_CONTENT;
         }
 
         private static class SizeDeterminerLayoutListener implements ViewTreeObserver.OnPreDrawListener {

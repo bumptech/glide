@@ -643,8 +643,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                     break;
                 //$CASES-OMITTED$
                 default:
-                    // silently ignore
-                    break;
+                    // Do nothing.
             }
         }
 
@@ -654,10 +653,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     /**
      * Returns a future that can be used to do a blocking get on a background thread.
      *
-     * @param width The desired width in pixels (note this will be overriden by {@link #override(int, int)} if
-     *              previously called).
-     * @param height The desired height in pixels (note this will be overriden by {@link #override(int, int)}}
-     *               if previously called).
+     * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
+     *             {@link #override * (int, int)} if previously called.
+     * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
+     *              {@link #override * (int, int)}} if previously called).
      *
      * @see Glide#clear(com.bumptech.glide.request.FutureTarget)
      *
@@ -689,11 +688,32 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      *     available quickly.
      * </p>
      *
+     *
      * @see com.bumptech.glide.ListPreloader
+     *
+     * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
+     *             {@link #override * (int, int)} if previously called.
+     * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
+     *              {@link #override * (int, int)}} if previously called).
+     * @return A {@link Target} that can be used to cancel the load via
+     *        {@link Glide#clear(com.bumptech.glide.request.target.Target)}.
      */
     public Target<TranscodeType> preload(int width, int height) {
         final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(width, height);
         return into(target);
+    }
+
+    /**
+     * Preloads the resource into the cache using {@link Target#SIZE_ORIGINAL} as the target width and height.
+     * Equivalent to calling {@link #preload(int, int)} with {@link Target#SIZE_ORIGINAL} as the width and height.
+     *
+     * @see #preload(int, int)
+     *
+     * @return A {@link Target} that can be used to cancel the load via
+     *        {@link Glide#clear(com.bumptech.glide.request.target.Target)}.
+     */
+    public Target<TranscodeType> preload() {
+        return preload(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
     }
 
     void applyCenterCrop() {

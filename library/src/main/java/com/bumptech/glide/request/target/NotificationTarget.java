@@ -27,7 +27,7 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
 
     /**
      * Constructor using a Notification object and a notificationId to get a handle on the Notification in order to
-     * update it when an override width and height have been set.
+     * update it that uses {@link #SIZE_ORIGINAL} as the target width and height.
      *
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
@@ -37,7 +37,7 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
      */
     public NotificationTarget(Context context, RemoteViews remoteViews, int viewId, Notification notification,
             int  notificationId) {
-        this(context, remoteViews, viewId, INVALID_SIZE, INVALID_SIZE, notification, notificationId);
+        this(context, remoteViews, viewId, SIZE_ORIGINAL, SIZE_ORIGINAL, notification, notificationId);
     }
 
     /**

@@ -21,8 +21,12 @@ public interface Transformation<T> {
      * </p>
      *
      * @param resource The resource to transform.
-     * @param outWidth The width of the view or target the resource will be displayed in.
-     * @param outHeight The height of the view or target the resource will be displayed in.
+     * @param outWidth The width of the view or target the resource will be displayed in, or
+     *                 {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original
+     *                 resource width.
+     * @param outHeight The height of the view or target the resource will be displayed in, or
+     *                  {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original
+     *                  resource height.
      * @return The transformed resource.
      */
     Resource<T> transform(Resource<T> resource, int outWidth, int outHeight);

@@ -24,24 +24,14 @@ package com.bumptech.glide.request.target;
  * @param <Z> The type of resource that this target will receive.
  */
 public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
-    /** A constant indicating an invalid pixel size. */
-    protected static final int INVALID_SIZE = -1;
-
     private final int width;
     private final int height;
 
     /**
-     * Constructor for the target that assumes you will have called
-     * {@link com.bumptech.glide.GenericRequestBuilder#override(int, int)} on the request builder this target is given
-     * to.
-     *
-     * <p>
-     *     Requests that load into this target will throw an {@link java.lang.IllegalArgumentException} if
-     *     {@link com.bumptech.glide.GenericRequestBuilder#override(int, int)} was not called on the request builder.
-     * </p>
+     * Constructor for the target that uses {@link Target#SIZE_ORIGINAL} as the target width and height.
      */
     public SimpleTarget() {
-        this(INVALID_SIZE, INVALID_SIZE);
+        this(SIZE_ORIGINAL, SIZE_ORIGINAL);
     }
 
     /**

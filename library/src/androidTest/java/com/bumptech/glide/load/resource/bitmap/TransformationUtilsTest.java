@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -136,6 +137,22 @@ public class TransformationUtilsTest {
     }
 
     @Test
+    public void testCenterCropReturnsNullIfGivenBitmapIsNull() {
+        Bitmap transformed = TransformationUtils.centerCrop(null /*recycled*/, null /*toCrop*/, 100, 100);
+        assertNull(transformed);
+    }
+
+    @Test
+    public void testCenterCropReturnsGivenBitmapIfGivenBitmapExactlyMatchesGivenDimensions() {
+        Bitmap toCrop = Bitmap.createBitmap(200, 300, Bitmap.Config.ARGB_8888);
+        Bitmap transformed = TransformationUtils.centerCrop(null /*recycled*/, toCrop, toCrop.getWidth(),
+                toCrop.getHeight());
+
+        // Robolectric incorrectly implements equals() for Bitmaps, we want the original object not just an equivalent.
+        assertTrue(toCrop == transformed);
+    }
+
+    @Test
     public void testCenterCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlphaAndOutBitmapIsReused() {
         Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
@@ -179,7 +196,7 @@ public class TransformationUtilsTest {
     }
 
     @Test
-    public void testSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlpha() {
+    public void testCenterCropSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlpha() {
         Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
         toTransform.setHasAlpha(false);
