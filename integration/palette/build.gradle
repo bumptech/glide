@@ -1,11 +1,3 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.0'
-    }
-}
 apply plugin: 'com.android.library'
 
 repositories {
@@ -13,20 +5,21 @@ repositories {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
-        applicationId "com.bumptech.glide.integration.palette"
-        minSdkVersion 8
-        targetSdkVersion 19
-        versionCode 1
-        versionName "1.0"
+        applicationId 'com.bumptech.glide.integration.palette'
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionCode = VERSION_CODE
+        versionName = VERSION_NAME
     }
 }
 
 dependencies {
-    compile project(':glide')
-    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile project(':library')
+
     compile 'com.android.support:palette-v7:21.0.0'
 }
