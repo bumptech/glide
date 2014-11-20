@@ -254,12 +254,11 @@ public final class TransformationUtils {
      * @return The rotated and/or flipped image or toOrient if no rotation or flip was necessary.
      */
     public static Bitmap rotateImageExif(Bitmap toOrient, BitmapPool pool, int exifOrientation) {
-        if (exifOrientation == ExifInterface.ORIENTATION_NORMAL
-                || exifOrientation == ExifInterface.ORIENTATION_UNDEFINED) {
-            return toOrient;
-        }
         final Matrix matrix = new Matrix();
         initializeMatrixForRotation(exifOrientation, matrix);
+        if (matrix.isIdentity()) {
+            return toOrient;
+        }
 
         // From Bitmap.createBitmap.
         final RectF newRect = new RectF(0, 0, toOrient.getWidth(), toOrient.getHeight());

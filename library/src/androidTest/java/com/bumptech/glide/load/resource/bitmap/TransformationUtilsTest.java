@@ -296,16 +296,30 @@ public class TransformationUtilsTest {
     public void testRotateImageExifReturnsGivenBitmapIfRotationIsNormal() {
         BitmapPool bitmapPool = mock(BitmapPool.class);
         Bitmap toRotate = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
-        assertEquals(toRotate,
-                TransformationUtils.rotateImageExif(toRotate, bitmapPool, ExifInterface.ORIENTATION_NORMAL));
+        // Use assertTrue because Robolectric incorrectly implements equality for Bitmaps. We want not just an
+        // identical Bitmap, but our original Bitmap object back.
+        Bitmap rotated = TransformationUtils.rotateImageExif(toRotate, bitmapPool, ExifInterface.ORIENTATION_NORMAL);
+        assertTrue(toRotate == rotated);
     }
 
     @Test
     public void testRotateImageExifReturnsGivenBitmapIfRotationIsUndefined() {
         BitmapPool bitmapPool = mock(BitmapPool.class);
         Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-        assertEquals(toRotate,
-                TransformationUtils.rotateImageExif(toRotate, bitmapPool, ExifInterface.ORIENTATION_UNDEFINED));
+        // Use assertTrue because Robolectric incorrectly implements equality for Bitmaps. We want not just an
+        // identical Bitmap, but our original Bitmap object back.
+        Bitmap rotated = TransformationUtils.rotateImageExif(toRotate, bitmapPool, ExifInterface.ORIENTATION_UNDEFINED);
+        assertTrue(toRotate == rotated);
+    }
+
+    @Test
+    public void testRotateImageExifReturnsGivenBitmapIfOrientationIsInvalid() {
+        BitmapPool bitmapPool = mock(BitmapPool.class);
+        Bitmap toRotate = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
+        // Use assertTrue because Robolectric incorrectly implements equality for Bitmaps. We want not just an
+        // identical Bitmap, but our original Bitmap object back.
+        Bitmap rotated = TransformationUtils.rotateImageExif(toRotate, bitmapPool, -1);
+        assertTrue(toRotate == rotated);
     }
 
     @Test
