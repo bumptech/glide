@@ -237,12 +237,12 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
         if (from < to) {
             // Increasing
             for (int i = start; i < end; i++) {
-                preloadItem(this.preloadModelProvider.getPreloadItems(i), i, true);
+                preloadAdapterPosition(this.preloadModelProvider.getPreloadItems(i), i, true);
             }
         } else {
             // Decreasing
             for (int i = end - 1; i >= start; i--) {
-                preloadItem(this.preloadModelProvider.getPreloadItems(i), i, false);
+                preloadAdapterPosition(this.preloadModelProvider.getPreloadItems(i), i, false);
             }
         }
 
@@ -250,7 +250,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
         lastEnd = end;
     }
 
-    private void preloadItem(List<T> items, int position, boolean isIncreasing) {
+    private void preloadAdapterPosition(List<T> items, int position, boolean isIncreasing) {
         final int numItems = items.size();
         if (isIncreasing) {
             for (int i = 0; i < numItems; ++i) {
