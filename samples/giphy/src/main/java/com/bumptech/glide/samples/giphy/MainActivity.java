@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements Api.Monitor {
         private Api.GifResult[] results = EMPTY_RESULTS;
 
         public GifAdapter(Activity activity, DrawableRequestBuilder<Api.GifResult> requestBuilder,
-                          ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider) {
+                ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider) {
             this.activity = activity;
             this.requestBuilder = requestBuilder;
             this.preloadSizeProvider = preloadSizeProvider;
@@ -155,11 +155,9 @@ public class MainActivity extends Activity implements Api.Monitor {
         }
 
         @Override
-        public List<Api.GifResult> getPreloadItems(int start, int end) {
-            List<Api.GifResult> items = new ArrayList<Api.GifResult>(end - start);
-            for (int i = start; i < end; i++) {
-                items.add(getItem(i));
-        }
+        public List<Api.GifResult> getPreloadItems(int position) {
+            List<Api.GifResult> items = new ArrayList<Api.GifResult>(1);
+            items.add(getItem(position));
             return items;
         }
 

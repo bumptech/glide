@@ -24,7 +24,7 @@ public class FixedPreloadSizeProvider<T> implements ListPreloader.PreloadSizePro
     }
 
     @Override
-    public int[] getPreloadSize(T item) {
+    public int[] getPreloadSize(T item, int adapterPosition, int itemPosition) {
         return Arrays.copyOf(this.size, this.size.length);
     }
 }

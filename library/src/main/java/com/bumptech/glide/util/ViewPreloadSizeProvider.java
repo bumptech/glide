@@ -38,7 +38,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
     }
 
     @Override
-    public int[] getPreloadSize(T item) {
+    public int[] getPreloadSize(T item, int adapterPosition, int itemPosition) {
         if (size == null) {
             return null;
         } else {
