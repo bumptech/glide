@@ -38,6 +38,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
 
     /**
      * An implementation of PreloadModelProvider should provide all the models that should be preloaded.
+     *
      * @param <U> The type of the model being preloaded.
      */
     public interface PreloadModelProvider<U> {
@@ -50,12 +51,9 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
          * A list of any size can be returned so there can be multiple models per adapter position.
          * </p>
          *
-         * @param start The smallest adapter position. Will be {@code >= 0 && < adapter.getCount() &&
-         *              <= end}
-         * @param end   The largest adapter position. Will be {@code >= 0 && < adapter.getCount && >=
-         *              start}
+         * @param position The adapter position.
          */
-        List<U> getPreloadItems(int start, int end);
+        List<U> getPreloadItems(int position);
 
         /**
          * Returns a non null {@link com.bumptech.glide.GenericRequestBuilder} for a given item. Must exactly match
@@ -88,7 +86,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
          *
          * @param item A model
          */
-        int[] getPreloadSize(T item);
+        int[] getPreloadSize(T item, int adapterPosition, int perItemPosition);
     }
 
     /**
@@ -102,16 +100,36 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      */
     @Deprecated
     public ListPreloader(int maxPreload) {
-        this(null, null, maxPreload);
+        this.preloadModelProvider = new PreloadModelProvider<T>() {
+            @Override
+            public List<T> getPreloadItems(int position) {
+                return getItems(position, position + 1);
+            }
+
+            @Override
+            public GenericRequestBuilder getPreloadRequestBuilder(T item) {
+                return getRequestBuilder(item);
+            }
+        };
+        this.preloadDimensionProvider = new PreloadSizeProvider<T>() {
+
+            @Override
+            public int[] getPreloadSize(T item, int adapterPosition, int perItemPosition) {
+                return getDimensions(item);
+            }
+        };
+        this.maxPreload = maxPreload;
+        preloadTargetQueue = new PreloadTargetQueue(maxPreload + 1);
+
     }
 
     /**
      * Constructor for {@link com.bumptech.glide.ListPreloader} that accepts interfaces for providing the dimensions of
      * images to preload, the list of models to preload for a given position, and the request to use to load images.
      *
-     * @param preloadModelProvider Provides models to load and requests capable of loading them.
+     * @param preloadModelProvider     Provides models to load and requests capable of loading them.
      * @param preloadDimensionProvider Provides the dimensions of images to load.
-     * @param maxPreload Maximum number of items to preload.
+     * @param maxPreload               Maximum number of items to preload.
      */
     public ListPreloader(PreloadModelProvider<T> preloadModelProvider,
                          PreloadSizeProvider<T> preloadDimensionProvider, int maxPreload) {
@@ -152,10 +170,8 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      */
     @Deprecated
     protected int[] getDimensions(T item) {
-        if (preloadDimensionProvider == null) {
-            throw new IllegalStateException("You must either provide a PreloadDimensionProvider or override getSize9)");
-        }
-        return this.preloadDimensionProvider.getPreloadSize(item);
+        throw new IllegalStateException("You must either provide a PreloadDimensionProvider or override "
+                                         + "getDimensions()");
     }
 
     /**
@@ -175,10 +191,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      */
     @Deprecated
     protected List<T> getItems(int start, int end) {
-        if (preloadModelProvider == null) {
-            throw new IllegalStateException("You must either provide a PreloadModelProvider or override getItems()");
-        }
-        return this.preloadModelProvider.getPreloadItems(start, end);
+        throw new IllegalStateException("You must either provide a PreloadModelProvider or override getItems()");
     }
 
     /**
@@ -196,11 +209,8 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     @SuppressWarnings("rawtypes")
     @Deprecated
     protected GenericRequestBuilder getRequestBuilder(T item) {
-        if (preloadModelProvider == null) {
-            throw new IllegalStateException("You must either provide a PreloadModelProvider, or override "
-                    + "getRequestBuilder()");
-        }
-        return this.preloadModelProvider.getPreloadRequestBuilder(item);
+        throw new IllegalStateException("You must either provide a PreloadModelProvider, or override "
+                                         + "getRequestBuilder()");
     }
 
     private void preload(int start, boolean increasing) {
@@ -223,18 +233,16 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
         }
         end = Math.min(totalItemCount, end);
         start = Math.min(totalItemCount, Math.max(0, start));
-        List<T> items = getItems(start, end);
 
         if (from < to) {
             // Increasing
-            final int numItems = items.size();
-            for (int i = 0; i < numItems; i++) {
-                preloadItem(items, i);
+            for (int i = start; i < end; i++) {
+                preloadAdapterPosition(this.preloadModelProvider.getPreloadItems(i), i, true);
             }
         } else {
             // Decreasing
-            for (int i = items.size() - 1; i >= 0; i--) {
-                preloadItem(items, i);
+            for (int i = end - 1; i >= start; i--) {
+                preloadAdapterPosition(this.preloadModelProvider.getPreloadItems(i), i, false);
             }
         }
 
@@ -242,12 +250,25 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
         lastEnd = end;
     }
 
+    private void preloadAdapterPosition(List<T> items, int position, boolean isIncreasing) {
+        final int numItems = items.size();
+        if (isIncreasing) {
+            for (int i = 0; i < numItems; ++i) {
+                preloadItem(items.get(i), position, i);
+            }
+        } else {
+            for (int i = numItems - 1; i >= 0; --i) {
+                preloadItem(items.get(i), position, i);
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    private void preloadItem(List<T> items, int position) {
-        final T item = items.get(position);
-        final int[] dimensions = getDimensions(item);
+    private void preloadItem(T item, int position, int i) {
+        final int[] dimensions = this.preloadDimensionProvider.getPreloadSize(item, position, i);
         if (dimensions != null) {
-            getRequestBuilder(item).into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
+            GenericRequestBuilder preloadRequestBuilder = this.preloadModelProvider.getPreloadRequestBuilder(item);
+            preloadRequestBuilder.into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
         }
     }
 
