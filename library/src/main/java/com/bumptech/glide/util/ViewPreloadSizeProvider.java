@@ -16,7 +16,10 @@ import java.util.Arrays;
  * @param <T> The type of the model the size should be provided for.
  */
 public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProvider<T>, SizeReadyCallback {
-    private int[] size = null;
+    private int[] size;
+    // We need to keep a strong reference to the Target so that it isn't garbage collected due to a weak reference
+    // while we're waiting to get its size.
+    @SuppressWarnings("unused")
     private SizeViewTarget viewTarget;
 
     /**
@@ -49,6 +52,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
     @Override
     public void onSizeReady(int width, int height) {
         this.size = new int[]{width, height};
+        viewTarget = null;
     }
 
     /**
@@ -62,7 +66,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
      *             .OnPreDrawListener}
      */
     public void setView(View view) {
-        if (this.viewTarget != null) {
+        if (this.size != null || viewTarget != null) {
             return;
         }
         this.viewTarget = new SizeViewTarget(view, this);
