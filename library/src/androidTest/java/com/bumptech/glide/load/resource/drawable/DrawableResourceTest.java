@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.drawable;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,18 +39,18 @@ public class DrawableResourceTest {
     }
 
     @Test
-    public void testReturnsDrawableOnFirstGet() {
-        assertEquals(drawable, resource.get());
+    public void testDoesNotReturnOriginalDrawableOnGet() {
+        when(drawable.getConstantState()).thenReturn(mock(Drawable.ConstantState.class));
+        assertNotEquals(drawable, resource.get());
     }
 
     @Test
-    public void testReturnsNewDrawableOnSecondGet() {
+    public void testReturnsNewDrawableOnGet() {
         GifDrawable expected = mock(GifDrawable.class);
         Drawable.ConstantState constantState = mock(Drawable.ConstantState.class);
         when(constantState.newDrawable()).thenReturn(expected);
         when(drawable.getConstantState()).thenReturn(constantState);
 
-        assertEquals(drawable, resource.get());
         assertEquals(expected, resource.get());
 
         verify(drawable).getConstantState();

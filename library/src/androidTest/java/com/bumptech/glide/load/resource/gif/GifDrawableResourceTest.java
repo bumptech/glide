@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.util.Util;
 
@@ -27,22 +26,6 @@ public class GifDrawableResourceTest {
     public void setUp() {
         drawable = mock(GifDrawable.class);
         resource = new GifDrawableResource(drawable);
-    }
-
-    @Test
-    public void testReturnsDrawableOnFirstGet() {
-        assertEquals(drawable, resource.get());
-    }
-
-    @Test
-    public void testReturnsNewDrawableOnSecondGet() {
-        GifDrawable expected = mock(GifDrawable.class);
-        Drawable.ConstantState constantState = mock(Drawable.ConstantState.class);
-        when(constantState.newDrawable()).thenReturn(expected);
-        when(drawable.getConstantState()).thenReturn(constantState);
-
-        resource.get();
-        assertEquals(expected, resource.get());
     }
 
     @Test
