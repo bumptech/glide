@@ -55,8 +55,6 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void cancel() {
-        if (request != null) {
-            client.cancel(request);
-        }
+        // TODO: call cancel on the client when this method is called on a background thread. See #257
     }
 }
