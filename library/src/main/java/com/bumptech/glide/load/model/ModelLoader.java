@@ -37,8 +37,12 @@ public interface ModelLoader<T, Y> {
      * </p>
      *
      * @param model The model representing the resource.
-     * @param width The width in pixels of the view or target the resource will be loaded into
-     * @param height The height in pixels of the view or target the resource will be loaded into
+     * @param width The width in pixels of the view or target the resource will be loaded into, or
+     *              {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate that the resource should
+     *              be loaded at its original width.
+     * @param height The height in pixels of the view or target the resource will be loaded into, or
+     *               {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate that the resource should
+     *               be loaded at its original height.
      * @return A {@link DataFetcher} that can obtain the data the resource can be decoded from if the resource is not
      * cached, or null if no valid {@link com.bumptech.glide.load.data.DataFetcher} could be constructed.
      */

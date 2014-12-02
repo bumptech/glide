@@ -112,21 +112,133 @@ public class ViewTargetTest {
         verify(cb).onSizeReady(eq(dimens), eq(dimens));
     }
 
+    private void setDisplayDimens(Integer width, Integer height) {
+        WindowManager windowManager = (WindowManager) Robolectric.application.getSystemService(Context.WINDOW_SERVICE);
+        ShadowDisplay shadowDisplay = Robolectric.shadowOf(windowManager.getDefaultDisplay());
+        if (width != null) {
+            shadowDisplay.setWidth(width);
+        }
+
+        if (height != null) {
+            shadowDisplay.setHeight(height);
+        }
+    }
+
+    private void setDisplayWidth(int width) {
+        setDisplayDimens(width, null);
+    }
+
+    private void setDisplayHeight(int height) {
+        setDisplayDimens(null, height);
+    }
+
     @Test
-    public void testSizeCallbackIsCalledSynchronouslyWithScreenSizeIfLayoutParamsWrapContent() {
+    public void testBothParamsWrapContent() {
         LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         view.setLayoutParams(layoutParams);
 
-        int width = 1234;
-        int height = 674;
-        WindowManager windowManager = (WindowManager) view.getContext()
-                .getSystemService(Context.WINDOW_SERVICE);
-        ShadowDisplay shadowDisplay = Robolectric.shadowOf(windowManager.getDefaultDisplay());
-        shadowDisplay.setWidth(width);
-        shadowDisplay.setHeight(height);
+        int width = 123;
+        int height = 456;
+        setDisplayDimens(width, height);
+        SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        target.getSize(cb);
+
+        verify(cb).onSizeReady(eq(width), eq(height));
+    }
+
+    @Test
+    public void testWrapContentWidthWithValidHeight() {
+        int displayWidth = 500;
+        setDisplayWidth(displayWidth);
+
+        int height = 100;
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, height);
+        view.setLayoutParams(params);
 
         SizeReadyCallback cb = mock(SizeReadyCallback.class);
         target.getSize(cb);
+
+        verify(cb).onSizeReady(eq(displayWidth), eq(height));
+    }
+
+    @Test
+    public void testWrapContentHeightWithValidWidth() {
+        int displayHeight = 700;
+        setDisplayHeight(displayHeight);
+        int width = 100;
+        LayoutParams params = new LayoutParams(width, LayoutParams.WRAP_CONTENT);
+        view.setLayoutParams(params);
+
+        SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        target.getSize(cb);
+
+        verify(cb).onSizeReady(eq(width), eq(displayHeight));
+    }
+
+    @Test
+    public void testWrapContentWidthWithMatchParentHeight() {
+        int displayWidth = 1234;
+        setDisplayWidth(displayWidth);
+
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+        view.setLayoutParams(params);
+
+        SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        target.getSize(cb);
+
+        verify(cb, never()).onSizeReady(anyInt(), anyInt());
+
+        int height = 32;
+        SizedShadowView shadowView = Robolectric.shadowOf_(view);
+        shadowView.setHeight(height);
+
+        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
+        shadowObserver.fireOnPreDrawListeners();
+
+        verify(cb).onSizeReady(eq(displayWidth), eq(height));
+    }
+
+    @Test
+    public void testWrapContentHeightWithMatchParentWidth() {
+        int displayHeight = 5812;
+        setDisplayHeight(displayHeight);
+
+        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        view.setLayoutParams(params);
+
+        SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        target.getSize(cb);
+
+        verify(cb, never()).onSizeReady(anyInt(), anyInt());
+
+        int width = 32;
+        SizedShadowView shadowView = Robolectric.shadowOf_(view);
+        shadowView.setWidth(width);
+
+        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
+        shadowObserver.fireOnPreDrawListeners();
+
+        verify(cb).onSizeReady(eq(width), eq(displayHeight));
+    }
+
+    @Test
+    public void testMatchParentWidthAndHeight() {
+        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        view.setLayoutParams(params);
+
+        SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        target.getSize(cb);
+
+        verify(cb, never()).onSizeReady(anyInt(), anyInt());
+
+        int width = 32;
+        int height = 45;
+        SizedShadowView shadowView = Robolectric.shadowOf_(view);
+        shadowView.setWidth(width);
+        shadowView.setHeight(height);
+
+        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
+        shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(width), eq(height));
     }
@@ -299,7 +411,7 @@ public class ViewTargetTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfGivenNullView() {
-        ViewTarget viewTarget = new TestViewTarget(null);
+        new TestViewTarget(null);
     }
 
     @Implements(ViewTreeObserver.class)

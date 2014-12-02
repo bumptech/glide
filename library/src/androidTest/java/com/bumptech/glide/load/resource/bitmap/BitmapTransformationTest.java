@@ -10,10 +10,13 @@ import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.request.target.Target;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -21,11 +24,12 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class BitmapTransformationTest {
 
+    @Mock
     private BitmapPool bitmapPool;
 
     @Before
     public void setUp() {
-        bitmapPool = mock(BitmapPool.class);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -42,14 +46,12 @@ public class BitmapTransformationTest {
             }
         };
 
-        Resource<Bitmap> resource = mock(Resource.class);
-        when(resource.get()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444));
+        Resource<Bitmap> resource = mockResource(100, 100);
         assertEquals(resource, transformation.transform(resource, 1, 1));
     }
 
     @Test
     public void testReturnsNewResourceWhenBitmapTransformed() {
-        final Bitmap toTransform = Bitmap.createBitmap(1, 2, Bitmap.Config.RGB_565);
         final Bitmap transformed = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
         BitmapTransformation transformation = new BitmapTransformation(bitmapPool) {
             @Override
@@ -63,9 +65,7 @@ public class BitmapTransformationTest {
             }
         };
 
-        Resource<Bitmap> resource = mock(Resource.class);
-        when(resource.get()).thenReturn(toTransform);
-
+        Resource<Bitmap> resource = mockResource(1, 2);
         assertNotSame(resource, transformation.transform(resource, 100, 100));
     }
 
@@ -73,15 +73,15 @@ public class BitmapTransformationTest {
     public void testPassesGivenArgumentsToTransform() {
         final int expectedWidth = 13;
         final int expectedHeight = 148;
-        final Bitmap expected = Bitmap.createBitmap(223, 4123, Bitmap.Config.RGB_565);
+        final Resource<Bitmap> resource = mockResource(223, 4123);
         BitmapTransformation transformation = new BitmapTransformation(bitmapPool) {
             @Override
             protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
                 assertEquals(bitmapPool, pool);
-                assertEquals(expected, toTransform);
+                assertEquals(resource.get(), toTransform);
                 assertEquals(expectedWidth, outWidth);
                 assertEquals(expectedHeight, outHeight);
-                return expected;
+                return resource.get();
             }
 
             @Override
@@ -89,8 +89,7 @@ public class BitmapTransformationTest {
                 return null;
             }
         };
-        Resource<Bitmap> resource = mock(Resource.class);
-        when(resource.get()).thenReturn(expected);
+
         transformation.transform(resource, expectedWidth, expectedHeight);
     }
 
@@ -145,8 +144,58 @@ public class BitmapTransformationTest {
             }
         };
 
-        Resource<Bitmap> resource = mock(Resource.class);
-        when(resource.get()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
+        Resource<Bitmap> resource = mockResource(100, 100);
         assertNull(transform.transform(resource, 100, 100));
+    }
+
+    @Test
+    public void testCallsTransformWithGivenBitmapWidthIfWidthIsSizeOriginal() {
+        SizeTrackingTransform transform = new SizeTrackingTransform();
+
+        int expectedWidth = 200;
+        Resource<Bitmap> resource = mockResource(expectedWidth, 300);
+        transform.transform(resource, Target.SIZE_ORIGINAL, 500);
+
+        assertEquals(expectedWidth, transform.givenWidth);
+    }
+
+    @Test
+    public void testCallsTransformWithGivenBitmapHeightIfHeightIsSizeOriginal() {
+        SizeTrackingTransform transform = new SizeTrackingTransform();
+
+        int expectedHeight = 500;
+        Resource<Bitmap> resource = mockResource(123, expectedHeight);
+        transform.transform(resource, 444, expectedHeight);
+
+        assertEquals(expectedHeight, transform.givenHeight);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Resource<Bitmap> mockResource(int width, int height) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Resource<Bitmap> resource = mock(Resource.class);
+        when(resource.get()).thenReturn(bitmap);
+        return resource;
+    }
+
+    private class SizeTrackingTransform extends BitmapTransformation {
+        int givenWidth;
+        int givenHeight;
+
+        public SizeTrackingTransform() {
+            super(bitmapPool);
+        }
+
+        @Override
+        protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+            givenWidth = outWidth;
+            givenHeight = outHeight;
+            return null;
+        }
+
+        @Override
+        public String getId() {
+            return null;
+        }
     }
 }

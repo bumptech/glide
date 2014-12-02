@@ -26,8 +26,12 @@ public interface ResourceDecoder<T, Z> {
      * </p>
      *
      * @param source The data the resource should be decoded from.
-     * @param width The ideal width in pixels of the decoded resource.
-     * @param height The ideal height in pixels of the decoded resource.
+     * @param width The ideal width in pixels of the decoded resource, or
+     *              {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original resource
+     *              width.
+     * @param height The ideal height in pixels of the decoded resource, or
+     *               {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original resource
+     *               height.
      * @throws IOException
      */
     Resource<Z> decode(T source, int width, int height) throws IOException;

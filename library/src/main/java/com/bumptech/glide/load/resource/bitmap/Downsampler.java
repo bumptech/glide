@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.ByteArrayPool;
 import com.bumptech.glide.util.ExceptionCatchingInputStream;
 import com.bumptech.glide.util.Util;
@@ -168,13 +169,16 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     }
 
     private int getRoundedSampleSize(int degreesToRotate, int inWidth, int inHeight, int outWidth, int outHeight) {
+        int targetHeight = outHeight == Target.SIZE_ORIGINAL ? inHeight : outHeight;
+        int targetWidth = outWidth == Target.SIZE_ORIGINAL ? inWidth : outWidth;
+
         final int exactSampleSize;
         if (degreesToRotate == 90 || degreesToRotate == 270) {
             // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
             // decreased to near our target's height and the image height is decreased to near our target width.
-            exactSampleSize = getSampleSize(inHeight, inWidth, outWidth, outHeight);
+            exactSampleSize = getSampleSize(inHeight, inWidth, targetWidth, targetHeight);
         } else {
-            exactSampleSize = getSampleSize(inWidth, inHeight, outWidth, outHeight);
+            exactSampleSize = getSampleSize(inWidth, inHeight, targetWidth, targetHeight);
         }
 
         // BitmapFactory only accepts powers of 2, so it will round down to the nearest power of two that is less than
@@ -264,10 +268,10 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      *
      * @see android.graphics.BitmapFactory.Options#inSampleSize
      *
-     * @param inWidth The width of the image to be downsampled.
-     * @param inHeight The height of the image to be downsampled.
-     * @param outWidth The width of the view/target the image will be displayed in.
-     * @param outHeight The height of the view/target the imag will be displayed in.
+     * @param inWidth The width in pixels of the image to be downsampled.
+     * @param inHeight The height in piexels of the image to be downsampled.
+     * @param outWidth The width in pixels of the view/target the image will be displayed in.
+     * @param outHeight The height in pixels of the view/target the imag will be displayed in.
      * @return An integer to pass in to {@link BitmapFactory#decodeStream(java.io.InputStream, android.graphics.Rect,
      *          android.graphics.BitmapFactory.Options)}.
      */

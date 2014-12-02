@@ -32,9 +32,9 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
      * @param viewId      The id of the ImageView view that will load the image.
-     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set
+     * @param width       Desired width in pixels of the bitmap that will be loaded. (Needs to be manually set
      *                    because of RemoteViews limitations.)
-     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set
+     * @param height      Desired height in pixels of the bitmap that will be loaded. (Needs to be manually set
      *                    because of RemoteViews limitations.)
      * @param widgetIds   The int[] that contains the widget ids of an application.
      */
@@ -61,8 +61,8 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
     }
 
     /**
-     * Constructor using an int array of widgetIds to get a handle on the Widget in order to update it when an override
-     * width and height have been set been set.
+     * Constructor using an int array of widgetIds to get a handle on the Widget in order to update it that uses
+     * {@link #SIZE_ORIGINAL} as the target width and height.
      *
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
@@ -70,7 +70,7 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
      * @param widgetIds   The int[] that contains the widget ids of an application.
      */
     public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int... widgetIds) {
-        this(context, remoteViews, viewId, INVALID_SIZE, INVALID_SIZE, widgetIds);
+        this(context, remoteViews, viewId, SIZE_ORIGINAL, SIZE_ORIGINAL, widgetIds);
     }
 
     /**
@@ -79,9 +79,9 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
      * @param viewId      The id of the ImageView view that will load the image.
-     * @param width       Desired width of the bitmap that will be loaded.(Need to be manually set
+     * @param width       Desired width in pixels of the bitmap that will be loaded. (Needs to be manually set
      *                    because of RemoteViews limitations.)
-     * @param height      Desired height of the bitmap that will be loaded. (Need to be manually set
+     * @param height      Desired height in pixels of the bitmap that will be loaded. (Needs to be manually set
      *                    because of RemoteViews limitations.)
      * @param componentName   The ComponentName that refers to our AppWidget.
      */
@@ -106,7 +106,7 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
 
     /**
      * Constructor using a ComponentName, when override has been set to get a handle on the Widget in order to update
-     * it.
+     * it that uses {@link #SIZE_ORIGINAL} as the target width and height.
      *
      * @param context     Context to use in the AppWidgetManager initialization.
      * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
@@ -114,7 +114,7 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
      * @param componentName   The ComponentName that refers to our AppWidget.
      */
     public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, ComponentName componentName) {
-        this(context, remoteViews, viewId, INVALID_SIZE, INVALID_SIZE, componentName);
+        this(context, remoteViews, viewId, SIZE_ORIGINAL, SIZE_ORIGINAL, componentName);
     }
 
     /**
