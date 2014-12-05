@@ -1,8 +1,10 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -79,5 +81,42 @@ public class VideoBitmapDecoderTest {
     @Test
     public void testHasValidId() {
         Util.assertClassHasValidId(VideoBitmapDecoder.class, decoder.getId());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsExceptionIfInitializedWithNegativeFrame() {
+        new VideoBitmapDecoder(-1);
+    }
+
+    @Test
+    public void testSpecifiesThumbnailFrameIfInitializedWithFrameNumber() throws IOException {
+        int frame = 5;
+        decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory()  {
+          @Override
+          public MediaMetadataRetriever build() {
+            return factory.build();
+          }
+        }, frame);
+
+        decoder.decode(resource, bitmapPool, 100, 100, decodeFormat);
+
+        verify(retriever).getFrameAtTime(5);
+        verify(retriever, never()).getFrameAtTime();
+    }
+
+    @Test
+    public void testDoesNotSpecifyThumbnailFrameIfInitializedWithoutFrameNumber()
+        throws IOException {
+      decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory()  {
+        @Override
+        public MediaMetadataRetriever build() {
+          return factory.build();
+        }
+      });
+
+      decoder.decode(resource, bitmapPool, 100, 100, decodeFormat);
+
+      verify(retriever).getFrameAtTime();
+      verify(retriever, never()).getFrameAtTime(anyLong());
     }
 }
