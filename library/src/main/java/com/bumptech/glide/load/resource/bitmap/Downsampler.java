@@ -185,7 +185,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         // or equal to the sample size we provide. Because we need to estimate the final image width and height to
         // re-use Bitmaps, we mirror BitmapFactory's calculation here. For bug, see issue #224. For algorithm see
         // http://stackoverflow.com/a/17379704/800716.
-        final int powerOfTwoSampleSize = exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize - 1);
+        final int powerOfTwoSampleSize = exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize);
 
         // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code than 0.
         return Math.max(1, powerOfTwoSampleSize);
