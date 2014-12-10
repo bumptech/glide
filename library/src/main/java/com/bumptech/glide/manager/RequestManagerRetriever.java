@@ -111,9 +111,6 @@ public class RequestManagerRetriever implements Handler.Callback {
         if (Util.isOnBackgroundThread()) {
             return get(fragment.getActivity().getApplicationContext());
         } else {
-            if (fragment.isDetached()) {
-                throw new IllegalArgumentException("You cannot start a load on a detached fragment");
-            }
             FragmentManager fm = fragment.getChildFragmentManager();
             return supportFragmentGet(fragment.getActivity(), fm);
         }
@@ -145,16 +142,8 @@ public class RequestManagerRetriever implements Handler.Callback {
         if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return get(fragment.getActivity().getApplicationContext());
         } else {
-            assertNotDetached(fragment);
             android.app.FragmentManager fm = fragment.getChildFragmentManager();
             return fragmentGet(fragment.getActivity(), fm);
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private static void assertNotDetached(android.app.Fragment fragment) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2 && fragment.isDetached()) {
-            throw new IllegalArgumentException("You cannot start a load on a detached fragment");
         }
     }
 

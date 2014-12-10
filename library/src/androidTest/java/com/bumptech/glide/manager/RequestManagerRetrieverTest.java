@@ -154,6 +154,56 @@ public class RequestManagerRetrieverTest {
         assertEquals(manager, retriever.get(fragment));
     }
 
+    @Test
+    public void testCanGetRequestManagerFromDetachedFragment() {
+      helpTestCanGetRequestManagerFromDetachedFragment();
+    }
+
+    @Test
+    public void testCanGetRequestManagerFromDetachedFragment_PreJellyBeanMr1() {
+      Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
+      helpTestCanGetRequestManagerFromDetachedFragment();
+    }
+
+    private void helpTestCanGetRequestManagerFromDetachedFragment() {
+      Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
+      android.app.Fragment fragment = new android.app.Fragment();
+      activity.getFragmentManager()
+        .beginTransaction()
+        .add(fragment, PARENT_TAG)
+        .detach(fragment)
+        .commit();
+      activity.getFragmentManager().executePendingTransactions();
+
+      assertTrue(fragment.isDetached());
+      retriever.get(fragment);
+    }
+
+    @Test
+    public void testSupportCanGetRequestManagerFromDetachedFragment() {
+      helpTestSupportCanGetRequestManagerFromDetachedFragment();
+    }
+
+    @Test
+    public void testSupportCanGetRequestManagerFromDetachedFragment_PreJellyBeanMr1() {
+      Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
+      helpTestSupportCanGetRequestManagerFromDetachedFragment();
+    }
+
+    private void helpTestSupportCanGetRequestManagerFromDetachedFragment() {
+      FragmentActivity activity = Robolectric.buildActivity(FragmentActivity.class).create().start().resume().get();
+      Fragment fragment = new Fragment();
+      activity.getSupportFragmentManager()
+              .beginTransaction()
+              .add(fragment, PARENT_TAG)
+              .detach(fragment)
+              .commit();
+      activity.getSupportFragmentManager().executePendingTransactions();
+
+      assertTrue(fragment.isDetached());
+      retriever.get(fragment);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfFragmentNotAttached() {
         android.app.Fragment fragment = new android.app.Fragment();
