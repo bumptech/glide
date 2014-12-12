@@ -153,6 +153,14 @@ public class TransformationUtilsTest {
     }
 
     @Test
+    public void testFitCenterHandlesBitmapsWithNullConfigs() {
+      Bitmap toFit = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+      Robolectric.shadowOf(toFit).setConfig(null);
+      Bitmap transformed = TransformationUtils.fitCenter(toFit, mock(BitmapPool.class), 50, 50);
+      assertEquals(Bitmap.Config.ARGB_8888, transformed.getConfig());
+    }
+
+    @Test
     public void testCenterCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlphaAndOutBitmapIsReused() {
         Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
@@ -185,7 +193,6 @@ public class TransformationUtilsTest {
     @Test
     public void testCenterCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlpha() {
         Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        BitmapPool pool = mock(BitmapPool.class);
 
         toTransform.setHasAlpha(true);
 
@@ -193,6 +200,16 @@ public class TransformationUtilsTest {
                 toTransform.getHeight() / 2);
 
         assertTrue(result.hasAlpha());
+    }
+
+    @Test
+    public void testCenterCropHandlesBitmapsWithNullConfigs() {
+      Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+      Robolectric.shadowOf(toTransform).setConfig(null);
+
+      Bitmap transformed = TransformationUtils.centerCrop(null /*recycled*/, toTransform, 50, 50);
+
+      assertEquals(Bitmap.Config.ARGB_8888, transformed.getConfig());
     }
 
     @Test
@@ -347,6 +364,16 @@ public class TransformationUtilsTest {
     }
 
     @Test
+    public void testRotateImageExifHandlesBitmapsWithNullConfigs() {
+      Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+      Robolectric.shadowOf(toRotate).setConfig(null);
+      BitmapPool bitmapPool = mock(BitmapPool.class);
+      Bitmap rotated = TransformationUtils.rotateImageExif(toRotate, bitmapPool,
+          ExifInterface.ORIENTATION_ROTATE_180);
+      assertEquals(Bitmap.Config.ARGB_8888, rotated.getConfig());
+    }
+
+    @Test
     public void testInitializeMatrixSetsScaleIfFlipHorizontal() {
         Matrix matrix = mock(Matrix.class);
         TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_FLIP_HORIZONTAL, matrix);
@@ -392,6 +419,16 @@ public class TransformationUtilsTest {
     public static class AlphaShadowBitmap extends ShadowBitmap {
 
         private boolean hasAlpha;
+
+        @Implementation
+        public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
+          // Robolectric doesn't match the framework behavior with null configs, so we have to do
+          // so here.
+          if (config == null) {
+            throw new NullPointerException("config must not be null");
+          }
+          return ShadowBitmap.createBitmap(width, height, config);
+        }
 
         @Implementation
         public void setHasAlpha(boolean hasAlpha) {
