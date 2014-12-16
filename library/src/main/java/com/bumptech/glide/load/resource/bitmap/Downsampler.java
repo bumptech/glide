@@ -360,6 +360,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         decodeBitmapOptions.inSampleSize = 1;
         decodeBitmapOptions.inPreferredConfig = null;
         decodeBitmapOptions.inJustDecodeBounds = false;
+        decodeBitmapOptions.outWidth = 0;
+        decodeBitmapOptions.outHeight = 0;
+        decodeBitmapOptions.outMimeType = null;
 
         if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)  {
             decodeBitmapOptions.inBitmap = null;
