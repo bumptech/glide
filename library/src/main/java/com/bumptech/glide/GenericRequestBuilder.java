@@ -763,6 +763,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
             Request fullRequest = obtainRequest(target, sizeMultiplier, priority, coordinator);
             // Recursively generate thumbnail requests.
+            if(!thumbnailRequestBuilder.isModelSet && thumbnailRequestBuilder.modelClass.isInstance( this.model )) {
+                @SuppressWarnings("unchecked")
+                GenericRequestBuilder<ModelType, ?, ?, TranscodeType> theBuilder = ( GenericRequestBuilder<ModelType, ?, ?, TranscodeType> )thumbnailRequestBuilder;
+                theBuilder.model = this.model;
+            }
             Request thumbRequest = thumbnailRequestBuilder.buildRequestRecursive(target, coordinator);
             coordinator.setRequests(fullRequest, thumbRequest);
             return coordinator;
