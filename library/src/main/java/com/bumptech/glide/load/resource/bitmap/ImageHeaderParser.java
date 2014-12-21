@@ -125,7 +125,7 @@ public class ImageHeaderParser {
         } else {
             byte[] exifData = getExifSegment();
             boolean hasJpegExifPreamble = exifData != null
-                    && exifData.length >= JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
+                    && exifData.length > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
 
             if (hasJpegExifPreamble) {
                 for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {

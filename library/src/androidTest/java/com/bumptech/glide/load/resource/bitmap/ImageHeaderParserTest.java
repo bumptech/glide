@@ -3,6 +3,8 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 import static org.junit.Assert.assertEquals;
 
+import com.bumptech.glide.testutil.TestResourceUtil;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -65,7 +67,14 @@ public class ImageHeaderParserTest {
         InputStream is = new ByteArrayInputStream(new byte[] { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 });
         ImageHeaderParser parser = new ImageHeaderParser(is);
         assertEquals(ImageType.UNKNOWN, parser.getType());
+    }
 
+    // Test for #286.
+    @Test
+    public void testHandlesParsingOrientationWithMinimalExifSegment() throws IOException {
+        InputStream is = TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg");
+        ImageHeaderParser parser = new ImageHeaderParser(is);
+        assertEquals(-1, parser.getOrientation());
     }
 
     private static byte[] generatePngHeaderWithIhdr(int bitDepth) {
