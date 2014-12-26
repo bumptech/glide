@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import com.bumptech.glide.load.Key;
@@ -20,7 +21,7 @@ import java.util.concurrent.Future;
  */
 class EngineJob implements EngineRunnable.EngineRunnableManager {
     private static final EngineResourceFactory DEFAULT_FACTORY = new EngineResourceFactory();
-    private static final Handler MAIN_THREAD_HANDLER = new Handler(new MainThreadCallback());
+    private static final Handler MAIN_THREAD_HANDLER = new Handler(Looper.getMainLooper(), new MainThreadCallback());
 
     private static final int MSG_COMPLETE = 1;
     private static final int MSG_EXCEPTION = 2;

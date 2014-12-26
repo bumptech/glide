@@ -33,8 +33,10 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     private final DiskCache diskCache;
     private final EngineJobFactory engineJobFactory;
     private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
-    private final ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
     private final ResourceRecycler resourceRecycler;
+
+    // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See #295.
+    private ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
 
     /**
      * Allows a request to indicate it no longer is interested in a given load.
@@ -91,9 +93,6 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
         this.resourceRecycler = resourceRecycler;
 
-        resourceReferenceQueue = new ReferenceQueue<EngineResource<?>>();
-        MessageQueue queue = Looper.myQueue();
-        queue.addIdleHandler(new RefQueueIdleHandler(activeResources, resourceReferenceQueue));
         cache.setResourceRemovedListener(this);
     }
 
@@ -220,7 +219,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         EngineResource<?> cached = getEngineResourceFromCache(key);
         if (cached != null) {
             cached.acquire();
-            activeResources.put(key, new ResourceWeakReference(key, cached, resourceReferenceQueue));
+            activeResources.put(key, new ResourceWeakReference(key, cached, getReferenceQueue()));
         }
         return cached;
     }
@@ -242,6 +241,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     }
 
     public void release(Resource resource) {
+        Util.assertMainThread();
         if (resource instanceof EngineResource) {
             ((EngineResource) resource).release();
         } else {
@@ -252,12 +252,13 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
     @SuppressWarnings("unchecked")
     @Override
     public void onEngineJobComplete(Key key, EngineResource<?> resource) {
+        Util.assertMainThread();
         // A null resource indicates that the load failed, usually due to an exception.
         if (resource != null) {
             resource.setResourceListener(key, this);
 
             if (resource.isCacheable()) {
-                activeResources.put(key, new ResourceWeakReference(key, resource, resourceReferenceQueue));
+                activeResources.put(key, new ResourceWeakReference(key, resource, getReferenceQueue()));
             }
         }
         // TODO: should this check that the engine job is still current?
@@ -266,6 +267,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     @Override
     public void onEngineJobCancelled(EngineJob engineJob, Key key) {
+        Util.assertMainThread();
         EngineJob current = jobs.get(key);
         if (engineJob.equals(current)) {
             jobs.remove(key);
@@ -274,17 +276,28 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
     @Override
     public void onResourceRemoved(final Resource<?> resource) {
+        Util.assertMainThread();
         resourceRecycler.recycle(resource);
     }
 
     @Override
     public void onResourceReleased(Key cacheKey, EngineResource resource) {
+        Util.assertMainThread();
         activeResources.remove(cacheKey);
         if (resource.isCacheable()) {
             cache.put(cacheKey, resource);
         } else {
             resourceRecycler.recycle(resource);
         }
+    }
+
+    private ReferenceQueue<EngineResource<?>> getReferenceQueue() {
+        if (resourceReferenceQueue == null) {
+            resourceReferenceQueue = new ReferenceQueue<EngineResource<?>>();
+            MessageQueue queue = Looper.myQueue();
+            queue.addIdleHandler(new RefQueueIdleHandler(activeResources, resourceReferenceQueue));
+        }
+        return resourceReferenceQueue;
     }
 
     private static class ResourceWeakReference extends WeakReference<EngineResource<?>> {

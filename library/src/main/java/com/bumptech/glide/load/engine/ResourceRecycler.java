@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import com.bumptech.glide.util.Util;
@@ -10,7 +11,7 @@ import com.bumptech.glide.util.Util;
  */
 class ResourceRecycler {
     private boolean isRecycling;
-    private final Handler handler = new Handler(new ResourceRecyclerCallback());
+    private final Handler handler = new Handler(Looper.getMainLooper(), new ResourceRecyclerCallback());
 
     public void recycle(Resource<?> resource) {
         Util.assertMainThread();
