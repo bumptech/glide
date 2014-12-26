@@ -95,13 +95,6 @@ public class ExceptionCatchingInputStreamTest {
         verify(wrapped).reset();
     }
 
-
-    @Test
-    public void testFixMarkLimitCallsFixMarkLimitOnWrappedStream() {
-        is.fixMarkLimit();
-        verify(wrapped).fixMarkLimit();
-    }
-
     @Test
     public void testCallsSkipOnWrapped() throws IOException {
         long toSkip = 67;

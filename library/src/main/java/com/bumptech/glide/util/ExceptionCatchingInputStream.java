@@ -1,7 +1,5 @@
 package com.bumptech.glide.util;
 
-import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Queue;
@@ -17,10 +15,10 @@ public class ExceptionCatchingInputStream extends InputStream {
 
     private static final Queue<ExceptionCatchingInputStream> QUEUE = Util.createQueue(0);
 
-    private RecyclableBufferedInputStream wrapped;
+    private InputStream wrapped;
     private IOException exception;
 
-    public static ExceptionCatchingInputStream obtain(RecyclableBufferedInputStream toWrap) {
+    public static ExceptionCatchingInputStream obtain(InputStream toWrap) {
         ExceptionCatchingInputStream result;
         synchronized (QUEUE) {
             result = QUEUE.poll();
@@ -43,7 +41,7 @@ public class ExceptionCatchingInputStream extends InputStream {
         // Do nothing.
     }
 
-    void setInputStream(RecyclableBufferedInputStream toWrap) {
+    void setInputStream(InputStream toWrap) {
         wrapped = toWrap;
     }
 
@@ -118,10 +116,6 @@ public class ExceptionCatchingInputStream extends InputStream {
             result = -1;
         }
         return result;
-    }
-
-    public void fixMarkLimit() {
-        wrapped.fixMarkLimit();
     }
 
     public IOException getException() {
