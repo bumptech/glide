@@ -23,9 +23,9 @@ import java.util.List;
  * {@link android.view.ViewTreeObserver.OnDrawListener}.
  *
  * <p>
- *     To detect {@link View} reuse in {@link android.widget.ListView} or any {@link ViewGroup} that reuses views, this
- *     class uses the {@link View#setTag(Object)} method to store some metadata so that if a view is reused, any
- *     previous loads or resources from previous loads can be cancelled or reused.
+ *     To detect {@link View} reuse in {@link android.widget.ListView} or any {@link android.view.ViewGroup} that reuses
+ *     views, this class uses the {@link View#setTag(Object)} method to store some metadata so that if a view is reused,
+ *     any previous loads or resources from previous loads can be cancelled or reused.
  * </p>
  *
  * <p>
