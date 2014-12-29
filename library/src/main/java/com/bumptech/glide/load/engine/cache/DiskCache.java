@@ -8,6 +8,17 @@ import java.io.File;
  * An interface for writing to and reading from a disk cache.
  */
 public interface DiskCache {
+
+    /**
+     * An interface for lazily creating a disk cache.
+     */
+    interface Factory {
+        /**
+         * Returns a new disk cache, or {@code null} if no disk cache could be created.
+         */
+        DiskCache build();
+    }
+
     /**
      * An interface to actually write data to a key in the disk cache.
      */

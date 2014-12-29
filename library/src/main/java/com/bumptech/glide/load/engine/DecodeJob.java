@@ -38,8 +38,8 @@ class DecodeJob<A, T, Z> {
     private final DataLoadProvider<A, T> loadProvider;
     private final Transformation<T> transformation;
     private final ResourceTranscoder<T, Z> transcoder;
+    private final DiskCacheProvider diskCacheProvider;
     private final DiskCacheStrategy diskCacheStrategy;
-    private final DiskCache diskCache;
     private final Priority priority;
     private final FileOpener fileOpener;
 
@@ -47,15 +47,16 @@ class DecodeJob<A, T, Z> {
 
     public DecodeJob(EngineKey resultKey, int width, int height, DataFetcher<A> fetcher,
             DataLoadProvider<A, T> loadProvider, Transformation<T> transformation, ResourceTranscoder<T, Z> transcoder,
-            DiskCache diskCache, DiskCacheStrategy diskCacheStrategy, Priority priority) {
-        this(resultKey, width, height, fetcher, loadProvider, transformation, transcoder, diskCache, diskCacheStrategy,
-                priority, DEFAULT_FILE_OPENER);
+            DiskCacheProvider diskCacheProvider, DiskCacheStrategy diskCacheStrategy, Priority priority) {
+        this(resultKey, width, height, fetcher, loadProvider, transformation, transcoder, diskCacheProvider,
+                diskCacheStrategy, priority, DEFAULT_FILE_OPENER);
     }
 
     // Visible for testing.
     DecodeJob(EngineKey resultKey, int width, int height, DataFetcher<A> fetcher,
             DataLoadProvider<A, T> loadProvider, Transformation<T> transformation, ResourceTranscoder<T, Z> transcoder,
-            DiskCache diskCache, DiskCacheStrategy diskCacheStrategy, Priority priority, FileOpener fileOpener) {
+            DiskCacheProvider diskCacheProvider, DiskCacheStrategy diskCacheStrategy, Priority priority, FileOpener
+            fileOpener) {
         this.resultKey = resultKey;
         this.width = width;
         this.height = height;
@@ -63,8 +64,8 @@ class DecodeJob<A, T, Z> {
         this.loadProvider = loadProvider;
         this.transformation = transformation;
         this.transcoder = transcoder;
+        this.diskCacheProvider = diskCacheProvider;
         this.diskCacheStrategy = diskCacheStrategy;
-        this.diskCache = diskCache;
         this.priority = priority;
         this.fileOpener = fileOpener;
     }
@@ -156,7 +157,7 @@ class DecodeJob<A, T, Z> {
         }
         long startTime = LogTime.getLogTime();
         SourceWriter<Resource<T>> writer = new SourceWriter<Resource<T>>(loadProvider.getEncoder(), transformed);
-        diskCache.put(resultKey, writer);
+        diskCacheProvider.getDiskCache().put(resultKey, writer);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Wrote transformed from source to cache", startTime);
         }
@@ -197,7 +198,7 @@ class DecodeJob<A, T, Z> {
     private Resource<T> cacheAndDecodeSourceData(A data) throws IOException {
         long startTime = LogTime.getLogTime();
         SourceWriter<A> writer = new SourceWriter<A>(loadProvider.getSourceEncoder(), data);
-        diskCache.put(resultKey.getOriginalKey(), writer);
+        diskCacheProvider.getDiskCache().put(resultKey.getOriginalKey(), writer);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Wrote source to cache", startTime);
         }
@@ -211,7 +212,7 @@ class DecodeJob<A, T, Z> {
     }
 
     private Resource<T> loadFromCache(Key key) throws IOException {
-        File cacheFile = diskCache.get(key);
+        File cacheFile = diskCacheProvider.getDiskCache().get(key);
         if (cacheFile == null) {
             return null;
         }
@@ -221,7 +222,7 @@ class DecodeJob<A, T, Z> {
             result = loadProvider.getCacheDecoder().decode(cacheFile, width, height);
         } finally {
             if (result == null) {
-                diskCache.delete(key);
+                diskCacheProvider.getDiskCache().delete(key);
             }
         }
         return result;
@@ -282,6 +283,10 @@ class DecodeJob<A, T, Z> {
             }
             return success;
         }
+    }
+
+    interface DiskCacheProvider {
+        DiskCache getDiskCache();
     }
 
     static class FileOpener {

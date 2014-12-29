@@ -589,6 +589,7 @@ public class DecodeJobTest {
         Transformation<Object> transformation = mock(Transformation.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         DiskCache diskCache = mock(DiskCache.class);
+        DecodeJob.DiskCacheProvider diskCacheProvider = mock(DecodeJob.DiskCacheProvider.class);
         Priority priority = Priority.IMMEDIATE;
 
         ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
@@ -614,11 +615,12 @@ public class DecodeJobTest {
             when(loadProvider.getEncoder()).thenReturn(resultEncoder);
             when(loadProvider.getSourceDecoder()).thenReturn(sourceDecoder);
             when(loadProvider.getSourceEncoder()).thenReturn(sourceEncoder);
+            when(diskCacheProvider.getDiskCache()).thenReturn(diskCache);
         }
 
         public DecodeJob<Object, Object, Object> getJob() {
             return new DecodeJob<Object, Object, Object>(key, width, height, dataFetcher, loadProvider, transformation,
-                    transcoder, diskCache, diskCacheStrategy, priority, fileOpener);
+                    transcoder, diskCacheProvider, diskCacheStrategy, priority, fileOpener);
         }
     }
 

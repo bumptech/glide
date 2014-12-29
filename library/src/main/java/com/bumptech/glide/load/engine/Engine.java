@@ -25,15 +25,17 @@ import java.util.concurrent.ExecutorService;
 /**
  * Responsible for starting loads and managing active and cached resources.
  */
-public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedListener, EngineResource.ResourceListener {
+public class Engine implements EngineJobListener,
+        MemoryCache.ResourceRemovedListener,
+        EngineResource.ResourceListener {
     private static final String TAG = "Engine";
     private final Map<Key, EngineJob> jobs;
     private final EngineKeyFactory keyFactory;
     private final MemoryCache cache;
-    private final DiskCache diskCache;
     private final EngineJobFactory engineJobFactory;
     private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
     private final ResourceRecycler resourceRecycler;
+    private final LazyDiskCacheProvider diskCacheProvider;
 
     // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See #295.
     private ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
@@ -55,18 +57,18 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
         }
     }
 
-    public Engine(MemoryCache memoryCache, DiskCache diskCache, ExecutorService diskCacheService,
+    public Engine(MemoryCache memoryCache, DiskCache.Factory diskCacheFactory, ExecutorService diskCacheService,
             ExecutorService sourceService) {
-        this(memoryCache, diskCache, diskCacheService, sourceService, null, null, null, null, null);
+        this(memoryCache, diskCacheFactory, diskCacheService, sourceService, null, null, null, null, null);
     }
 
     // Visible for testing.
-    Engine(MemoryCache cache, DiskCache diskCache, ExecutorService diskCacheService, ExecutorService sourceService,
-            Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
+    Engine(MemoryCache cache, DiskCache.Factory diskCacheFactory, ExecutorService diskCacheService,
+            ExecutorService sourceService, Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
             Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory,
             ResourceRecycler resourceRecycler) {
         this.cache = cache;
-        this.diskCache = diskCache;
+        this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
 
         if (activeResources == null) {
             activeResources = new HashMap<Key, WeakReference<EngineResource<?>>>();
@@ -176,7 +178,7 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
 
         EngineJob engineJob = engineJobFactory.build(key, isMemoryCacheable);
         DecodeJob<T, Z, R> decodeJob = new DecodeJob<T, Z, R>(key, width, height, fetcher, loadProvider, transformation,
-                transcoder, diskCache, diskCacheStrategy, priority);
+                transcoder, diskCacheProvider, diskCacheStrategy, priority);
         EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, priority);
         jobs.put(key, engineJob);
         engineJob.addCallback(cb);
@@ -298,6 +300,28 @@ public class Engine implements EngineJobListener, MemoryCache.ResourceRemovedLis
             queue.addIdleHandler(new RefQueueIdleHandler(activeResources, resourceReferenceQueue));
         }
         return resourceReferenceQueue;
+    }
+
+    private static class LazyDiskCacheProvider implements DecodeJob.DiskCacheProvider {
+
+        private final DiskCache.Factory factory;
+        private volatile DiskCache diskCache;
+
+        public LazyDiskCacheProvider(DiskCache.Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        public DiskCache getDiskCache() {
+            if (diskCache == null) {
+                synchronized (this) {
+                    if (diskCache == null) {
+                        diskCache = factory.build();
+                    }
+                }
+            }
+            return diskCache;
+        }
     }
 
     private static class ResourceWeakReference extends WeakReference<EngineResource<?>> {

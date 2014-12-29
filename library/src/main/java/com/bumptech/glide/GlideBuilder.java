@@ -9,14 +9,12 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
-import com.bumptech.glide.load.engine.cache.DiskLruCacheWrapper;
+import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor;
 
-import java.io.File;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -28,10 +26,10 @@ public class GlideBuilder {
     private Engine engine;
     private BitmapPool bitmapPool;
     private MemoryCache memoryCache;
-    private DiskCache diskCache;
     private ExecutorService sourceService;
     private ExecutorService diskCacheService;
     private DecodeFormat decodeFormat;
+    private DiskCache.Factory diskCacheFactory;
 
     public GlideBuilder(Context context) {
         this.context = context.getApplicationContext();
@@ -65,11 +63,32 @@ public class GlideBuilder {
      * Sets the {@link com.bumptech.glide.load.engine.cache.DiskCache} implementation to use to store
      * {@link com.bumptech.glide.load.engine.Resource} data and thumbnails.
      *
+     * @deprecated Creating a disk cache directory on the main thread causes strict mode violations, use
+     * {@link #setDiskCache(com.bumptech.glide.load.engine.cache.DiskCache.Factory)} instead. Scheduled to be removed
+     * in Glide 4.0.
      * @param diskCache The disk cache to use.
      * @return This builder.
      */
-    public GlideBuilder setDiskCache(DiskCache diskCache) {
-        this.diskCache = diskCache;
+    @Deprecated
+    public GlideBuilder setDiskCache(final DiskCache diskCache) {
+        return setDiskCache(new DiskCache.Factory() {
+            @Override
+            public DiskCache build() {
+                return diskCache;
+            }
+        });
+    }
+
+    /**
+     * Sets the {@link com.bumptech.glide.load.engine.cache.DiskCache.Factory} implementation to use to construct
+     * the {@link com.bumptech.glide.load.engine.cache.DiskCache} to use to store
+     * {@link com.bumptech.glide.load.engine.Resource} data on disk.
+     *
+     * @param diskCacheFactory The disk cche factory to use.
+     * @return This builder.
+     */
+    public GlideBuilder setDiskCache(DiskCache.Factory diskCacheFactory) {
+        this.diskCacheFactory = diskCacheFactory;
         return this;
     }
 
@@ -164,18 +183,12 @@ public class GlideBuilder {
             memoryCache = new LruResourceCache(calculator.getMemoryCacheSize());
         }
 
-        if (diskCache == null) {
-            File cacheDir = Glide.getPhotoCacheDir(context);
-            if (cacheDir != null) {
-                diskCache = DiskLruCacheWrapper.get(cacheDir, Glide.DEFAULT_DISK_CACHE_SIZE);
-            }
-            if (diskCache == null) {
-                diskCache = new DiskCacheAdapter();
-            }
+        if (diskCacheFactory == null) {
+            diskCacheFactory = new InternalCacheDiskCacheFactory(context, Glide.DEFAULT_DISK_CACHE_SIZE);
         }
 
         if (engine == null) {
-            engine = new Engine(memoryCache, diskCache, diskCacheService, sourceService);
+            engine = new Engine(memoryCache, diskCacheFactory, diskCacheService, sourceService);
         }
 
         if (decodeFormat == null) {

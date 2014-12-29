@@ -487,7 +487,7 @@ public class EngineTest {
 
             job = mock(EngineJob.class);
 
-            engine = new Engine(cache, mock(DiskCache.class), mock(ExecutorService.class),
+            engine = new Engine(cache, mock(DiskCache.Factory.class), mock(ExecutorService.class),
                     mock(ExecutorService.class), jobs, keyFactory, activeResources, engineJobFactory, resourceRecycler);
 
         }
