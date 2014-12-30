@@ -7,15 +7,15 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.transcode.BitmapToGlideDrawableTranscoder;
+import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -65,18 +65,18 @@ public class FullscreenActivity extends Activity {
                 .thumbnail(Glide.with(this)
                         .load(result)
                         .asBitmap()
-                        .transcode(new BitmapToGlideDrawableTranscoder(this), GlideDrawable.class)
+                        .transcode(new BitmapDrawableTranscoder(this), Drawable.class)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 )
-                .listener(new RequestListener<Object, GlideDrawable>() {
+                .listener(new RequestListener<Object, Drawable>() {
                     @Override
-                    public boolean onException(Exception e, Object model, Target<GlideDrawable> target,
+                    public boolean onException(Exception e, Object model, Target<Drawable> target,
                             boolean isFirstResource) {
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(GlideDrawable resource, Object model, Target<GlideDrawable> target,
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
                             boolean isFromMemoryCache, boolean isFirstResource) {
                         if (resource instanceof GifDrawable) {
                             gifDrawable = (GifDrawable) resource;

@@ -68,7 +68,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
     private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
     private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
     private Transformation<ResourceType> transformation = UnitTransformation.get();
-    private ResourceTranscoder<ResourceType, TranscodeType> transcoder;
+    private ResourceTranscoder<ResourceType, ? extends TranscodeType> transcoder;
 
     GenericRequestBuilder(Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass,
             GenericRequestBuilder<ModelType, ?, ?> other) {
@@ -245,13 +245,13 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
      * Sets the {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} to use for this load.
      *
      * @see com.bumptech.glide.load.resource.transcode.UnitTranscoder
-     * @see com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder
+     * @see com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder
      *
      * @param transcoder The transcoder to use.
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> transcoder(
-            ResourceTranscoder<ResourceType, TranscodeType> transcoder) {
+            ResourceTranscoder<ResourceType, ? extends TranscodeType> transcoder) {
         this.transcoder = transcoder;
         return this;
     }

@@ -196,7 +196,7 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      */
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> transcoder(
-            ResourceTranscoder<Bitmap, TranscodeType> transcoder) {
+            ResourceTranscoder<Bitmap, ? extends TranscodeType> transcoder) {
         super.transcoder(transcoder);
         return this;
     }

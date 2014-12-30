@@ -46,24 +46,25 @@ class DecodeJob<Z, R> {
     private final Class<Z> resourceClass;
     private final RequestContext requestContext;
     private final Transformation<Z> transformation;
-    private final ResourceTranscoder<Z, R> transcoder;
+    private final ResourceTranscoder<Z, ? extends R> transcoder;
     private final DiskCacheStrategy diskCacheStrategy;
     private final Priority priority;
     private final FileOpener fileOpener;
     private volatile boolean isCancelled;
 
     public DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet sourceFetchers,
-            RequestContext requestContext, Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder,
-            DiskCacheProvider diskCacheProvider, DiskCacheStrategy diskCacheStrategy, Priority priority) {
+            RequestContext requestContext, Transformation<Z> transformation,
+            ResourceTranscoder<Z, ? extends R> transcoder, DiskCacheProvider diskCacheProvider,
+            DiskCacheStrategy diskCacheStrategy, Priority priority) {
         this(resourceClass, resultKey, width, height, sourceFetchers, requestContext, transformation, transcoder,
                 diskCacheProvider, diskCacheStrategy, priority, DEFAULT_FILE_OPENER);
     }
 
     // Visible for testing.
     DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet sourceFetchers,
-            RequestContext requestContext, Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder,
-            DiskCacheProvider diskCacheProvider, DiskCacheStrategy diskCacheStrategy, Priority priority, FileOpener
-            fileOpener) {
+            RequestContext requestContext, Transformation<Z> transformation,
+            ResourceTranscoder<Z, ? extends R>  transcoder, DiskCacheProvider diskCacheProvider,
+            DiskCacheStrategy diskCacheStrategy, Priority priority, FileOpener fileOpener) {
         this.resultKey = resultKey;
         this.width = width;
         this.height = height;
@@ -282,11 +283,12 @@ class DecodeJob<Z, R> {
         return transformed;
     }
 
+    @SuppressWarnings("unchecked")
     private Resource<R> transcode(Resource<Z> transformed) {
         if (transformed == null) {
             return null;
         }
-        return transcoder.transcode(transformed);
+        return (Resource<R>) transcoder.transcode(transformed);
     }
 
     private void logWithTimeAndKey(String message, long startTime) {

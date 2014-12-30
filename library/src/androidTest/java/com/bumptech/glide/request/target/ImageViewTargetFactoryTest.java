@@ -10,7 +10,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 
@@ -59,8 +58,8 @@ public class ImageViewTargetFactoryTest {
 
     @Test
     public void testReturnsTargetForGlideBitmapDrawables() {
-        GlideBitmapDrawable drawable = mock(GlideBitmapDrawable.class);
-        Target target = factory.buildTarget(view, GlideBitmapDrawable.class);
+        BitmapDrawable drawable = mock(BitmapDrawable.class);
+        Target target = factory.buildTarget(view, BitmapDrawable.class);
         target.onResourceReady(drawable, null);
         assertThat(target).isInstanceOf(GlideDrawableImageViewTarget.class);
     }

@@ -29,12 +29,12 @@ import com.bumptech.glide.request.target.Target;
  * @param <ModelType> The type of model that will be loaded into the target.
  */
 public class DrawableRequestBuilder<ModelType>
-        extends GenericRequestBuilder<ModelType, GlideDrawable, GlideDrawable>
+        extends GenericRequestBuilder<ModelType, Drawable, Drawable>
         implements BitmapOptions, DrawableOptions {
 
     DrawableRequestBuilder(Context context, Class<ModelType> modelClass, Glide glide, RequestTracker requestTracker,
             Lifecycle lifecycle) {
-        super(context, modelClass, GlideDrawable.class, GlideDrawable.class, glide, requestTracker, lifecycle);
+        super(context, modelClass, Drawable.class, Drawable.class, glide, requestTracker, lifecycle);
         // Default to animating.
         crossFade();
     }
@@ -73,7 +73,7 @@ public class DrawableRequestBuilder<ModelType>
      */
     @Override
     public DrawableRequestBuilder<ModelType> thumbnail(
-            GenericRequestBuilder<?, ?, GlideDrawable> thumbnailRequest) {
+            GenericRequestBuilder<?, ?, Drawable> thumbnailRequest) {
         super.thumbnail(thumbnailRequest);
         return this;
     }
@@ -206,7 +206,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public final DrawableRequestBuilder<ModelType> crossFade() {
-        super.animate(new DrawableCrossFadeFactory<GlideDrawable>());
+        super.animate(new DrawableCrossFadeFactory<Drawable>());
         return this;
     }
 
@@ -214,7 +214,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int duration) {
-        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(duration));
+        super.animate(new DrawableCrossFadeFactory<Drawable>(duration));
         return this;
     }
 
@@ -223,7 +223,7 @@ public class DrawableRequestBuilder<ModelType>
      */
     @Deprecated
     public DrawableRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
-        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(animation, duration));
+        super.animate(new DrawableCrossFadeFactory<Drawable>(animation, duration));
         return this;
     }
 
@@ -231,7 +231,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(context, animationId,
+        super.animate(new DrawableCrossFadeFactory<Drawable>(context, animationId,
                 duration));
         return this;
     }
@@ -315,7 +315,7 @@ public class DrawableRequestBuilder<ModelType>
      */
     @Override
     public DrawableRequestBuilder<ModelType> listener(
-            RequestListener<? super ModelType, GlideDrawable> requestListener) {
+            RequestListener<? super ModelType, Drawable> requestListener) {
         super.listener(requestListener);
         return this;
     }
@@ -386,7 +386,7 @@ public class DrawableRequestBuilder<ModelType>
      * @return {@inheritDoc}
      */
     @Override
-    public Target<GlideDrawable> into(ImageView view) {
+    public Target<Drawable> into(ImageView view) {
         return super.into(view);
     }
 

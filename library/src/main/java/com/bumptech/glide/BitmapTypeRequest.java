@@ -28,7 +28,7 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
      * @param <R> The type of the resource the {@link Bitmap} will be transcoded to.
      * @return This request builder.
      */
-    public <R> BitmapRequestBuilder<ModelType, R> transcode(ResourceTranscoder<Bitmap, R> transcoder,
+    public <R> BitmapRequestBuilder<ModelType, R> transcode(ResourceTranscoder<Bitmap, ? extends R> transcoder,
             Class<R> transcodeClass) {
         return optionsApplier.apply(new BitmapRequestBuilder<ModelType, R>(transcodeClass, this))
                 .transcoder(transcoder);

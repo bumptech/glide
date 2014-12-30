@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -42,13 +43,12 @@ import com.bumptech.glide.load.model.stream.StreamResourceLoader;
 import com.bumptech.glide.load.model.stream.StreamStringLoader;
 import com.bumptech.glide.load.model.stream.StreamUriLoader;
 import com.bumptech.glide.load.model.stream.StreamUrlLoader;
+import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
+import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
-import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
-import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawableDecoder;
-import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -56,7 +56,7 @@ import com.bumptech.glide.load.resource.gif.GifFrameModelLoader;
 import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
-import com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder;
+import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -234,13 +234,13 @@ public class Glide {
         resourceEncoderRegistry.add(Bitmap.class, new BitmapEncoder());
 
         /* GlideBitmapDrawables */
-        decoderRegistry.append(new GlideBitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
-                new StreamBitmapDecoder(bitmapPool, decodeFormat)), InputStream.class, GlideBitmapDrawable.class);
-        decoderRegistry.append(new GlideBitmapDrawableDecoder<ParcelFileDescriptor>(context.getResources(), bitmapPool,
+        decoderRegistry.append(new BitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
+                new StreamBitmapDecoder(bitmapPool, decodeFormat)), InputStream.class, BitmapDrawable.class);
+        decoderRegistry.append(new BitmapDrawableDecoder<ParcelFileDescriptor>(context.getResources(), bitmapPool,
                 new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat)), ParcelFileDescriptor.class,
-                GlideBitmapDrawable.class);
-        resourceEncoderRegistry.add(GlideBitmapDrawable.class,
-                new GlideBitmapDrawableEncoder(bitmapPool, new BitmapEncoder()));
+                BitmapDrawable.class);
+        resourceEncoderRegistry.add(BitmapDrawable.class,
+                new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()));
 
         /* Gifs */
         decoderRegistry.prepend(new GifResourceDecoder(context, bitmapPool), InputStream.class, GifDrawable.class);
@@ -270,8 +270,8 @@ public class Glide {
         register(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
         register(byte[].class, InputStream.class, new StreamByteArrayLoader.Factory());
 
-        transcoderRegistry.register(Bitmap.class, GlideBitmapDrawable.class,
-                new GlideBitmapDrawableTranscoder(context.getResources(), bitmapPool));
+        transcoderRegistry.register(Bitmap.class, BitmapDrawable.class,
+                new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
 
         bitmapCenterCrop = new CenterCrop(bitmapPool);
 

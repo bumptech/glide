@@ -138,7 +138,7 @@ public class Engine implements EngineJobListener,
      */
     public <T, Z, R> LoadStatus load(Class<Z> resourceClass, Class<R> transcodeClass, Key signature, int width,
             int height, DataFetcherSet fetchers, RequestContext requestContext,
-            Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder, Priority priority,
+            Transformation<Z> transformation, ResourceTranscoder<Z, ? extends R> transcoder, Priority priority,
             boolean isMemoryCacheable, DiskCacheStrategy diskCacheStrategy, ResourceCallback cb) {
         Util.assertMainThread();
         long startTime = LogTime.getLogTime();

@@ -58,7 +58,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
 
     private Class<Z> resourceClass;
     private RequestContext requestContext;
-    private ResourceTranscoder<Z, R> transcoder;
+    private ResourceTranscoder<Z, ? extends R> transcoder;
     private Key signature;
     private int placeholderResourceId;
     private int errorResourceId;
@@ -92,7 +92,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             Class<Z> resourceClass,
             Class<R> transcodeClass,
             RequestContext requestContext,
-            ResourceTranscoder<Z, R> transcoder,
+            ResourceTranscoder<Z, ? extends R> transcoder,
             Key signature,
             Context context,
             Priority priority,
@@ -152,7 +152,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             Class<Z> resourceClass,
             Class<R> transcodeClass,
             RequestContext requestContext,
-            ResourceTranscoder<Z, R> transcoder,
+            ResourceTranscoder<Z, ? extends R> transcoder,
             Key signature,
             Context context,
             Priority priority,

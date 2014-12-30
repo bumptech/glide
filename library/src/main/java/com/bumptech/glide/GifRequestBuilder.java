@@ -182,7 +182,7 @@ public class GifRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     @Override
-    public GifRequestBuilder<ModelType> transcoder(ResourceTranscoder<GifDrawable, GifDrawable> transcoder) {
+    public GifRequestBuilder<ModelType> transcoder(ResourceTranscoder<GifDrawable, ? extends GifDrawable> transcoder) {
         super.transcoder(transcoder);
         return this;
     }
