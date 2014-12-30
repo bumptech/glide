@@ -11,7 +11,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapperTransformation;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.RequestListener;
@@ -203,11 +202,6 @@ public class DrawableRequestBuilder<ModelType>
      * @return This request builder.
      */
     public DrawableRequestBuilder<ModelType> bitmapTransform(Transformation<Bitmap>... bitmapTransformations) {
-        GifBitmapWrapperTransformation[] transformations =
-                new GifBitmapWrapperTransformation[bitmapTransformations.length];
-        for (int i = 0; i < bitmapTransformations.length; i++) {
-            transformations[i] = new GifBitmapWrapperTransformation(glide.getBitmapPool(), bitmapTransformations[i]);
-        }
         // TODO: fixme.
         return this;
 //        return transform(transformations);

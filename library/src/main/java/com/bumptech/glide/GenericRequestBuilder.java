@@ -338,7 +338,6 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
      *
      * @see com.bumptech.glide.load.resource.transcode.UnitTranscoder
      * @see com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder
-     * @see com.bumptech.glide.load.resource.transcode.GifBitmapWrapperDrawableTranscoder
      *
      * @param transcoder The transcoder to use.
      * @return This request builder.
