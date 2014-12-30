@@ -115,6 +115,9 @@ public class GenericLoaderFactory {
         // TODO: priority?
         List<ModelLoader<T, ?>> modelLoaders = new ArrayList<ModelLoader<T, ?>>();
         Set<Class> dataClasses = modelClassToRegisteredDataClass.get(modelClass);
+        if (dataClasses == null) {
+            throw new IllegalStateException("No data class registered for " + modelClass);
+        }
         for (Class dataClass : dataClasses) {
             modelLoaders.add(buildModelLoader(modelClass, dataClass));
         }

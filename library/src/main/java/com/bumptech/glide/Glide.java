@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.data.InputStreamRewinder;
@@ -52,6 +53,8 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.load.resource.gif.GifFrameModelLoader;
+import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder;
@@ -243,8 +246,14 @@ public class Glide {
                 new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat)), ParcelFileDescriptor.class,
                 GlideBitmapDrawable.class);
 
-        decoderRegistry.append(new GifResourceDecoder(context, bitmapPool), InputStream.class, GifDrawable.class);
+        /** Gifs */
+        decoderRegistry.prepend(new GifResourceDecoder(context, bitmapPool), InputStream.class, GifDrawable.class);
+        decoderRegistry.prepend(new FileToStreamDecoder<GifDrawable>(new GifResourceDecoder(context, bitmapPool)),
+                File.class, GifDrawable.class);
         resourceEncoderRegistry.add(GifDrawable.class, new GifResourceEncoder(bitmapPool));
+        /** Gif Frames */
+        register(GifDecoder.class, GifDecoder.class, new GifFrameModelLoader.Factory());
+        decoderRegistry.append(new GifFrameResourceDecoder(bitmapPool), GifDecoder.class, Bitmap.class);
 
         decoderRegistry.append(new FileDecoder(), File.class, File.class);
 

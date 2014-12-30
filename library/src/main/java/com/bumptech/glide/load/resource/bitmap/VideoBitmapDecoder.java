@@ -39,6 +39,20 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
     }
 
     @Override
+    public boolean handles(ParcelFileDescriptor data) {
+        MediaMetadataRetriever retriever = factory.build();
+        try {
+            retriever.setDataSource(data.getFileDescriptor());
+            return true;
+        } catch (RuntimeException e) {
+            // Throws a generic runtime exception when given invalid data.
+            return false;
+        } finally {
+            retriever.release();
+        }
+    }
+
+    @Override
     public Bitmap decode(ParcelFileDescriptor resource, BitmapPool bitmapPool, int outWidth, int outHeight,
             DecodeFormat decodeFormat)
             throws IOException {

@@ -1,5 +1,7 @@
 package com.bumptech.glide.request;
 
+import android.util.Log;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -13,8 +15,11 @@ import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class RequestContext {
+    private static final String TAG = "RequestContext";
 
     private final ModelLoaderRegistry modelLoaderRegistry;
     private final EncoderRegistry encoderRegistry;
@@ -60,15 +65,24 @@ public class RequestContext {
             throws NoDecoderAvailableException,
             IOException {
         X data = rewinder.rewindAndGet();
-        for (ResourceDecoder<X, Z> decoder :
-            decoderRegistry.getDecoders((Class<X>) data.getClass(), resourceClass)) {
+        List<ResourceDecoder<X, Z>> decoders = decoderRegistry.getDecoders((Class<X>) data.getClass(), resourceClass);
+        for (ResourceDecoder<X, Z> decoder : decoders) {
             if (decoder.handles(data)) {
+                maybeLogFoundDecoder(decoders, decoder);
                 return decoder;
             }
             data = rewinder.rewindAndGet();
         }
         throw new NoDecoderAvailableException(data.getClass());
     }
+
+    private static <X, Z> void maybeLogFoundDecoder(List<ResourceDecoder<X, Z>> decoders,
+            ResourceDecoder<X, Z> handles) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "Found decoder: " + handles + " from " + Arrays.toString(decoders.toArray(new Object[0])));
+        }
+    }
+
 
     public DataFetcherSet getDataFetchers(Object model, int width, int height) {
         return modelLoaderRegistry.getDataFetchers(model, width, height);

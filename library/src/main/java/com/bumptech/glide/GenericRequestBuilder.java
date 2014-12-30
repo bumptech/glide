@@ -68,6 +68,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
     private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
     private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
     private Transformation<ResourceType> transformation = UnitTransformation.get();
+    private ResourceTranscoder<ResourceType, TranscodeType> transcoder;
 
     GenericRequestBuilder(Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass,
             GenericRequestBuilder<ModelType, ?, ?> other) {
@@ -251,12 +252,8 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
      */
     public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> transcoder(
             ResourceTranscoder<ResourceType, TranscodeType> transcoder) {
-        throw new UnsupportedOperationException();
-//        if (loadProvider != null) {
-//            loadProvider.setTranscoder(transcoder);
-//        }
-//
-//        return this;
+        this.transcoder = transcoder;
+        return this;
     }
 
     /**
@@ -687,7 +684,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
                 resourceClass,
                 transcodeClass,
                 glide.getRequestContext(),
-                glide.buildTranscoder(resourceClass, transcodeClass),
+                transcoder != null ? transcoder : glide.buildTranscoder(resourceClass, transcodeClass),
                 signature,
                 context,
                 priority,

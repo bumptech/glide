@@ -26,6 +26,10 @@ public class ResourceDecoderRegistry {
         decoders.add(new Entry<T, R>(dataClass, resourceClass, decoder));
     }
 
+    public synchronized <T, R> void prepend(ResourceDecoder<T, R> decoder, Class<T> dataClass, Class<R> resourceClass) {
+        decoders.add(0, new Entry<T, R>(dataClass, resourceClass, decoder));
+    }
+
     private static class Entry<T, R> {
         private final Class<T> dataClass;
         private final Class<R> resourceClass;

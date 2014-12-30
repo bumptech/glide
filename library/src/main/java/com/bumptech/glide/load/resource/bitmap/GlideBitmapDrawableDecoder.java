@@ -28,7 +28,7 @@ public class GlideBitmapDrawableDecoder<T> implements ResourceDecoder<T, GlideBi
     }
 
     @Override
-    public boolean handles(T source) {
+    public boolean handles(T source) throws IOException {
         return wrapped.handles(source);
     }
 

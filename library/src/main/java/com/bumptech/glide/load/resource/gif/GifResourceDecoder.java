@@ -12,6 +12,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
+import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.util.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -53,9 +54,9 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     }
 
     @Override
-    public boolean handles(InputStream source) {
-        // TODO: fixme.
-        return true;
+    public boolean handles(InputStream source) throws IOException {
+        ImageHeaderParser parser = new ImageHeaderParser(source);
+        return parser.getType() == ImageHeaderParser.ImageType.GIF;
     }
 
     @Override

@@ -42,8 +42,7 @@ public class FileDescriptorBitmapDecoder implements ResourceDecoder<ParcelFileDe
 
     @Override
     public boolean handles(ParcelFileDescriptor source) {
-        // TODO: fixme.
-        return true;
+        return bitmapDecoder.handles(source);
     }
 
     @Override

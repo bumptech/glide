@@ -30,7 +30,8 @@ public class BitmapTypeRequest<ModelType> extends BitmapRequestBuilder<ModelType
      */
     public <R> BitmapRequestBuilder<ModelType, R> transcode(ResourceTranscoder<Bitmap, R> transcoder,
             Class<R> transcodeClass) {
-        return optionsApplier.apply(new BitmapRequestBuilder<ModelType, R>(transcodeClass, this));
+        return optionsApplier.apply(new BitmapRequestBuilder<ModelType, R>(transcodeClass, this))
+                .transcoder(transcoder);
     }
 
     /**

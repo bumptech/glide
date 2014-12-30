@@ -12,7 +12,7 @@ import java.io.IOException;
  */
 public interface ResourceDecoder<T, Z> {
 
-    boolean handles(T source);
+    boolean handles(T source) throws IOException;
 
     /**
      * Returns a decoded resource from the given data or null if no resource could be decoded.

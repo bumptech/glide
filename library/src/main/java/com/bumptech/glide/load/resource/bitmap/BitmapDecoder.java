@@ -11,10 +11,12 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
  * @param <T> The type of resource this decoder can decode a {@link Bitmap} from.
  */
 public interface BitmapDecoder<T> {
+    boolean handles(T data);
+
     /**
      * Returns a decoded bitmap for a given resource and target dimensions.
      *
-     * @param resource The resource to decode, managed by the caller, no need to clean it up.
+     * @param data The resource to decode, managed by the caller, no need to clean it up.
      * @param bitmapPool A bitmap pool that can be used to reuse bitmaps during the load. Any bitmaps created or
      *                   obtained from the pool other than the bitmap returned by this method should be returned to the
      *                   pool.
@@ -22,7 +24,7 @@ public interface BitmapDecoder<T> {
      * @param outHeight The target height for the returned bitmap (need not match exactly).
      * @param decodeFormat The desired configuration for the returned bitmap.
      */
-    Bitmap decode(T resource, BitmapPool bitmapPool, int outWidth, int outHeight, DecodeFormat decodeFormat)
+    Bitmap decode(T data, BitmapPool bitmapPool, int outWidth, int outHeight, DecodeFormat decodeFormat)
             throws Exception;
 
     /**

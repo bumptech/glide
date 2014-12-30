@@ -23,11 +23,20 @@ public class DataRewinderRegistry {
 
     @SuppressWarnings("unchecked")
     public synchronized <T> DataRewinder<T> build(T data) {
-        DataRewinder.Factory factory = rewinders.get(data.getClass());
-        if (factory == null) {
-            factory = DEFAULT_FACTORY;
+        DataRewinder.Factory result = rewinders.get(data.getClass());
+        if (result == null) {
+            for (DataRewinder.Factory<?> registeredFactory : rewinders.values()) {
+                if (registeredFactory.getDataClass().isAssignableFrom(data.getClass())) {
+                    result = registeredFactory;
+                    break;
+                }
+            }
         }
-        return factory.build(data);
+
+        if (result == null) {
+            result = DEFAULT_FACTORY;
+        }
+        return result.build(data);
     }
 
     private static class DefaultRewinder implements DataRewinder<Object> {

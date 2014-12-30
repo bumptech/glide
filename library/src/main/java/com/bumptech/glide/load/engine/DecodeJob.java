@@ -24,6 +24,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source and applying
@@ -131,7 +133,8 @@ class DecodeJob<Z, R> {
      * @throws Exception
      */
     public Resource<R> decodeFromSource() throws Exception {
-        for (DataFetcher<?> fetcher : fetchers.getFetchers()) {
+        List<DataFetcher<?>> fectcherList = fetchers.getFetchers();
+        for (DataFetcher<?> fetcher : fectcherList) {
             try {
                 Resource<Z> decoded = decodeSource(fetcher);
                 if (decoded == null) {
@@ -155,7 +158,7 @@ class DecodeJob<Z, R> {
             }
         }
         throw new IllegalStateException("Load failed, unable to obtain or unable to decode data into requested"
-                + " resource type");
+                + " resource type, checked: " + Arrays.asList(fectcherList.toArray(new Object[0])));
     }
 
     public void cancel() {

@@ -337,6 +337,12 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         return result;
     }
 
+    @Override
+    public boolean handles(InputStream data) {
+        // BitmapFactory should handle any valid image type.
+        return true;
+    }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private static void setInBitmap(BitmapFactory.Options options, Bitmap recycled) {
         if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
