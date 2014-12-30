@@ -51,7 +51,6 @@ import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
-import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifFrameModelLoader;
 import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
@@ -227,34 +226,31 @@ public class Glide {
         resourceEncoderRegistry = new ResourceEncoderRegistry();
 
         decoderRegistry = new ResourceDecoderRegistry();
+
+        /* Bitmaps */
         decoderRegistry.append(new StreamBitmapDecoder(bitmapPool, decodeFormat), InputStream.class, Bitmap.class);
-        decoderRegistry.append(new GlideBitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
-                new StreamBitmapDecoder(bitmapPool, decodeFormat)), InputStream.class, GlideBitmapDrawable.class);
-        decoderRegistry.append(new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(bitmapPool, decodeFormat)),
-                File.class, Bitmap.class);
-        decoderRegistry.append(new FileToStreamDecoder<GlideBitmapDrawable>(
-                new GlideBitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
-                        new StreamBitmapDecoder(bitmapPool,  decodeFormat))), File.class, GlideBitmapDrawable.class);
-
-        resourceEncoderRegistry.add(Bitmap.class, new BitmapEncoder());
-        resourceEncoderRegistry.add(GlideBitmapDrawable.class,
-                new GlideBitmapDrawableEncoder(bitmapPool, new BitmapEncoder()));
-
         decoderRegistry.append(new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat), ParcelFileDescriptor.class,
                 Bitmap.class);
+        resourceEncoderRegistry.add(Bitmap.class, new BitmapEncoder());
+
+        /* GlideBitmapDrawables */
+        decoderRegistry.append(new GlideBitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
+                new StreamBitmapDecoder(bitmapPool, decodeFormat)), InputStream.class, GlideBitmapDrawable.class);
         decoderRegistry.append(new GlideBitmapDrawableDecoder<ParcelFileDescriptor>(context.getResources(), bitmapPool,
                 new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat)), ParcelFileDescriptor.class,
                 GlideBitmapDrawable.class);
+        resourceEncoderRegistry.add(GlideBitmapDrawable.class,
+                new GlideBitmapDrawableEncoder(bitmapPool, new BitmapEncoder()));
 
-        /** Gifs */
+        /* Gifs */
         decoderRegistry.prepend(new GifResourceDecoder(context, bitmapPool), InputStream.class, GifDrawable.class);
-        decoderRegistry.prepend(new FileToStreamDecoder<GifDrawable>(new GifResourceDecoder(context, bitmapPool)),
-                File.class, GifDrawable.class);
         resourceEncoderRegistry.add(GifDrawable.class, new GifResourceEncoder(bitmapPool));
-        /** Gif Frames */
+
+        /* Gif Frames */
         register(GifDecoder.class, GifDecoder.class, new GifFrameModelLoader.Factory());
         decoderRegistry.append(new GifFrameResourceDecoder(bitmapPool), GifDecoder.class, Bitmap.class);
 
+        /* Files */
         decoderRegistry.append(new FileDecoder(), File.class, File.class);
 
         dataRewinderRegistry = new DataRewinderRegistry();

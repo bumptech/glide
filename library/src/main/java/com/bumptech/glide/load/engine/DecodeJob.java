@@ -42,7 +42,7 @@ class DecodeJob<Z, R> {
     private final int width;
     private final int height;
     private final DiskCacheProvider diskCacheProvider;
-    private final DataFetcherSet fetchers;
+    private final DataFetcherSet sourceFetchers;
     private final Class<Z> resourceClass;
     private final RequestContext requestContext;
     private final Transformation<Z> transformation;
@@ -52,22 +52,22 @@ class DecodeJob<Z, R> {
     private final FileOpener fileOpener;
     private volatile boolean isCancelled;
 
-    public DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet fetchers,
+    public DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet sourceFetchers,
             RequestContext requestContext, Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder,
             DiskCacheProvider diskCacheProvider, DiskCacheStrategy diskCacheStrategy, Priority priority) {
-        this(resourceClass, resultKey, width, height, fetchers, requestContext, transformation, transcoder,
+        this(resourceClass, resultKey, width, height, sourceFetchers, requestContext, transformation, transcoder,
                 diskCacheProvider, diskCacheStrategy, priority, DEFAULT_FILE_OPENER);
     }
 
     // Visible for testing.
-    DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet fetchers,
+    DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet sourceFetchers,
             RequestContext requestContext, Transformation<Z> transformation, ResourceTranscoder<Z, R> transcoder,
             DiskCacheProvider diskCacheProvider, DiskCacheStrategy diskCacheStrategy, Priority priority, FileOpener
             fileOpener) {
         this.resultKey = resultKey;
         this.width = width;
         this.height = height;
-        this.fetchers = fetchers;
+        this.sourceFetchers = sourceFetchers;
         this.resourceClass = resourceClass;
         this.requestContext = requestContext;
         this.transformation = transformation;
@@ -133,14 +133,18 @@ class DecodeJob<Z, R> {
      * @throws Exception
      */
     public Resource<R> decodeFromSource() throws Exception {
+        Resource<Z> decoded = decodeFromFetcherSet(sourceFetchers, diskCacheStrategy == DiskCacheStrategy.SOURCE);
+        return transformEncodeAndTranscode(decoded);
+    }
+
+    private Resource<Z> decodeFromFetcherSet(DataFetcherSet fetchers, boolean cacheSource) throws Exception {
         List<DataFetcher<?>> fectcherList = fetchers.getFetchers();
         for (DataFetcher<?> fetcher : fectcherList) {
             try {
-                Resource<Z> decoded = decodeSource(fetcher);
-                if (decoded == null) {
-                    continue;
+                Resource<Z> decoded = decodeSource(fetcher, cacheSource);
+                if (decoded != null) {
+                    return decoded;
                 }
-                return transformEncodeAndTranscode(decoded);
             } catch (NoDecoderAvailableException e) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "Failed to find encoder/decoder for data type, continuing", e);
@@ -159,10 +163,11 @@ class DecodeJob<Z, R> {
         }
         throw new IllegalStateException("Load failed, unable to obtain or unable to decode data into requested"
                 + " resource type, checked: " + Arrays.asList(fectcherList.toArray(new Object[0])));
+
     }
 
     public void cancel() {
-        fetchers.cancel();
+        sourceFetchers.cancel();
         isCancelled = true;
     }
 
@@ -196,7 +201,7 @@ class DecodeJob<Z, R> {
         }
     }
 
-    private <T> Resource<Z> decodeSource(DataFetcher<T> fetcher) throws Exception {
+    private <T> Resource<Z> decodeSource(DataFetcher<T> fetcher, boolean cacheSource) throws Exception {
         long startTime = LogTime.getLogTime();
         final T data = fetcher.loadData(priority);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -207,17 +212,15 @@ class DecodeJob<Z, R> {
         }
         DataRewinder<T> rewinder = requestContext.getRewinder(data);
         try {
-            return decodeFromSourceData(rewinder);
+            return decodeFromSourceData(rewinder, cacheSource);
         } finally {
             rewinder.cleanup();
         }
     }
 
-    private <T> Resource<Z> decodeFromSourceData(DataRewinder<T> rewinder) throws IOException,
-            NoDecoderAvailableException,
-            NoSourceEncoderAvailableException {
+    private <T> Resource<Z> decodeFromSourceData(DataRewinder<T> rewinder, boolean cacheSource) throws Exception {
         final Resource<Z> decoded;
-        if (diskCacheStrategy.cacheSource()) {
+        if (cacheSource) {
             decoded = cacheAndDecodeSourceData(rewinder);
         } else {
             ResourceDecoder<T, Z> decoder = requestContext.getDecoder(rewinder, resourceClass);
@@ -231,9 +234,7 @@ class DecodeJob<Z, R> {
         return decoded;
     }
 
-    private <T> Resource<Z> cacheAndDecodeSourceData(DataRewinder<T> rewinder) throws IOException,
-            NoSourceEncoderAvailableException,
-            NoDecoderAvailableException {
+    private <T> Resource<Z> cacheAndDecodeSourceData(DataRewinder<T> rewinder) throws Exception {
         long startTime = LogTime.getLogTime();
 
         T data = rewinder.rewindAndGet();
@@ -252,21 +253,19 @@ class DecodeJob<Z, R> {
         return result;
     }
 
-    private Resource<Z> loadFromCache(Key key) throws IOException, NoDecoderAvailableException {
+    private Resource<Z> loadFromCache(Key key) throws Exception {
         File cacheFile = diskCacheProvider.getDiskCache().get(key);
         if (cacheFile == null) {
             return null;
         }
-        DataRewinder<File> rewinder = requestContext.getRewinder(cacheFile);
+        DataFetcherSet fetchers = requestContext.getDataFetchers(cacheFile, width, height);
         Resource<Z> result = null;
         try {
-            ResourceDecoder<File, Z> decoder = requestContext.getDecoder(rewinder, resourceClass);
-            result = decoder.decode(rewinder.rewindAndGet(), width, height);
+            result = decodeFromFetcherSet(fetchers, false /*cacheSource*/);
         } finally {
             if (result == null) {
                 diskCacheProvider.getDiskCache().delete(key);
             }
-            rewinder.cleanup();
         }
         return result;
     }
