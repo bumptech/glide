@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.data.DataRewinderRegistry;
+import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
@@ -110,6 +112,7 @@ public class Glide {
     private final ResourceDecoderRegistry decoderRegistry;
     private final EncoderRegistry encoderRegistry;
     private final ResourceEncoderRegistry resourceEncoderRegistry;
+    private final DataRewinderRegistry dataRewinderRegistry;
 
     /**
      * Returns a directory with a default name in the private cache directory of the application to use to store
@@ -228,7 +231,6 @@ public class Glide {
         resourceEncoderRegistry = new ResourceEncoderRegistry();
 
         decoderRegistry = new ResourceDecoderRegistry();
-
         decoderRegistry.append(new StreamBitmapDecoder(bitmapPool, decodeFormat), InputStream.class, Bitmap.class);
         decoderRegistry.append(new GlideBitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
                 new StreamBitmapDecoder(bitmapPool, decodeFormat)), InputStream.class, GlideBitmapDrawable.class);
@@ -252,6 +254,9 @@ public class Glide {
         resourceEncoderRegistry.add(GifDrawable.class, new GifResourceEncoder(bitmapPool));
 
         decoderRegistry.append(new FileDecoder(), File.class, File.class);
+
+        dataRewinderRegistry = new DataRewinderRegistry();
+        dataRewinderRegistry.register(new InputStreamRewinder.Factory());
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
         register(File.class, InputStream.class, new StreamFileLoader.Factory());
@@ -348,7 +353,8 @@ public class Glide {
     }
 
     RequestContext getRequestContext() {
-        return new RequestContext(loaderRegistry, encoderRegistry, decoderRegistry, resourceEncoderRegistry);
+        return new RequestContext(loaderRegistry, encoderRegistry, decoderRegistry, resourceEncoderRegistry,
+                dataRewinderRegistry);
     }
 
     private GenericLoaderFactory getLoaderFactory() {

@@ -9,6 +9,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
+import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.RequestContext;
@@ -179,8 +180,7 @@ class DecodeJob<Z, R> {
         return result;
     }
 
-    private void writeTransformedToCache(Resource<Z> transformed) throws NoResultEncoderAvailableException,
-            NoResultEncoderAvailableException {
+    private void writeTransformedToCache(Resource<Z> transformed) throws NoResultEncoderAvailableException {
         if (transformed == null || !diskCacheStrategy.cacheResult()) {
             return;
         }
@@ -202,17 +202,24 @@ class DecodeJob<Z, R> {
         if (isCancelled) {
             return null;
         }
-        return decodeFromSourceData(data);
+        DataRewinder<T> rewinder = requestContext.getRewinder(data);
+        try {
+            return decodeFromSourceData(rewinder);
+        } finally {
+            rewinder.cleanup();
+        }
     }
 
-    private <T> Resource<Z> decodeFromSourceData(T data) throws IOException, NoDecoderAvailableException,
+    private <T> Resource<Z> decodeFromSourceData(DataRewinder<T> rewinder) throws IOException,
+            NoDecoderAvailableException,
             NoSourceEncoderAvailableException {
         final Resource<Z> decoded;
         if (diskCacheStrategy.cacheSource()) {
-            decoded = cacheAndDecodeSourceData(data);
+            decoded = cacheAndDecodeSourceData(rewinder);
         } else {
-            ResourceDecoder<T, Z> decoder = requestContext.getDecoder(data, resourceClass);
+            ResourceDecoder<T, Z> decoder = requestContext.getDecoder(rewinder, resourceClass);
             long startTime = LogTime.getLogTime();
+            T data = rewinder.rewindAndGet();
             decoded = decoder.decode(data, width, height);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Decoded from source", startTime);
@@ -221,10 +228,12 @@ class DecodeJob<Z, R> {
         return decoded;
     }
 
-    private <T> Resource<Z> cacheAndDecodeSourceData(T data) throws IOException, NoSourceEncoderAvailableException,
+    private <T> Resource<Z> cacheAndDecodeSourceData(DataRewinder<T> rewinder) throws IOException,
+            NoSourceEncoderAvailableException,
             NoDecoderAvailableException {
         long startTime = LogTime.getLogTime();
 
+        T data = rewinder.rewindAndGet();
         Encoder<T> encoder = requestContext.getSourceEncoder(data);
         SourceWriter<T> writer = new SourceWriter<T>(encoder, data);
         diskCacheProvider.getDiskCache().put(resultKey.getOriginalKey(), writer);
@@ -245,16 +254,16 @@ class DecodeJob<Z, R> {
         if (cacheFile == null) {
             return null;
         }
-
-        ResourceDecoder<File, Z> decoder = requestContext.getDecoder(cacheFile, resourceClass);
-
+        DataRewinder<File> rewinder = requestContext.getRewinder(cacheFile);
         Resource<Z> result = null;
         try {
-            result = decoder.decode(cacheFile, width, height);
+            ResourceDecoder<File, Z> decoder = requestContext.getDecoder(rewinder, resourceClass);
+            result = decoder.decode(rewinder.rewindAndGet(), width, height);
         } finally {
             if (result == null) {
                 diskCacheProvider.getDiskCache().delete(key);
             }
+            rewinder.cleanup();
         }
         return result;
     }

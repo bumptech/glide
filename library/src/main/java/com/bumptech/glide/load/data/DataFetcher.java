@@ -13,7 +13,7 @@ import com.bumptech.glide.Priority;
 public interface DataFetcher<T> {
 
     /**
-     * Asynchronously fetch data from which a resource can be decoded. This will always be called on
+     * Synchronously fetch data from which a resource can be decoded. This will always be called on
      * background thread so it is safe to perform long running tasks here. Any third party libraries called
      * must be thread safe since this method will be called from a thread in a
      * {@link java.util.concurrent.ExecutorService} that may have more than one background thread.

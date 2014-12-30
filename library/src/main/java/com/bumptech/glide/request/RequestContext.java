@@ -4,11 +4,15 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcherSet;
+import com.bumptech.glide.load.data.DataRewinder;
+import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.provider.EncoderRegistry;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
+
+import java.io.IOException;
 
 public class RequestContext {
 
@@ -16,13 +20,16 @@ public class RequestContext {
     private final EncoderRegistry encoderRegistry;
     private final ResourceDecoderRegistry decoderRegistry;
     private final ResourceEncoderRegistry resultEncoderRegistry;
+    private DataRewinderRegistry dataRewinderRegistry;
 
     public RequestContext(ModelLoaderRegistry modelLoaderRegistry, EncoderRegistry encoderRegistry,
-            ResourceDecoderRegistry decoderRegistry, ResourceEncoderRegistry resultEncoderRegistry) {
+            ResourceDecoderRegistry decoderRegistry, ResourceEncoderRegistry resultEncoderRegistry,
+            DataRewinderRegistry dataRewinderRegistry) {
         this.modelLoaderRegistry = modelLoaderRegistry;
         this.encoderRegistry = encoderRegistry;
         this.decoderRegistry = decoderRegistry;
         this.resultEncoderRegistry = resultEncoderRegistry;
+        this.dataRewinderRegistry = dataRewinderRegistry;
     }
 
     @SuppressWarnings("unchecked")
@@ -44,14 +51,21 @@ public class RequestContext {
         throw new NoSourceEncoderAvailableException(data.getClass());
     }
 
-    @SuppressWarnings("unchecked")
-    public <X, Z> ResourceDecoder<X, Z> getDecoder(X data, Class<Z> resourceClass) throws NoDecoderAvailableException {
-        for (ResourceDecoder<X, Z> decoder :
-                decoderRegistry.getDecoders((Class<X>) data.getClass(), resourceClass)) {
+    public <X> DataRewinder<X> getRewinder(X data) {
+        return dataRewinderRegistry.build(data);
+    }
 
+    @SuppressWarnings("unchecked")
+    public <X, Z> ResourceDecoder<X, Z> getDecoder(DataRewinder<X> rewinder, Class<Z> resourceClass)
+            throws NoDecoderAvailableException,
+            IOException {
+        X data = rewinder.rewindAndGet();
+        for (ResourceDecoder<X, Z> decoder :
+            decoderRegistry.getDecoders((Class<X>) data.getClass(), resourceClass)) {
             if (decoder.handles(data)) {
                 return decoder;
             }
+            data = rewinder.rewindAndGet();
         }
         throw new NoDecoderAvailableException(data.getClass());
     }
