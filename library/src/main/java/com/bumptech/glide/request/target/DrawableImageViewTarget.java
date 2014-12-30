@@ -2,6 +2,7 @@ package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -24,6 +25,17 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
 
     @Override
     public void onResourceReady(Drawable resource, GlideAnimation<? super Drawable> glideAnimation) {
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+
+        // This is a dirty hack that tries to make loading square thumbnails and then square full images less costly
+        // by forcing both the smaller thumb and the larger version to have exactly the same intrinsic dimensions.
+        // If a drawable is replaced in an ImageView by another drawable with different intrinsic dimensions,
+        // the ImageView requests a layout. Scrolling rapidly while replacing thumbs with larger images triggers
+        // lots of these calls and causes significant amounts of jank.
+        if (!(resource instanceof Animatable) && layoutParams != null && layoutParams.width > 0
+                && layoutParams.height > 0) {
+            resource = new FixedSizeDrawable(resource, layoutParams.width, layoutParams.height);
+        }
         super.onResourceReady(resource, glideAnimation);
         if (resource instanceof Animatable) {
             ((Animatable) resource).start();

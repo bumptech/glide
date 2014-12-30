@@ -26,7 +26,6 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.Util;
 
@@ -494,7 +493,7 @@ public class GifDrawableTest {
         final int loopCount = 2;
         when(gifDecoder.getLoopCount()).thenReturn(loopCount);
         when(gifDecoder.getFrameCount()).thenReturn(frameCount);
-        drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
+        drawable.setLoopCount(GifDrawable.LOOP_INTRINSIC);
         drawable.setVisible(true, true);
         drawable.start();
 

@@ -9,6 +9,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.Gravity;
@@ -17,12 +18,18 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 
 /**
  * An animated {@link android.graphics.drawable.Drawable} that plays the frames of an animated GIF.
  */
-public class GifDrawable extends GlideDrawable implements GifFrameLoader.FrameCallback {
+public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallback, Animatable {
+    /** A constant indicating that an animated drawable should loop continuously. */
+    public static final int LOOP_FOREVER = -1;
+    /**
+     * A constant indicating that an animated drawable should loop for its default number of times. For animated GIFs,
+     * this constant indicates the GIF should use the netscape loop count if present.
+     */
+    public static final int LOOP_INTRINSIC = 0;
     private final Paint paint;
     private final Rect destRect = new Rect();
     private final GifState state;
@@ -288,12 +295,10 @@ public class GifDrawable extends GlideDrawable implements GifFrameLoader.FrameCa
         return isRecycled;
     }
 
-    @Override
     public boolean isAnimated() {
         return true;
     }
 
-    @Override
     public void setLoopCount(int loopCount) {
         if (loopCount <= 0 && loopCount != LOOP_FOREVER && loopCount != LOOP_INTRINSIC) {
             throw new IllegalArgumentException("Loop count must be greater than 0, or equal to "

@@ -10,7 +10,6 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.RequestListener;
@@ -19,7 +18,7 @@ import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
 
 /**
- * A class for creating a request to load a {@link GlideDrawable}.
+ * A class for creating a request to load a {@link Drawable}.
  *
  * <p>
  *     Warning - It is <em>not</em> safe to use this builder after calling <code>into()</code>, it may be pooled and
@@ -40,17 +39,17 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
-     * Loads and displays the {@link GlideDrawable} retrieved by the given thumbnail request if it finishes before this
-     * request. Best used for loading thumbnail {@link GlideDrawable}s that are smaller and will be loaded more quickly
-     * than the fullsize {@link GlideDrawable}. There are no guarantees about the order in which the requests will
-     * actually finish. However, if the thumb request completes after the full request, the thumb {@link GlideDrawable}
+     * Loads and displays the {@link Drawable} retrieved by the given thumbnail request if it finishes before this
+     * request. Best used for loading thumbnail {@link Drawable}s that are smaller and will be loaded more quickly
+     * than the fullsize {@link Drawable}. There are no guarantees about the order in which the requests will
+     * actually finish. However, if the thumb request completes after the full request, the thumb {@link Drawable}
      * will never replace the full image.
      *
      * @see #thumbnail(float)
      *
      * <p>
      *     Note - Any options on the main request will not be passed on to the thumbnail request. For example, if
-     *     you want an animation to occur when either the full {@link GlideDrawable} loads or the thumbnail loads,
+     *     you want an animation to occur when either the full {@link Drawable} loads or the thumbnail loads,
      *     you need to call {@link #animate(int)} on both the thumb and the full request. For a simpler thumbnail
      *     option where these options are applied to the humbnail as well, see {@link #thumbnail(float)}.
      * </p>
@@ -106,7 +105,7 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
-     * Transform {@link GlideDrawable}s using the given
+     * Transform {@link Drawable}s using the given
      * {@link com.bumptech.glide.load.resource.bitmap.BitmapTransformation}s.
      *
      * <p>
@@ -127,7 +126,7 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
-     * Transform {@link GlideDrawable}s using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
+     * Transform {@link Drawable}s using {@link com.bumptech.glide.load.resource.bitmap.CenterCrop}.
      *
      * @see #fitCenter()
      * @see #transform(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
@@ -144,7 +143,7 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
-     * Transform {@link GlideDrawable}s using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
+     * Transform {@link Drawable}s using {@link com.bumptech.glide.load.resource.bitmap.FitCenter}.
      *
      * @see #centerCrop()
      * @see #transform(com.bumptech.glide.load.resource.bitmap.BitmapTransformation...)
@@ -161,7 +160,7 @@ public class DrawableRequestBuilder<ModelType>
     }
 
     /**
-     * Transform {@link GlideDrawable}s using the given {@link android.graphics.Bitmap} transformations. Replaces any
+     * Transform {@link Drawable}s using the given {@link android.graphics.Bitmap} transformations. Replaces any
      * previous transformations.
      *
      * @see #fitCenter()
@@ -197,7 +196,7 @@ public class DrawableRequestBuilder<ModelType>
     // TODO: fixme.
 //    @Override
 //    public DrawableRequestBuilder<ModelType> transcoder(
-//            ResourceTranscoder<GifBitmapWrapper, GlideDrawable> transcoder) {
+//            ResourceTranscoder<GifBitmapWrapper, Drawable> transcoder) {
 //        super.transcoder(transcoder);
 //        return this;
 //    }

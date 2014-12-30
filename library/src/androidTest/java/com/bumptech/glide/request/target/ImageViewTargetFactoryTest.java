@@ -1,7 +1,6 @@
 package com.bumptech.glide.request.target;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -9,9 +8,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,30 +34,6 @@ public class ImageViewTargetFactoryTest {
         Target<Bitmap> target = factory.buildTarget(view, Bitmap.class);
         target.onResourceReady(bitmap, null);
         assertThat(target).isInstanceOf(BitmapImageViewTarget.class);
-    }
-
-    @Test
-    public void testReturnsTargetForGlideDrawables() {
-        GlideDrawable glideDrawable = mock(GlideDrawable.class);
-        Target<GlideDrawable> target = factory.buildTarget(view, GlideDrawable.class);
-        target.onResourceReady(glideDrawable, null);
-        assertThat(target).isInstanceOf(GlideDrawableImageViewTarget.class);
-    }
-
-    @Test
-    public void testReturnsTargetForGifDrawables() {
-        GifDrawable gifDrawable = mock(GifDrawable.class);
-        Target target = factory.buildTarget(view, GifDrawable.class);
-        target.onResourceReady(gifDrawable, null);
-        assertThat(target).isInstanceOf(GlideDrawableImageViewTarget.class);
-    }
-
-    @Test
-    public void testReturnsTargetForGlideBitmapDrawables() {
-        BitmapDrawable drawable = mock(BitmapDrawable.class);
-        Target target = factory.buildTarget(view, BitmapDrawable.class);
-        target.onResourceReady(drawable, null);
-        assertThat(target).isInstanceOf(GlideDrawableImageViewTarget.class);
     }
 
     @Test

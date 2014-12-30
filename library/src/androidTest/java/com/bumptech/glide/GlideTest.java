@@ -41,7 +41,6 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
@@ -402,7 +401,7 @@ public class GlideTest {
     private void runTestStringDefaultLoader(String string) {
         requestManager
                 .load(string)
-                .listener(new RequestListener<String, GlideDrawable>() {
+                .listener(new RequestListener<String, GifDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target target, boolean isFirstResource) {
                         if (!(e instanceof IOException)) {
@@ -412,7 +411,7 @@ public class GlideTest {
                     }
 
                     @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target target,
+                    public boolean onResourceReady(GifDrawable resource, String model, Target target,
                             boolean isFromMemoryCache,
                             boolean isFirstResource) {
                         return false;
@@ -682,16 +681,16 @@ public class GlideTest {
 
     @Test
     public void testClone() throws IOException {
-        GlideDrawable firstResult = mock(GlideDrawable.class);
-        Resource<GlideDrawable> firstResource = mock(Resource.class);
+        GifDrawable firstResult = mock(GifDrawable.class);
+        Resource<GifDrawable> firstResource = mock(Resource.class);
         when(firstResource.get()).thenReturn(firstResult);
         // TODO: fixme.
 //        ResourceTranscoder<GifBitmapWrapper, GlideDrawable> firstTranscoder = mock(ResourceTranscoder.class);
 //        when(firstTranscoder.transcode(any(Resource.class))).thenReturn(firstResource);
 //        when(firstTranscoder.getId()).thenReturn("transcoder1");
 
-        GlideDrawable secondResult = mock(GlideDrawable.class);
-        Resource<GlideDrawable> secondResource = mock(Resource.class);
+        GifDrawable secondResult = mock(GifDrawable.class);
+        Resource<GifDrawable> secondResource = mock(Resource.class);
         when(secondResource.get()).thenReturn(secondResult);
         // TODO: fixme.
 //        ResourceTranscoder<GifBitmapWrapper, GlideDrawable> secondTranscoder = mock(ResourceTranscoder.class);
