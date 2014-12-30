@@ -32,9 +32,4 @@ public class BitmapBytesTranscoder implements ResourceTranscoder<Bitmap, byte[]>
         toTranscode.recycle();
         return new BytesResource(os.toByteArray());
     }
-
-    @Override
-    public String getId() {
-        return "BitmapBytesTranscoder.com.bumptech.glide.load.resource.transcode";
-    }
 }

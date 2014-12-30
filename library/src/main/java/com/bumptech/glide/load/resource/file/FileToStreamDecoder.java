@@ -54,11 +54,6 @@ public class FileToStreamDecoder<T> implements ResourceDecoder<File, T> {
         return result;
     }
 
-    @Override
-    public String getId() {
-        return "";
-    }
-
     // Visible for testing.
     static class FileOpener {
         public InputStream open(File file) throws FileNotFoundException {

@@ -17,15 +17,4 @@ public interface Encoder<T> {
      * @param os The OutputStream to write the data to.
      */
     boolean encode(T data, OutputStream os);
-
-    /**
-     * Returns an ID identifying any transformation this encoder may apply to the given data that will be mixed in to
-     * the cache key.
-     *
-     * <p>
-     *     If the encoder does not transform the data in a way that significantly affects the cached result (ie performs
-     *     no unusual compression or downsampling) an empty string is an appropriate id.
-     * </p>
-     */
-    String getId();
 }

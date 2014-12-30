@@ -31,12 +31,4 @@ public class ImageVideoWrapperEncoder implements Encoder<ImageVideoWrapper> {
             return fileDescriptorEncoder.encode(data.getFileDescriptor(), os);
         }
     }
-
-    @Override
-    public String getId() {
-        if (id == null) {
-            id = streamEncoder.getId() + fileDescriptorEncoder.getId();
-        }
-        return id;
-    }
 }

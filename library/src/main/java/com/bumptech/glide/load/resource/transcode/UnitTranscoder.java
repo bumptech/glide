@@ -19,9 +19,4 @@ public class UnitTranscoder<Z> implements ResourceTranscoder<Z, Z> {
     public Resource<Z> transcode(Resource<Z> toTranscode) {
         return toTranscode;
     }
-
-    @Override
-    public String getId() {
-        return "";
-    }
 }

@@ -58,10 +58,5 @@ public class StreamFileDataLoadProvider implements DataLoadProvider<InputStream,
                     + " try either #diskCacheStratey(DiskCacheStrategy.SOURCE) to avoid this call or"
                     + " #decoder(ResourceDecoder) to replace this Decoder");
         }
-
-        @Override
-        public String getId() {
-            return "";
-        }
     }
 }

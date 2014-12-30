@@ -32,9 +32,4 @@ public class GlideBitmapDrawableTranscoder implements ResourceTranscoder<Bitmap,
         GlideBitmapDrawable drawable = new GlideBitmapDrawable(resources, toTranscode.get());
         return new GlideBitmapDrawableResource(drawable, bitmapPool);
     }
-
-    @Override
-    public String getId() {
-        return "GlideBitmapDrawableTranscoder.com.bumptech.glide.load.resource.transcode";
-    }
 }

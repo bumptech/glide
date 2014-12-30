@@ -97,11 +97,6 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
         return decoder.getNextFrame();
     }
 
-    @Override
-    public String getId() {
-        return "";
-    }
-
     private static byte[] inputStreamToBytes(InputStream is) {
         final int bufferSize = 16384;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream(bufferSize);

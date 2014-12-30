@@ -27,9 +27,4 @@ public class NullEncoder<T> implements Encoder<T> {
     public boolean encode(T data, OutputStream os) {
         return false;
     }
-
-    @Override
-    public String getId() {
-        return "";
-    }
 }

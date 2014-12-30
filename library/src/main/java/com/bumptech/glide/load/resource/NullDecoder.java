@@ -33,9 +33,4 @@ public class NullDecoder<T, Z> implements ResourceDecoder<T, Z> {
     public Resource<Z> decode(T source, int width, int height) {
         return null;
     }
-
-    @Override
-    public String getId() {
-        return "";
-    }
 }

@@ -35,9 +35,4 @@ public class GifBitmapWrapperDrawableTranscoder implements ResourceTranscoder<Gi
         // This is unchecked but always safe, anything that extends a Drawable can be safely cast to a Drawable.
         return (Resource<GlideDrawable>) result;
     }
-
-    @Override
-    public String getId() {
-        return "GifBitmapWrapperDrawableTranscoder.com.bumptech.glide.load.resource.transcode";
-    }
 }

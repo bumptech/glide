@@ -131,14 +131,6 @@ public class GifBitmapWrapperResourceDecoder implements ResourceDecoder<ImageVid
         return result;
     }
 
-    @Override
-    public String getId() {
-        if (id == null) {
-            id = gifDecoder.getId() + bitmapDecoder.getId();
-        }
-        return id;
-    }
-
     // Visible for testing.
     static class BufferedStreamFactory {
         public InputStream build(InputStream is, byte[] buffer) {

@@ -28,9 +28,4 @@ public class GifBitmapWrapperStreamResourceDecoder implements ResourceDecoder<In
     public Resource<GifBitmapWrapper> decode(InputStream source, int width, int height) throws IOException {
         return gifBitmapDecoder.decode(new ImageVideoWrapper(source, null), width, height);
     }
-
-    @Override
-    public String getId() {
-        return gifBitmapDecoder.getId();
-    }
 }

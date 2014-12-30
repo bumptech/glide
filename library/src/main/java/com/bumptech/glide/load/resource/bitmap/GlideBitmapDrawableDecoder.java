@@ -39,9 +39,4 @@ public class GlideBitmapDrawableDecoder<T> implements ResourceDecoder<T, GlideBi
 
         return new GlideBitmapDrawableResource(drawable, bitmapPool);
     }
-
-    @Override
-    public String getId() {
-        return wrapped.getId();
-    }
 }

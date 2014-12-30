@@ -51,9 +51,4 @@ public class FileDescriptorBitmapDecoder implements ResourceDecoder<ParcelFileDe
         Bitmap bitmap = bitmapDecoder.decode(source, bitmapPool, width, height, decodeFormat);
         return BitmapResource.obtain(bitmap, bitmapPool);
     }
-
-    @Override
-    public String getId() {
-        return "FileDescriptorBitmapDecoder.com.bumptech.glide.load.data.bitmap";
-    }
 }

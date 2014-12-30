@@ -33,9 +33,4 @@ public class StreamEncoder implements Encoder<InputStream> {
             ByteArrayPool.get().releaseBytes(buffer);
         }
     }
-
-    @Override
-    public String getId() {
-        return "";
-    }
 }

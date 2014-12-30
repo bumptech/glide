@@ -25,9 +25,4 @@ class GifFrameResourceDecoder implements ResourceDecoder<GifDecoder, Bitmap> {
         Bitmap bitmap = source.getNextFrame();
         return BitmapResource.obtain(bitmap, bitmapPool);
     }
-
-    @Override
-    public String getId() {
-        return "GifFrameResourceDecoder.com.bumptech.glide.load.resource.gif";
-    }
 }

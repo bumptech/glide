@@ -37,15 +37,4 @@ public interface ResourceDecoder<T, Z> {
      * @throws IOException
      */
     Resource<Z> decode(T source, int width, int height) throws IOException;
-
-    /**
-     * Returns an ID identifying any transformation this decoder may apply to the given data that will be mixed in to
-     * the cache key.
-     *
-     * <p>
-     *     If the decoder does not transform the data in a way that significantly affects the cached
-     *     result (ie performs no downsampling) an empty string is an appropriate id.
-     * </p>
-     */
-    String getId();
 }

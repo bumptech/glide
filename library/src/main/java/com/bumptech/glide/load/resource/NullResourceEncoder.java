@@ -27,9 +27,4 @@ public class NullResourceEncoder<T> implements ResourceEncoder<T> {
     public boolean encode(Resource<T> data, OutputStream os) {
         return false;
     }
-
-    @Override
-    public String getId() {
-        return "";
-    }
 }

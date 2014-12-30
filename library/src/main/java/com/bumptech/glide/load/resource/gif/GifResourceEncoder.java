@@ -121,11 +121,6 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
         return transformedResource;
     }
 
-    @Override
-    public String getId() {
-        return "";
-    }
-
     // Visible for testing.
     static class Factory {
 

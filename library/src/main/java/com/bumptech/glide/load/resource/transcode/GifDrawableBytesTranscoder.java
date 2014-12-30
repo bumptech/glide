@@ -15,9 +15,4 @@ public class GifDrawableBytesTranscoder implements ResourceTranscoder<GifDrawabl
         GifDrawable gifData = toTranscode.get();
         return new BytesResource(gifData.getData());
     }
-
-    @Override
-    public String getId() {
-        return "GifDrawableBytesTranscoder.com.bumptech.glide.load.resource.transcode";
-    }
 }

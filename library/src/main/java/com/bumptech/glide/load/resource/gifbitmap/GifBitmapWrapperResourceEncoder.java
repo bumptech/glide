@@ -34,12 +34,4 @@ public class GifBitmapWrapperResourceEncoder implements ResourceEncoder<GifBitma
             return gifEncoder.encode(gifBitmap.getGifResource(), os);
         }
     }
-
-    @Override
-    public String getId() {
-        if (id == null) {
-            id = bitmapEncoder.getId() + gifEncoder.getId();
-        }
-        return id;
-    }
 }

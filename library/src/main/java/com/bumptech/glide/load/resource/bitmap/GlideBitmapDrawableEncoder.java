@@ -22,9 +22,4 @@ public class GlideBitmapDrawableEncoder implements ResourceEncoder<GlideBitmapDr
     public boolean encode(Resource<GlideBitmapDrawable> data, OutputStream os) {
         return encoder.encode(new BitmapResource(data.get().getBitmap(), bitmapPool), os);
     }
-
-    @Override
-    public String getId() {
-        return encoder.getId();
-    }
 }

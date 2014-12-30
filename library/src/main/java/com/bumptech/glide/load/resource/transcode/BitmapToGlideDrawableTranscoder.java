@@ -31,9 +31,4 @@ public class BitmapToGlideDrawableTranscoder implements ResourceTranscoder<Bitma
         return (Resource<GlideDrawable>) (Resource<? extends GlideDrawable>)
                 glideBitmapDrawableTranscoder.transcode(toTranscode);
     }
-
-    @Override
-    public String getId() {
-        return glideBitmapDrawableTranscoder.getId();
-    }
 }

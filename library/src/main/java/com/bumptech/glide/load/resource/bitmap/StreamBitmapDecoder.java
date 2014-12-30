@@ -17,11 +17,9 @@ import java.io.InputStream;
  * {@link java.io.InputStream}.
  */
 public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap> {
-    private static final String ID = "StreamBitmapDecoder.com.bumptech.glide.load.resource.bitmap";
     private final Downsampler downsampler;
     private BitmapPool bitmapPool;
     private DecodeFormat decodeFormat;
-    private String id;
 
     public StreamBitmapDecoder(Context context) {
         this(Glide.get(context).getBitmapPool());
@@ -55,17 +53,5 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     public Resource<Bitmap> decode(InputStream source, int width, int height) {
         Bitmap bitmap = downsampler.decode(source, bitmapPool, width, height, decodeFormat);
         return BitmapResource.obtain(bitmap, bitmapPool);
-    }
-
-    @Override
-    public String getId() {
-        if (id == null) {
-            id = new StringBuilder()
-                .append(ID)
-                .append(downsampler.getId())
-                .append(decodeFormat.name())
-                .toString();
-        }
-        return id;
     }
 }

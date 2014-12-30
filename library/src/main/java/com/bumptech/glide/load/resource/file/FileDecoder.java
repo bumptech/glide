@@ -19,9 +19,4 @@ public class FileDecoder implements ResourceDecoder<File, File> {
     public Resource<File> decode(File source, int width, int height) {
         return new FileResource(source);
     }
-
-    @Override
-    public String getId() {
-        return "";
-    }
 }
