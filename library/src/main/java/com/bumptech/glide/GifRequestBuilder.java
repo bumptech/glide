@@ -5,8 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
@@ -16,8 +14,6 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
-
-import java.io.File;
 
 /**
  * A class for creating a request to load an animated gif.
@@ -89,37 +85,6 @@ public class GifRequestBuilder<ModelType>
     @Override
     public GifRequestBuilder<ModelType> sizeMultiplier(float sizeMultiplier) {
         super.sizeMultiplier(sizeMultiplier);
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    // TODO: fixme
-//    @Override
-//    public GifRequestBuilder<ModelType> decoder(
-//            ResourceDecoder<InputStream, GifDrawable> decoder) {
-//        super.decoder(decoder);
-//        return this;
-//    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GifRequestBuilder<ModelType> cacheDecoder(
-            ResourceDecoder<File, GifDrawable> cacheDecoder) {
-        super.cacheDecoder(cacheDecoder);
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GifRequestBuilder<ModelType> encoder(
-            ResourceEncoder<GifDrawable> encoder) {
-        super.encoder(encoder);
         return this;
     }
 
@@ -370,16 +335,6 @@ public class GifRequestBuilder<ModelType>
         super.override(width, height);
         return this;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    // TODO: fixme.
-//    @Override
-//    public GifRequestBuilder<ModelType> sourceEncoder(Encoder<InputStream> sourceEncoder) {
-//        super.sourceEncoder(sourceEncoder);
-//        return this;
-//    }
 
     /**
      * {@inheritDoc}

@@ -5,11 +5,8 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.UnitTransformation;
@@ -32,8 +29,6 @@ import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Util;
-
-import java.io.File;
 
 /**
  * A generic class that can handle setting options and staring loads for generic resource types.
@@ -180,69 +175,6 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
     }
 
     /**
-     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} to use to load the resource from the original data.
-     * By default, this decoder will only be used if the final transformed resource is not in the disk cache.
-     *
-     * @see #cacheDecoder(com.bumptech.glide.load.ResourceDecoder)
-     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
-     *
-     * @param decoder The {@link com.bumptech.glide.load.ResourceDecoder} to use to decode the resource.
-     * @return This request builder.
-     */
-    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> decoder(
-            ResourceDecoder<?, ResourceType> decoder) {
-        throw new UnsupportedOperationException();
-//        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
-//        // ignore the decoder.
-//        if (loadProvider != null) {
-//            loadProvider.setSourceDecoder(decoder);
-//        }
-//
-//        return this;
-    }
-
-    /**
-     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} to use to load the resource from the disk cache. By
-     * default, this decoder will only be used if the final transformed resource is already in the disk cache.
-     *
-     * @see #decoder(com.bumptech.glide.load.ResourceDecoder)
-     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
-     *
-     * @param cacheDecoder The decoder to use.
-     * @return This request builder.
-     */
-    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> cacheDecoder(
-            ResourceDecoder<File, ResourceType> cacheDecoder) {
-        throw new UnsupportedOperationException();
-//        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
-//        // ignore the decoder.
-//        if (loadProvider != null) {
-//            loadProvider.setCacheDecoder(cacheDecoder);
-//        }
-//
-//        return this;
-    }
-
-    /**
-     * Sets the source encoder to use to encode the data retrieved by this request directly into cache. The returned
-     * resource will then be decoded from the cached data.
-     *
-     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
-     *
-     * @param sourceEncoder The encoder to use.
-     * @return This request builder.
-     */
-    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> sourceEncoder(
-            Encoder<?> sourceEncoder) {
-        throw new UnsupportedOperationException();
-//        if (loadProvider != null) {
-//            loadProvider.setSourceEncoder(sourceEncoder);
-//        }
-//
-//        return this;
-    }
-
-    /**
      * Sets the {@link com.bumptech.glide.load.engine.DiskCacheStrategy} to use for this load. Defaults to
      * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}.
      *
@@ -263,31 +195,6 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
         this.diskCacheStrategy = strategy;
 
         return this;
-    }
-
-    /**
-     * Sets the {@link com.bumptech.glide.load.Encoder} to use to encode the original data directly to cache. Will only
-     * be used if the original data is not already in cache and if the
-     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy} is set to
-     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#SOURCE} or
-     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#ALL}.
-     *
-     * @see #sourceEncoder(com.bumptech.glide.load.Encoder)
-     * @see com.bumptech.glide.load.engine.DiskCacheStrategy
-     *
-     * @param encoder The encoder to use.
-     * @return This request builder.
-     */
-    public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> encoder(
-            ResourceEncoder<ResourceType> encoder) {
-        throw new UnsupportedOperationException();
-//        // loadProvider will be null if model is null, in which case we're not going to load anything so it's ok to
-//        // ignore the encoder.
-//        if (loadProvider != null) {
-//            loadProvider.setEncoder(encoder);
-//        }
-//
-//        return this;
     }
 
     /**
@@ -571,9 +478,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
     @Override
     public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> clone() {
         try {
-            GenericRequestBuilder<ModelType, ResourceType, TranscodeType> clone =
-                    (GenericRequestBuilder<ModelType, ResourceType, TranscodeType>) super.clone();
-            return clone;
+            return (GenericRequestBuilder<ModelType, ResourceType, TranscodeType>) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }

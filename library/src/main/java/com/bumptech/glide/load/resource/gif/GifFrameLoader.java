@@ -169,6 +169,7 @@ class GifFrameLoader {
 
     private static GenericRequestBuilder<GifDecoder, Bitmap, Bitmap> getRequestBuilder(Context context,
             GifDecoder gifDecoder, int width, int height, BitmapPool bitmapPool) {
+        // TODO: fixme.
         GifFrameResourceDecoder frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
         GifFrameModelLoader frameLoader = new GifFrameModelLoader();
         Encoder<GifDecoder> sourceEncoder = NullEncoder.get();
@@ -176,8 +177,8 @@ class GifFrameLoader {
                 .using(frameLoader, GifDecoder.class)
                 .load(gifDecoder)
                 .as(Bitmap.class)
-                .sourceEncoder(sourceEncoder)
-                .decoder(frameResourceDecoder)
+//                .soureEncoder(sourceEncoder)
+//                .decoder(frameResourceDecoder)
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .override(width, height);

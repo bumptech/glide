@@ -99,36 +99,6 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
-    // TODO: fixme.
-//    @Override
-//    public DrawableRequestBuilder<ModelType> decoder(ResourceDecoder<ImageVideoWrapper, GifBitmapWrapper> decoder) {
-//        super.decoder(decoder);
-//        return this;
-//    }
-
-    /**
-     * {@inheritDoc}
-     */
-    // TODO: fixme.
-//    @Override
-//    public DrawableRequestBuilder<ModelType> cacheDecoder(ResourceDecoder<File, GifBitmapWrapper> cacheDecoder) {
-//        super.cacheDecoder(cacheDecoder);
-//        return this;
-//    }
-
-    /**
-     * {@inheritDoc}
-     */
-    // TODO: fixme.
-//    @Override
-//    public DrawableRequestBuilder<ModelType> encoder(ResourceEncoder<GifBitmapWrapper> encoder) {
-//        super.encoder(encoder);
-//        return this;
-//    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DrawableRequestBuilder<ModelType> priority(Priority priority) {
         super.priority(priority);
@@ -206,8 +176,6 @@ public class DrawableRequestBuilder<ModelType>
         return this;
 //        return transform(transformations);
     }
-
-
 
     /**
      * {@inheritDoc}
@@ -378,16 +346,6 @@ public class DrawableRequestBuilder<ModelType>
         super.override(width, height);
         return this;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    // TODO: fixme.
-//    @Override
-//    public DrawableRequestBuilder<ModelType> sourceEncoder(Encoder<ImageVideoWrapper> sourceEncoder) {
-//        super.sourceEncoder(sourceEncoder);
-//        return this;
-//    }
 
     /**
      * {@inheritDoc}

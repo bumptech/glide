@@ -43,71 +43,12 @@ import java.io.InputStream;
 public class BitmapRequestBuilder<ModelType, TranscodeType>
         extends GenericRequestBuilder<ModelType, Bitmap, TranscodeType> implements BitmapOptions {
     private final BitmapPool bitmapPool;
-
-    private Downsampler downsampler = Downsampler.AT_LEAST;
     private DecodeFormat decodeFormat;
-    private ResourceDecoder<InputStream, Bitmap> imageDecoder;
-    private ResourceDecoder<ParcelFileDescriptor, Bitmap> videoDecoder;
 
     BitmapRequestBuilder(Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?> other) {
         super(Bitmap.class, transcodeClass, other);
         this.bitmapPool = other.glide.getBitmapPool();
         this.decodeFormat =  other.glide.getDecodeFormat();
-
-        imageDecoder = new StreamBitmapDecoder(bitmapPool, decodeFormat);
-        videoDecoder = new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat);
-    }
-
-    /**
-     * Load images at a size near the size of the target using {@link Downsampler#AT_LEAST}.
-     *
-     * @see #downsample(Downsampler)
-     *
-     * @return This request builder.
-     */
-    public BitmapRequestBuilder<ModelType, TranscodeType> approximate() {
-        return downsample(Downsampler.AT_LEAST);
-    }
-
-    /**
-     * Load images at their original size using {@link Downsampler#NONE}.
-     *
-     * @see #downsample(Downsampler)
-     *
-     * @return This request builder.
-     */
-    public BitmapRequestBuilder<ModelType, TranscodeType> asIs() {
-        return downsample(Downsampler.NONE);
-    }
-
-    /**
-     * Load images at a size that is at most exactly as big as the target using
-     * {@link com.bumptech.glide.load.resource.bitmap.Downsampler#AT_MOST}.
-     *
-     * @see #downsample(com.bumptech.glide.load.resource.bitmap.Downsampler)
-     *
-     * @return This request builder.
-     */
-    public BitmapRequestBuilder<ModelType, TranscodeType> atMost() {
-        return downsample(Downsampler.AT_MOST);
-    }
-
-    /**
-     * Load images using the given {@link Downsampler}. Replaces any existing image decoder. Defaults to
-     * {@link Downsampler#AT_LEAST}. Will be ignored if the data represented by the model is a video. This replaces any
-     * previous calls to {@link #imageDecoder(ResourceDecoder)}  and {@link #decoder(ResourceDecoder)} with default
-     * decoders with the appropriate options set.
-     *
-     * @see #imageDecoder
-     *
-     * @param downsampler The downsampler.
-     * @return This request builder.
-     */
-    private BitmapRequestBuilder<ModelType, TranscodeType> downsample(Downsampler downsampler) {
-        this.downsampler = downsampler;
-        imageDecoder = new StreamBitmapDecoder(downsampler, bitmapPool, decodeFormat);
-        super.decoder(new ImageVideoBitmapDecoder(imageDecoder, videoDecoder));
-        return this;
     }
 
     /**
@@ -168,53 +109,6 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
 //    }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> cacheDecoder(ResourceDecoder<File, Bitmap> cacheDecoder) {
-        super.cacheDecoder(cacheDecoder);
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public BitmapRequestBuilder<ModelType, TranscodeType> encoder(ResourceEncoder<Bitmap> encoder) {
-        super.encoder(encoder);
-        return this;
-    }
-
-    /**
-     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} that will be used to decode {@link Bitmap}s obtained
-     * from an {@link java.io.InputStream}.
-     *
-     * @see #videoDecoder
-     *
-     * @param decoder The decoder to use to decode {@link Bitmap}s.
-     * @return This request builder.
-     */
-    public BitmapRequestBuilder<ModelType, TranscodeType> imageDecoder(ResourceDecoder<InputStream, Bitmap> decoder) {
-        imageDecoder = decoder;
-        super.decoder(new ImageVideoBitmapDecoder(decoder, videoDecoder));
-        return this;
-    }
-
-    /**
-     * Sets the {@link com.bumptech.glide.load.ResourceDecoder} that will be used to decode {@link Bitmap}s obtained
-     * from an {@link android.os.ParcelFileDescriptor}.
-     *
-     * @param decoder The decoder to use to decode {@link Bitmap}s.
-     * @return This request builder.
-     */
-    public BitmapRequestBuilder<ModelType, TranscodeType> videoDecoder(
-            ResourceDecoder<ParcelFileDescriptor, Bitmap> decoder) {
-        videoDecoder = decoder;
-        super.decoder(new ImageVideoBitmapDecoder(imageDecoder, decoder));
-        return this;
-    }
-
-    /**
      * Sets the preferred format for {@link Bitmap}s decoded in this request. Defaults to
      * {@link DecodeFormat#PREFER_RGB_565}. This replaces any previous calls to {@link #imageDecoder(ResourceDecoder)},
      * {@link #videoDecoder(ResourceDecoder)}, {@link #decoder(ResourceDecoder)} and
@@ -234,10 +128,9 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
      */
     public BitmapRequestBuilder<ModelType, TranscodeType> format(DecodeFormat format) {
         this.decodeFormat = format;
-        imageDecoder = new StreamBitmapDecoder(downsampler, bitmapPool, format);
-        videoDecoder = new FileDescriptorBitmapDecoder(new VideoBitmapDecoder(), bitmapPool, format);
-        super.cacheDecoder(new FileToStreamDecoder<Bitmap>(new StreamBitmapDecoder(downsampler, bitmapPool, format)));
-        super.decoder(new ImageVideoBitmapDecoder(imageDecoder, videoDecoder));
+//        imageDecoder = new StreamBitmapDecoder(downsampler, bitmapPool, format);
+//        videoDecoder = new FileDescriptorBitmapDecoder(new VideoBitmapDecoder(), bitmapPool, format);
+        // TODO: fixme.
         return this;
     }
 
