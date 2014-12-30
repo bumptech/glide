@@ -60,7 +60,6 @@ import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
-import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.EncoderRegistry;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
@@ -302,11 +301,6 @@ public class Glide {
 
     <Z, R> ResourceTranscoder<Z, R> buildTranscoder(Class<Z> decodedClass, Class<R> transcodedClass) {
         return transcoderRegistry.get(decodedClass, transcodedClass);
-    }
-
-    <T, Z> DataLoadProvider<T, Z> buildDataProvider(Class<T> dataClass, Class<Z> decodedClass) {
-        throw new UnsupportedOperationException();
-//        return dataLoadProviderRegistry.get(dataClass, decodedClass);
     }
 
     <R> Target<R> buildImageViewTarget(ImageView imageView, Class<R> transcodedClass) {

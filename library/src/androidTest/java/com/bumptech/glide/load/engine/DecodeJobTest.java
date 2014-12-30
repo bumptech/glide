@@ -22,7 +22,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.DataLoadProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -585,7 +584,6 @@ public class DecodeJobTest {
         int width = 100;
         int height = 200;
         DataFetcher<Object> dataFetcher = mock(DataFetcher.class);
-        DataLoadProvider<Object, Object> loadProvider = mock(DataLoadProvider.class);
         Transformation<Object> transformation = mock(Transformation.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         DiskCache diskCache = mock(DiskCache.class);

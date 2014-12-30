@@ -14,7 +14,6 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.Target;
@@ -40,7 +39,7 @@ public class GenericRequestBuilderTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
-        new GenericRequestBuilder(null, Object.class, mock(LoadProvider.class), Object.class, mock(Glide.class),
+        new GenericRequestBuilder(null, Object.class, Object.class, mock(Glide.class),
                 requestTracker, mock(Lifecycle.class));
     }
 

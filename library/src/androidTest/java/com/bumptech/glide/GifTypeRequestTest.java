@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.DataLoadProvider;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
 import org.junit.After;
@@ -38,10 +36,9 @@ public class GifTypeRequestTest {
 
         Glide glide = mock(Glide.class);
         when(glide.buildTranscoder(any(Class.class), any(Class.class))).thenReturn(mock(ResourceTranscoder.class));
-        when(glide.buildDataProvider(any(Class.class), any(Class.class))).thenReturn(mock(DataLoadProvider.class));
 
         GenericRequestBuilder original = new GenericRequestBuilder(Robolectric.application, String.class,
-                mock(LoadProvider.class), null, glide, null, null);
+                null, glide, null, null);
         request = new GifTypeRequest<String>(original, mock(ModelLoader.class), optionsApplier);
     }
 

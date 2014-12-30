@@ -26,7 +26,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -471,7 +470,6 @@ public class EngineTest {
         Engine engine;
         boolean isMemoryCacheable = true;
         Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
-        DataLoadProvider<Object, Object> loadProvider = mock(DataLoadProvider.class);
         ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
 
         public EngineTestHarness() {

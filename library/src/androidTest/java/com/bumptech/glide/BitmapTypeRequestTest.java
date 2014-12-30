@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.DataLoadProvider;
-import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
 import org.junit.After;
@@ -36,10 +35,9 @@ public class BitmapTypeRequestTest {
         when(optionsApplier.apply(any(GenericRequestBuilder.class))).thenAnswer(arg(0));
         Glide glide = mock(Glide.class);
         when(glide.buildTranscoder(any(Class.class), any(Class.class))).thenReturn(mock(ResourceTranscoder.class));
-        when(glide.buildDataProvider(any(Class.class), any(Class.class))).thenReturn(mock(DataLoadProvider.class));
 
         GenericRequestBuilder original = new GenericRequestBuilder(Robolectric.application, Object.class,
-                mock(LoadProvider.class), null, glide, null, null);
+                null, glide, null, null);
         request = new BitmapTypeRequest(original, mock(ModelLoader.class), mock(ModelLoader.class), optionsApplier);
     }
 
