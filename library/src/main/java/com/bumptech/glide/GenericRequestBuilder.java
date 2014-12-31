@@ -65,7 +65,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
     private int overrideHeight = -1;
     private int overrideWidth = -1;
     private Key signature = EmptySignature.obtain();
-    private GlideAnimationFactory<TranscodeType> animationFactory = NoAnimation.getFactory();
+    private GlideAnimationFactory<? super TranscodeType> animationFactory = NoAnimation.getFactory();
     private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
     private Transformation<ResourceType> transformation = UnitTransformation.get();
     private ResourceTranscoder<ResourceType, ? extends TranscodeType> transcoder;
@@ -310,7 +310,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
     }
 
     GenericRequestBuilder<ModelType, ResourceType, TranscodeType> animate(
-            GlideAnimationFactory<TranscodeType> animationFactory) {
+            GlideAnimationFactory<? super TranscodeType> animationFactory) {
         if (animationFactory == null) {
             throw new NullPointerException("Animation factory must not be null!");
         }

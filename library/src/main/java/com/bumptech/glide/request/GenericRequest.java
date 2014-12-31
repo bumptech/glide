@@ -25,14 +25,13 @@ import java.util.Queue;
  * A {@link Request} that loads a {@link com.bumptech.glide.load.engine.Resource} into a given {@link Target}.
  *
  * @param <A> The type of the model that the resource will be loaded from.
- * @param <T> The type of the data that the resource will be loaded from.
  * @param <Z> The type of the resource that will be loaded.
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
  */
-public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallback,
+public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback,
         ResourceCallback {
     private static final String TAG = "GenericRequest";
-    private static final Queue<GenericRequest<?, ?, ?, ?>> REQUEST_POOL = Util.createQueue(0);
+    private static final Queue<GenericRequest<?, ?, ?>> REQUEST_POOL = Util.createQueue(0);
     private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
     private enum Status {
@@ -73,7 +72,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private RequestListener<? super A, R> requestListener;
     private float sizeMultiplier;
     private Engine engine;
-    private GlideAnimationFactory<R> animationFactory;
+    private GlideAnimationFactory<? super R> animationFactory;
     private int overrideWidth;
     private int overrideHeight;
     private DiskCacheStrategy diskCacheStrategy;
@@ -87,7 +86,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private long startTime;
     private Status status;
 
-    public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
+    public static <A, Z, R> GenericRequest<A, Z, R> obtain(
             A model,
             Class<Z> resourceClass,
             Class<R> transcodeClass,
@@ -107,14 +106,14 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             Engine engine,
             Transformation<Z> transformation,
             boolean isMemoryCacheable,
-            GlideAnimationFactory<R> animationFactory,
+            GlideAnimationFactory<? super R> animationFactory,
             int overrideWidth,
             int overrideHeight,
             DiskCacheStrategy diskCacheStrategy) {
         @SuppressWarnings("unchecked")
-        GenericRequest<A, T, Z, R> request = (GenericRequest<A, T, Z, R>) REQUEST_POOL.poll();
+        GenericRequest<A, Z, R> request = (GenericRequest<A, Z, R>) REQUEST_POOL.poll();
         if (request == null) {
-            request = new GenericRequest<A, T, Z, R>();
+            request = new GenericRequest<A, Z, R>();
         }
         request.init(
                 model,
@@ -167,7 +166,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             Engine engine,
             Transformation<Z> transformation,
             boolean isMemoryCacheable,
-            GlideAnimationFactory<R> animationFactory,
+            GlideAnimationFactory<? super R> animationFactory,
             int overrideWidth,
             int overrideHeight,
             DiskCacheStrategy diskCacheStrategy) {
@@ -503,7 +502,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private void onResourceReady(Resource<?> resource, R result) {
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstReadyResource())) {
-            GlideAnimation<R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
+            GlideAnimation<? super R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
             target.onResourceReady(result, animation);
         }
 

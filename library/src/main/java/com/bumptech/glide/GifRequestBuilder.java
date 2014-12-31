@@ -192,7 +192,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> crossFade() {
-        super.animate(new DrawableCrossFadeFactory<GifDrawable>());
+        super.animate(new DrawableCrossFadeFactory());
         return this;
     }
 
@@ -201,7 +201,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> crossFade(int duration) {
-        super.animate(new DrawableCrossFadeFactory<GifDrawable>(duration));
+        super.animate(new DrawableCrossFadeFactory(duration));
         return this;
     }
 
@@ -211,7 +211,7 @@ public class GifRequestBuilder<ModelType>
     @Deprecated
     @Override
     public GifRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
-        super.animate(new DrawableCrossFadeFactory<GifDrawable>(animation, duration));
+        super.animate(new DrawableCrossFadeFactory(animation, duration));
         return this;
     }
 
@@ -220,7 +220,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeFactory<GifDrawable>(context, animationId,
+        super.animate(new DrawableCrossFadeFactory(context, animationId,
                 duration));
         return this;
     }

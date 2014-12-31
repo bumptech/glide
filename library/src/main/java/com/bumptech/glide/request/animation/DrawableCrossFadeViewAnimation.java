@@ -8,11 +8,9 @@ import android.graphics.drawable.TransitionDrawable;
  * that uses an {@link android.graphics.drawable.TransitionDrawable} to transition from an existing drawable
  * already visible on the target to a new drawable. If no existing drawable exists, this class can instead fall back
  * to a default animation that doesn't rely on {@link android.graphics.drawable.TransitionDrawable}.
- *
- * @param <T> The type of the {@link android.graphics.drawable.Drawable} that will be animated.
  */
-public class DrawableCrossFadeViewAnimation<T extends Drawable> implements GlideAnimation<T> {
-    private final GlideAnimation<T> defaultAnimation;
+public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> {
+    private final GlideAnimation<Drawable> defaultAnimation;
     private final int duration;
 
     /**
@@ -21,7 +19,7 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
      * @param duration The duration that the cross fade animation should run if there is something to cross fade from
      *                 when a new {@link android.graphics.drawable.Drawable} is set.
      */
-    public DrawableCrossFadeViewAnimation(GlideAnimation<T> defaultAnimation, int duration) {
+    public DrawableCrossFadeViewAnimation(GlideAnimation<Drawable> defaultAnimation, int duration) {
         this.defaultAnimation = defaultAnimation;
         this.duration = duration;
     }
@@ -40,7 +38,7 @@ public class DrawableCrossFadeViewAnimation<T extends Drawable> implements Glide
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(T current, ViewAdapter adapter) {
+    public boolean animate(Drawable current, ViewAdapter adapter) {
         Drawable previous = adapter.getCurrentDrawable();
         if (previous != null) {
             TransitionDrawable transitionDrawable = new TransitionDrawable(new Drawable[] { previous, current });

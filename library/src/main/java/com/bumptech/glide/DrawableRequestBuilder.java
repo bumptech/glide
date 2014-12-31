@@ -10,6 +10,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.RequestListener;
@@ -193,19 +194,18 @@ public class DrawableRequestBuilder<ModelType>
     /**
      * {@inheritDoc}
      */
-    // TODO: fixme.
-//    @Override
-//    public DrawableRequestBuilder<ModelType> transcoder(
-//            ResourceTranscoder<GifBitmapWrapper, Drawable> transcoder) {
-//        super.transcoder(transcoder);
-//        return this;
-//    }
+    @Override
+    public DrawableRequestBuilder<ModelType> transcoder(
+            ResourceTranscoder<Drawable, ? extends Drawable> transcoder) {
+        super.transcoder(transcoder);
+        return this;
+    }
 
     /**
      * {@inheritDoc}
      */
     public final DrawableRequestBuilder<ModelType> crossFade() {
-        super.animate(new DrawableCrossFadeFactory<Drawable>());
+        super.animate(new DrawableCrossFadeFactory());
         return this;
     }
 
@@ -213,7 +213,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int duration) {
-        super.animate(new DrawableCrossFadeFactory<Drawable>(duration));
+        super.animate(new DrawableCrossFadeFactory(duration));
         return this;
     }
 
@@ -222,7 +222,7 @@ public class DrawableRequestBuilder<ModelType>
      */
     @Deprecated
     public DrawableRequestBuilder<ModelType> crossFade(Animation animation, int duration) {
-        super.animate(new DrawableCrossFadeFactory<Drawable>(animation, duration));
+        super.animate(new DrawableCrossFadeFactory(animation, duration));
         return this;
     }
 
@@ -230,7 +230,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeFactory<Drawable>(context, animationId,
+        super.animate(new DrawableCrossFadeFactory(context, animationId,
                 duration));
         return this;
     }

@@ -16,45 +16,43 @@ import android.view.animation.Animation;
  *     typically does not expect to see an animation. As a result, when the resource is loaded from the memory
  *     cache this factory produces an {@link com.bumptech.glide.request.animation.NoAnimation}.
  * </p>
- *
- * @param <T> The type of the {@link android.graphics.drawable.Drawable} that will be animated.
  */
-public class DrawableCrossFadeFactory<T extends Drawable> implements GlideAnimationFactory<T> {
+public class DrawableCrossFadeFactory implements GlideAnimationFactory<Drawable> {
     private static final int DEFAULT_DURATION_MS = 300;
-    private final ViewAnimationFactory<T> animationFactory;
+    private final ViewAnimationFactory<Drawable> animationFactory;
     private final int duration;
-    private DrawableCrossFadeViewAnimation<T> animation;
+    private DrawableCrossFadeViewAnimation animation;
 
     public DrawableCrossFadeFactory() {
         this(DEFAULT_DURATION_MS);
     }
 
     public DrawableCrossFadeFactory(int duration) {
-        this(new ViewAnimationFactory<T>(new DefaultAnimationFactory()), duration);
+        this(new ViewAnimationFactory<Drawable>(new DefaultAnimationFactory()), duration);
     }
 
     public DrawableCrossFadeFactory(Context context, int defaultAnimationId, int duration) {
-        this(new ViewAnimationFactory<T>(context, defaultAnimationId), duration);
+        this(new ViewAnimationFactory<Drawable>(context, defaultAnimationId), duration);
     }
 
     public DrawableCrossFadeFactory(Animation defaultAnimation, int duration) {
-        this(new ViewAnimationFactory<T>(defaultAnimation), duration);
+        this(new ViewAnimationFactory<Drawable>(defaultAnimation), duration);
     }
 
-    DrawableCrossFadeFactory(ViewAnimationFactory<T> animationFactory, int duration) {
+    DrawableCrossFadeFactory(ViewAnimationFactory<Drawable> animationFactory, int duration) {
         this.animationFactory = animationFactory;
         this.duration = duration;
     }
 
     @Override
-    public GlideAnimation<T> build(boolean isFromMemoryCache, boolean isFirstResource) {
+    public GlideAnimation<Drawable> build(boolean isFromMemoryCache, boolean isFirstResource) {
         if (isFromMemoryCache) {
             return NoAnimation.get();
         }
 
         if (animation == null) {
-            GlideAnimation<T> defaultAnimation = animationFactory.build(false, isFirstResource);
-            animation = new DrawableCrossFadeViewAnimation<T>(defaultAnimation, duration);
+            GlideAnimation<Drawable> defaultAnimation = animationFactory.build(false, isFirstResource);
+            animation = new DrawableCrossFadeViewAnimation(defaultAnimation, duration);
         }
 
         return animation;
