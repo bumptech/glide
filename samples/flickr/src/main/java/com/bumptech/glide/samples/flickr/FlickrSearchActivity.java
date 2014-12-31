@@ -364,7 +364,9 @@ public class FlickrSearchActivity extends ActionBarActivity {
                     return;
                 }
 
+                // TODO: Calling asDrawable (or Bitmap/Gif) and then downloadOnly is weird.
                 FutureTarget<File> futureTarget = Glide.with(context)
+                        .asDrawable()
                         .load(photo)
                         .downloadOnly(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
 

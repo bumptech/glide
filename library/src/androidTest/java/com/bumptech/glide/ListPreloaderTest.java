@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.Bitmap;
+
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 
@@ -34,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ListPreloaderTest {
 
     @Mock
-    private BitmapRequestBuilder request;
+    private RequestBuilder<Bitmap, Bitmap> request;
 
     @Before
     public void setUp() throws Exception {
@@ -83,10 +85,10 @@ public class ListPreloaderTest {
             }
 
             @Override
-            public BitmapRequestBuilder getPreloadRequestBuilder(Object item) {
+            public RequestBuilder<Bitmap, Bitmap> getPreloadRequestBuilder(Object item) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition++;
-                return mock(BitmapRequestBuilder.class);
+                return mock(RequestBuilder.class);
             }
         };
         ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter,
@@ -142,10 +144,10 @@ public class ListPreloaderTest {
             }
 
             @Override
-            public BitmapRequestBuilder getPreloadRequestBuilder(Object item) {
+            public RequestBuilder<Bitmap, Bitmap> getPreloadRequestBuilder(Object item) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition--;
-                return mock(BitmapRequestBuilder.class);
+                return mock(RequestBuilder.class);
             }
         };
         ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, toPreload);
@@ -257,7 +259,7 @@ public class ListPreloaderTest {
             }
 
             @Override
-            public GenericRequestBuilder getPreloadRequestBuilder(Object item) {
+            public RequestBuilder getPreloadRequestBuilder(Object item) {
                 return request;
             }
         };
@@ -292,7 +294,7 @@ public class ListPreloaderTest {
             }
 
             @Override
-            public GenericRequestBuilder getPreloadRequestBuilder(Object item) {
+            public RequestBuilder getPreloadRequestBuilder(Object item) {
                 return request;
             }
         };
@@ -306,10 +308,12 @@ public class ListPreloaderTest {
         assertEquals(expected, allValues);
     }
 
-    private List<Integer> getTagetsSizes(BitmapRequestBuilder requestBuilder, VerificationMode callVerificationMode) {
+    private List<Integer> getTagetsSizes(RequestBuilder<?, ?> requestBuilder,
+            VerificationMode callVerificationMode) {
         ArgumentCaptor<Integer> integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Target> targetArgumentCaptor = ArgumentCaptor.forClass(Target.class);
         SizeReadyCallback cb = mock(SizeReadyCallback.class);
+        // TODO: fixme.
         VerificationMode mode = atLeastOnce();
         verify(requestBuilder, mode).into(targetArgumentCaptor.capture());
         for (Target target : targetArgumentCaptor.getAllValues()) {
@@ -332,7 +336,7 @@ public class ListPreloaderTest {
             }
 
             @Override
-            public GenericRequestBuilder getPreloadRequestBuilder(Object item) {
+            public RequestBuilder getPreloadRequestBuilder(Object item) {
                 loadedObjects.add(item);
                 return super.getPreloadRequestBuilder(item);
             }
@@ -357,8 +361,8 @@ public class ListPreloaderTest {
         }
 
         @Override
-        public GenericRequestBuilder getPreloadRequestBuilder(Object item) {
-            return mock(BitmapRequestBuilder.class);
+        public RequestBuilder getPreloadRequestBuilder(Object item) {
+            return mock(RequestBuilder.class);
         }
 
         @Override

@@ -5,10 +5,8 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcherSet;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -28,10 +26,10 @@ import java.util.Queue;
  * @param <Z> The type of the resource that will be loaded.
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
  */
-public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback,
+public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
         ResourceCallback {
-    private static final String TAG = "GenericRequest";
-    private static final Queue<GenericRequest<?, ?, ?>> REQUEST_POOL = Util.createQueue(0);
+    private static final String TAG = "Request";
+    private static final Queue<SingleRequest<?, ?, ?>> REQUEST_POOL = Util.createQueue(0);
     private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
     private enum Status {
@@ -57,25 +55,19 @@ public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback
 
     private Class<Z> resourceClass;
     private RequestContext requestContext;
+    private RequestOptions requestOptions;
+    private float sizeMultiplier;
+    private Priority priority;
     private ResourceTranscoder<Z, ? extends R> transcoder;
-    private Key signature;
-    private int placeholderResourceId;
-    private int errorResourceId;
     private Context context;
     private Transformation<Z> transformation;
     private RequestCoordinator requestCoordinator;
     private A model;
     private Class<R> transcodeClass;
-    private boolean isMemoryCacheable;
-    private Priority priority;
     private Target<R> target;
-    private RequestListener<? super A, R> requestListener;
-    private float sizeMultiplier;
+    private RequestListener<R> requestListener;
     private Engine engine;
     private GlideAnimationFactory<? super R> animationFactory;
-    private int overrideWidth;
-    private int overrideHeight;
-    private DiskCacheStrategy diskCacheStrategy;
 
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
@@ -86,63 +78,46 @@ public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback
     private long startTime;
     private Status status;
 
-    public static <A, Z, R> GenericRequest<A, Z, R> obtain(
+    public static <A, Z, R> SingleRequest<A, Z, R> obtain(
             A model,
             Class<Z> resourceClass,
             Class<R> transcodeClass,
             RequestContext requestContext,
-            ResourceTranscoder<Z, ? extends R> transcoder,
-            Key signature,
-            Context context,
-            Priority priority,
-            Target<R> target,
+            RequestOptions requestOptions,
             float sizeMultiplier,
-            Drawable placeholderDrawable,
-            int placeholderResourceId,
-            Drawable errorDrawable,
-            int errorResourceId,
-            RequestListener<? super A, R> requestListener,
+            Priority priority,
+            ResourceTranscoder<Z, ? extends R> transcoder,
+            Context context,
+            Target<R> target,
+            RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
             Transformation<Z> transformation,
-            boolean isMemoryCacheable,
-            GlideAnimationFactory<? super R> animationFactory,
-            int overrideWidth,
-            int overrideHeight,
-            DiskCacheStrategy diskCacheStrategy) {
-        @SuppressWarnings("unchecked")
-        GenericRequest<A, Z, R> request = (GenericRequest<A, Z, R>) REQUEST_POOL.poll();
+            GlideAnimationFactory<? super R> animationFactory) {
+        @SuppressWarnings("unchecked") SingleRequest<A, Z, R> request = (SingleRequest<A, Z, R>) REQUEST_POOL.poll();
         if (request == null) {
-            request = new GenericRequest<A, Z, R>();
+            request = new SingleRequest<A, Z, R>();
         }
         request.init(
                 model,
                 resourceClass,
                 transcodeClass,
                 requestContext,
-                transcoder,
-                signature,
-                context,
-                priority,
-                target,
+                requestOptions,
                 sizeMultiplier,
-                placeholderDrawable,
-                placeholderResourceId,
-                errorDrawable,
-                errorResourceId,
+                priority,
+                transcoder,
+                context,
+                target,
                 requestListener,
                 requestCoordinator,
                 engine,
                 transformation,
-                isMemoryCacheable,
-                animationFactory,
-                overrideWidth,
-                overrideHeight,
-                diskCacheStrategy);
+                animationFactory);
         return request;
     }
 
-    private GenericRequest() {
+    private SingleRequest() {
         // just create, instances are reused with recycle/init
     }
 
@@ -151,49 +126,32 @@ public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback
             Class<Z> resourceClass,
             Class<R> transcodeClass,
             RequestContext requestContext,
-            ResourceTranscoder<Z, ? extends R> transcoder,
-            Key signature,
-            Context context,
-            Priority priority,
-            Target<R> target,
+            RequestOptions requestOptions,
             float sizeMultiplier,
-            Drawable placeholderDrawable,
-            int placeholderResourceId,
-            Drawable errorDrawable,
-            int errorResourceId,
-            RequestListener<? super A, R> requestListener,
+            Priority priority,
+            ResourceTranscoder<Z, ? extends R> transcoder,
+            Context context,
+            Target<R> target,
+            RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
             Transformation<Z> transformation,
-            boolean isMemoryCacheable,
-            GlideAnimationFactory<? super R> animationFactory,
-            int overrideWidth,
-            int overrideHeight,
-            DiskCacheStrategy diskCacheStrategy) {
+            GlideAnimationFactory<? super R> animationFactory) {
         this.model = model;
         this.resourceClass = resourceClass;
         this.requestContext = requestContext;
-        this.transcoder = transcoder;
-        this.signature = signature;
-        this.context = context;
-        this.context = context.getApplicationContext();
-        this.priority = priority;
-        this.target = target;
+        this.requestOptions = requestOptions;
         this.sizeMultiplier = sizeMultiplier;
-        this.placeholderDrawable = placeholderDrawable;
-        this.placeholderResourceId = placeholderResourceId;
-        this.errorDrawable = errorDrawable;
-        this.errorResourceId = errorResourceId;
+        this.priority = priority;
+        this.transcoder = transcoder;
+        this.context = context.getApplicationContext();
+        this.target = target;
         this.requestListener = requestListener;
         this.requestCoordinator = requestCoordinator;
         this.engine = engine;
         this.transformation = transformation;
         this.transcodeClass = transcodeClass;
-        this.isMemoryCacheable = isMemoryCacheable;
         this.animationFactory = animationFactory;
-        this.overrideWidth = overrideWidth;
-        this.overrideHeight = overrideHeight;
-        this.diskCacheStrategy = diskCacheStrategy;
         status = Status.PENDING;
 
         // We allow null models by just setting an error drawable. Null models will always have empty providers, we
@@ -264,6 +222,8 @@ public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback
         }
 
         status = Status.WAITING_FOR_SIZE;
+        int overrideWidth = requestOptions.getOverrideWidth();
+        int overrideHeight = requestOptions.getOverrideHeight();
         if (overrideWidth > 0 && overrideHeight > 0) {
             onSizeReady(overrideWidth, overrideHeight);
         } else {
@@ -393,15 +353,23 @@ public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback
     }
 
     private Drawable getErrorDrawable() {
-        if (errorDrawable == null && errorResourceId > 0) {
-            errorDrawable = context.getResources().getDrawable(errorResourceId);
+        if (errorDrawable == null) {
+            errorDrawable = requestOptions.getErrorPlaceholder();
+            if (errorDrawable == null && requestOptions.getErrorId() > 0) {
+                errorDrawable = context.getResources()
+                        .getDrawable(requestOptions.getErrorId());
+            }
         }
         return errorDrawable;
     }
 
     private Drawable getPlaceholderDrawable() {
-        if (placeholderDrawable == null && placeholderResourceId > 0) {
-            placeholderDrawable = context.getResources().getDrawable(placeholderResourceId);
+        if (placeholderDrawable == null) {
+            placeholderDrawable = requestOptions.getPlaceholderDrawable();
+            if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
+                placeholderDrawable = context.getResources()
+                        .getDrawable(requestOptions.getPlaceholderId());
+            }
         }
         return placeholderDrawable;
     }
@@ -432,8 +400,9 @@ public final class GenericRequest<A, Z, R> implements Request, SizeReadyCallback
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(resourceClass, transcodeClass, signature, width, height, fetchers, requestContext,
-                transformation, transcoder, priority, isMemoryCacheable, diskCacheStrategy, this);
+        loadStatus = engine.load(resourceClass, transcodeClass, requestOptions.getSignature(), width, height, fetchers,
+                requestContext, transformation, transcoder, priority, requestOptions.isCacheable(),
+                requestOptions.getDiskCacheStrategy(), this);
         loadedFromMemoryCache = resource != null;
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));

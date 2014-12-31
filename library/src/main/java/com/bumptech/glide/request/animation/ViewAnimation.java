@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.animation;
 
+import android.content.Context;
 import android.view.View;
 import android.view.animation.Animation;
 
@@ -36,7 +37,7 @@ public class ViewAnimation<R> implements GlideAnimation<R> {
         View view = adapter.getView();
         if (view != null) {
             view.clearAnimation();
-            Animation animation = animationFactory.build();
+            Animation animation = animationFactory.build(view.getContext());
             view.startAnimation(animation);
         }
 
@@ -44,6 +45,6 @@ public class ViewAnimation<R> implements GlideAnimation<R> {
     }
 
     interface AnimationFactory {
-        Animation build();
+        Animation build(Context context);
     }
 }

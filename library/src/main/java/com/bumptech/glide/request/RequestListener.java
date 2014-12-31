@@ -5,10 +5,9 @@ import com.bumptech.glide.request.target.Target;
 /**
  * A class for monitoring the status of a request while images load.
  *
- * @param <T> The type of the model being loaded.
  * @param <R> The type of resource being loaded.
  */
-public interface RequestListener<T, R> {
+public interface RequestListener<R> {
 
     /**
      * Called when an exception occurs during a load. Will only be called if we currently want to display an image
@@ -40,7 +39,7 @@ public interface RequestListener<T, R> {
      * @return True if the listener has handled updating the target for the given exception, false to allow
      *         Glide's request to update the target.
      */
-    boolean onException(Exception e, T model, Target<R> target, boolean isFirstResource);
+    boolean onException(Exception e, Object model, Target<R> target, boolean isFirstResource);
 
     /**
      * Called when a load completes successfully, immediately after
@@ -57,5 +56,6 @@ public interface RequestListener<T, R> {
      * @return True if the listener has handled setting the resource on the target (including any animations), false to
      *         allow Glide's request to update the target (again including animations).
      */
-    boolean onResourceReady(R resource, T model, Target<R> target, boolean isFromMemoryCache, boolean isFirstResource);
+    boolean onResourceReady(R resource, Object model, Target<R> target, boolean isFromMemoryCache,
+            boolean isFirstResource);
 }

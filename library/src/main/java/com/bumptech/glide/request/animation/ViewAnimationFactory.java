@@ -18,8 +18,8 @@ public class ViewAnimationFactory<R> implements GlideAnimationFactory<R> {
         this(new ConcreteAnimationFactory(animation));
     }
 
-    public ViewAnimationFactory(Context context, int animationId) {
-        this(new ResourceAnimationFactory(context, animationId));
+    public ViewAnimationFactory(int animationId) {
+        this(new ResourceAnimationFactory(animationId));
     }
 
     ViewAnimationFactory(ViewAnimation.AnimationFactory animationFactory) {
@@ -56,22 +56,20 @@ public class ViewAnimationFactory<R> implements GlideAnimationFactory<R> {
         }
 
         @Override
-        public Animation build() {
+        public Animation build(Context context) {
             return animation;
         }
     }
 
     private static class ResourceAnimationFactory implements ViewAnimation.AnimationFactory {
-        private final Context context;
         private final int animationId;
 
-        public ResourceAnimationFactory(Context context, int animationId) {
-            this.context = context.getApplicationContext();
+        public ResourceAnimationFactory(int animationId) {
             this.animationId = animationId;
         }
 
         @Override
-        public Animation build() {
+        public Animation build(Context context) {
             return AnimationUtils.loadAnimation(context, animationId);
         }
     }

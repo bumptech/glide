@@ -10,7 +10,7 @@ import com.bumptech.glide.util.Util;
  * <code>
  * Glide.load("http://somefakeurl.com/fakeImage.jpeg")
  *      .asBitmap()
- *      .fitCenter()
+ *      .withFitCenter()
  *      .into(new SimpleTarget<Bitmap>(250, 250) {
  *
  *          {@literal @Override}

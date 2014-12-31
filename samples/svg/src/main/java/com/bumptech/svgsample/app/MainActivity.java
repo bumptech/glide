@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.StreamEncoder;
@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
 
     private ImageView imageViewRes;
     private ImageView imageViewNet;
-    private GenericRequestBuilder<Uri, InputStream, SVG, PictureDrawable> requestBuilder;
+    private RequestBuilder<Uri, InputStream, SVG, PictureDrawable> requestBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

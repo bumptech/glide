@@ -32,10 +32,9 @@ import java.util.concurrent.TimeoutException;
  *     The {@link com.bumptech.glide.Glide#clear(FutureTarget)} call will make sure any resources used are recycled.
  * </p>
  *
- * @param <T> The type of the data to load.
  * @param <R> The type of the resource that will be loaded.
  */
-public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
+public class RequestFutureTarget<R> implements FutureTarget<R>, Runnable {
     private static final Waiter DEFAULT_WAITER = new Waiter();
 
     private final Handler mainHandler;

@@ -56,7 +56,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
         List<U> getPreloadItems(int position);
 
         /**
-         * Returns a non null {@link com.bumptech.glide.GenericRequestBuilder} for a given item. Must exactly match
+         * Returns a non null {@link RequestBuilder} for a given item. Must exactly match
          * the request used to load the resource in the list.
          *
          * <p>
@@ -65,7 +65,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
          *
          * @param item The model to load.
          */
-        GenericRequestBuilder getPreloadRequestBuilder(U item);
+        RequestBuilder getPreloadRequestBuilder(U item);
     }
 
     /**
@@ -107,7 +107,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
             }
 
             @Override
-            public GenericRequestBuilder getPreloadRequestBuilder(T item) {
+            public RequestBuilder getPreloadRequestBuilder(T item) {
                 return getRequestBuilder(item);
             }
         };
@@ -195,7 +195,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     /**
-     * Returns a non null {@link com.bumptech.glide.GenericRequestBuilder} for a given item. Must exactly match the
+     * Returns a non null {@link RequestBuilder} for a given item. Must exactly match the
      * request used to load the resource in the list.
      *
      * <p>
@@ -208,7 +208,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      */
     @SuppressWarnings("rawtypes")
     @Deprecated
-    protected GenericRequestBuilder getRequestBuilder(T item) {
+    protected RequestBuilder getRequestBuilder(T item) {
         throw new IllegalStateException("You must either provide a PreloadModelProvider, or override "
                                          + "getRequestBuilder()");
     }
@@ -267,7 +267,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     private void preloadItem(T item, int position, int i) {
         final int[] dimensions = this.preloadDimensionProvider.getPreloadSize(item, position, i);
         if (dimensions != null) {
-            GenericRequestBuilder preloadRequestBuilder = this.preloadModelProvider.getPreloadRequestBuilder(item);
+            RequestBuilder preloadRequestBuilder = this.preloadModelProvider.getPreloadRequestBuilder(item);
             preloadRequestBuilder.into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
         }
     }

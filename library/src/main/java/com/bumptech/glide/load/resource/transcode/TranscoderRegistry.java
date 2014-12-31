@@ -1,19 +1,14 @@
 package com.bumptech.glide.load.resource.transcode;
 
-import com.bumptech.glide.util.MultiClassKey;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class that allows {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder}s to be registered and
  * retrieved by the classes they convert between.
  */
 public class TranscoderRegistry {
-    private static final MultiClassKey GET_KEY = new MultiClassKey();
-
-    private final Map<MultiClassKey, ResourceTranscoder<?, ?>> factories =
-            new HashMap<MultiClassKey, ResourceTranscoder<?, ?>>();
+    private final List<Entry<?, ?>> transcoders = new ArrayList<Entry<?, ?>>();
 
     /**
      * Registers the given {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} using the given
@@ -25,8 +20,9 @@ public class TranscoderRegistry {
      * @param <Z> The type of the resource that the transcoder transcodes from.
      * @param <R> The type of the resource that the transcoder transcodes to.
      */
-    public <Z, R> void register(Class<Z> decodedClass, Class<R> transcodedClass, ResourceTranscoder<Z, R> transcoder) {
-        factories.put(new MultiClassKey(decodedClass, transcodedClass), transcoder);
+    public synchronized <Z, R> void register(Class<Z> decodedClass, Class<R> transcodedClass,
+            ResourceTranscoder<Z, R> transcoder) {
+        transcoders.add(new Entry<Z, R>(decodedClass, transcodedClass, transcoder));
     }
 
     /**
@@ -39,20 +35,36 @@ public class TranscoderRegistry {
      * @param <R> The type of the resource that the transcoder transcodes to.
      */
     @SuppressWarnings("unchecked")
-    public <Z, R> ResourceTranscoder<Z, R> get(Class<Z> decodedClass, Class<R> transcodedClass) {
+    public synchronized <Z, R> ResourceTranscoder<Z, R> get(Class<Z> decodedClass, Class<R> transcodedClass) {
         if (decodedClass.equals(transcodedClass)) {
-            // we know they're the same type (Z and R)
             return (ResourceTranscoder<Z, R>) UnitTranscoder.get();
         }
-        final ResourceTranscoder<?, ?> result;
-        synchronized (GET_KEY) {
-            GET_KEY.set(decodedClass, transcodedClass);
-            result = factories.get(GET_KEY);
+        for (Entry<?, ?> entry : transcoders) {
+            if (entry.handles(decodedClass, transcodedClass)) {
+                return (ResourceTranscoder<Z, R>) entry.transcoder;
+            }
         }
-        if (result == null) {
-            throw new IllegalArgumentException("No transcoder registered for " + decodedClass + " and "
-                    + transcodedClass);
+        throw new IllegalArgumentException("No transcoder registered to transcode from " + decodedClass + " to "
+                + transcodedClass);
+    }
+
+    private static class Entry<Z, R> {
+        private final Class<Z> fromClass;
+        private final Class<R> toClass;
+        private final ResourceTranscoder<Z, R> transcoder;
+
+        private Entry(Class<Z> fromClass, Class<R> toClass, ResourceTranscoder<Z, R> transcoder) {
+            this.fromClass = fromClass;
+            this.toClass = toClass;
+            this.transcoder = transcoder;
         }
-        return (ResourceTranscoder<Z, R>) result;
+
+        public boolean handles(Class<?> fromClass, Class<?> toClass) {
+            // If we convert from a specific Drawable, we must get that specific Drawable class or a subclass of that
+            // Drawable. In contrast, if we we convert <em>to</em> a specific Drawable, we can fulfill requests for
+            // a more generic parent class (like Drawable). As a result, we check fromClass and toClass in different
+            // orders.
+            return this.fromClass.isAssignableFrom(fromClass) && toClass.isAssignableFrom(this.toClass);
+        }
     }
 }

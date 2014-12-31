@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.Resource;
 public abstract class DrawableResource<T extends Drawable> implements Resource<T> {
     protected final T drawable;
 
+
     public DrawableResource(T drawable) {
         if (drawable == null) {
             throw new NullPointerException("Drawable must not be null!");

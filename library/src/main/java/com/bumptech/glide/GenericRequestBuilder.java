@@ -14,11 +14,12 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.FutureTarget;
-import com.bumptech.glide.request.GenericRequest;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.RequestFutureTarget;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.SingleRequest;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.animation.NoAnimation;
@@ -52,7 +53,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
     private boolean isModelSet;
     private int placeholderId;
     private int errorId;
-    private RequestListener<? super ModelType, TranscodeType> requestListener;
+    private RequestListener<TranscodeType> requestListener;
     private Float thumbSizeMultiplier;
     private GenericRequestBuilder<?, ?, TranscodeType> thumbnailRequestBuilder;
     private Drawable placeholderDrawable;
@@ -273,7 +274,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> animate(int animationId) {
-        return animate(new ViewAnimationFactory<TranscodeType>(context, animationId));
+        return animate(new ViewAnimationFactory<TranscodeType>(animationId));
     }
 
     /**
@@ -381,7 +382,7 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, ResourceType, TranscodeType> listener(
-            RequestListener<? super ModelType, TranscodeType> requestListener) {
+            RequestListener<TranscodeType> requestListener) {
         this.requestListener = requestListener;
 
         return this;
@@ -562,8 +563,8 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
      *         resource in a blocking manner.
      */
     public FutureTarget<TranscodeType> into(int width, int height) {
-        final RequestFutureTarget<ModelType, TranscodeType> target =
-                new RequestFutureTarget<ModelType, TranscodeType>(glide.getMainHandler(), width, height);
+        final RequestFutureTarget<TranscodeType> target =
+                new RequestFutureTarget<TranscodeType>(glide.getMainHandler(), width, height);
 
         // TODO: Currently all loads must be started on the main thread...
         glide.getMainHandler().post(new Runnable() {
@@ -679,29 +680,21 @@ public class GenericRequestBuilder<ModelType, ResourceType, TranscodeType> imple
 
     private Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
-        return GenericRequest.obtain(
+        return SingleRequest.obtain(
                 model,
                 resourceClass,
                 transcodeClass,
                 glide.getRequestContext(),
-                transcoder != null ? transcoder : glide.buildTranscoder(resourceClass, transcodeClass),
-                signature,
-                context,
-                priority,
-                target,
+                new RequestOptions(),
                 sizeMultiplier,
-                placeholderDrawable,
-                placeholderId,
-                errorPlaceholder,
-                errorId,
+                priority,
+                transcoder,
+                context,
+                target,
                 requestListener,
                 requestCoordinator,
                 glide.getEngine(),
                 transformation,
-                isCacheable,
-                animationFactory,
-                overrideWidth,
-                overrideHeight,
-                diskCacheStrategy);
+                animationFactory);
     }
 }

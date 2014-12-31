@@ -55,7 +55,7 @@ import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
-public class GenericRequestTest {
+public class SingleRequestTest {
     private RequestHarness harness;
 
     /**
@@ -107,28 +107,11 @@ public class GenericRequestTest {
             when(resource.get()).thenReturn(result);
         }
 
-        public GenericRequest<Number, Object, Object, List> getRequest() {
-            return GenericRequest.obtain(loadProvider,
-                    model,
-                    signature,
-                    context,
-                    priority,
-                    target,
-                    1f,
-                    placeholderDrawable,
-                    placeholderResourceId,
-                    errorDrawable,
-                    errorResourceId,
-                    requestListener,
-                    requestCoordinator,
-                    engine,
-                    transformation,
-                    List.class,
-                    skipMemoryCache,
-                    factory,
-                    overrideWidth,
-                    overrideHeight,
-                    diskCacheStrategy);
+        public SingleRequest<Number, Object, Object, List> getRequest() {
+            return SingleRequest.obtain(loadProvider, model, signature, context, priority, target, 1f,
+                    placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, requestListener,
+                    requestCoordinator, engine, transformation, List.class, skipMemoryCache, factory, overrideWidth,
+                    overrideHeight, diskCacheStrategy);
         }
     }
 
@@ -315,14 +298,14 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotCompleteBeforeReceivingResource() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         assertFalse(request.isComplete());
     }
 
     @Test
     public void testCanHandleNullResources() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onResourceReady(null);
 
@@ -333,7 +316,7 @@ public class GenericRequestTest {
 
     @Test
     public void testCanHandleEmptyResources() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.resource.get()).thenReturn(null);
 
         request.onResourceReady(harness.resource);
@@ -346,7 +329,7 @@ public class GenericRequestTest {
 
     @Test
     public void testCanHandleNonConformingResources() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(((Resource) (harness.resource)).get()).thenReturn("Invalid mocked String, this should be a List");
 
         request.onResourceReady(harness.resource);
@@ -359,7 +342,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotFailedAfterClear() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onResourceReady(null);
         request.clear();
@@ -369,7 +352,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsPausedAfterPause() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.pause();
 
         assertTrue(request.isPaused());
@@ -377,7 +360,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotCancelledAfterPause() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.pause();
 
         assertFalse(request.isCancelled());
@@ -385,7 +368,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotPausedAfterBeginningWhilePaused() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.pause();
         request.begin();
 
@@ -395,7 +378,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotFailedAfterBegin() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onResourceReady(null);
         request.begin();
@@ -405,7 +388,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsCompleteAfterReceivingResource() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
 
@@ -414,7 +397,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotCompleteAfterClear() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onResourceReady(harness.resource);
         request.clear();
 
@@ -423,7 +406,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsCancelledAfterClear() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.clear();
 
         assertTrue(request.isCancelled());
@@ -431,7 +414,7 @@ public class GenericRequestTest {
 
     @Test
     public void testDoesNotNotifyTargetTwiceIfClearedTwiceInARow() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.clear();
         request.clear();
 
@@ -451,7 +434,7 @@ public class GenericRequestTest {
         }).when(requestCoordinator).canSetImage(any(Request.class));
 
         harness.requestCoordinator = requestCoordinator;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
 
@@ -460,14 +443,14 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotFailedWithoutException() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         assertFalse(request.isFailed());
     }
 
     @Test
     public void testIsFailedAfterException() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onException(new Exception("test"));
         assertTrue(request.isFailed());
@@ -475,7 +458,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIgnoresOnSizeReadyIfNotWaitingForSize() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
         request.onSizeReady(100, 100);
         request.onSizeReady(100, 100);
@@ -487,7 +470,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsFailedAfterNoResultAndNullException() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onException(null);
         assertTrue(request.isFailed());
@@ -497,7 +480,7 @@ public class GenericRequestTest {
     public void testEngineLoadPassedCorrectPriority() {
         Priority expected = Priority.HIGH;
         harness.priority = expected;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         request.onSizeReady(100, 100);
@@ -515,7 +498,7 @@ public class GenericRequestTest {
                 any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class)))
                 .thenReturn(loadStatus);
 
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         request.onSizeReady(100, 100);
@@ -526,7 +509,7 @@ public class GenericRequestTest {
 
     @Test
     public void testResourceIsRecycledOnClear() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
         request.clear();
@@ -545,7 +528,7 @@ public class GenericRequestTest {
         harness.context = context;
         harness.placeholderResourceId = expectedId;
         harness.target = target;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -559,7 +542,7 @@ public class GenericRequestTest {
 
         harness.placeholderDrawable = expected;
         harness.target = target;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -576,7 +559,7 @@ public class GenericRequestTest {
         harness.context = context;
         harness.errorResourceId = expectedId;
         harness.target = target;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onException(null);
 
@@ -591,7 +574,7 @@ public class GenericRequestTest {
 
         harness.errorDrawable = expected;
         harness.target = target;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.onException(null);
 
@@ -607,7 +590,7 @@ public class GenericRequestTest {
         harness.placeholderDrawable = placeholder;
         harness.target = target;
         harness.model = null;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.begin();
 
@@ -625,7 +608,7 @@ public class GenericRequestTest {
         harness.errorDrawable = errorPlaceholder;
         harness.target = target;
         harness.model = null;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.begin();
 
@@ -646,7 +629,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotRunningAfterComplete() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
         request.onResourceReady(harness.resource);
 
@@ -655,7 +638,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotRunningAfterFailing() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
         request.onException(new RuntimeException("Test"));
 
@@ -664,7 +647,7 @@ public class GenericRequestTest {
 
     @Test
     public void testIsNotRunningAfterClear() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
         request.clear();
 
@@ -674,7 +657,7 @@ public class GenericRequestTest {
     @Test
     public void testCallsTargetOnResourceReadyIfNoRequestListener() {
         harness.requestListener = null;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.target).onResourceReady(eq(harness.result), any(GlideAnimation.class));
@@ -682,7 +665,7 @@ public class GenericRequestTest {
 
     @Test
     public void testCallsTargetOnResourceReadyIfRequestListenerReturnsFalse() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.requestListener.onResourceReady(any(List.class), any(Number.class), eq(harness.target),
                 anyBoolean(), anyBoolean())).thenReturn(false);
         request.onResourceReady(harness.resource);
@@ -692,7 +675,7 @@ public class GenericRequestTest {
 
     @Test
     public void testDoesNotCallTargetOnResourceReadyIfRequestListenerReturnsTrue() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.requestListener.onResourceReady(any(List.class), any(Number.class), eq(harness.target),
                 anyBoolean(), anyBoolean())).thenReturn(true);
         request.onResourceReady(harness.resource);
@@ -703,7 +686,7 @@ public class GenericRequestTest {
     @Test
     public void testCallsTargetOnExceptionIfNoRequestListener() {
         harness.requestListener = null;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         Exception exception = new IOException("test");
         request.onException(exception);
 
@@ -712,7 +695,7 @@ public class GenericRequestTest {
 
     @Test
     public void testCallsTargetOnExceptionIfRequestListenerReturnsFalse() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.requestListener
                 .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean()))
                 .thenReturn(false);
@@ -724,7 +707,7 @@ public class GenericRequestTest {
 
     @Test
     public void testDoesNotCallTargetOnExceptionIfRequestListenerReturnsTrue() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.requestListener
                 .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean()))
                 .thenReturn(true);
@@ -736,7 +719,7 @@ public class GenericRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithResourceResult() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(eq(harness.result), any(Number.class), any(Target.class),
@@ -745,7 +728,7 @@ public class GenericRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithModel() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(any(List.class), eq(harness.model), any(Target.class),
@@ -754,7 +737,7 @@ public class GenericRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithTarget() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(any(List.class), any(Number.class), eq(harness.target),
@@ -763,7 +746,7 @@ public class GenericRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithLoadedFromMemoryIfLoadCompletesSynchronously() {
-        final GenericRequest request = harness.getRequest();
+        final SingleRequest request = harness.getRequest();
         when(harness.engine.load(any(Key.class), anyInt(), anyInt(), any(DataFetcher.class),
                 any(Transformation.class), any(ResourceTranscoder.class),
                 any(Priority.class), anyBoolean(),  any(DiskCacheStrategy.class),
@@ -783,7 +766,7 @@ public class GenericRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithNotLoadedFromMemoryCacheIfLoadCompletesAsynchronously() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onSizeReady(100, 100);
         request.onResourceReady(harness.resource);
 
@@ -794,7 +777,7 @@ public class GenericRequestTest {
     @Test
     public void testRequestListenerIsCalledWithIsFirstResourceIfNoRequestCoordinator() {
         harness.requestCoordinator = null;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(eq(harness.result), any(Number.class), any(Target.class),
@@ -803,7 +786,7 @@ public class GenericRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithIsFirstImageIfRequestCoordinatorReturnsNoResourceSet() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(false);
         request.onResourceReady(harness.resource);
 
@@ -813,7 +796,7 @@ public class GenericRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsResourceSet() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(true);
         request.onResourceReady(harness.resource);
 
@@ -823,7 +806,7 @@ public class GenericRequestTest {
 
     @Test
     public void testTargetIsCalledWithAnimationFromFactory() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         GlideAnimation<List> glideAnimation = mock(GlideAnimation.class);
         when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(glideAnimation);
         request.onResourceReady(harness.resource);
@@ -835,7 +818,7 @@ public class GenericRequestTest {
     public void testCallsGetSizeIfOverrideWidthIsLessThanZero() {
         harness.overrideWidth = -1;
         harness.overrideHeight = 100;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         verify(harness.target).getSize(any(SizeReadyCallback.class));
@@ -845,7 +828,7 @@ public class GenericRequestTest {
     public void testCallsGetSizeIfOverrideHeightIsLessThanZero() {
         harness.overrideHeight = -1;
         harness.overrideWidth = 100;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         verify(harness.target).getSize(any(SizeReadyCallback.class));
@@ -855,7 +838,7 @@ public class GenericRequestTest {
     public void testDoesNotCallGetSizeIfOverrideWidthAndHeightAreSet() {
         harness.overrideWidth = 100;
         harness.overrideHeight = 100;
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         verify(harness.target, never()).getSize(any(SizeReadyCallback.class));
@@ -866,7 +849,7 @@ public class GenericRequestTest {
         harness.overrideWidth = 1;
         harness.overrideHeight = 2;
 
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.begin();
 
         verify(harness.engine).load(any(Key.class), eq(harness.overrideWidth), eq(harness.overrideHeight),
@@ -878,7 +861,7 @@ public class GenericRequestTest {
     @Test
     public void testDoesNotSetErrorDrawableIfRequestCoordinatorDoesntAllowIt() {
         harness.errorDrawable = new ColorDrawable(Color.RED);
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(false);
         request.onException(new IOException("Test"));
 
@@ -893,7 +876,7 @@ public class GenericRequestTest {
                 any(Transformation.class), any(ResourceTranscoder.class),
                 any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class)))
                 .thenAnswer(new CallResourceCallback(harness.resource));
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
 
         request.begin();
         request.cancel();
@@ -904,7 +887,7 @@ public class GenericRequestTest {
 
     @Test
     public void testResourceOnlyReceivesOneGetOnResourceReady() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.resource, times(1)).get();
@@ -912,7 +895,7 @@ public class GenericRequestTest {
 
     @Test
     public void testOnSizeReadyWithNullDataFetcherCallsOnException() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         when(harness.modelLoader.getDataFetcher(any(Number.class), anyInt(), anyInt())).thenReturn(null);
         request.begin();
         request.onSizeReady(100, 100);
@@ -923,7 +906,7 @@ public class GenericRequestTest {
 
     @Test
     public void testDoesNotStartALoadIfOnSizeReadyIsCalledAfterCancel() {
-        GenericRequest request = harness.getRequest();
+        SingleRequest request = harness.getRequest();
         request.cancel();
         request.onSizeReady(100, 100);
 

@@ -1,5 +1,7 @@
 package com.bumptech.glide.samples.giphy;
 
+import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
+
 import com.google.gson.Gson;
 
 import android.app.Activity;
@@ -7,15 +9,16 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -59,16 +62,18 @@ public class FullscreenActivity extends Activity {
             }
         });
 
+        RequestBuilder<Bitmap, Drawable> thumbnailRequest = Glide.with(this)
+                .asBitmap()
+                .to(Drawable.class)
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE))
+                .load(result);
+
         Glide.with(this)
+                .asDrawable()
+                .thumbnail(thumbnailRequest)
                 .load(result.images.original.url)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .thumbnail(Glide.with(this)
-                        .load(result)
-                        .asBitmap()
-                        .transcode(new BitmapDrawableTranscoder(this), Drawable.class)
-                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                )
-                .listener(new RequestListener<Object, Drawable>() {
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE))
+                .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onException(Exception e, Object model, Target<Drawable> target,
                             boolean isFirstResource) {

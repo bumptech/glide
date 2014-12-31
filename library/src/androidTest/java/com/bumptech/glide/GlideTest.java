@@ -697,9 +697,10 @@ public class GlideTest {
 //        when(secondTranscoder.transcode(any(Resource.class))).thenReturn(secondResource);
 //        when(secondTranscoder.getId()).thenReturn("transcoder2");
 
-        DrawableRequestBuilder<String> firstRequest = requestManager.from(String.class).transcoder(firstTranscoder)
+        RequestBuilder<Drawable, Drawable> firstRequest = requestManager.from(String.class).transcoder
+                (firstTranscoder)
                 .override(100, 100);
-        DrawableRequestBuilder<String> secondRequest = firstRequest.clone().transcoder(secondTranscoder);
+        RequestBuilder<Drawable, Drawable> secondRequest = firstRequest.clone().transcoder(secondTranscoder);
 
         Target firstTarget = mock(Target.class);
         Target secondTarget = mock(Target.class);

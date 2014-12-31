@@ -19,7 +19,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 
-import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
@@ -42,7 +42,7 @@ public class GifFrameLoaderTest {
     private GifFrameLoader.FrameCallback callback;
     private GifDecoder gifDecoder;
     private Handler handler;
-    private GenericRequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap> requestBuilder;
+    private RequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap> requestBuilder;
     private GifFrameLoader loader;
 
     @SuppressWarnings("unchecked")
@@ -53,7 +53,7 @@ public class GifFrameLoaderTest {
         handler = mock(Handler.class);
         when(handler.obtainMessage(anyInt(), anyObject())).thenReturn(mock(Message.class));
 
-        requestBuilder = mock(GenericRequestBuilder.class);
+        requestBuilder = mock(RequestBuilder.class);
 
         loader = new GifFrameLoader(callback, gifDecoder, handler, requestBuilder);
         when(requestBuilder.signature(any(Key.class))).thenReturn(requestBuilder);

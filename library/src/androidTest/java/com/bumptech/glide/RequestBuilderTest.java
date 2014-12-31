@@ -29,7 +29,7 @@ import org.robolectric.annotation.Config;
 @SuppressWarnings("unchecked")
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
-public class GenericRequestBuilderTest {
+public class RequestBuilderTest {
     private RequestTracker requestTracker;
 
     @Before
@@ -39,13 +39,13 @@ public class GenericRequestBuilderTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
-        new GenericRequestBuilder(null, Object.class, Object.class, mock(Glide.class),
+        new RequestBuilder(null, Object.class, Object.class, mock(Glide.class),
                 requestTracker, mock(Lifecycle.class));
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfNonNullModelAndNullLoadProvider() {
-        new GenericRequestBuilder(Robolectric.application, Object.class, null, Object.class, mock(Glide.class),
+        new RequestBuilder(Robolectric.application, Object.class, null, Object.class, mock(Glide.class),
                 requestTracker, mock(Lifecycle.class));
     }
 
@@ -86,7 +86,7 @@ public class GenericRequestBuilderTest {
 
     @Test
     public void testDoesNotThrowWhenModelAndLoaderNull() {
-        new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class), requestTracker,
+        new RequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class), requestTracker,
                 mock(Lifecycle.class));
     }
 
@@ -165,11 +165,11 @@ public class GenericRequestBuilderTest {
         });
     }
 
-    private GenericRequestBuilder getNullModelRequest() {
+    private RequestBuilder getNullModelRequest() {
         Glide glide = mock(Glide.class);
         when(glide.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(
                 mock(Target.class));
-        return new GenericRequestBuilder(Robolectric.application, null, null, Object.class, glide, requestTracker,
+        return new RequestBuilder(Robolectric.application, null, null, Object.class, glide, requestTracker,
                 mock(Lifecycle.class)).load(null);
     }
 }

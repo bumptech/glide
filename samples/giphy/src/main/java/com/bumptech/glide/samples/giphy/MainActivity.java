@@ -1,10 +1,13 @@
 package com.bumptech.glide.samples.giphy;
 
+import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
+
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,8 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.bumptech.glide.DrawableRequestBuilder;
-import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -39,16 +41,15 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         ImageView giphyLogoView = (ImageView) findViewById(R.id.giphy_logo_view);
         Glide.with(this)
+                .asDrawable()
                 .load(R.raw.large_giphy_logo)
-                .fitCenter()
                 .into(giphyLogoView);
 
         ListView gifList = (ListView) findViewById(R.id.gif_list);
 
-        DrawableRequestBuilder<Api.GifResult> gifItemRequest = Glide.with(this)
-                .from(Api.GifResult.class)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .fitCenter();
+        RequestBuilder<Drawable, Drawable> gifItemRequest = Glide.with(this)
+                .asDrawable()
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE));
 
         ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider = new ViewPreloadSizeProvider<Api.GifResult>();
         adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);
@@ -81,12 +82,12 @@ public class MainActivity extends Activity implements Api.Monitor {
         private static final Api.GifResult[] EMPTY_RESULTS = new Api.GifResult[0];
 
         private final Activity activity;
-        private DrawableRequestBuilder<Api.GifResult> requestBuilder;
+        private RequestBuilder<Drawable, Drawable> requestBuilder;
         private ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider;
 
         private Api.GifResult[] results = EMPTY_RESULTS;
 
-        public GifAdapter(Activity activity, DrawableRequestBuilder<Api.GifResult> requestBuilder,
+        public GifAdapter(Activity activity, RequestBuilder<Drawable, Drawable> requestBuilder,
                 ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider) {
             this.activity = activity;
             this.requestBuilder = requestBuilder;
@@ -158,7 +159,7 @@ public class MainActivity extends Activity implements Api.Monitor {
         }
 
         @Override
-        public GenericRequestBuilder getPreloadRequestBuilder(Api.GifResult item) {
+        public RequestBuilder getPreloadRequestBuilder(Api.GifResult item) {
             return requestBuilder.load(item);
         }
     }

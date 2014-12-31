@@ -1,6 +1,12 @@
 package com.bumptech.glide.samples.flickr;
 
+import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
+import static com.bumptech.glide.request.RequestOptions.priorityOf;
+import static com.bumptech.glide.load.resource.drawable.DrawableAnimationOptions.withCrossFade;
+import static com.bumptech.glide.load.resource.drawable.DrawableTransformationOptions.withCenterCrop;
+
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,8 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-import com.bumptech.glide.DrawableRequestBuilder;
-import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.Priority;
@@ -39,9 +44,9 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     private int photoSize;
     private GridView grid;
     private boolean thumbnail;
-    private DrawableRequestBuilder<Photo> fullRequest;
-    private DrawableRequestBuilder<Photo> thumbnailRequest;
-    private DrawableRequestBuilder<Photo> preloadRequest;
+    private RequestBuilder<Drawable, Drawable> fullRequest;
+    private RequestBuilder<Drawable, Drawable> thumbnailRequest;
+    private RequestBuilder<Drawable, Drawable> preloadRequest;
 
     public static FlickrPhotoGrid newInstance(int size, int preloadCount, boolean thumbnail) {
         FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
@@ -60,16 +65,16 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         thumbnail = args.getBoolean(THUMBNAIL_KEY);
 
         fullRequest = Glide.with(this)
-                .from(Photo.class)
-                .centerCrop()
-                .crossFade(R.anim.fade_in, 150);
+                .asDrawable()
+                .transform(withCenterCrop(getActivity()))
+                .animate(withCrossFade(R.anim.fade_in, 150));
 
         thumbnailRequest = Glide.with(this)
-                .from(Photo.class)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+                .asDrawable()
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE)
+                        .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
 
-        preloadRequest = thumbnail ? thumbnailRequest.clone().priority(Priority.HIGH) : fullRequest;
+        preloadRequest = thumbnail ? thumbnailRequest.clone().apply(priorityOf(Priority.HIGH)) : fullRequest;
 
         final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
 
@@ -176,7 +181,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         }
 
         @Override
-        public GenericRequestBuilder getPreloadRequestBuilder(Photo item) {
+        public RequestBuilder getPreloadRequestBuilder(Photo item) {
             return preloadRequest.load(item);
         }
     }

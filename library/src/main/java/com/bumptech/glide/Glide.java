@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -46,9 +45,7 @@ import com.bumptech.glide.load.model.stream.StreamUrlLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -56,6 +53,7 @@ import com.bumptech.glide.load.resource.gif.GifFrameModelLoader;
 import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
+import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
@@ -80,7 +78,7 @@ import java.net.URL;
 import java.util.List;
 
 /**
- * A singleton to present a simple static interface for building requests with {@link BitmapRequestBuilder} and
+ * A singleton to present a simple static interface for building requests with {@link RequestBuilder} and
  * maintaining an {@link Engine}, {@link BitmapPool}, {@link com.bumptech.glide.load.engine.cache.DiskCache} and
  * {@link MemoryCache}.
  */
@@ -99,8 +97,6 @@ public class Glide {
     private final DecodeFormat decodeFormat;
     private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     private final TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
-    private final CenterCrop bitmapCenterCrop;
-    private final FitCenter bitmapFitCenter;
     private final Handler mainHandler;
     private final BitmapPreFiller bitmapPreFiller;
     private final ModelLoaderRegistry loaderRegistry;
@@ -224,7 +220,6 @@ public class Glide {
         encoderRegistry.add(InputStream.class, new StreamEncoder());
 
         resourceEncoderRegistry = new ResourceEncoderRegistry();
-
         decoderRegistry = new ResourceDecoderRegistry();
 
         /* Bitmaps */
@@ -272,10 +267,8 @@ public class Glide {
 
         transcoderRegistry.register(Bitmap.class, BitmapDrawable.class,
                 new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
-
-        bitmapCenterCrop = new CenterCrop(bitmapPool);
-
-        bitmapFitCenter = new FitCenter(bitmapPool);
+        transcoderRegistry.register(Bitmap.class, byte[].class,
+                new BitmapBytesTranscoder());
     }
 
     /**
@@ -314,14 +307,6 @@ public class Glide {
 
     Engine getEngine() {
         return engine;
-    }
-
-    CenterCrop getBitmapCenterCrop() {
-        return bitmapCenterCrop;
-    }
-
-    FitCenter getBitmapFitCenter() {
-        return bitmapFitCenter;
     }
 
     Handler getMainHandler() {
@@ -674,22 +659,7 @@ public class Glide {
         }
 
         @Override
-        public void onLoadStarted(Drawable placeholder) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-            // Do nothing.
-        }
-
-        @Override
         public void onResourceReady(Object resource, GlideAnimation<? super Object> glideAnimation) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onLoadCleared(Drawable placeholder) {
             // Do nothing.
         }
     }

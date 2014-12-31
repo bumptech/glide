@@ -31,8 +31,8 @@ public class DrawableCrossFadeFactory implements GlideAnimationFactory<Drawable>
         this(new ViewAnimationFactory<Drawable>(new DefaultAnimationFactory()), duration);
     }
 
-    public DrawableCrossFadeFactory(Context context, int defaultAnimationId, int duration) {
-        this(new ViewAnimationFactory<Drawable>(context, defaultAnimationId), duration);
+    public DrawableCrossFadeFactory(int defaultAnimationId, int duration) {
+        this(new ViewAnimationFactory<Drawable>(defaultAnimationId), duration);
     }
 
     public DrawableCrossFadeFactory(Animation defaultAnimation, int duration) {
@@ -61,7 +61,7 @@ public class DrawableCrossFadeFactory implements GlideAnimationFactory<Drawable>
     private static class DefaultAnimationFactory implements ViewAnimation.AnimationFactory {
 
         @Override
-        public Animation build() {
+        public Animation build(Context context) {
             AlphaAnimation animation = new AlphaAnimation(0f, 1f);
             animation.setDuration(DEFAULT_DURATION_MS / 2);
             return animation;

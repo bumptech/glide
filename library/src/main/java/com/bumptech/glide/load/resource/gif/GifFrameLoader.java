@@ -1,5 +1,8 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
+import static com.bumptech.glide.request.RequestOptions.signatureOf;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -7,15 +10,12 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 
-import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.NullEncoder;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
@@ -31,7 +31,7 @@ class GifFrameLoader {
 
     private boolean isRunning = false;
     private boolean isLoadPending = false;
-    private GenericRequestBuilder<GifDecoder, Bitmap, Bitmap> requestBuilder;
+    private RequestBuilder<Bitmap, Bitmap> requestBuilder;
     private DelayTarget current;
     private boolean isCleared;
 
@@ -41,11 +41,11 @@ class GifFrameLoader {
 
     public GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, int width, int height) {
         this(callback, gifDecoder, null,
-                getRequestBuilder(context, gifDecoder, width, height, Glide.get(context).getBitmapPool()));
+                getRequestBuilder(context, gifDecoder, width, height));
     }
 
     GifFrameLoader(FrameCallback callback, GifDecoder gifDecoder, Handler handler,
-            GenericRequestBuilder<GifDecoder, Bitmap, Bitmap>  requestBuilder) {
+            RequestBuilder<Bitmap, Bitmap> requestBuilder) {
         if (handler == null) {
             handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
         }
@@ -60,7 +60,8 @@ class GifFrameLoader {
         if (transformation == null) {
             throw new NullPointerException("Transformation must not be null");
         }
-        requestBuilder = requestBuilder.transform(transformation);
+        // TODO: fixme.
+//        requestBuilder = requestBuilder.transform(transformation);
     }
 
     public void start() {
@@ -101,7 +102,7 @@ class GifFrameLoader {
         long targetTime = SystemClock.uptimeMillis() + gifDecoder.getNextDelay();
         DelayTarget next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
         requestBuilder
-                .signature(new FrameSignature())
+                .apply(signatureOf(new FrameSignature()))
                 .into(next);
     }
 
@@ -167,22 +168,14 @@ class GifFrameLoader {
         }
     }
 
-    private static GenericRequestBuilder<GifDecoder, Bitmap, Bitmap> getRequestBuilder(Context context,
-            GifDecoder gifDecoder, int width, int height, BitmapPool bitmapPool) {
-        // TODO: fixme.
-        GifFrameResourceDecoder frameResourceDecoder = new GifFrameResourceDecoder(bitmapPool);
-        GifFrameModelLoader frameLoader = new GifFrameModelLoader();
-        Encoder<GifDecoder> sourceEncoder = NullEncoder.get();
+    private static RequestBuilder<Bitmap, Bitmap> getRequestBuilder(Context context,
+            GifDecoder gifDecoder, int width, int height) {
         return Glide.with(context)
-                .using(frameLoader, GifDecoder.class)
-                .load(gifDecoder)
-                .as(Bitmap.class)
-//                .soureEncoder(sourceEncoder)
-//                .decoder(frameResourceDecoder)
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .override(width, height);
-
+                .asBitmap()
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .override(width, height))
+                .load(gifDecoder);
     }
 
     // Visible for testing.
