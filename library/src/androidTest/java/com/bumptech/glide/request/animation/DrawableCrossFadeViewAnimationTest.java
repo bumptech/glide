@@ -72,8 +72,7 @@ public class DrawableCrossFadeViewAnimationTest {
         ImageView view = mock(ImageView.class);
         GlideAnimation<Drawable> defaultAnimation = mock(GlideAnimation.class);
         int duration = 200;
-        DrawableCrossFadeViewAnimation<Drawable> animation = new DrawableCrossFadeViewAnimation<Drawable>(
-                defaultAnimation, duration);
+        DrawableCrossFadeViewAnimation animation = new DrawableCrossFadeViewAnimation(defaultAnimation, duration);
     }
 }
 

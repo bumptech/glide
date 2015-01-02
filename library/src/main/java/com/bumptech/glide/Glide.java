@@ -55,6 +55,7 @@ import com.bumptech.glide.load.resource.gif.GifResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
+import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -267,8 +268,8 @@ public class Glide {
 
         transcoderRegistry.register(Bitmap.class, BitmapDrawable.class,
                 new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
-        transcoderRegistry.register(Bitmap.class, byte[].class,
-                new BitmapBytesTranscoder());
+        transcoderRegistry.register(Bitmap.class, byte[].class, new BitmapBytesTranscoder());
+        transcoderRegistry.register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
     }
 
     /**

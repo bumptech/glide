@@ -20,8 +20,11 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.DataFetcherSet;
+import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.request.RequestContext;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,9 +35,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +48,8 @@ public class DecodeJobTest {
     private Harness harness;
 
     @Before
-    public void setUp() throws FileNotFoundException {
+    public void setUp() throws IOException, RequestContext.NoResultEncoderAvailableException,
+            RequestContext.NoSourceEncoderAvailableException, RequestContext.NoDecoderAvailableException {
         harness = new Harness();
     }
 
@@ -583,7 +587,7 @@ public class DecodeJobTest {
         Key originalKey = mock(Key.class);
         int width = 100;
         int height = 200;
-        DataFetcher<Object> dataFetcher = mock(DataFetcher.class);
+        DataFetcher<?> dataFetcher = mock(DataFetcher.class);
         Transformation<Object> transformation = mock(Transformation.class);
         ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         DiskCache diskCache = mock(DiskCache.class);
@@ -596,29 +600,36 @@ public class DecodeJobTest {
         ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
         Encoder<Object> sourceEncoder = mock(Encoder.class);
         DecodeJob.FileOpener fileOpener = mock(DecodeJob.FileOpener.class);
+        RequestContext requestContext = mock(RequestContext.class);
+        DataFetcherSet dataFetcherSet = mock(DataFetcherSet.class);
 
         DiskCacheStrategy diskCacheStrategy;
 
-        public Harness() throws FileNotFoundException {
+        public Harness() throws IOException, RequestContext.NoDecoderAvailableException,
+                RequestContext.NoResultEncoderAvailableException, RequestContext.NoSourceEncoderAvailableException {
             this(DiskCacheStrategy.RESULT);
         }
 
-        public Harness(DiskCacheStrategy diskCacheStrategy) throws FileNotFoundException {
+        public Harness(DiskCacheStrategy diskCacheStrategy) throws IOException,
+                RequestContext.NoDecoderAvailableException, RequestContext.NoResultEncoderAvailableException,
+                RequestContext.NoSourceEncoderAvailableException {
             this.diskCacheStrategy = diskCacheStrategy;
             when(fileOpener.open(any(File.class))).thenReturn(mock(OutputStream.class));
             when(key.getOriginalKey()).thenReturn(originalKey);
             when(transcoder.transcode(eq(resource))).thenReturn(resource);
             when(transformation.transform(eq(resource), eq(width), eq(height))).thenReturn(resource);
-            when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
-            when(loadProvider.getEncoder()).thenReturn(resultEncoder);
-            when(loadProvider.getSourceDecoder()).thenReturn(sourceDecoder);
-            when(loadProvider.getSourceEncoder()).thenReturn(sourceEncoder);
+            List<DataFetcher<?>> dataFetchersList = new ArrayList<DataFetcher<?>>();
+            dataFetchersList.add(dataFetcher);
+            when(dataFetcherSet.getFetchers()).thenReturn(dataFetchersList);
+            when(requestContext.getDecoder(any(DataRewinder.class), eq(Object.class))).thenReturn(cacheDecoder);
+            when(requestContext.getResultEncoder(any(Resource.class))).thenReturn(resultEncoder);
+            when(requestContext.getSourceEncoder(anyObject())).thenReturn(sourceEncoder);
             when(diskCacheProvider.getDiskCache()).thenReturn(diskCache);
         }
 
-        public DecodeJob<Object, Object, Object> getJob() {
-            return new DecodeJob<Object, Object, Object>(key, width, height, dataFetcher, loadProvider, transformation,
-                    transcoder, diskCacheProvider, diskCacheStrategy, priority, fileOpener);
+        public DecodeJob<Object, Object> getJob() {
+            return new DecodeJob<Object, Object>(Object.class, key, width, height, dataFetcherSet, requestContext,
+                    transformation, transcoder, diskCacheProvider, diskCacheStrategy, priority, fileOpener);
         }
     }
 

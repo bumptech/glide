@@ -2,7 +2,6 @@ package com.bumptech.glide.request;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -29,6 +28,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.Resource;
@@ -82,7 +82,8 @@ public class SingleRequestTest {
         ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
         Encoder<Object> sourceEncoder = mock(Encoder.class);
-        RequestListener<Number, List> requestListener = mock(RequestListener.class);
+        RequestListener<List> requestListener = mock(RequestListener.class);
+        DataFetcherSet dataFetcherSet = mock(DataFetcherSet.class);
         boolean skipMemoryCache;
         GlideAnimationFactory<List> factory = mock(GlideAnimationFactory.class);
         int overrideWidth = -1;
@@ -90,194 +91,28 @@ public class SingleRequestTest {
         List result = new ArrayList();
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         Key signature = mock(Key.class);
+        RequestContext requestContext = mock(RequestContext.class);
+        RequestOptions requestOptions = mock(RequestOptions.class);
 
         public RequestHarness() {
             modelLoader = mock(ModelLoader.class);
             when(modelLoader.getDataFetcher(any(Number.class), anyInt(), anyInt()))
                     .thenReturn(mock(DataFetcher.class));
-            when(loadProvider.getModelLoader()).thenReturn(modelLoader);
-            when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
-            when(loadProvider.getSourceDecoder()).thenReturn(sourceDecoder);
-            when(loadProvider.getSourceEncoder()).thenReturn(sourceEncoder);
-            when(loadProvider.getEncoder()).thenReturn(encoder);
-            when(loadProvider.getTranscoder()).thenReturn(transcoder);
             when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
             when(requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(true);
-
+            when(requestContext.getDataFetchers(eq(model), anyInt(), anyInt())).thenReturn(dataFetcherSet);
             when(resource.get()).thenReturn(result);
         }
 
-        public SingleRequest<Number, Object, Object, List> getRequest() {
-            return SingleRequest.obtain(loadProvider, model, signature, context, priority, target, 1f,
-                    placeholderDrawable, placeholderResourceId, errorDrawable, errorResourceId, requestListener,
-                    requestCoordinator, engine, transformation, List.class, skipMemoryCache, factory, overrideWidth,
-                    overrideHeight, diskCacheStrategy);
+        public SingleRequest<Number, List, List> getRequest() {
+            return SingleRequest.obtain(model, List.class, List.class, requestContext, requestOptions, 1f, priority,
+                    transcoder, context, target, requestListener, requestCoordinator, engine, transformation, factory);
         }
     }
 
     @Before
     public void setUp() {
         harness = new RequestHarness();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingCacheDecoderAndNeeded1() {
-        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
-        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingCacheDecoderAndNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
-        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testReturnsWhenMissingCacheDecoderAndNeeded3() {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
-        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test
-    public void testReturnsWhenMissingCacheDecoderAndNotNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
-        when(harness.loadProvider.getCacheDecoder()).thenReturn(null);
-
-        assertNotNull(harness.getRequest());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingSourceDecoderAndNeeded1() {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
-        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingSourceDecoderAndNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
-        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test
-    public void testReturnsWhenMissingSourceDecoderAndNotNeeded1() {
-        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
-        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
-
-        assertNotNull(harness.getRequest());
-    }
-
-    @Test
-    public void testReturnsWhenMissingSourceDecoderAndNotNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
-        when(harness.loadProvider.getSourceDecoder()).thenReturn(null);
-
-        assertNotNull(harness.getRequest());
-    }
-
-    @Test(expected =  NullPointerException.class)
-    public void testThrowsWhenMissingEncoderWhenNeeded1() {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
-        when(harness.loadProvider.getEncoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test(expected =  NullPointerException.class)
-    public void testThrowsWhenMissingEncoderWhenNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
-        when(harness.loadProvider.getEncoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test
-    public void testReturnsWhenMissingEncoderWhenNotNeeded1() {
-        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
-        when(harness.loadProvider.getEncoder()).thenReturn(null);
-
-        assertNotNull(harness.getRequest());
-    }
-
-    @Test
-    public void testReturnsWhenMissingEncoderWhenNotNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
-        when(harness.loadProvider.getEncoder()).thenReturn(null);
-
-        assertNotNull(harness.getRequest());
-    }
-
-    @Test
-    public void testThrowsWhenMissingTranscoder() {
-        for (DiskCacheStrategy strategy : DiskCacheStrategy.values()) {
-            harness = new RequestHarness();
-            harness.diskCacheStrategy = strategy;
-            when(harness.loadProvider.getTranscoder()).thenReturn(null);
-
-            try {
-                harness.getRequest();
-                fail(NullPointerException.class.getSimpleName() + " expected for " + strategy);
-            } catch (NullPointerException ex) {
-                // expected
-            }
-        }
-    }
-
-    @Test
-    public void testThrowsWhenMissingModelLoader() {
-        for (DiskCacheStrategy strategy : DiskCacheStrategy.values()) {
-            harness = new RequestHarness();
-            harness.diskCacheStrategy = strategy;
-            when(harness.loadProvider.getModelLoader()).thenReturn(null);
-
-            try {
-                harness.getRequest();
-                fail(NullPointerException.class.getSimpleName() + " expected for " + strategy);
-            } catch (NullPointerException ex) {
-                // expected
-            }
-        }
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingSourceEncoderAndNeeded1() {
-        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
-        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testThrowsWhenMissingSourceEncoderAndNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.ALL;
-        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
-
-        harness.getRequest();
-    }
-
-    @Test
-    public void testReturnsWhenMissingSourceEncoderAndNotNeeded1() {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
-        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
-
-        assertNotNull(harness.getRequest());
-    }
-
-    @Test
-    public void testReturnsWhenMissingSourceEncoderAndNotNeeded2() {
-        harness.diskCacheStrategy = DiskCacheStrategy.NONE;
-        when(harness.loadProvider.getSourceEncoder()).thenReturn(null);
-
-        assertNotNull(harness.getRequest());
     }
 
     @Test
@@ -463,9 +298,10 @@ public class SingleRequestTest {
         request.onSizeReady(100, 100);
         request.onSizeReady(100, 100);
 
-        verify(harness.engine, times(1)).load(eq(harness.signature), eq(100), eq(100), any(DataFetcher.class),
-                any(Transformation.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class));
+        verify(harness.engine, times(1)).load(eq(List.class), eq(List.class), eq(harness.signature), eq(100), eq(100),
+                eq(harness.dataFetcherSet), eq(harness.requestContext), any(Transformation.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
+                any(ResourceCallback.class));
     }
 
     @Test
@@ -485,17 +321,20 @@ public class SingleRequestTest {
 
         request.onSizeReady(100, 100);
 
-        verify(harness.engine).load(any(Key.class), anyInt(), anyInt(), any(DataFetcher.class),
-                any(Transformation.class), any(ResourceTranscoder.class),
-                eq(expected), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class));
+        verify(harness.engine).load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(),
+                any(DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                any(ResourceTranscoder.class), eq(expected), anyBoolean(), any(DiskCacheStrategy.class),
+                any(ResourceCallback.class));
     }
 
     @Test
     public void testEngineLoadCancelledOnCancel() {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
-        when(harness.engine.load(any(Key.class), anyInt(), anyInt(), any(DataFetcher.class),
-                any(Transformation.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class)))
+
+        when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
+                (DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
+                any(ResourceCallback.class)))
                 .thenReturn(loadStatus);
 
         SingleRequest request = harness.getRequest();
@@ -747,16 +586,17 @@ public class SingleRequestTest {
     @Test
     public void testRequestListenerIsCalledWithLoadedFromMemoryIfLoadCompletesSynchronously() {
         final SingleRequest request = harness.getRequest();
-        when(harness.engine.load(any(Key.class), anyInt(), anyInt(), any(DataFetcher.class),
-                any(Transformation.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(),  any(DiskCacheStrategy.class),
+
+        when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
+                        (DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class))).thenAnswer(new Answer<Object>() {
-                    @Override
-                    public Object answer(InvocationOnMock invocation) throws Throwable {
-                        request.onResourceReady(harness.resource);
-                        return null;
-                    }
-                });
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                request.onResourceReady(harness.resource);
+                return null;
+            }
+        });
 
         request.begin();
         request.onSizeReady(100, 100);
@@ -852,10 +692,10 @@ public class SingleRequestTest {
         SingleRequest request = harness.getRequest();
         request.begin();
 
-        verify(harness.engine).load(any(Key.class), eq(harness.overrideWidth), eq(harness.overrideHeight),
-                any(DataFetcher.class), any(Transformation.class),
-                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
-                any(ResourceCallback.class));
+        verify(harness.engine).load(eq(List.class), eq(List.class), eq(harness.signature), eq(harness.overrideWidth),
+                eq(harness.overrideHeight), any(DataFetcherSet.class), any(RequestContext.class),
+                any(Transformation.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
+                any(DiskCacheStrategy.class), any(ResourceCallback.class));
     }
 
     @Test
@@ -872,10 +712,11 @@ public class SingleRequestTest {
     public void testCanReRunCancelledRequests() {
         doAnswer(new CallSizeReady(100, 100)).when(harness.target)
                 .getSize(any(SizeReadyCallback.class));
-        when(harness.engine.load(any(Key.class), anyInt(), anyInt(), any(DataFetcher.class),
-                any(Transformation.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class)))
-                .thenAnswer(new CallResourceCallback(harness.resource));
+
+        when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
+                        (DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
+                any(ResourceCallback.class))).thenAnswer(new CallResourceCallback(harness.resource));
         SingleRequest request = harness.getRequest();
 
         request.begin();
@@ -910,9 +751,10 @@ public class SingleRequestTest {
         request.cancel();
         request.onSizeReady(100, 100);
 
-        verify(harness.engine, never()).load(any(Key.class), anyInt(), anyInt(), any(DataFetcher.class),
-                any(Transformation.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class));
+        verify(harness.engine, never()).load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(),
+                any(DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
+                any(ResourceCallback.class));
     }
 
     private static class CallResourceCallback implements Answer {

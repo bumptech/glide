@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 
+import com.bumptech.glide.GenericTransformationOptions;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
@@ -60,8 +61,7 @@ class GifFrameLoader {
         if (transformation == null) {
             throw new NullPointerException("Transformation must not be null");
         }
-        // TODO: fixme.
-//        requestBuilder = requestBuilder.transform(transformation);
+        requestBuilder = requestBuilder.transform(new GenericTransformationOptions<Bitmap>().transform(transformation));
     }
 
     public void start() {

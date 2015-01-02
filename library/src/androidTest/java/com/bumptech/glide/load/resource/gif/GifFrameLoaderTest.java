@@ -20,10 +20,11 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.TransformationOptions;
 import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 
 import org.junit.Before;
@@ -42,7 +43,7 @@ public class GifFrameLoaderTest {
     private GifFrameLoader.FrameCallback callback;
     private GifDecoder gifDecoder;
     private Handler handler;
-    private RequestBuilder<GifDecoder, GifDecoder, Bitmap, Bitmap> requestBuilder;
+    private RequestBuilder<Bitmap, Bitmap> requestBuilder;
     private GifFrameLoader loader;
 
     @SuppressWarnings("unchecked")
@@ -56,15 +57,16 @@ public class GifFrameLoaderTest {
         requestBuilder = mock(RequestBuilder.class);
 
         loader = new GifFrameLoader(callback, gifDecoder, handler, requestBuilder);
-        when(requestBuilder.signature(any(Key.class))).thenReturn(requestBuilder);
+        when(requestBuilder.apply(any(RequestOptions.class))).thenReturn(requestBuilder);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testSetFrameTransformationSetsTransformationOnRequestBuilder() {
         Transformation<Bitmap> transformation = mock(Transformation.class);
         loader.setFrameTransformation(transformation);
 
-        verify(requestBuilder).transform(eq(transformation));
+        verify(requestBuilder).transform(any(TransformationOptions.class));
     }
 
     @Test(expected = NullPointerException.class)
@@ -85,7 +87,7 @@ public class GifFrameLoaderTest {
 
         InOrder order = inOrder(gifDecoder, requestBuilder);
         order.verify(gifDecoder).advance();
-        order.verify(requestBuilder).signature(any(Key.class));
+        order.verify(requestBuilder).apply(any(RequestOptions.class));
         order.verify(requestBuilder).into(any(Target.class));
     }
 

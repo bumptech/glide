@@ -16,13 +16,13 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class DrawableCrossFadeFactoryTest {
 
-    private DrawableCrossFadeFactory<Drawable> factory;
+    private DrawableCrossFadeFactory factory;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         ViewAnimationFactory<Drawable> viewAnimationFactory = mock(ViewAnimationFactory.class);
-        factory = new DrawableCrossFadeFactory<Drawable>(viewAnimationFactory, 100 /*duration*/);
+        factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/);
     }
 
     @Test

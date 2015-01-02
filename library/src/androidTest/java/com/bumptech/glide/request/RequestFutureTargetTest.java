@@ -34,7 +34,7 @@ import java.util.concurrent.TimeoutException;
 public class RequestFutureTargetTest {
     private int width;
     private int height;
-    private RequestFutureTarget<Object, Object> future;
+    private RequestFutureTarget<Object> future;
     private Request request;
     private Handler handler;
     private RequestFutureTarget.Waiter waiter;
@@ -45,7 +45,7 @@ public class RequestFutureTargetTest {
         height = 100;
         handler = mock(Handler.class);
         waiter = mock(RequestFutureTarget.Waiter.class);
-        future = new RequestFutureTarget<Object, Object>(handler, width, height, false, waiter);
+        future = new RequestFutureTarget<Object>(handler, width, height, false, waiter);
         request = mock(Request.class);
         future.setRequest(request);
     }
@@ -200,7 +200,7 @@ public class RequestFutureTargetTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsExceptionIfGetCalledOnMainThread() throws ExecutionException, InterruptedException {
-        future = new RequestFutureTarget<Object, Object>(handler, width, height, true, waiter);
+        future = new RequestFutureTarget<Object>(handler, width, height, true, waiter);
         future.get();
     }
 

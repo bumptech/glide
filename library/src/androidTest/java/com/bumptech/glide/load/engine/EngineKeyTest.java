@@ -6,12 +6,10 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.tests.KeyAssertions;
 
 import org.junit.Before;
@@ -43,26 +41,15 @@ public class EngineKeyTest {
         String id = "testId";
         int width = 1;
         int height = 2;
-        ResourceDecoder cacheDecoder = mock(ResourceDecoder.class);
+        Class resourceClass = Object.class;
+        Class transcodeClass = Integer.class;
         ResourceDecoder decoder = mock(ResourceDecoder.class);
         Transformation transformation = mock(Transformation.class);
         ResourceEncoder encoder = mock(ResourceEncoder.class);
-        ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
-        Encoder sourceEncoder = mock(Encoder.class);
         Key signature = mock(Key.class);
 
-        public Harness() {
-            when(cacheDecoder.getId()).thenReturn("cacheDecoder");
-            when(decoder.getId()).thenReturn("decoder");
-            when(transformation.getId()).thenReturn("transformation");
-            when(encoder.getId()).thenReturn("encoder");
-            when(transcoder.getId()).thenReturn("transcoder");
-            when(sourceEncoder.getId()).thenReturn("sourceEncoder");
-        }
-
         public EngineKey build() {
-            return new EngineKey(id, signature, width, height, cacheDecoder, decoder, transformation, encoder,
-                    transcoder, sourceEncoder);
+            return new EngineKey(id, signature, width, height, transformation, resourceClass, transcodeClass);
         }
     }
 
@@ -120,115 +107,6 @@ public class EngineKeyTest {
     }
 
     @Test
-    public void testDiffersIfCacheDecoderDiffers() throws Exception {
-        String id = "cacheDecoder";
-        when(harness.cacheDecoder.getId()).thenReturn(id);
-        EngineKey first = harness.build();
-        harness.cacheDecoder = mock(ResourceDecoder.class);
-        when(harness.cacheDecoder.getId()).thenReturn(id + "2");
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfCacheDecoderMissing() throws Exception {
-        EngineKey first = harness.build();
-        harness.cacheDecoder = null;
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfDecoderDiffers() throws Exception {
-        String id = "decoder";
-        when(harness.decoder.getId()).thenReturn(id);
-        EngineKey first = harness.build();
-        harness.decoder = mock(ResourceDecoder.class);
-        when(harness.decoder.getId()).thenReturn(id + "2");
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfDecoderMissing() throws Exception {
-        EngineKey first = harness.build();
-        harness.decoder = null;
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfEncoderDiffers() throws Exception {
-        String id = "encoder";
-        when(harness.encoder.getId()).thenReturn(id);
-        EngineKey first = harness.build();
-        harness.encoder = mock(ResourceEncoder.class);
-        when(harness.encoder.getId()).thenReturn(id + "2");
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfEncoderMissing() throws Exception {
-        EngineKey first = harness.build();
-        harness.encoder = null;
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersWhenTranscoderDiffers() throws Exception {
-        String id = "transcoder";
-        when(harness.transcoder.getId()).thenReturn(id);
-        EngineKey first = harness.build();
-        harness.transcoder = mock(ResourceTranscoder.class);
-        when(harness.transcoder.getId()).thenReturn(id + "2");
-        EngineKey second = harness.build();
-
-        // The transcoder doesn't affect the cached data,
-        // so we don't expect the key digests to updated differently even though the transcoder id isn't the same.
-        KeyAssertions.assertDifferent(first, second, false);
-        KeyAssertions.assertDifferent(second, first, false);
-    }
-
-    @Test
-    public void testDiffersIfTranscoderMissing() throws Exception {
-        EngineKey first = harness.build();
-        harness.transcoder = null;
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second, false);
-        KeyAssertions.assertDifferent(second, first, false);
-    }
-
-    @Test
-    public void testDiffersWhenSourceEncoderDiffers() throws Exception {
-        String id = "sourceEncoder";
-        when(harness.sourceEncoder.getId()).thenReturn(id);
-        EngineKey first = harness.build();
-        harness.sourceEncoder = mock(Encoder.class);
-        when(harness.sourceEncoder.getId()).thenReturn(id + "2");
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfSourceEncoderMissing() throws Exception {
-        EngineKey first = harness.build();
-        harness.sourceEncoder = null;
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
     public void testDiffersIfSignatureDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
         EngineKey first = harness.build();
         Key signature = mock(Key.class);
@@ -243,6 +121,22 @@ public class EngineKeyTest {
         harness.signature = signature;
         EngineKey second = harness.build();
 
+        KeyAssertions.assertDifferent(first, second);
+    }
+
+    @Test
+    public void testDiffersIfResourceClassDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        EngineKey first = harness.build();
+        harness.resourceClass = Long.class;
+        EngineKey second = harness.build();
+        KeyAssertions.assertDifferent(first, second);
+    }
+
+    @Test
+    public void testDiffersIfTranscodeClassDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        EngineKey first = harness.build();
+        harness.transcodeClass = Long.class;
+        EngineKey second = harness.build();
         KeyAssertions.assertDifferent(first, second);
     }
 }
