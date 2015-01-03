@@ -5,6 +5,7 @@ import com.bumptech.glide.request.animation.NoAnimation;
 import com.bumptech.glide.request.animation.ViewAnimationFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimationFactory;
+import com.bumptech.glide.util.Preconditions;
 
 public abstract class AnimationOptions<CHILD extends AnimationOptions<CHILD, TranscodeType>, TranscodeType>
         implements Cloneable {
@@ -43,10 +44,7 @@ public abstract class AnimationOptions<CHILD extends AnimationOptions<CHILD, Tra
     }
 
     protected final CHILD animate(GlideAnimationFactory<? super TranscodeType> animationFactory) {
-        if (animationFactory == null) {
-            throw new NullPointerException("Animation factory must not be null!");
-        }
-        this.animationFactory = animationFactory;
+        this.animationFactory = Preconditions.checkNotNull(animationFactory);
 
         return self();
     }

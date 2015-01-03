@@ -2,6 +2,8 @@ package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.util.Preconditions;
+
 /**
  * A container for a set of options used to pre-fill a {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}
  * with {@link Bitmap Bitmaps} of a single size and configuration.
@@ -27,13 +29,9 @@ public final class PreFillType {
      * {@link android.graphics.Bitmap} against any other sizes/configurations that may be being pre-filled.
      */
     PreFillType(int width, int height, Bitmap.Config config, int weight) {
-        if (config == null) {
-            throw new NullPointerException("Config must not be null");
-        }
-
+        this.config = Preconditions.checkNotNull(config, "Config must not be null");
         this.width = width;
         this.height = height;
-        this.config = config;
         this.weight = weight;
     }
 

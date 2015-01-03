@@ -2,11 +2,13 @@ package com.bumptech.glide.request.animation;
 
 import static com.bumptech.glide.request.animation.GlideAnimation.ViewAdapter;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 
@@ -49,7 +51,7 @@ public class ViewAnimationTest {
     @Test
     public void testStartsAnimationOnAnimate() {
         Animation animation = mock(Animation.class);
-        when(animationFactory.build()).thenReturn(animation);
+        when(animationFactory.build(any(Context.class))).thenReturn(animation);
         viewAnimation.animate(null, adapter);
         verify(view).clearAnimation();
         verify(view).startAnimation(eq(animation));

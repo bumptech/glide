@@ -9,9 +9,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.request.GlideContext.NoDecoderAvailableException;
 import com.bumptech.glide.request.GlideContext.NoResultEncoderAvailableException;
-import com.bumptech.glide.request.GlideContext.NoSourceEncoderAvailableException;
 import com.bumptech.glide.util.LogTime;
 
 import java.io.BufferedOutputStream;
@@ -127,17 +125,9 @@ class DecodeJob<Z, R> {
                 if (decoded != null) {
                     return decoded;
                 }
-            } catch (NoDecoderAvailableException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Failed to find encoder/decoder for data type, continuing", e);
-                }
-            } catch (NoSourceEncoderAvailableException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Failed to find source encoder for data type, continuing", e);
-                }
-            } catch (NoResultEncoderAvailableException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Failed to find result encoder for resource type, continuing", e);
+            } catch (Exception e) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Failed to fetch data and/or decode resource", e);
                 }
             } finally {
                 fetcher.cleanup();
@@ -145,7 +135,6 @@ class DecodeJob<Z, R> {
         }
         throw new IllegalStateException("Load failed, unable to obtain or unable to decode data into requested"
                 + " resource type, checked: " + Arrays.asList(fectcherList.toArray(new Object[fectcherList.size()])));
-
     }
 
     public void cancel() {

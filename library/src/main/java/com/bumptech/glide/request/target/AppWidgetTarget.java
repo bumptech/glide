@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.widget.RemoteViews;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.util.Preconditions;
 
 
 /**
@@ -41,22 +42,13 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
     public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int width, int height,
             int... widgetIds) {
         super(width, height);
-        if (context == null) {
-            throw new NullPointerException("Context can not be null!");
-        }
-        if (widgetIds == null) {
-            throw new NullPointerException("WidgetIds can not be null!");
-        }
         if (widgetIds.length == 0) {
             throw new IllegalArgumentException("WidgetIds must have length > 0");
         }
-        if (remoteViews == null) {
-            throw new NullPointerException("RemoteViews object can not be null!");
-        }
-        this.context = context;
-        this.remoteViews = remoteViews;
+        this.context = Preconditions.checkNotNull(context, "Context can not be null!");
+        this.remoteViews = Preconditions.checkNotNull(remoteViews, "RemoteViews object can not be null!");
+        this.widgetIds = Preconditions.checkNotNull(widgetIds, "WidgetIds can not be null!");
         this.viewId = viewId;
-        this.widgetIds = widgetIds;
         componentName = null;
     }
 
@@ -88,19 +80,10 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
     public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int width, int height,
             ComponentName componentName) {
         super(width, height);
-        if (context == null) {
-            throw new NullPointerException("Context can not be null!");
-        }
-        if (componentName == null) {
-            throw new NullPointerException("ComponentName can not be null!");
-        }
-        if (remoteViews == null) {
-            throw new NullPointerException("RemoteViews object can not be null!");
-        }
-        this.context = context;
-        this.remoteViews = remoteViews;
+        this.context = Preconditions.checkNotNull(context, "Context can not be null!");
+        this.remoteViews = Preconditions.checkNotNull(remoteViews, "RemoteViews object can not be null!");
+        this.componentName = Preconditions.checkNotNull(componentName, "ComponentName can not be null!");
         this.viewId = viewId;
-        this.componentName = componentName;
         widgetIds = null;
     }
 

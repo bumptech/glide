@@ -8,6 +8,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.drawable.DrawableTransformation;
+import com.bumptech.glide.util.Preconditions;
 
 public class GifDrawableTransformer implements DrawableTransformation.Transformer<GifDrawable> {
     private final BitmapPool bitmapPool;
@@ -17,10 +18,7 @@ public class GifDrawableTransformer implements DrawableTransformation.Transforme
     }
 
     public GifDrawableTransformer(BitmapPool bitmapPool) {
-        if (bitmapPool == null) {
-            throw new NullPointerException("Bitmap pool must not be null");
-        }
-        this.bitmapPool = bitmapPool;
+        this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     }
 
     @Override

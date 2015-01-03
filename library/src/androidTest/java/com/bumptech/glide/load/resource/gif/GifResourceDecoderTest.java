@@ -171,9 +171,4 @@ public class GifResourceDecoderTest {
         pool.release(gifDecoder);
         verify(gifDecoder).clear();
     }
-
-    @Test
-    public void testHasValidId() {
-        assertEquals("", decoder.getId());
-    }
 }

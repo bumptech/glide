@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.gif;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -259,10 +258,5 @@ public class GifResourceEncoderTest {
         verify(gifEncoder, never()).start(any(OutputStream.class));
         verify(parser, never()).setData(any(byte[].class));
         verify(parser, never()).parseHeader();
-    }
-
-    @Test
-    public void testHasValidId() {
-        assertEquals("", encoder.getId());
     }
 }

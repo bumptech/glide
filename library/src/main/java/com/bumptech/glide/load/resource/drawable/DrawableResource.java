@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.drawable;
 import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * Simple wrapper for an Android {@link Drawable} which returns a
@@ -18,10 +19,7 @@ public abstract class DrawableResource<T extends Drawable> implements Resource<T
 
 
     public DrawableResource(T drawable) {
-        if (drawable == null) {
-            throw new NullPointerException("Drawable must not be null!");
-        }
-        this.drawable = drawable;
+        this.drawable = Preconditions.checkNotNull(drawable);
     }
 
     @SuppressWarnings("unchecked")

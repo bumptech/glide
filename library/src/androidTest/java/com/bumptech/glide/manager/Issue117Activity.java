@@ -60,7 +60,7 @@ class Issue117Activity extends FragmentActivity {
         @Override
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
-            Glide.with(getContext()).load(android.R.drawable.ic_menu_rotate).into(this);
+            Glide.with(getContext()).asDrawable().load(android.R.drawable.ic_menu_rotate).into(this);
         }
     }
 }

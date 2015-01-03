@@ -9,7 +9,6 @@ import android.graphics.drawable.BitmapDrawable;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,11 +25,6 @@ public class BitmapDrawableTranscoderTest {
     @Before
     public void setUp() {
         transcoder = new BitmapDrawableTranscoder(Robolectric.application.getResources(), mock(BitmapPool.class));
-    }
-
-    @Test
-    public void testHasValidId() {
-        Util.assertClassHasValidId(BitmapDrawableTranscoder.class, transcoder.getId());
     }
 
     @Test

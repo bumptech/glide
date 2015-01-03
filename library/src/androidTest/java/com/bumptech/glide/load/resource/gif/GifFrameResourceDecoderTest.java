@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,11 +28,6 @@ public class GifFrameResourceDecoderTest {
     public void setUp() {
         gifDecoder = mock(GifDecoder.class);
         resourceDecoder = new GifFrameResourceDecoder(mock(BitmapPool.class));
-    }
-
-    @Test
-    public void testReturnsValidId() {
-        Util.assertClassHasValidId(GifFrameResourceDecoder.class, resourceDecoder.getId());
     }
 
     @Test

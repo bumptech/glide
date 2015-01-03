@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.widget.RemoteViews;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * This class is used to display downloaded Bitmap inside an ImageView of a Notification through RemoteViews.
@@ -57,20 +58,11 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
     public NotificationTarget(Context context, RemoteViews remoteViews, int viewId, int width, int height,
             Notification notification, int notificationId) {
         super(width, height);
-        if (context == null) {
-            throw new NullPointerException("Context must not be null!");
-        }
-        if (notification == null) {
-            throw new NullPointerException("Notification object can not be null!");
-        }
-        if (remoteViews == null) {
-            throw new NullPointerException("RemoteViews object can not be null!");
-        }
-        this.context = context;
+        this.context = Preconditions.checkNotNull(context, "Context must not be null!");
+        this.notification = Preconditions.checkNotNull(notification, "Notification object can not be null!");
+        this.remoteViews = Preconditions.checkNotNull(remoteViews, "RemoteViews object can not be null!");
         this.viewId = viewId;
-        this.notification = notification;
         this.notificationId = notificationId;
-        this.remoteViews = remoteViews;
     }
 
     /**

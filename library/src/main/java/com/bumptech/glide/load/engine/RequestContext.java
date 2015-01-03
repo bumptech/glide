@@ -18,7 +18,7 @@ import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.io.IOException;
 
-public final class RequestContext<ResourceClass, TranscodeClass> extends ContextWrapper {
+public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrapper {
 
     private final GlideContext glideContext;
     private final Object model;

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.BackgroundUtil;
@@ -18,6 +19,8 @@ import com.bumptech.glide.tests.BackgroundUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -26,17 +29,18 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class RequestBuilderTest {
-    private RequestTracker requestTracker;
+    @Mock GlideContext glideContext;
+    @Mock RequestTracker requestTracker;
+    @Mock Lifecycle lifecycle;
 
     @Before
     public void setUp() {
-        requestTracker = mock(RequestTracker.class);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
-        new RequestBuilder(null, Object.class, Object.class, mock(Glide.class),
-                requestTracker, mock(Lifecycle.class));
+        new RequestBuilder(null, Object.class, Object.class, requestTracker, lifecycle);
     }
 
     @Test(expected = NullPointerException.class)
@@ -138,10 +142,8 @@ public class RequestBuilderTest {
     }
 
     private RequestBuilder getNullModelRequest() {
-        Glide glide = mock(Glide.class);
-        when(glide.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(
-                mock(Target.class));
-        return new RequestBuilder(Robolectric.application, Object.class, Object.class, glide, requestTracker,
-                mock(Lifecycle.class)).load((Object) null);
+        when(glideContext.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(mock(Target.class));
+        return new RequestBuilder(glideContext, Object.class, Object.class, requestTracker, lifecycle)
+                .load((Object) null);
     }
 }

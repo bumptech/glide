@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import android.os.Looper;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * A wrapper resource that allows reference counting a wrapped {@link com.bumptech.glide.load.engine.Resource}
@@ -23,10 +24,7 @@ class EngineResource<Z> implements Resource<Z> {
     }
 
     EngineResource(Resource<Z> toWrap, boolean isCacheable) {
-        if (toWrap == null) {
-            throw new NullPointerException("Wrapped resource must not be null");
-        }
-        resource = toWrap;
+        resource = Preconditions.checkNotNull(toWrap);
         this.isCacheable = isCacheable;
     }
 

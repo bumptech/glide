@@ -19,6 +19,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.util.Preconditions;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -58,9 +59,7 @@ class GifFrameLoader {
 
     @SuppressWarnings("unchecked")
     public void setFrameTransformation(Transformation<Bitmap> transformation) {
-        if (transformation == null) {
-            throw new NullPointerException("Transformation must not be null");
-        }
+        Preconditions.checkNotNull(transformation);
         requestBuilder = requestBuilder.transform(new GenericTransformationOptions<Bitmap>().transform(transformation));
     }
 

@@ -18,6 +18,7 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Preconditions;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -422,12 +423,9 @@ public class TransformationUtilsTest {
 
         @Implementation
         public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
-          // Robolectric doesn't match the framework behavior with null configs, so we have to do
-          // so here.
-          if (config == null) {
-            throw new NullPointerException("config must not be null");
-          }
-          return ShadowBitmap.createBitmap(width, height, config);
+            // Robolectric doesn't match the framework behavior with null configs, so we have to do so here.
+            Preconditions.checkNotNull("Config must not be null");
+            return ShadowBitmap.createBitmap(width, height, config);
         }
 
         @Implementation

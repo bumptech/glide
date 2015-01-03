@@ -18,6 +18,7 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * An animated {@link android.graphics.drawable.Drawable} that plays the frames of an animated GIF.
@@ -82,11 +83,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     }
 
     GifDrawable(GifState state) {
-        if (state == null) {
-            throw new NullPointerException("GifState must not be null");
-        }
-
-        this.state = state;
+        this.state = Preconditions.checkNotNull(state);
         this.decoder = new GifDecoder(state.bitmapProvider);
         this.paint = new Paint();
         decoder.setData(state.gifHeader, state.data);
@@ -108,14 +105,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     }
 
     public void setFrameTransformation(Transformation<Bitmap> frameTransformation, Bitmap firstFrame) {
-        if (firstFrame == null) {
-            throw new NullPointerException("The first frame of the GIF must not be null");
-        }
-        if (frameTransformation == null) {
-            throw new NullPointerException("The frame transformation must not be null");
-        }
-        state.frameTransformation = frameTransformation;
-        state.firstFrame = firstFrame;
+        state.firstFrame = Preconditions.checkNotNull(firstFrame, "The first frame of the GIF must not be null");
+        state.frameTransformation = Preconditions.checkNotNull(frameTransformation,
+                "The frame transformation must not be null");
         frameLoader.setFrameTransformation(frameTransformation);
     }
 
@@ -327,18 +319,15 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
         public GifState(GifHeader header, byte[] data, Context context,
                 Transformation<Bitmap> frameTransformation, int targetWidth, int targetHeight,
                 GifDecoder.BitmapProvider provider, BitmapPool bitmapPool, Bitmap firstFrame) {
-            if (firstFrame == null) {
-                throw new NullPointerException("The first frame of the GIF must not be null");
-            }
-            gifHeader = header;
+            this.firstFrame = Preconditions.checkNotNull(firstFrame, "The first frame of the GIF must not be null");
+            this.gifHeader = header;
             this.data = data;
             this.bitmapPool = bitmapPool;
-            this.firstFrame = firstFrame;
             this.context = context.getApplicationContext();
             this.frameTransformation = frameTransformation;
             this.targetWidth = targetWidth;
             this.targetHeight = targetHeight;
-            bitmapProvider = provider;
+            this.bitmapProvider = provider;
         }
 
         public GifState(GifState original) {

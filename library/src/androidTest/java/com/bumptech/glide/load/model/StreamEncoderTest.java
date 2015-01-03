@@ -22,11 +22,6 @@ public class StreamEncoderTest {
     }
 
     @Test
-    public void testReturnsEmptyId() {
-        assertEquals("", encoder.getId());
-    }
-
-    @Test
     public void testWritesDataFromInputStreamToOutputStream() {
         String fakeData = "SomeRandomFakeData";
         ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());

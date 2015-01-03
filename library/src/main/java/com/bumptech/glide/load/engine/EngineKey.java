@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.util.Preconditions;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -21,13 +22,15 @@ class EngineKey implements Key {
 
     public EngineKey(String id, Key signature, int width, int height, Transformation transformation,
             Class<?>  resourceClass,  Class<?> transcodeClass) {
-        this.id = id;
-        this.signature = signature;
+        this.id = Preconditions.checkNotNull(id);
+        this.signature = Preconditions.checkNotNull(signature, "Signature must not be null");
         this.width = width;
         this.height = height;
-        this.transformation = transformation;
-        this.resourceClass = resourceClass;
-        this.transcodeClass = transcodeClass;
+        this.transformation = Preconditions.checkNotNull(transformation, "Transformation must not be null");
+        this.resourceClass = Preconditions.checkNotNull(resourceClass, "Resource class must not be null");
+        this.transcodeClass = Preconditions.checkNotNull(transcodeClass, "Transcode class must not be null");
+
+        Preconditions.checkNotNull(transformation.getId(), "Transformation id must not be null");
     }
 
     public Key getOriginalKey() {

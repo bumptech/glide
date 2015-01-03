@@ -1,6 +1,7 @@
 package com.bumptech.glide.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.RETURNS_DEFAULTS;
 
 import android.os.Build;
 
@@ -60,21 +61,20 @@ public class Util {
         return result;
     }
 
-    public static <T> Answer<T> arg(final int argumentIndex) {
-        return new Answer<T>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public T answer(InvocationOnMock invocation) {
-                if (argumentIndex >= invocation.getArguments().length) {
-                    throw new IllegalArgumentException("Cannot invoke argument " + argumentIndex
-                            + " greater than arguments length " + invocation.getArguments().length);
-                }
-                return (T) invocation.getArguments()[argumentIndex];
-            }
-        };
-    }
-
     public static void setSdkVersionInt(int version) {
         Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", version);
+
+    }
+
+    public static class ReturnsSelfAnswer implements Answer<Object> {
+
+        public Object answer(InvocationOnMock invocation) throws Throwable {
+            Object mock = invocation.getMock();
+            if (invocation.getMethod().getReturnType().isInstance(mock)) {
+                return mock;
+            } else {
+                return RETURNS_DEFAULTS.answer(invocation);
+            }
+        }
     }
 }

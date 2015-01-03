@@ -7,8 +7,10 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.EmptySignature;
+import com.bumptech.glide.util.Preconditions;
 
-public final class RequestOptions implements Cloneable {
+public class RequestOptions implements Cloneable {
+    private static final int UNSET = -1;
     private static final int SIZE_MULTIPLIER = 1 << 1;
     private static final int DISK_CACHE_STRATEGY = 1 << 2;
     private static final int PRIORITY = 1 << 3;
@@ -30,8 +32,8 @@ public final class RequestOptions implements Cloneable {
     private Drawable placeholderDrawable;
     private int placeholderId;
     private boolean isCacheable = true;
-    private int overrideHeight = -1;
-    private int overrideWidth = -1;
+    private int overrideHeight = UNSET;
+    private int overrideWidth = UNSET;
     private Key signature = EmptySignature.obtain();
 
     public static RequestOptions sizeMultiplierOf(float sizeMultiplier) {
@@ -87,8 +89,8 @@ public final class RequestOptions implements Cloneable {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
         }
-        fields |= SIZE_MULTIPLIER;
         this.sizeMultiplier = sizeMultiplier;
+        fields |= SIZE_MULTIPLIER;
 
         return this;
     }
@@ -110,11 +112,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions diskCacheStrategy(DiskCacheStrategy strategy) {
-        if (strategy == null) {
-            throw new NullPointerException("Disk cache strategy must not be null");
-        }
+        this.diskCacheStrategy = Preconditions.checkNotNull(strategy);
         fields |= DISK_CACHE_STRATEGY;
-        this.diskCacheStrategy = strategy;
 
         return this;
     }
@@ -126,11 +125,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions priority(Priority priority) {
-        if (priority == null) {
-            throw new NullPointerException("Priority must not be null");
-        }
+        this.priority = Preconditions.checkNotNull(priority);
         fields |= PRIORITY;
-        this.priority = priority;
 
         return this;
     }
@@ -142,8 +138,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions placeholder(Drawable drawable) {
-        fields |= PLACEHOLDER;
         this.placeholderDrawable = drawable;
+        fields |= PLACEHOLDER;
 
         return this;
     }
@@ -156,8 +152,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions placeholder(int resourceId) {
-        fields |= PLACEHOLDER_ID;
         this.placeholderId = resourceId;
+        fields |= PLACEHOLDER_ID;
 
         return this;
     }
@@ -169,8 +165,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions error(Drawable drawable) {
-        fields |= ERROR_PLACEHOLDER;
         this.errorPlaceholder = drawable;
+        fields |= ERROR_PLACEHOLDER;
 
         return this;
     }
@@ -182,8 +178,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions error(int resourceId) {
-        fields |= ERROR_ID;
         this.errorId = resourceId;
+        fields |= ERROR_ID;
 
         return this;
     }
@@ -200,8 +196,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions skipMemoryCache(boolean skip) {
-        fields |= IS_CACHEABLE;
         this.isCacheable = !skip;
+        fields |= IS_CACHEABLE;
 
         return this;
     }
@@ -216,15 +212,9 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions override(int width, int height) {
-        if (width <= 0) {
-            throw new IllegalArgumentException("Width must be > 0");
-        }
-        if (height <= 0) {
-            throw new IllegalArgumentException("Height must be > 0");
-        }
-        fields |= OVERRIDE;
         this.overrideWidth = width;
         this.overrideHeight = height;
+        fields |= OVERRIDE;
 
         return this;
     }
@@ -244,11 +234,8 @@ public final class RequestOptions implements Cloneable {
      * @return This request builder.
      */
     public RequestOptions signature(Key signature) {
-        if (signature == null) {
-            throw new NullPointerException("Signature must not be null");
-        }
+        this.signature = Preconditions.checkNotNull(signature);
         fields |= SIGNATURE;
-        this.signature = signature;
         return this;
     }
 

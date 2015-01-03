@@ -9,14 +9,11 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
@@ -58,7 +55,6 @@ import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.GlideModule;
@@ -95,19 +91,9 @@ public class Glide implements ComponentCallbacks2 {
     private static volatile Glide glide;
 
     private final GenericLoaderFactory loaderFactory;
-    private final Engine engine;
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
-    private final DecodeFormat decodeFormat;
-    private final ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
-    private final TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
-    private final Handler mainHandler;
     private final BitmapPreFiller bitmapPreFiller;
-    private final ModelLoaderRegistry loaderRegistry;
-    private final ResourceDecoderRegistry decoderRegistry;
-    private final EncoderRegistry encoderRegistry;
-    private final ResourceEncoderRegistry resourceEncoderRegistry;
-    private final DataRewinderRegistry dataRewinderRegistry;
     private final GlideContext glideContext;
 
     /**
@@ -213,20 +199,17 @@ public class Glide implements ComponentCallbacks2 {
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context, DecodeFormat decodeFormat) {
-        this.engine = engine;
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
-        this.decodeFormat = decodeFormat;
         loaderFactory = new GenericLoaderFactory(context);
-        loaderRegistry = new ModelLoaderRegistry(loaderFactory);
-        mainHandler = new Handler(Looper.getMainLooper());
+        ModelLoaderRegistry loaderRegistry = new ModelLoaderRegistry(loaderFactory);
         bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
-        encoderRegistry = new EncoderRegistry();
+        EncoderRegistry encoderRegistry = new EncoderRegistry();
         encoderRegistry.add(InputStream.class, new StreamEncoder());
 
-        resourceEncoderRegistry = new ResourceEncoderRegistry();
-        decoderRegistry = new ResourceDecoderRegistry();
+        ResourceEncoderRegistry resourceEncoderRegistry = new ResourceEncoderRegistry();
+        ResourceDecoderRegistry decoderRegistry = new ResourceDecoderRegistry();
 
         /* Bitmaps */
         decoderRegistry.append(new StreamBitmapDecoder(bitmapPool, decodeFormat), InputStream.class, Bitmap.class);
@@ -235,13 +218,12 @@ public class Glide implements ComponentCallbacks2 {
         resourceEncoderRegistry.add(Bitmap.class, new BitmapEncoder());
 
         /* GlideBitmapDrawables */
-        decoderRegistry.append(new BitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
-                new StreamBitmapDecoder(bitmapPool, decodeFormat)), InputStream.class, BitmapDrawable.class);
+        decoderRegistry.append(new BitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool, new
+                StreamBitmapDecoder(bitmapPool, decodeFormat)), InputStream.class, BitmapDrawable.class);
         decoderRegistry.append(new BitmapDrawableDecoder<ParcelFileDescriptor>(context.getResources(), bitmapPool,
                 new FileDescriptorBitmapDecoder(bitmapPool, decodeFormat)), ParcelFileDescriptor.class,
                 BitmapDrawable.class);
-        resourceEncoderRegistry.add(BitmapDrawable.class,
-                new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()));
+        resourceEncoderRegistry.add(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()));
 
         /* Gifs */
         decoderRegistry.prepend(new GifResourceDecoder(context, bitmapPool), InputStream.class, GifDrawable.class);
@@ -254,7 +236,7 @@ public class Glide implements ComponentCallbacks2 {
         /* Files */
         decoderRegistry.append(new FileDecoder(), File.class, File.class);
 
-        dataRewinderRegistry = new DataRewinderRegistry();
+        DataRewinderRegistry dataRewinderRegistry = new DataRewinderRegistry();
         dataRewinderRegistry.register(new InputStreamRewinder.Factory());
 
         register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
@@ -271,11 +253,13 @@ public class Glide implements ComponentCallbacks2 {
         register(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
         register(byte[].class, InputStream.class, new StreamByteArrayLoader.Factory());
 
-        transcoderRegistry.register(Bitmap.class, BitmapDrawable.class,
-                new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
+        TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
+        transcoderRegistry.register(Bitmap.class, BitmapDrawable.class, new BitmapDrawableTranscoder(context
+                .getResources(), bitmapPool));
         transcoderRegistry.register(Bitmap.class, byte[].class, new BitmapBytesTranscoder());
         transcoderRegistry.register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
 
+        ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
         glideContext = new GlideContext(context, loaderRegistry, encoderRegistry, decoderRegistry,
                 resourceEncoderRegistry, dataRewinderRegistry, transcoderRegistry, imageViewTargetFactory, engine,
                 this);

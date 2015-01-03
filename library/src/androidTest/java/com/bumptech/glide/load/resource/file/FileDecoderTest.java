@@ -23,11 +23,6 @@ public class FileDecoderTest {
     }
 
     @Test
-    public void testReturnsEmptyId() {
-        assertEquals("", decoder.getId());
-    }
-
-    @Test
     public void testReturnsGivenFileAsResource() throws IOException {
         File expected = new File("testFile");
         Resource<File> decoded = decoder.decode(expected, 1, 1);

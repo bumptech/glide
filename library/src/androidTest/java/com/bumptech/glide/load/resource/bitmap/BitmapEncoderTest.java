@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.bumptech.glide.tests.Util.assertClassHasValidId;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -82,12 +81,6 @@ public class BitmapEncoderTest {
     public void testReturnsTrueFromWrite() {
         BitmapEncoder encoder = new BitmapEncoder(harness.compressFormat, harness.quality);
         assertTrue(encoder.encode(harness.resource, harness.os));
-    }
-
-    @Test
-    public void testReturnsValidId() {
-        assertClassHasValidId(BitmapEncoder.class,
-                new BitmapEncoder(harness.compressFormat, harness.quality).getId());
     }
 
     private static void assertContains(String string, String expected) {

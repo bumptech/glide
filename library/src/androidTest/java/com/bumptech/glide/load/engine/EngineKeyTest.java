@@ -39,6 +39,7 @@ public class EngineKeyTest {
 
     private static class Harness {
         String id = "testId";
+        String transformationId= "transformationId";
         int width = 1;
         int height = 2;
         Class resourceClass = Object.class;
@@ -47,6 +48,10 @@ public class EngineKeyTest {
         Transformation transformation = mock(Transformation.class);
         ResourceEncoder encoder = mock(ResourceEncoder.class);
         Key signature = mock(Key.class);
+
+        public Harness() {
+            when(transformation.getId()).thenReturn(transformationId);
+        }
 
         public EngineKey build() {
             return new EngineKey(id, signature, width, height, transformation, resourceClass, transcodeClass);
@@ -87,20 +92,9 @@ public class EngineKeyTest {
 
     @Test
     public void testDiffersIfTransformationDiffers() throws Exception {
-        String id = "transformation";
-        when(harness.transformation.getId()).thenReturn(id);
         EngineKey first = harness.build();
         harness.transformation = mock(Transformation.class);
-        when(harness.transformation.getId()).thenReturn(id + "2");
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfTransformationMissing() throws Exception {
-        EngineKey first = harness.build();
-        harness.transformation = null;
+        when(harness.transformation.getId()).thenReturn(harness.transformationId + "2");
         EngineKey second = harness.build();
 
         KeyAssertions.assertDifferent(first, second);

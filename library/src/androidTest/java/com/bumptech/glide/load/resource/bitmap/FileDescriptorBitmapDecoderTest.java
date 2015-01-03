@@ -38,11 +38,6 @@ public class FileDescriptorBitmapDecoderTest {
     }
 
     @Test
-    public void testHasValidId() {
-        assertEquals("FileDescriptorBitmapDecoder.com.bumptech.glide.load.data.bitmap", decoder.getId());
-    }
-
-    @Test
     public void testReturnsBitmapFromWrappedDecoderAsResource() throws IOException {
         ParcelFileDescriptor source = mock(ParcelFileDescriptor.class);
         int width = 100;

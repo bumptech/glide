@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
@@ -13,17 +12,11 @@ import java.io.IOException;
 
 @RunWith(JUnit4.class)
 public class NullDecoderTest {
-    private NullDecoder decoder;
+    private NullDecoder<Object, Object> decoder;
 
     @Before
     public void setUp() {
-        decoder = new NullDecoder();
-    }
-
-    //TODO: do we really want an empty id here?
-    @Test
-    public void testHasValidId() {
-        assertEquals("", decoder.getId());
+        decoder = new NullDecoder<Object, Object>();
     }
 
     @Test

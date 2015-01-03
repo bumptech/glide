@@ -20,7 +20,9 @@ public class ModelLoaderRegistry {
         DataFetcherSet fetcherSet = new DataFetcherSet();
         for (ModelLoader<A, ?> modelLoader : modelLoaders) {
             DataFetcher<?> fetcher = modelLoader.getDataFetcher(model, width, height);
-            fetcherSet.add(fetcher);
+            if (fetcher != null) {
+                fetcherSet.add(fetcher);
+            }
         }
         return fetcherSet;
     }

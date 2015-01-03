@@ -100,7 +100,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
             }
             data = rewinder.rewindAndGet();
         }
-        throw new NoDecoderAvailableException(data.getClass());
+        throw new NoDecoderAvailableException(data.getClass(), resourceClass);
     }
 
     private static <X, Z> void maybeLogFoundDecoder(List<ResourceDecoder<X, Z>> decoders,
@@ -156,21 +156,27 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         }
     }
 
-    public static class NoResultEncoderAvailableException extends Exception {
+    public static class NoResultEncoderAvailableException extends MissingComponentException {
         public NoResultEncoderAvailableException(Class<?> resourceClass) {
             super("Failed to find result encoder for resource class: " + resourceClass);
         }
     }
 
-    public static class NoSourceEncoderAvailableException extends Exception {
+    public static class NoSourceEncoderAvailableException extends MissingComponentException{
         public NoSourceEncoderAvailableException(Class<?> dataClass) {
             super("Failed to find source encoder for data class: " + dataClass);
         }
     }
 
-    public static class NoDecoderAvailableException extends Exception {
-        public NoDecoderAvailableException(Class<?> dataClass) {
-            super("Failed to find decoder that handles data: " + dataClass);
+    public static class NoDecoderAvailableException extends MissingComponentException {
+        public NoDecoderAvailableException(Class<?> dataClass, Class<?> resourceClass) {
+            super("Failed to find decoder that decodes " + resourceClass + " from data " + dataClass);
+        }
+    }
+
+    public static class MissingComponentException extends RuntimeException {
+        public MissingComponentException(String message) {
+            super(message);
         }
     }
 }

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,10 +37,5 @@ public class GifDrawableBytesTranscoderTest {
 
             assertArrayEquals(expected, transcoded.get());
         }
-    }
-
-    @Test
-    public void testReturnsValidId() {
-        Util.assertClassHasValidId(GifDrawableBytesTranscoder.class, transcoder.getId());
     }
 }

@@ -19,9 +19,4 @@ public class UnitTranscoderTest {
 
         assertEquals(resource, unitTranscoder.transcode(resource));
     }
-
-    @Test
-    public void testHasEmptyId() {
-        assertEquals("", UnitTranscoder.get().getId());
-    }
 }

@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.util.Preconditions;
 
 import java.util.Arrays;
 
@@ -48,13 +49,10 @@ public class DrawableTransformation implements Transformation<Drawable> {
     }
 
     public DrawableTransformation(Transformation<Bitmap> transformation, Transformer... transformers) {
-        if (transformation == null) {
-            throw new NullPointerException("Transformation must not be null");
-        }
         if (transformers.length == 0) {
             throw new IllegalArgumentException("Must provide at least one transformer");
         }
-        this.transformation = transformation;
+        this.transformation = Preconditions.checkNotNull(transformation, "Transformation must not be null");
         this.transformers = transformers;
     }
 }

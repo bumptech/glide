@@ -26,11 +26,14 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.tests.Util.ReturnsSelfAnswer;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -40,24 +43,21 @@ import java.util.UUID;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifFrameLoaderTest {
 
-    private GifFrameLoader.FrameCallback callback;
-    private GifDecoder gifDecoder;
-    private Handler handler;
-    private RequestBuilder<Bitmap, Bitmap> requestBuilder;
+    @Mock GifFrameLoader.FrameCallback callback;
+    @Mock GifDecoder gifDecoder;
+    @Mock Handler handler;
     private GifFrameLoader loader;
+    private RequestBuilder requestBuilder;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        callback = mock(GifFrameLoader.FrameCallback.class);
-        gifDecoder = mock(GifDecoder.class);
-        handler = mock(Handler.class);
+        MockitoAnnotations.initMocks(this);
         when(handler.obtainMessage(anyInt(), anyObject())).thenReturn(mock(Message.class));
 
-        requestBuilder = mock(RequestBuilder.class);
+        requestBuilder = mock(RequestBuilder.class, new ReturnsSelfAnswer());
 
         loader = new GifFrameLoader(callback, gifDecoder, handler, requestBuilder);
-        when(requestBuilder.apply(any(RequestOptions.class))).thenReturn(requestBuilder);
     }
 
     @SuppressWarnings("unchecked")

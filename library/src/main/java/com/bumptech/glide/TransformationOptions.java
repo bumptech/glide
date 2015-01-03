@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.UnitTransformation;
+import com.bumptech.glide.util.Preconditions;
 
 public abstract class TransformationOptions<CHILD extends TransformationOptions<CHILD, ResourceType>, ResourceType>
         implements Cloneable {
@@ -17,11 +18,8 @@ public abstract class TransformationOptions<CHILD extends TransformationOptions<
      */
     @SuppressWarnings("unchecked")
     public final CHILD transform(Transformation<ResourceType> transformation) {
-        if (transformation == null) {
-            throw new NullPointerException("Transformation must not be null, use UnitTransformation to unset");
-        }
+        this.transformation = Preconditions.checkNotNull(transformation);
         isTransformationSet = true;
-        this.transformation = transformation;
 
         return (CHILD) this;
     }

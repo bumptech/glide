@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,12 +53,6 @@ public class BitmapBytesTranscoderTest {
         harness.getTranscodedDescription();
 
         verify(harness.bitmapResource).recycle();
-    }
-
-    @Test
-    public void testHasValidId() {
-        Util.assertClassHasValidId(BitmapBytesTranscoder.class,
-                new BitmapBytesTranscoder(harness.compressFormat, harness.quality).getId());
     }
 
     @SuppressWarnings("unchecked")

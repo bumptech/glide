@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
@@ -17,15 +17,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -38,7 +33,6 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +41,6 @@ import java.util.concurrent.ExecutorService;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = { GlideShadowLooper.class })
 public class EngineTest {
-    private static final String ID = "asdf";
     private EngineTestHarness harness;
 
     @Before
@@ -185,7 +178,7 @@ public class EngineTest {
     public void testActiveResourcesIsNotCheckedIfNotMemoryCacheable() {
         harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource<?>>(harness.resource));
 
-        harness.isMemoryCacheable = false;
+        when(harness.requestContext.isMemoryCacheable()).thenReturn(false);
         harness.doLoad();
 
         verify(harness.resource, never()).acquire();
@@ -205,7 +198,7 @@ public class EngineTest {
     public void testCacheIsNotCheckedIfNotMemoryCacheable() {
         when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
 
-        harness.isMemoryCacheable = false;
+        when(harness.requestContext.isMemoryCacheable()).thenReturn(false);
         harness.doLoad();
 
         verify(harness.job).start(any(EngineRunnable.class));
@@ -408,16 +401,16 @@ public class EngineTest {
     public void testKeyFactoryIsGivenNecessaryArguments() {
         harness.doLoad();
 
-        verify(harness.keyFactory).buildKey(eq(ID), eq(harness.signature), eq(harness.width), eq(harness.height),
-                eq(harness.cacheDecoder), eq(harness.decoder), eq(harness.transformation), eq(harness.encoder),
-                eq(harness.transcoder), eq(harness.sourceEncoder));
+        verify(harness.keyFactory).buildKey(eq(harness.requestContext), eq(harness.width), eq(harness.height));
     }
 
     @Test
     public void testFactoryIsGivenNecessaryArguments() {
+        boolean isMemoryCacheable = true;
+        when(harness.requestContext.isMemoryCacheable()).thenReturn(isMemoryCacheable);
         harness.doLoad();
 
-        verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(harness.isMemoryCacheable));
+        verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(isMemoryCacheable));
     }
 
     @Test
@@ -446,11 +439,6 @@ public class EngineTest {
     private static class EngineTestHarness {
         EngineKey cacheKey = mock(EngineKey.class);
         EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
-        ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
-        DataFetcher<Object> fetcher = mock(DataFetcher.class);
-        ResourceDecoder<Object, Object> decoder = mock(ResourceDecoder.class);
-        ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
-        ResourceTranscoder<Object, Object> transcoder = mock(ResourceTranscoder.class);
         Priority priority = Priority.NORMAL;
         ResourceCallback cb = mock(ResourceCallback.class);
         EngineResource resource = mock(EngineResource.class);
@@ -458,9 +446,8 @@ public class EngineTest {
         Transformation transformation = mock(Transformation.class);
         Map<Key, WeakReference<EngineResource<?>>> activeResources =
                 new HashMap<Key, WeakReference<EngineResource<?>>>();
-        Encoder<Object> sourceEncoder = mock(Encoder.class);
-        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         Key signature = mock(Key.class);
+        RequestContext<Object, Object> requestContext = mock(RequestContext.class);
 
         int width = 100;
         int height = 100;
@@ -468,20 +455,12 @@ public class EngineTest {
         MemoryCache cache = mock(MemoryCache.class);
         EngineJob job;
         Engine engine;
-        boolean isMemoryCacheable = true;
         Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
         ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
 
         public EngineTestHarness() {
-            when(loadProvider.getCacheDecoder()).thenReturn(cacheDecoder);
-            when(loadProvider.getSourceEncoder()).thenReturn(sourceEncoder);
-            when(loadProvider.getEncoder()).thenReturn(encoder);
-            when(loadProvider.getSourceDecoder()).thenReturn(decoder);
-
-            when(keyFactory.buildKey(anyString(), any(Key.class), anyInt(), anyInt(), any(ResourceDecoder.class),
-                    any(ResourceDecoder.class), any(Transformation.class), any(ResourceEncoder.class),
-                    any(ResourceTranscoder.class), any(Encoder.class))).thenReturn(cacheKey);
-            when(fetcher.getId()).thenReturn(ID);
+            when(keyFactory.buildKey(eq(requestContext), anyInt(), anyInt())).thenReturn(cacheKey);
+            when(requestContext.isMemoryCacheable()).thenReturn(true);
 
             job = mock(EngineJob.class);
 
@@ -491,9 +470,8 @@ public class EngineTest {
         }
 
         public Engine.LoadStatus doLoad() {
-            when(engineJobFactory.build(eq(cacheKey), eq(isMemoryCacheable))).thenReturn(job);
-            return engine.load(signature, width, height, fetcher, loadProvider, transformation, transcoder, priority,
-                    isMemoryCacheable, diskCacheStrategy, cb);
+            when(engineJobFactory.build(eq(cacheKey), anyBoolean())).thenReturn(job);
+            return engine.load(requestContext, width, height, cb);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.bumptech.glide.signature;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.util.Preconditions;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -12,10 +13,7 @@ public class StringSignature implements Key {
     private final String signature;
 
     public StringSignature(String signature) {
-        if (signature == null) {
-            throw new NullPointerException("Signature cannot be null!");
-        }
-        this.signature = signature;
+        this.signature = Preconditions.checkNotNull(signature);
     }
 
     @Override

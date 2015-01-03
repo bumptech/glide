@@ -49,9 +49,9 @@ public final class SingleRequest<R> implements Request,
     private final String tag = String.valueOf(hashCode());
 
     private RequestContext<?, R> requestContext;
+    private Object model;
     private RequestOptions requestOptions;
     private RequestCoordinator requestCoordinator;
-    private Object model;
     private Class<R> transcodeClass;
     private Target<R> target;
     private RequestListener<R> requestListener;
@@ -67,6 +67,7 @@ public final class SingleRequest<R> implements Request,
 
     public static <R> SingleRequest<R> obtain(
             RequestContext<?, R> requestContext,
+            Object model,
             Class<R> transcodeClass,
             RequestOptions requestOptions,
             Target<R> target,
@@ -80,6 +81,7 @@ public final class SingleRequest<R> implements Request,
         }
         request.init(
                 requestContext,
+                model,
                 transcodeClass,
                 requestOptions,
                 target,
@@ -96,6 +98,7 @@ public final class SingleRequest<R> implements Request,
 
     private void init(
             RequestContext<?, R> requestContext,
+            Object model,
             Class<R> transcodeClass,
             RequestOptions requestOptions,
             Target<R> target,
@@ -104,6 +107,7 @@ public final class SingleRequest<R> implements Request,
             Engine engine,
             GlideAnimationFactory<? super R> animationFactory) {
         this.requestContext = requestContext;
+        this.model = model;
         this.requestOptions = requestOptions;
         this.target = target;
         this.requestListener = requestListener;
@@ -116,7 +120,6 @@ public final class SingleRequest<R> implements Request,
 
     @Override
     public void recycle() {
-        model = null;
         requestContext = null;
         requestOptions = null;
         target = null;

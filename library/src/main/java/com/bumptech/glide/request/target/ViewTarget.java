@@ -12,6 +12,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.util.Preconditions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -44,10 +45,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     private final SizeDeterminer sizeDeterminer;
 
     public ViewTarget(T view) {
-        if (view == null) {
-            throw new NullPointerException("View must not be null!");
-        }
-        this.view = view;
+        this.view = Preconditions.checkNotNull(view);
         sizeDeterminer = new SizeDeterminer(view);
     }
 

@@ -3,7 +3,6 @@ package com.bumptech.glide.request;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -15,25 +14,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 
-import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Encoder;
-import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -44,11 +34,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,49 +52,43 @@ public class SingleRequestTest {
      */
     @SuppressWarnings("unchecked")
     private static class RequestHarness {
-        ModelLoader<Number, Object> modelLoader;
         Engine engine = mock(Engine.class);
         Number model = 123456;
         Target<List> target = mock(Target.class);
-        Context context = Robolectric.application;
         Resource<List> resource = mock(Resource.class);
         RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
-        Priority priority = Priority.NORMAL;
         int placeholderResourceId = 0;
         Drawable placeholderDrawable = null;
         int errorResourceId = 0;
-        Transformation transformation = mock(Transformation.class);
         Drawable errorDrawable = null;
-        ResourceDecoder<File, Object> cacheDecoder = mock(ResourceDecoder.class);
-        ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
-        ResourceEncoder<Object> encoder = mock(ResourceEncoder.class);
-        ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
-        Encoder<Object> sourceEncoder = mock(Encoder.class);
         RequestListener<List> requestListener = mock(RequestListener.class);
         DataFetcherSet dataFetcherSet = mock(DataFetcherSet.class);
-        boolean skipMemoryCache;
         GlideAnimationFactory<List> factory = mock(GlideAnimationFactory.class);
         int overrideWidth = -1;
         int overrideHeight = -1;
         List result = new ArrayList();
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
-        Key signature = mock(Key.class);
         GlideContext glideContext = mock(GlideContext.class);
-        RequestOptions requestOptions = mock(RequestOptions.class);
+        RequestOptions requestOptions = new RequestOptions();
+        RequestContext<?, List> requestContext = mock(RequestContext.class);
 
         public RequestHarness() {
-            modelLoader = mock(ModelLoader.class);
-            when(modelLoader.getDataFetcher(any(Number.class), anyInt(), anyInt()))
-                    .thenReturn(mock(DataFetcher.class));
             when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
             when(requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(true);
             when(glideContext.getDataFetchers(eq(model), anyInt(), anyInt())).thenReturn(dataFetcherSet);
             when(resource.get()).thenReturn(result);
         }
 
-        public SingleRequest<Number, List, List> getRequest() {
-            return SingleRequest.obtain(model, List.class, List.class, glideContext, requestOptions, 1f, priority,
-                    transcoder, context, target, requestListener, requestCoordinator, engine, transformation, factory);
+        public SingleRequest<List> getRequest() {
+            requestOptions
+                    .override(overrideWidth, overrideHeight)
+                    .placeholder(placeholderResourceId)
+                    .placeholder(placeholderDrawable)
+                    .error(errorResourceId)
+                    .error(errorDrawable)
+                    .diskCacheStrategy(diskCacheStrategy);
+            return SingleRequest.obtain(requestContext, model, List.class, requestOptions, target, requestListener,
+                    requestCoordinator, engine, factory);
         }
     }
 
@@ -116,31 +98,15 @@ public class SingleRequestTest {
     }
 
     @Test
-    public void testThrowsWhenTransformationIsNull() {
-        for (DiskCacheStrategy strategy : DiskCacheStrategy.values()) {
-            harness = new RequestHarness();
-            harness.diskCacheStrategy = strategy;
-            harness.transformation = null;
-
-            try {
-                harness.getRequest();
-                fail(NullPointerException.class.getSimpleName() + " expected for " + strategy);
-            } catch (NullPointerException ex) {
-                // expected
-            }
-        }
-    }
-
-    @Test
     public void testIsNotCompleteBeforeReceivingResource() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         assertFalse(request.isComplete());
     }
 
     @Test
     public void testCanHandleNullResources() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onResourceReady(null);
 
@@ -151,7 +117,7 @@ public class SingleRequestTest {
 
     @Test
     public void testCanHandleEmptyResources() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.resource.get()).thenReturn(null);
 
         request.onResourceReady(harness.resource);
@@ -164,7 +130,7 @@ public class SingleRequestTest {
 
     @Test
     public void testCanHandleNonConformingResources() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(((Resource) (harness.resource)).get()).thenReturn("Invalid mocked String, this should be a List");
 
         request.onResourceReady(harness.resource);
@@ -177,7 +143,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotFailedAfterClear() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onResourceReady(null);
         request.clear();
@@ -187,7 +153,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsPausedAfterPause() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.pause();
 
         assertTrue(request.isPaused());
@@ -195,7 +161,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotCancelledAfterPause() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.pause();
 
         assertFalse(request.isCancelled());
@@ -203,7 +169,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotPausedAfterBeginningWhilePaused() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.pause();
         request.begin();
 
@@ -213,7 +179,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotFailedAfterBegin() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onResourceReady(null);
         request.begin();
@@ -223,7 +189,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsCompleteAfterReceivingResource() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
 
@@ -232,7 +198,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotCompleteAfterClear() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
         request.clear();
 
@@ -241,7 +207,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsCancelledAfterClear() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.clear();
 
         assertTrue(request.isCancelled());
@@ -249,7 +215,7 @@ public class SingleRequestTest {
 
     @Test
     public void testDoesNotNotifyTargetTwiceIfClearedTwiceInARow() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.clear();
         request.clear();
 
@@ -269,7 +235,7 @@ public class SingleRequestTest {
         }).when(requestCoordinator).canSetImage(any(Request.class));
 
         harness.requestCoordinator = requestCoordinator;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
 
@@ -278,14 +244,14 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotFailedWithoutException() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         assertFalse(request.isFailed());
     }
 
     @Test
     public void testIsFailedAfterException() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onException(new Exception("test"));
         assertTrue(request.isFailed());
@@ -293,51 +259,31 @@ public class SingleRequestTest {
 
     @Test
     public void testIgnoresOnSizeReadyIfNotWaitingForSize() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
         request.onSizeReady(100, 100);
         request.onSizeReady(100, 100);
 
-        verify(harness.engine, times(1)).load(eq(List.class), eq(List.class), eq(harness.signature), eq(100), eq(100),
-                eq(harness.dataFetcherSet), eq(harness.glideContext), any(Transformation.class),
-                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
-                any(ResourceCallback.class));
+        verify(harness.engine, times(1)).load(eq(harness.requestContext), eq(100), eq(100), any(ResourceCallback
+                .class));
     }
 
     @Test
     public void testIsFailedAfterNoResultAndNullException() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onException(null);
         assertTrue(request.isFailed());
     }
 
     @Test
-    public void testEngineLoadPassedCorrectPriority() {
-        Priority expected = Priority.HIGH;
-        harness.priority = expected;
-        SingleRequest request = harness.getRequest();
-        request.begin();
-
-        request.onSizeReady(100, 100);
-
-        verify(harness.engine).load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(),
-                any(DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
-                any(ResourceTranscoder.class), eq(expected), anyBoolean(), any(DiskCacheStrategy.class),
-                any(ResourceCallback.class));
-    }
-
-    @Test
     public void testEngineLoadCancelledOnCancel() {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
 
-        when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
-                (DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
-                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
-                any(ResourceCallback.class)))
+        when(harness.engine.load(any(RequestContext.class), anyInt(), anyInt(), any(ResourceCallback.class)))
                 .thenReturn(loadStatus);
 
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
 
         request.onSizeReady(100, 100);
@@ -348,7 +294,7 @@ public class SingleRequestTest {
 
     @Test
     public void testResourceIsRecycledOnClear() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onResourceReady(harness.resource);
         request.clear();
@@ -361,13 +307,12 @@ public class SingleRequestTest {
         final int expectedId = 12345;
         Drawable expected = new ColorDrawable(Color.RED);
 
-        Context context = mockContextToReturn(expectedId, expected);
+        mockContextToReturn(expectedId, expected);
         MockTarget target = new MockTarget();
 
-        harness.context = context;
         harness.placeholderResourceId = expectedId;
         harness.target = target;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -381,7 +326,7 @@ public class SingleRequestTest {
 
         harness.placeholderDrawable = expected;
         harness.target = target;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
 
         assertEquals(expected, target.currentPlaceholder);
@@ -392,13 +337,12 @@ public class SingleRequestTest {
         final int expectedId = 12345;
         Drawable expected = new ColorDrawable(Color.RED);
 
-        Context context = mockContextToReturn(expectedId, expected);
+        mockContextToReturn(expectedId, expected);
         MockTarget target = new MockTarget();
 
-        harness.context = context;
         harness.errorResourceId = expectedId;
         harness.target = target;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onException(null);
 
@@ -413,7 +357,7 @@ public class SingleRequestTest {
 
         harness.errorDrawable = expected;
         harness.target = target;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.onException(null);
 
@@ -429,7 +373,7 @@ public class SingleRequestTest {
         harness.placeholderDrawable = placeholder;
         harness.target = target;
         harness.model = null;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.begin();
 
@@ -447,7 +391,7 @@ public class SingleRequestTest {
         harness.errorDrawable = errorPlaceholder;
         harness.target = target;
         harness.model = null;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
 
         request.begin();
 
@@ -468,7 +412,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotRunningAfterComplete() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
         request.onResourceReady(harness.resource);
 
@@ -477,7 +421,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotRunningAfterFailing() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
         request.onException(new RuntimeException("Test"));
 
@@ -486,7 +430,7 @@ public class SingleRequestTest {
 
     @Test
     public void testIsNotRunningAfterClear() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
         request.clear();
 
@@ -496,7 +440,7 @@ public class SingleRequestTest {
     @Test
     public void testCallsTargetOnResourceReadyIfNoRequestListener() {
         harness.requestListener = null;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.target).onResourceReady(eq(harness.result), any(GlideAnimation.class));
@@ -504,7 +448,7 @@ public class SingleRequestTest {
 
     @Test
     public void testCallsTargetOnResourceReadyIfRequestListenerReturnsFalse() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.requestListener.onResourceReady(any(List.class), any(Number.class), eq(harness.target),
                 anyBoolean(), anyBoolean())).thenReturn(false);
         request.onResourceReady(harness.resource);
@@ -514,7 +458,7 @@ public class SingleRequestTest {
 
     @Test
     public void testDoesNotCallTargetOnResourceReadyIfRequestListenerReturnsTrue() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.requestListener.onResourceReady(any(List.class), any(Number.class), eq(harness.target),
                 anyBoolean(), anyBoolean())).thenReturn(true);
         request.onResourceReady(harness.resource);
@@ -525,7 +469,7 @@ public class SingleRequestTest {
     @Test
     public void testCallsTargetOnExceptionIfNoRequestListener() {
         harness.requestListener = null;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         Exception exception = new IOException("test");
         request.onException(exception);
 
@@ -534,7 +478,7 @@ public class SingleRequestTest {
 
     @Test
     public void testCallsTargetOnExceptionIfRequestListenerReturnsFalse() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.requestListener
                 .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean()))
                 .thenReturn(false);
@@ -546,7 +490,7 @@ public class SingleRequestTest {
 
     @Test
     public void testDoesNotCallTargetOnExceptionIfRequestListenerReturnsTrue() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.requestListener
                 .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean()))
                 .thenReturn(true);
@@ -558,7 +502,7 @@ public class SingleRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithResourceResult() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(eq(harness.result), any(Number.class), any(Target.class),
@@ -567,7 +511,7 @@ public class SingleRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithModel() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(any(List.class), eq(harness.model), any(Target.class),
@@ -576,7 +520,7 @@ public class SingleRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithTarget() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(any(List.class), any(Number.class), eq(harness.target),
@@ -585,18 +529,16 @@ public class SingleRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithLoadedFromMemoryIfLoadCompletesSynchronously() {
-        final SingleRequest request = harness.getRequest();
+        final SingleRequest<List> request = harness.getRequest();
 
-        when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
-                        (DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
-                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
-                any(ResourceCallback.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                request.onResourceReady(harness.resource);
-                return null;
-            }
-        });
+        when(harness.engine.load(any(RequestContext.class), anyInt(), anyInt(), any(ResourceCallback.class)))
+                .thenAnswer(new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        request.onResourceReady(harness.resource);
+                        return null;
+                    }
+                });
 
         request.begin();
         request.onSizeReady(100, 100);
@@ -606,7 +548,7 @@ public class SingleRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithNotLoadedFromMemoryCacheIfLoadCompletesAsynchronously() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onSizeReady(100, 100);
         request.onResourceReady(harness.resource);
 
@@ -617,7 +559,7 @@ public class SingleRequestTest {
     @Test
     public void testRequestListenerIsCalledWithIsFirstResourceIfNoRequestCoordinator() {
         harness.requestCoordinator = null;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.requestListener).onResourceReady(eq(harness.result), any(Number.class), any(Target.class),
@@ -626,7 +568,7 @@ public class SingleRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithIsFirstImageIfRequestCoordinatorReturnsNoResourceSet() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(false);
         request.onResourceReady(harness.resource);
 
@@ -636,7 +578,7 @@ public class SingleRequestTest {
 
     @Test
     public void testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsResourceSet() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(true);
         request.onResourceReady(harness.resource);
 
@@ -646,7 +588,7 @@ public class SingleRequestTest {
 
     @Test
     public void testTargetIsCalledWithAnimationFromFactory() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         GlideAnimation<List> glideAnimation = mock(GlideAnimation.class);
         when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(glideAnimation);
         request.onResourceReady(harness.resource);
@@ -658,7 +600,7 @@ public class SingleRequestTest {
     public void testCallsGetSizeIfOverrideWidthIsLessThanZero() {
         harness.overrideWidth = -1;
         harness.overrideHeight = 100;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
 
         verify(harness.target).getSize(any(SizeReadyCallback.class));
@@ -668,7 +610,7 @@ public class SingleRequestTest {
     public void testCallsGetSizeIfOverrideHeightIsLessThanZero() {
         harness.overrideHeight = -1;
         harness.overrideWidth = 100;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
 
         verify(harness.target).getSize(any(SizeReadyCallback.class));
@@ -678,7 +620,7 @@ public class SingleRequestTest {
     public void testDoesNotCallGetSizeIfOverrideWidthAndHeightAreSet() {
         harness.overrideWidth = 100;
         harness.overrideHeight = 100;
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
 
         verify(harness.target, never()).getSize(any(SizeReadyCallback.class));
@@ -689,19 +631,17 @@ public class SingleRequestTest {
         harness.overrideWidth = 1;
         harness.overrideHeight = 2;
 
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.begin();
 
-        verify(harness.engine).load(eq(List.class), eq(List.class), eq(harness.signature), eq(harness.overrideWidth),
-                eq(harness.overrideHeight), any(DataFetcherSet.class), any(GlideContext.class),
-                any(Transformation.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
-                any(DiskCacheStrategy.class), any(ResourceCallback.class));
+        verify(harness.engine).load(eq(harness.requestContext), eq(harness.overrideWidth), eq(harness.overrideHeight),
+                any(ResourceCallback.class));
     }
 
     @Test
     public void testDoesNotSetErrorDrawableIfRequestCoordinatorDoesntAllowIt() {
         harness.errorDrawable = new ColorDrawable(Color.RED);
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         when(harness.requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(false);
         request.onException(new IOException("Test"));
 
@@ -713,11 +653,9 @@ public class SingleRequestTest {
         doAnswer(new CallSizeReady(100, 100)).when(harness.target)
                 .getSize(any(SizeReadyCallback.class));
 
-        when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
-                        (DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
-                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
-                any(ResourceCallback.class))).thenAnswer(new CallResourceCallback(harness.resource));
-        SingleRequest request = harness.getRequest();
+        when(harness.engine.load(eq(harness.requestContext), eq(100), eq(100), any(ResourceCallback.class)))
+                .thenAnswer(new CallResourceCallback(harness.resource));
+        SingleRequest<List> request = harness.getRequest();
 
         request.begin();
         request.cancel();
@@ -728,32 +666,19 @@ public class SingleRequestTest {
 
     @Test
     public void testResourceOnlyReceivesOneGetOnResourceReady() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
         verify(harness.resource, times(1)).get();
     }
 
     @Test
-    public void testOnSizeReadyWithNullDataFetcherCallsOnException() {
-        SingleRequest request = harness.getRequest();
-        when(harness.modelLoader.getDataFetcher(any(Number.class), anyInt(), anyInt())).thenReturn(null);
-        request.begin();
-        request.onSizeReady(100, 100);
-
-        verify(harness.requestListener).onException(any(Exception.class), any(Number.class), any(Target.class),
-                anyBoolean());
-    }
-
-    @Test
     public void testDoesNotStartALoadIfOnSizeReadyIsCalledAfterCancel() {
-        SingleRequest request = harness.getRequest();
+        SingleRequest<List> request = harness.getRequest();
         request.cancel();
         request.onSizeReady(100, 100);
 
-        verify(harness.engine, never()).load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(),
-                any(DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
-                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
+        verify(harness.engine, never()).load(any(RequestContext.class), anyInt(), anyInt(),
                 any(ResourceCallback.class));
     }
 
@@ -793,18 +718,13 @@ public class SingleRequestTest {
         }
     }
 
-    private Context mockContextToReturn(int resourceId, Drawable drawable) {
+    private void mockContextToReturn(int resourceId, Drawable drawable) {
         Resources resources = mock(Resources.class);
-        Context context = mock(Context.class);
-
-        when(context.getApplicationContext()).thenReturn(context);
-        when(context.getResources()).thenReturn(resources);
+        when(harness.requestContext.getResources()).thenReturn(resources);
         when(resources.getDrawable(eq(resourceId))).thenReturn(drawable);
-
-        return context;
     }
 
-    private static class MockTarget implements Target {
+    private static class MockTarget implements Target<List> {
         private Drawable currentPlaceholder;
 
         @Override
@@ -825,7 +745,7 @@ public class SingleRequestTest {
         }
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
+        public void onResourceReady(List resource, GlideAnimation<? super List> glideAnimation) {
             currentPlaceholder = null;
         }
 
