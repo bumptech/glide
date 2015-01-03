@@ -2,7 +2,9 @@ package com.bumptech.glide;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -65,8 +67,8 @@ import com.bumptech.glide.provider.EncoderRegistry;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.RequestContext;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -83,7 +85,8 @@ import java.util.List;
  * maintaining an {@link Engine}, {@link BitmapPool}, {@link com.bumptech.glide.load.engine.cache.DiskCache} and
  * {@link MemoryCache}.
  */
-public class Glide {
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+public class Glide implements ComponentCallbacks2 {
     /** 250 MB of cache. */
     static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
 
@@ -105,6 +108,7 @@ public class Glide {
     private final EncoderRegistry encoderRegistry;
     private final ResourceEncoderRegistry resourceEncoderRegistry;
     private final DataRewinderRegistry dataRewinderRegistry;
+    private final GlideContext glideContext;
 
     /**
      * Returns a directory with a default name in the private cache directory of the application to use to store
@@ -207,6 +211,7 @@ public class Glide {
         glide = null;
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context, DecodeFormat decodeFormat) {
         this.engine = engine;
         this.bitmapPool = bitmapPool;
@@ -270,6 +275,10 @@ public class Glide {
                 new BitmapDrawableTranscoder(context.getResources(), bitmapPool));
         transcoderRegistry.register(Bitmap.class, byte[].class, new BitmapBytesTranscoder());
         transcoderRegistry.register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
+
+        glideContext = new GlideContext(context, loaderRegistry, encoderRegistry, decoderRegistry,
+                resourceEncoderRegistry, dataRewinderRegistry, transcoderRegistry, imageViewTargetFactory, engine,
+                this);
     }
 
     /**
@@ -298,29 +307,8 @@ public class Glide {
         return bitmapPool;
     }
 
-    <Z, R> ResourceTranscoder<Z, R> buildTranscoder(Class<Z> decodedClass, Class<R> transcodedClass) {
-        return transcoderRegistry.get(decodedClass, transcodedClass);
-    }
-
-    <R> Target<R> buildImageViewTarget(ImageView imageView, Class<R> transcodedClass) {
-        return imageViewTargetFactory.buildTarget(imageView, transcodedClass);
-    }
-
-    Engine getEngine() {
-        return engine;
-    }
-
-    Handler getMainHandler() {
-        return mainHandler;
-    }
-
-    DecodeFormat getDecodeFormat() {
-        return decodeFormat;
-    }
-
-    RequestContext getRequestContext() {
-        return new RequestContext(loaderRegistry, encoderRegistry, decoderRegistry, resourceEncoderRegistry,
-                dataRewinderRegistry);
+    GlideContext getGlideContext() {
+        return glideContext;
     }
 
     private GenericLoaderFactory getLoaderFactory() {
@@ -652,6 +640,21 @@ public class Glide {
     public static RequestManager with(Fragment fragment) {
         RequestManagerRetriever retriever = RequestManagerRetriever.get();
         return retriever.get(fragment);
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        trimMemory(level);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onLowMemory() {
+        clearMemory();
     }
 
     private static class ClearTarget extends ViewTarget<View, Object> {

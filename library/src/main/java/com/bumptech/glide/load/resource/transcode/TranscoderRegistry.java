@@ -29,22 +29,22 @@ public class TranscoderRegistry {
      * Returns the currently registered {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} for the
      * given classes.
      *
-     * @param decodedClass The class of the resource that the transcoder transcodes from.
+     * @param resourceClass The class of the resource that the transcoder transcodes from.
      * @param transcodedClass The class of the resource that the transcoder transcodes to.
      * @param <Z> The type of the resource that the transcoder transcodes from.
      * @param <R> The type of the resource that the transcoder transcodes to.
      */
     @SuppressWarnings("unchecked")
-    public synchronized <Z, R> ResourceTranscoder<Z, R> get(Class<Z> decodedClass, Class<R> transcodedClass) {
-        if (decodedClass.equals(transcodedClass)) {
+    public synchronized <Z, R> ResourceTranscoder<Z, R> get(Class<Z> resourceClass, Class<R> transcodedClass) {
+        if (resourceClass.equals(transcodedClass)) {
             return (ResourceTranscoder<Z, R>) UnitTranscoder.get();
         }
         for (Entry<?, ?> entry : transcoders) {
-            if (entry.handles(decodedClass, transcodedClass)) {
+            if (entry.handles(resourceClass, transcodedClass)) {
                 return (ResourceTranscoder<Z, R>) entry.transcoder;
             }
         }
-        throw new IllegalArgumentException("No transcoder registered to transcode from " + decodedClass + " to "
+        throw new IllegalArgumentException("No transcoder registered to transcode from " + resourceClass + " to "
                 + transcodedClass);
     }
 

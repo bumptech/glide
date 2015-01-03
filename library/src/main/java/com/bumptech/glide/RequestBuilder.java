@@ -2,19 +2,20 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
-import android.content.Context;
 import android.net.Uri;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.UnitTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.RequestFutureTarget;
@@ -43,8 +44,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
     private static final TransformationOptions<?, ?> DEFAULT_TRANSFORMATION_OPTIONS = new GenericTransformationOptions<Object>();
     private static final AnimationOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
             new GenericAnimationOptions<Object>();
-    protected final Context context;
-    protected final Glide glide;
+    protected final GlideContext context;
     protected final Class<ResourceType> resourceClass;
     protected final Class<TranscodeType> transcodeClass;
     protected final RequestTracker requestTracker;
@@ -68,19 +68,17 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
     private Float thumbSizeMultiplier;
 
     RequestBuilder(Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass, RequestBuilder<?, ?> other) {
-        this(other.context, resourceClass, transcodeClass, other.glide, other.requestTracker,
-                other.lifecycle);
+        this(other.context, resourceClass, transcodeClass, other.requestTracker, other.lifecycle);
         this.model = other.model;
         this.isModelSet = other.isModelSet;
         this.requestOptions = other.requestOptions;
     }
 
-    RequestBuilder(Context context, Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass, Glide glide,
+    RequestBuilder(GlideContext context, Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass,
             RequestTracker requestTracker, Lifecycle lifecycle) {
         this.context = context;
         this.resourceClass = resourceClass;
         this.transcodeClass = transcodeClass;
-        this.glide = glide;
         this.requestTracker = requestTracker;
         this.lifecycle = lifecycle;
 
@@ -433,7 +431,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
             }
         }
 
-        return into(glide.buildImageViewTarget(view, transcodeClass));
+        return into(context.buildImageViewTarget(view, transcodeClass));
     }
 
     /**
@@ -451,10 +449,10 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      */
     public final FutureTarget<TranscodeType> into(int width, int height) {
         final RequestFutureTarget<TranscodeType> target =
-                new RequestFutureTarget<TranscodeType>(glide.getMainHandler(), width, height);
+                new RequestFutureTarget<TranscodeType>(context.getMainHandler(), width, height);
 
         // TODO: Currently all loads must be started on the main thread...
-        glide.getMainHandler().post(new Runnable() {
+        context.getMainHandler().post(new Runnable() {
             @Override
             public void run() {
                 if (!target.isCancelled()) {
@@ -569,8 +567,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
             }
 
             ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
-            Request fullRequest = obtainRequest(target, requestOptions.getSizeMultiplier(),
-                    requestOptions.getPriority(), coordinator);
+            Request fullRequest = obtainRequest(target, requestOptions, coordinator);
             // Recursively generate thumbnail requests.
             Request thumbRequest = thumbnailBuilder.buildRequestRecursive(target, coordinator);
             coordinator.setRequests(fullRequest, thumbRequest);
@@ -578,24 +575,27 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
         } else if (thumbSizeMultiplier != null) {
             // Base case: thumbnail multiplier generates a thumbnail request, but cannot recurse.
             ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
-            Request fullRequest = obtainRequest(target, requestOptions.getSizeMultiplier(),
-                    requestOptions.getPriority(), coordinator);
-            Request thumbnailRequest = obtainRequest(target, thumbSizeMultiplier,
-                    getThumbnailPriority(), coordinator);
+            Request fullRequest = obtainRequest(target, requestOptions, coordinator);
+            RequestOptions thumbnailOptions = new RequestOptions()
+                    .apply(requestOptions)
+                    .sizeMultiplier(thumbSizeMultiplier)
+                    .priority(getThumbnailPriority());
+            Request thumbnailRequest = obtainRequest(target, thumbnailOptions, coordinator);
             coordinator.setRequests(fullRequest, thumbnailRequest);
             return coordinator;
         } else {
             // Base case: no thumbnail.
-            return obtainRequest(target, requestOptions.getSizeMultiplier(), requestOptions.getPriority(),
-                    parentCoordinator);
+            return obtainRequest(target, requestOptions, parentCoordinator);
         }
     }
 
-    private Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
+    private Request obtainRequest(Target<TranscodeType> target, RequestOptions requestOptions,
             RequestCoordinator requestCoordinator) {
-        return SingleRequest.obtain(model, resourceClass, transcodeClass, glide.getRequestContext(), requestOptions,
-                sizeMultiplier, priority, transcoder != null ? transcoder : glide.buildTranscoder(resourceClass,
-                        transcodeClass), context, target, requestListener, requestCoordinator, glide.getEngine(),
-                transformationOptions.getTransformation(), animationOptions.getAnimationFactory());
+        RequestContext<ResourceType, TranscodeType> requestContext =
+                new RequestContext<ResourceType, TranscodeType>(context, model, resourceClass,
+                        transcodeClass, transformationOptions.getTransformation(), transcoder, requestOptions);
+
+        return SingleRequest.obtain(requestContext, transcodeClass, requestOptions, target, requestListener,
+                requestCoordinator, context.getEngine(), animationOptions.getAnimationFactory());
     }
 }

@@ -91,7 +91,7 @@ public class SingleRequestTest {
         List result = new ArrayList();
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         Key signature = mock(Key.class);
-        RequestContext requestContext = mock(RequestContext.class);
+        GlideContext glideContext = mock(GlideContext.class);
         RequestOptions requestOptions = mock(RequestOptions.class);
 
         public RequestHarness() {
@@ -100,12 +100,12 @@ public class SingleRequestTest {
                     .thenReturn(mock(DataFetcher.class));
             when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
             when(requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(true);
-            when(requestContext.getDataFetchers(eq(model), anyInt(), anyInt())).thenReturn(dataFetcherSet);
+            when(glideContext.getDataFetchers(eq(model), anyInt(), anyInt())).thenReturn(dataFetcherSet);
             when(resource.get()).thenReturn(result);
         }
 
         public SingleRequest<Number, List, List> getRequest() {
-            return SingleRequest.obtain(model, List.class, List.class, requestContext, requestOptions, 1f, priority,
+            return SingleRequest.obtain(model, List.class, List.class, glideContext, requestOptions, 1f, priority,
                     transcoder, context, target, requestListener, requestCoordinator, engine, transformation, factory);
         }
     }
@@ -299,7 +299,7 @@ public class SingleRequestTest {
         request.onSizeReady(100, 100);
 
         verify(harness.engine, times(1)).load(eq(List.class), eq(List.class), eq(harness.signature), eq(100), eq(100),
-                eq(harness.dataFetcherSet), eq(harness.requestContext), any(Transformation.class),
+                eq(harness.dataFetcherSet), eq(harness.glideContext), any(Transformation.class),
                 any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class));
     }
@@ -322,7 +322,7 @@ public class SingleRequestTest {
         request.onSizeReady(100, 100);
 
         verify(harness.engine).load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(),
-                any(DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                any(DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
                 any(ResourceTranscoder.class), eq(expected), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class));
     }
@@ -332,7 +332,7 @@ public class SingleRequestTest {
         Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
 
         when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
-                (DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                (DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
                 any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class)))
                 .thenReturn(loadStatus);
@@ -588,7 +588,7 @@ public class SingleRequestTest {
         final SingleRequest request = harness.getRequest();
 
         when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
-                        (DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                        (DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
                 any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class))).thenAnswer(new Answer<Object>() {
             @Override
@@ -693,7 +693,7 @@ public class SingleRequestTest {
         request.begin();
 
         verify(harness.engine).load(eq(List.class), eq(List.class), eq(harness.signature), eq(harness.overrideWidth),
-                eq(harness.overrideHeight), any(DataFetcherSet.class), any(RequestContext.class),
+                eq(harness.overrideHeight), any(DataFetcherSet.class), any(GlideContext.class),
                 any(Transformation.class), any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
                 any(DiskCacheStrategy.class), any(ResourceCallback.class));
     }
@@ -714,7 +714,7 @@ public class SingleRequestTest {
                 .getSize(any(SizeReadyCallback.class));
 
         when(harness.engine.load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(), any
-                        (DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                        (DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
                 any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class))).thenAnswer(new CallResourceCallback(harness.resource));
         SingleRequest request = harness.getRequest();
@@ -752,7 +752,7 @@ public class SingleRequestTest {
         request.onSizeReady(100, 100);
 
         verify(harness.engine, never()).load(eq(List.class), eq(List.class), eq(harness.signature), anyInt(), anyInt(),
-                any(DataFetcherSet.class), any(RequestContext.class), any(Transformation.class),
+                any(DataFetcherSet.class), any(GlideContext.class), any(Transformation.class),
                 any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
                 any(ResourceCallback.class));
     }

@@ -2,20 +2,16 @@ package com.bumptech.glide.load.engine;
 
 import android.util.Log;
 
-import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
-import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.request.RequestContext;
-import com.bumptech.glide.request.RequestContext.NoDecoderAvailableException;
-import com.bumptech.glide.request.RequestContext.NoResultEncoderAvailableException;
-import com.bumptech.glide.request.RequestContext.NoSourceEncoderAvailableException;
+import com.bumptech.glide.request.GlideContext.NoDecoderAvailableException;
+import com.bumptech.glide.request.GlideContext.NoResultEncoderAvailableException;
+import com.bumptech.glide.request.GlideContext.NoSourceEncoderAvailableException;
 import com.bumptech.glide.util.LogTime;
 
 import java.io.BufferedOutputStream;
@@ -38,44 +34,28 @@ class DecodeJob<Z, R> {
     private static final String TAG = "DecodeJob";
     private static final FileOpener DEFAULT_FILE_OPENER = new FileOpener();
 
+    private final RequestContext<Z, R> requestContext;
     private final EngineKey resultKey;
     private final int width;
     private final int height;
     private final DiskCacheProvider diskCacheProvider;
-    private final DataFetcherSet sourceFetchers;
-    private final Class<Z> resourceClass;
-    private final RequestContext requestContext;
-    private final Transformation<Z> transformation;
-    private final ResourceTranscoder<Z, ? extends R> transcoder;
-    private final DiskCacheStrategy diskCacheStrategy;
-    private final Priority priority;
     private final FileOpener fileOpener;
+
     private volatile boolean isCancelled;
 
-    public DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet sourceFetchers,
-            RequestContext requestContext, Transformation<Z> transformation,
-            ResourceTranscoder<Z, ? extends R> transcoder, DiskCacheProvider diskCacheProvider,
-            DiskCacheStrategy diskCacheStrategy, Priority priority) {
-        this(resourceClass, resultKey, width, height, sourceFetchers, requestContext, transformation, transcoder,
-                diskCacheProvider, diskCacheStrategy, priority, DEFAULT_FILE_OPENER);
+    public DecodeJob(RequestContext<Z, R> requestContext, EngineKey resultKey, int width, int height,
+            DiskCacheProvider diskCacheProvider) {
+        this(requestContext, resultKey, width, height, diskCacheProvider, DEFAULT_FILE_OPENER);
     }
 
     // Visible for testing.
-    DecodeJob(Class<Z> resourceClass, EngineKey resultKey, int width, int height, DataFetcherSet sourceFetchers,
-            RequestContext requestContext, Transformation<Z> transformation,
-            ResourceTranscoder<Z, ? extends R>  transcoder, DiskCacheProvider diskCacheProvider,
-            DiskCacheStrategy diskCacheStrategy, Priority priority, FileOpener fileOpener) {
+    DecodeJob(RequestContext<Z, R> requestContext, EngineKey resultKey, int width, int height,
+            DiskCacheProvider diskCacheProvider, FileOpener fileOpener) {
+        this.requestContext = requestContext;
         this.resultKey = resultKey;
         this.width = width;
         this.height = height;
-        this.sourceFetchers = sourceFetchers;
-        this.resourceClass = resourceClass;
-        this.requestContext = requestContext;
-        this.transformation = transformation;
-        this.transcoder = transcoder;
         this.diskCacheProvider = diskCacheProvider;
-        this.diskCacheStrategy = diskCacheStrategy;
-        this.priority = priority;
         this.fileOpener = fileOpener;
     }
 
@@ -86,7 +66,7 @@ class DecodeJob<Z, R> {
      * @throws Exception
      */
     public Resource<R> decodeResultFromCache() throws Exception {
-        if (!diskCacheStrategy.cacheResult()) {
+        if (!requestContext.getDiskCacheStrategy().cacheResult()) {
             return null;
         }
 
@@ -110,7 +90,7 @@ class DecodeJob<Z, R> {
      * @throws Exception
      */
     public Resource<R> decodeSourceFromCache() throws Exception {
-        if (!diskCacheStrategy.cacheSource()) {
+        if (!requestContext.getDiskCacheStrategy().cacheSource()) {
             return null;
         }
 
@@ -134,7 +114,8 @@ class DecodeJob<Z, R> {
      * @throws Exception
      */
     public Resource<R> decodeFromSource() throws Exception {
-        Resource<Z> decoded = decodeFromFetcherSet(sourceFetchers, diskCacheStrategy == DiskCacheStrategy.SOURCE);
+        Resource<Z> decoded = decodeFromFetcherSet(requestContext.getDataFetchers(),
+                requestContext.getDiskCacheStrategy() == DiskCacheStrategy.SOURCE);
         return transformEncodeAndTranscode(decoded);
     }
 
@@ -163,12 +144,12 @@ class DecodeJob<Z, R> {
             }
         }
         throw new IllegalStateException("Load failed, unable to obtain or unable to decode data into requested"
-                + " resource type, checked: " + Arrays.asList(fectcherList.toArray(new Object[0])));
+                + " resource type, checked: " + Arrays.asList(fectcherList.toArray(new Object[fectcherList.size()])));
 
     }
 
     public void cancel() {
-        sourceFetchers.cancel();
+        requestContext.getDataFetchers().cancel();
         isCancelled = true;
     }
 
@@ -190,7 +171,7 @@ class DecodeJob<Z, R> {
     }
 
     private void writeTransformedToCache(Resource<Z> transformed) throws NoResultEncoderAvailableException {
-        if (transformed == null || !diskCacheStrategy.cacheResult()) {
+        if (transformed == null || !requestContext.getDiskCacheStrategy().cacheResult()) {
             return;
         }
         long startTime = LogTime.getLogTime();
@@ -204,7 +185,7 @@ class DecodeJob<Z, R> {
 
     private <T> Resource<Z> decodeSource(DataFetcher<T> fetcher, boolean cacheSource) throws Exception {
         long startTime = LogTime.getLogTime();
-        final T data = fetcher.loadData(priority);
+        final T data = fetcher.loadData(requestContext.getPriority());
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Fetched data", startTime);
         }
@@ -224,7 +205,7 @@ class DecodeJob<Z, R> {
         if (cacheSource) {
             decoded = cacheAndDecodeSourceData(rewinder);
         } else {
-            ResourceDecoder<T, Z> decoder = requestContext.getDecoder(rewinder, resourceClass);
+            ResourceDecoder<T, Z> decoder = requestContext.getDecoder(rewinder);
             long startTime = LogTime.getLogTime();
             T data = rewinder.rewindAndGet();
             decoded = decoder.decode(data, width, height);
@@ -276,7 +257,7 @@ class DecodeJob<Z, R> {
             return null;
         }
 
-        Resource<Z> transformed = transformation.transform(decoded, width, height);
+        Resource<Z> transformed = requestContext.getTransformation().transform(decoded, width, height);
         if (!decoded.equals(transformed)) {
             decoded.recycle();
         }
@@ -288,7 +269,7 @@ class DecodeJob<Z, R> {
         if (transformed == null) {
             return null;
         }
-        return (Resource<R>) transcoder.transcode(transformed);
+        return (Resource<R>) requestContext.getTranscoder().transcode(transformed);
     }
 
     private void logWithTimeAndKey(String message, long startTime) {

@@ -29,7 +29,7 @@ public class EngineResourceTest {
     @Before
     public void setUp() {
         resource = mock(Resource.class);
-        engineResource = new EngineResource<Object>(resource, true /*isCacheable*/);
+        engineResource = new EngineResource<Object>(resource, true /*isMemoryCacheable*/);
         listener = mock(EngineResource.ResourceListener.class);
         engineResource.setResourceListener(cacheKey, listener);
     }

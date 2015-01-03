@@ -1,15 +1,11 @@
 package com.bumptech.glide.request;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -22,14 +18,13 @@ import java.util.Queue;
 /**
  * A {@link Request} that loads a {@link com.bumptech.glide.load.engine.Resource} into a given {@link Target}.
  *
- * @param <A> The type of the model that the resource will be loaded from.
- * @param <Z> The type of the resource that will be loaded.
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
  */
-public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
+public final class SingleRequest<R> implements Request,
+        SizeReadyCallback,
         ResourceCallback {
     private static final String TAG = "Request";
-    private static final Queue<SingleRequest<?, ?, ?>> REQUEST_POOL = Util.createQueue(0);
+    private static final Queue<SingleRequest<?>> REQUEST_POOL = Util.createQueue(0);
     private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
     private enum Status {
@@ -53,66 +48,44 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
 
     private final String tag = String.valueOf(hashCode());
 
-    private Class<Z> resourceClass;
-    private RequestContext requestContext;
+    private RequestContext<?, R> requestContext;
     private RequestOptions requestOptions;
-    private float sizeMultiplier;
-    private Priority priority;
-    private ResourceTranscoder<Z, ? extends R> transcoder;
-    private Context context;
-    private Transformation<Z> transformation;
     private RequestCoordinator requestCoordinator;
-    private A model;
+    private Object model;
     private Class<R> transcodeClass;
     private Target<R> target;
     private RequestListener<R> requestListener;
     private Engine engine;
     private GlideAnimationFactory<? super R> animationFactory;
-
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
     private boolean loadedFromMemoryCache;
-    // doing our own type check
-    private Resource<?> resource;
+    private Resource<R> resource;
     private Engine.LoadStatus loadStatus;
     private long startTime;
     private Status status;
 
-    public static <A, Z, R> SingleRequest<A, Z, R> obtain(
-            A model,
-            Class<Z> resourceClass,
+    public static <R> SingleRequest<R> obtain(
+            RequestContext<?, R> requestContext,
             Class<R> transcodeClass,
-            RequestContext requestContext,
             RequestOptions requestOptions,
-            float sizeMultiplier,
-            Priority priority,
-            ResourceTranscoder<Z, ? extends R> transcoder,
-            Context context,
             Target<R> target,
             RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
-            Transformation<Z> transformation,
             GlideAnimationFactory<? super R> animationFactory) {
-        @SuppressWarnings("unchecked") SingleRequest<A, Z, R> request = (SingleRequest<A, Z, R>) REQUEST_POOL.poll();
+        @SuppressWarnings("unchecked") SingleRequest<R> request = (SingleRequest<R>) REQUEST_POOL.poll();
         if (request == null) {
-            request = new SingleRequest<A, Z, R>();
+            request = new SingleRequest<R>();
         }
         request.init(
-                model,
-                resourceClass,
-                transcodeClass,
                 requestContext,
+                transcodeClass,
                 requestOptions,
-                sizeMultiplier,
-                priority,
-                transcoder,
-                context,
                 target,
                 requestListener,
                 requestCoordinator,
                 engine,
-                transformation,
                 animationFactory);
         return request;
     }
@@ -122,97 +95,41 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
     }
 
     private void init(
-            A model,
-            Class<Z> resourceClass,
+            RequestContext<?, R> requestContext,
             Class<R> transcodeClass,
-            RequestContext requestContext,
             RequestOptions requestOptions,
-            float sizeMultiplier,
-            Priority priority,
-            ResourceTranscoder<Z, ? extends R> transcoder,
-            Context context,
             Target<R> target,
             RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
-            Transformation<Z> transformation,
             GlideAnimationFactory<? super R> animationFactory) {
-        this.model = model;
-        this.resourceClass = resourceClass;
         this.requestContext = requestContext;
         this.requestOptions = requestOptions;
-        this.sizeMultiplier = sizeMultiplier;
-        this.priority = priority;
-        this.transcoder = transcoder;
-        this.context = context.getApplicationContext();
         this.target = target;
         this.requestListener = requestListener;
         this.requestCoordinator = requestCoordinator;
         this.engine = engine;
-        this.transformation = transformation;
         this.transcodeClass = transcodeClass;
         this.animationFactory = animationFactory;
         status = Status.PENDING;
-
-        // We allow null models by just setting an error drawable. Null models will always have empty providers, we
-        // simply skip our sanity checks in that unusual case.
-        if (model != null) {
-            // TODO: is this still necessary?
-//            check("ModelLoader", loadProvider.getModelLoader(), "try .using(ModelLoader)");
-//            check("Transcoder", loadProvider.getTranscoder(), "try .as*(Class).transcode(ResourceTranscoder)");
-            check("Transformation", transformation, "try .transform(UnitTransformation.get())");
-//            if (diskCacheStrategy.cacheSource()) {
-//                check("SourceEncoder", loadProvider.getSourceEncoder(),
-//                        "try .sourceEncoder(Encoder) or .diskCacheStrategy(NONE/RESULT)");
-//            } else {
-//                check("SourceDecoder", loadProvider.getSourceDecoder(),
-//                      "try .decoder/.imageDecoder/.videoDecoder(ResourceDecoder) or .diskCacheStrategy(ALL/SOURCE)");
-//            }
-//            if (diskCacheStrategy.cacheSource() || diskCacheStrategy.cacheResult()) {
-//                // TODO if(resourceClass.isAssignableFrom(InputStream.class) it is possible to wrap sourceDecoder
-//                // and use it instead of cacheDecoder: new FileToStreamDecoder<Z>(sourceDecoder)
-//                // in that case this shouldn't throw
-//                check("CacheDecoder", loadProvider.getCacheDecoder(),
-//                        "try .cacheDecoder(ResouceDecoder) or .diskCacheStrategy(NONE)");
-//            }
-//            if (diskCacheStrategy.cacheResult()) {
-//                check("Encoder", loadProvider.getEncoder(),
-//                        "try .encode(ResourceEncoder) or .diskCacheStrategy(NONE/SOURCE)");
-//            }
-        }
     }
 
     @Override
     public void recycle() {
         model = null;
-        context = null;
+        requestContext = null;
+        requestOptions = null;
         target = null;
         placeholderDrawable = null;
         errorDrawable = null;
         requestListener = null;
         requestCoordinator = null;
-        transformation = null;
         animationFactory = null;
         loadedFromMemoryCache = false;
         loadStatus = null;
         REQUEST_POOL.offer(this);
     }
 
-    private static void check(String name, Object object, String suggestion) {
-        if (object == null) {
-            StringBuilder message = new StringBuilder(name);
-            message.append(" must not be null");
-            if (suggestion != null) {
-                message.append(", ");
-                message.append(suggestion);
-            }
-            throw new NullPointerException(message.toString());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void begin() {
         startTime = LogTime.getLogTime();
@@ -300,41 +217,26 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
         this.resource = null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isRunning() {
         return status == Status.RUNNING || status == Status.WAITING_FOR_SIZE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isComplete() {
         return status == Status.COMPLETE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isResourceSet() {
         return isComplete();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isCancelled() {
         return status == Status.CANCELLED || status == Status.CLEARED;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isFailed() {
         return status == Status.FAILED;
@@ -356,8 +258,7 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
         if (errorDrawable == null) {
             errorDrawable = requestOptions.getErrorPlaceholder();
             if (errorDrawable == null && requestOptions.getErrorId() > 0) {
-                errorDrawable = context.getResources()
-                        .getDrawable(requestOptions.getErrorId());
+                errorDrawable = requestContext.getResources().getDrawable(requestOptions.getErrorId());
             }
         }
         return errorDrawable;
@@ -367,8 +268,7 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
         if (placeholderDrawable == null) {
             placeholderDrawable = requestOptions.getPlaceholderDrawable();
             if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
-                placeholderDrawable = context.getResources()
-                        .getDrawable(requestOptions.getPlaceholderId());
+                placeholderDrawable = requestContext.getResources().getDrawable(requestOptions.getPlaceholderId());
             }
         }
         return placeholderDrawable;
@@ -387,22 +287,15 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
         }
         status = Status.RUNNING;
 
+        float sizeMultiplier = requestOptions.getSizeMultiplier();
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
 
-        DataFetcherSet fetchers = requestContext.getDataFetchers(model, width, height);
-
-        if (fetchers.isEmpty()) {
-            onException(new Exception("Failed to obtain fetchers from model loader registry"));
-            return;
-        }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
-        loadStatus = engine.load(resourceClass, transcodeClass, requestOptions.getSignature(), width, height, fetchers,
-                requestContext, transformation, transcoder, priority, requestOptions.isCacheable(),
-                requestOptions.getDiskCacheStrategy(), this);
+        loadStatus = engine.load(requestContext, width, height, this);
         loadedFromMemoryCache = resource != null;
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
@@ -459,7 +352,7 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
             return;
         }
 
-        onResourceReady(resource, (R) received);
+        onResourceReady((Resource<R>) resource, (R) received);
     }
 
     /**
@@ -468,7 +361,7 @@ public final class SingleRequest<A, Z, R> implements Request, SizeReadyCallback,
      * @param resource original {@link Resource}, never <code>null</code>
      * @param result object returned by {@link Resource#get()}, checked for type and never <code>null</code>
      */
-    private void onResourceReady(Resource<?> resource, R result) {
+    private void onResourceReady(Resource<R> resource, R result) {
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstReadyResource())) {
             GlideAnimation<? super R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());

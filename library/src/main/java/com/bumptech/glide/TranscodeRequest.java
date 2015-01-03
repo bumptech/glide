@@ -1,9 +1,8 @@
 package com.bumptech.glide;
 
-import android.content.Context;
-
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.request.GlideContext;
 
 /**
  * A class for handling requests to load a generic resource type or transcode the generic resource type into another
@@ -16,8 +15,7 @@ import com.bumptech.glide.manager.RequestTracker;
  *
  * @param <ResourceType> The type of resource to be decoded from the the data.
  */
-public final class TranscodeRequest<ResourceType>
-        extends RequestBuilder<ResourceType, ResourceType> {
+public final class TranscodeRequest<ResourceType> extends RequestBuilder<ResourceType, ResourceType> {
     private final Class<ResourceType> resourceClass;
 
     TranscodeRequest(Class<ResourceType> resourceClass, RequestBuilder<?, ?> other) {
@@ -25,9 +23,9 @@ public final class TranscodeRequest<ResourceType>
         this.resourceClass = resourceClass;
     }
 
-    TranscodeRequest(Context context, Glide glide, Class<ResourceType> resourceClass, RequestTracker requestTracker,
+    TranscodeRequest(GlideContext context, Class<ResourceType> resourceClass, RequestTracker requestTracker,
             Lifecycle lifecycle) {
-        super(context, resourceClass, resourceClass, glide, requestTracker, lifecycle);
+        super(context, resourceClass, resourceClass, requestTracker, lifecycle);
         this.resourceClass = resourceClass;
     }
 

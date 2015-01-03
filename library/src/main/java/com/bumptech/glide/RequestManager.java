@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -20,6 +19,7 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.util.Util;
 
 /**
@@ -34,10 +34,9 @@ import com.bumptech.glide.util.Util;
  * @see Glide#with(Context)
  */
 public final class RequestManager implements LifecycleListener {
-    private final Context context;
+    private final GlideContext context;
     private final Lifecycle lifecycle;
     private final RequestTracker requestTracker;
-    private final Glide glide;
 
     public RequestManager(Context context, Lifecycle lifecycle) {
         this(context, lifecycle, new RequestTracker(), new ConnectivityMonitorFactory());
@@ -45,8 +44,7 @@ public final class RequestManager implements LifecycleListener {
 
     RequestManager(Context context, final Lifecycle lifecycle, RequestTracker requestTracker,
             ConnectivityMonitorFactory factory) {
-        this.context = context;
-        this.glide = Glide.get(context);
+        this.context = Glide.get(context).getGlideContext();
         this.lifecycle = lifecycle;
         this.requestTracker = requestTracker;
 
@@ -73,14 +71,14 @@ public final class RequestManager implements LifecycleListener {
      * @see android.content.ComponentCallbacks2#onTrimMemory(int)
      */
     public void onTrimMemory(int level) {
-        glide.trimMemory(level);
+        context.onTrimMemory(level);
     }
 
     /**
      * @see android.content.ComponentCallbacks2#onLowMemory()
      */
     public void onLowMemory() {
-        glide.clearMemory();
+        context.onLowMemory();
     }
 
     /**
@@ -194,7 +192,7 @@ public final class RequestManager implements LifecycleListener {
      * @return A new request builder for loading the given resource class.
      */
     public <ResourceType> TranscodeRequest<ResourceType> as(Class<ResourceType> resourceClass) {
-        return new TranscodeRequest<ResourceType>(context, glide, resourceClass, requestTracker, lifecycle);
+        return new TranscodeRequest<ResourceType>(context, resourceClass, requestTracker, lifecycle);
     }
 
     private static class RequestManagerConnectivityListener implements ConnectivityMonitor.ConnectivityListener {

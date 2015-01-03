@@ -326,7 +326,7 @@ public final class RequestOptions implements Cloneable {
         return placeholderDrawable;
     }
 
-    public boolean isCacheable() {
+    public boolean isMemoryCacheable() {
         return isCacheable;
     }
 
