@@ -5,16 +5,15 @@ import android.content.Context;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 public final class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
 
     public static final class Factory implements ModelLoaderFactory<GifDecoder, GifDecoder> {
 
-        @Override
-        public ModelLoader<GifDecoder, GifDecoder> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<GifDecoder, GifDecoder> build(Context context, MultiModelLoaderFactory multiFactory) {
             return new GifFrameModelLoader();
         }
 
@@ -31,6 +30,11 @@ public final class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDec
     @Override
     public DataFetcher<GifDecoder> getDataFetcher(GifDecoder model, int width, int height) {
         return new GifFrameDataFetcher(model);
+    }
+
+    @Override
+    public boolean handles(GifDecoder model) {
+        return true;
     }
 
     private static class GifFrameDataFetcher implements DataFetcher<GifDecoder> {

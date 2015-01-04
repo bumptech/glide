@@ -2,12 +2,11 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.data.ByteArrayFetcher;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
 
@@ -16,24 +15,15 @@ import java.io.InputStream;
  * no simple/quick way to generate an id from the bytes themselves, so subclass must include an id.
  */
 public class StreamByteArrayLoader implements StreamModelLoader<byte[]> {
-    private final String id;
-
-    public StreamByteArrayLoader() {
-        this("");
-    }
-
-    /**
-     * @deprecated Use {@link RequestBuilder#signature(com.bumptech.glide.load.Key)}
-     * and the empty constructor instead. Scheduled to be removed in Glide 4.0.
-     */
-    @Deprecated
-    public StreamByteArrayLoader(String id) {
-        this.id = id;
-    }
 
     @Override
     public DataFetcher<InputStream> getDataFetcher(byte[] model, int width, int height) {
-        return new ByteArrayFetcher(model, id);
+        return new ByteArrayFetcher(model);
+    }
+
+    @Override
+    public boolean handles(byte[] model) {
+        return true;
     }
 
     /**
@@ -42,7 +32,7 @@ public class StreamByteArrayLoader implements StreamModelLoader<byte[]> {
     public static class Factory implements ModelLoaderFactory<byte[], InputStream> {
 
         @Override
-        public ModelLoader<byte[], InputStream> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<byte[], InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
             return new StreamByteArrayLoader();
         }
 

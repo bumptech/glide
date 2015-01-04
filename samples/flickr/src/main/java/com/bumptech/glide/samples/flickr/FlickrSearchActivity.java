@@ -94,8 +94,7 @@ public class FlickrSearchActivity extends ActionBarActivity {
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
         setContentView(R.layout.flickr_search_activity);
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                .detectAll()
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll()
                 .penaltyLog()
                 .build());
         searching = findViewById(R.id.searching);

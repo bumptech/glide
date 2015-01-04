@@ -11,11 +11,9 @@ import java.io.InputStream;
  */
 public class ByteArrayFetcher implements DataFetcher<InputStream> {
     private final byte[] bytes;
-    private final String id;
 
-    public ByteArrayFetcher(byte[] bytes, String id) {
+    public ByteArrayFetcher(byte[] bytes) {
         this.bytes = bytes;
-        this.id = id;
     }
 
     @Override
@@ -30,7 +28,7 @@ public class ByteArrayFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return id;
+        return "";
     }
 
     @Override

@@ -50,4 +50,10 @@ public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
                 || ContentResolver.SCHEME_CONTENT.equals(scheme)
                 || ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme);
     }
+
+    @Override
+    public boolean handles(Uri model) {
+        // TODO: fixme.
+        return true;
+    }
 }

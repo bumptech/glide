@@ -3,9 +3,10 @@ package com.bumptech.glide.samples.giphy;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.bumptech.glide.load.model.GenericLoaderFactory;
+import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 
 import java.io.InputStream;
@@ -16,14 +17,21 @@ import java.io.InputStream;
  */
 public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
+    @Override
+    public boolean handles(Api.GifResult model) {
+        return true;
+    }
+
     /**
      * The default factory for {@link com.bumptech.glide.samples.giphy.GiphyModelLoader}s.
      */
     public static class Factory implements ModelLoaderFactory<Api.GifResult, InputStream> {
 
+
         @Override
-        public ModelLoader<Api.GifResult, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new GiphyModelLoader(context);
+        public ModelLoader<Api.GifResult, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
+            // TODO: fixme.
+            return new GiphyModelLoader(multiFactory.build(GlideUrl.class, InputStream.class).get(0));
         }
 
         @Override
@@ -32,8 +40,8 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
         }
     }
 
-    public GiphyModelLoader(Context context) {
-        super(context);
+    public GiphyModelLoader(ModelLoader<GlideUrl, InputStream> urlLoader) {
+        super(urlLoader);
     }
 
     @Override

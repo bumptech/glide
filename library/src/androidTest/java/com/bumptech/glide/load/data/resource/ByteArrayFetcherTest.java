@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data.resource;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import com.bumptech.glide.Priority;
@@ -21,7 +22,7 @@ public class ByteArrayFetcherTest {
             bytes[i] = (byte) i;
         }
 
-        ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes, "testId");
+        ByteArrayFetcher fetcher = new ByteArrayFetcher(bytes);
         InputStream is = fetcher.loadData(Priority.NORMAL);
 
         int read = 0;
@@ -34,9 +35,8 @@ public class ByteArrayFetcherTest {
     }
 
     @Test
-    public void testReturnsGivenId() {
-        String expected = "fakeId";
-        ByteArrayFetcher fetcher = new ByteArrayFetcher(new byte[0], expected);
-        assertEquals(expected, fetcher.getId());
+    public void testReturnsEmptyId() {
+        ByteArrayFetcher fetcher = new ByteArrayFetcher(new byte[0]);
+        assertThat(fetcher.getId()).isEmpty();
     }
 }

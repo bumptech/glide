@@ -4,10 +4,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.model.StringLoader;
 
 /**
@@ -21,9 +20,11 @@ public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescripto
      * The default factory for {@link com.bumptech.glide.load.model.file_descriptor.FileDescriptorStringLoader}s.
      */
     public static class Factory implements ModelLoaderFactory<String, ParcelFileDescriptor> {
+
         @Override
-        public ModelLoader<String, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
-            return new FileDescriptorStringLoader(factories.buildModelLoader(Uri.class, ParcelFileDescriptor.class));
+        public ModelLoader<String, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
+            // TODO: fixme.
+            return new FileDescriptorStringLoader(multiFactory.build(Uri.class, ParcelFileDescriptor.class).get(0));
         }
 
         @Override
@@ -32,11 +33,7 @@ public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescripto
         }
     }
 
-    public FileDescriptorStringLoader(Context context) {
-        this(Glide.buildFileDescriptorModelLoader(Uri.class, context));
-    }
-
-    public FileDescriptorStringLoader(ModelLoader<Uri, ParcelFileDescriptor> uriLoader) {
+    protected FileDescriptorStringLoader(ModelLoader<Uri, ParcelFileDescriptor> uriLoader) {
         super(uriLoader);
     }
 }

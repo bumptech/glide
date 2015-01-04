@@ -132,5 +132,10 @@ public class BaseGlideUrlLoaderTest {
         protected String getUrl(Object model, int width, int height) {
             return resultUrl;
         }
+
+        @Override
+        public boolean handles(Object model) {
+            return true;
+        }
     }
 }

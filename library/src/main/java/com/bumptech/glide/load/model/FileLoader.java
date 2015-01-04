@@ -24,4 +24,9 @@ public class FileLoader<T> implements ModelLoader<File, T> {
     public DataFetcher<T> getDataFetcher(File model, int width, int height) {
         return uriLoader.getDataFetcher(Uri.fromFile(model), width, height);
     }
+
+    @Override
+    public boolean handles(File model) {
+        return true;
+    }
 }

@@ -28,7 +28,7 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
     private final ResourceTranscoder<ResourceClass, ? extends TranscodeClass> transcoder;
     private final RequestOptions requestOptions;
 
-    private DataFetcherSet fetchers;
+    private DataFetcherSet<?> fetchers;
 
     public RequestContext(GlideContext glideContext, Object model, Class<ResourceClass> resourceClass,
             Class<TranscodeClass> transcodeClass, Transformation<ResourceClass> transformation,
@@ -51,7 +51,7 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
         fetchers = glideContext.getDataFetchers(model, width, height);
     }
 
-    DataFetcherSet getDataFetchers() {
+    DataFetcherSet<?> getDataFetchers() {
         if (fetchers == null) {
             throw new IllegalStateException("Must call buildDataFetchers first");
         }
@@ -115,7 +115,7 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
         return glideContext.getSourceEncoder(data);
     }
 
-    DataFetcherSet getDataFetchers(File file, int width, int height) throws GlideContext.NoModelLoaderAvailableException {
+    DataFetcherSet<?> getDataFetchers(File file, int width, int height) throws GlideContext.NoModelLoaderAvailableException {
         return glideContext.getDataFetchers(file, width, height);
     }
 }

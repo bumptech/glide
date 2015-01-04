@@ -22,4 +22,9 @@ public class UrlLoader<T> implements ModelLoader<URL, T> {
     public DataFetcher<T> getDataFetcher(URL model, int width, int height) {
         return glideUrlLoader.getDataFetcher(new GlideUrl(model), width, height);
     }
+
+    @Override
+    public boolean handles(URL model) {
+        return true;
+    }
 }

@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine;
 
 import android.util.Log;
-
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -18,8 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source and applying
@@ -117,9 +114,8 @@ class DecodeJob<Z, R> {
         return transformEncodeAndTranscode(decoded);
     }
 
-    private Resource<Z> decodeFromFetcherSet(DataFetcherSet fetchers, boolean cacheSource) throws Exception {
-        List<DataFetcher<?>> fectcherList = fetchers.getFetchers();
-        for (DataFetcher<?> fetcher : fectcherList) {
+    private Resource<Z> decodeFromFetcherSet(DataFetcherSet<?> fetchers, boolean cacheSource) throws Exception {
+        for (DataFetcher<?> fetcher : fetchers) {
             try {
                 Resource<Z> decoded = decodeSource(fetcher, cacheSource);
                 if (decoded != null) {
@@ -134,7 +130,7 @@ class DecodeJob<Z, R> {
             }
         }
         throw new IllegalStateException("Load failed, unable to obtain or unable to decode data into requested"
-                + " resource type, checked: " + Arrays.asList(fectcherList.toArray(new Object[fectcherList.size()])));
+                + " resource type, checked: " + fetchers);
     }
 
     public void cancel() {
@@ -229,7 +225,7 @@ class DecodeJob<Z, R> {
         if (cacheFile == null) {
             return null;
         }
-        DataFetcherSet fetchers = requestContext.getDataFetchers(cacheFile, width, height);
+        DataFetcherSet<?> fetchers = requestContext.getDataFetchers(cacheFile, width, height);
         Resource<Z> result = null;
         try {
             result = decodeFromFetcherSet(fetchers, false /*cacheSource*/);

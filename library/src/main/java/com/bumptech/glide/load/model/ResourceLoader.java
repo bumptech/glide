@@ -36,4 +36,9 @@ public class ResourceLoader<T> implements ModelLoader<Integer, T> {
 
         return uriLoader.getDataFetcher(uri, width, height);
     }
+
+    @Override
+    public boolean handles(Integer model) {
+        return true;
+    }
 }

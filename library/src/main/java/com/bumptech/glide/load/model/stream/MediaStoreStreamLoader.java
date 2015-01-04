@@ -31,4 +31,10 @@ public class MediaStoreStreamLoader implements ModelLoader<Uri, InputStream> {
         return new MediaStoreThumbFetcher(context, model, uriLoader.getDataFetcher(model, width, height), width,
                 height);
     }
+
+    @Override
+    public boolean handles(Uri model) {
+        // TODO: fixme.
+        return false;
+    }
 }

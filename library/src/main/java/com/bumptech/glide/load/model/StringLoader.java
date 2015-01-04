@@ -35,6 +35,11 @@ public class StringLoader<T> implements ModelLoader<String, T> {
         return uriLoader.getDataFetcher(uri, width, height);
     }
 
+    @Override
+    public boolean handles(String model) {
+        return true;
+    }
+
     private static Uri toFileUri(String path) {
         return Uri.fromFile(new File(path));
     }

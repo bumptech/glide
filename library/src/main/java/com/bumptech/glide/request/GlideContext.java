@@ -111,8 +111,8 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         }
     }
 
-    public DataFetcherSet getDataFetchers(Object model, int width, int height) {
-        DataFetcherSet result = modelLoaderRegistry.getDataFetchers(model, width, height);
+    public DataFetcherSet<?> getDataFetchers(Object model, int width, int height) {
+        DataFetcherSet<?> result = modelLoaderRegistry.getDataFetchers(model, width, height);
         if (result.isEmpty()) {
             throw new NoModelLoaderAvailableException(model);
         }

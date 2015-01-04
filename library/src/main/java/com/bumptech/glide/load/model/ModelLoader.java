@@ -47,4 +47,6 @@ public interface ModelLoader<T, Y> {
      * cached, or null if no valid {@link com.bumptech.glide.load.data.DataFetcher} could be constructed.
      */
     DataFetcher<Y> getDataFetcher(T model, int width, int height);
+
+    boolean handles(T model);
 }

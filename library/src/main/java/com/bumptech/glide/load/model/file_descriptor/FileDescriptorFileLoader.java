@@ -4,11 +4,10 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.FileLoader;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.File;
 
@@ -23,9 +22,11 @@ public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor>
      * {@link com.bumptech.glide.load.model.file_descriptor.FileDescriptorFileLoader}s.
      */
     public static class Factory implements ModelLoaderFactory<File, ParcelFileDescriptor> {
+
         @Override
-        public ModelLoader<File, ParcelFileDescriptor> build(Context context, GenericLoaderFactory factories) {
-            return new FileDescriptorFileLoader(factories.buildModelLoader(Uri.class, ParcelFileDescriptor.class));
+        public ModelLoader<File, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
+            // TODO: fixme.
+            return new FileDescriptorFileLoader(multiFactory.build(Uri.class, ParcelFileDescriptor.class).get(0));
         }
 
         @Override
@@ -34,11 +35,7 @@ public class FileDescriptorFileLoader extends FileLoader<ParcelFileDescriptor>
         }
     }
 
-    public FileDescriptorFileLoader(Context context) {
-        this(Glide.buildFileDescriptorModelLoader(Uri.class, context));
-    }
-
-    public FileDescriptorFileLoader(ModelLoader<Uri, ParcelFileDescriptor> uriLoader) {
+    protected FileDescriptorFileLoader(ModelLoader<Uri, ParcelFileDescriptor> uriLoader) {
         super(uriLoader);
     }
 }

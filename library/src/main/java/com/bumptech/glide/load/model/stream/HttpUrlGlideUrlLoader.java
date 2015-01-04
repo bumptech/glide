@@ -4,11 +4,11 @@ import android.content.Context;
 
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.HttpUrlFetcher;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
 
@@ -27,7 +27,7 @@ public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream>
         private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<GlideUrl, GlideUrl>(500);
 
         @Override
-        public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<GlideUrl, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
             return new HttpUrlGlideUrlLoader(modelCache);
         }
 
@@ -57,5 +57,10 @@ public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream>
             }
         }
         return new HttpUrlFetcher(url);
+    }
+
+    @Override
+    public boolean handles(GlideUrl model) {
+        return true;
     }
 }

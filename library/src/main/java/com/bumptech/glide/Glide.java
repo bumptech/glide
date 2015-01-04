@@ -24,7 +24,6 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -90,10 +89,10 @@ public class Glide implements ComponentCallbacks2 {
     private static final String TAG = "Glide";
     private static volatile Glide glide;
 
-    private final GenericLoaderFactory loaderFactory;
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
     private final BitmapPreFiller bitmapPreFiller;
+    private final ModelLoaderRegistry modelLoaderRegistry;
     private final GlideContext glideContext;
 
     /**
@@ -201,8 +200,7 @@ public class Glide implements ComponentCallbacks2 {
     Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context, DecodeFormat decodeFormat) {
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
-        loaderFactory = new GenericLoaderFactory(context);
-        ModelLoaderRegistry loaderRegistry = new ModelLoaderRegistry(loaderFactory);
+        modelLoaderRegistry = new ModelLoaderRegistry(context);
         bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
         EncoderRegistry encoderRegistry = new EncoderRegistry();
@@ -230,7 +228,7 @@ public class Glide implements ComponentCallbacks2 {
         resourceEncoderRegistry.add(GifDrawable.class, new GifResourceEncoder(bitmapPool));
 
         /* Gif Frames */
-        register(GifDecoder.class, GifDecoder.class, new GifFrameModelLoader.Factory());
+        modelLoaderRegistry.append(GifDecoder.class, GifDecoder.class, new GifFrameModelLoader.Factory());
         decoderRegistry.append(new GifFrameResourceDecoder(bitmapPool), GifDecoder.class, Bitmap.class);
 
         /* Files */
@@ -239,19 +237,20 @@ public class Glide implements ComponentCallbacks2 {
         DataRewinderRegistry dataRewinderRegistry = new DataRewinderRegistry();
         dataRewinderRegistry.register(new InputStreamRewinder.Factory());
 
-        register(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
-        register(File.class, InputStream.class, new StreamFileLoader.Factory());
-        register(int.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
-        register(int.class, InputStream.class, new StreamResourceLoader.Factory());
-        register(Integer.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
-        register(Integer.class, InputStream.class, new StreamResourceLoader.Factory());
-        register(String.class, ParcelFileDescriptor.class, new FileDescriptorStringLoader.Factory());
-        register(String.class, InputStream.class, new StreamStringLoader.Factory());
-        register(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
-        register(Uri.class, InputStream.class, new StreamUriLoader.Factory());
-        register(URL.class, InputStream.class, new StreamUrlLoader.Factory());
-        register(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
-        register(byte[].class, InputStream.class, new StreamByteArrayLoader.Factory());
+        modelLoaderRegistry.append(File.class, InputStream.class, new StreamFileLoader.Factory());
+        modelLoaderRegistry.append(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
+        modelLoaderRegistry.append(int.class, InputStream.class, new StreamResourceLoader.Factory());
+        modelLoaderRegistry.append(int.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
+        modelLoaderRegistry.append(Integer.class, InputStream.class, new StreamResourceLoader.Factory());
+        modelLoaderRegistry.append(Integer.class, ParcelFileDescriptor.class,
+                new FileDescriptorResourceLoader.Factory());
+        modelLoaderRegistry.append(String.class, InputStream.class, new StreamStringLoader.Factory());
+        modelLoaderRegistry.append(String.class, ParcelFileDescriptor.class, new FileDescriptorStringLoader.Factory());
+        modelLoaderRegistry.append(Uri.class, InputStream.class, new StreamUriLoader.Factory());
+        modelLoaderRegistry.append(Uri.class, ParcelFileDescriptor.class, new FileDescriptorUriLoader.Factory());
+        modelLoaderRegistry.append(URL.class, InputStream.class, new StreamUrlLoader.Factory());
+        modelLoaderRegistry.append(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
+        modelLoaderRegistry.append(byte[].class, InputStream.class, new StreamByteArrayLoader.Factory());
 
         TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
         transcoderRegistry.register(Bitmap.class, BitmapDrawable.class, new BitmapDrawableTranscoder(context
@@ -260,7 +259,7 @@ public class Glide implements ComponentCallbacks2 {
         transcoderRegistry.register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
 
         ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
-        glideContext = new GlideContext(context, loaderRegistry, encoderRegistry, decoderRegistry,
+        glideContext = new GlideContext(context, modelLoaderRegistry, encoderRegistry, decoderRegistry,
                 resourceEncoderRegistry, dataRewinderRegistry, transcoderRegistry, imageViewTargetFactory, engine,
                 this);
     }
@@ -293,10 +292,6 @@ public class Glide implements ComponentCallbacks2 {
 
     GlideContext getGlideContext() {
         return glideContext;
-    }
-
-    private GenericLoaderFactory getLoaderFactory() {
-        return loaderFactory;
     }
 
     /**
@@ -436,114 +431,32 @@ public class Glide implements ComponentCallbacks2 {
      * @param <T> The type of the model.
      * @param <Y> the type of the resource.
      */
-    public <T, Y> void register(Class<T> modelClass, Class<Y> resourceClass, ModelLoaderFactory<T, Y> factory) {
-        ModelLoaderFactory<T, Y> removed = loaderFactory.register(modelClass, resourceClass, factory);
-        if (removed != null) {
-            removed.teardown();
-        }
+    public <Model, Data> void append(Class<Model> modelClass, Class<Data> dataClass,
+            ModelLoaderFactory<Model, Data> factory) {
+        modelLoaderRegistry.append(modelClass, dataClass, factory);
+    }
+
+    public <Model, Data> void prepend(Class<Model> modelClass, Class<Data> dataClass,
+            ModelLoaderFactory<Model, Data> factory) {
+        modelLoaderRegistry.prepend(modelClass, dataClass, factory);
+    }
+
+    public <Model, Data> void replace(Class<Model> modelClass, Class<Data> dataClass,
+            ModelLoaderFactory<Model, Data> factory) {
+        modelLoaderRegistry.replace(modelClass, dataClass, factory);
     }
 
     /**
      * Removes any {@link ModelLoaderFactory} registered for the given model and resource classes if one exists. If a
      * {@link ModelLoaderFactory} is removed, its {@link ModelLoaderFactory#teardown()}} method will be called.
      *
-     * @deprecated Use {@link #register(Class, Class, com.bumptech.glide.load.model.ModelLoaderFactory)} to replace
-     * a registered loader rather than simply removing it.
      * @param modelClass The model class.
      * @param resourceClass The resource class.
      * @param <T> The type of the model.
      * @param <Y> The type of the resource.
      */
-    @Deprecated
-    public <T, Y> void unregister(Class<T> modelClass, Class<Y> resourceClass) {
-        ModelLoaderFactory<T, Y> removed = loaderFactory.unregister(modelClass, resourceClass);
-        if (removed != null) {
-            removed.teardown();
-        }
-    }
-
-    /**
-     * Build a {@link ModelLoader} for the given model class using registered {@link ModelLoaderFactory}s.
-     *
-     * @see  #buildModelLoader(Object, Class, Context)
-     * @see  #buildStreamModelLoader(Class, Context)
-     * @see  #buildFileDescriptorModelLoader(Class, Context)
-     *
-     * @param modelClass The class to get a {@link ModelLoader} for.
-     * @param resourceClass The resource class to get a {@link ModelLoader} for.
-     * @param context Any context.
-     * @param <T> The type of the model.
-     * @param <Y> The type of the resource.
-     * @return A new {@link ModelLoader} for the given model class.
-     */
-    public static <T, Y> ModelLoader<T, Y> buildModelLoader(Class<T> modelClass, Class<Y> resourceClass,
-            Context context) {
-         if (modelClass == null) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unable to load null model, setting placeholder only");
-            }
-            return null;
-        }
-        return Glide.get(context).getLoaderFactory().buildModelLoader(modelClass, resourceClass);
-    }
-
-    /**
-     * A convenience method to build a {@link ModelLoader} for a given model object using registered
-     * {@link ModelLoaderFactory}s.
-     *
-     * @see #buildModelLoader(Class, Class, Context)
-     *
-     * @param model A non null model object whose class we will get a {@link ModelLoader} for.
-     * @param resourceClass The resource class to get a {@link ModelLoader} for.
-     * @param context Any context.
-     * @param <T> The type of the model.
-     * @param <Y> The type of the resource.
-     * @return A new {@link ModelLoader} for the given model and resource classes, or null if model is null.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T, Y> ModelLoader<T, Y> buildModelLoader(T model, Class<Y> resourceClass, Context context) {
-        return buildModelLoader(model != null ? (Class<T>) model.getClass() : null, resourceClass, context);
-    }
-
-    /**
-     * A method to build a {@link ModelLoader} for the given model that produces {@link InputStream}s using a registered
-     * factory.
-     *
-     * @see #buildModelLoader(Class, Class, android.content.Context)
-     */
-    public static <T> ModelLoader<T, InputStream> buildStreamModelLoader(Class<T> modelClass, Context context) {
-        return buildModelLoader(modelClass, InputStream.class, context);
-    }
-
-    /**
-     * A method to build a {@link ModelLoader} for the given model that produces {@link InputStream}s using a registered
-     * factory.
-     *
-     * @see #buildModelLoader(Object, Class, Context)
-     */
-    public static <T> ModelLoader<T, InputStream> buildStreamModelLoader(T model, Context context) {
-        return buildModelLoader(model, InputStream.class, context);
-    }
-
-    /**
-     * A method to build a {@link ModelLoader} for the given model class that produces
-     * {@link ParcelFileDescriptor}s using a registered factory.
-     *
-     * @see #buildModelLoader(Class, Class, android.content.Context)
-     */
-    public static <T> ModelLoader<T, ParcelFileDescriptor> buildFileDescriptorModelLoader(Class<T> modelClass,
-            Context context) {
-        return buildModelLoader(modelClass, ParcelFileDescriptor.class, context);
-    }
-
-    /**
-     * A method to build a {@link ModelLoader} for the given model class that produces
-     * {@link ParcelFileDescriptor}s using a registered factory.
-     *
-     * @see #buildModelLoader(Object, Class, android.content.Context)
-     */
-    public static <T> ModelLoader<T, ParcelFileDescriptor> buildFileDescriptorModelLoader(T model, Context context) {
-        return buildModelLoader(model, ParcelFileDescriptor.class, context);
+    public <Model, Data> void remove(Class<Model> modelClass, Class<Data> dataClass) {
+        modelLoaderRegistry.remove(modelClass, dataClass);
     }
 
     /**
