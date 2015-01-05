@@ -16,19 +16,19 @@ import java.io.InputStream;
  * An {@link com.bumptech.glide.load.model.ModelLoader} for translating {@link com.bumptech.glide.load.model.GlideUrl}
  * (http/https URLS) into {@link java.io.InputStream} data.
  */
-public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
+public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
     private final ModelCache<GlideUrl, GlideUrl> modelCache;
 
     /**
-     * The default factory for {@link com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader}s.
+     * The default factory for {@link HttpGlideUrlLoader}s.
      */
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
         private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<GlideUrl, GlideUrl>(500);
 
         @Override
         public ModelLoader<GlideUrl, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new HttpUrlGlideUrlLoader(modelCache);
+            return new HttpGlideUrlLoader(modelCache);
         }
 
         @Override
@@ -37,11 +37,11 @@ public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream>
         }
     }
 
-    public HttpUrlGlideUrlLoader() {
+    public HttpGlideUrlLoader() {
         this(null);
     }
 
-    public HttpUrlGlideUrlLoader(ModelCache<GlideUrl, GlideUrl> modelCache) {
+    public HttpGlideUrlLoader(ModelCache<GlideUrl, GlideUrl> modelCache) {
         this.modelCache = modelCache;
     }
 

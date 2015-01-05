@@ -1,26 +1,29 @@
 package com.bumptech.glide.load.model;
 
+import android.content.Context;
 import android.net.Uri;
 
+import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * A model loader for handling certain string models. Handles paths, urls, and any uri string with a scheme handled by
  * {@link android.content.ContentResolver#openInputStream(Uri)}.
  *
- * @param <T> The type of data that will be loaded from the given {@link java.lang.String}.
+ * @param <Data> The type of data that will be loaded from the given {@link java.lang.String}.
  */
-public class StringLoader<T> implements ModelLoader<String, T> {
-    private final ModelLoader<Uri, T> uriLoader;
+public class StringLoader<Data> implements ModelLoader<String, Data> {
+    private final ModelLoader<Uri, Data> uriLoader;
 
-    public StringLoader(ModelLoader<Uri, T> uriLoader) {
+    public StringLoader(ModelLoader<Uri, Data> uriLoader) {
         this.uriLoader = uriLoader;
     }
 
     @Override
-    public DataFetcher<T> getDataFetcher(String model, int width, int height) {
+    public DataFetcher<Data> getDataFetcher(String model, int width, int height) {
         Uri uri;
         if (model.startsWith("/")) {
             uri = toFileUri(model);
@@ -42,5 +45,31 @@ public class StringLoader<T> implements ModelLoader<String, T> {
 
     private static Uri toFileUri(String path) {
         return Uri.fromFile(new File(path));
+    }
+
+    public static class StreamFactory implements ModelLoaderFactory<String, InputStream> {
+
+        @Override
+        public ModelLoader<String, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
+            return new StringLoader<InputStream>(multiFactory.build(Uri.class, InputStream.class));
+        }
+
+        @Override
+        public void teardown() {
+            // Do nothing.
+        }
+    }
+
+    public static class FileDescriptorFactory implements ModelLoaderFactory<String, ParcelFileDescriptor> {
+
+        @Override
+        public ModelLoader<String, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
+            return new StringLoader<ParcelFileDescriptor>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
+        }
+
+        @Override
+        public void teardown() {
+            // Do nothing.
+        }
     }
 }

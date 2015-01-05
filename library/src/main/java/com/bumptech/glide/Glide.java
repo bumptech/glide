@@ -24,24 +24,21 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
 import com.bumptech.glide.load.model.AssetUriLoader;
+import com.bumptech.glide.load.model.FileLoader;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoaderRegistry;
+import com.bumptech.glide.load.model.ResourceLoader;
 import com.bumptech.glide.load.model.StreamEncoder;
+import com.bumptech.glide.load.model.StringLoader;
 import com.bumptech.glide.load.model.UriLoader;
-import com.bumptech.glide.load.model.file_descriptor.FileDescriptorFileLoader;
-import com.bumptech.glide.load.model.file_descriptor.FileDescriptorResourceLoader;
-import com.bumptech.glide.load.model.file_descriptor.FileDescriptorStringLoader;
+import com.bumptech.glide.load.model.stream.HttpGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.HttpUriLoader;
-import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreImageThumbLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreVideoThumbLoader;
-import com.bumptech.glide.load.model.stream.StreamByteArrayLoader;
-import com.bumptech.glide.load.model.stream.StreamFileLoader;
-import com.bumptech.glide.load.model.stream.StreamResourceLoader;
-import com.bumptech.glide.load.model.stream.StreamStringLoader;
-import com.bumptech.glide.load.model.stream.StreamUrlLoader;
+import com.bumptech.glide.load.model.stream.ByteArrayLoader;
+import com.bumptech.glide.load.model.stream.UrlLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
@@ -239,15 +236,15 @@ public class Glide implements ComponentCallbacks2 {
         DataRewinderRegistry dataRewinderRegistry = new DataRewinderRegistry();
         dataRewinderRegistry.register(new InputStreamRewinder.Factory());
 
-        modelLoaderRegistry.append(File.class, InputStream.class, new StreamFileLoader.Factory());
-        modelLoaderRegistry.append(File.class, ParcelFileDescriptor.class, new FileDescriptorFileLoader.Factory());
-        modelLoaderRegistry.append(int.class, InputStream.class, new StreamResourceLoader.Factory());
-        modelLoaderRegistry.append(int.class, ParcelFileDescriptor.class, new FileDescriptorResourceLoader.Factory());
-        modelLoaderRegistry.append(Integer.class, InputStream.class, new StreamResourceLoader.Factory());
+        modelLoaderRegistry.append(File.class, InputStream.class, new FileLoader.StreamFactory());
+        modelLoaderRegistry.append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory());
+        modelLoaderRegistry.append(int.class, InputStream.class, new ResourceLoader.StreamFactory());
+        modelLoaderRegistry.append(int.class, ParcelFileDescriptor.class, new ResourceLoader.FileDescriptorFactory());
+        modelLoaderRegistry.append(Integer.class, InputStream.class, new ResourceLoader.StreamFactory());
         modelLoaderRegistry.append(Integer.class, ParcelFileDescriptor.class,
-                new FileDescriptorResourceLoader.Factory());
-        modelLoaderRegistry.append(String.class, InputStream.class, new StreamStringLoader.Factory());
-        modelLoaderRegistry.append(String.class, ParcelFileDescriptor.class, new FileDescriptorStringLoader.Factory());
+                new ResourceLoader.FileDescriptorFactory());
+        modelLoaderRegistry.append(String.class, InputStream.class, new StringLoader.StreamFactory());
+        modelLoaderRegistry.append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory());
         modelLoaderRegistry.append(Uri.class, InputStream.class, new HttpUriLoader.Factory());
         modelLoaderRegistry.append(Uri.class, InputStream.class, new AssetUriLoader.StreamFactory());
         modelLoaderRegistry.append(Uri.class, ParcelFileDescriptor.class, new AssetUriLoader.FileDescriptorFactory());
@@ -255,9 +252,9 @@ public class Glide implements ComponentCallbacks2 {
         modelLoaderRegistry.append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory());
         modelLoaderRegistry.append(Uri.class, InputStream.class, new UriLoader.StreamFactory());
         modelLoaderRegistry.append(Uri.class, ParcelFileDescriptor.class, new UriLoader.FileDescriptorFactory());
-        modelLoaderRegistry.append(URL.class, InputStream.class, new StreamUrlLoader.Factory());
-        modelLoaderRegistry.append(GlideUrl.class, InputStream.class, new HttpUrlGlideUrlLoader.Factory());
-        modelLoaderRegistry.append(byte[].class, InputStream.class, new StreamByteArrayLoader.Factory());
+        modelLoaderRegistry.append(URL.class, InputStream.class, new UrlLoader.StreamFactory());
+        modelLoaderRegistry.append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory());
+        modelLoaderRegistry.append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory());
 
         TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
         transcoderRegistry.register(Bitmap.class, BitmapDrawable.class, new BitmapDrawableTranscoder(context
@@ -413,10 +410,8 @@ public class Glide implements ComponentCallbacks2 {
     /**
      * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
      * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Typically the {@link RequestManager#using(com.bumptech.glide.load.model.stream.StreamModelLoader)} or
-     * {@link RequestManager#using(com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader)} syntax is
-     * preferred because it directly links the model with the ModelLoader being used to load it. Any factory replaced
-     * by the given factory will have its {@link ModelLoaderFactory#teardown()}} method called.
+     * models. Any factory replaced by the given factory will have its {@link ModelLoaderFactory#teardown()}} method
+     * called.
      *
      * <p>
      *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
@@ -428,9 +423,6 @@ public class Glide implements ComponentCallbacks2 {
      *     Note - The factory must not be an anonymous inner class of an Activity or another object that cannot be
      *     retained statically.
      * </p>
-     *
-     * @see RequestManager#using(com.bumptech.glide.load.model.file_descriptor.FileDescriptorModelLoader)
-     * @see RequestManager#using(com.bumptech.glide.load.model.stream.StreamModelLoader)
      *
      * @param modelClass The model class.
      * @param resourceClass The resource class the model loader will translate the model type into.

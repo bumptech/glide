@@ -15,14 +15,14 @@ import org.junit.runners.JUnit4;
 import java.io.InputStream;
 
 @RunWith(JUnit4.class)
-public class HttpUrlGlideUrlLoaderTest {
-    private HttpUrlGlideUrlLoader loader;
+public class HttpGlideUrlLoaderTest {
+    private HttpGlideUrlLoader loader;
     private GlideUrl model;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        loader = new HttpUrlGlideUrlLoader();
+        loader = new HttpGlideUrlLoader();
         model = mock(GlideUrl.class);
     }
     @Test

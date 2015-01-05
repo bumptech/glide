@@ -22,7 +22,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -472,7 +471,7 @@ public class GlideTest {
     @SuppressWarnings("unchecked")
     public void testUnregisteredModelWithGivenLoaderDoesNotThrow() {
         Float unregistered = 0.5f;
-        StreamModelLoader<Float> mockLoader = mockStreamModelLoader(Float.class);
+        ModelLoader<Float, InputStream> mockLoader = mockStreamModelLoader(Float.class);
         // TODO: fixme.
 //        requestManager
 //                .using(mockLoader)
@@ -742,7 +741,7 @@ public class GlideTest {
 
     @SuppressWarnings("unchecked")
     private <T> void registerMockStreamModelLoader(final Class<T> modelClass) {
-        StreamModelLoader<T> modelLoader = mockStreamModelLoader(modelClass);
+        ModelLoader<T, InputStream> modelLoader = mockStreamModelLoader(modelClass);
         ModelLoaderFactory<T, InputStream> modelLoaderFactory = mock(ModelLoaderFactory.class);
         when(modelLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
                 .thenReturn(modelLoader);
@@ -751,8 +750,8 @@ public class GlideTest {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> StreamModelLoader<T> mockStreamModelLoader(final Class<T> modelClass) {
-        StreamModelLoader<T> modelLoader = mock(StreamModelLoader.class);
+    private <T> ModelLoader<T, InputStream> mockStreamModelLoader(final Class<T> modelClass) {
+        ModelLoader<T, InputStream> modelLoader = mock(ModelLoader.class);
         DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
         try {
             when(fetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));

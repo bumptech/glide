@@ -285,8 +285,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * Returns a request builder to load the given resource id.
      * Returns a request builder that uses the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently
      * registered for {@link Integer} to load the image represented by the given {@link Integer} resource id. Defaults
-     * to {@link com.bumptech.glide.load.model.stream.StreamResourceLoader.Factory} and
-     * {@link com.bumptech.glide.load.model.stream.StreamResourceLoader} to load resource id models.
+     * to {@link com.bumptech.glide.load.model.ResourceLoader} to load resource id models.
      *
      * <p>
      *     By default this method adds a version code based signature to the cache key used to cache this resource in

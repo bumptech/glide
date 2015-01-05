@@ -14,7 +14,7 @@ import java.io.InputStream;
  * A base class to convert byte arrays to input streams so they can be decoded. This class is abstract because there is
  * no simple/quick way to generate an id from the bytes themselves, so subclass must include an id.
  */
-public class StreamByteArrayLoader implements StreamModelLoader<byte[]> {
+public class ByteArrayLoader implements ModelLoader<byte[], InputStream> {
 
     @Override
     public DataFetcher<InputStream> getDataFetcher(byte[] model, int width, int height) {
@@ -27,13 +27,13 @@ public class StreamByteArrayLoader implements StreamModelLoader<byte[]> {
     }
 
     /**
-     * Factory for {@link com.bumptech.glide.load.model.stream.StreamByteArrayLoader}.
+     * Factory for {@link ByteArrayLoader}.
      */
-    public static class Factory implements ModelLoaderFactory<byte[], InputStream> {
+    public static class StreamFactory implements ModelLoaderFactory<byte[], InputStream> {
 
         @Override
         public ModelLoader<byte[], InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new StreamByteArrayLoader();
+            return new ByteArrayLoader();
         }
 
         @Override
