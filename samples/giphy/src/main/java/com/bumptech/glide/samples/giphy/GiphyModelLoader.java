@@ -30,8 +30,7 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
         @Override
         public ModelLoader<Api.GifResult, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new GiphyModelLoader(multiFactory.build(GlideUrl.class, InputStream.class).get(0));
+            return new GiphyModelLoader(multiFactory.build(GlideUrl.class, InputStream.class));
         }
 
         @Override

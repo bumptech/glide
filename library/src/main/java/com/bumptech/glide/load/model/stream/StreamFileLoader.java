@@ -2,7 +2,6 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
-
 import com.bumptech.glide.load.model.FileLoader;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -22,8 +21,7 @@ public class StreamFileLoader extends FileLoader<InputStream> implements StreamM
     public static class Factory implements ModelLoaderFactory<File, InputStream> {
         @Override
         public ModelLoader<File, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new StreamFileLoader(multiFactory.build(Uri.class, InputStream.class).get(0));
+            return new StreamFileLoader(multiFactory.build(Uri.class, InputStream.class));
         }
 
         @Override

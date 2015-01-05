@@ -45,10 +45,9 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
 
     void buildDataFetchers(int width, int height) {
         Util.assertMainThread();
-        if (fetchers != null) {
-            throw new IllegalStateException("Already built data fetchers!");
+        if (fetchers == null) {
+            fetchers = glideContext.getDataFetchers(model, width, height);
         }
-        fetchers = glideContext.getDataFetchers(model, width, height);
     }
 
     DataFetcherSet<?> getDataFetchers() {

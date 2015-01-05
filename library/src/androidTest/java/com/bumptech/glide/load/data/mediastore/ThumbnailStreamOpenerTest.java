@@ -1,17 +1,9 @@
-package com.bumptech.glide.load.data;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+package com.bumptech.glide.load.data.mediastore;
 
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +17,14 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -84,13 +84,13 @@ public class ThumbnailStreamOpenerTest {
     public void testReturnsOpenedInputStreamWhenFileFound() throws FileNotFoundException {
         InputStream expected = new ByteArrayInputStream(new byte[0]);
         Robolectric.shadowOf(Robolectric.application.getContentResolver()).registerInputStream(harness.uri, expected);
-        assertEquals(expected, harness.get().open(Robolectric.application, harness.uri));
+        Assert.assertEquals(expected, harness.get().open(Robolectric.application, harness.uri));
     }
 
     @Test
     public void testVideoQueryReturnsVideoCursor() {
         Uri queryUri = MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI;
-        MediaStoreThumbFetcher.VideoThumbnailQuery query = new MediaStoreThumbFetcher.VideoThumbnailQuery();
+        ThumbFetcher.VideoThumbnailQuery query = new ThumbFetcher.VideoThumbnailQuery();
         TestCursor testCursor = new SimpleTestCursor();
         Robolectric.shadowOf(Robolectric.application.getContentResolver()).setCursor(queryUri, testCursor);
         assertEquals(testCursor, query.query(Robolectric.application, harness.uri));
@@ -99,7 +99,7 @@ public class ThumbnailStreamOpenerTest {
     @Test
     public void testImageQueryReturnsImageCurosr() {
         Uri queryUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
-        MediaStoreThumbFetcher.ImageThumbnailQuery query = new MediaStoreThumbFetcher.ImageThumbnailQuery();
+        ThumbFetcher.ImageThumbnailQuery query = new ThumbFetcher.ImageThumbnailQuery();
         TestCursor testCursor = new SimpleTestCursor();
         Robolectric.shadowOf(Robolectric.application.getContentResolver()).setCursor(queryUri, testCursor);
         assertEquals(testCursor, query.query(Robolectric.application, harness.uri));
@@ -109,8 +109,8 @@ public class ThumbnailStreamOpenerTest {
         MatrixCursor cursor = new MatrixCursor(new String[1]);
         File file = new File("fake/uri");
         Uri uri = Uri.fromFile(file);
-        MediaStoreThumbFetcher.ThumbnailQuery query = mock(MediaStoreThumbFetcher.ThumbnailQuery.class);
-        MediaStoreThumbFetcher.FileService service = mock(MediaStoreThumbFetcher.FileService.class);
+        ThumbnailQuery query = mock(ThumbnailQuery.class);
+        FileService service = mock(FileService.class);
 
         public Harness() {
             cursor.addRow(new String[] { file.getAbsolutePath() });
@@ -120,8 +120,8 @@ public class ThumbnailStreamOpenerTest {
             when(service.length(eq(file))).thenReturn(1L);
         }
 
-        public MediaStoreThumbFetcher.ThumbnailStreamOpener get() {
-            return new MediaStoreThumbFetcher.ThumbnailStreamOpener(service, query);
+        public ThumbnailStreamOpener get() {
+            return new ThumbnailStreamOpener(service, query);
         }
     }
 }

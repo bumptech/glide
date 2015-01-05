@@ -2,7 +2,6 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
-
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
@@ -22,8 +21,7 @@ public class StreamStringLoader extends StringLoader<InputStream> implements Str
     public static class Factory implements ModelLoaderFactory<String, InputStream> {
         @Override
         public ModelLoader<String, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new StreamStringLoader(multiFactory.build(Uri.class, InputStream.class).get(0));
+            return new StreamStringLoader(multiFactory.build(Uri.class, InputStream.class));
         }
 
         @Override

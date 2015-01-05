@@ -3,11 +3,12 @@ package com.bumptech.glide.load.model.file_descriptor;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.model.StringLoader;
+
+import java.util.List;
 
 /**
  * A {@link ModelLoader} For translating {@link String} models, such as file paths, into {@link ParcelFileDescriptor}
@@ -23,8 +24,7 @@ public class FileDescriptorStringLoader extends StringLoader<ParcelFileDescripto
 
         @Override
         public ModelLoader<String, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new FileDescriptorStringLoader(multiFactory.build(Uri.class, ParcelFileDescriptor.class).get(0));
+            return new FileDescriptorStringLoader(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
         }
 
         @Override

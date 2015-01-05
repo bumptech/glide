@@ -9,11 +9,18 @@ import java.util.Iterator;
 import java.util.List;
 
 public class MultiModelLoaderFactory {
+    private static final Factory DEFAULT_FACTORY = new Factory();
     private final List<Entry<?, ?>> entries = new ArrayList<Entry<?, ?>>();
     private final Context context;
+    private final Factory factory;
 
     public MultiModelLoaderFactory(Context context) {
+        this(context, DEFAULT_FACTORY);
+    }
+
+    MultiModelLoaderFactory(Context context, Factory factory) {
         this.context = context.getApplicationContext();
+        this.factory = factory;
     }
 
     <Model, Data> void append(Class<Model> modelClass, Class<Data> dataClass, ModelLoaderFactory<Model, Data> factory) {
@@ -60,14 +67,14 @@ public class MultiModelLoaderFactory {
         return loaders;
     }
 
-    public <Model, Data> List<ModelLoader<Model, Data>> build(Class<Model> modelClass, Class<Data> dataClass) {
+    public <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass, Class<Data> dataClass) {
         List<ModelLoader<Model, Data>> loaders = new ArrayList<ModelLoader<Model, Data>>();
         for (Entry<?, ?> entry : entries) {
             if (entry.handles(modelClass, dataClass)) {
                 loaders.add(build(modelClass, dataClass, entry));
             }
         }
-        return loaders;
+        return factory.build(loaders);
     }
 
     @SuppressWarnings("unchecked")
@@ -104,6 +111,12 @@ public class MultiModelLoaderFactory {
 
         public boolean handles(Class<?> modelClass) {
             return this.modelClass.isAssignableFrom(modelClass);
+        }
+    }
+
+    static class Factory {
+        public <Model, Data> MultiModelLoader<Model, Data> build(List<ModelLoader<Model, Data>> modelLoaders) {
+            return new MultiModelLoader<Model, Data>(modelLoaders);
         }
     }
 }

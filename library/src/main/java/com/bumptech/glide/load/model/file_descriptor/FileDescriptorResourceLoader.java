@@ -22,9 +22,7 @@ public class FileDescriptorResourceLoader extends ResourceLoader<ParcelFileDescr
 
         @Override
         public ModelLoader<Integer, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new FileDescriptorResourceLoader(context,
-                    multiFactory.build(Uri.class, ParcelFileDescriptor.class).get(0));
+            return new FileDescriptorResourceLoader(context, multiFactory.build(Uri.class, ParcelFileDescriptor.class));
         }
 
         @Override

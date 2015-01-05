@@ -28,8 +28,7 @@ public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
 
         @Override
         public ModelLoader<Photo, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new FlickrModelLoader(multiFactory.build(GlideUrl.class, InputStream.class).get(0), modelCache);
+            return new FlickrModelLoader(multiFactory.build(GlideUrl.class, InputStream.class), modelCache);
         }
 
         @Override

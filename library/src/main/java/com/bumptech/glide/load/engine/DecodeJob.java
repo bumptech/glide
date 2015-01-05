@@ -116,6 +116,9 @@ class DecodeJob<Z, R> {
 
     private Resource<Z> decodeFromFetcherSet(DataFetcherSet<?> fetchers, boolean cacheSource) throws Exception {
         for (DataFetcher<?> fetcher : fetchers) {
+            if (fetcher == null) {
+                continue;
+            }
             try {
                 Resource<Z> decoded = decodeSource(fetcher, cacheSource);
                 if (decoded != null) {
@@ -174,7 +177,7 @@ class DecodeJob<Z, R> {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Fetched data", startTime);
         }
-        if (isCancelled) {
+        if (isCancelled || data == null) {
             return null;
         }
         DataRewinder<T> rewinder = requestContext.getRewinder(data);

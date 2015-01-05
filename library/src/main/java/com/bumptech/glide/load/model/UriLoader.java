@@ -3,57 +3,92 @@ package com.bumptech.glide.load.model;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-
+import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
+import com.bumptech.glide.load.data.StreamLocalUriFetcher;
+
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A base ModelLoader for {@link android.net.Uri}s that handles local {@link android.net.Uri}s directly and routes
  * remote {@link android.net.Uri}s to a wrapped {@link com.bumptech.glide.load.model.ModelLoader} that handles
  * {@link com.bumptech.glide.load.model.GlideUrl}s.
  *
- * @param <T> The type of data that will be retrieved for {@link android.net.Uri}s.
+ * @param <Data> The type of data that will be retrieved for {@link android.net.Uri}s.
  */
-public abstract class UriLoader<T> implements ModelLoader<Uri, T> {
-    private final Context context;
-    private final ModelLoader<GlideUrl, T> urlLoader;
+public class UriLoader<Data> implements ModelLoader<Uri, Data> {
+    private static final Set<String> SCHEMES = Collections.unmodifiableSet(
+            new HashSet<String>(
+                    Arrays.asList(
+                            ContentResolver.SCHEME_FILE,
+                            ContentResolver.SCHEME_ANDROID_RESOURCE,
+                            ContentResolver.SCHEME_CONTENT
+                    )
+            )
+    );
 
-    public UriLoader(Context context, ModelLoader<GlideUrl, T> urlLoader) {
+    private final Context context;
+    private final LocalUriFetcherFactory<Data> factory;
+
+    public UriLoader(Context context, LocalUriFetcherFactory<Data> factory) {
         this.context = context;
-        this.urlLoader = urlLoader;
+        this.factory = factory;
     }
 
     @Override
-    public final DataFetcher<T> getDataFetcher(Uri model, int width, int height) {
-        final String scheme = model.getScheme();
-
-        DataFetcher<T> result = null;
-        if (isLocalUri(scheme)) {
-            if (AssetUriParser.isAssetUri(model)) {
-                String path = AssetUriParser.toAssetPath(model);
-                result = getAssetPathFetcher(context, path);
-            } else {
-                result = getLocalUriFetcher(context, model);
-            }
-        } else if (urlLoader != null && ("http".equals(scheme) || "https".equals(scheme))) {
-            result = urlLoader.getDataFetcher(new GlideUrl(model.toString()), width, height);
-        }
-
-        return result;
-    }
-
-    protected abstract DataFetcher<T> getLocalUriFetcher(Context context, Uri uri);
-
-    protected abstract DataFetcher<T> getAssetPathFetcher(Context context, String path);
-
-    private static boolean isLocalUri(String scheme) {
-        return ContentResolver.SCHEME_FILE.equals(scheme)
-                || ContentResolver.SCHEME_CONTENT.equals(scheme)
-                || ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme);
+    public final DataFetcher<Data> getDataFetcher(Uri model, int width, int height) {
+        return factory.build(context, model);
     }
 
     @Override
     public boolean handles(Uri model) {
-        // TODO: fixme.
-        return true;
+        return SCHEMES.contains(model.getScheme());
+    }
+
+    public interface LocalUriFetcherFactory<Data> {
+        DataFetcher<Data> build(Context context, Uri uri);
+    }
+
+    public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream>,
+            LocalUriFetcherFactory<InputStream> {
+
+        @Override
+        public DataFetcher<InputStream> build(Context context, Uri uri) {
+            return new StreamLocalUriFetcher(context, uri);
+        }
+
+        @Override
+        public ModelLoader<Uri, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
+            return new UriLoader<InputStream>(context, this);
+        }
+
+        @Override
+        public void teardown() {
+            // Do nothing.
+        }
+    }
+
+    public static class FileDescriptorFactory implements ModelLoaderFactory<Uri, ParcelFileDescriptor>,
+            LocalUriFetcherFactory<ParcelFileDescriptor> {
+
+        @Override
+        public DataFetcher<ParcelFileDescriptor> build(Context context, Uri uri) {
+            return new FileDescriptorLocalUriFetcher(context, uri);
+        }
+
+        @Override
+        public ModelLoader<Uri, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
+            return new UriLoader<ParcelFileDescriptor>(context, this);
+        }
+
+        @Override
+        public void teardown() {
+            // Do nothing.
+        }
     }
 }

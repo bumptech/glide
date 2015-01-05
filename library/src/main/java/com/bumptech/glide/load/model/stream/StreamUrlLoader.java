@@ -24,8 +24,7 @@ public class StreamUrlLoader extends UrlLoader<InputStream> {
     public static class Factory implements ModelLoaderFactory<URL, InputStream> {
         @Override
         public ModelLoader<URL, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new StreamUrlLoader(multiFactory.build(GlideUrl.class, InputStream.class).get(0));
+            return new StreamUrlLoader(multiFactory.build(GlideUrl.class, InputStream.class));
         }
 
         @Override

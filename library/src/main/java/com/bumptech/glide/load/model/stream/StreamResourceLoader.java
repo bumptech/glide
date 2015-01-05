@@ -22,8 +22,7 @@ public class StreamResourceLoader extends ResourceLoader<InputStream> implements
 
         @Override
         public ModelLoader<Integer, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            // TODO: fixme.
-            return new StreamResourceLoader(context, multiFactory.build(Uri.class, InputStream.class).get(0));
+            return new StreamResourceLoader(context, multiFactory.build(Uri.class, InputStream.class));
         }
 
         @Override
