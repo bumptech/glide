@@ -33,6 +33,7 @@ import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.load.model.ResourceLoader;
 import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.model.StringLoader;
+import com.bumptech.glide.load.model.UnitModelLoader;
 import com.bumptech.glide.load.model.UriLoader;
 import com.bumptech.glide.load.model.stream.ByteArrayLoader;
 import com.bumptech.glide.load.model.stream.HttpGlideUrlLoader;
@@ -47,7 +48,6 @@ import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gif.GifFrameModelLoader;
 import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
@@ -228,7 +228,7 @@ public class Glide implements ComponentCallbacks2 {
         resourceEncoderRegistry.add(GifDrawable.class, new GifResourceEncoder(bitmapPool));
 
         /* Gif Frames */
-        modelLoaderRegistry.append(GifDecoder.class, GifDecoder.class, new GifFrameModelLoader.Factory());
+        modelLoaderRegistry.append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>());
         decoderRegistry.append(new GifFrameResourceDecoder(bitmapPool), GifDecoder.class, Bitmap.class);
 
         /* Files */
@@ -237,6 +237,7 @@ public class Glide implements ComponentCallbacks2 {
         DataRewinderRegistry dataRewinderRegistry = new DataRewinderRegistry();
         dataRewinderRegistry.register(new InputStreamRewinder.Factory());
 
+        modelLoaderRegistry.append(File.class, File.class, new UnitModelLoader.Factory<File>());
         modelLoaderRegistry.append(File.class, InputStream.class, new FileLoader.StreamFactory());
         modelLoaderRegistry.append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory());
         modelLoaderRegistry.append(int.class, InputStream.class, new ResourceLoader.StreamFactory());

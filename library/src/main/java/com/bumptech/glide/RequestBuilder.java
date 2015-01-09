@@ -505,9 +505,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @return The given Target.
      */
     public <Y extends Target<File>> Y downloadOnly(Y target) {
-        // TODO: fixme.
-//        return getDownloadOnlyRequest().downloadOnly(target);
-        return target;
+        return getDownloadOnlyRequest().into(target);
     }
 
     /**
@@ -519,9 +517,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @return A {@link java.util.concurrent.Future} that can be used to retrieve the cache File containing the data.
      */
     public FutureTarget<File> downloadOnly(int width, int height) {
-        // TODO: fixme.
-//        return getDownloadOnlyRequest().downloadOnly(width, height);
-        return null;
+        return getDownloadOnlyRequest().into(width, height);
     }
 
     private RequestBuilder<File, File> getDownloadOnlyRequest() {
