@@ -39,7 +39,7 @@ public class EngineKeyTest {
 
     private static class Harness {
         String id = "testId";
-        String transformationId= "transformationId";
+        String transformationId = "transformationId";
         int width = 1;
         int height = 2;
         Class resourceClass = Object.class;

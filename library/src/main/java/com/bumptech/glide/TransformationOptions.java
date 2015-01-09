@@ -4,6 +4,12 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.util.Preconditions;
 
+/**
+ * A base class for setting an animation to use to animate in a resource when the load completes.
+ *
+ * @param <CHILD> The implementation of this class to return to chain methods.
+ * @param <ResourceType> The type of resource that will be transformed.
+ */
 public abstract class TransformationOptions<CHILD extends TransformationOptions<CHILD, ResourceType>, ResourceType>
         implements Cloneable {
     private Transformation<ResourceType> transformation = UnitTransformation.get();
@@ -68,7 +74,7 @@ public abstract class TransformationOptions<CHILD extends TransformationOptions<
     }
 
     @SuppressWarnings("unchecked")
-    private final CHILD self() {
+    private CHILD self() {
         return (CHILD) this;
     }
 }

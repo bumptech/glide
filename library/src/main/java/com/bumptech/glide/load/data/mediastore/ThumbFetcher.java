@@ -4,12 +4,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A {@link DataFetcher} implementation for {@link InputStream}s that loads data from thumbnail files obtained from
+ * the {@link MediaStore}.
+ */
 public class ThumbFetcher implements DataFetcher<InputStream> {
     private final Context context;
     private final Uri mediaStoreImageUri;

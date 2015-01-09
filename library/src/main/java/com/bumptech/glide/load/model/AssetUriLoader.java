@@ -5,12 +5,18 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorAssetPathFetcher;
 import com.bumptech.glide.load.data.StreamAssetPathFetcher;
 
 import java.io.InputStream;
 
+/**
+ * Loads a specific data type from an Asset Manager Uri.
+ *
+ * @param <Data> The type of data this loader will obtain.
+ */
 public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
     private static final String ASSET_PATH_SEGMENT = "android_asset";
     private static final String ASSET_PREFIX = ContentResolver.SCHEME_FILE + ":///" + ASSET_PATH_SEGMENT + "/";
@@ -37,10 +43,18 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
                 && ASSET_PATH_SEGMENT.equals(model.getPathSegments().get(0));
     }
 
+    /**
+     * A factory to build a {@link DataFetcher} for a specific asset path.
+     *
+     * @param <Data> The type of data that will be obtained by the fetcher.
+     */
     public interface AssetFetcherFactory<Data> {
         DataFetcher<Data> buildFetcher(AssetManager assetManager, String assetPath);
     }
 
+    /**
+     * Factory for loading {@link InputStream}s from asset manager Uris.
+     */
     public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream>,
         AssetFetcherFactory<InputStream> {
 
@@ -60,6 +74,9 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
         }
     }
 
+    /**
+     * Factory for loading {@link ParcelFileDescriptor}s from asset manager Uris.
+     */
     public static class FileDescriptorFactory implements ModelLoaderFactory<Uri, ParcelFileDescriptor>,
             AssetFetcherFactory<ParcelFileDescriptor> {
 

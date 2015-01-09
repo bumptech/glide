@@ -5,7 +5,12 @@ import com.bumptech.glide.load.Encoder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains an unordered list of {@link Encoder}s capable of encoding arbitrary data types.
+ *
+ */
 public class EncoderRegistry {
+    // TODO: This registry should probably contain a set, rather than a list.
     private final List<Entry<?>> encoders = new ArrayList<Entry<?>>();
 
     @SuppressWarnings("unchecked")
@@ -15,7 +20,6 @@ public class EncoderRegistry {
                 return (Encoder<T>) entry.encoder;
             }
         }
-        // TODO: throw an exception here.
         return null;
     }
 
@@ -23,7 +27,7 @@ public class EncoderRegistry {
         encoders.add(new Entry<T>(dataClass, encoder));
     }
 
-    private static class Entry<T> {
+    private static final class Entry<T> {
         private final Class<T> dataClass;
         private final Encoder<T> encoder;
 

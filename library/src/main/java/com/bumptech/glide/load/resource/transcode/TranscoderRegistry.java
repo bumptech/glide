@@ -48,7 +48,7 @@ public class TranscoderRegistry {
                 + transcodedClass);
     }
 
-    private static class Entry<Z, R> {
+    private static final class Entry<Z, R> {
         private final Class<Z> fromClass;
         private final Class<R> toClass;
         private final ResourceTranscoder<Z, R> transcoder;

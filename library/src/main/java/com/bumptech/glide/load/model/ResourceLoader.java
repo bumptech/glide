@@ -4,8 +4,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
-
 import android.os.ParcelFileDescriptor;
+
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.InputStream;
@@ -45,6 +45,9 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
         return true;
     }
 
+    /**
+     * Factory for loading {@link InputStream}s from Android resource ids.
+     */
     public static class StreamFactory implements ModelLoaderFactory<Integer, InputStream> {
 
         @Override
@@ -58,6 +61,9 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
         }
     }
 
+    /**
+     * Factory for loading {@link ParcelFileDescriptor}s from Android resource ids.
+     */
     public static class FileDescriptorFactory implements ModelLoaderFactory<Integer, ParcelFileDescriptor> {
 
         @Override

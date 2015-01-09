@@ -9,6 +9,9 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 
+/**
+ * Contains {@link GifDrawable} specific transformation options.
+ */
 public final class GifTransformationOptions extends TransformationOptions<GifTransformationOptions, GifDrawable> {
     private final Context context;
 

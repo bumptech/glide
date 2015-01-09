@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -32,6 +33,9 @@ public class UrlLoader implements ModelLoader<URL, InputStream> {
         return true;
     }
 
+    /**
+     * Factory for loading {@link InputStream}s from {@link URL}s.
+     */
     public static class StreamFactory implements ModelLoaderFactory<URL, InputStream> {
 
         @Override

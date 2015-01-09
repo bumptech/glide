@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.content.Context;
+
 import com.bumptech.glide.load.data.DataFetcherSet;
 
 import java.util.Collections;
@@ -8,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Maintains an ordered set of {@link ModelLoader}s and the model and data types they handle in order from highest
+ * priority to lowest priority.
+ */
 public class ModelLoaderRegistry {
 
     private final MultiModelLoaderFactory multiModelLoaderFactory;

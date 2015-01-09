@@ -9,6 +9,9 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
+/**
+ * Simple model loader that returns a data fetcher that just returns the provided model as its data.
+ */
 public final class GifFrameModelLoader implements ModelLoader<GifDecoder, GifDecoder> {
 
     public static final class Factory implements ModelLoaderFactory<GifDecoder, GifDecoder> {

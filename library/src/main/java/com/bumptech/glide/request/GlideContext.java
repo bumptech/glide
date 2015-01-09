@@ -19,6 +19,7 @@ import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
@@ -32,6 +33,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Global context for all loads in Glide containing and exposing the various registries and classes required to load
+ * resources.
+ */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class GlideContext extends ContextWrapper implements ComponentCallbacks2 {
     private static final String TAG = "RequestContext";
@@ -150,30 +155,45 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         componentCallbacks.onLowMemory();
     }
 
+    /**
+     * Thrown when no {@link ModelLoader} is registered for a given model class.
+     */
     public static class NoModelLoaderAvailableException extends RuntimeException {
         public NoModelLoaderAvailableException(Object model) {
             super("Failed to find any ModelLoaders for model: " + model);
         }
     }
 
+    /**
+     * Thrown when no {@link ResourceEncoder} is registered for a given resource class.
+     */
     public static class NoResultEncoderAvailableException extends MissingComponentException {
         public NoResultEncoderAvailableException(Class<?> resourceClass) {
             super("Failed to find result encoder for resource class: " + resourceClass);
         }
     }
 
+    /**
+     * Thrown when no {@link Encoder} is registered for a given data class.
+     */
     public static class NoSourceEncoderAvailableException extends MissingComponentException{
         public NoSourceEncoderAvailableException(Class<?> dataClass) {
             super("Failed to find source encoder for data class: " + dataClass);
         }
     }
 
+    /**
+     * Thrown when no {@link ResourceDecoder} is registered for a given data and resource class.
+     */
     public static class NoDecoderAvailableException extends MissingComponentException {
         public NoDecoderAvailableException(Class<?> dataClass, Class<?> resourceClass) {
             super("Failed to find decoder that decodes " + resourceClass + " from data " + dataClass);
         }
     }
 
+    /**
+     * Thrown when some necessary component is missing for a load.
+     */
     public static class MissingComponentException extends RuntimeException {
         public MissingComponentException(String message) {
             super(message);

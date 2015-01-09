@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.util.Log;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;

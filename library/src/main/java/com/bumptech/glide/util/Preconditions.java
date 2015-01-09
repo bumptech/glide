@@ -1,5 +1,8 @@
 package com.bumptech.glide.util;
 
+/**
+ * Contains common assertions.
+ */
 public class Preconditions {
 
     public static <T> T checkNotNull(T arg) {

@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Capable of building an {@link ModelLoader} that wraps one or more other {@link ModelLoader}s for a given model and
+ * data class.
+ */
 public class MultiModelLoaderFactory {
     private static final Factory DEFAULT_FACTORY = new Factory();
     private final List<Entry<?, ?>> entries = new ArrayList<Entry<?, ?>>();

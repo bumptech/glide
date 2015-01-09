@@ -5,6 +5,9 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.AnimationOptions;
 import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
 
+/**
+ * Contains {@link Drawable} specific animation options.
+ */
 public final class DrawableAnimationOptions extends AnimationOptions<DrawableAnimationOptions, Drawable> {
 
     public static DrawableAnimationOptions withCrossFade() {

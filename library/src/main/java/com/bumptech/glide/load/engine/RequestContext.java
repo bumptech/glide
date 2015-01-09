@@ -18,6 +18,13 @@ import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Context for individual requests and decodes that contains and exposes classes necessary to obtain, decode, and
+ * encode resources.
+ *
+ * @param <ResourceClass> The type of objects decoded using classes from this object.
+ * @param <TranscodeClass> The type of resources returned using classes from this object.
+ */
 public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrapper {
 
     private final GlideContext glideContext;

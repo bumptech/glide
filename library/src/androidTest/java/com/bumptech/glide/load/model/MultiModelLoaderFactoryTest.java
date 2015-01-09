@@ -1,6 +1,14 @@
 package com.bumptech.glide.load.model;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,13 +21,6 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -95,7 +96,8 @@ public class MultiModelLoaderFactoryTest {
         multiFactory.append(String.class, String.class, firstOtherFactory);
         multiFactory.append(String.class, String.class, secondOtherFactory);
 
-        List<ModelLoaderFactory<String, String>> removed = multiFactory.replace(String.class, String.class, singleFactory);
+        List<ModelLoaderFactory<String, String>> removed =
+                multiFactory.replace(String.class, String.class, singleFactory);
         assertThat(removed).containsExactly(firstOtherFactory, secondOtherFactory);
     }
 

@@ -4,6 +4,9 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+/**
+ * Utility classes for interacting with the media store.
+ */
 public final class MediaStoreUtil {
     private static final int MINI_THUMB_WIDTH = 512;
     private static final int MINI_THUMB_HEIGHT = 384;

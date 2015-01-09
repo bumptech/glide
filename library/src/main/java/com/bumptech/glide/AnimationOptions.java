@@ -7,6 +7,12 @@ import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimationFactory;
 import com.bumptech.glide.util.Preconditions;
 
+/**
+ * A base class for setting an animation to use to animate in a resource when the load completes.
+ *
+ * @param <CHILD> The implementation of this class to return to chain methods.
+ * @param <TranscodeType> The type of resource that will be animated.
+ */
 public abstract class AnimationOptions<CHILD extends AnimationOptions<CHILD, TranscodeType>, TranscodeType>
         implements Cloneable {
     private GlideAnimationFactory<? super TranscodeType> animationFactory = NoAnimation.getFactory();
@@ -16,8 +22,7 @@ public abstract class AnimationOptions<CHILD extends AnimationOptions<CHILD, Tra
      * @return This request builder.
      */
     public final CHILD dontAnimate() {
-        GlideAnimationFactory<TranscodeType> animation = NoAnimation.getFactory();
-        return animate(animation);
+        return animate(NoAnimation.getFactory());
     }
 
     /**
@@ -43,9 +48,8 @@ public abstract class AnimationOptions<CHILD extends AnimationOptions<CHILD, Tra
         return animate(new ViewPropertyAnimationFactory<TranscodeType>(animator));
     }
 
-    protected final CHILD animate(GlideAnimationFactory<? super TranscodeType> animationFactory) {
+    public final CHILD animate(GlideAnimationFactory<? super TranscodeType> animationFactory) {
         this.animationFactory = Preconditions.checkNotNull(animationFactory);
-
         return self();
     }
 
@@ -64,7 +68,7 @@ public abstract class AnimationOptions<CHILD extends AnimationOptions<CHILD, Tra
     }
 
     @SuppressWarnings("unchecked")
-    private final CHILD self() {
+    private CHILD self() {
         return (CHILD) this;
     }
 }

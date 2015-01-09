@@ -11,8 +11,8 @@ import android.os.Message;
 import android.os.SystemClock;
 
 import com.bumptech.glide.GenericTransformationOptions;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;

@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
@@ -50,10 +51,18 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
         return SCHEMES.contains(model.getScheme());
     }
 
+    /**
+     * Factory for obtaining a {@link DataFetcher} for a data type for a particular {@link Uri}.
+     *
+     * @param <Data> The type of data the returned {@link DataFetcher} will obtain.
+     */
     public interface LocalUriFetcherFactory<Data> {
         DataFetcher<Data> build(Context context, Uri uri);
     }
 
+    /**
+     * Loads {@link InputStream}s from {@link Uri}s.
+     */
     public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream>,
             LocalUriFetcherFactory<InputStream> {
 
@@ -73,6 +82,9 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
         }
     }
 
+    /**
+     * Loads {@link ParcelFileDescriptor}s from {@link Uri}s.
+     */
     public static class FileDescriptorFactory implements ModelLoaderFactory<Uri, ParcelFileDescriptor>,
             LocalUriFetcherFactory<ParcelFileDescriptor> {
 

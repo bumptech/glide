@@ -2,8 +2,8 @@ package com.bumptech.glide.load.model;
 
 import android.content.Context;
 import android.net.Uri;
-
 import android.os.ParcelFileDescriptor;
+
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.File;
@@ -33,6 +33,9 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
         return true;
     }
 
+    /**
+     * Factory for loading {@link InputStream}s from {@link File}s.
+     */
     public static class StreamFactory implements ModelLoaderFactory<File, InputStream> {
 
         @Override
@@ -46,6 +49,9 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
         }
     }
 
+    /**
+     * Factory for loading {@link ParcelFileDescriptor}s from {@link File}s.
+     */
     public static class FileDescriptorFactory implements ModelLoaderFactory<File, ParcelFileDescriptor> {
 
         @Override

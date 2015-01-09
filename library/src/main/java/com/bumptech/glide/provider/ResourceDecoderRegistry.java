@@ -5,6 +5,10 @@ import com.bumptech.glide.load.ResourceDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains an ordered list of {@link ResourceDecoder}s capable of decoding arbitrary data types into arbitrary resource
+ * types from highest priority decoders to loweset priority decoders.
+ */
 @SuppressWarnings("rawtypes")
 public class ResourceDecoderRegistry {
     private final List<Entry<?, ?>> decoders = new ArrayList<Entry<?, ?>>();

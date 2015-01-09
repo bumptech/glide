@@ -42,7 +42,8 @@ import java.util.UUID;
  */
 public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
     private static final RequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
-    private static final TransformationOptions<?, ?> DEFAULT_TRANSFORMATION_OPTIONS = new GenericTransformationOptions<Object>();
+    private static final TransformationOptions<?, ?> DEFAULT_TRANSFORMATION_OPTIONS =
+            new GenericTransformationOptions<Object>();
     private static final AnimationOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
             new GenericAnimationOptions<Object>();
     protected final GlideContext context;
@@ -434,9 +435,9 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * Returns a future that can be used to do a blocking get on a background thread.
      *
      * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *             {@link #override * (int, int)} if previously called.
+     *             {@link RequestOptions#override * (int, int)} if previously called.
      * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *              {@link #override * (int, int)}} if previously called).
+     *              {@link RequestOptions#override * (int, int)}} if previously called).
      *
      * @see Glide#clear(com.bumptech.glide.request.FutureTarget)
      *
@@ -472,9 +473,9 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @see com.bumptech.glide.ListPreloader
      *
      * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *             {@link #override * (int, int)} if previously called.
+     *             {@link RequestOptions#override * (int, int)} if previously called.
      * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *              {@link #override * (int, int)}} if previously called).
+     *              {@link RequestOptions#override * (int, int)}} if previously called).
      * @return A {@link Target} that can be used to cancel the load via
      *        {@link Glide#clear(com.bumptech.glide.request.target.Target)}.
      */

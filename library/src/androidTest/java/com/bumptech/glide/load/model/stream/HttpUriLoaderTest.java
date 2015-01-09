@@ -1,8 +1,14 @@
 package com.bumptech.glide.load.model.stream;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+
 import android.net.Uri;
+
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,10 +19,6 @@ import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
-
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -59,7 +61,7 @@ public class HttpUriLoaderTest {
 
         assertTrue(loader.handles(mostlyInvalidHttpUri));
         loader.getDataFetcher(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE);
-        verify(urlLoader).getDataFetcher(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE), eq
-                (IMAGE_SIDE));
+        verify(urlLoader).getDataFetcher(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE),
+                eq(IMAGE_SIDE));
     }
 }

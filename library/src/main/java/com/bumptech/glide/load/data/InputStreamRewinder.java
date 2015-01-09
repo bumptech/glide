@@ -6,6 +6,9 @@ import com.bumptech.glide.util.ByteArrayPool;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Implementation for {@link InputStream}s that rewinds streams by wrapping them in a buffered stream.
+ */
 public final class InputStreamRewinder implements DataRewinder<InputStream> {
     public static class Factory implements DataRewinder.Factory<InputStream> {
 

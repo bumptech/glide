@@ -5,7 +5,11 @@ import com.bumptech.glide.load.ResourceEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains an unordered list of {@link ResourceEncoder}s capable of encoding arbitrary resource types.
+ */
 public class ResourceEncoderRegistry {
+    // TODO: this should probably be a set.
     final List<Entry<?>> encoders = new ArrayList<Entry<?>>();
 
     public synchronized <Z> void add(Class<Z> resourceClass, ResourceEncoder<Z> encoder) {
@@ -23,7 +27,7 @@ public class ResourceEncoderRegistry {
         return null;
     }
 
-    private static class Entry<T> {
+    private static final class Entry<T> {
         private final Class<T> resourceClass;
         private final ResourceEncoder<T> encoder;
 

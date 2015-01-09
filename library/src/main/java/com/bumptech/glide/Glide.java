@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
@@ -33,11 +34,11 @@ import com.bumptech.glide.load.model.ResourceLoader;
 import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.model.StringLoader;
 import com.bumptech.glide.load.model.UriLoader;
+import com.bumptech.glide.load.model.stream.ByteArrayLoader;
 import com.bumptech.glide.load.model.stream.HttpGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.HttpUriLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreImageThumbLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreVideoThumbLoader;
-import com.bumptech.glide.load.model.stream.ByteArrayLoader;
 import com.bumptech.glide.load.model.stream.UrlLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
@@ -425,10 +426,7 @@ public class Glide implements ComponentCallbacks2 {
      * </p>
      *
      * @param modelClass The model class.
-     * @param resourceClass The resource class the model loader will translate the model type into.
-     * @param factory The factory to use.
-     * @param <T> The type of the model.
-     * @param <Y> the type of the resource.
+     * @param dataClass the data class.
      */
     public <Model, Data> void append(Class<Model> modelClass, Class<Data> dataClass,
             ModelLoaderFactory<Model, Data> factory) {
@@ -450,9 +448,7 @@ public class Glide implements ComponentCallbacks2 {
      * {@link ModelLoaderFactory} is removed, its {@link ModelLoaderFactory#teardown()}} method will be called.
      *
      * @param modelClass The model class.
-     * @param resourceClass The resource class.
-     * @param <T> The type of the model.
-     * @param <Y> The type of the resource.
+     * @param dataClass The data class.
      */
     public <Model, Data> void remove(Class<Model> modelClass, Class<Data> dataClass) {
         modelLoaderRegistry.remove(modelClass, dataClass);

@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.load.data.mediastore.ThumbFetcher;
@@ -11,6 +12,10 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
 
+/**
+ * Loads {@link InputStream}s from media store image {@link Uri}s that point to pre-generated thumbnails for those
+ * {@link Uri}s in the media store.
+ */
 public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream> {
     public final Context context;
 
@@ -32,6 +37,9 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
         return MediaStoreUtil.isMediaStoreImageUri(model);
     }
 
+    /**
+     * Factory that loads {@link InputStream}s from media store image {@link Uri}s.
+     */
     public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
 
         @Override

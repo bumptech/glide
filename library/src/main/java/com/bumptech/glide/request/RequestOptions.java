@@ -9,6 +9,9 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
 
+/**
+ * Contains and exposes a variety of non type specific options that can be applied to a load in Glide.
+ */
 public class RequestOptions implements Cloneable {
     private static final int UNSET = -1;
     private static final int SIZE_MULTIPLIER = 1 << 1;
