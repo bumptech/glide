@@ -2,11 +2,13 @@ package com.bumptech.glide.manager;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
+import android.content.ComponentCallbacks;
 import android.support.v4.app.FragmentActivity;
 
 import com.bumptech.glide.RequestManager;
@@ -103,6 +105,30 @@ public class RequestManagerFragmentTest {
         });
     }
 
+    @Test
+    public void testCallsRequestManagerOnLowMemory() {
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                RequestManager requestManager = mock(RequestManager.class);
+                harness.setRequestManager(requestManager);
+                harness.getCallbacks().onLowMemory();
+                verify(requestManager).onLowMemory();
+            }
+        });
+    }
+
+    @Test
+    public void testNonSupportFragmentCallsRequestManagerOnTrimMemory() {
+        RequestManagerHarness requestManagerHarness = new RequestManagerHarness();
+        RequestManager requestManager = mock(RequestManager.class);
+        requestManagerHarness.setRequestManager(requestManager);
+        int level = 123;
+        requestManagerHarness.fragment.onTrimMemory(level);
+
+        verify(requestManager).onTrimMemory(eq(level));
+    }
+
     private void runTest(TestCase testCase) {
         for (Harness harness : harnesses) {
             try {
@@ -127,6 +153,8 @@ public class RequestManagerFragmentTest {
         public ActivityFragmentLifecycle getFragmentLifecycle();
 
         public ActivityController getController();
+
+        public ComponentCallbacks getCallbacks();
     }
 
     private static class RequestManagerHarness implements Harness {
@@ -173,6 +201,11 @@ public class RequestManagerFragmentTest {
         @Override
         public ActivityController getController() {
             return controller;
+        }
+
+        @Override
+        public ComponentCallbacks getCallbacks() {
+            return fragment;
         }
     }
 
@@ -221,6 +254,11 @@ public class RequestManagerFragmentTest {
         @Override
         public ActivityController getController() {
             return supportController;
+        }
+
+        @Override
+        public ComponentCallbacks getCallbacks() {
+            return supportFragment;
         }
     }
 }

@@ -68,4 +68,14 @@ public class RequestManagerFragment extends Fragment {
         super.onDestroy();
         lifecycle.onDestroy();
     }
+
+    @Override
+    public void onTrimMemory(int level) {
+        requestManager.onTrimMemory(level);
+    }
+
+    @Override
+    public void onLowMemory() {
+        requestManager.onLowMemory();
+    }
 }

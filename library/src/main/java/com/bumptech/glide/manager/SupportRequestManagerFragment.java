@@ -65,4 +65,10 @@ public class SupportRequestManagerFragment extends Fragment {
         super.onDestroy();
         lifecycle.onDestroy();
     }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        requestManager.onLowMemory();
+    }
 }

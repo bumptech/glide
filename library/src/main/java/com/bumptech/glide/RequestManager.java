@@ -1,6 +1,9 @@
 package com.bumptech.glide;
 
+import android.annotation.SuppressLint;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,7 +42,9 @@ import java.util.UUID;
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
-public class RequestManager implements LifecycleListener {
+// It's safe to implement ComponentCallbacks2.
+@SuppressLint("NewApi")
+public class RequestManager implements LifecycleListener, ComponentCallbacks2 {
     private final Context context;
     private final Lifecycle lifecycle;
     private final RequestTracker requestTracker;
@@ -76,6 +81,21 @@ public class RequestManager implements LifecycleListener {
             lifecycle.addListener(this);
         }
         lifecycle.addListener(connectivityMonitor);
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        glide.trimMemory(level);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onLowMemory() {
+        glide.clearMemory();
     }
 
     /**

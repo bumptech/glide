@@ -346,6 +346,7 @@ public class Glide {
     /**
      * Clears as much memory as possible.
      *
+     * @see android.content.ComponentCallbacks#onLowMemory()
      * @see android.content.ComponentCallbacks2#onLowMemory()
      */
     public void clearMemory() {
