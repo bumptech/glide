@@ -37,7 +37,8 @@ public class FifoPriorityThreadPoolExecutorTest {
             }));
         }
 
-        executor.awaitTermination(200, TimeUnit.MILLISECONDS);
+        executor.shutdown();
+        executor.awaitTermination(500, TimeUnit.MILLISECONDS);
 
         assertThat(resultPriorities).hasSize(numPrioritiesToTest);
 
