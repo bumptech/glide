@@ -73,4 +73,6 @@ public interface DataFetcher<T> {
      * </p>
      */
     void cancel();
+
+    Class<T> getDataClass();
 }

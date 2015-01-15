@@ -43,7 +43,7 @@ class GifFrameLoader {
 
     public GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, int width, int height) {
         this(callback, gifDecoder, null,
-                getRequestBuilder(context, gifDecoder, width, height));
+                getRequestBuilder(context, width, height));
     }
 
     GifFrameLoader(FrameCallback callback, GifDecoder gifDecoder, Handler handler,
@@ -102,6 +102,7 @@ class GifFrameLoader {
         DelayTarget next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
         requestBuilder
                 .apply(signatureOf(new FrameSignature()))
+                .load(gifDecoder)
                 .into(next);
     }
 
@@ -167,14 +168,12 @@ class GifFrameLoader {
         }
     }
 
-    private static RequestBuilder<Bitmap, Bitmap> getRequestBuilder(Context context,
-            GifDecoder gifDecoder, int width, int height) {
+    private static RequestBuilder<Bitmap, Bitmap> getRequestBuilder(Context context, int width, int height) {
         return Glide.with(context)
                 .asBitmap()
                 .apply(diskCacheStrategyOf(DiskCacheStrategy.NONE)
                         .skipMemoryCache(true)
-                        .override(width, height))
-                .load(gifDecoder);
+                        .override(width, height));
     }
 
     // Visible for testing.

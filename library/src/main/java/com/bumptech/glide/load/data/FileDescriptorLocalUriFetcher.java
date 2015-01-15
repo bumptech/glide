@@ -25,4 +25,9 @@ public class FileDescriptorLocalUriFetcher extends LocalUriFetcher<ParcelFileDes
     protected void close(ParcelFileDescriptor data) throws IOException {
         data.close();
     }
+
+    @Override
+    public Class<ParcelFileDescriptor> getDataClass() {
+        return ParcelFileDescriptor.class;
+    }
 }

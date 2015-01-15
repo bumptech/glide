@@ -33,7 +33,7 @@ public class LruCache<T, Y> {
      *
      * @param multiplier The multiplier to apply.
      */
-    public void setSizeMultiplier(float multiplier) {
+    public synchronized void setSizeMultiplier(float multiplier) {
         if (multiplier < 0) {
             throw new IllegalArgumentException("Multiplier must be >= 0");
         }
@@ -64,14 +64,14 @@ public class LruCache<T, Y> {
     /**
      * Returns the current maximum size of the cache in bytes.
      */
-    public int getMaxSize() {
+    public synchronized int getMaxSize() {
         return maxSize;
     }
 
     /**
      * Returns the sum of the sizes of all items in the cache.
      */
-    public int getCurrentSize() {
+    public synchronized int getCurrentSize() {
         return currentSize;
     }
 
@@ -81,7 +81,7 @@ public class LruCache<T, Y> {
      * @param key The key to check.
      */
 
-    public boolean contains(T key) {
+    public synchronized boolean contains(T key) {
         return cache.containsKey(key);
     }
 
@@ -90,7 +90,7 @@ public class LruCache<T, Y> {
      *
      * @param key The key to check.
      */
-    public Y get(T key) {
+    public synchronized Y get(T key) {
         return cache.get(key);
     }
 
@@ -106,7 +106,7 @@ public class LruCache<T, Y> {
      * @param key The key to add the item at.
      * @param item The item to add.
      */
-    public Y put(T key, Y item) {
+    public synchronized Y put(T key, Y item) {
         final int itemSize = getSize(item);
         if (itemSize >= maxSize) {
             onItemEvicted(key, item);
@@ -131,7 +131,7 @@ public class LruCache<T, Y> {
      *
      * @param key The key to remove the item at.
      */
-    public Y remove(T key) {
+    public synchronized Y remove(T key) {
         final Y value = cache.remove(key);
         if (value != null) {
             currentSize -= getSize(value);
@@ -142,7 +142,7 @@ public class LruCache<T, Y> {
     /**
      * Clears all items in the cache.
      */
-    public void clearMemory() {
+    public synchronized void clearMemory() {
         trimToSize(0);
     }
 

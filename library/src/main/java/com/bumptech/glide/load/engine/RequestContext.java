@@ -17,6 +17,7 @@ import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Context for individual requests and decodes that contains and exposes classes necessary to obtain, decode, and
@@ -48,6 +49,14 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
         this.transformation = transformation;
         this.transcoder = transcoder;
         this.requestOptions = requestOptions;
+    }
+
+    List<LoadPath<?, ResourceClass, TranscodeClass>> getLoadPaths() {
+        return glideContext.getLoadPaths(model, resourceClass, transcodeClass);
+    }
+
+    List<LoadPath<?, ResourceClass, TranscodeClass>> getSourceCacheLoadPaths(File sourceCacheFile) {
+        return glideContext.getLoadPaths(sourceCacheFile, resourceClass, transcodeClass);
     }
 
     void buildDataFetchers(int width, int height) {

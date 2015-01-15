@@ -71,6 +71,16 @@ public class MultiModelLoaderFactory {
         return loaders;
     }
 
+    List<Class<?>> getDataClasses(Class<?> modelClass) {
+        List<Class<?>> result = new ArrayList<Class<?>>();
+        for (Entry<?, ?> entry : entries) {
+            if (entry.handles(modelClass)) {
+                result.add(entry.dataClass);
+            }
+        }
+        return result;
+    }
+
     public <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass, Class<Data> dataClass) {
         List<ModelLoader<Model, Data>> loaders = new ArrayList<ModelLoader<Model, Data>>();
         for (Entry<?, ?> entry : entries) {

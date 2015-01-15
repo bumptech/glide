@@ -22,4 +22,9 @@ public class FileDescriptorAssetPathFetcher extends AssetPathFetcher<ParcelFileD
     protected void close(ParcelFileDescriptor data) throws IOException {
         data.close();
     }
+
+    @Override
+    public Class<ParcelFileDescriptor> getDataClass() {
+        return ParcelFileDescriptor.class;
+    }
 }

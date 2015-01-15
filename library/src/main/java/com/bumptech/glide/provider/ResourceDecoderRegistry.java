@@ -16,13 +16,24 @@ public class ResourceDecoderRegistry {
     @SuppressWarnings("unchecked")
     public synchronized <T, R> List<ResourceDecoder<T, R>> getDecoders(Class<T> dataClass, Class<R> resourceClass) {
         List<ResourceDecoder<T, R>> result = new ArrayList<ResourceDecoder<T, R>>();
-        for (Entry entry : decoders) {
+        for (Entry<?, ?> entry : decoders) {
             if (entry.handles(dataClass, resourceClass)) {
-                result.add(entry.decoder);
+                result.add((ResourceDecoder<T, R>) entry.decoder);
             }
         }
         // TODO: cache result list.
 
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public synchronized <T, R> List<Class<R>> getResourceClasses(Class<T> dataClass, Class<R> resourceClass) {
+        List<Class<R>> result = new ArrayList<Class<R>>();
+        for (Entry<?, ?> entry : decoders) {
+            if (entry.handles(dataClass, resourceClass)) {
+                result.add((Class<R>) entry.resourceClass);
+            }
+        }
         return result;
     }
 

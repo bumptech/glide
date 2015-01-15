@@ -71,5 +71,10 @@ public class LocalUriFetcherTest {
         protected void close(Closeable data) throws IOException {
             data.close();
         }
+
+        @Override
+        public Class<Closeable> getDataClass() {
+            return Closeable.class;
+        }
     }
 }

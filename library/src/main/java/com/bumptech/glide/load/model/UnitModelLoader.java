@@ -44,6 +44,12 @@ public class UnitModelLoader<ResourceType> implements ModelLoader<ResourceType, 
         public void cancel() {
             // Do nothing.
         }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Class<ResourceType> getDataClass() {
+            return (Class<ResourceType>) resource.getClass();
+        }
     }
 
     public static class Factory<ResourceType> implements ModelLoaderFactory<ResourceType, ResourceType> {

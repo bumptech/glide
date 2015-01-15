@@ -265,8 +265,8 @@ public class FlickrSearchActivity extends ActionBarActivity {
                 backgroundThumbnailFetcher.cancel();
             }
 
-            backgroundThumbnailFetcher = new BackgroundThumbnailFetcher(FlickrSearchActivity.this, photos);
-            backgroundHandler.post(backgroundThumbnailFetcher);
+//            backgroundThumbnailFetcher = new BackgroundThumbnailFetcher(FlickrSearchActivity.this, photos);
+//            backgroundHandler.post(backgroundThumbnailFetcher);
 
             currentPhotos = photos;
         }

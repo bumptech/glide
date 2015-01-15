@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.data;
 
+import com.bumptech.glide.util.Preconditions;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ public class DataRewinderRegistry {
 
     @SuppressWarnings("unchecked")
     public synchronized <T> DataRewinder<T> build(T data) {
+        Preconditions.checkNotNull(data);
         DataRewinder.Factory result = rewinders.get(data.getClass());
         if (result == null) {
             for (DataRewinder.Factory<?> registeredFactory : rewinders.values()) {

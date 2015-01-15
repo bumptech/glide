@@ -20,6 +20,6 @@ public class FlickrGlideModule implements GlideModule {
 
     @Override
     public void registerComponents(Context context, Glide glide) {
-        glide.register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
+        glide.append(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
     }
 }

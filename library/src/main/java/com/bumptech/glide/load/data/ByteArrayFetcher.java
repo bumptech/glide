@@ -35,4 +35,9 @@ public class ByteArrayFetcher implements DataFetcher<InputStream> {
     public void cancel() {
         // Do nothing.
     }
+
+    @Override
+    public Class<InputStream> getDataClass() {
+        return InputStream.class;
+    }
 }

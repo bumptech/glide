@@ -68,9 +68,12 @@ public class ModelCache<A, B> {
         private int width;
         private A model;
 
+        @SuppressWarnings("unchecked")
         static <A> ModelKey<A> get(A model, int width, int height) {
-            @SuppressWarnings("unchecked")
-            ModelKey<A> modelKey = (ModelKey<A>) KEY_QUEUE.poll();
+            ModelKey<A> modelKey;
+            synchronized (KEY_QUEUE) {
+                modelKey = (ModelKey<A>) KEY_QUEUE.poll();
+            }
             if (modelKey == null) {
                 modelKey = new ModelKey<A>();
             }
@@ -88,7 +91,9 @@ public class ModelCache<A, B> {
         }
 
         public void release() {
-            KEY_QUEUE.offer(this);
+            synchronized (KEY_QUEUE) {
+                KEY_QUEUE.offer(this);
+            }
         }
 
         @Override

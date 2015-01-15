@@ -25,4 +25,9 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
     protected void close(InputStream data) throws IOException {
         data.close();
     }
+
+    @Override
+    public Class<InputStream> getDataClass() {
+        return InputStream.class;
+    }
 }

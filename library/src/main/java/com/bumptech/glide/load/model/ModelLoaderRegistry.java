@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Maintains an ordered set of {@link ModelLoader}s and the model and data types they handle in order from highest
- * priority to lowest priority.
+ * priority to lowe
  */
 public class ModelLoaderRegistry {
 
@@ -60,6 +60,14 @@ public class ModelLoaderRegistry {
         List<ModelLoader<A, ?>> modelLoaders = getModelLoaders(model);
 
         return new DataFetcherSet<A>(model, width, height, modelLoaders);
+    }
+
+    public synchronized <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass, Class<Data> dataClass) {
+        return multiModelLoaderFactory.build(modelClass, dataClass);
+    }
+
+    public synchronized List<Class<?>> getDataClasses(Class<?> modelClass){
+        return multiModelLoaderFactory.getDataClasses(modelClass);
     }
 
     private <A> List<ModelLoader<A, ?>> getModelLoaders(A model) {

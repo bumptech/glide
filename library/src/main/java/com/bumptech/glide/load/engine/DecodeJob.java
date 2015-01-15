@@ -4,12 +4,9 @@ import android.util.Log;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
-import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.request.GlideContext.NoResultEncoderAvailableException;
 import com.bumptech.glide.util.LogTime;
 
 import java.io.BufferedOutputStream;
@@ -18,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source and applying
@@ -66,17 +64,7 @@ class DecodeJob<Z, R> {
             return null;
         }
 
-        long startTime = LogTime.getLogTime();
-        Resource<Z> transformed = loadFromCache(resultKey);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Decoded transformed from cache", startTime);
-        }
-        startTime = LogTime.getLogTime();
-        Resource<R> result = transcode(transformed);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Transcoded transformed from cache", startTime);
-        }
-        return result;
+        return decodeFromCache(resultKey, false /*cacheResult*/, false /*transformResult*/);
     }
 
     /**
@@ -89,13 +77,25 @@ class DecodeJob<Z, R> {
         if (!requestContext.getDiskCacheStrategy().cacheSource()) {
             return null;
         }
+        return decodeFromCache(resultKey.getOriginalKey(), requestContext.getDiskCacheStrategy().cacheResult(),
+                true /*transformResult*/);
+    }
 
+    private Resource<R> decodeFromCache(Key key, boolean cacheResult, boolean transformResult) throws Exception {
         long startTime = LogTime.getLogTime();
-        Resource<Z> decoded = loadFromCache(resultKey.getOriginalKey());
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Decoded source from cache", startTime);
+        final Resource<R> result;
+        File cacheFile = diskCacheProvider.getDiskCache().get(key);
+        if (cacheFile != null) {
+            result = decodeFromPaths(
+                    requestContext.getDataFetchers(cacheFile, width, height),
+                    requestContext.getSourceCacheLoadPaths(cacheFile), cacheResult, transformResult);
+        } else {
+            result = null;
         }
-        return transformEncodeAndTranscode(decoded);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            logWithTimeAndKey("Decoded from cache", startTime);
+        }
+        return result;
     }
 
     /**
@@ -110,155 +110,67 @@ class DecodeJob<Z, R> {
      * @throws Exception
      */
     public Resource<R> decodeFromSource() throws Exception {
-        Resource<Z> decoded = decodeFromFetcherSet(requestContext.getDataFetchers(),
-                requestContext.getDiskCacheStrategy() == DiskCacheStrategy.SOURCE);
-        return transformEncodeAndTranscode(decoded);
+        if (requestContext.getDiskCacheStrategy().cacheSource()) {
+            return cacheAndDecodeSource();
+        } else {
+            return decodeFromPaths(requestContext.getDataFetchers(), requestContext.getLoadPaths(),
+                    requestContext.getDiskCacheStrategy().cacheResult(), true /*transformResult*/);
+        }
     }
 
-    private Resource<Z> decodeFromFetcherSet(DataFetcherSet<?> fetchers, boolean cacheSource) throws Exception {
-        for (DataFetcher<?> fetcher : fetchers) {
+    private Resource<R> cacheAndDecodeSource() throws Exception {
+        for (DataFetcher<?> fetcher : requestContext.getDataFetchers()) {
             if (fetcher == null) {
                 continue;
             }
-            try {
-                Resource<Z> decoded = decodeSource(fetcher, cacheSource);
-                if (decoded != null) {
-                    return decoded;
-                }
-            } catch (Exception e) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Failed to fetch data and/or decode resource", e);
-                }
-            } finally {
-                fetcher.cleanup();
+            Object data = fetcher.loadData(requestContext.getPriority());
+            Encoder<Object> encoder = requestContext.getSourceEncoder(data);
+            SourceWriter<Object> writer = new SourceWriter<Object>(encoder, data);
+            diskCacheProvider.getDiskCache().put(resultKey.getOriginalKey(), writer);
+            return decodeFromCache(resultKey.getOriginalKey(),
+                    requestContext.getDiskCacheStrategy().cacheResult(), true /*transformResult*/);
+        }
+        throw new IllegalStateException("No path found to load " + requestContext.getResourceClass() + " and "
+                + requestContext.getTranscodeClass() + " from a cached File");
+    }
+
+    private Resource<R> decodeFromPaths(DataFetcherSet<?> fetchers, List<LoadPath<?, Z, R>> loadPaths, final boolean
+            cacheResult, final
+            boolean transformResult) throws Exception {
+        for (LoadPath<?, Z, R> path : loadPaths) {
+            Resource<R> result = runLoadPath(fetchers, path, cacheResult, transformResult);
+            if (result != null) {
+                return result;
+            }
+            if (isCancelled) {
+                break;
             }
         }
-        throw new IllegalStateException("Load failed, unable to obtain or unable to decode data into requested"
-                + " resource type, checked: " + fetchers);
+        return null;
+    }
+
+    private <T> Resource<R> runLoadPath(DataFetcherSet<?> fetchers, LoadPath<T, Z, R> path, final boolean cacheResult,
+            final boolean transformResult) throws Exception {
+        DataFetcher<T> fetcher = fetchers.getFetcher(path.getDataClass());
+        return path.load(fetcher, requestContext, width, height, new DecodePath.DecodeCallback<Z>() {
+                @Override
+                public Resource<Z> onResourceDecoded(final Resource<Z> resource) {
+                    Resource<Z> result = resource;
+                    if (transformResult) {
+                        result = requestContext.getTransformation().transform(resource, width, height);
+                    }
+                    if (cacheResult) {
+                        diskCacheProvider.getDiskCache().put(resultKey,
+                                new SourceWriter<Resource<Z>>(requestContext.getResultEncoder(result), result));
+                    }
+                    return result;
+                }
+            });
     }
 
     public void cancel() {
         requestContext.getDataFetchers().cancel();
         isCancelled = true;
-    }
-
-    private Resource<R> transformEncodeAndTranscode(Resource<Z> decoded) throws NoResultEncoderAvailableException {
-        long startTime = LogTime.getLogTime();
-        Resource<Z> transformed = transform(decoded);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Transformed resource from source", startTime);
-        }
-
-        writeTransformedToCache(transformed);
-
-        startTime = LogTime.getLogTime();
-        Resource<R> result = transcode(transformed);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Transcoded transformed from source", startTime);
-        }
-        return result;
-    }
-
-    private void writeTransformedToCache(Resource<Z> transformed) throws NoResultEncoderAvailableException {
-        if (transformed == null || !requestContext.getDiskCacheStrategy().cacheResult()) {
-            return;
-        }
-        long startTime = LogTime.getLogTime();
-        SourceWriter<Resource<Z>> writer = new SourceWriter<Resource<Z>>(requestContext.getResultEncoder(transformed),
-                transformed);
-        diskCacheProvider.getDiskCache().put(resultKey, writer);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Wrote transformed from source to cache", startTime);
-        }
-    }
-
-    private <T> Resource<Z> decodeSource(DataFetcher<T> fetcher, boolean cacheSource) throws Exception {
-        long startTime = LogTime.getLogTime();
-        final T data = fetcher.loadData(requestContext.getPriority());
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Fetched data", startTime);
-        }
-        if (isCancelled || data == null) {
-            return null;
-        }
-        DataRewinder<T> rewinder = requestContext.getRewinder(data);
-        try {
-            return decodeFromSourceData(rewinder, cacheSource);
-        } finally {
-            rewinder.cleanup();
-        }
-    }
-
-    private <T> Resource<Z> decodeFromSourceData(DataRewinder<T> rewinder, boolean cacheSource) throws Exception {
-        final Resource<Z> decoded;
-        if (cacheSource) {
-            decoded = cacheAndDecodeSourceData(rewinder);
-        } else {
-            ResourceDecoder<T, Z> decoder = requestContext.getDecoder(rewinder);
-            long startTime = LogTime.getLogTime();
-            T data = rewinder.rewindAndGet();
-            decoded = decoder.decode(data, width, height);
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                logWithTimeAndKey("Decoded from source", startTime);
-            }
-        }
-        return decoded;
-    }
-
-    private <T> Resource<Z> cacheAndDecodeSourceData(DataRewinder<T> rewinder) throws Exception {
-        long startTime = LogTime.getLogTime();
-
-        T data = rewinder.rewindAndGet();
-        Encoder<T> encoder = requestContext.getSourceEncoder(data);
-        SourceWriter<T> writer = new SourceWriter<T>(encoder, data);
-        diskCacheProvider.getDiskCache().put(resultKey.getOriginalKey(), writer);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            logWithTimeAndKey("Wrote source to cache", startTime);
-        }
-
-        startTime = LogTime.getLogTime();
-        Resource<Z> result = loadFromCache(resultKey.getOriginalKey());
-        if (Log.isLoggable(TAG, Log.VERBOSE) && result != null) {
-            logWithTimeAndKey("Decoded source from cache", startTime);
-        }
-        return result;
-    }
-
-    private Resource<Z> loadFromCache(Key key) throws Exception {
-        File cacheFile = diskCacheProvider.getDiskCache().get(key);
-        if (cacheFile == null) {
-            return null;
-        }
-        DataFetcherSet<?> fetchers = requestContext.getDataFetchers(cacheFile, width, height);
-        Resource<Z> result = null;
-        try {
-            result = decodeFromFetcherSet(fetchers, false /*cacheSource*/);
-        } finally {
-            if (result == null) {
-                diskCacheProvider.getDiskCache().delete(key);
-            }
-        }
-        return result;
-    }
-
-    private Resource<Z> transform(Resource<Z> decoded) {
-        if (decoded == null) {
-            return null;
-        }
-
-        Resource<Z> transformed = requestContext.getTransformation().transform(decoded, width, height);
-        if (!decoded.equals(transformed)) {
-            decoded.recycle();
-        }
-        return transformed;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Resource<R> transcode(Resource<Z> transformed) {
-        if (transformed == null) {
-            return null;
-        }
-        return (Resource<R>) requestContext.getTranscoder().transcode(transformed);
     }
 
     private void logWithTimeAndKey(String message, long startTime) {

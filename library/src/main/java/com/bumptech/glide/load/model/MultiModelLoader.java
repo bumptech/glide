@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model;
 
 import com.bumptech.glide.load.data.DataFetcher;
 
+import java.util.Arrays;
 import java.util.List;
 
 class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
@@ -34,5 +35,12 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
             }
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "MultiModelLoader{" +
+                "modelLoaders=" + Arrays.toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) +
+                '}';
     }
 }

@@ -110,6 +110,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         isCancelled = true;
     }
 
+    @Override
+    public Class<InputStream> getDataClass() {
+        return InputStream.class;
+    }
+
     interface HttpUrlConnectionFactory {
         HttpURLConnection build(URL url) throws IOException;
     }

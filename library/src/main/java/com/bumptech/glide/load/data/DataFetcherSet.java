@@ -26,6 +26,16 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
         return modelLoaders.isEmpty();
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> DataFetcher<T> getFetcher(Class<T> dataClass) {
+        for (DataFetcher<?> fetcher : this) {
+            if (fetcher.getDataClass().equals(dataClass)) {
+                return (DataFetcher<T>) fetcher;
+            }
+        }
+        throw new IllegalArgumentException("Failed to find fetcher for " + dataClass);
+    }
+
     public String getId() {
         Iterator<DataFetcher<?>> iterator = iterator();
         return iterator.hasNext() ? iterator.next().getId() : null;

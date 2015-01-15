@@ -20,11 +20,11 @@ import com.bumptech.glide.load.data.DataFetcher;
  *      footprint per resource.
  *</p>
  *
- * @param <T> The type of the model.
- * @param <Y> The type of the data that can be used by a {@link com.bumptech.glide.load.ResourceDecoder} to decode a
+ * @param <Model> The type of the model.
+ * @param <Data> The type of the data that can be used by a {@link com.bumptech.glide.load.ResourceDecoder} to decode a
  *           resource.
  */
-public interface ModelLoader<T, Y> {
+public interface ModelLoader<Model, Data> {
 
     /**
      * Obtains an {@link DataFetcher} that can fetch the data required to decode the resource represented by this model.
@@ -46,7 +46,7 @@ public interface ModelLoader<T, Y> {
      * @return A {@link DataFetcher} that can obtain the data the resource can be decoded from if the resource is not
      * cached, or null if no valid {@link com.bumptech.glide.load.data.DataFetcher} could be constructed.
      */
-    DataFetcher<Y> getDataFetcher(T model, int width, int height);
+    DataFetcher<Data> getDataFetcher(Model model, int width, int height);
 
-    boolean handles(T model);
+    boolean handles(Model model);
 }

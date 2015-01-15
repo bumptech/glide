@@ -159,38 +159,6 @@ public class Glide implements ComponentCallbacks2 {
         return glide;
     }
 
-    /**
-     * Returns false if the {@link Glide} singleton has not yet been created and can therefore be setup using
-     * {@link #setup(GlideBuilder)}.
-     *
-     * @see #setup(GlideBuilder)
-     *
-     * @deprecated Use {@link com.bumptech.glide.module.GlideModule} instead. Scheduled to be removed in Glide 4.0.
-     */
-    @Deprecated
-    public static boolean isSetup() {
-        return glide != null;
-    }
-
-    /**
-     * Creates the {@link Glide} singleton using the given builder. Can be used to set options like cache sizes and
-     * locations.
-     *
-     * @see #isSetup()
-     *
-     * @deprecated Use {@link com.bumptech.glide.module.GlideModule} instead. Scheduled to be removed in Glide 4.0.
-     * @param builder The builder.
-     * @throws IllegalArgumentException if the Glide singleton has already been created.
-     */
-    @Deprecated
-    public static void setup(GlideBuilder builder) {
-        if (isSetup()) {
-            throw new IllegalArgumentException("Glide is already setup, check with isSetup() first");
-        }
-
-        glide = builder.createGlide();
-    }
-
     // For testing.
     static void tearDown() {
         glide = null;

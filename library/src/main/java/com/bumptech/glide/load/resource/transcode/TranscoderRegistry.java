@@ -44,8 +44,30 @@ public class TranscoderRegistry {
                 return (ResourceTranscoder<Z, R>) entry.transcoder;
             }
         }
+        // For example, there may be a transcoder that can convert a GifDrawable to a Drawable, which will be caught
+        // above. However, if there is no registered transcoder, we can still just use the UnitTranscoder to return
+        // the Drawable because the transcode class (Drawable) is assignable from the resource class (GifDrawable).
+        if (transcodedClass.isAssignableFrom(resourceClass)) {
+            return (ResourceTranscoder<Z, R>) UnitTranscoder.get();
+        }
         throw new IllegalArgumentException("No transcoder registered to transcode from " + resourceClass + " to "
                 + transcodedClass);
+    }
+
+    public synchronized <Z, R> List<Class<R>> getTranscodeClasses(Class<Z> resourceClass, Class<R> transcodeClass) {
+        List<Class<R>> transcodeClasses = new ArrayList<Class<R>>();
+        if (resourceClass.equals(transcodeClass)) {
+            transcodeClasses.add(transcodeClass);
+            return transcodeClasses;
+        }
+
+        for (Entry<?, ?> entry : transcoders) {
+            if (entry.handles(resourceClass, transcodeClass)) {
+                transcodeClasses.add(transcodeClass);
+            }
+        }
+
+        return transcodeClasses;
     }
 
     private static final class Entry<Z, R> {

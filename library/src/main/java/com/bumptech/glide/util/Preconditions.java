@@ -1,5 +1,7 @@
 package com.bumptech.glide.util;
 
+import java.util.Collection;
+
 /**
  * Contains common assertions.
  */
@@ -14,5 +16,12 @@ public class Preconditions {
             throw new NullPointerException(message);
         }
         return arg;
+    }
+
+    public static <T extends Collection<Y>, Y> T checkNotEmpty(T collection) {
+        if (collection.isEmpty()) {
+            throw new IllegalArgumentException("Must not be empty.");
+        }
+        return collection;
     }
 }

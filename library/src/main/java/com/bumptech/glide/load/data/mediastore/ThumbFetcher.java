@@ -67,6 +67,11 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
         // Do nothing.
     }
 
+    @Override
+    public Class<InputStream> getDataClass() {
+        return InputStream.class;
+    }
+
     // Visible for testing.
     static class VideoThumbnailQuery implements ThumbnailQuery {
 

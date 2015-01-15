@@ -17,7 +17,9 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
+import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderRegistry;
@@ -30,6 +32,7 @@ import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,7 +53,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     private final Handler mainHandler;
     private final ImageViewTargetFactory imageViewTargetFactory;
     private final Engine engine;
-    private ComponentCallbacks2 componentCallbacks;
+    private final ComponentCallbacks2 componentCallbacks;
 
     public GlideContext(Context context, ModelLoaderRegistry modelLoaderRegistry, EncoderRegistry encoderRegistry,
             ResourceDecoderRegistry decoderRegistry, ResourceEncoderRegistry resultEncoderRegistry,
@@ -68,6 +71,60 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         this.componentCallbacks = componentCallbacks;
 
         mainHandler = new Handler(Looper.getMainLooper());
+    }
+
+    public <ResourceType, TranscodeType> List<LoadPath<?, ResourceType, TranscodeType>> getLoadPaths(Object model,
+            Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass) {
+        Class<?> modelClass = model.getClass();
+        List<Class<?>> dataClasses = modelLoaderRegistry.getDataClasses(modelClass);
+        List<LoadPath<?, ResourceType, TranscodeType>> loadPaths =
+                new ArrayList<LoadPath<?, ResourceType, TranscodeType>>();
+        for (Class<?> dataClass : dataClasses) {
+            LoadPath<?, ResourceType, TranscodeType> path = getLoadPath(dataClass, resourceClass, transcodeClass);
+            if (path != null) {
+                loadPaths.add(path);
+            }
+        }
+        if (loadPaths.isEmpty()) {
+            throw new IllegalArgumentException("No load path found for path " + modelClass + "->" + resourceClass
+                    + "->" + transcodeClass);
+        }
+        return loadPaths;
+    }
+
+    private <DataType, ResourceType, TranscodeType>
+            LoadPath<DataType, ResourceType, TranscodeType> getLoadPath(Class<DataType> dataClass,
+            Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass) {
+
+        List<DecodePath<DataType, ResourceType, TranscodeType>> decodePaths =
+                getDecodePaths(dataClass, resourceClass, transcodeClass);
+        // It's possible there is no way to decode or transcode to the desired types from a given data class.
+        if (!decodePaths.isEmpty()) {
+            return new LoadPath<DataType, ResourceType, TranscodeType>(dataClass, decodePaths);
+        } else {
+            return null;
+        }
+    }
+
+    private <DataType, ResourceType, TranscodeType> List<DecodePath<DataType, ResourceType, TranscodeType>>
+            getDecodePaths(Class<DataType> dataClass, Class<ResourceType> resourceClass,
+            Class<TranscodeType> transcodeClass) {
+        List<DecodePath<DataType, ResourceType, TranscodeType>> decodePaths =
+                new ArrayList<DecodePath<DataType, ResourceType, TranscodeType>>();
+        List<Class<ResourceType>> registeredResourceClasses =
+                decoderRegistry.getResourceClasses(dataClass, resourceClass);
+        for (Class<ResourceType> registeredResourceClass : registeredResourceClasses) {
+            List<Class<TranscodeType>> registeredTranscodeClasses =
+                    transcoderRegistry.getTranscodeClasses(resourceClass, transcodeClass);
+            for (Class<TranscodeType> registeredTranscodeClass : registeredTranscodeClasses) {
+                List<ResourceDecoder<DataType, ResourceType>> decoders =
+                        decoderRegistry.getDecoders(dataClass, registeredResourceClass);
+                ResourceTranscoder<ResourceType, TranscodeType> transcoder =
+                        transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
+                decodePaths.add(new DecodePath<DataType, ResourceType, TranscodeType>(dataClass, decoders, transcoder));
+            }
+        }
+        return decodePaths;
     }
 
     @SuppressWarnings("unchecked")

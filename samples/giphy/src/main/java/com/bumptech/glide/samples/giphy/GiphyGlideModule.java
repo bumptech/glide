@@ -19,6 +19,6 @@ public class GiphyGlideModule implements GlideModule {
 
     @Override
     public void registerComponents(Context context, Glide glide) {
-        glide.register(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
+        glide.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
     }
 }
