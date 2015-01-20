@@ -53,7 +53,7 @@ public class RequestTracker {
      */
     public void pauseRequests() {
         isPaused = true;
-        for (Request request : requests) {
+        for (Request request : getSnapshot()) {
             if (request.isRunning()) {
                 request.pause();
             }
@@ -65,7 +65,7 @@ public class RequestTracker {
      */
     public void resumeRequests() {
         isPaused = false;
-        for (Request request : requests) {
+        for (Request request : getSnapshot()) {
             if (!request.isComplete() && !request.isCancelled() && !request.isRunning()) {
                 request.begin();
             }
@@ -76,7 +76,7 @@ public class RequestTracker {
      * Cancels all requests and clears their resources.
      */
     public void clearRequests() {
-        for (Request request : requests) {
+        for (Request request : getSnapshot()) {
             request.clear();
         }
     }
@@ -85,7 +85,7 @@ public class RequestTracker {
      * Restarts failed requests and cancels and restarts in progress requests.
      */
     public void restartRequests() {
-        for (Request request : requests) {
+        for (Request request : getSnapshot()) {
             if (!request.isComplete() && !request.isCancelled()) {
                 // Ensure the request will be restarted in onResume.
                 request.pause();
@@ -94,5 +94,10 @@ public class RequestTracker {
                 }
             }
         }
+    }
+
+    // Avoids a ConcurrentModificationException when requests are started by another request completing. See #303.
+    private Request[] getSnapshot() {
+        return requests.toArray(new Request[requests.size()]);
     }
 }

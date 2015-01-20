@@ -2,6 +2,7 @@ package com.bumptech.glide.manager;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 @RunWith(JUnit4.class)
 public class RequestTrackerTest {
@@ -161,6 +164,63 @@ public class RequestTrackerTest {
     }
 
     @Test
+    public void testAvoidsConcurrentModificationWhenResuming() {
+        Request first = mock(Request.class);
+        Request second = mock(Request.class);
+
+        doAnswer(new RemoveRequest(second)).when(first).begin();
+
+        tracker.addRequest(mock(Request.class));
+        tracker.addRequest(first);
+        tracker.addRequest(second);
+
+        tracker.resumeRequests();
+    }
+
+    @Test
+    public void testAvoidsConcurrentModificationWhenPausing() {
+        Request first = mock(Request.class);
+        Request second = mock(Request.class);
+
+        when(first.isRunning()).thenReturn(true);
+        doAnswer(new RemoveRequest(second)).when(first).pause();
+
+        tracker.addRequest(mock(Request.class));
+        tracker.addRequest(first);
+        tracker.addRequest(second);
+
+        tracker.pauseRequests();
+    }
+
+    @Test
+    public void testAvoidsConcurrentModificationWhenClearing() {
+        Request first = mock(Request.class);
+        Request second = mock(Request.class);
+
+        doAnswer(new RemoveRequest(second)).when(first).clear();
+
+        tracker.addRequest(mock(Request.class));
+        tracker.addRequest(first);
+        tracker.addRequest(second);
+
+        tracker.clearRequests();
+    }
+
+    @Test
+    public void testAvoidsConcurrentModificationWhenRestarting() {
+        Request first = mock(Request.class);
+        Request second = mock(Request.class);
+
+        doAnswer(new RemoveRequest(second)).when(first).pause();
+
+        tracker.addRequest(mock(Request.class));
+        tracker.addRequest(first);
+        tracker.addRequest(second);
+
+        tracker.restartRequests();
+    }
+
+    @Test
     public void testRestartsFailedRequestRestart() {
         Request request = mock(Request.class);
         when(request.isFailed()).thenReturn(true);
@@ -240,5 +300,20 @@ public class RequestTrackerTest {
     public void testReturnsFalseFromIsPausedWhenResumed() {
         tracker.resumeRequests();
         assertFalse(tracker.isPaused());
+    }
+
+    private class RemoveRequest implements Answer<Void> {
+
+        private Request toRemove;
+
+        public RemoveRequest(Request toRemove) {
+            this.toRemove = toRemove;
+        }
+
+        @Override
+        public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+            tracker.removeRequest(toRemove);
+            return null;
+        }
     }
 }
