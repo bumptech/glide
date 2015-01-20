@@ -29,7 +29,10 @@ public enum DecodeFormat {
      */
     PREFER_RGB_565;
 
+
+    /** There is a rendering issue in KitKat and L (or at least L MR1) when reusing mixed format bitmaps. See #301. */
+    public static final boolean REQUIRE_ARGB_8888 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
     /** The default value for DecodeFormat. */
-    public static final DecodeFormat DEFAULT = Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT
-            ? ALWAYS_ARGB_8888 : PREFER_RGB_565;
+    public static final DecodeFormat DEFAULT = REQUIRE_ARGB_8888 ? ALWAYS_ARGB_8888 : PREFER_RGB_565;
 }

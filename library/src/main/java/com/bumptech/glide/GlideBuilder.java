@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
@@ -21,6 +22,7 @@ import java.util.concurrent.ExecutorService;
  * A builder class for setting default structural classes for Glide to use.
  */
 public class GlideBuilder {
+    private static final String TAG = "Glide";
     private final Context context;
 
     private Engine engine;
@@ -147,11 +149,22 @@ public class GlideBuilder {
      *     {@link com.bumptech.glide.load.DecodeFormat#DEFAULT} as its default.
      * </p>
      *
+     * <p>
+     *     Calls to this method are ignored on KitKat and Lollipop. See #301.
+     * </p>
+     *
      * @param decodeFormat The format to use.
      * @return This builder.
      */
     public GlideBuilder setDecodeFormat(DecodeFormat decodeFormat) {
-        this.decodeFormat = decodeFormat;
+        if (DecodeFormat.REQUIRE_ARGB_8888 && decodeFormat != DecodeFormat.ALWAYS_ARGB_8888) {
+            this.decodeFormat = DecodeFormat.ALWAYS_ARGB_8888;
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Unsafe to use RGB_565 on KitKat or Lollipop, ignoring setDecodeFormat");
+            }
+        } else {
+            this.decodeFormat = decodeFormat;
+        }
         return this;
     }
 

@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -14,14 +15,16 @@ import android.util.Log;
 public class MemorySizeCalculator {
     private static final String TAG = "MemorySizeCalculator";
 
+    // Visible for testing.
     static final int BYTES_PER_ARGB_8888_PIXEL = 4;
     static final int MEMORY_CACHE_TARGET_SCREENS = 2;
-    static final int BITMAP_POOL_TARGET_SCREENS = 3;
-
+    static final int BITMAP_POOL_TARGET_SCREENS = 4;
     static final float MAX_SIZE_MULTIPLIER = 0.4f;
     static final float LOW_MEMORY_MAX_SIZE_MULTIPLIER = 0.33f;
+
     private final int bitmapPoolSize;
     private final int memoryCacheSize;
+    private final Context context;
 
     interface ScreenDimensions {
         int getWidthPixels();
@@ -29,11 +32,14 @@ public class MemorySizeCalculator {
     }
 
     public MemorySizeCalculator(Context context) {
-        this((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE),
+        this(context,
+                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE),
                 new DisplayMetricsScreenDimensions(context.getResources().getDisplayMetrics()));
     }
 
-    MemorySizeCalculator(ActivityManager activityManager, ScreenDimensions screenDimensions) {
+    // Visible for testing.
+    MemorySizeCalculator(Context context, ActivityManager activityManager, ScreenDimensions screenDimensions) {
+        this.context = context;
         final int maxSize = getMaxSize(activityManager);
 
         final int screenSize = screenDimensions.getWidthPixels() * screenDimensions.getHeightPixels()
@@ -80,8 +86,8 @@ public class MemorySizeCalculator {
                 * (isLowMemoryDevice ? LOW_MEMORY_MAX_SIZE_MULTIPLIER : MAX_SIZE_MULTIPLIER));
     }
 
-    private static int toMb(int bytes) {
-        return bytes / (1024 * 1024);
+    private String toMb(int bytes) {
+        return Formatter.formatFileSize(context, bytes);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

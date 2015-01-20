@@ -38,7 +38,6 @@ public class MemorySizeCalculatorTest {
         Util.setSdkVersionInt(initialSdkVersion);
     }
 
-
     @Test
     public void testDefaultMemoryCacheSizeIsTwiceScreenSize() {
         Robolectric.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
@@ -61,11 +60,12 @@ public class MemorySizeCalculatorTest {
     }
 
     @Test
-    public void testDefaultBitmapPoolSizeIsThreeTimesScreenSize() {
+    public void testDefaultBitmapPoolSize() {
         Robolectric.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
+//        assertThat(bitmapPoolSize).isIn(Range.open());
         assertEquals(harness.getScreenSize() * harness.bitmapPoolScreens, bitmapPoolSize);
     }
 
@@ -110,9 +110,11 @@ public class MemorySizeCalculatorTest {
     }
 
     private int getLargeEnoughMemoryClass() {
+        float totalScreenBytes = harness.getScreenSize() * (harness.bitmapPoolScreens + harness.memoryCacheScreens);
         // Memory class is in mb, not bytes!
-        return Math.round(harness.getScreenSize() * (harness.bitmapPoolScreens + harness.memoryCacheScreens)
-                * (1f / harness.sizeMultiplier) / (1024 * 1024));
+        float totalScreenMb = totalScreenBytes / (1024 * 1024);
+        float memoryClassMb = totalScreenMb / harness.sizeMultiplier;
+        return (int) Math.ceil(memoryClassMb);
     }
 
     private static class MemorySizeHarness {
@@ -128,7 +130,7 @@ public class MemorySizeCalculatorTest {
         public MemorySizeCalculator getCalculator() {
             when(screenDimensions.getWidthPixels()).thenReturn(pixelSize);
             when(screenDimensions.getHeightPixels()).thenReturn(pixelSize);
-            return new MemorySizeCalculator(activityManager, screenDimensions);
+            return new MemorySizeCalculator(Robolectric.application, activityManager, screenDimensions);
         }
 
         public int getScreenSize() {
