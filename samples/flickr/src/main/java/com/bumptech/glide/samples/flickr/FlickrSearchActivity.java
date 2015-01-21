@@ -33,7 +33,6 @@ import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,7 +89,6 @@ public class FlickrSearchActivity extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Glide.get(this).register(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
         backgroundThread = new HandlerThread("BackgroundThumbnailHandlerThread");
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());

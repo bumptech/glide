@@ -20,7 +20,6 @@ import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,15 +30,12 @@ public class MainActivity extends Activity implements Api.Monitor {
     private static final String TAG = "GiphyActivity";
 
     private GifAdapter adapter;
-    private DrawableRequestBuilder<Api.GifResult> gifItemRequest;
-    private ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Glide.get(this).register(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
 
         ImageView giphyLogoView = (ImageView) findViewById(R.id.giphy_logo_view);
         Glide.with(this)
@@ -49,12 +45,12 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         ListView gifList = (ListView) findViewById(R.id.gif_list);
 
-        gifItemRequest = Glide.with(this)
+        DrawableRequestBuilder<Api.GifResult> gifItemRequest = Glide.with(this)
                 .from(Api.GifResult.class)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .fitCenter();
 
-        preloadSizeProvider = new ViewPreloadSizeProvider<Api.GifResult>();
+        ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider = new ViewPreloadSizeProvider<Api.GifResult>();
         adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);
         gifList.setAdapter(adapter);
         ListPreloader<Api.GifResult> preloader = new ListPreloader<Api.GifResult>(adapter, preloadSizeProvider, 2);

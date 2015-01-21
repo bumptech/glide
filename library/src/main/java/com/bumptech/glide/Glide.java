@@ -56,6 +56,8 @@ import com.bumptech.glide.load.resource.transcode.GlideBitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
+import com.bumptech.glide.module.GlideModule;
+import com.bumptech.glide.module.ManifestParser;
 import com.bumptech.glide.provider.DataLoadProvider;
 import com.bumptech.glide.provider.DataLoadProviderRegistry;
 import com.bumptech.glide.request.FutureTarget;
@@ -241,6 +243,10 @@ public class Glide {
 
         bitmapFitCenter = new FitCenter(bitmapPool);
         drawableFitCenter = new GifBitmapWrapperTransformation(bitmapPool, bitmapFitCenter);
+
+        for (GlideModule module : new ManifestParser(context).parse()) {
+            module.initialize(context, this);
+        }
     }
 
     /**

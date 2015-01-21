@@ -23,6 +23,9 @@
 
     <activity android:name=".FullscreenActivity" />
 
+    <meta-data
+        android:name="com.bumptech.glide.samples.flickr.FlickrGlideModule"
+        android:value="GlideModule" />
   </application>
 
 </manifest>

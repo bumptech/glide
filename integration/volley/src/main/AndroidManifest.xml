@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.bumptech.glide.integration.volley">
-  <application />
+  <application>
+      <meta-data
+          android:name="com.bumptech.glide.integration.volley.VolleyGlideModule"
+          android:value="GlideModule" />
+  </application>
 </manifest>
