@@ -510,11 +510,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return This request builder.
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> override(int width, int height) {
-        if (width <= 0) {
-            throw new IllegalArgumentException("Width must be > 0");
-        }
-        if (height <= 0) {
-            throw new IllegalArgumentException("Height must be > 0");
+        if (!Util.isValidDimensions(width, height)) {
+            throw new IllegalArgumentException("Width and height must be Target#SIZE_ORIGINAL or > 0");
         }
         this.overrideWidth = width;
         this.overrideHeight = height;
@@ -754,9 +751,9 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 thumbnailRequestBuilder.priority = getThumbnailPriority();
             }
 
-            if (overrideWidth > 0 && overrideHeight > 0
-                && thumbnailRequestBuilder.overrideWidth < 0
-                && thumbnailRequestBuilder.overrideHeight < 0) {
+            if (Util.isValidDimensions(overrideWidth, overrideHeight)
+                    && !Util.isValidDimensions(thumbnailRequestBuilder.overrideWidth,
+                            thumbnailRequestBuilder.overrideHeight)) {
               thumbnailRequestBuilder.override(overrideWidth, overrideHeight);
             }
 

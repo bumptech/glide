@@ -8,6 +8,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.Util;
 
 /**
  * A simple {@link com.bumptech.glide.load.Transformation} for transforming {@link android.graphics.Bitmap}s that
@@ -43,8 +44,7 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
 
     @Override
     public final Resource<Bitmap> transform(Resource<Bitmap> resource, int outWidth, int outHeight) {
-        if ((outWidth <= 0 && outWidth != Target.SIZE_ORIGINAL)
-                || (outHeight <= 0 && outHeight != Target.SIZE_ORIGINAL)) {
+        if (!Util.isValidDimensions(outWidth, outHeight)) {
             throw new IllegalArgumentException("Cannot apply transformation on width: " + outWidth + " or height: "
                     + outHeight + " less than or equal to zero and not Target.SIZE_ORIGINAL");
         }

@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
 
+import com.bumptech.glide.request.target.Target;
+
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -105,6 +107,17 @@ public final class Util {
                 bytesPerPixel = 4;
         }
         return bytesPerPixel;
+    }
+
+    /**
+     * Returns true if width and height are both > 0 and/or equal to {@link Target#SIZE_ORIGINAL}.
+     */
+    public static boolean isValidDimensions(int width, int height) {
+        return isValidDimension(width) && isValidDimension(height);
+    }
+
+    private static boolean isValidDimension(int dimen) {
+        return dimen > 0 || dimen == Target.SIZE_ORIGINAL;
     }
 
     /**

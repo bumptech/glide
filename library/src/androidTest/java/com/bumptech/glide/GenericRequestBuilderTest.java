@@ -76,6 +76,16 @@ public class GenericRequestBuilderTest {
     }
 
     @Test
+    public void testDoesNotThrowWhenWidthIsSizeOriginal() {
+        getNullModelRequest().override(Target.SIZE_ORIGINAL, 100);
+    }
+
+    @Test
+    public void testDoesNotThrowWhenHeightIsSizeOriginal() {
+        getNullModelRequest().override(100, Target.SIZE_ORIGINAL);
+    }
+
+    @Test
     public void testDoesNotThrowWhenModelAndLoaderNull() {
         new GenericRequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class), requestTracker,
                 mock(Lifecycle.class));
