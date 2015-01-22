@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +23,7 @@ public class LruBitmapPool implements BitmapPool {
     private static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.ARGB_8888;
 
     private final LruPoolStrategy strategy;
+    private final Set<Bitmap.Config> allowedConfigs;
     private final int initialMaxSize;
     private final BitmapTracker tracker;
 
@@ -33,10 +35,11 @@ public class LruBitmapPool implements BitmapPool {
     private int evictions;
 
     // Exposed for testing only.
-    LruBitmapPool(int maxSize, LruPoolStrategy strategy) {
+    LruBitmapPool(int maxSize, LruPoolStrategy strategy, Set<Bitmap.Config> allowedConfigs) {
         this.initialMaxSize = maxSize;
         this.maxSize = maxSize;
         this.strategy = strategy;
+        this.allowedConfigs = allowedConfigs;
         this.tracker = new NullBitmapTracker();
     }
 
@@ -46,7 +49,18 @@ public class LruBitmapPool implements BitmapPool {
      * @param maxSize The initial maximum size of the pool in bytes.
      */
     public LruBitmapPool(int maxSize) {
-        this(maxSize, getDefaultStrategy());
+        this(maxSize, getDefaultStrategy(), getDefaultAllowedConfigs());
+    }
+
+    /**
+     * Constructor for LruBitmapPool.
+     *
+     * @param maxSize The initial maximum size of the pool in bytes.
+     * @param allowedConfigs A white listed set of {@link android.graphics.Bitmap.Config} that are allowed to be put
+     *                       into the pool. Configs not in the allowed set will be rejected.
+     */
+    public LruBitmapPool(int maxSize, Set<Bitmap.Config> allowedConfigs) {
+        this(maxSize, getDefaultStrategy(), allowedConfigs);
     }
 
     @Override
@@ -62,10 +76,15 @@ public class LruBitmapPool implements BitmapPool {
 
     @Override
     public synchronized boolean put(Bitmap bitmap) {
-        if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize) {
+        if (bitmap == null) {
+            throw new NullPointerException("Bitmap must not be null");
+        }
+        if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize || !allowedConfigs.contains(bitmap.getConfig())) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Reject bitmap from pool=" + strategy.logBitmap(bitmap) + " is mutable="
-                        + bitmap.isMutable());
+                Log.v(TAG, "Reject bitmap from pool"
+                        + ", bitmap: " + strategy.logBitmap(bitmap)
+                        + ", is mutable: " + bitmap.isMutable()
+                        + ", is allowed config: " + allowedConfigs.contains(bitmap.getConfig()));
             }
             return false;
         }
@@ -174,6 +193,15 @@ public class LruBitmapPool implements BitmapPool {
             strategy = new AttributeStrategy();
         }
         return strategy;
+    }
+
+    private static Set<Bitmap.Config> getDefaultAllowedConfigs() {
+        Set<Bitmap.Config> configs = new HashSet<Bitmap.Config>();
+        configs.addAll(Arrays.asList(Bitmap.Config.values()));
+        if (Build.VERSION.SDK_INT >= 19) {
+            configs.add(null);
+        }
+        return Collections.unmodifiableSet(configs);
     }
 
     private interface BitmapTracker {

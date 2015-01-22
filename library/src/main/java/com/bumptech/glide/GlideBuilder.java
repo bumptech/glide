@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.Log;
 
@@ -16,6 +17,7 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor;
 
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -186,7 +188,12 @@ public class GlideBuilder {
         MemorySizeCalculator calculator = new MemorySizeCalculator(context);
         if (bitmapPool == null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                bitmapPool = new LruBitmapPool(calculator.getBitmapPoolSize());
+                int size = calculator.getBitmapPoolSize();
+                if (DecodeFormat.REQUIRE_ARGB_8888) {
+                    bitmapPool = new LruBitmapPool(size, Collections.singleton(Bitmap.Config.ARGB_8888));
+                } else {
+                    bitmapPool = new LruBitmapPool(size);
+                }
             } else {
                 bitmapPool = new BitmapPoolAdapter();
             }
