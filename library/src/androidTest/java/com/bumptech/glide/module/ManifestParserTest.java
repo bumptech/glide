@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -114,7 +115,10 @@ public class ManifestParserTest {
 
     public static class TestModule1 implements GlideModule {
         @Override
-        public void initialize(Context context, Glide glide) { }
+        public void applyOptions(Context context, GlideBuilder builder) { }
+
+        @Override
+        public void registerComponents(Context context, Glide glide) { }
 
         @Override
         public boolean equals(Object o) {
@@ -130,7 +134,10 @@ public class ManifestParserTest {
     public static class TestModule2 implements GlideModule {
 
         @Override
-        public void initialize(Context context, Glide glide) { }
+        public void applyOptions(Context context, GlideBuilder builder) { }
+
+        @Override
+        public void registerComponents(Context context, Glide glide) { }
 
         @Override
         public boolean equals(Object o) {

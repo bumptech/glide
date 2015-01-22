@@ -71,6 +71,7 @@ import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 
 /**
  * A singleton to present a simple static interface for building requests with {@link BitmapRequestBuilder} and
@@ -146,7 +147,17 @@ public class Glide {
         if (glide == null) {
             synchronized (Glide.class) {
                 if (glide == null) {
-                    glide = new GlideBuilder(context).createGlide();
+                    Context applicationContext = context.getApplicationContext();
+                    List<GlideModule> modules = new ManifestParser(applicationContext).parse();
+
+                    GlideBuilder builder = new GlideBuilder(applicationContext);
+                    for (GlideModule module : modules) {
+                        module.applyOptions(applicationContext, builder);
+                    }
+                    glide = builder.createGlide();
+                    for (GlideModule module : modules) {
+                        module.registerComponents(applicationContext, glide);
+                    }
                 }
             }
         }
@@ -159,7 +170,10 @@ public class Glide {
      * {@link #setup(GlideBuilder)}.
      *
      * @see #setup(GlideBuilder)
+     *
+     * @deprecated Use {@link com.bumptech.glide.module.GlideModule} instead. Scheduled to be removed in Glide 4.0.
      */
+    @Deprecated
     public static boolean isSetup() {
         return glide != null;
     }
@@ -170,9 +184,11 @@ public class Glide {
      *
      * @see #isSetup()
      *
+     * @deprecated Use {@link com.bumptech.glide.module.GlideModule} instead. Scheduled to be removed in Glide 4.0.
      * @param builder The builder.
      * @throws IllegalArgumentException if the Glide singleton has already been created.
      */
+    @Deprecated
     public static void setup(GlideBuilder builder) {
         if (isSetup()) {
             throw new IllegalArgumentException("Glide is already setup, check with isSetup() first");
@@ -243,10 +259,6 @@ public class Glide {
 
         bitmapFitCenter = new FitCenter(bitmapPool);
         drawableFitCenter = new GifBitmapWrapperTransformation(bitmapPool, bitmapFitCenter);
-
-        for (GlideModule module : new ManifestParser(context).parse()) {
-            module.initialize(context, this);
-        }
     }
 
     /**
@@ -467,11 +479,14 @@ public class Glide {
      * Removes any {@link ModelLoaderFactory} registered for the given model and resource classes if one exists. If a
      * {@link ModelLoaderFactory} is removed, its {@link ModelLoaderFactory#teardown()}} method will be called.
      *
+     * @deprecated Use {@link #register(Class, Class, com.bumptech.glide.load.model.ModelLoaderFactory)} to replace
+     * a registered loader rather than simply removing it.
      * @param modelClass The model class.
      * @param resourceClass The resource class.
      * @param <T> The type of the model.
      * @param <Y> The type of the resource.
      */
+    @Deprecated
     public <T, Y> void unregister(Class<T> modelClass, Class<Y> resourceClass) {
         ModelLoaderFactory<T, Y> removed = loaderFactory.unregister(modelClass, resourceClass);
         if (removed != null) {

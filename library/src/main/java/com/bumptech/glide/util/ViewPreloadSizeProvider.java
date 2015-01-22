@@ -24,7 +24,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
 
     /**
      * Constructor that does nothing by default and requires users to call {@link #setView(android.view.View)} when a
-     * View is available to initialize the dimensions returned by this class.
+     * View is available to registerComponents the dimensions returned by this class.
      */
     public ViewPreloadSizeProvider() {
         // This constructor is intentionally empty. Nothing special is needed here.
