@@ -91,87 +91,13 @@ public View getView(int position, View recycled, ViewGroup container) {
 
 ```
 
-Volley
--------
-Volley is now an optional dependency that can be included via a utility library. To use Volley to fetch media over
-http/https:
+OkHttp and Volley
+-----------------
+Support for OkHttp and Volley is provided by integration libraries you can optionally include as dependencies. The
+integration libraries are available via Maven or the [releases page][1].
 
-With Gradle:
-
-```groovy
-dependencies {
-    compile 'com.github.bumptech.glide:volley-integration:1.1.+'
-    compile 'com.mcxiaoke.volley:library:1.0.+'
-}
-```
-
-Or with Maven:
-
-```xml
-<dependency>
-    <groupId>com.github.bumptech.glide</groupId>
-    <artifactId>volley-integration</artifactId>
-    <version>1.1.0</version>
-    <type>jar</type>
-</dependency>
-<dependency>
-    <groupId>com.mcxiaoke.volley</groupId>
-    <artifactId>library</artifactId>
-    <version>1.0.5</version>
-    <type>aar</type>
-</dependency>
-```
-
-Then in your Activity or Application, register the Volley based model loader:
-```java
-public void onCreate() {
-  Glide.get(this).register(GlideUrl.class, InputStream.class,
-        new VolleyUrlLoader.Factory(yourRequestQueue));
-  ...
-}
-```
-
-After the call to register any requests using http or https will go through Volley.
-
-OkHttp
-------
-In addition to Volley, Glide also includes support for fetching media using OkHttp. To use OkHttp to fetch media over
-http/https:
-
-With Gradle:
-
-```groovy
-dependencies {
-    compile 'com.github.bumptech.glide:okhttp-integration:1.1.+'
-    compile 'com.squareup.okhttp:okhttp:2.0.+'
-}
-```
-
-Or with Maven:
-
-```xml
-<dependency>
-    <groupId>com.github.bumptech.glide</groupId>
-    <artifactId>okhttp-integration</artifactId>
-    <version>1.1.0</version>
-    <type>jar</type>
-</dependency>
-<dependency>
-    <groupId>com.squareup.okhttp</groupId>
-    <artifactId>okhttp</artifactId>
-    <version>2.0.0</version>
-    <type>jar</type>
-</dependency>
-```
-
-Then in your Activity or Application, register the OkHttp based model loader:
-```java
-public void onCreate() {
-  Glide.get(this).register(GlideUrl.class, InputStream.class,
-        new OkHttpUrlLoader.Factory(yourOkHttpClient));
-  ...
-}
-```
+For instructions on including either the OkHttp or the Volley integration libraries, see the
+[Integration Libraries][12] wiki page.
 
 Android SDK Version
 -------------------
@@ -183,7 +109,7 @@ BSD, part MIT and Apache 2.0. See LICENSE file for details.
 
 Status
 ------
-Version 3.x is a stable public release used in multiple open source projects at Google including in the Android Camera
+Version 3 is a stable public release used in multiple open source projects at Google including in the Android Camera
 app and in the 2014 Google IO app. Comments/bugs/questions/pull requests welcome!
 
 Build
@@ -258,3 +184,4 @@ This is not an official Google product.
 [9]: https://gist.github.com/devunwired/4479231
 [10]: https://github.com/chrisbanes/gradle-mvn-push
 [11]: static/glide_logo.png
+[12]: https://github.com/bumptech/glide/wiki/Integration-Libraries
