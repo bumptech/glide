@@ -7,7 +7,7 @@ apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 
 findbugs {
-    toolVersion = "2.0.3"
+    toolVersion = "3.0.0"
 }
 jacoco {
     toolVersion = "0.7.1.201405082137"
