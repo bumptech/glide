@@ -5,6 +5,8 @@ android:
   licenses: 
   - 'android-sdk-license.*'
 
+sudo: false
+
 script: 'travis_retry ./gradlew build --parallel'
 
 after_success:
