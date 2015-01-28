@@ -2,7 +2,9 @@ package com.bumptech.glide.manager;
 
 import com.bumptech.glide.request.Request;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -97,7 +99,15 @@ public class RequestTracker {
     }
 
     // Avoids a ConcurrentModificationException when requests are started by another request completing. See #303.
-    private Request[] getSnapshot() {
-        return requests.toArray(new Request[requests.size()]);
+    private List<Request> getSnapshot() {
+        // toArray creates a new ArrayList internally and this way we can guarantee entries will not be
+        // null. See #322.
+        List<Request> result = new ArrayList<Request>(requests.size());
+        // We could also just call new ArrayList<Request>(requests) but that actually creates two new ArrayLists because
+        // that constructor in ArrayList calls toArray().
+        for (Request request : requests) {
+            result.add(request);
+        }
+        return result;
     }
 }
