@@ -26,7 +26,7 @@ public final class ManifestParser {
                     context.getPackageName(), PackageManager.GET_META_DATA);
             if (appInfo.metaData != null) {
                 for (String key : appInfo.metaData.keySet()) {
-                    if (GLIDE_MODULE_VALUE.equals(appInfo.metaData.getString(key))) {
+                    if (GLIDE_MODULE_VALUE.equals(appInfo.metaData.get(key))) {
                         modules.add(parseModule(key));
                     }
                 }
