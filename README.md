@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:3.5.0'
+    compile 'com.github.bumptech.glide:glide:3.5.1'
     compile 'com.android.support:support-v4:19.1.0'
 }
 ```
@@ -38,7 +38,7 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>3.5.0</version>
+  <version>3.5.1</version>
   <type>aar</type>
 </dependency>
 <dependency>
