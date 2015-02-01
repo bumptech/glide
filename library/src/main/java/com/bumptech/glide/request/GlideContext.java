@@ -127,6 +127,16 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         return decodePaths;
     }
 
+    public List<Class<?>> getRegisteredResourceClasses(Class<?> modelClass, Class<?> resourceClass) {
+        List<Class<?>> result = new ArrayList<Class<?>>();
+        List<Class<?>> dataClasses = modelLoaderRegistry.getDataClasses(modelClass);
+        for (Class<?> dataClass : dataClasses) {
+            List<? extends Class<?>> registeredResourceClasses = decoderRegistry.getResourceClasses(dataClass, resourceClass);
+            result.addAll(registeredResourceClasses);
+        }
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     public <X> ResourceEncoder<X> getResultEncoder(Resource<X> resource) throws NoResultEncoderAvailableException {
         ResourceEncoder<X> resourceEncoder = (ResourceEncoder<X>) resultEncoderRegistry.get(resource.get().getClass());

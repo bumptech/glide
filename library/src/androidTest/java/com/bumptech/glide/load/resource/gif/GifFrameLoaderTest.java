@@ -20,9 +20,9 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.TransformationOptions;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -57,7 +58,7 @@ public class GifFrameLoaderTest {
 
         requestBuilder = mock(RequestBuilder.class, new ReturnsSelfAnswer());
 
-        loader = new GifFrameLoader(callback, gifDecoder, handler, requestBuilder);
+        loader = new GifFrameLoader(Robolectric.application, callback, gifDecoder, handler, requestBuilder);
     }
 
     @SuppressWarnings("unchecked")
@@ -66,7 +67,7 @@ public class GifFrameLoaderTest {
         Transformation<Bitmap> transformation = mock(Transformation.class);
         loader.setFrameTransformation(transformation);
 
-        verify(requestBuilder).transform(any(TransformationOptions.class));
+        verify(requestBuilder).decode(any(DecodeOptions.class));
     }
 
     @Test(expected = NullPointerException.class)
@@ -152,7 +153,7 @@ public class GifFrameLoaderTest {
     @Test
     public void testOnFrameReadyClearsPreviousFrame() {
         // Force the loader to create a real Handler.
-        loader = new GifFrameLoader(callback, gifDecoder, null /*handler*/, requestBuilder);
+        loader = new GifFrameLoader(Robolectric.application, callback, gifDecoder, null /*handler*/, requestBuilder);
 
         GifFrameLoader.DelayTarget previous = mock(GifFrameLoader.DelayTarget.class);
         Request previousRequest = mock(Request.class);
@@ -184,7 +185,7 @@ public class GifFrameLoaderTest {
     @Test
     public void testClearsCompletedLoadOnFrameReadyIfCleared() {
         // Force the loader to create a real Handler.
-        loader = new GifFrameLoader(callback, gifDecoder, null /*handler*/, requestBuilder);
+        loader = new GifFrameLoader(Robolectric.application, callback, gifDecoder, null /*handler*/, requestBuilder);
         loader.clear();
         GifFrameLoader.DelayTarget delayTarget = mock(GifFrameLoader.DelayTarget.class);
         Request request = mock(Request.class);

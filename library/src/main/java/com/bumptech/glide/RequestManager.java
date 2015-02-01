@@ -9,11 +9,8 @@ import android.os.Looper;
 
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapAnimationOptions;
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformationOptions;
 import com.bumptech.glide.load.resource.drawable.DrawableAnimationOptions;
-import com.bumptech.glide.load.resource.drawable.DrawableTransformationOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gif.GifTransformationOptions;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
@@ -149,8 +146,7 @@ public final class RequestManager implements LifecycleListener {
      */
     public TranscodeRequest<Bitmap> asBitmap() {
         return (TranscodeRequest<Bitmap>) as(Bitmap.class)
-                .animate(new BitmapAnimationOptions())
-                .transform(new BitmapTransformationOptions(context));
+                .animate(new BitmapAnimationOptions());
     }
 
     /**
@@ -166,8 +162,7 @@ public final class RequestManager implements LifecycleListener {
      */
     public TranscodeRequest<GifDrawable> asGif() {
         return (TranscodeRequest<GifDrawable>) as(GifDrawable.class)
-                .animate(new DrawableAnimationOptions())
-                .transform(new GifTransformationOptions(context));
+                .animate(new DrawableAnimationOptions());
     }
 
     /**
@@ -180,8 +175,7 @@ public final class RequestManager implements LifecycleListener {
      */
     public TranscodeRequest<Drawable> asDrawable() {
         return (TranscodeRequest<Drawable>) as(Drawable.class)
-                .animate(new DrawableAnimationOptions())
-                .transform(new DrawableTransformationOptions(context));
+                .animate(new DrawableAnimationOptions());
     }
 
     /**

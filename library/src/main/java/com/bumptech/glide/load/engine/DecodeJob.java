@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -29,7 +30,7 @@ class DecodeJob<Z, R> {
     private static final FileOpener DEFAULT_FILE_OPENER = new FileOpener();
 
     private final RequestContext<Z, R> requestContext;
-    private final EngineKey resultKey;
+    private final EngineKey loadKey;
     private final int width;
     private final int height;
     private final DiskCacheProvider diskCacheProvider;
@@ -37,16 +38,16 @@ class DecodeJob<Z, R> {
 
     private volatile boolean isCancelled;
 
-    public DecodeJob(RequestContext<Z, R> requestContext, EngineKey resultKey, int width, int height,
+    public DecodeJob(RequestContext<Z, R> requestContext, EngineKey loadKey, int width, int height,
             DiskCacheProvider diskCacheProvider) {
-        this(requestContext, resultKey, width, height, diskCacheProvider, DEFAULT_FILE_OPENER);
+        this(requestContext, loadKey, width, height, diskCacheProvider, DEFAULT_FILE_OPENER);
     }
 
     // Visible for testing.
-    DecodeJob(RequestContext<Z, R> requestContext, EngineKey resultKey, int width, int height,
+    DecodeJob(RequestContext<Z, R> requestContext, EngineKey loadKey, int width, int height,
             DiskCacheProvider diskCacheProvider, FileOpener fileOpener) {
         this.requestContext = requestContext;
-        this.resultKey = resultKey;
+        this.loadKey = loadKey;
         this.width = width;
         this.height = height;
         this.diskCacheProvider = diskCacheProvider;
@@ -63,8 +64,19 @@ class DecodeJob<Z, R> {
         if (!requestContext.getDiskCacheStrategy().cacheResult()) {
             return null;
         }
-
-        return decodeFromCache(resultKey, false /*cacheResult*/, false /*transformResult*/);
+        List<Class<?>> resourceClasses = requestContext.getRegisteredResourceClasses();
+        for (Class<?> registeredResourceClass : resourceClasses) {
+            Transformation<?> transformation = requestContext.getTransformation(registeredResourceClass);
+            Key key = loadKey.getResultKey(transformation, registeredResourceClass);
+            try {
+                return decodeFromCache(loadKey, false /*cacheResult*/, false /*transformResult*/);
+            } catch (Exception e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Failed to find or decode resource from cache with key=" + key);
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -77,7 +89,7 @@ class DecodeJob<Z, R> {
         if (!requestContext.getDiskCacheStrategy().cacheSource()) {
             return null;
         }
-        return decodeFromCache(resultKey.getOriginalKey(), requestContext.getDiskCacheStrategy().cacheResult(),
+        return decodeFromCache(loadKey.getOriginalKey(), requestContext.getDiskCacheStrategy().cacheResult(),
                 true /*transformResult*/);
     }
 
@@ -124,11 +136,21 @@ class DecodeJob<Z, R> {
                 continue;
             }
             Object data = fetcher.loadData(requestContext.getPriority());
-            Encoder<Object> encoder = requestContext.getSourceEncoder(data);
-            SourceWriter<Object> writer = new SourceWriter<Object>(encoder, data);
-            diskCacheProvider.getDiskCache().put(resultKey.getOriginalKey(), writer);
-            return decodeFromCache(resultKey.getOriginalKey(),
-                    requestContext.getDiskCacheStrategy().cacheResult(), true /*transformResult*/);
+            try {
+                if (data == null) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Failed to fetch data from: " + fetcher);
+                    }
+                    continue;
+                }
+                Encoder<Object> encoder = requestContext.getSourceEncoder(data);
+                SourceWriter<Object> writer = new SourceWriter<Object>(encoder, data);
+                diskCacheProvider.getDiskCache().put(loadKey.getOriginalKey(), writer);
+                return decodeFromCache(loadKey.getOriginalKey(),
+                        requestContext.getDiskCacheStrategy().cacheResult(), true /*transformResult*/);
+            } finally {
+                fetcher.cleanup();
+            }
         }
         throw new IllegalStateException("No path found to load " + requestContext.getResourceClass() + " and "
                 + requestContext.getTranscodeClass() + " from a cached File");
@@ -156,11 +178,15 @@ class DecodeJob<Z, R> {
                 @Override
                 public Resource<Z> onResourceDecoded(final Resource<Z> resource) {
                     Resource<Z> result = resource;
+                    Class<Z> resourceSubClass = (Class<Z>) result.get().getClass();
+                    Transformation<Z> appliedTransformation = null;
                     if (transformResult) {
-                        result = requestContext.getTransformation().transform(resource, width, height);
+                        appliedTransformation = requestContext.getTransformation(resourceSubClass);
+                        result = appliedTransformation.transform(resource, width, height);
                     }
                     if (cacheResult) {
-                        diskCacheProvider.getDiskCache().put(resultKey,
+                        Key resultCacheKey = loadKey.getResultKey(appliedTransformation, resourceSubClass);
+                        diskCacheProvider.getDiskCache().put(resultCacheKey,
                                 new SourceWriter<Resource<Z>>(requestContext.getResultEncoder(result), result));
                     }
                     return result;
@@ -174,7 +200,7 @@ class DecodeJob<Z, R> {
     }
 
     private void logWithTimeAndKey(String message, long startTime) {
-        Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + resultKey);
+        Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + loadKey);
     }
 
     class SourceWriter<DataType> implements DiskCache.Writer {

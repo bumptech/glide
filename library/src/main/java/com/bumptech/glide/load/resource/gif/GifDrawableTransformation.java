@@ -1,7 +1,9 @@
 package com.bumptech.glide.load.resource.gif;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -14,6 +16,10 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 public class GifDrawableTransformation implements Transformation<GifDrawable> {
     private final Transformation<Bitmap> wrapped;
     private final BitmapPool bitmapPool;
+
+    public GifDrawableTransformation(Context context, Transformation<Bitmap> wrapped) {
+        this(wrapped, Glide.get(context).getBitmapPool());
+    }
 
     public GifDrawableTransformation(Transformation<Bitmap> wrapped, BitmapPool bitmapPool) {
         this.wrapped = wrapped;

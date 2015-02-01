@@ -7,6 +7,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.BaseDecodeOptions;
+import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
@@ -42,8 +44,6 @@ import java.util.UUID;
  */
 public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
     private static final RequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
-    private static final TransformationOptions<?, ?> DEFAULT_TRANSFORMATION_OPTIONS =
-            new GenericTransformationOptions<Object>();
     private static final AnimationOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
             new GenericAnimationOptions<Object>();
     protected final GlideContext context;
@@ -52,11 +52,8 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
     protected final RequestTracker requestTracker;
     protected final Lifecycle lifecycle;
 
+    private BaseDecodeOptions<?> decodeOptions;
     private RequestOptions requestOptions = DEFAULT_REQUEST_OPTIONS;
-    @SuppressWarnings("unchecked")
-    private TransformationOptions<?, ResourceType> transformationOptions =
-            (TransformationOptions<?, ResourceType>) DEFAULT_TRANSFORMATION_OPTIONS;
-    @SuppressWarnings("unchecked")
     private AnimationOptions<?, ? super TranscodeType> animationOptions =
             (AnimationOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
 
@@ -83,6 +80,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
         this.transcodeClass = transcodeClass;
         this.requestTracker = requestTracker;
         this.lifecycle = lifecycle;
+        decodeOptions = new DecodeOptions(context);
     }
 
     public RequestBuilder<ResourceType, TranscodeType> apply(RequestOptions requestOptions) {
@@ -98,11 +96,8 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
         return this;
     }
 
-    public RequestBuilder<ResourceType, TranscodeType> transform(
-            TransformationOptions<?, ResourceType> transformationOptions) {
-        Preconditions.checkNotNull(transformationOptions);
-        this.transformationOptions = DEFAULT_TRANSFORMATION_OPTIONS.equals(this.transformationOptions)
-                ? transformationOptions : this.transformationOptions.apply(transformationOptions);
+    public RequestBuilder<ResourceType, TranscodeType> decode(DecodeOptions options) {
+        this.decodeOptions.apply(Preconditions.checkNotNull(options));
         return this;
     }
 
@@ -357,7 +352,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
                     (RequestBuilder<ResourceType, TranscodeType>) super.clone();
             result.requestOptions = result.requestOptions.clone();
             result.animationOptions = result.animationOptions.clone();
-            result.transformationOptions = result.transformationOptions.clone();
+            result.decodeOptions = decodeOptions.clone();
             return result;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -412,15 +407,15 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
             throw new IllegalArgumentException("You must pass in a non null View");
         }
 
-        if (!transformationOptions.isTransformationSet() && view.getScaleType() != null) {
+        if (!decodeOptions.isTransformationSet() && view.getScaleType() != null) {
             switch (view.getScaleType()) {
                 case CENTER_CROP:
-                    transformationOptions.applyCenterCrop();
+                    decodeOptions.centerCrop();
                     break;
                 case FIT_CENTER:
                 case FIT_START:
                 case FIT_END:
-                    transformationOptions.applyFitCenter();
+                    decodeOptions.fitCenter();
                     break;
                 //$CASES-OMITTED$
                 default:
@@ -590,7 +585,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
             RequestCoordinator requestCoordinator) {
         RequestContext<ResourceType, TranscodeType> requestContext =
                 new RequestContext<ResourceType, TranscodeType>(context, model, resourceClass,
-                        transcodeClass, transformationOptions.getTransformation(), transcoder, requestOptions);
+                        transcodeClass, decodeOptions, transcoder, requestOptions);
 
         return SingleRequest.obtain(requestContext, model, transcodeClass, requestOptions, target, requestListener,
                 requestCoordinator, context.getEngine(), animationOptions.getAnimationFactory());

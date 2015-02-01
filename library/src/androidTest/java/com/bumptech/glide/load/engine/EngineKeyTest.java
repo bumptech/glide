@@ -4,12 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.tests.KeyAssertions;
 
 import org.junit.Before;
@@ -45,16 +43,11 @@ public class EngineKeyTest {
         Class resourceClass = Object.class;
         Class transcodeClass = Integer.class;
         ResourceDecoder decoder = mock(ResourceDecoder.class);
-        Transformation transformation = mock(Transformation.class);
         ResourceEncoder encoder = mock(ResourceEncoder.class);
         Key signature = mock(Key.class);
 
-        public Harness() {
-            when(transformation.getId()).thenReturn(transformationId);
-        }
-
         public EngineKey build() {
-            return new EngineKey(id, signature, width, height, transformation, resourceClass, transcodeClass);
+            return new EngineKey(id, signature, width, height, resourceClass, transcodeClass);
         }
     }
 
@@ -85,16 +78,6 @@ public class EngineKeyTest {
     public void testDiffersIfWidthDiffers() throws Exception {
         EngineKey first = harness.build();
         harness.width += 1;
-        EngineKey second = harness.build();
-
-        KeyAssertions.assertDifferent(first, second);
-    }
-
-    @Test
-    public void testDiffersIfTransformationDiffers() throws Exception {
-        EngineKey first = harness.build();
-        harness.transformation = mock(Transformation.class);
-        when(harness.transformation.getId()).thenReturn(harness.transformationId + "2");
         EngineKey second = harness.build();
 
         KeyAssertions.assertDifferent(first, second);

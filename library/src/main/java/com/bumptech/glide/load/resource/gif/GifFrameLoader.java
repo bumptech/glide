@@ -10,12 +10,12 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 
-import com.bumptech.glide.GenericTransformationOptions;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -30,6 +30,7 @@ class GifFrameLoader {
     private final FrameCallback callback;
     private final GifDecoder gifDecoder;
     private final Handler handler;
+    private final Context context;
 
     private boolean isRunning = false;
     private boolean isLoadPending = false;
@@ -42,15 +43,15 @@ class GifFrameLoader {
     }
 
     public GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, int width, int height) {
-        this(callback, gifDecoder, null,
-                getRequestBuilder(context, width, height));
+        this(context, callback, gifDecoder, null, getRequestBuilder(context, width, height));
     }
 
-    GifFrameLoader(FrameCallback callback, GifDecoder gifDecoder, Handler handler,
+    GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, Handler handler,
             RequestBuilder<Bitmap, Bitmap> requestBuilder) {
         if (handler == null) {
             handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
         }
+        this.context = context.getApplicationContext();
         this.callback = callback;
         this.gifDecoder = gifDecoder;
         this.handler = handler;
@@ -60,7 +61,7 @@ class GifFrameLoader {
     @SuppressWarnings("unchecked")
     public void setFrameTransformation(Transformation<Bitmap> transformation) {
         Preconditions.checkNotNull(transformation);
-        requestBuilder = requestBuilder.transform(new GenericTransformationOptions<Bitmap>().transform(transformation));
+        requestBuilder = requestBuilder.decode(new DecodeOptions(context).transform(transformation));
     }
 
     public void start() {

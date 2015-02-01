@@ -17,7 +17,9 @@ import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Context for individual requests and decodes that contains and exposes classes necessary to obtain, decode, and
@@ -32,21 +34,21 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
     private final Object model;
     private final Class<ResourceClass> resourceClass;
     private final Class<TranscodeClass> transcodeClass;
-    private final Transformation<ResourceClass> transformation;
+    private BaseDecodeOptions<?> decodeOptions;
     private final ResourceTranscoder<ResourceClass, ? extends TranscodeClass> transcoder;
     private final RequestOptions requestOptions;
 
     private DataFetcherSet<?> fetchers;
 
     public RequestContext(GlideContext glideContext, Object model, Class<ResourceClass> resourceClass,
-            Class<TranscodeClass> transcodeClass, Transformation<ResourceClass> transformation,
+            Class<TranscodeClass> transcodeClass, BaseDecodeOptions<?> decodeOptions,
             ResourceTranscoder<ResourceClass, ? extends TranscodeClass> transcoder, RequestOptions requestOptions) {
         super(glideContext);
         this.glideContext = glideContext;
         this.model = model;
         this.resourceClass = resourceClass;
         this.transcodeClass = transcodeClass;
-        this.transformation = transformation;
+        this.decodeOptions = decodeOptions;
         this.transcoder = transcoder;
         this.requestOptions = requestOptions;
     }
@@ -84,6 +86,10 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
         return requestOptions.getSignature();
     }
 
+    List<Class<?>> getRegisteredResourceClasses() {
+        return glideContext.getRegisteredResourceClasses(model.getClass(), resourceClass);
+    }
+
     Class<ResourceClass> getResourceClass() {
         return resourceClass;
     }
@@ -92,8 +98,12 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
         return transcodeClass;
     }
 
-    Transformation<ResourceClass> getTransformation() {
-        return transformation;
+    <DecodedResource> Transformation<DecodedResource> getTransformation(Class<DecodedResource> decodedResourceClass) {
+        return decodeOptions.getTransformation(decodedResourceClass);
+    }
+
+    Map<String, Object> getOptions() {
+        return new HashMap<String, Object>();
     }
 
     boolean isMemoryCacheable() {
@@ -133,4 +143,5 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
     DataFetcherSet<?> getDataFetchers(File file, int width, int height) throws GlideContext.NoModelLoaderAvailableException {
         return glideContext.getDataFetchers(file, width, height);
     }
+
 }
