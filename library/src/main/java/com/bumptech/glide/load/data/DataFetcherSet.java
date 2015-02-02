@@ -27,13 +27,18 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> DataFetcher<T> getFetcher(Class<T> dataClass) {
+    public <T> List<DataFetcher<T>> getFetchers(Class<T> dataClass) {
+        List<DataFetcher<T>> result = new ArrayList<DataFetcher<T>>();
         for (DataFetcher<?> fetcher : this) {
-            if (fetcher.getDataClass().equals(dataClass)) {
-                return (DataFetcher<T>) fetcher;
+            if (fetcher != null && fetcher.getDataClass().equals(dataClass)) {
+                result.add((DataFetcher<T>) fetcher);
             }
         }
-        throw new IllegalArgumentException("Failed to find fetcher for " + dataClass);
+        if (result.isEmpty()) {
+            throw new IllegalArgumentException("Failed to find fetcher for " + dataClass);
+        }
+
+        return result;
     }
 
     public String getId() {

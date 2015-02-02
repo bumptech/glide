@@ -36,6 +36,10 @@ public final class DecodeOptions extends BaseDecodeOptions<DecodeOptions> {
         return new DecodeOptions(context).set(key, option);
     }
 
+    public static DecodeOptions through(Context context, Class<?> resourceClass) {
+        return new DecodeOptions(context).through(resourceClass);
+    }
+
     public DecodeOptions(Context context) {
         super(context);
     }

@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import static com.bumptech.glide.load.engine.DecodeOptions.through;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -22,6 +24,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
@@ -36,11 +39,9 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.load.resource.bitmap.BitmapResource;
-import com.bumptech.glide.load.resource.bytes.BytesResource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
+import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -61,6 +62,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
+import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.ByteArrayInputStream;
@@ -89,6 +91,12 @@ public class GlideTest {
     @Before
     public void setUp() throws Exception {
         Glide.tearDown();
+
+        RobolectricPackageManager pm = (RobolectricPackageManager) Robolectric.application.getPackageManager();
+        ApplicationInfo info = pm.getApplicationInfo(Robolectric.application.getPackageName(), 0);
+        info.metaData = new Bundle();
+        info.metaData.putString(SetupModule.class.getName(), "GlideModule");
+
         // Ensure that target's size ready callback will be called synchronously.
         target = mock(Target.class);
         imageView = new ImageView(Robolectric.application);
@@ -105,32 +113,9 @@ public class GlideTest {
             }
         });
 
-        // Run all tasks on the main thread so they complete synchronously.
-        ExecutorService service = mock(ExecutorService.class);
-        when(service.submit(any(Runnable.class))).thenAnswer(new Answer<Future<?>>() {
-            @Override
-            public Future<?> answer(InvocationOnMock invocation) throws Throwable {
-                Runnable runnable = (Runnable) invocation.getArguments()[0];
-                runnable.run();
-                return mock(Future.class);
-            }
-        });
+//        ShadowPackageManager spm = Robolectric.shadowOf_(Robolectric.application.getPackageManager());
+//        spm.addGlideModule(SetupModule.class);
 
-        Glide.setup(new GlideBuilder(Robolectric.application)
-                .setMemoryCache(mock(MemoryCache.class))
-                .setDiskCache(mock(DiskCache.class))
-                .setResizeService(service)
-                .setDiskCacheService(service));
-        DataFetcher<InputStream> mockStreamFetcher = mock(DataFetcher.class);
-        when(mockStreamFetcher.getId()).thenReturn("fakeId");
-        when(mockStreamFetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
-        ModelLoader<GlideUrl, InputStream> mockUrlLoader = mock(ModelLoader.class);
-        when(mockUrlLoader.getDataFetcher(any(GlideUrl.class), anyInt(), anyInt())).thenReturn(mockStreamFetcher);
-        ModelLoaderFactory<GlideUrl, InputStream> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
-        when(mockUrlLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
-                .thenReturn(mockUrlLoader);
-
-        Glide.get(getContext()).prepend(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
         Lifecycle lifecycle = mock(Lifecycle.class);
         requestManager = new RequestManager(getContext(), lifecycle);
         requestManager.resumeRequests();
@@ -283,30 +268,15 @@ public class GlideTest {
     }
 
     @Test
-    public void testTranscodeOption() {
-        Uri uri = Uri.parse("content://something/else");
-        mockUri(uri);
-        final byte[] bytes = new byte[0];
-
-        ResourceTranscoder<Bitmap, byte[]> transcoder = mock(ResourceTranscoder.class);
-        when(transcoder.transcode(any(Resource.class))).thenReturn(new BytesResource(bytes));
-
-        requestManager
-                .asBitmap()
-                .to(byte[].class)
-                .load(uri)
-                .transcoder(transcoder)
-                .into(target);
-
-        verify(target).onResourceReady(eq(bytes), any(GlideAnimation.class));
-    }
-
-    @Test
     public void testToBytesOption() {
         Uri uri = Uri.parse("content://something/else");
         mockUri(uri);
 
-        requestManager.asBitmap().to(byte[].class).load(uri).into(target);
+        requestManager
+                .as(byte[].class)
+                .decode(through(Robolectric.application, Bitmap.class))
+                .load(uri)
+                .into(target);
 
         verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
     }
@@ -510,8 +480,8 @@ public class GlideTest {
         mockUri(Uri.parse(fakeUri), testGifData);
 
         requestManager
-                .asGif()
-                .to(byte[].class)
+                .as(byte[].class)
+                .decode(through(Robolectric.application, GifDrawable.class))
                 .load(fakeUri)
                 .into(target);
 
@@ -523,31 +493,12 @@ public class GlideTest {
         String fakeUri = "content://fake";
         mockUri(fakeUri);
         requestManager
-                .asBitmap()
-                .to(byte[].class)
+                .as(byte[].class)
+                .decode(through(Robolectric.application, Bitmap.class))
                 .load(fakeUri)
                 .into(target);
 
         verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
-    }
-
-    @Test
-    public void testReceivesTranscodedData() {
-        String fakeUri = "content://fake";
-        mockUri(fakeUri);
-        final Bitmap expected = Bitmap.createBitmap(1234, 6432, Bitmap.Config.ALPHA_8);
-        requestManager
-                .asBitmap()
-                .load(fakeUri)
-                .transcoder(new ResourceTranscoder<Bitmap, Bitmap>() {
-                    @Override
-                    public Resource<Bitmap> transcode(Resource<Bitmap> toTranscode) {
-                        return new BitmapResource(expected, mock(BitmapPool.class));
-                    }
-                })
-                .into(target);
-
-        verify(target).onResourceReady(eq(expected), any(GlideAnimation.class));
     }
 
     @Test
@@ -704,9 +655,11 @@ public class GlideTest {
     private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) throws Exception {
         DataFetcher<Z> failFetcher = mock(DataFetcher.class);
         when(failFetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
+        when(failFetcher.getDataClass()).thenReturn(failResource);
         when(failFetcher.getId()).thenReturn("fakeId");
         ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
         when(failLoader.getDataFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
+        when(failLoader.handles(any(failModel))).thenReturn(true);
         ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
         when(failFactory.build(any(Context.class), any(MultiModelLoaderFactory.class))).thenReturn(failLoader);
 
@@ -761,8 +714,10 @@ public class GlideTest {
             // Do nothing.
         }
         when(fetcher.getId()).thenReturn(UUID.randomUUID().toString());
+        when(fetcher.getDataClass()).thenReturn(InputStream.class);
         when(modelLoader.getDataFetcher(any(modelClass), anyInt(), anyInt()))
                 .thenReturn(fetcher);
+        when(modelLoader.handles(any(modelClass))).thenReturn(true);
 
         return modelLoader;
     }
@@ -790,6 +745,48 @@ public class GlideTest {
             SizeReadyCallback cb = (SizeReadyCallback) invocation.getArguments()[0];
             cb.onSizeReady(width, height);
             return null;
+        }
+    }
+
+    public static class SetupModule implements GlideModule {
+
+        @Override
+        public void applyOptions(Context context, GlideBuilder builder) {
+            // Run all tasks on the main thread so they complete synchronously.
+            ExecutorService service = mock(ExecutorService.class);
+            when(service.submit(any(Runnable.class))).thenAnswer(new Answer<Future<?>>() {
+                @Override
+                public Future<?> answer(InvocationOnMock invocation) throws Throwable {
+                    Runnable runnable = (Runnable) invocation.getArguments()[0];
+                    runnable.run();
+                    return mock(Future.class);
+                }
+            });
+            builder
+                .setMemoryCache(mock(MemoryCache.class))
+                .setDiskCache(mock(DiskCache.class))
+                .setResizeService(service)
+                .setDiskCacheService(service);
+        }
+
+        @Override
+        public void registerComponents(Context context, Glide glide) {
+            DataFetcher<InputStream> mockStreamFetcher = mock(DataFetcher.class);
+            when(mockStreamFetcher.getId()).thenReturn("fakeId");
+            when(mockStreamFetcher.getDataClass()).thenReturn(InputStream.class);
+            try {
+                when(mockStreamFetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            ModelLoader<GlideUrl, InputStream> mockUrlLoader = mock(ModelLoader.class);
+            when(mockUrlLoader.getDataFetcher(any(GlideUrl.class), anyInt(), anyInt())).thenReturn(mockStreamFetcher);
+            when(mockUrlLoader.handles(any(GlideUrl.class))).thenReturn(true);
+            ModelLoaderFactory<GlideUrl, InputStream> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
+            when(mockUrlLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
+                    .thenReturn(mockUrlLoader);
+
+            glide.prepend(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
         }
     }
 

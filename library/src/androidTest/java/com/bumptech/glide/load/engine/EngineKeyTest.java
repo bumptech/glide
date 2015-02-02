@@ -37,7 +37,6 @@ public class EngineKeyTest {
 
     private static class Harness {
         String id = "testId";
-        String transformationId = "transformationId";
         int width = 1;
         int height = 2;
         Class resourceClass = Object.class;
@@ -62,7 +61,7 @@ public class EngineKeyTest {
         harness.id = harness.id + "2";
         EngineKey second = harness.build();
 
-        KeyAssertions.assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class EngineKeyTest {
         harness.height += 1;
         EngineKey second = harness.build();
 
-        KeyAssertions.assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
     }
 
     @Test
@@ -80,7 +79,7 @@ public class EngineKeyTest {
         harness.width += 1;
         EngineKey second = harness.build();
 
-        KeyAssertions.assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
     }
 
     @Test
@@ -98,7 +97,7 @@ public class EngineKeyTest {
         harness.signature = signature;
         EngineKey second = harness.build();
 
-        KeyAssertions.assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
     }
 
     @Test
@@ -106,7 +105,7 @@ public class EngineKeyTest {
         EngineKey first = harness.build();
         harness.resourceClass = Long.class;
         EngineKey second = harness.build();
-        KeyAssertions.assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
     }
 
     @Test
@@ -114,6 +113,6 @@ public class EngineKeyTest {
         EngineKey first = harness.build();
         harness.transcodeClass = Long.class;
         EngineKey second = harness.build();
-        KeyAssertions.assertDifferent(first, second);
+        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
     }
 }

@@ -100,7 +100,8 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
                 getDecodePaths(dataClass, resourceClass, transcodeClass);
         // It's possible there is no way to decode or transcode to the desired types from a given data class.
         if (!decodePaths.isEmpty()) {
-            return new LoadPath<DataType, ResourceType, TranscodeType>(dataClass, decodePaths);
+            return new LoadPath<DataType, ResourceType, TranscodeType>(dataClass, resourceClass, transcodeClass,
+                    decodePaths);
         } else {
             return null;
         }
@@ -115,13 +116,14 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
                 decoderRegistry.getResourceClasses(dataClass, resourceClass);
         for (Class<ResourceType> registeredResourceClass : registeredResourceClasses) {
             List<Class<TranscodeType>> registeredTranscodeClasses =
-                    transcoderRegistry.getTranscodeClasses(resourceClass, transcodeClass);
+                    transcoderRegistry.getTranscodeClasses(registeredResourceClass, transcodeClass);
             for (Class<TranscodeType> registeredTranscodeClass : registeredTranscodeClasses) {
                 List<ResourceDecoder<DataType, ResourceType>> decoders =
                         decoderRegistry.getDecoders(dataClass, registeredResourceClass);
                 ResourceTranscoder<ResourceType, TranscodeType> transcoder =
                         transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
-                decodePaths.add(new DecodePath<DataType, ResourceType, TranscodeType>(dataClass, decoders, transcoder));
+                decodePaths.add(new DecodePath<DataType, ResourceType, TranscodeType>(dataClass,
+                        registeredResourceClass, registeredTranscodeClass, decoders, transcoder));
             }
         }
         return decodePaths;

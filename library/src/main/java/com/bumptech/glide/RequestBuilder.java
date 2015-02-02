@@ -11,9 +11,6 @@ import com.bumptech.glide.load.engine.BaseDecodeOptions;
 import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.RequestContext;
-import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.resource.transcode.UnitTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.FutureTarget;
@@ -39,15 +36,18 @@ import java.util.UUID;
 /**
  * A generic class that can handle setting options and staring loads for generic resource types.
  *
- * @param <ResourceType> The type of the resource that will be loaded.
- * @param <TranscodeType> The type of resource the decoded resource will be transcoded to.
+ * @param <TranscodeType> The type of resource that will be delivered to the
+ * {@link com.bumptech.glide.request.target.Target}.
  */
-public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
+public class RequestBuilder<TranscodeType> implements Cloneable {
     private static final RequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
     private static final AnimationOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
             new GenericAnimationOptions<Object>();
+    private static final RequestOptions DOWNLOAD_ONLY_OPTIONS = new RequestOptions()
+            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+            .priority(Priority.LOW)
+            .skipMemoryCache(true);
     protected final GlideContext context;
-    protected final Class<ResourceType> resourceClass;
     protected final Class<TranscodeType> transcodeClass;
     protected final RequestTracker requestTracker;
     protected final Lifecycle lifecycle;
@@ -62,41 +62,39 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
     // not to be null.
     private boolean isModelSet;
     private RequestListener<TranscodeType> requestListener;
-    private ResourceTranscoder<ResourceType, ? extends TranscodeType> transcoder;
-    private RequestBuilder<?, TranscodeType> thumbnailBuilder;
+    private RequestBuilder<TranscodeType> thumbnailBuilder;
     private Float thumbSizeMultiplier;
 
-    RequestBuilder(Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass, RequestBuilder<?, ?> other) {
-        this(other.context, resourceClass, transcodeClass, other.requestTracker, other.lifecycle);
+    RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
+        this(other.context, transcodeClass, other.requestTracker, other.lifecycle);
         this.model = other.model;
         this.isModelSet = other.isModelSet;
         this.requestOptions = other.requestOptions;
     }
 
-    RequestBuilder(GlideContext context, Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass,
-            RequestTracker requestTracker, Lifecycle lifecycle) {
+    RequestBuilder(GlideContext context, Class<TranscodeType> transcodeClass, RequestTracker requestTracker,
+            Lifecycle lifecycle) {
         this.context = Preconditions.checkNotNull(context);
-        this.resourceClass = resourceClass;
         this.transcodeClass = transcodeClass;
         this.requestTracker = requestTracker;
         this.lifecycle = lifecycle;
         decodeOptions = new DecodeOptions(context);
     }
 
-    public RequestBuilder<ResourceType, TranscodeType> apply(RequestOptions requestOptions) {
+    public RequestBuilder<TranscodeType> apply(RequestOptions requestOptions) {
         Preconditions.checkNotNull(requestOptions);
         this.requestOptions = DEFAULT_REQUEST_OPTIONS.equals(this.requestOptions)
                 ? requestOptions : this.requestOptions.apply(requestOptions);
         return this;
     }
 
-    public RequestBuilder<ResourceType, TranscodeType> animate(
+    public RequestBuilder<TranscodeType> animate(
             AnimationOptions<?, ? super TranscodeType> animationOptions) {
         this.animationOptions = Preconditions.checkNotNull(animationOptions);
         return this;
     }
 
-    public RequestBuilder<ResourceType, TranscodeType> decode(DecodeOptions options) {
+    public RequestBuilder<TranscodeType> decode(DecodeOptions options) {
         this.decodeOptions.apply(Preconditions.checkNotNull(options));
         return this;
     }
@@ -110,25 +108,9 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @return This request builder.
      */
      @SuppressWarnings("unchecked")
-    public RequestBuilder<ResourceType, TranscodeType> listener(RequestListener<TranscodeType> requestListener) {
+    public RequestBuilder<TranscodeType> listener(RequestListener<TranscodeType> requestListener) {
         this.requestListener = requestListener;
 
-        return this;
-    }
-
-    /**
-     * Sets the {@link ResourceTranscoder} to use for this load.
-     *
-     * @see UnitTranscoder
-     * @see BitmapDrawableTranscoder
-     *
-     * @param transcoder The transcoder to use.
-     * @return This request builder.
-     */
-    @SuppressWarnings("unchecked")
-    public RequestBuilder<ResourceType, TranscodeType> transcoder(
-            ResourceTranscoder<ResourceType, ? extends TranscodeType> transcoder) {
-        this.transcoder = transcoder;
         return this;
     }
 
@@ -148,7 +130,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @return This request builder.
      */
     @SuppressWarnings("unchecked")
-    public RequestBuilder<ResourceType, TranscodeType> thumbnail(RequestBuilder<?, TranscodeType> thumbnailRequest) {
+    public RequestBuilder<TranscodeType> thumbnail(RequestBuilder<TranscodeType> thumbnailRequest) {
         this.thumbnailBuilder = thumbnailRequest;
 
         return this;
@@ -180,7 +162,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @return This request builder.
      */
     @SuppressWarnings("unchecked")
-    public RequestBuilder<ResourceType, TranscodeType> thumbnail(float sizeMultiplier) {
+    public RequestBuilder<TranscodeType> thumbnail(float sizeMultiplier) {
         if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
             throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
         }
@@ -202,11 +184,11 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @return This request builder.
      */
     @SuppressWarnings("unchecked")
-    public RequestBuilder<ResourceType, TranscodeType> load(Object model) {
+    public RequestBuilder<TranscodeType> load(Object model) {
         return loadGeneric(model);
     }
 
-    private RequestBuilder<ResourceType, TranscodeType> loadGeneric(Object model) {
+    private RequestBuilder<TranscodeType> loadGeneric(Object model) {
         this.model = model;
         isModelSet = true;
         return this;
@@ -230,7 +212,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      *
      * @param string A file path, or a uri or url handled by {@link com.bumptech.glide.load.model.UriLoader}.
      */
-    public RequestBuilder<ResourceType, TranscodeType> load(String string) {
+    public RequestBuilder<TranscodeType> load(String string) {
         return loadGeneric(string);
     }
 
@@ -252,7 +234,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @param uri The Uri representing the image. Must be of a type handled by
      * {@link com.bumptech.glide.load.model.UriLoader}.
      */
-    public RequestBuilder<ResourceType, TranscodeType> load(Uri uri) {
+    public RequestBuilder<TranscodeType> load(Uri uri) {
         return loadGeneric(uri);
     }
 
@@ -273,7 +255,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      *
      * @param file The File containing the image
      */
-    public RequestBuilder<ResourceType, TranscodeType> load(File file) {
+    public RequestBuilder<TranscodeType> load(File file) {
         return loadGeneric(file);
     }
 
@@ -297,7 +279,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @see #load(Integer)
      * @see com.bumptech.glide.signature.ApplicationVersionSignature
      */
-    public RequestBuilder<ResourceType, TranscodeType> load(Integer resourceId) {
+    public RequestBuilder<TranscodeType> load(Integer resourceId) {
         return loadGeneric(resourceId)
                 .apply(signatureOf(ApplicationVersionSignature.obtain(context)));
     }
@@ -313,7 +295,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      * @param url The URL representing the image.
      */
     @Deprecated
-    public RequestBuilder<ResourceType, TranscodeType> load(URL url) {
+    public RequestBuilder<TranscodeType> load(URL url) {
         return loadGeneric(url);
     }
 
@@ -328,7 +310,7 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      *
      * @param model the data to load.
      */
-    public RequestBuilder<ResourceType, TranscodeType> load(byte[] model) {
+    public RequestBuilder<TranscodeType> load(byte[] model) {
         return loadGeneric(model)
                 .apply(signatureOf(new StringSignature(UUID.randomUUID()
                         .toString())).diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -346,10 +328,10 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public RequestBuilder<ResourceType, TranscodeType> clone() {
+    public RequestBuilder<TranscodeType> clone() {
         try {
-            RequestBuilder<ResourceType, TranscodeType> result =
-                    (RequestBuilder<ResourceType, TranscodeType>) super.clone();
+            RequestBuilder<TranscodeType> result =
+                    (RequestBuilder<TranscodeType>) super.clone();
             result.requestOptions = result.requestOptions.clone();
             result.animationOptions = result.animationOptions.clone();
             result.decodeOptions = decodeOptions.clone();
@@ -515,11 +497,9 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
         return getDownloadOnlyRequest().into(width, height);
     }
 
-    private RequestBuilder<File, File> getDownloadOnlyRequest() {
-        return new TranscodeRequest<File>(File.class, this)
-                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                        .priority(Priority.LOW)
-                        .skipMemoryCache(true));
+    private RequestBuilder<File> getDownloadOnlyRequest() {
+        return new RequestBuilder<File>(File.class, this)
+                .apply(DOWNLOAD_ONLY_OPTIONS);
     }
 
     private Priority getThumbnailPriority() {
@@ -583,9 +563,8 @@ public class RequestBuilder<ResourceType, TranscodeType> implements Cloneable {
 
     private Request obtainRequest(Target<TranscodeType> target, RequestOptions requestOptions,
             RequestCoordinator requestCoordinator) {
-        RequestContext<ResourceType, TranscodeType> requestContext =
-                new RequestContext<ResourceType, TranscodeType>(context, model, resourceClass,
-                        transcodeClass, decodeOptions, transcoder, requestOptions);
+        RequestContext<TranscodeType> requestContext =
+                new RequestContext<TranscodeType>(context, model, transcodeClass, decodeOptions, requestOptions);
 
         return SingleRequest.obtain(requestContext, model, transcodeClass, requestOptions, target, requestListener,
                 requestCoordinator, context.getEngine(), animationOptions.getAnimationFactory());

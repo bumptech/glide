@@ -28,13 +28,13 @@ class EngineRunnable implements Runnable, Prioritized {
 
     private final Priority priority;
     private final EngineRunnableManager manager;
-    private final DecodeJob<?, ?> decodeJob;
+    private final DecodeJob<?> decodeJob;
 
     private Stage stage;
 
     private volatile boolean isCancelled;
 
-    public EngineRunnable(EngineRunnableManager manager, DecodeJob<?, ?> decodeJob, Priority priority) {
+    public EngineRunnable(EngineRunnableManager manager, DecodeJob<?> decodeJob, Priority priority) {
         this.manager = manager;
         this.decodeJob = decodeJob;
         this.stage = Stage.CACHE;
@@ -82,6 +82,9 @@ class EngineRunnable implements Runnable, Prioritized {
     }
 
     private void onLoadComplete(Resource resource) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            decodeJob.maybeWriteDebugLogs();
+        }
         manager.onResourceReady(resource);
     }
 
@@ -90,6 +93,9 @@ class EngineRunnable implements Runnable, Prioritized {
             stage = Stage.SOURCE;
             manager.submitForSource(this);
         } else {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                decodeJob.maybeWriteDebugLogs();
+            }
             manager.onException(e);
         }
     }

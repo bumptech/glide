@@ -40,22 +40,12 @@ public class RequestBuilderTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfContextIsNull() {
-        new RequestBuilder(null, Object.class, Object.class, requestTracker, lifecycle);
+        new RequestBuilder(null, Object.class, requestTracker, lifecycle);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenGlideAnimationFactoryIsNull() {
         getNullModelRequest().animate(null);
-    }
-
-    @Test
-    public void testDoesNotThrowWhenWidthIsSizeOriginal() {
-        getNullModelRequest().override(Target.SIZE_ORIGINAL, 100);
-    }
-
-    @Test
-    public void testDoesNotThrowWhenHeightIsSizeOriginal() {
-        getNullModelRequest().override(100, Target.SIZE_ORIGINAL);
     }
 
     @Test
@@ -143,7 +133,7 @@ public class RequestBuilderTest {
 
     private RequestBuilder getNullModelRequest() {
         when(glideContext.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(mock(Target.class));
-        return new RequestBuilder(glideContext, Object.class, Object.class, requestTracker, lifecycle)
+        return new RequestBuilder(glideContext, Object.class, requestTracker, lifecycle)
                 .load((Object) null);
     }
 }

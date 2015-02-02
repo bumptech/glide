@@ -30,7 +30,7 @@ import com.bumptech.glide.util.Util;
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
-public final class RequestManager implements LifecycleListener {
+public class RequestManager implements LifecycleListener {
     private final GlideContext context;
     private final Lifecycle lifecycle;
     private final RequestTracker requestTracker;
@@ -144,9 +144,8 @@ public final class RequestManager implements LifecycleListener {
      *
      * @return A new request builder for loading a {@link android.graphics.Bitmap}
      */
-    public TranscodeRequest<Bitmap> asBitmap() {
-        return (TranscodeRequest<Bitmap>) as(Bitmap.class)
-                .animate(new BitmapAnimationOptions());
+    public RequestBuilder<Bitmap> asBitmap() {
+        return as(Bitmap.class).animate(new BitmapAnimationOptions());
     }
 
     /**
@@ -160,9 +159,8 @@ public final class RequestManager implements LifecycleListener {
      *
      * @return A new request builder for loading a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
      */
-    public TranscodeRequest<GifDrawable> asGif() {
-        return (TranscodeRequest<GifDrawable>) as(GifDrawable.class)
-                .animate(new DrawableAnimationOptions());
+    public RequestBuilder<GifDrawable> asGif() {
+        return as(GifDrawable.class).animate(new DrawableAnimationOptions());
     }
 
     /**
@@ -173,9 +171,8 @@ public final class RequestManager implements LifecycleListener {
      *
      * @return A new request builder for loading a {@link Drawable}.
      */
-    public TranscodeRequest<Drawable> asDrawable() {
-        return (TranscodeRequest<Drawable>) as(Drawable.class)
-                .animate(new DrawableAnimationOptions());
+    public RequestBuilder<Drawable> asDrawable() {
+        return as(Drawable.class).animate(new DrawableAnimationOptions());
     }
 
     /**
@@ -185,8 +182,8 @@ public final class RequestManager implements LifecycleListener {
      * @param resourceClass The resource to decode.
      * @return A new request builder for loading the given resource class.
      */
-    public <ResourceType> TranscodeRequest<ResourceType> as(Class<ResourceType> resourceClass) {
-        return new TranscodeRequest<ResourceType>(context, resourceClass, requestTracker, lifecycle);
+    public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
+        return new RequestBuilder<ResourceType>(context, resourceClass, requestTracker, lifecycle);
     }
 
     private static class RequestManagerConnectivityListener implements ConnectivityMonitor.ConnectivityListener {

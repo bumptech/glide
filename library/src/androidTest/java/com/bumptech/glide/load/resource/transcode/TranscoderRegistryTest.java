@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.transcode;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
@@ -27,13 +28,21 @@ public class TranscoderRegistryTest {
     @Test
     public void testCanRegisterAndRetreiveResouceTranscoder() {
         ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
-        factories.register(File.class, Object.class, transcoder);
+        factories.register(File.class, String.class, transcoder);
 
-        assertEquals(transcoder, factories.get(File.class, Object.class));
+        assertEquals(transcoder, factories.get(File.class, String.class));
+    }
+
+    @Test
+    public void testDoesNotThrowIfRequestCanBeSatisfiedByUnitTranscoder() {
+        // Assignable from.
+        assertNotNull(factories.get(Integer.class, Number.class));
+        // Equal to.
+        assertNotNull(factories.get(Integer.class, Integer.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsIfNoTranscoderRegistered() {
-        factories.get(File.class, Object.class);
+        factories.get(File.class, Integer.class);
     }
 }

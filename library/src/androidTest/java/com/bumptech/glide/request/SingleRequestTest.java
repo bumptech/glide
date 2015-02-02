@@ -70,7 +70,7 @@ public class SingleRequestTest {
         DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
         GlideContext glideContext = mock(GlideContext.class);
         RequestOptions requestOptions = new RequestOptions();
-        RequestContext<?, List> requestContext = mock(RequestContext.class);
+        RequestContext<List> requestContext = mock(RequestContext.class);
 
         public RequestHarness() {
             when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);

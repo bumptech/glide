@@ -34,7 +34,7 @@ class GifFrameLoader {
 
     private boolean isRunning = false;
     private boolean isLoadPending = false;
-    private RequestBuilder<Bitmap, Bitmap> requestBuilder;
+    private RequestBuilder<Bitmap> requestBuilder;
     private DelayTarget current;
     private boolean isCleared;
 
@@ -47,7 +47,7 @@ class GifFrameLoader {
     }
 
     GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, Handler handler,
-            RequestBuilder<Bitmap, Bitmap> requestBuilder) {
+            RequestBuilder<Bitmap> requestBuilder) {
         if (handler == null) {
             handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
         }
@@ -169,7 +169,7 @@ class GifFrameLoader {
         }
     }
 
-    private static RequestBuilder<Bitmap, Bitmap> getRequestBuilder(Context context, int width, int height) {
+    private static RequestBuilder<Bitmap> getRequestBuilder(Context context, int width, int height) {
         return Glide.with(context)
                 .asBitmap()
                 .apply(diskCacheStrategyOf(DiskCacheStrategy.NONE)

@@ -3,10 +3,12 @@ package com.bumptech.glide.load.engine;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @SuppressWarnings("rawtypes")
 class EngineKey implements Key {
@@ -125,7 +127,7 @@ class EngineKey implements Key {
 
             if (height != resultKey.height) return false;
             if (width != resultKey.width) return false;
-            if (!appliedTransformation.equals(resultKey.appliedTransformation)) return false;
+            if (!appliedTransformation.getId().equals(resultKey.appliedTransformation.getId())) return false;
             if (!decodedResourceClass.equals(resultKey.decodedResourceClass)) return false;
             if (!id.equals(resultKey.id)) return false;
             if (!signature.equals(resultKey.signature)) return false;
@@ -139,7 +141,7 @@ class EngineKey implements Key {
             result = 31 * result + signature.hashCode();
             result = 31 * result + width;
             result = 31 * result + height;
-            result = 31 * result + appliedTransformation.hashCode();
+            result = 31 * result + appliedTransformation.getId().hashCode();
             result = 31 * result + decodedResourceClass.hashCode();
             return result;
         }
@@ -150,10 +152,33 @@ class EngineKey implements Key {
                     .putInt(width)
                     .putInt(height)
                     .array();
-            messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
             signature.updateDiskCacheKey(messageDigest);
+            messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
             messageDigest.update(dimensions);
             messageDigest.update(appliedTransformation.getId().getBytes(STRING_CHARSET_NAME));
+        }
+
+        @Override
+        public String toString() {
+            String cacheKey = null;
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                updateDiskCacheKey(md);
+                cacheKey = Util.sha256BytesToHex(md.digest());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            return "ResultKey{"
+                    + "id='" + id + '\''
+                    + ", signature=" + signature
+                    + ", width=" + width
+                    + ", height=" + height
+                    + ", appliedTransformation=" + appliedTransformation.getId()
+                    + ", decodedResourceClass=" + decodedResourceClass
+                    + ", cacheKey=" + cacheKey
+                    + '}';
         }
     }
 }

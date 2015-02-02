@@ -3,7 +3,6 @@ package com.bumptech.glide;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ListPreloaderTest {
 
     @Mock
-    private RequestBuilder<Bitmap, Bitmap> request;
+    private RequestBuilder<Bitmap> request;
 
     @Before
     public void setUp() throws Exception {
@@ -85,7 +84,7 @@ public class ListPreloaderTest {
             }
 
             @Override
-            public RequestBuilder<Bitmap, Bitmap> getPreloadRequestBuilder(Object item) {
+            public RequestBuilder<Bitmap> getPreloadRequestBuilder(Object item) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition++;
                 return mock(RequestBuilder.class);
@@ -144,7 +143,7 @@ public class ListPreloaderTest {
             }
 
             @Override
-            public RequestBuilder<Bitmap, Bitmap> getPreloadRequestBuilder(Object item) {
+            public RequestBuilder<Bitmap> getPreloadRequestBuilder(Object item) {
                 assertEquals(objects.get(expectedPosition), item);
                 expectedPosition--;
                 return mock(RequestBuilder.class);
@@ -308,13 +307,11 @@ public class ListPreloaderTest {
         assertEquals(expected, allValues);
     }
 
-    private List<Integer> getTagetsSizes(RequestBuilder<?, ?> requestBuilder,
-            VerificationMode callVerificationMode) {
+    private List<Integer> getTagetsSizes(RequestBuilder<?> requestBuilder,
+            VerificationMode mode) {
         ArgumentCaptor<Integer> integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Target> targetArgumentCaptor = ArgumentCaptor.forClass(Target.class);
         SizeReadyCallback cb = mock(SizeReadyCallback.class);
-        // TODO: fixme.
-        VerificationMode mode = atLeastOnce();
         verify(requestBuilder, mode).into(targetArgumentCaptor.capture());
         for (Target target : targetArgumentCaptor.getAllValues()) {
             target.getSize(cb);

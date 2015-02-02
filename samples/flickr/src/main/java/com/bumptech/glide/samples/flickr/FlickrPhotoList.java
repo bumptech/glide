@@ -40,8 +40,8 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     private FlickrPhotoListAdapter adapter;
     private List<Photo> currentPhotos;
     private ListView list;
-    private RequestBuilder<Drawable, Drawable> fullRequest;
-    private RequestBuilder<Drawable, Drawable> thumbRequest;
+    private RequestBuilder<Drawable> fullRequest;
+    private RequestBuilder<Drawable> thumbRequest;
     private ViewPreloadSizeProvider<Photo> preloadSizeProvider;
 
     public static FlickrPhotoList newInstance() {

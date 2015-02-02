@@ -28,6 +28,7 @@ public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> 
     private Map<String, Object> options = new HashMap<String, Object>();
     private Map<Class<?>, Transformation<?>> transformations = new HashMap<Class<?>, Transformation<?>>();
     private boolean isTransformationSet;
+    private Class<?> resourceClass = Object.class;
 
     public BaseDecodeOptions(Context context) {
         this.context = context.getApplicationContext();
@@ -55,6 +56,13 @@ public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> 
     public final CHILD apply(BaseDecodeOptions<?> other) {
         transformations.putAll(other.transformations);
         options.putAll(other.options);
+        this.isTransformationSet |= other.isTransformationSet;
+        this.resourceClass = other.resourceClass;
+        return self();
+    }
+
+    public final CHILD through(Class<?> resourceClass) {
+        this.resourceClass = Preconditions.checkNotNull(resourceClass);
         return self();
     }
 
@@ -112,5 +120,9 @@ public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> 
 
     final Map<String, Object> getOptions() {
         return options;
+    }
+
+    final Class<?> getResourceClass() {
+        return resourceClass;
     }
 }

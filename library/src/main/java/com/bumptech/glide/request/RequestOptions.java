@@ -24,6 +24,7 @@ public class RequestOptions implements Cloneable {
     private static final int IS_CACHEABLE = 1 << 8;
     private static final int OVERRIDE = 1 << 9;
     private static final int SIGNATURE = 1 << 10;
+    private static final int TAG = 1 << 11;
 
     private int fields;
 
@@ -38,6 +39,7 @@ public class RequestOptions implements Cloneable {
     private int overrideHeight = UNSET;
     private int overrideWidth = UNSET;
     private Key signature = EmptySignature.obtain();
+    private String tag;
 
     public static RequestOptions sizeMultiplierOf(float sizeMultiplier) {
         return new RequestOptions().sizeMultiplier(sizeMultiplier);
@@ -77,6 +79,16 @@ public class RequestOptions implements Cloneable {
 
     public static RequestOptions signatureOf(Key signature) {
         return new RequestOptions().signature(signature);
+    }
+
+    public static RequestOptions tagOf(String tag) {
+        return new RequestOptions().tag(tag);
+    }
+
+    public RequestOptions tag(String tag) {
+        this.tag = tag;
+        fields |= TAG;
+        return this;
     }
 
     /**
@@ -293,6 +305,9 @@ public class RequestOptions implements Cloneable {
         if (isSet(other.fields, SIZE_MULTIPLIER)) {
             sizeMultiplier = other.sizeMultiplier;
         }
+        if (isSet(other.fields, TAG)) {
+            tag = other.tag;
+        }
         return this;
     }
 
@@ -342,6 +357,10 @@ public class RequestOptions implements Cloneable {
 
     public float getSizeMultiplier() {
         return sizeMultiplier;
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     private boolean isSet(int flag) {

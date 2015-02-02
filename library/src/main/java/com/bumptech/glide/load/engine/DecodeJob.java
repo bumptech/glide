@@ -22,14 +22,13 @@ import java.util.List;
  * A class responsible for decoding resources either from cached data or from the original source and applying
  * transformations and transcodes.
  *
- * @param <Z> The type of resource that will be decoded.
  * @param <R> The type of resource that will be transcoded from the decoded and transformed resource.
  */
-class DecodeJob<Z, R> {
+class DecodeJob<R> {
     private static final String TAG = "DecodeJob";
     private static final FileOpener DEFAULT_FILE_OPENER = new FileOpener();
 
-    private final RequestContext<Z, R> requestContext;
+    private final RequestContext<R> requestContext;
     private final EngineKey loadKey;
     private final int width;
     private final int height;
@@ -38,13 +37,13 @@ class DecodeJob<Z, R> {
 
     private volatile boolean isCancelled;
 
-    public DecodeJob(RequestContext<Z, R> requestContext, EngineKey loadKey, int width, int height,
+    public DecodeJob(RequestContext<R> requestContext, EngineKey loadKey, int width, int height,
             DiskCacheProvider diskCacheProvider) {
         this(requestContext, loadKey, width, height, diskCacheProvider, DEFAULT_FILE_OPENER);
     }
 
     // Visible for testing.
-    DecodeJob(RequestContext<Z, R> requestContext, EngineKey loadKey, int width, int height,
+    DecodeJob(RequestContext<R> requestContext, EngineKey loadKey, int width, int height,
             DiskCacheProvider diskCacheProvider, FileOpener fileOpener) {
         this.requestContext = requestContext;
         this.loadKey = loadKey;
@@ -64,18 +63,24 @@ class DecodeJob<Z, R> {
         if (!requestContext.getDiskCacheStrategy().cacheResult()) {
             return null;
         }
+        requestContext.getDebugger().startDecodeResultFromCache();
         List<Class<?>> resourceClasses = requestContext.getRegisteredResourceClasses();
         for (Class<?> registeredResourceClass : resourceClasses) {
             Transformation<?> transformation = requestContext.getTransformation(registeredResourceClass);
             Key key = loadKey.getResultKey(transformation, registeredResourceClass);
+            Resource<R> result = null;
             try {
-                return decodeFromCache(loadKey, false /*cacheResult*/, false /*transformResult*/);
+                 result = decodeFromCache(key, false /*cacheResult*/, false /*transformResult*/);
             } catch (Exception e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Failed to find or decode resource from cache with key=" + key);
-                }
+                requestContext.getDebugger().appendResultCacheDecodeResult(key, null /*result*/, e);
+            }
+            if (result != null) {
+                requestContext.getDebugger().appendResultCacheDecodeResult(key, result /*result*/, null /*exception*/);
+                requestContext.getDebugger().endDecodeResultFromCache();
+                return result;
             }
         }
+        requestContext.getDebugger().endDecodeResultFromCache();
         return null;
     }
 
@@ -89,8 +94,11 @@ class DecodeJob<Z, R> {
         if (!requestContext.getDiskCacheStrategy().cacheSource()) {
             return null;
         }
-        return decodeFromCache(loadKey.getOriginalKey(), requestContext.getDiskCacheStrategy().cacheResult(),
-                true /*transformResult*/);
+        requestContext.getDebugger().startDecodeSourceFromCache();
+        Resource<R> result = decodeFromCache(loadKey.getOriginalKey(),
+                requestContext.getDiskCacheStrategy().cacheResult(), true /*transformResult*/);
+        requestContext.getDebugger().endDecodeSourceFromCache();
+        return result;
     }
 
     private Resource<R> decodeFromCache(Key key, boolean cacheResult, boolean transformResult) throws Exception {
@@ -98,10 +106,12 @@ class DecodeJob<Z, R> {
         final Resource<R> result;
         File cacheFile = diskCacheProvider.getDiskCache().get(key);
         if (cacheFile != null) {
+            requestContext.getDebugger().appendFoundCacheFile(key, cacheFile);
             result = decodeFromPaths(
                     requestContext.getDataFetchers(cacheFile, width, height),
                     requestContext.getSourceCacheLoadPaths(cacheFile), cacheResult, transformResult);
         } else {
+            requestContext.getDebugger().appendMissingCacheFile(key);
             result = null;
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -123,29 +133,37 @@ class DecodeJob<Z, R> {
      */
     public Resource<R> decodeFromSource() throws Exception {
         if (requestContext.getDiskCacheStrategy().cacheSource()) {
-            return cacheAndDecodeSource();
+            requestContext.getDebugger().startCacheAndDecodeSource();
+            Resource<R> result = cacheAndDecodeSource();
+            requestContext.getDebugger().endCacheAndDecodeSource();
+            return result;
         } else {
-            return decodeFromPaths(requestContext.getDataFetchers(), requestContext.getLoadPaths(),
+            requestContext.getDebugger().startDecodeFromSource();
+            Resource<R> result = decodeFromPaths(requestContext.getDataFetchers(), requestContext.getLoadPaths(),
                     requestContext.getDiskCacheStrategy().cacheResult(), true /*transformResult*/);
+            requestContext.getDebugger().endDecodeFromSource();
+            return result;
         }
     }
 
     private Resource<R> cacheAndDecodeSource() throws Exception {
         for (DataFetcher<?> fetcher : requestContext.getDataFetchers()) {
+            requestContext.getDebugger().startEncodeFromFetcher(fetcher);
             if (fetcher == null) {
+                requestContext.getDebugger().endEncodeFromFetcher();
                 continue;
             }
             Object data = fetcher.loadData(requestContext.getPriority());
             try {
+                requestContext.getDebugger().appendDataFromFetcher(data);
                 if (data == null) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "Failed to fetch data from: " + fetcher);
-                    }
                     continue;
                 }
                 Encoder<Object> encoder = requestContext.getSourceEncoder(data);
                 SourceWriter<Object> writer = new SourceWriter<Object>(encoder, data);
                 diskCacheProvider.getDiskCache().put(loadKey.getOriginalKey(), writer);
+                requestContext.getDebugger().appendWriteDataToCache(loadKey.getOriginalKey());
+                requestContext.getDebugger().endEncodeFromFetcher();
                 return decodeFromCache(loadKey.getOriginalKey(),
                         requestContext.getDiskCacheStrategy().cacheResult(), true /*transformResult*/);
             } finally {
@@ -156,11 +174,31 @@ class DecodeJob<Z, R> {
                 + requestContext.getTranscodeClass() + " from a cached File");
     }
 
-    private Resource<R> decodeFromPaths(DataFetcherSet<?> fetchers, List<LoadPath<?, Z, R>> loadPaths, final boolean
-            cacheResult, final
+    private Resource<R> decodeFromPaths(DataFetcherSet<?> fetchers, List<? extends LoadPath<?, ?, R>> loadPaths,
+            final boolean cacheResult, final
             boolean transformResult) throws Exception {
-        for (LoadPath<?, Z, R> path : loadPaths) {
+        requestContext.getDebugger().appendStartLoadPaths(loadPaths);
+        for (LoadPath<?, ?, R> path : loadPaths) {
             Resource<R> result = runLoadPath(fetchers, path, cacheResult, transformResult);
+
+            if (result != null) {
+                requestContext.getDebugger().appendEndLoadPaths();
+                return result;
+            }
+            if (isCancelled) {
+                break;
+            }
+        }
+        requestContext.getDebugger().appendEndLoadPaths();
+        return null;
+    }
+
+    private <T, Z> Resource<R> runLoadPath(DataFetcherSet<?> fetchers, LoadPath<T, Z, R> path,
+            final boolean cacheResult, final boolean transformResult) throws Exception {
+        List<DataFetcher<T>> fetchersForData = fetchers.getFetchers(path.getDataClass());
+        DecodeCallback<Z> callback = new DecodeCallback<Z>(cacheResult, transformResult);
+        for (DataFetcher<T> fetcher : fetchersForData) {
+            Resource<R> result = path.load(fetcher, requestContext, width, height, callback);
             if (result != null) {
                 return result;
             }
@@ -169,29 +207,6 @@ class DecodeJob<Z, R> {
             }
         }
         return null;
-    }
-
-    private <T> Resource<R> runLoadPath(DataFetcherSet<?> fetchers, LoadPath<T, Z, R> path, final boolean cacheResult,
-            final boolean transformResult) throws Exception {
-        DataFetcher<T> fetcher = fetchers.getFetcher(path.getDataClass());
-        return path.load(fetcher, requestContext, width, height, new DecodePath.DecodeCallback<Z>() {
-                @Override
-                public Resource<Z> onResourceDecoded(final Resource<Z> resource) {
-                    Resource<Z> result = resource;
-                    Class<Z> resourceSubClass = (Class<Z>) result.get().getClass();
-                    Transformation<Z> appliedTransformation = null;
-                    if (transformResult) {
-                        appliedTransformation = requestContext.getTransformation(resourceSubClass);
-                        result = appliedTransformation.transform(resource, width, height);
-                    }
-                    if (cacheResult) {
-                        Key resultCacheKey = loadKey.getResultKey(appliedTransformation, resourceSubClass);
-                        diskCacheProvider.getDiskCache().put(resultCacheKey,
-                                new SourceWriter<Resource<Z>>(requestContext.getResultEncoder(result), result));
-                    }
-                    return result;
-                }
-            });
     }
 
     public void cancel() {
@@ -237,6 +252,37 @@ class DecodeJob<Z, R> {
         }
     }
 
+    class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
+
+        private final boolean transformResult;
+        private final boolean cacheResult;
+
+        public DecodeCallback(boolean cacheResult, boolean transformResult) {
+            this.cacheResult = cacheResult;
+            this.transformResult = transformResult;
+        }
+
+        @Override
+        public Resource<Z> onResourceDecoded(Resource<Z> resource) {
+            Resource<Z> result = resource;
+            Class<Z> resourceSubClass = (Class<Z>) result.get().getClass();
+            Transformation<Z> appliedTransformation = null;
+            if (transformResult) {
+                appliedTransformation = requestContext.getTransformation(resourceSubClass);
+                result = appliedTransformation.transform(resource, width, height);
+            }
+            if (cacheResult) {
+                Key resultCacheKey = loadKey.getResultKey(appliedTransformation, resourceSubClass);
+                diskCacheProvider.getDiskCache().put(resultCacheKey,
+                        new SourceWriter<Resource<Z>>(requestContext.getResultEncoder(result), result));
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Encoded resource to cache with key " + resultCacheKey);
+                }
+            }
+            return result;
+        }
+    }
+
     interface DiskCacheProvider {
         DiskCache getDiskCache();
     }
@@ -244,6 +290,12 @@ class DecodeJob<Z, R> {
     static class FileOpener {
         public OutputStream open(File file) throws FileNotFoundException {
             return new BufferedOutputStream(new FileOutputStream(file));
+        }
+    }
+
+    public void maybeWriteDebugLogs() {
+        if (Log.isLoggable(requestContext.getTag(), Log.VERBOSE)) {
+            requestContext.getDebugger().writeLogs(requestContext.getTag());
         }
     }
 }

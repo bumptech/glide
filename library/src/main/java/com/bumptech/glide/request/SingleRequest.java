@@ -48,7 +48,7 @@ public final class SingleRequest<R> implements Request,
 
     private final String tag = String.valueOf(hashCode());
 
-    private RequestContext<?, R> requestContext;
+    private RequestContext<R> requestContext;
     private Object model;
     private RequestOptions requestOptions;
     private RequestCoordinator requestCoordinator;
@@ -66,7 +66,7 @@ public final class SingleRequest<R> implements Request,
     private Status status;
 
     public static <R> SingleRequest<R> obtain(
-            RequestContext<?, R> requestContext,
+            RequestContext<R> requestContext,
             Object model,
             Class<R> transcodeClass,
             RequestOptions requestOptions,
@@ -97,7 +97,7 @@ public final class SingleRequest<R> implements Request,
     }
 
     private void init(
-            RequestContext<?, R> requestContext,
+            RequestContext<R> requestContext,
             Object model,
             Class<R> transcodeClass,
             RequestOptions requestOptions,

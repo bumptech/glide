@@ -74,7 +74,7 @@ public class MultiModelLoaderFactory {
     List<Class<?>> getDataClasses(Class<?> modelClass) {
         List<Class<?>> result = new ArrayList<Class<?>>();
         for (Entry<?, ?> entry : entries) {
-            if (entry.handles(modelClass)) {
+            if (!result.contains(entry.dataClass) && entry.handles(modelClass)) {
                 result.add(entry.dataClass);
             }
         }

@@ -120,7 +120,7 @@ public class Engine implements EngineJobListener,
      * @param cb The callback that will be called when the load completes.
      *
      */
-    public <Z, R> LoadStatus load(RequestContext<Z, R> requestContext, int width, int height, ResourceCallback cb) {
+    public <Z, R> LoadStatus load(RequestContext<R> requestContext, int width, int height, ResourceCallback cb) {
         Util.assertMainThread();
         long startTime = LogTime.getLogTime();
 
@@ -156,7 +156,7 @@ public class Engine implements EngineJobListener,
         }
 
         EngineJob engineJob = engineJobFactory.build(key, requestContext.isMemoryCacheable());
-        DecodeJob<Z, R> decodeJob = new DecodeJob<Z, R>(requestContext, key, width, height,  diskCacheProvider);
+        DecodeJob<R> decodeJob = new DecodeJob<R>(requestContext, key, width, height,  diskCacheProvider);
         EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, requestContext.getPriority());
         jobs.put(key, engineJob);
         engineJob.addCallback(cb);

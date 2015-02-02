@@ -31,12 +31,12 @@ public class KeyAssertions {
         assertDifferent(second, first, true);
     }
 
-    public static void assertDifferent(Key first, Key second, boolean diskCacheDiffers)
+    public static void assertDifferent(Key first, Key second, boolean checkDiskCacheKey)
             throws NoSuchAlgorithmException, UnsupportedEncodingException {
         assertNotEquals(first, second);
         assertNotEquals(first.hashCode(), second.hashCode());
 
-        if (diskCacheDiffers) {
+        if (checkDiskCacheKey) {
             MessageDigest firstDigest = MessageDigest.getInstance("SHA-1");
             first.updateDiskCacheKey(firstDigest);
             MessageDigest secondDigest = MessageDigest.getInstance("SHA-1");

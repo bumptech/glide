@@ -36,7 +36,10 @@ public class TranscoderRegistry {
      */
     @SuppressWarnings("unchecked")
     public synchronized <Z, R> ResourceTranscoder<Z, R> get(Class<Z> resourceClass, Class<R> transcodedClass) {
-        if (resourceClass.equals(transcodedClass)) {
+         // For example, there may be a transcoder that can convert a GifDrawable to a Drawable, which will be caught
+        // above. However, if there is no registered transcoder, we can still just use the UnitTranscoder to return
+        // the Drawable because the transcode class (Drawable) is assignable from the resource class (GifDrawable).
+        if (transcodedClass.isAssignableFrom(resourceClass)) {
             return (ResourceTranscoder<Z, R>) UnitTranscoder.get();
         }
         for (Entry<?, ?> entry : transcoders) {
@@ -44,19 +47,15 @@ public class TranscoderRegistry {
                 return (ResourceTranscoder<Z, R>) entry.transcoder;
             }
         }
-        // For example, there may be a transcoder that can convert a GifDrawable to a Drawable, which will be caught
-        // above. However, if there is no registered transcoder, we can still just use the UnitTranscoder to return
-        // the Drawable because the transcode class (Drawable) is assignable from the resource class (GifDrawable).
-        if (transcodedClass.isAssignableFrom(resourceClass)) {
-            return (ResourceTranscoder<Z, R>) UnitTranscoder.get();
-        }
+
         throw new IllegalArgumentException("No transcoder registered to transcode from " + resourceClass + " to "
                 + transcodedClass);
     }
 
     public synchronized <Z, R> List<Class<R>> getTranscodeClasses(Class<Z> resourceClass, Class<R> transcodeClass) {
         List<Class<R>> transcodeClasses = new ArrayList<Class<R>>();
-        if (resourceClass.equals(transcodeClass)) {
+        // GifDrawable -> Drawable is just the UnitTranscoder, as is GifDrawable -> GifDrawable.
+        if (transcodeClass.isAssignableFrom(resourceClass)) {
             transcodeClasses.add(transcodeClass);
             return transcodeClasses;
         }

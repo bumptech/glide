@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.content.ContextWrapper;
+import android.util.Log;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
@@ -25,40 +26,37 @@ import java.util.Map;
  * Context for individual requests and decodes that contains and exposes classes necessary to obtain, decode, and
  * encode resources.
  *
- * @param <ResourceClass> The type of objects decoded using classes from this object.
  * @param <TranscodeClass> The type of resources returned using classes from this object.
  */
-public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrapper {
+public class RequestContext<TranscodeClass> extends ContextWrapper {
+    private static final String TAG = "RequestContext";
 
     private final GlideContext glideContext;
     private final Object model;
-    private final Class<ResourceClass> resourceClass;
     private final Class<TranscodeClass> transcodeClass;
-    private BaseDecodeOptions<?> decodeOptions;
-    private final ResourceTranscoder<ResourceClass, ? extends TranscodeClass> transcoder;
+    private final BaseDecodeOptions<?> decodeOptions;
     private final RequestOptions requestOptions;
+    private final LoadDebugger debugger = Log.isLoggable(TAG, Log.VERBOSE)
+            ? new LoadDebuggerImpl() : new EmptyLoadDebugger();
 
     private DataFetcherSet<?> fetchers;
 
-    public RequestContext(GlideContext glideContext, Object model, Class<ResourceClass> resourceClass,
-            Class<TranscodeClass> transcodeClass, BaseDecodeOptions<?> decodeOptions,
-            ResourceTranscoder<ResourceClass, ? extends TranscodeClass> transcoder, RequestOptions requestOptions) {
+    public RequestContext(GlideContext glideContext, Object model, Class<TranscodeClass> transcodeClass,
+            BaseDecodeOptions<?> decodeOptions, RequestOptions requestOptions) {
         super(glideContext);
         this.glideContext = glideContext;
         this.model = model;
-        this.resourceClass = resourceClass;
         this.transcodeClass = transcodeClass;
         this.decodeOptions = decodeOptions;
-        this.transcoder = transcoder;
         this.requestOptions = requestOptions;
     }
 
-    List<LoadPath<?, ResourceClass, TranscodeClass>> getLoadPaths() {
-        return glideContext.getLoadPaths(model, resourceClass, transcodeClass);
+    List<? extends LoadPath<?, ?, TranscodeClass>> getLoadPaths() {
+        return glideContext.getLoadPaths(model, decodeOptions.getResourceClass(), transcodeClass);
     }
 
-    List<LoadPath<?, ResourceClass, TranscodeClass>> getSourceCacheLoadPaths(File sourceCacheFile) {
-        return glideContext.getLoadPaths(sourceCacheFile, resourceClass, transcodeClass);
+    List<? extends LoadPath<?, ?, TranscodeClass>> getSourceCacheLoadPaths(File sourceCacheFile) {
+        return glideContext.getLoadPaths(sourceCacheFile, decodeOptions.getResourceClass(), transcodeClass);
     }
 
     void buildDataFetchers(int width, int height) {
@@ -87,11 +85,11 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
     }
 
     List<Class<?>> getRegisteredResourceClasses() {
-        return glideContext.getRegisteredResourceClasses(model.getClass(), resourceClass);
+        return glideContext.getRegisteredResourceClasses(model.getClass(), decodeOptions.getResourceClass());
     }
 
-    Class<ResourceClass> getResourceClass() {
-        return resourceClass;
+    Class<?> getResourceClass() {
+        return decodeOptions.getResourceClass();
     }
 
     Class<TranscodeClass> getTranscodeClass() {
@@ -118,20 +116,20 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
         return requestOptions.getPriority();
     }
 
-    ResourceTranscoder<ResourceClass, ? extends TranscodeClass> getTranscoder() {
-        return transcoder != null ? transcoder : glideContext.getTranscoder(resourceClass, transcodeClass);
+    ResourceTranscoder<?, ? extends TranscodeClass> getTranscoder() {
+        return glideContext.getTranscoder(decodeOptions.getResourceClass(), transcodeClass);
     }
 
     <X> DataRewinder<X> getRewinder(X data) {
         return glideContext.getRewinder(data);
     }
 
-    <X> ResourceDecoder<X, ResourceClass> getDecoder(DataRewinder<X> rewinder)
+    <X> ResourceDecoder<X, ?> getDecoder(DataRewinder<X> rewinder)
             throws IOException, GlideContext.NoDecoderAvailableException {
-        return glideContext.getDecoder(rewinder, resourceClass);
+        return glideContext.getDecoder(rewinder, decodeOptions.getResourceClass());
     }
 
-    ResourceEncoder<ResourceClass> getResultEncoder(Resource<ResourceClass> resource)
+    <ResourceClass> ResourceEncoder<ResourceClass> getResultEncoder(Resource<ResourceClass> resource)
             throws GlideContext.NoResultEncoderAvailableException {
         return glideContext.getResultEncoder(resource);
     }
@@ -144,4 +142,11 @@ public class RequestContext<ResourceClass, TranscodeClass> extends ContextWrappe
         return glideContext.getDataFetchers(file, width, height);
     }
 
+    LoadDebugger getDebugger() {
+        return debugger;
+    }
+
+    String getTag() {
+        return requestOptions.getTag();
+    }
 }

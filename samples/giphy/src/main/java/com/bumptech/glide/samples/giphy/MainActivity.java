@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
         ListView gifList = (ListView) findViewById(R.id.gif_list);
 
-        RequestBuilder<Drawable, Drawable> gifItemRequest = Glide.with(this)
+        RequestBuilder<Drawable> gifItemRequest = Glide.with(this)
                 .asDrawable()
                 .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE));
 
@@ -81,12 +81,12 @@ public class MainActivity extends Activity implements Api.Monitor {
         private static final Api.GifResult[] EMPTY_RESULTS = new Api.GifResult[0];
 
         private final Activity activity;
-        private RequestBuilder<Drawable, Drawable> requestBuilder;
+        private RequestBuilder<Drawable> requestBuilder;
         private ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider;
 
         private Api.GifResult[] results = EMPTY_RESULTS;
 
-        public GifAdapter(Activity activity, RequestBuilder<Drawable, Drawable> requestBuilder,
+        public GifAdapter(Activity activity, RequestBuilder<Drawable> requestBuilder,
                 ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider) {
             this.activity = activity;
             this.requestBuilder = requestBuilder;

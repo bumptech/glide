@@ -14,13 +14,17 @@ public class DecodePath<DataType, ResourceType, Transcode> {
     }
 
     private final Class<DataType> dataClass;
+    private final Class<ResourceType> resourceClass;
+    private final Class<Transcode> transcodeClass;
     private final List<? extends ResourceDecoder<DataType, ResourceType>> decoders;
     private final ResourceTranscoder<ResourceType, Transcode> transcoder;
 
-    public DecodePath(Class<DataType> dataClass,
+    public DecodePath(Class<DataType> dataClass, Class<ResourceType> resourceClass, Class<Transcode> transcodeClass,
             List<? extends ResourceDecoder<DataType, ResourceType>> decoders,
             ResourceTranscoder<ResourceType, Transcode> transcoder) {
         this.dataClass = dataClass;
+        this.resourceClass = resourceClass;
+        this.transcodeClass = transcodeClass;
         this.decoders = decoders;
         this.transcoder = transcoder;
     }
@@ -50,6 +54,10 @@ public class DecodePath<DataType, ResourceType, Transcode> {
             }
         }
         return result;
+    }
+
+    public String getDebugString() {
+        return "[" + dataClass + "->" + resourceClass + "->" + transcodeClass + "]";
     }
 
     @Override

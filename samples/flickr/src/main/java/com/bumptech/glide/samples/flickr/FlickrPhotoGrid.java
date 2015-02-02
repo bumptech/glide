@@ -44,9 +44,9 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     private int photoSize;
     private GridView grid;
     private boolean thumbnail;
-    private RequestBuilder<Drawable, Drawable> fullRequest;
-    private RequestBuilder<Drawable, Drawable> thumbnailRequest;
-    private RequestBuilder<Drawable, Drawable> preloadRequest;
+    private RequestBuilder<Drawable> fullRequest;
+    private RequestBuilder<Drawable> thumbnailRequest;
+    private RequestBuilder<Drawable> preloadRequest;
 
     public static FlickrPhotoGrid newInstance(int size, int preloadCount, boolean thumbnail) {
         FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
