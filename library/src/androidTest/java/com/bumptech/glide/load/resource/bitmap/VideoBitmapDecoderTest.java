@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
 
@@ -24,21 +23,22 @@ import org.robolectric.annotation.Config;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class VideoBitmapDecoderTest {
     private BitmapPool bitmapPool;
-    private DecodeFormat decodeFormat;
     private ParcelFileDescriptor resource;
     private VideoBitmapDecoder decoder;
     private VideoBitmapDecoder.MediaMetadataRetrieverFactory factory;
     private MediaMetadataRetriever retriever;
+    private Map<String, Object> options;
 
     @Before
     public void setup() {
         bitmapPool = mock(BitmapPool.class);
-        decodeFormat = DecodeFormat.ALWAYS_ARGB_8888;
         resource = mock(ParcelFileDescriptor.class);
         factory = mock(VideoBitmapDecoder.MediaMetadataRetrieverFactory.class);
         retriever = mock(MediaMetadataRetriever.class);
@@ -49,6 +49,7 @@ public class VideoBitmapDecoderTest {
                 return factory.build();
             }
         });
+        options = new HashMap<String, Object>();
     }
 
     @Test
@@ -58,7 +59,7 @@ public class VideoBitmapDecoderTest {
 
         FileDescriptor toSet = FileDescriptor.in;
         when(resource.getFileDescriptor()).thenReturn(toSet);
-        Bitmap result = decoder.decode(resource, bitmapPool, 100, 100, decodeFormat);
+        Bitmap result = decoder.decode(resource, bitmapPool, 100, 100, options);
 
         verify(retriever).setDataSource(eq(toSet));
         assertEquals(expected, result);
@@ -66,14 +67,14 @@ public class VideoBitmapDecoderTest {
 
     @Test
     public void testReleasesMediaMetadataRetriever() throws IOException {
-        decoder.decode(resource, bitmapPool, 1, 2, decodeFormat);
+        decoder.decode(resource, bitmapPool, 1, 2, options);
 
         verify(retriever).release();
     }
 
     @Test
     public void testClosesResource() throws IOException {
-        decoder.decode(resource, bitmapPool, 1, 2, decodeFormat);
+        decoder.decode(resource, bitmapPool, 1, 2, options);
 
         verify(resource).close();
     }
@@ -84,28 +85,30 @@ public class VideoBitmapDecoderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testThrowsExceptionIfInitializedWithNegativeFrame() {
-        new VideoBitmapDecoder(-1);
+    public void testThrowsExceptionIfCalledWithInvalidFrame() throws IOException {
+        options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, -5);
+        new VideoBitmapDecoder().decode(resource, bitmapPool, 100, 100, options);
     }
 
     @Test
-    public void testSpecifiesThumbnailFrameIfInitializedWithFrameNumber() throws IOException {
+    public void testSpecifiesThumbnailFrameIfICalledWithFrameNumber() throws IOException {
         int frame = 5;
+        options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, frame);
         decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory()  {
           @Override
           public MediaMetadataRetriever build() {
             return factory.build();
           }
-        }, frame);
+        });
 
-        decoder.decode(resource, bitmapPool, 100, 100, decodeFormat);
+        decoder.decode(resource, bitmapPool, 100, 100, options);
 
-        verify(retriever).getFrameAtTime(5);
+        verify(retriever).getFrameAtTime(frame);
         verify(retriever, never()).getFrameAtTime();
     }
 
     @Test
-    public void testDoesNotSpecifyThumbnailFrameIfInitializedWithoutFrameNumber()
+    public void testDoesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber()
         throws IOException {
       decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory()  {
         @Override
@@ -114,7 +117,7 @@ public class VideoBitmapDecoderTest {
         }
       });
 
-      decoder.decode(resource, bitmapPool, 100, 100, decodeFormat);
+      decoder.decode(resource, bitmapPool, 100, 100, options);
 
       verify(retriever).getFrameAtTime();
       verify(retriever, never()).getFrameAtTime(anyLong());

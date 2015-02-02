@@ -30,6 +30,7 @@ import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
@@ -40,6 +41,7 @@ public class GifResourceDecoderTest {
     private GifResourceDecoder.GifDecoderPool decoderPool;
     private GifDecoder gifDecoder;
     private GifHeader gifHeader;
+    private HashMap<String, Object> options;
 
     @Before
     public void setUp() {
@@ -56,32 +58,33 @@ public class GifResourceDecoderTest {
         when(decoderPool.obtain(any(GifDecoder.BitmapProvider.class))).thenReturn(gifDecoder);
 
         decoder = new GifResourceDecoder(Robolectric.application, bitmapPool, parserPool, decoderPool);
+        options = new HashMap<String, Object>();
     }
 
     @Test
     public void testReturnsNullIfParsedHeaderHasZeroFrames() throws IOException {
         when(gifHeader.getNumFrames()).thenReturn(0);
 
-        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
     }
 
     @Test
     public void testReturnsNullIfParsedHeaderHasFormatError() {
         when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_FORMAT_ERROR);
 
-        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
     }
 
     @Test
     public void testReturnsNullIfParsedHeaderHasOpenError() {
         when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OPEN_ERROR);
 
-        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
     }
 
     @Test
     public void testReturnsParserToPool() throws IOException {
-        decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
+        decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
         verify(parserPool).release(eq(parser));
     }
 
@@ -89,7 +92,7 @@ public class GifResourceDecoderTest {
     public void testReturnsParserToPoolWhenParserThrows() {
         when(parser.parseHeader()).thenThrow(new RuntimeException("Test"));
         try {
-            decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
+            decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
             fail("Failed to receive expected exception");
         } catch (RuntimeException e) {
             // Expected.
@@ -105,7 +108,7 @@ public class GifResourceDecoderTest {
         when(gifDecoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
 
         byte[] data = new byte[100];
-        decoder.decode(new ByteArrayInputStream(data), 100, 100);
+        decoder.decode(new ByteArrayInputStream(data), 100, 100, options);
 
         InOrder order = inOrder(decoderPool, gifDecoder);
         order.verify(decoderPool).obtain(any(GifDecoder.BitmapProvider.class));
@@ -121,7 +124,7 @@ public class GifResourceDecoderTest {
         when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
         when(gifDecoder.getNextFrame()).thenThrow(new RuntimeException("test"));
         try {
-            decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
+            decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
             fail("Failed to receive expected exception");
         } catch (RuntimeException e) {
             // Expected.
@@ -136,7 +139,7 @@ public class GifResourceDecoderTest {
         when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
         when(gifDecoder.getNextFrame()).thenReturn(null);
 
-        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100));
+        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
     }
 
     @Test
@@ -145,7 +148,7 @@ public class GifResourceDecoderTest {
         when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
         when(gifDecoder.getNextFrame()).thenReturn(null);
 
-        decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100);
+        decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
 
         verify(decoderPool).release(eq(gifDecoder));
     }

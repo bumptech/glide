@@ -81,10 +81,16 @@ public class LoadDebuggerImpl implements LoadDebugger {
     }
 
     @Override
-    public void appendStartLoadPath(Object data, DataFetcher<?> fetcher) {
+    public void appendStartLoadPath(DataFetcher<?> fetcher) {
         indent(2).append("--- Start Load Path ---");
         nl();
-        indent(3).append("Fetcher: ").append(fetcher).append(" data: ").append(data);
+        indent(3).append("Fetcher: ").append(fetcher);
+        nl();
+    }
+
+    @Override
+    public void appendLoadPathData(Object data) {
+        indent(3).append("Data: ").append(data);
         nl();
     }
 
@@ -100,7 +106,7 @@ public class LoadDebuggerImpl implements LoadDebugger {
 
     @Override
     public void appendEndLoadPath(Exception e) {
-        indent(3).append("Failed: ").append(e.getMessage());
+        indent(3).append("Failed: ").append(e != null ? e.getMessage() : null);
         nl();
         indent(2).append("=== End Load Path ===");
         nl();

@@ -7,6 +7,7 @@ import com.bumptech.glide.util.Preconditions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class LoadPath<Data, ResourceType, Transcode> {
     private Class<Data> dataClass;
@@ -24,21 +25,25 @@ public class LoadPath<Data, ResourceType, Transcode> {
 
     public Resource<Transcode> load(DataFetcher<Data> fetcher, RequestContext<Transcode> context, int width, int height,
             DecodePath.DecodeCallback<ResourceType> decodeCallback) throws Exception {
-        context.getDebugger().appendStartLoadPath(null, fetcher);
+        context.getDebugger().appendStartLoadPath(fetcher);
         Data data = null;
         try {
             data = fetcher.loadData(context.getPriority());
         } catch (Exception e) {
             context.getDebugger().appendEndLoadPath(e);
-        }
-        if (data == null) {
             return null;
         }
+        if (data == null) {
+            context.getDebugger().appendEndLoadPath((Exception) null /*exception*/);
+            return null;
+        }
+        context.getDebugger().appendLoadPathData(data);
         Resource<Transcode> result = null;
         DataRewinder<Data> rewinder = context.getRewinder(data);
+        Map<String, Object> options = context.getOptions();
         try {
             for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {
-                result = path.decode(rewinder, width, height, decodeCallback);
+                result = path.decode(rewinder, width, height, options, decodeCallback);
                 context.getDebugger().appendDecodePath(path, result);
                 if (result != null) {
                     break;

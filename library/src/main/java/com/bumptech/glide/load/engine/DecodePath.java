@@ -6,6 +6,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class DecodePath<DataType, ResourceType, Transcode> {
 
@@ -30,8 +31,8 @@ public class DecodePath<DataType, ResourceType, Transcode> {
     }
 
     public Resource<Transcode> decode(DataRewinder<DataType> rewinder, int width, int height,
-            DecodeCallback<ResourceType> callback) throws IOException {
-        Resource<ResourceType> resource = decodeResource(rewinder, width, height);
+            Map<String, Object> options, DecodeCallback<ResourceType> callback) throws IOException {
+        Resource<ResourceType> resource = decodeResource(rewinder, width, height, options);
         if (resource == null) {
             return null;
         } else {
@@ -40,14 +41,14 @@ public class DecodePath<DataType, ResourceType, Transcode> {
         }
     }
 
-    private Resource<ResourceType> decodeResource(DataRewinder<DataType> rewinder, int width, int height)
-            throws IOException {
+    private Resource<ResourceType> decodeResource(DataRewinder<DataType> rewinder, int width, int height,
+            Map<String, Object> options) throws IOException {
         Resource<ResourceType> result = null;
         for (ResourceDecoder<DataType, ResourceType> decoder : decoders) {
             DataType data = rewinder.rewindAndGet();
             if (decoder.handles(data)) {
                 data = rewinder.rewindAndGet();
-                result = decoder.decode(data, width, height);
+                result = decoder.decode(data, width, height, options);
                 if (result != null) {
                     break;
                 }

@@ -4,11 +4,16 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
+import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
+import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.util.Preconditions;
@@ -33,6 +38,7 @@ public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> 
     public BaseDecodeOptions(Context context) {
         this.context = context.getApplicationContext();
     }
+
 
     public final <T> CHILD transform(Class<T> resourceClass, Transformation<T> transformation) {
         Preconditions.checkNotNull(resourceClass);
@@ -70,6 +76,18 @@ public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> 
         return isTransformationSet;
     }
 
+    public CHILD format(DecodeFormat format) {
+        return set(Downsampler.KEY_DECODE_FORMAT, Preconditions.checkNotNull(format));
+    }
+
+    public CHILD frame(int frame) {
+        return set(VideoBitmapDecoder.KEY_TARGET_FRAME, frame);
+    }
+
+    public CHILD downsample(DownsampleStrategy strategy) {
+        return set(StreamBitmapDecoder.KEY_DOWNSAMPLE_STRATEGY, strategy);
+    }
+
     public CHILD centerCrop() {
         return transform(new CenterCrop(context));
     }
@@ -93,7 +111,7 @@ public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> 
 
     @SuppressWarnings("unchecked")
     @Override
-    public final CHILD clone() throws CloneNotSupportedException {
+    public final CHILD clone() {
         try {
             BaseDecodeOptions<CHILD> result = (BaseDecodeOptions<CHILD>) super.clone();
             result.options = new HashMap<String, Object>();

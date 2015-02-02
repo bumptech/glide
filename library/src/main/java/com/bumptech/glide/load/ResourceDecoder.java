@@ -3,6 +3,7 @@ package com.bumptech.glide.load;
 import com.bumptech.glide.load.engine.Resource;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * An interface for decoding resources.
@@ -34,7 +35,12 @@ public interface ResourceDecoder<T, Z> {
      * @param height The ideal height in pixels of the decoded resource, or
      *               {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original resource
      *               height.
+     *
+     * @param options A map of string keys to objects that may or may not contain options available to this particular
+     *                implementation. Implementations should not assume that any or all of their option keys are
+     *                present. However, implementations may assume that if one of their option keys is present, it's
+     *                value is non-null and is of the expected type.
      * @throws IOException
      */
-    Resource<Z> decode(T source, int width, int height) throws IOException;
+    Resource<Z> decode(T source, int width, int height, Map<String, Object> options) throws IOException;
 }

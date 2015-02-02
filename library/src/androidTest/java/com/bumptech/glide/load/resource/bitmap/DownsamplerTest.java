@@ -24,17 +24,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class DownsamplerTest {
     private File tempFile;
+    private HashMap<String, Object> options;
 
     @Before
     public void setUp() throws Exception {
         File cacheDir = Robolectric.application.getCacheDir();
         cacheDir.mkdir();
         tempFile = new File(cacheDir, "temp");
+        options = new HashMap<String, Object>();
     }
 
     @After
@@ -48,8 +51,9 @@ public class DownsamplerTest {
         compressBitmap(rgb565, Bitmap.CompressFormat.JPEG);
         Downsampler downsampler = Downsampler.AT_LEAST;
         InputStream is = new FileInputStream(tempFile);
+        options.put(Downsampler.KEY_DECODE_FORMAT, DecodeFormat.ALWAYS_ARGB_8888);
         try {
-            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.ALWAYS_ARGB_8888);
+            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, options);
             assertEquals(Bitmap.Config.ARGB_8888, result.getConfig());
         } finally {
             try {
@@ -66,8 +70,9 @@ public class DownsamplerTest {
         compressBitmap(rgb565, Bitmap.CompressFormat.JPEG);
         Downsampler downsampler = Downsampler.AT_LEAST;
         InputStream is = new FileInputStream(tempFile);
+        options.put(Downsampler.KEY_DECODE_FORMAT, DecodeFormat.PREFER_RGB_565);
         try {
-            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.PREFER_RGB_565);
+            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, options);
             assertEquals(Bitmap.Config.RGB_565, result.getConfig());
         } finally {
             try {

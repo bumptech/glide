@@ -11,21 +11,25 @@ import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class FileDecoderTest {
 
     private FileDecoder decoder;
+    private Map<String, Object> options;
 
     @Before
     public void setUp() {
         decoder = new FileDecoder();
+        options = Collections.emptyMap();
     }
 
     @Test
     public void testReturnsGivenFileAsResource() throws IOException {
         File expected = new File("testFile");
-        Resource<File> decoded = decoder.decode(expected, 1, 1);
+        Resource<File> decoded = decoder.decode(expected, 1, 1, options);
 
         assertEquals(expected, decoded.get());
     }

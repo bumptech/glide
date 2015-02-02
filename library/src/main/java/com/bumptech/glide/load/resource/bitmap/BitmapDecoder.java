@@ -2,8 +2,9 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+
+import java.util.Map;
 
 /**
  * A bitmap decoder for a given resource type.
@@ -22,9 +23,8 @@ public interface BitmapDecoder<T> {
      *                   pool.
      * @param outWidth The target width for the returned bitmap (need not match exactly).
      * @param outHeight The target height for the returned bitmap (need not match exactly).
-     * @param decodeFormat The desired configuration for the returned bitmap.
      */
-    Bitmap decode(T data, BitmapPool bitmapPool, int outWidth, int outHeight, DecodeFormat decodeFormat)
+    Bitmap decode(T data, BitmapPool bitmapPool, int outWidth, int outHeight, Map<String, Object> options)
             throws Exception;
 
     /**

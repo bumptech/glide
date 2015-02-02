@@ -17,6 +17,7 @@ import com.bumptech.glide.util.Util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ import java.util.Set;
  * A base class with methods for loading and decoding images from InputStreams.
  */
 public abstract class Downsampler implements BitmapDecoder<InputStream> {
+    public static final String KEY_DECODE_FORMAT = "com.bumptech.glide.load.resource.bitmap.Downsampler.DecodeFormat";
     private static final String TAG = "Downsampler";
 
     private static final Set<ImageHeaderParser.ImageType> TYPES_THAT_USE_POOL = EnumSet.of(
@@ -102,11 +104,12 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     @SuppressWarnings("resource")
     // see BitmapDecoder.decode
     @Override
-    public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight, DecodeFormat decodeFormat) {
+    public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight,
+            Map<String, Object> options) {
         final ByteArrayPool byteArrayPool = ByteArrayPool.get();
         final byte[] bytesForOptions = byteArrayPool.getBytes();
         final byte[] bytesForStream = byteArrayPool.getBytes();
-        final BitmapFactory.Options options = getDefaultOptions();
+        final BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
 
         // Use to fix the mark limit to avoid allocating buffers that fit entire images.
         RecyclableBufferedInputStream bufferedStream = new RecyclableBufferedInputStream(
@@ -139,17 +142,20 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
                 }
             }
 
-            options.inTempStorage = bytesForOptions;
+            bitmapFactoryOptions.inTempStorage = bytesForOptions;
 
-            final int[] inDimens = getDimensions(invalidatingStream, bufferedStream, options);
+            final int[] inDimens = getDimensions(invalidatingStream, bufferedStream, bitmapFactoryOptions);
             final int inWidth = inDimens[0];
             final int inHeight = inDimens[1];
 
             final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
             final int sampleSize = getRoundedSampleSize(degreesToRotate, inWidth, inHeight, outWidth, outHeight);
 
+            DecodeFormat decodeFormat = options.containsKey(KEY_DECODE_FORMAT)
+                    ? (DecodeFormat) options.get(KEY_DECODE_FORMAT) :  DecodeFormat.DEFAULT;
+
             final Bitmap downsampled =
-                    downsampleWithSize(invalidatingStream, bufferedStream, options, pool, inWidth, inHeight, sampleSize,
+                    downsampleWithSize(invalidatingStream, bufferedStream, bitmapFactoryOptions, pool, inWidth, inHeight, sampleSize,
                             decodeFormat);
 
             // BitmapFactory swallows exceptions during decodes and in some cases when inBitmap is non null, may catch
@@ -174,7 +180,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
             byteArrayPool.releaseBytes(bytesForOptions);
             byteArrayPool.releaseBytes(bytesForStream);
             exceptionStream.release();
-            releaseOptions(options);
+            releaseOptions(bitmapFactoryOptions);
         }
     }
 

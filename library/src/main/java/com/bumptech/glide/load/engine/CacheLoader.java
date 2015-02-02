@@ -8,6 +8,7 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 class CacheLoader {
     private static final String TAG = "CacheLoader";
@@ -17,7 +18,8 @@ class CacheLoader {
         this.diskCache = diskCache;
     }
 
-    public <Z> Resource<Z> load(Key key, ResourceDecoder<File, Z> decoder, int width, int height) {
+    public <Z> Resource<Z> load(Key key, ResourceDecoder<File, Z> decoder, int width, int height,
+            Map<String, Object> options) {
         File fromCache = diskCache.get(key);
         if (fromCache == null) {
             return null;
@@ -25,7 +27,7 @@ class CacheLoader {
 
         Resource<Z> result = null;
         try {
-            result = decoder.decode(fromCache, width, height);
+            result = decoder.decode(fromCache, width, height, options);
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Exception decoding image from cache", e);

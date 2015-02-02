@@ -4,10 +4,10 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * An {@link com.bumptech.glide.load.resource.bitmap.BitmapDecoder} that can decode a thumbnail frame
@@ -16,26 +16,23 @@ import java.io.IOException;
  * @see android.media.MediaMetadataRetriever
  */
 public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
+    public static final String KEY_TARGET_FRAME =
+            "com.bumtpech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame";
+    /**
+     * A constant indicating we should use whatever frame we consider best, frequently not the first frame.
+     */
+    public static final int DEFAULT_FRAME = -1;
+
     private static final MediaMetadataRetrieverFactory DEFAULT_FACTORY =  new MediaMetadataRetrieverFactory();
-    private static final int NO_FRAME = -1;
-    private MediaMetadataRetrieverFactory factory;
-    private int frame;
+
+    private final MediaMetadataRetrieverFactory factory;
 
     public VideoBitmapDecoder() {
-        this(DEFAULT_FACTORY, NO_FRAME);
-    }
-
-    public VideoBitmapDecoder(int frame) {
-      this(DEFAULT_FACTORY, checkValidFrame(frame));
+        this(DEFAULT_FACTORY);
     }
 
     VideoBitmapDecoder(MediaMetadataRetrieverFactory factory) {
-      this(factory, NO_FRAME);
-    }
-
-    VideoBitmapDecoder(MediaMetadataRetrieverFactory factory, int frame) {
         this.factory = factory;
-        this.frame = frame;
     }
 
     @Override
@@ -54,15 +51,19 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
 
     @Override
     public Bitmap decode(ParcelFileDescriptor resource, BitmapPool bitmapPool, int outWidth, int outHeight,
-            DecodeFormat decodeFormat)
-            throws IOException {
+            Map<String, Object> options) throws IOException {
+        int frame = options.containsKey(KEY_TARGET_FRAME) ? (Integer) options.get(KEY_TARGET_FRAME) : DEFAULT_FRAME;
+        if (frame < 0 && frame != DEFAULT_FRAME) {
+            throw new IllegalArgumentException("Requested frame must be non-negative, or DEFAULT_FRAME, given: " + frame);
+        }
+
         MediaMetadataRetriever mediaMetadataRetriever = factory.build();
         mediaMetadataRetriever.setDataSource(resource.getFileDescriptor());
-        Bitmap result;
-        if (frame >= 0) {
-          result = mediaMetadataRetriever.getFrameAtTime(frame);
+        final Bitmap result;
+        if (frame == DEFAULT_FRAME) {
+            result = mediaMetadataRetriever.getFrameAtTime();
         } else {
-          result = mediaMetadataRetriever.getFrameAtTime();
+            result = mediaMetadataRetriever.getFrameAtTime(frame);
         }
         mediaMetadataRetriever.release();
         resource.close();
@@ -79,12 +80,5 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
         public MediaMetadataRetriever build() {
             return new MediaMetadataRetriever();
         }
-    }
-
-    private static int checkValidFrame(int frame) {
-      if (frame < 0) {
-        throw new IllegalArgumentException("Requested frame must be non-negative");
-      }
-      return frame;
     }
 }

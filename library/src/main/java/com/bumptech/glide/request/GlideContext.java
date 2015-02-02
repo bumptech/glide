@@ -17,6 +17,7 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
+import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.LoadPath;
@@ -52,13 +53,16 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     private final TranscoderRegistry transcoderRegistry;
     private final Handler mainHandler;
     private final ImageViewTargetFactory imageViewTargetFactory;
+    private final DecodeOptions decodeOptions;
     private final Engine engine;
     private final ComponentCallbacks2 componentCallbacks;
 
     public GlideContext(Context context, ModelLoaderRegistry modelLoaderRegistry, EncoderRegistry encoderRegistry,
             ResourceDecoderRegistry decoderRegistry, ResourceEncoderRegistry resultEncoderRegistry,
             DataRewinderRegistry dataRewinderRegistry, TranscoderRegistry transcoderRegistry,
-            ImageViewTargetFactory imageViewTargetFactory, Engine engine, ComponentCallbacks2 componentCallbacks) {
+            ImageViewTargetFactory imageViewTargetFactory, DecodeOptions decodeOptions, Engine engine,
+            ComponentCallbacks2
+            componentCallbacks) {
         super(context.getApplicationContext());
         this.modelLoaderRegistry = modelLoaderRegistry;
         this.encoderRegistry = encoderRegistry;
@@ -67,10 +71,15 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         this.dataRewinderRegistry = dataRewinderRegistry;
         this.transcoderRegistry = transcoderRegistry;
         this.imageViewTargetFactory = imageViewTargetFactory;
+        this.decodeOptions = decodeOptions;
         this.engine = engine;
         this.componentCallbacks = componentCallbacks;
 
         mainHandler = new Handler(Looper.getMainLooper());
+    }
+
+    public DecodeOptions getDecodeOptions() {
+        return decodeOptions;
     }
 
     public <ResourceType, TranscodeType> List<LoadPath<?, ResourceType, TranscodeType>> getLoadPaths(Object model,

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -20,7 +21,6 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -54,7 +56,7 @@ public class DecodeJobTest {
     private void mockCacheToReturnResultResource() throws IOException {
         File cacheFile = new File("fake");
         when(harness.diskCache.get(eq(harness.key))).thenReturn(cacheFile);
-        when(harness.cacheDecoder.decode(eq(cacheFile), eq(harness.width), eq(harness.height)))
+        when(harness.cacheDecoder.decode(eq(cacheFile), eq(harness.width), eq(harness.height), eq(harness.options)))
                 .thenReturn(harness.resource);
     }
 
@@ -126,19 +128,20 @@ public class DecodeJobTest {
     public void testDecodeResultFromCacheThrowsIfCacheDecoderThrows() throws Exception {
         harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("Fake"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt()))
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
                 .thenThrow(new RuntimeException("test"));
 
         assertNull(harness.getJob().decodeResultFromCache());
 
-        verify(harness.cacheDecoder).decode(any(File.class), anyInt(), anyInt());
+        verify(harness.cacheDecoder).decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class));
     }
 
     @Test
     public void testEntryIsDeletedFromCacheIfCacheDecoderThrowsButResultIsInCache() throws IOException {
         harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("fake"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenThrow(new RuntimeException("test"));
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenThrow(new RuntimeException("test"));
 
         try {
             harness.getJob().decodeResultFromCache();
@@ -154,7 +157,8 @@ public class DecodeJobTest {
     public void testDecodeResultFromCacheReturnsNullIfCacheDecoderReturnsNull() throws Exception {
         harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("fake"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenReturn(null);
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenReturn(null);
 
         assertNull(harness.getJob().decodeResultFromCache());
     }
@@ -163,7 +167,8 @@ public class DecodeJobTest {
     public void testEntryIsDeletedFromCacheIfCacheDecoderReturnsNullButResultIsInCache() throws Exception {
         harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("fake"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenReturn(null);
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenReturn(null);
 
         harness.getJob().decodeResultFromCache();
         verify(harness.diskCache).delete(eq(harness.key));
@@ -194,7 +199,7 @@ public class DecodeJobTest {
     private void mockCacheToReturnSourceResource() throws IOException {
         File file = new File("Test");
         when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(file);
-        when(harness.cacheDecoder.decode(eq(file), eq(harness.width), eq(harness.height)))
+        when(harness.cacheDecoder.decode(eq(file), eq(harness.width), eq(harness.height), eq(harness.options)))
                 .thenReturn(harness.resource);
     }
 
@@ -307,7 +312,8 @@ public class DecodeJobTest {
     public void testSourceIsDeletedFromCacheIfCacheDecodeFails() throws Exception {
         harness.diskCacheStrategy = DiskCacheStrategy.ALL;
         when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(new File("fake"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenReturn(null);
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenReturn(null);
 
         assertNull(harness.getJob().decodeSourceFromCache());
 
@@ -318,7 +324,8 @@ public class DecodeJobTest {
     public void testSourceIsDeletedFromCacheIfCacheDecoderThrows() throws IOException {
         harness.diskCacheStrategy = DiskCacheStrategy.ALL;
         when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(new File("test"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenThrow(new RuntimeException("test"));
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenThrow(new RuntimeException("test"));
 
         try {
             harness.getJob().decodeSourceFromCache();
@@ -333,7 +340,8 @@ public class DecodeJobTest {
     public void testReturnsNullIfSourceCacheDecodeOfCachedSourceReturnsNull() throws Exception {
         harness.diskCacheStrategy = DiskCacheStrategy.ALL;
         when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(new File("test"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenReturn(null);
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenReturn(null);
 
         assertNull(harness.getJob().decodeSourceFromCache());
     }
@@ -342,7 +350,8 @@ public class DecodeJobTest {
     public void testThrowsIfCacheDecodeOfCachedSourceThrows() throws Exception {
         harness.diskCacheStrategy = DiskCacheStrategy.ALL;
         when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(new File("test"));
-        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenThrow(new RuntimeException("test"));
+        when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenThrow(new RuntimeException("test"));
 
         harness.getJob().decodeSourceFromCache();
     }
@@ -390,13 +399,15 @@ public class DecodeJobTest {
         // For NONE/RESULT
         Object data = new Object();
         when(harness.dataFetcher.loadData(eq(harness.priority))).thenReturn(data);
-        when(harness.sourceDecoder.decode(eq(data), eq(harness.width), eq(harness.height)))
+        when(harness.sourceDecoder.decode(eq(data), eq(harness.width), eq(harness.height),
+                anyMapOf(String.class, Object.class)))
                 .thenReturn(harness.resource);
 
         // For ALL/SOURCE
         File cachedSource = new File("source");
         when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(cachedSource);
-        when(harness.cacheDecoder.decode(eq(cachedSource), eq(harness.width), eq(harness.height)))
+        when(harness.cacheDecoder.decode(eq(cachedSource), eq(harness.width), eq(harness.height),
+                anyMapOf(String.class, Object.class)))
                 .thenReturn(harness.resource);
     }
 
@@ -515,7 +526,8 @@ public class DecodeJobTest {
     @Test
     public void testFetcherIsCleanedUpIfDecodeThrows() throws Exception {
         when(harness.dataFetcher.loadData(any(Priority.class))).thenReturn(new Object());
-        when(harness.sourceDecoder.decode(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("test"));
+        when(harness.sourceDecoder.decode(anyObject(), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
+                .thenThrow(new IOException("test"));
 
         try {
             harness.getJob().decodeFromSource();
@@ -546,8 +558,10 @@ public class DecodeJobTest {
         for (DiskCacheStrategy strategy : DiskCacheStrategy.values()) {
             harness = new Harness(strategy);
             mockSourceToReturnResource();
-            when(harness.sourceDecoder.decode(any(Object.class), anyInt(), anyInt())).thenReturn(null);
-            when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt())).thenReturn(null);
+            when(harness.sourceDecoder.decode(any(Object.class), anyInt(), anyInt(),
+                    anyMapOf(String.class, Object.class))).thenReturn(null);
+            when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(),
+                    anyMapOf(String.class, Object.class))).thenReturn(null);
 
             assertNull(harness.getJob().decodeFromSource());
         }
@@ -598,10 +612,10 @@ public class DecodeJobTest {
         ResourceDecoder<Object, Object> sourceDecoder = mock(ResourceDecoder.class);
         Encoder<Object> sourceEncoder = mock(Encoder.class);
         DecodeJob.FileOpener fileOpener = mock(DecodeJob.FileOpener.class);
-        RequestContext<Object, Object> requestContext = mock(RequestContext.class);
-        DataFetcherSet<?> dataFetcherSet = mock(DataFetcherSet.class);
+        RequestContext<Object> requestContext = mock(RequestContext.class);
         DataRewinder<Object> rewinder = mock(DataRewinder.class);
         Object data = new Object();
+        Map<String, Object> options = Collections.emptyMap();
 
         DiskCacheStrategy diskCacheStrategy;
 
@@ -626,8 +640,8 @@ public class DecodeJobTest {
             when(diskCacheProvider.getDiskCache()).thenReturn(diskCache);
         }
 
-        public DecodeJob<Object, Object> getJob() {
-            return new DecodeJob<Object, Object>(requestContext, key, width, height, diskCacheProvider, fileOpener);
+        public DecodeJob<Object> getJob() {
+            return new DecodeJob<Object>(requestContext, key, width, height, diskCacheProvider, fileOpener);
         }
     }
 

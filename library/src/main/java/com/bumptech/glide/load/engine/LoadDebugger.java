@@ -25,7 +25,9 @@ public interface LoadDebugger {
 
     void appendEndLoadPaths();
 
-    void appendStartLoadPath(Object data, DataFetcher<?> fetcher);
+    void appendStartLoadPath(DataFetcher<?> fetcher);
+
+    void appendLoadPathData(Object data);
 
     void appendDecodePath(DecodePath<?, ?, ?> path, Resource<?> result);
 

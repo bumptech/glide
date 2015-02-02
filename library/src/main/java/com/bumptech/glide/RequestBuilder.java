@@ -78,7 +78,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         this.transcodeClass = transcodeClass;
         this.requestTracker = requestTracker;
         this.lifecycle = lifecycle;
-        decodeOptions = new DecodeOptions(context);
+        decodeOptions = context.getDecodeOptions().clone();
     }
 
     public RequestBuilder<TranscodeType> apply(RequestOptions requestOptions) {

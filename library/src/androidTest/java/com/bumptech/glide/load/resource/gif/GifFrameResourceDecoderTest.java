@@ -17,17 +17,21 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifFrameResourceDecoderTest {
     private GifDecoder gifDecoder;
     private GifFrameResourceDecoder resourceDecoder;
+    private Map<String, Object> options;
 
     @Before
     public void setUp() {
         gifDecoder = mock(GifDecoder.class);
         resourceDecoder = new GifFrameResourceDecoder(mock(BitmapPool.class));
+        options = Collections.emptyMap();
     }
 
     @Test
@@ -35,13 +39,13 @@ public class GifFrameResourceDecoderTest {
         Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
         when(gifDecoder.getNextFrame()).thenReturn(expected);
 
-        assertEquals(expected, resourceDecoder.decode(gifDecoder, 100, 100).get());
+        assertEquals(expected, resourceDecoder.decode(gifDecoder, 100, 100, options).get());
     }
 
     @Test
     public void testReturnsNullIfGifDecoderReturnsNullFrame() {
         when(gifDecoder.getNextFrame()).thenReturn(null);
 
-        assertNull(resourceDecoder.decode(gifDecoder, 100, 100));
+        assertNull(resourceDecoder.decode(gifDecoder, 100, 100, options));
     }
 }

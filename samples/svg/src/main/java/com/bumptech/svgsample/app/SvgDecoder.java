@@ -8,22 +8,26 @@ import com.caverock.androidsvg.SVGParseException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Decodes an SVG internal representation from an {@link InputStream}.
  */
 public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
-    public Resource<SVG> decode(InputStream source, int width, int height) throws IOException {
+
+    @Override
+    public boolean handles(InputStream source) throws IOException {
+        // TODO: Can we tell?
+        return true;
+    }
+
+    public Resource<SVG> decode(InputStream source, int width, int height, Map<String, Object> options)
+            throws IOException {
         try {
             SVG svg = SVG.getFromInputStream(source);
             return new SimpleResource<SVG>(svg);
         } catch (SVGParseException ex) {
             throw new IOException("Cannot load SVG from stream", ex);
         }
-    }
-
-    @Override
-    public String getId() {
-        return "SvgDecoder.com.bumptech.svgsample.app";
     }
 }

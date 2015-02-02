@@ -11,15 +11,16 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class BitmapDrawableDecoder<T> implements ResourceDecoder<T, BitmapDrawable> {
 
-    private Resources resources;
-    private BitmapPool bitmapPool;
-    private ResourceDecoder<T, Bitmap> wrapped;
+    private final Resources resources;
+    private final BitmapPool bitmapPool;
+    private final ResourceDecoder<T, Bitmap> wrapped;
 
     public BitmapDrawableDecoder(Context context, ResourceDecoder<T, Bitmap> decoder) {
-        this(context.getResources(), Glide.get(context).getBitmapPool(), decoder);
+        this(context.getApplicationContext().getResources(), Glide.get(context).getBitmapPool(), decoder);
     }
 
     public BitmapDrawableDecoder(Resources resources, BitmapPool bitmapPool, ResourceDecoder<T, Bitmap> wrapped) {
@@ -34,8 +35,9 @@ public class BitmapDrawableDecoder<T> implements ResourceDecoder<T, BitmapDrawab
     }
 
     @Override
-    public Resource<BitmapDrawable> decode(T source, int width, int height) throws IOException {
-        Resource<Bitmap> bitmapResource = wrapped.decode(source, width, height);
+    public Resource<BitmapDrawable> decode(T source, int width, int height, Map<String, Object> options)
+            throws IOException {
+        Resource<Bitmap> bitmapResource = wrapped.decode(source, width, height, options);
         BitmapDrawable drawable = new BitmapDrawable(resources, bitmapResource.get());
 
         return new BitmapDrawableResource(drawable, bitmapPool);
