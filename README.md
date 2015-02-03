@@ -151,7 +151,7 @@ To open the project in Intellij 14:
 Getting Help
 ------------
 To report a specific problem or feature request, [open a new issue on Github][5]. For questions, suggestions, or
-anything else, join or email [Glide's discussion group][6].
+anything else, join or email [Glide's discussion group][6], or join our irc channel: [irc.freenode.net#glide-library][13].
 
 Contributing
 ------------
@@ -185,3 +185,4 @@ This is not an official Google product.
 [10]: https://github.com/chrisbanes/gradle-mvn-push
 [11]: static/glide_logo.png
 [12]: https://github.com/bumptech/glide/wiki/Integration-Libraries
+[13]: http://webchat.freenode.net/?channels=glide-library
