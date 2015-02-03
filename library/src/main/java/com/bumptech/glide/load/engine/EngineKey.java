@@ -44,29 +44,13 @@ class EngineKey implements Key {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+        if (o instanceof EngineKey) {
+            EngineKey other = (EngineKey) o;
+            return id.equals(other.id) && signature.equals(other.signature) && height == other.height
+                    && width == other.width && resourceClass.equals(other.resourceClass)
+                    && transcodeClass.equals(other.transcodeClass);
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        EngineKey engineKey = (EngineKey) o;
-
-        if (!id.equals(engineKey.id)) {
-            return false;
-        } else if (!signature.equals(engineKey.signature)) {
-            return false;
-        } else if (height != engineKey.height) {
-            return false;
-        } else if (width != engineKey.width) {
-            return false;
-        } else if (resourceClass != engineKey.resourceClass) {
-            return false;
-        } else if (transcodeClass != engineKey.transcodeClass) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     @Override
@@ -120,19 +104,15 @@ class EngineKey implements Key {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            ResultKey resultKey = (ResultKey) o;
-
-            if (height != resultKey.height) return false;
-            if (width != resultKey.width) return false;
-            if (!appliedTransformation.getId().equals(resultKey.appliedTransformation.getId())) return false;
-            if (!decodedResourceClass.equals(resultKey.decodedResourceClass)) return false;
-            if (!id.equals(resultKey.id)) return false;
-            if (!signature.equals(resultKey.signature)) return false;
-
-            return true;
+            if (o instanceof ResultKey) {
+                ResultKey other = (ResultKey) o;
+                return height == other.height && width == other.width
+                        && appliedTransformation.getId().equals(other.appliedTransformation.getId())
+                        && decodedResourceClass.equals(other.decodedResourceClass)
+                        && id.equals(other.id)
+                        && signature.equals(other.signature);
+            }
+            return false;
         }
 
         @Override

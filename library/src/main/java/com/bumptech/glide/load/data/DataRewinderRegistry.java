@@ -5,6 +5,10 @@ import com.bumptech.glide.util.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Stores a mapping of data class to {@link com.bumptech.glide.load.data.DataRewinder.Factory} and allows  registation
+ * of new types and factories.
+ */
 public class DataRewinderRegistry {
     private final Map<Class, DataRewinder.Factory> rewinders = new HashMap<Class, DataRewinder.Factory>();
     private static final DataRewinder.Factory DEFAULT_FACTORY = new DataRewinder.Factory<Object>() {
@@ -43,7 +47,7 @@ public class DataRewinderRegistry {
     }
 
     private static class DefaultRewinder implements DataRewinder<Object> {
-        private Object data;
+        private final Object data;
 
         public DefaultRewinder(Object data) {
             this.data = data;

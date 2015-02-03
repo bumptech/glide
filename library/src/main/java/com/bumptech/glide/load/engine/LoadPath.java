@@ -9,8 +9,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * For a given {@link com.bumptech.glide.load.data.DataFetcher} for a given data class, attempts to fetch the data and
+ * then run it through one or more {@link com.bumptech.glide.load.engine.DecodePath}s.
+ *
+ * @param <Data> The type of data that will be fetched.
+ * @param <ResourceType> The type of intermediate resource that will be decoded within one of the
+ * {@link com.bumptech.glide.load.engine.DecodePath}s.
+ * @param <Transcode> The type of resource that will be returned as the result if the load and one of the
+ *                   decode paths succeeds..
+ */
 public class LoadPath<Data, ResourceType, Transcode> {
-    private Class<Data> dataClass;
+    private final Class<Data> dataClass;
     private final Class<ResourceType> resourceClass;
     private final Class<Transcode> transcodeClass;
     private final List<? extends DecodePath<Data, ResourceType, Transcode>> decodePaths;
@@ -26,7 +36,7 @@ public class LoadPath<Data, ResourceType, Transcode> {
     public Resource<Transcode> load(DataFetcher<Data> fetcher, RequestContext<Transcode> context, int width, int height,
             DecodePath.DecodeCallback<ResourceType> decodeCallback) throws Exception {
         context.getDebugger().appendStartLoadPath(fetcher);
-        Data data = null;
+        final Data data;
         try {
             data = fetcher.loadData(context.getPriority());
         } catch (Exception e) {

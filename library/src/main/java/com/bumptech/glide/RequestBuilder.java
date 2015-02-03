@@ -5,8 +5,6 @@ import static com.bumptech.glide.request.RequestOptions.signatureOf;
 import android.net.Uri;
 import android.widget.ImageView;
 
-import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.BaseDecodeOptions;
 import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -148,7 +146,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      * <p>
      *     Almost all options will be copied from the original load, including the
      *     {@link com.bumptech.glide.load.model.ModelLoader}, {@link com.bumptech.glide.load.ResourceDecoder}, and
-     *     {@link Transformation}s. However, {@link RequestOptions#placeholder(int)} and
+     *     {@link com.bumptech.glide.load.Transformation}s. However, {@link RequestOptions#placeholder(int)} and
      *     {@link RequestOptions#error(int)}, and {@link #listener(RequestListener)} will only be used on the fullsize
      *     load and will not be copied for the thumbnail load.
      * </p>
@@ -201,7 +199,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      *     Note - this method caches data using only the given String as the cache key. If the data is a Uri outside of
      *     your control, or you otherwise expect the data represented by the given String to change without the String
      *     identifier changing, Consider using
-     *     {@link RequestOptions#signature(Key)} to mixin a signature
+     *     {@link RequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a signature
      *     you create that identifies the data currently at the given String that will invalidate the cache if that data
      *     changes. Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
      *     {@link RequestOptions#skipMemoryCache(boolean)} may be appropriate.
@@ -222,7 +220,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      *     Note - this method caches data at Uris using only the Uri itself as the cache key. The data represented by
      *     Uris from some content providers may change without the Uri changing, which means using this method
      *     can lead to displaying stale data. Consider using
-     *     {@link RequestOptions#signature(Key)} to mixin a signature
+     *     {@link RequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a signature
      *     you create based on the data at the given Uri that will invalidate the cache if that data changes.
      *     Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
      *     {@link RequestOptions#skipMemoryCache(boolean)} may be appropriate.

@@ -5,28 +5,33 @@ import android.content.Context;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 
-public class UnitModelLoader<ResourceType> implements ModelLoader<ResourceType, ResourceType> {
+/**
+ * A set of helper classes that performs no loading and instead always returns the given model as the data to decode.
+ *
+ * @param <ModelType> The type of model that will also be returned as decodable data.
+ */
+public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelType> {
 
     @Override
-    public DataFetcher<ResourceType> getDataFetcher(ResourceType model, int width, int height) {
-        return new UnitFetcher<ResourceType>(model);
+    public DataFetcher<ModelType> getDataFetcher(ModelType model, int width, int height) {
+        return new UnitFetcher<ModelType>(model);
     }
 
     @Override
-    public boolean handles(ResourceType model) {
+    public boolean handles(ModelType model) {
         return true;
     }
 
-    private static class UnitFetcher<ResourceType> implements DataFetcher<ResourceType> {
+    private static class UnitFetcher<ModelType> implements DataFetcher<ModelType> {
 
-        private ResourceType resource;
+        private final ModelType resource;
 
-        public UnitFetcher(ResourceType resource) {
+        public UnitFetcher(ModelType resource) {
             this.resource = resource;
         }
 
         @Override
-        public ResourceType loadData(Priority priority) throws Exception {
+        public ModelType loadData(Priority priority) throws Exception {
             return resource;
         }
 
@@ -47,11 +52,14 @@ public class UnitModelLoader<ResourceType> implements ModelLoader<ResourceType, 
 
         @SuppressWarnings("unchecked")
         @Override
-        public Class<ResourceType> getDataClass() {
-            return (Class<ResourceType>) resource.getClass();
+        public Class<ModelType> getDataClass() {
+            return (Class<ModelType>) resource.getClass();
         }
     }
 
+    /**
+     * Factory for producing {@link com.bumptech.glide.load.model.UnitModelLoader}s.
+     */
     public static class Factory<ResourceType> implements ModelLoaderFactory<ResourceType, ResourceType> {
 
         @Override

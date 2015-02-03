@@ -16,6 +16,7 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
  * </p>
  *
  */
+@SuppressWarnings("PMD.UseUtilityClass")
 public final class DecodeOptions extends BaseDecodeOptions<DecodeOptions> {
 
     public static DecodeOptions fitCenter(Context context) {
@@ -53,7 +54,6 @@ public final class DecodeOptions extends BaseDecodeOptions<DecodeOptions> {
     public static DecodeOptions downsample(Context context, DownsampleStrategy strategy) {
         return new DecodeOptions(context).downsample(strategy);
     }
-
 
     public DecodeOptions(Context context) {
         super(context);

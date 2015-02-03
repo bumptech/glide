@@ -55,7 +55,7 @@ public class MultiModelLoaderFactory {
             Entry<?, ?> entry = iterator.next();
             if (entry.handles(modelClass, dataClass)) {
                 iterator.remove();
-                factories.add(getFactory(modelClass, dataClass, entry));
+                factories.add(this.<Model, Data>getFactory(entry));
             }
         }
         return factories;
@@ -65,7 +65,7 @@ public class MultiModelLoaderFactory {
         List<ModelLoader<Model, ?>> loaders = new ArrayList<ModelLoader<Model, ?>>();
         for (Entry<?, ?> entry : entries) {
             if (entry.handles(modelClass)) {
-                loaders.add(build(modelClass, entry));
+                loaders.add(this.<Model, Object>build(entry));
             }
         }
         return loaders;
@@ -85,26 +85,19 @@ public class MultiModelLoaderFactory {
         List<ModelLoader<Model, Data>> loaders = new ArrayList<ModelLoader<Model, Data>>();
         for (Entry<?, ?> entry : entries) {
             if (entry.handles(modelClass, dataClass)) {
-                loaders.add(build(modelClass, dataClass, entry));
+                loaders.add(this.<Model, Data>build(entry));
             }
         }
         return factory.build(loaders);
     }
 
     @SuppressWarnings("unchecked")
-    private <Model, Data> ModelLoaderFactory<Model, Data> getFactory(Class<Model> modelClass, Class<Data> dataClass,
-            Entry<?, ?> entry) {
+    private <Model, Data> ModelLoaderFactory<Model, Data> getFactory(Entry<?, ?> entry) {
         return (ModelLoaderFactory<Model, Data>) entry.factory;
     }
 
     @SuppressWarnings("unchecked")
-    private <Model> ModelLoader<Model, ?> build(Class<Model> modelClass, Entry<?, ?> entry) {
-        return (ModelLoader<Model, ?>) Preconditions.checkNotNull(entry.factory.build(context, this));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass, Class<Data> dataClass,
-            Entry<?, ?> entry) {
+    private <Model, Data> ModelLoader<Model, Data> build(Entry<?, ?> entry) {
         return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(context, this));
     }
 

@@ -3,10 +3,10 @@ package com.bumptech.glide.integration.okhttp;
 import android.content.Context;
 
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.io.InputStream;
@@ -15,6 +15,22 @@ import java.io.InputStream;
  * A simple model loader for fetching media over http/https using OkHttp.
  */
 public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
+
+    private final OkHttpClient client;
+
+    public OkHttpUrlLoader(OkHttpClient client) {
+        this.client = client;
+    }
+
+    @Override
+    public boolean handles(GlideUrl url) {
+        return true;
+    }
+
+    @Override
+    public DataFetcher<InputStream> getDataFetcher(GlideUrl model, int width, int height) {
+        return new OkHttpStreamFetcher(client, model);
+    }
 
     /**
      * The default factory for {@link OkHttpUrlLoader}s.
@@ -49,7 +65,7 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         }
 
         @Override
-        public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<GlideUrl, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
             return new OkHttpUrlLoader(client);
         }
 
@@ -57,16 +73,5 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         public void teardown() {
             // Do nothing, this instance doesn't own the client.
         }
-    }
-
-    private final OkHttpClient client;
-
-    public OkHttpUrlLoader(OkHttpClient client) {
-        this.client = client;
-    }
-
-    @Override
-    public DataFetcher<InputStream> getResourceFetcher(GlideUrl model, int width, int height) {
-        return new OkHttpStreamFetcher(client, model);
     }
 }

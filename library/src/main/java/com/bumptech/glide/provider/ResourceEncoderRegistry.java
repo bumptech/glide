@@ -31,7 +31,7 @@ public class ResourceEncoderRegistry {
         private final Class<T> resourceClass;
         private final ResourceEncoder<T> encoder;
 
-        private Entry(Class<T> resourceClass, ResourceEncoder<T> encoder) {
+        Entry(Class<T> resourceClass, ResourceEncoder<T> encoder) {
             this.resourceClass = resourceClass;
             this.encoder = encoder;
         }

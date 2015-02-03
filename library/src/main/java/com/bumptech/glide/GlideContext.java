@@ -21,7 +21,6 @@ import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -217,7 +216,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     }
 
     /**
-     * Thrown when no {@link ModelLoader} is registered for a given model class.
+     * Thrown when no {@link com.bumptech.glide.load.model.ModelLoader} is registered for a given model class.
      */
     public static class NoModelLoaderAvailableException extends RuntimeException {
         public NoModelLoaderAvailableException(Object model) {
@@ -237,7 +236,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     /**
      * Thrown when no {@link Encoder} is registered for a given data class.
      */
-    public static class NoSourceEncoderAvailableException extends MissingComponentException{
+    public static class NoSourceEncoderAvailableException extends MissingComponentException {
         public NoSourceEncoderAvailableException(Class<?> dataClass) {
             super("Failed to find source encoder for data class: " + dataClass);
         }

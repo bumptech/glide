@@ -9,6 +9,9 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.io.OutputStream;
 
+/**
+ * Encodes {@link android.graphics.drawable.BitmapDrawable}s.
+ */
 public class BitmapDrawableEncoder implements ResourceEncoder<BitmapDrawable> {
 
     private final BitmapPool bitmapPool;

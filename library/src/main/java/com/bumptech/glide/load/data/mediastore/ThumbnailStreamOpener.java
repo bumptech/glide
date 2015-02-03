@@ -29,14 +29,17 @@ class ThumbnailStreamOpener {
 
         final Cursor cursor = query.query(context, uri);
         try {
-            if (cursor != null && cursor.moveToFirst()) {
-                String path = cursor.getString(0);
-                if (!TextUtils.isEmpty(path)) {
-                    File file = service.get(path);
-                    if (service.exists(file) && service.length(file) > 0) {
-                        thumbnailUri = Uri.fromFile(file);
-                    }
-                }
+            if (cursor == null || !cursor.moveToFirst()) {
+                return null;
+            }
+            String path = cursor.getString(0);
+            if (TextUtils.isEmpty(path)) {
+                return null;
+            }
+
+            File file = service.get(path);
+            if (service.exists(file) && service.length(file) > 0) {
+                thumbnailUri = Uri.fromFile(file);
             }
         } finally {
             if (cursor != null) {

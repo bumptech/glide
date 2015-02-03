@@ -13,29 +13,34 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import java.io.IOException;
 import java.util.Map;
 
-public class BitmapDrawableDecoder<T> implements ResourceDecoder<T, BitmapDrawable> {
+/**
+ * Decodes an {@link android.graphics.drawable.BitmapDrawable} for a data type.
+ * @param <DataType> The type of data that will be decoded.
+ */
+public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType, BitmapDrawable> {
 
     private final Resources resources;
     private final BitmapPool bitmapPool;
-    private final ResourceDecoder<T, Bitmap> wrapped;
+    private final ResourceDecoder<DataType, Bitmap> wrapped;
 
-    public BitmapDrawableDecoder(Context context, ResourceDecoder<T, Bitmap> decoder) {
+    public BitmapDrawableDecoder(Context context, ResourceDecoder<DataType, Bitmap> decoder) {
         this(context.getApplicationContext().getResources(), Glide.get(context).getBitmapPool(), decoder);
     }
 
-    public BitmapDrawableDecoder(Resources resources, BitmapPool bitmapPool, ResourceDecoder<T, Bitmap> wrapped) {
+    public BitmapDrawableDecoder(Resources resources, BitmapPool bitmapPool,
+            ResourceDecoder<DataType, Bitmap> wrapped) {
         this.resources = resources;
         this.bitmapPool = bitmapPool;
         this.wrapped = wrapped;
     }
 
     @Override
-    public boolean handles(T source) throws IOException {
+    public boolean handles(DataType source) throws IOException {
         return wrapped.handles(source);
     }
 
     @Override
-    public Resource<BitmapDrawable> decode(T source, int width, int height, Map<String, Object> options)
+    public Resource<BitmapDrawable> decode(DataType source, int width, int height, Map<String, Object> options)
             throws IOException {
         Resource<Bitmap> bitmapResource = wrapped.decode(source, width, height, options);
         BitmapDrawable drawable = new BitmapDrawable(resources, bitmapResource.get());

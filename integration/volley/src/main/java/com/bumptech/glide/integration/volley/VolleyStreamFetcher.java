@@ -64,6 +64,11 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
         }
     }
 
+    @Override
+    public Class<InputStream> getDataClass() {
+        return InputStream.class;
+    }
+
     private static Request.Priority glideToVolleyPriority(Priority priority) {
         switch (priority) {
             case LOW:

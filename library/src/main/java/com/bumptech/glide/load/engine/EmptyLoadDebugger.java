@@ -6,7 +6,11 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.File;
 import java.util.List;
 
-public class EmptyLoadDebugger implements LoadDebugger {
+/**
+ * An empty implementation of {@link com.bumptech.glide.load.engine.LoadDebugger}.
+ */
+@SuppressWarnings("PMD.UncommentedEmptyMethod")
+class EmptyLoadDebugger implements LoadDebugger {
     @Override
     public void startDecodeResultFromCache() { }
 
@@ -35,7 +39,10 @@ public class EmptyLoadDebugger implements LoadDebugger {
     public void appendEndLoadPaths() { }
 
     @Override
-    public void appendStartLoadPath(Object data, DataFetcher<?> fetcher) { }
+    public void appendStartLoadPath(DataFetcher<?> fetcher) { }
+
+    @Override
+    public void appendLoadPathData(Object data) { }
 
     @Override
     public void appendDecodePath(DecodePath<?, ?, ?> path, Resource<?> result) { }

@@ -9,6 +9,9 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
+/**
+ * Transforms {@link android.graphics.drawable.BitmapDrawable}s.
+ */
 public class BitmapDrawableTransformation implements Transformation<BitmapDrawable> {
 
     private final Context context;
@@ -27,7 +30,7 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
         Bitmap bitmap = other.getBitmap();
         BitmapResource toTransform = BitmapResource.obtain(bitmap, bitmapPool);
         Resource<Bitmap> result = wrapped.transform(toTransform, outWidth, outHeight);
-        if (result != toTransform) {
+        if (!result.equals(toTransform)) {
             toTransform.recycle();
         }
         return new BitmapDrawableResource(new BitmapDrawable(context.getResources(), result.get()), bitmapPool);

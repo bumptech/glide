@@ -5,7 +5,11 @@ import java.util.Collection;
 /**
  * Contains common assertions.
  */
-public class Preconditions {
+public final class Preconditions {
+
+    private Preconditions() {
+        // Utility class.
+    }
 
     public static <T> T checkNotNull(T arg) {
         return checkNotNull(arg, "Argument must not be null");

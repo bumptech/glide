@@ -8,10 +8,15 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.File;
 import java.util.List;
 
-public class LoadDebuggerImpl implements LoadDebugger {
+/**
+ * Collects string log data and attempts to pretty print the load and decode paths attempted and the result.
+ */
+@SuppressWarnings("PMD.AvoidStringBufferField")
+class PrettyPrintDebugger implements LoadDebugger {
     private static final String TAG = "LoadDebugger";
     private static final String INDENT = "    ";
-    private final StringBuilder sb = new StringBuilder();
+    // 284 is from pmd...
+    private final StringBuilder sb = new StringBuilder(284);
 
     @Override
     public void startDecodeResultFromCache() {
@@ -182,7 +187,7 @@ public class LoadDebuggerImpl implements LoadDebugger {
     }
 
     private void nl() {
-        sb.append("\n");
+        sb.append('\n');
     }
 
     @Override

@@ -15,7 +15,6 @@ import java.io.InputStream;
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     private final OkHttpClient client;
     private final GlideUrl url;
-    private volatile Request request;
     private InputStream stream;
 
     public OkHttpStreamFetcher(OkHttpClient client, GlideUrl url) {
@@ -25,7 +24,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public InputStream loadData(Priority priority) throws Exception {
-        request = new Request.Builder()
+        Request request = new Request.Builder()
                 .url(url.toString())
                 .build();
 
@@ -56,5 +55,10 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     @Override
     public void cancel() {
         // TODO: call cancel on the client when this method is called on a background thread. See #257
+    }
+
+    @Override
+    public Class<InputStream> getDataClass() {
+        return InputStream.class;
     }
 }

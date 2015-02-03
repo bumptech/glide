@@ -8,11 +8,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Attempts to decode and transcode  resource type from a given data type.
+ * @param <DataType> The type of data ResourceType that will be decoded from.
+ * @param <ResourceType> The type of intermediate resource that will be decoded.
+ * @param <Transcode> The final type of resource that will be transcoded from ResourceType and returned to the caller.
+ */
 public class DecodePath<DataType, ResourceType, Transcode> {
-
-    interface DecodeCallback<ResourceType> {
-        Resource<ResourceType> onResourceDecoded(Resource<ResourceType> resource);
-    }
 
     private final Class<DataType> dataClass;
     private final Class<ResourceType> resourceClass;
@@ -68,5 +70,9 @@ public class DecodePath<DataType, ResourceType, Transcode> {
                 + ", decoders=" + decoders
                 + ", transcoder=" + transcoder
                 + '}';
+    }
+
+    interface DecodeCallback<ResourceType> {
+        Resource<ResourceType> onResourceDecoded(Resource<ResourceType> resource);
     }
 }

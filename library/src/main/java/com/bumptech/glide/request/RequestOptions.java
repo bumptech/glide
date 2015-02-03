@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
 
@@ -218,9 +217,8 @@ public class RequestOptions implements Cloneable {
     }
 
     /**
-     * Overrides the {@link Target}'s width and height with the given values. This is useful almost exclusively for
-     * thumbnails, and should only be used when you both need a very specific sized image and when it is impossible or
-     * impractical to return that size from {@link Target#getSize(com.bumptech.glide.request.target.SizeReadyCallback)}.
+     * Overrides the {@link com.bumptech.glide.request.target.Target}'s width and height with the given values. This is
+     * useful for thumbnails, and should only be used for other cases when you need a very specific image size.
      *
      * @param width The width in pixels to use to load the resource.
      * @param height The height in pixels to use to load the resource.

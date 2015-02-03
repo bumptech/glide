@@ -5,10 +5,10 @@ import android.content.Context;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
 
@@ -16,6 +16,22 @@ import java.io.InputStream;
  *  A simple model loader for fetching media over http/https using Volley.
  */
 public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
+
+    private final RequestQueue requestQueue;
+
+    public VolleyUrlLoader(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
+    }
+
+    @Override
+    public DataFetcher<InputStream> getDataFetcher(GlideUrl url, int width, int height) {
+        return new VolleyStreamFetcher(requestQueue, url, new VolleyRequestFuture<InputStream>());
+    }
+
+    @Override
+    public boolean handles(GlideUrl url) {
+        return true;
+    }
 
     /**
      * The default factory for {@link VolleyUrlLoader}s.
@@ -50,7 +66,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         }
 
         @Override
-        public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<GlideUrl, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
             return new VolleyUrlLoader(requestQueue);
         }
 
@@ -58,16 +74,5 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         public void teardown() {
             // Do nothing, this instance doesn't own the request queue.
         }
-    }
-
-    private final RequestQueue requestQueue;
-
-    public VolleyUrlLoader(RequestQueue requestQueue) {
-        this.requestQueue = requestQueue;
-    }
-
-    @Override
-    public DataFetcher<InputStream> getResourceFetcher(GlideUrl url, int width, int height) {
-        return new VolleyStreamFetcher(requestQueue, url, new VolleyRequestFuture<InputStream>());
     }
 }

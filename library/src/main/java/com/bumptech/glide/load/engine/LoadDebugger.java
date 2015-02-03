@@ -6,7 +6,10 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.File;
 import java.util.List;
 
-public interface LoadDebugger {
+/**
+ * An interface for collecting loggable data about how a particular request attempts to obtain its resource.
+ */
+interface LoadDebugger {
     void startDecodeResultFromCache();
 
     void endDecodeResultFromCache();

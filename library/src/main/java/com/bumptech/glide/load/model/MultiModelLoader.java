@@ -39,8 +39,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public String toString() {
-        return "MultiModelLoader{" +
-                "modelLoaders=" + Arrays.toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) +
-                '}';
+        return "MultiModelLoader{"
+                + "modelLoaders=" + Arrays.toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()]))
+                + '}';
     }
 }

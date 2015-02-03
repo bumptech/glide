@@ -155,8 +155,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
                     ? (DecodeFormat) options.get(KEY_DECODE_FORMAT) :  DecodeFormat.DEFAULT;
 
             final Bitmap downsampled =
-                    downsampleWithSize(invalidatingStream, bufferedStream, bitmapFactoryOptions, pool, inWidth, inHeight, sampleSize,
-                            decodeFormat);
+                    downsampleWithSize(invalidatingStream, bufferedStream, bitmapFactoryOptions, pool, inWidth,
+                            inHeight, sampleSize, decodeFormat);
 
             // BitmapFactory swallows exceptions during decodes and in some cases when inBitmap is non null, may catch
             // and log a stack trace but still return a non null bitmap. To avoid displaying partially decoded bitmaps,

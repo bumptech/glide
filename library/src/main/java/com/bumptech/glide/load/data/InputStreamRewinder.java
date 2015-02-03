@@ -10,19 +10,6 @@ import java.io.InputStream;
  * Implementation for {@link InputStream}s that rewinds streams by wrapping them in a buffered stream.
  */
 public final class InputStreamRewinder implements DataRewinder<InputStream> {
-    public static class Factory implements DataRewinder.Factory<InputStream> {
-
-        @Override
-        public DataRewinder<InputStream> build(InputStream data) {
-            return new InputStreamRewinder(data);
-        }
-
-        @Override
-        public Class getDataClass() {
-            return InputStream.class;
-        }
-    }
-
     // 5mb.
     private static final int MARK_LIMIT = 5 * 1024 * 1024;
 
@@ -46,4 +33,22 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
     public void cleanup() {
         ByteArrayPool.get().releaseBytes(buffer);
     }
+
+     /**
+     * Factory for producing {@link com.bumptech.glide.load.data.InputStreamRewinder}s from
+     * {@link java.io.InputStream}s.
+     */
+    public static class Factory implements DataRewinder.Factory<InputStream> {
+
+        @Override
+        public DataRewinder<InputStream> build(InputStream data) {
+            return new InputStreamRewinder(data);
+        }
+
+        @Override
+        public Class getDataClass() {
+            return InputStream.class;
+        }
+    }
+
 }

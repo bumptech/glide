@@ -74,7 +74,7 @@ public class TranscoderRegistry {
         private final Class<R> toClass;
         private final ResourceTranscoder<Z, R> transcoder;
 
-        private Entry(Class<Z> fromClass, Class<R> toClass, ResourceTranscoder<Z, R> transcoder) {
+        Entry(Class<Z> fromClass, Class<R> toClass, ResourceTranscoder<Z, R> transcoder) {
             this.fromClass = fromClass;
             this.toClass = toClass;
             this.transcoder = transcoder;

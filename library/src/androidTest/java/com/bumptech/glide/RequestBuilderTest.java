@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import android.widget.ImageView;
 
+import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.Request;
@@ -132,6 +133,7 @@ public class RequestBuilderTest {
 
     private RequestBuilder getNullModelRequest() {
         when(glideContext.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(mock(Target.class));
+        when(glideContext.getDecodeOptions()).thenReturn(new DecodeOptions(Robolectric.application));
         return new RequestBuilder(glideContext, Object.class, requestTracker, lifecycle)
                 .load((Object) null);
     }

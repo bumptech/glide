@@ -27,7 +27,8 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
                     )
             )
     );
-    private ModelLoader<GlideUrl, InputStream> urlLoader;
+
+    private final ModelLoader<GlideUrl, InputStream> urlLoader;
 
     public HttpUriLoader(ModelLoader<GlideUrl, InputStream> urlLoader) {
         this.urlLoader = urlLoader;

@@ -37,7 +37,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     private final BaseDecodeOptions<?> decodeOptions;
     private final RequestOptions requestOptions;
     private final LoadDebugger debugger = Log.isLoggable(TAG, Log.VERBOSE)
-            ? new LoadDebuggerImpl() : new EmptyLoadDebugger();
+            ? new PrettyPrintDebugger() : new EmptyLoadDebugger();
 
     private DataFetcherSet<?> fetchers;
 
@@ -138,7 +138,8 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
         return glideContext.getSourceEncoder(data);
     }
 
-    DataFetcherSet<?> getDataFetchers(File file, int width, int height) throws GlideContext.NoModelLoaderAvailableException {
+    DataFetcherSet<?> getDataFetchers(File file, int width, int height)
+            throws GlideContext.NoModelLoaderAvailableException {
         return glideContext.getDataFetchers(file, width, height);
     }
 

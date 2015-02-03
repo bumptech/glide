@@ -2,12 +2,10 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapAnimationOptions;
 import com.bumptech.glide.load.resource.drawable.DrawableAnimationOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -163,10 +161,10 @@ public class RequestManager implements LifecycleListener {
     }
 
     /**
-     * Attempts to always load the resource using any registered {@link ResourceDecoder}s that can decode any
-     * subclass of {@link Drawable}. By default, may return either a {@link BitmapDrawable} or {@link GifDrawable},
-     * but if additional decoders are registered for other {@link Drawable} subclasses, any of those subclasses may
-     * also be returned.
+     * Attempts to always load the resource using any registered {@link com.bumptech.glide.load.ResourceDecoder}s that
+     * can decode any subclass of {@link Drawable}. By default, may return either a
+     * {@link android.graphics.drawable.BitmapDrawable} or {@link GifDrawable}, but if additional decoders are
+     * registered for other {@link Drawable} subclasses, any of those subclasses may also be returned.
      *
      * @return A new request builder for loading a {@link Drawable}.
      */
@@ -175,8 +173,8 @@ public class RequestManager implements LifecycleListener {
     }
 
     /**
-     * Attempts to load the resource using any registered {@link ResourceDecoder}s that can decode the given resource
-     * class or any subclass of the given resource class.
+     * Attempts to load the resource using any registered {@link com.bumptech.glide.load.ResourceDecoder}s that can
+     * decode the given resource class or any subclass of the given resource class.
      *
      * @param resourceClass The resource to decode.
      * @return A new request builder for loading the given resource class.

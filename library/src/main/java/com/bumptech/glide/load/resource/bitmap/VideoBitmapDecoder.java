@@ -54,7 +54,8 @@ public class VideoBitmapDecoder implements BitmapDecoder<ParcelFileDescriptor> {
             Map<String, Object> options) throws IOException {
         int frame = options.containsKey(KEY_TARGET_FRAME) ? (Integer) options.get(KEY_TARGET_FRAME) : DEFAULT_FRAME;
         if (frame < 0 && frame != DEFAULT_FRAME) {
-            throw new IllegalArgumentException("Requested frame must be non-negative, or DEFAULT_FRAME, given: " + frame);
+            throw new IllegalArgumentException("Requested frame must be non-negative, or DEFAULT_FRAME, given: "
+                    + frame);
         }
 
         MediaMetadataRetriever mediaMetadataRetriever = factory.build();

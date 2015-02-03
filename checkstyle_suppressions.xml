@@ -7,6 +7,6 @@
 <suppressions>
     <suppress files=".*[/\\]library[/\\]src[/\\]androidTest[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]gif_encoder[/\\].*" checks=".*"/>
-    <suppress files=".*RequestBuilder.java|ChildLoadProvider.java" checks="NoClone" />
+    <suppress files=".*RequestBuilder.java|ChildLoadProvider.java|AnimationOptions.java|BaseDecodeOptions.java|RequestOptions.java" checks="NoClone" />
 </suppressions>
 

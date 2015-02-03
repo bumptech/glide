@@ -7,7 +7,10 @@
     <exclude name="AvoidBranchingStatementAsLastInLoop" />
   </rule>
   <rule ref="rulesets/java/braces.xml" />
-  <rule ref="rulesets/java/strings.xml" />
+  <rule ref="rulesets/java/strings.xml">
+      <!-- TODO: This warns about annotations, apparently fixed in a later version. -->
+      <exclude name="AvoidDuplicateLiterals" />
+  </rule>
   <rule ref="rulesets/java/unusedcode.xml" />
 
   <rule ref="rulesets/java/design.xml" >
@@ -28,4 +31,6 @@
       <property name="allowCommentedBlocks" value="true" />
     </properties>
   </rule>
+
+
 </ruleset>

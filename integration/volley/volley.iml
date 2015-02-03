@@ -83,7 +83,6 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
       <excludeFolder url="file://$MODULE_DIR$/build/libs" />
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
-      <excludeFolder url="file://$MODULE_DIR$/build/poms" />
       <excludeFolder url="file://$MODULE_DIR$/build/reports" />
       <excludeFolder url="file://$MODULE_DIR$/build/test-classes" />
       <excludeFolder url="file://$MODULE_DIR$/build/test-report" />
@@ -117,5 +116,6 @@
     <orderEntry type="library" exported="" scope="TEST" name="bcprov-jdk15on-1.48" level="project" />
     <orderEntry type="module" module-name="testutil" exported="" />
     <orderEntry type="module" module-name="glide" exported="" />
+    <orderEntry type="module" module-name="library" />
   </component>
 </module>
