@@ -3,8 +3,8 @@ Glide
 
 [![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=master)](https://travis-ci.org/bumptech/glide)
 
-Glide is a fast and efficient open source media management framework for Android that wraps media decoding, memory and
-disk caching, and resource pooling into a simple and easy to use interface.
+Glide is a fast and efficient open source media management and image loading framework for Android that wraps media
+decoding, memory and disk caching, and resource pooling into a simple and easy to use interface.
 
 ![](static/glide_logo.png)
 
