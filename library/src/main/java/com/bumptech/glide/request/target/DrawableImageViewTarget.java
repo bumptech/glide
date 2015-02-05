@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.transition.Transition;
 
 /**
  * A target for display {@link Drawable} objects in {@link ImageView}s.
@@ -24,7 +24,7 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
     }
 
     @Override
-    public void onResourceReady(Drawable resource, GlideAnimation<? super Drawable> glideAnimation) {
+    public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
 
         // This is a dirty hack that tries to make loading square thumbnails and then square full images less costly
@@ -36,7 +36,7 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
                 && layoutParams.height > 0) {
             resource = new FixedSizeDrawable(resource, layoutParams.width, layoutParams.height);
         }
-        super.onResourceReady(resource, glideAnimation);
+        super.onResourceReady(resource, transition);
         if (resource instanceof Animatable) {
             ((Animatable) resource).start();
         }

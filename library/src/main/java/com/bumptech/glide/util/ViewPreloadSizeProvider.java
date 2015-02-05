@@ -3,9 +3,9 @@ package com.bumptech.glide.util;
 import android.view.View;
 
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import java.util.Arrays;
 
@@ -80,7 +80,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
         }
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
+        public void onResourceReady(Object resource, Transition transition) {
             // Do nothing
         }
     }

@@ -6,10 +6,10 @@ import android.util.Log;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
@@ -56,7 +56,7 @@ public final class SingleRequest<R> implements Request,
     private Target<R> target;
     private RequestListener<R> requestListener;
     private Engine engine;
-    private GlideAnimationFactory<? super R> animationFactory;
+    private TransitionFactory<? super R> animationFactory;
     private Drawable placeholderDrawable;
     private Drawable errorDrawable;
     private boolean loadedFromMemoryCache;
@@ -74,7 +74,7 @@ public final class SingleRequest<R> implements Request,
             RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
-            GlideAnimationFactory<? super R> animationFactory) {
+            TransitionFactory<? super R> animationFactory) {
         @SuppressWarnings("unchecked") SingleRequest<R> request = (SingleRequest<R>) REQUEST_POOL.poll();
         if (request == null) {
             request = new SingleRequest<R>();
@@ -105,7 +105,7 @@ public final class SingleRequest<R> implements Request,
             RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
-            GlideAnimationFactory<? super R> animationFactory) {
+            TransitionFactory<? super R> animationFactory) {
         this.requestContext = requestContext;
         this.model = model;
         this.requestOptions = requestOptions;
@@ -367,7 +367,7 @@ public final class SingleRequest<R> implements Request,
     private void onResourceReady(Resource<R> resource, R result) {
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstReadyResource())) {
-            GlideAnimation<? super R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
+            Transition<? super R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
             target.onResourceReady(result, animation);
         }
 

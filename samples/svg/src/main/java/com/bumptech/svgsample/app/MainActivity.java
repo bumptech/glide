@@ -1,6 +1,6 @@
 package com.bumptech.svgsample.app;
 
-import static com.bumptech.glide.load.resource.drawable.DrawableAnimationOptions.withCrossFade;
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 
@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
                 .as(PictureDrawable.class)
                 .apply(placeholderOf(R.drawable.image_loading)
                         .error(R.drawable.image_error))
-                .animate(withCrossFade())
+                .transition(withCrossFade())
                 .listener(new SvgSoftwareLayerSetter());
     }
 

@@ -4,7 +4,7 @@ import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.transition.Transition;
 
 /**
  * An interface that Glide can load a resource into and notify of relevant lifecycle events during a load.
@@ -68,7 +68,7 @@ public interface Target<R> extends LifecycleListener {
      *
      * @param resource the loaded resource.
      */
-    void onResourceReady(R resource, GlideAnimation<? super R> glideAnimation);
+    void onResourceReady(R resource, Transition<? super R> transition);
 
     /**
      * A lifecycle callback that is called when a load is cancelled and its resources are freed.

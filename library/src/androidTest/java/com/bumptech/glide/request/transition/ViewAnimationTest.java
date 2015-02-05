@@ -1,6 +1,6 @@
-package com.bumptech.glide.request.animation;
+package com.bumptech.glide.request.transition;
 
-import static com.bumptech.glide.request.animation.GlideAnimation.ViewAdapter;
+import static com.bumptech.glide.request.transition.Transition.ViewAdapter;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -21,38 +21,38 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ViewAnimationTest {
-    private ViewAnimation<Object> viewAnimation;
+    private ViewTransition<Object> viewAnimation;
     private ViewAdapter adapter;
     private ImageView view;
-    private ViewAnimation.AnimationFactory animationFactory;
+    private ViewTransition.ViewTransitionAnimationFactory viewTransitionAnimationFactory;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        animationFactory = mock(ViewAnimation.AnimationFactory.class);
+        viewTransitionAnimationFactory = mock(ViewTransition.ViewTransitionAnimationFactory.class);
         view = mock(ImageView.class);
         adapter = mock(ViewAdapter.class);
         when(adapter.getView()).thenReturn(view);
-        viewAnimation = new ViewAnimation<Object>(animationFactory);
+        viewAnimation = new ViewTransition<Object>(viewTransitionAnimationFactory);
     }
 
     @Test
     public void testClearsAnimationOnAnimate() {
-        viewAnimation.animate(null, adapter);
+        viewAnimation.transition(null, adapter);
 
         verify(view).clearAnimation();
     }
 
     @Test
     public void testAlwaysReturnsFalse() {
-        assertFalse(viewAnimation.animate(null, adapter));
+        assertFalse(viewAnimation.transition(null, adapter));
     }
 
     @Test
     public void testStartsAnimationOnAnimate() {
         Animation animation = mock(Animation.class);
-        when(animationFactory.build(any(Context.class))).thenReturn(animation);
-        viewAnimation.animate(null, adapter);
+        when(viewTransitionAnimationFactory.build(any(Context.class))).thenReturn(animation);
+        viewAnimation.transition(null, adapter);
         verify(view).clearAnimation();
         verify(view).startAnimation(eq(animation));
     }

@@ -13,7 +13,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.transition.Transition;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,8 +74,8 @@ public class ImageViewTargetTest {
 
     @Test
     public void testSetsDrawableOnViewInOnResourceReadyWhenAnimationReturnsFalse() {
-        GlideAnimation<Drawable> animation = mock(GlideAnimation.class);
-        when(animation.animate(any(Drawable.class), eq(target))).thenReturn(false);
+        Transition<Drawable> animation = mock(Transition.class);
+        when(animation.transition(any(Drawable.class), eq(target))).thenReturn(false);
         Drawable resource = new ColorDrawable(Color.GRAY);
         target.onResourceReady(resource, animation);
 
@@ -85,8 +85,8 @@ public class ImageViewTargetTest {
     @Test
     public void testDoesNotSetDrawableOnViewInOnResourceReadyWhenAnimationReturnsTrue() {
         Drawable resource = new ColorDrawable(Color.RED);
-        GlideAnimation<Drawable> animation = mock(GlideAnimation.class);
-        when(animation.animate(eq(resource), eq(target))).thenReturn(true);
+        Transition<Drawable> animation = mock(Transition.class);
+        when(animation.transition(eq(resource), eq(target))).thenReturn(true);
         target.onResourceReady(resource, animation);
 
         assertNull(target.resource);
@@ -97,11 +97,11 @@ public class ImageViewTargetTest {
         Drawable placeholder = new ColorDrawable(Color.BLACK);
         view.setImageDrawable(placeholder);
 
-        GlideAnimation<Drawable> animation = mock(GlideAnimation.class);
+        Transition<Drawable> animation = mock(Transition.class);
 
         target.onResourceReady(new ColorDrawable(Color.GREEN), animation);
 
-        verify(animation).animate(eq(placeholder), eq(target));
+        verify(animation).transition(eq(placeholder), eq(target));
     }
 
     private static class TestTarget extends ImageViewTarget<Drawable> {

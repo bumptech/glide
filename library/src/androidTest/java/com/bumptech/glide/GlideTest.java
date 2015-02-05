@@ -44,9 +44,9 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.testutil.TestResourceUtil;
 
@@ -238,7 +238,7 @@ public class GlideTest {
         requestManager.asDrawable().load(file).into(target);
         requestManager.asDrawable().load(file).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(Resource.class), any(Transition.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -251,7 +251,7 @@ public class GlideTest {
         requestManager.asDrawable().load(url).into(target);
         requestManager.asDrawable().load(url).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(Resource.class), any(Transition.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -264,7 +264,7 @@ public class GlideTest {
 
         requestManager.asBitmap().load(uri).into(target);
 
-        verify(target).onResourceReady(any(Bitmap.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(Bitmap.class), any(Transition.class));
     }
 
     @Test
@@ -278,7 +278,7 @@ public class GlideTest {
                 .load(uri)
                 .into(target);
 
-        verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(byte[].class), any(Transition.class));
     }
 
     @Test
@@ -305,7 +305,7 @@ public class GlideTest {
         requestManager.asDrawable().load(uri).into(target);
         requestManager.asDrawable().load(uri).into(imageView);
 
-        verify(target).onResourceReady(anyObject(), any(GlideAnimation.class));
+        verify(target).onResourceReady(anyObject(), any(Transition.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -384,7 +384,7 @@ public class GlideTest {
                 .into(target);
         requestManager.asDrawable().load(string).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(Resource.class), any(Transition.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -414,7 +414,7 @@ public class GlideTest {
         requestManager.asDrawable().load(integer).into(target);
         requestManager.asDrawable().load(integer).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(Resource.class), any(Transition.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -426,7 +426,7 @@ public class GlideTest {
         requestManager.asDrawable().load(bytes).into(target);
         requestManager.asDrawable().load(bytes).into(imageView);
 
-        verify(target).onResourceReady(any(Resource.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(Resource.class), any(Transition.class));
         verify(target).setRequest((Request) notNull());
 
         assertNotNull(imageView.getDrawable());
@@ -470,7 +470,7 @@ public class GlideTest {
                 .load(fakeUri)
                 .into(target);
 
-        verify(target).onResourceReady(any(GifDrawable.class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(GifDrawable.class), any(Transition.class));
     }
 
     @Test
@@ -485,7 +485,7 @@ public class GlideTest {
                 .load(fakeUri)
                 .into(target);
 
-        verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(byte[].class), any(Transition.class));
     }
 
     @Test
@@ -498,7 +498,7 @@ public class GlideTest {
                 .load(fakeUri)
                 .into(target);
 
-        verify(target).onResourceReady(any(byte[].class), any(GlideAnimation.class));
+        verify(target).onResourceReady(any(byte[].class), any(Transition.class));
     }
 
     @Test
@@ -512,7 +512,7 @@ public class GlideTest {
                         .load(thumb))
                 .into(target);
 
-        verify(target, times(2)).onResourceReady(any(Drawable.class), any(GlideAnimation.class));
+        verify(target, times(2)).onResourceReady(any(Drawable.class), any(Transition.class));
     }
 
     @Test
@@ -533,7 +533,7 @@ public class GlideTest {
                         )
                 )
                 .into(target);
-        verify(target, times(4)).onResourceReady(any(Drawable.class), any(GlideAnimation.class));
+        verify(target, times(4)).onResourceReady(any(Drawable.class), any(Transition.class));
     }
 
     @Test
@@ -547,7 +547,7 @@ public class GlideTest {
                         .thumbnail(0.5f)
                 )
                 .into(target);
-        verify(target, times(3)).onResourceReady(any(Drawable.class), any(GlideAnimation.class));
+        verify(target, times(3)).onResourceReady(any(Drawable.class), any(Transition.class));
     }
 
     @Test

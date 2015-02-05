@@ -1,4 +1,4 @@
-package com.bumptech.glide.request.animation;
+package com.bumptech.glide.request.transition;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -27,18 +27,18 @@ public class DrawableCrossFadeFactoryTest {
 
     @Test
     public void testReturnsNoAnimationIfFromMemoryCache() {
-        assertEquals(NoAnimation.<Drawable>get(), factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/));
+        assertEquals(NoTransition.<Drawable>get(), factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/));
     }
 
     @Test
     public void testReturnsReturnsAnimationIfNotFromMemoryCacheAndIsFirstResource() {
-        assertNotEquals(NoAnimation.<Drawable>get(),
+        assertNotEquals(NoTransition.<Drawable>get(),
                 factory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/));
     }
 
     @Test
     public void testReturnsAnimationIfNotFromMemocyCacheAndNotIsFirstResource() {
-        assertNotEquals(NoAnimation.<Drawable>get(),
+        assertNotEquals(NoTransition.<Drawable>get(),
                 factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/));
     }
 }

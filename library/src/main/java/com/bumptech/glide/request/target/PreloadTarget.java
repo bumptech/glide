@@ -1,7 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.transition.Transition;
 
 /**
  * A one time use {@link com.bumptech.glide.request.target.Target} class that loads a resource into memory and then
@@ -27,7 +27,7 @@ public final class PreloadTarget<Z> extends SimpleTarget<Z> {
     }
 
     @Override
-    public void onResourceReady(Z resource, GlideAnimation<? super Z> glideAnimation) {
+    public void onResourceReady(Z resource, Transition<? super Z> transition) {
         Glide.clear(this);
     }
 }

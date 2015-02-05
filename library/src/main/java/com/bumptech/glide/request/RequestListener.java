@@ -43,13 +43,13 @@ public interface RequestListener<R> {
 
     /**
      * Called when a load completes successfully, immediately after
-     * {@link Target#onResourceReady(Object, com.bumptech.glide.request.animation.GlideAnimation)}.
+     * {@link Target#onResourceReady(Object, com.bumptech.glide.request.transition.Transition)}.
      *
      * @param resource The resource that was loaded for the target.
      * @param model The specific model that was used to load the image.
      * @param target The target the model was loaded into.
      * @param isFromMemoryCache True if the load completed synchronously (useful for determining whether or not to
-     *                          animate)
+     *                          run a transition)
      * @param isFirstResource True if this is the first resource to in this load to be loaded into the target. For
      *                        example when loading a thumbnail and a fullsize image, this will be true for the first
      *                        image to load and false for the second.

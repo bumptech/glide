@@ -1,7 +1,7 @@
 package com.bumptech.glide.samples.flickr;
 
 import static com.bumptech.glide.load.engine.DecodeOptions.centerCrop;
-import static com.bumptech.glide.load.resource.drawable.DrawableAnimationOptions.withCrossFade;
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 
@@ -78,7 +78,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
 
         thumbRequest = Glide.with(FlickrPhotoList.this)
                 .asDrawable()
-                .animate(withCrossFade())
+                .transition(withCrossFade())
                 .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
 

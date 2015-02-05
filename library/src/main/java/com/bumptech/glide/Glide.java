@@ -56,10 +56,10 @@ import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
@@ -460,7 +460,7 @@ public class Glide implements ComponentCallbacks2 {
         }
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation<? super Object> glideAnimation) {
+        public void onResourceReady(Object resource, Transition<? super Object> transition) {
             // Do nothing.
         }
     }

@@ -1,31 +1,30 @@
-package com.bumptech.glide.request.animation;
+package com.bumptech.glide.request.transition;
 
 import android.view.View;
 
 /**
- * A {@link com.bumptech.glide.request.animation.GlideAnimation GlideAnimation} that accepts an interface
- * that can apply an animation like a {@link android.view.ViewPropertyAnimator}
- * or a {@link android.animation.ObjectAnimator} to an {@link View}.
+ * A {@link Transition} that accepts an interface that can apply an animation like
+ * a {@link android.view.ViewPropertyAnimator} or a {@link android.animation.ObjectAnimator} that can be used to
+ * transition a resource into a {@link View}.
  *
- * @param <R> The type of the resource displayed in the view that is animated
+ * @param <R> The type of the resource that will be transitioned into a view.
  */
-public class ViewPropertyAnimation<R> implements GlideAnimation<R> {
+public class ViewPropertyTransition<R> implements Transition<R> {
 
     private final Animator animator;
 
     /**
      * Constructor for a view property animation that takes an
-     * {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} interface that can apply an animation
-     * to a view.
+     * {@link ViewPropertyTransition.Animator} interface that can apply a transition to a view.
      *
      * @param animator The animator to use.
      */
-    public ViewPropertyAnimation(Animator animator) {
+    public ViewPropertyTransition(Animator animator) {
         this.animator = animator;
     }
 
     /**
-     * Always applies the {@link com.bumptech.glide.request.animation.ViewPropertyAnimation.Animator} given in the
+     * Always applies the {@link ViewPropertyTransition.Animator} given in the
      * constructor to the given view and returns {@code false} because the animator cannot set the new resource on
      * the view.
      *
@@ -34,7 +33,7 @@ public class ViewPropertyAnimation<R> implements GlideAnimation<R> {
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(R current, ViewAdapter adapter) {
+    public boolean transition(R current, ViewAdapter adapter) {
         final View view = adapter.getView();
         if (view != null) {
             animator.animate(adapter.getView());
@@ -49,7 +48,7 @@ public class ViewPropertyAnimation<R> implements GlideAnimation<R> {
         /**
          * Starts an animation on the given {@link android.view.View}.
          *
-         * @param view The view to animate.
+         * @param view The view to transition.
          */
         void animate(View view);
     }

@@ -6,8 +6,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.bumptech.glide.load.resource.bitmap.BitmapAnimationOptions;
-import com.bumptech.glide.load.resource.drawable.DrawableAnimationOptions;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
@@ -142,7 +142,7 @@ public class RequestManager implements LifecycleListener {
      * @return A new request builder for loading a {@link android.graphics.Bitmap}
      */
     public RequestBuilder<Bitmap> asBitmap() {
-        return as(Bitmap.class).animate(new BitmapAnimationOptions());
+        return as(Bitmap.class).transition(new BitmapTransitionOptions());
     }
 
     /**
@@ -157,7 +157,7 @@ public class RequestManager implements LifecycleListener {
      * @return A new request builder for loading a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
      */
     public RequestBuilder<GifDrawable> asGif() {
-        return as(GifDrawable.class).animate(new DrawableAnimationOptions());
+        return as(GifDrawable.class).transition(new DrawableTransitionOptions());
     }
 
     /**
@@ -169,7 +169,7 @@ public class RequestManager implements LifecycleListener {
      * @return A new request builder for loading a {@link Drawable}.
      */
     public RequestBuilder<Drawable> asDrawable() {
-        return as(Drawable.class).animate(new DrawableAnimationOptions());
+        return as(Drawable.class).transition(new DrawableTransitionOptions());
     }
 
     /**

@@ -38,8 +38,8 @@ import java.util.UUID;
  */
 public class RequestBuilder<TranscodeType> implements Cloneable {
     private static final RequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
-    private static final AnimationOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
-            new GenericAnimationOptions<Object>();
+    private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
+            new GenericTransitionOptions<Object>();
     private static final RequestOptions DOWNLOAD_ONLY_OPTIONS = new RequestOptions()
             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
             .priority(Priority.LOW)
@@ -51,8 +51,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
 
     private BaseDecodeOptions<?> decodeOptions;
     private RequestOptions requestOptions = DEFAULT_REQUEST_OPTIONS;
-    private AnimationOptions<?, ? super TranscodeType> animationOptions =
-            (AnimationOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
+    private TransitionOptions<?, ? super TranscodeType> transitionOptions =
+            (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
 
     private Object model;
     // model may occasionally be null, so to enforce that load() was called, set a boolean rather than relying on model
@@ -85,9 +85,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         return this;
     }
 
-    public RequestBuilder<TranscodeType> animate(
-            AnimationOptions<?, ? super TranscodeType> animationOptions) {
-        this.animationOptions = Preconditions.checkNotNull(animationOptions);
+    public RequestBuilder<TranscodeType> transition(
+            TransitionOptions<?, ? super TranscodeType> transitionOptions) {
+        this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
         return this;
     }
 
@@ -330,7 +330,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
             RequestBuilder<TranscodeType> result =
                     (RequestBuilder<TranscodeType>) super.clone();
             result.requestOptions = result.requestOptions.clone();
-            result.animationOptions = result.animationOptions.clone();
+            result.transitionOptions = result.transitionOptions.clone();
             result.decodeOptions = decodeOptions.clone();
             return result;
         } catch (CloneNotSupportedException e) {
@@ -520,8 +520,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     private Request buildRequestRecursive(Target<TranscodeType> target, ThumbnailRequestCoordinator parentCoordinator) {
         if (thumbnailBuilder != null) {
             // Recursive case: contains a potentially recursive thumbnail request builder.
-            if (DEFAULT_ANIMATION_OPTIONS.equals(thumbnailBuilder.animationOptions)) {
-                thumbnailBuilder.animationOptions = animationOptions;
+            if (DEFAULT_ANIMATION_OPTIONS.equals(thumbnailBuilder.transitionOptions)) {
+                thumbnailBuilder.transitionOptions = transitionOptions;
             }
 
             if (!thumbnailBuilder.requestOptions.isPrioritySet()) {
@@ -564,6 +564,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
                 new RequestContext<TranscodeType>(context, model, transcodeClass, decodeOptions, requestOptions);
 
         return SingleRequest.obtain(requestContext, model, transcodeClass, requestOptions, target, requestListener,
-                requestCoordinator, context.getEngine(), animationOptions.getAnimationFactory());
+                requestCoordinator, context.getEngine(), transitionOptions.getTransitionFactory());
     }
 }

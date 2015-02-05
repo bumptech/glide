@@ -1,25 +1,25 @@
-package com.bumptech.glide.request.animation;
+package com.bumptech.glide.request.transition;
 
 import android.content.Context;
 import android.view.View;
 import android.view.animation.Animation;
 
 /**
- * A {@link com.bumptech.glide.request.animation.GlideAnimation GlideAnimation} that can apply a
- * {@link android.view.animation.Animation Animation} to a {@link android.view.View View} using
+ * A {@link Transition} that can apply a {@link android.view.animation.Animation Animation} to a
+ * {@link android.view.View View} using
  * {@link android.view.View#startAnimation(android.view.animation.Animation) View.startAnimation}.
  *
- * @param <R> The type of the resource displayed in the view that is animated
+ * @param <R> The type of the resource that will be transitioned into a view.
  */
-public class ViewAnimation<R> implements GlideAnimation<R> {
+public class ViewTransition<R> implements Transition<R> {
 
-    private final AnimationFactory animationFactory;
+    private final ViewTransitionAnimationFactory viewTransitionAnimationFactory;
 
     /**
      * Constructs a new ViewAnimation that will start the given {@link android.view.animation.Animation}.
      */
-    ViewAnimation(AnimationFactory animationFactory) {
-        this.animationFactory = animationFactory;
+    ViewTransition(ViewTransitionAnimationFactory viewTransitionAnimationFactory) {
+        this.viewTransitionAnimationFactory = viewTransitionAnimationFactory;
     }
 
     /**
@@ -33,18 +33,18 @@ public class ViewAnimation<R> implements GlideAnimation<R> {
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(R current, ViewAdapter adapter) {
+    public boolean transition(R current, ViewAdapter adapter) {
         View view = adapter.getView();
         if (view != null) {
             view.clearAnimation();
-            Animation animation = animationFactory.build(view.getContext());
+            Animation animation = viewTransitionAnimationFactory.build(view.getContext());
             view.startAnimation(animation);
         }
 
         return false;
     }
 
-    interface AnimationFactory {
+    interface ViewTransitionAnimationFactory {
         Animation build(Context context);
     }
 }

@@ -1,6 +1,6 @@
-package com.bumptech.glide.request.animation;
+package com.bumptech.glide.request.transition;
 
-import static com.bumptech.glide.request.animation.GlideAnimation.ViewAdapter;
+import static com.bumptech.glide.request.transition.Transition.ViewAdapter;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -22,18 +22,18 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ViewPropertyAnimationTest {
-    private ViewPropertyAnimation.Animator animator;
-    private ViewPropertyAnimation animation;
+    private ViewPropertyTransition.Animator animator;
+    private ViewPropertyTransition animation;
 
     @Before
     public void setUp() {
-        animator = mock(ViewPropertyAnimation.Animator.class);
-        animation = new ViewPropertyAnimation(animator);
+        animator = mock(ViewPropertyTransition.Animator.class);
+        animation = new ViewPropertyTransition(animator);
     }
 
     @Test
     public void testAlwaysReturnsFalse() {
-        assertFalse(animation.animate(new Object(), mock(ViewAdapter.class)));
+        assertFalse(animation.transition(new Object(), mock(ViewAdapter.class)));
     }
 
     @Test
@@ -41,7 +41,7 @@ public class ViewPropertyAnimationTest {
         ImageView view = new ImageView(Robolectric.application);
         ViewAdapter adapter = mock(ViewAdapter.class);
         when(adapter.getView()).thenReturn(view);
-        animation.animate(new Object(), adapter);
+        animation.transition(new Object(), adapter);
 
         verify(animator).animate(eq(view));
     }
@@ -49,7 +49,7 @@ public class ViewPropertyAnimationTest {
     @Test
     public void testDoesNotCallAnimatorIfGivenAdapterWithNullView() {
         ViewAdapter adapter = mock(ViewAdapter.class);
-        animation.animate(new Object(), adapter);
+        animation.transition(new Object(), adapter);
 
         verify(animator, never()).animate(any(View.class));
     }

@@ -20,7 +20,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.transition.Transition;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -501,7 +501,7 @@ public class ViewTargetTest {
         }
 
         @Override
-        public void onResourceReady(Object resource, GlideAnimation glideAnimation) {
+        public void onResourceReady(Object resource, Transition transition) {
 
         }
 

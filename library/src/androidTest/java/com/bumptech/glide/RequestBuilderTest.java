@@ -45,7 +45,7 @@ public class RequestBuilderTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenGlideAnimationFactoryIsNull() {
-        getNullModelRequest().animate(null);
+        getNullModelRequest().transition(null);
     }
 
     @Test

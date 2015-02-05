@@ -25,10 +25,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.request.transition.TransitionFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class SingleRequestTest {
         Drawable errorDrawable = null;
         RequestListener<List> requestListener = mock(RequestListener.class);
         DataFetcherSet dataFetcherSet = mock(DataFetcherSet.class);
-        GlideAnimationFactory<List> factory = mock(GlideAnimationFactory.class);
+        TransitionFactory<List> factory = mock(TransitionFactory.class);
         int overrideWidth = -1;
         int overrideHeight = -1;
         List result = new ArrayList();
@@ -444,7 +444,7 @@ public class SingleRequestTest {
         SingleRequest<List> request = harness.getRequest();
         request.onResourceReady(harness.resource);
 
-        verify(harness.target).onResourceReady(eq(harness.result), any(GlideAnimation.class));
+        verify(harness.target).onResourceReady(eq(harness.result), any(Transition.class));
     }
 
     @Test
@@ -454,7 +454,7 @@ public class SingleRequestTest {
                 anyBoolean(), anyBoolean())).thenReturn(false);
         request.onResourceReady(harness.resource);
 
-        verify(harness.target).onResourceReady(eq(harness.result), any(GlideAnimation.class));
+        verify(harness.target).onResourceReady(eq(harness.result), any(Transition.class));
     }
 
     @Test
@@ -464,7 +464,7 @@ public class SingleRequestTest {
                 anyBoolean(), anyBoolean())).thenReturn(true);
         request.onResourceReady(harness.resource);
 
-        verify(harness.target, never()).onResourceReady(any(List.class), any(GlideAnimation.class));
+        verify(harness.target, never()).onResourceReady(any(List.class), any(Transition.class));
     }
 
     @Test
@@ -590,11 +590,11 @@ public class SingleRequestTest {
     @Test
     public void testTargetIsCalledWithAnimationFromFactory() {
         SingleRequest<List> request = harness.getRequest();
-        GlideAnimation<List> glideAnimation = mock(GlideAnimation.class);
-        when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(glideAnimation);
+        Transition<List> transition = mock(Transition.class);
+        when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(transition);
         request.onResourceReady(harness.resource);
 
-        verify(harness.target).onResourceReady(eq(harness.result), eq(glideAnimation));
+        verify(harness.target).onResourceReady(eq(harness.result), eq(transition));
     }
 
     @Test
@@ -662,7 +662,7 @@ public class SingleRequestTest {
         request.cancel();
         request.begin();
 
-        verify(harness.target, times(2)).onResourceReady(eq(harness.result), any(GlideAnimation.class));
+        verify(harness.target, times(2)).onResourceReady(eq(harness.result), any(Transition.class));
     }
 
     @Test
@@ -746,7 +746,7 @@ public class SingleRequestTest {
         }
 
         @Override
-        public void onResourceReady(List resource, GlideAnimation<? super List> glideAnimation) {
+        public void onResourceReady(List resource, Transition<? super List> transition) {
             currentPlaceholder = null;
         }
 

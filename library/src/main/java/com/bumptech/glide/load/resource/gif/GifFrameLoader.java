@@ -17,8 +17,8 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
 
 import java.io.UnsupportedEncodingException;
@@ -162,7 +162,7 @@ class GifFrameLoader {
         }
 
         @Override
-        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
             this.resource = resource;
             Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
             handler.sendMessageAtTime(msg, targetTime);

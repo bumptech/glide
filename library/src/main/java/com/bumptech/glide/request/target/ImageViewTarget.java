@@ -3,7 +3,7 @@ package com.bumptech.glide.request.target;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.transition.Transition;
 
 /**
  * A base {@link com.bumptech.glide.request.target.Target} for displaying resources in
@@ -11,7 +11,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
  *
  * @param <Z> The type of resource that this target will display in the wrapped {@link android.widget.ImageView}.
  */
-public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implements GlideAnimation.ViewAdapter {
+public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implements Transition.ViewAdapter {
 
     public ImageViewTarget(ImageView view) {
         super(view);
@@ -71,8 +71,8 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
     }
 
     @Override
-    public void onResourceReady(Z resource, GlideAnimation<? super Z> glideAnimation) {
-        if (glideAnimation == null || !glideAnimation.animate(resource, this)) {
+    public void onResourceReady(Z resource, Transition<? super Z> transition) {
+        if (transition == null || !transition.transition(resource, this)) {
             setResource(resource);
         }
     }

@@ -3,8 +3,8 @@ package com.bumptech.glide.request;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
 
 import java.util.concurrent.CancellationException;
@@ -175,7 +175,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, Runnable {
      * A callback that should never be invoked directly.
      */
     @Override
-    public synchronized void onResourceReady(R resource, GlideAnimation<? super R> glideAnimation) {
+    public synchronized void onResourceReady(R resource, Transition<? super R> transition) {
         // We might get a null result.
         resultReceived = true;
         this.resource = resource;

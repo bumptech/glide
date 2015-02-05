@@ -1,16 +1,16 @@
-package com.bumptech.glide.request.animation;
+package com.bumptech.glide.request.transition;
 
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 
 /**
- * A cross fade {@link GlideAnimation} for {@link android.graphics.drawable.Drawable}s
+ * A cross fade {@link Transition} for {@link android.graphics.drawable.Drawable}s
  * that uses an {@link android.graphics.drawable.TransitionDrawable} to transition from an existing drawable
  * already visible on the target to a new drawable. If no existing drawable exists, this class can instead fall back
  * to a default animation that doesn't rely on {@link android.graphics.drawable.TransitionDrawable}.
  */
-public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> {
-    private final GlideAnimation<Drawable> defaultAnimation;
+public class DrawableCrossFadeTransition implements Transition<Drawable> {
+    private final Transition<Drawable> defaultAnimation;
     private final int duration;
 
     /**
@@ -19,7 +19,7 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
      * @param duration The duration that the cross fade animation should run if there is something to cross fade from
      *                 when a new {@link android.graphics.drawable.Drawable} is set.
      */
-    public DrawableCrossFadeViewAnimation(GlideAnimation<Drawable> defaultAnimation, int duration) {
+    public DrawableCrossFadeTransition(Transition<Drawable> defaultAnimation, int duration) {
         this.defaultAnimation = defaultAnimation;
         this.duration = duration;
     }
@@ -38,7 +38,7 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
      * @return {@inheritDoc}
      */
     @Override
-    public boolean animate(Drawable current, ViewAdapter adapter) {
+    public boolean transition(Drawable current, ViewAdapter adapter) {
         Drawable previous = adapter.getCurrentDrawable();
         if (previous != null) {
             TransitionDrawable transitionDrawable = new TransitionDrawable(new Drawable[] { previous, current });
@@ -47,7 +47,7 @@ public class DrawableCrossFadeViewAnimation implements GlideAnimation<Drawable> 
             adapter.setDrawable(transitionDrawable);
             return true;
         } else {
-            defaultAnimation.animate(current, adapter);
+            defaultAnimation.transition(current, adapter);
             return false;
         }
     }

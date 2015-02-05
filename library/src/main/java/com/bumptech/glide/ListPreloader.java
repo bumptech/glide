@@ -2,9 +2,9 @@ package com.bumptech.glide;
 
 import android.widget.AbsListView;
 
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
 
 import java.util.List;
@@ -304,7 +304,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
 
         @Override
         public void onResourceReady(Object resource,
-                                    GlideAnimation<? super Object> glideAnimation) {
+                                    Transition<? super Object> transition) {
             // Do nothing.
         }
 
