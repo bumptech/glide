@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import android.content.ContextWrapper;
 import android.util.Log;
 
+import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
@@ -12,7 +13,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.Util;
 

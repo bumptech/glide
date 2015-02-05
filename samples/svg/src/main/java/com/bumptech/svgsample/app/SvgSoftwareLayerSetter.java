@@ -13,14 +13,12 @@ import com.bumptech.glide.request.target.Target;
  * Listener which updates the {@link ImageView} to be software rendered,
  * because {@link com.caverock.androidsvg.SVG SVG}/{@link android.graphics.Picture Picture}
  * can't render on a hardware backed {@link android.graphics.Canvas Canvas}.
- *
- * @param <T> not used, here to prevent unchecked warnings at usage
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class SvgSoftwareLayerSetter<T> implements RequestListener<T, PictureDrawable> {
+public class SvgSoftwareLayerSetter implements RequestListener<PictureDrawable> {
 
     @Override
-    public boolean onException(Exception e, T model, Target<PictureDrawable> target, boolean isFirstResource) {
+    public boolean onException(Exception e, Object model, Target<PictureDrawable> target, boolean isFirstResource) {
         ImageView view = ((ImageViewTarget<?>) target).getView();
         if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
             view.setLayerType(ImageView.LAYER_TYPE_NONE, null);
@@ -29,7 +27,7 @@ public class SvgSoftwareLayerSetter<T> implements RequestListener<T, PictureDraw
     }
 
     @Override
-    public boolean onResourceReady(PictureDrawable resource, T model, Target<PictureDrawable> target,
+    public boolean onResourceReady(PictureDrawable resource, Object model, Target<PictureDrawable> target,
                                    boolean isFromMemoryCache, boolean isFirstResource) {
         ImageView view = ((ImageViewTarget<?>) target).getView();
         if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {

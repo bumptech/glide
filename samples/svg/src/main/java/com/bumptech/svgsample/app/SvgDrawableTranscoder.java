@@ -19,9 +19,5 @@ public class SvgDrawableTranscoder implements ResourceTranscoder<SVG, PictureDra
         PictureDrawable drawable = new PictureDrawable(picture);
         return new SimpleResource<PictureDrawable>(drawable);
     }
-
-    @Override
-    public String getId() {
-        return "";
-    }
 }
+

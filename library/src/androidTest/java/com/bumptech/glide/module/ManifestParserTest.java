@@ -10,8 +10,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.Registry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -118,7 +118,7 @@ public class ManifestParserTest {
         public void applyOptions(Context context, GlideBuilder builder) { }
 
         @Override
-        public void registerComponents(Context context, Glide glide) { }
+        public void registerComponents(Context context, Registry registry) { }
 
         @Override
         public boolean equals(Object o) {
@@ -137,7 +137,7 @@ public class ManifestParserTest {
         public void applyOptions(Context context, GlideBuilder builder) { }
 
         @Override
-        public void registerComponents(Context context, Glide glide) { }
+        public void registerComponents(Context context, Registry registry) { }
 
         @Override
         public boolean equals(Object o) {

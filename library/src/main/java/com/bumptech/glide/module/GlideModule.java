@@ -2,8 +2,8 @@ package com.bumptech.glide.module;
 
 import android.content.Context;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.Registry;
 
 /**
  * An interface allowing lazy configuration of Glide including setting options using
@@ -91,7 +91,7 @@ public interface GlideModule {
      * </p>
      *
      * @param context An Application {@link android.content.Context}.
-     * @param glide The newly created Glide singleton.
+     * @param registry An {@link com.bumptech.glide.Registry} to use to register components.
      */
-    void registerComponents(Context context, Glide glide);
+    void registerComponents(Context context, Registry registry);
 }

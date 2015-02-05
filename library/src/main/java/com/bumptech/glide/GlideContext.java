@@ -1,4 +1,4 @@
-package com.bumptech.glide.request;
+package com.bumptech.glide;
 
 import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
@@ -16,19 +16,13 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
-import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
-import com.bumptech.glide.provider.EncoderRegistry;
-import com.bumptech.glide.provider.ResourceDecoderRegistry;
-import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 
@@ -45,31 +39,17 @@ import java.util.List;
 public class GlideContext extends ContextWrapper implements ComponentCallbacks2 {
     private static final String TAG = "RequestContext";
 
-    private final ModelLoaderRegistry modelLoaderRegistry;
-    private final EncoderRegistry encoderRegistry;
-    private final ResourceDecoderRegistry decoderRegistry;
-    private final ResourceEncoderRegistry resultEncoderRegistry;
-    private final DataRewinderRegistry dataRewinderRegistry;
-    private final TranscoderRegistry transcoderRegistry;
     private final Handler mainHandler;
+    private final Registry registry;
     private final ImageViewTargetFactory imageViewTargetFactory;
     private final DecodeOptions decodeOptions;
     private final Engine engine;
     private final ComponentCallbacks2 componentCallbacks;
 
-    public GlideContext(Context context, ModelLoaderRegistry modelLoaderRegistry, EncoderRegistry encoderRegistry,
-            ResourceDecoderRegistry decoderRegistry, ResourceEncoderRegistry resultEncoderRegistry,
-            DataRewinderRegistry dataRewinderRegistry, TranscoderRegistry transcoderRegistry,
-            ImageViewTargetFactory imageViewTargetFactory, DecodeOptions decodeOptions, Engine engine,
-            ComponentCallbacks2
-            componentCallbacks) {
+    public GlideContext(Context context, Registry registry, ImageViewTargetFactory imageViewTargetFactory,
+            DecodeOptions decodeOptions, Engine engine, ComponentCallbacks2 componentCallbacks) {
         super(context.getApplicationContext());
-        this.modelLoaderRegistry = modelLoaderRegistry;
-        this.encoderRegistry = encoderRegistry;
-        this.decoderRegistry = decoderRegistry;
-        this.resultEncoderRegistry = resultEncoderRegistry;
-        this.dataRewinderRegistry = dataRewinderRegistry;
-        this.transcoderRegistry = transcoderRegistry;
+        this.registry = registry;
         this.imageViewTargetFactory = imageViewTargetFactory;
         this.decodeOptions = decodeOptions;
         this.engine = engine;
@@ -85,7 +65,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     public <ResourceType, TranscodeType> List<LoadPath<?, ResourceType, TranscodeType>> getLoadPaths(Object model,
             Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass) {
         Class<?> modelClass = model.getClass();
-        List<Class<?>> dataClasses = modelLoaderRegistry.getDataClasses(modelClass);
+        List<Class<?>> dataClasses = registry.modelLoaderRegistry.getDataClasses(modelClass);
         List<LoadPath<?, ResourceType, TranscodeType>> loadPaths =
                 new ArrayList<LoadPath<?, ResourceType, TranscodeType>>();
         for (Class<?> dataClass : dataClasses) {
@@ -122,15 +102,15 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         List<DecodePath<DataType, ResourceType, TranscodeType>> decodePaths =
                 new ArrayList<DecodePath<DataType, ResourceType, TranscodeType>>();
         List<Class<ResourceType>> registeredResourceClasses =
-                decoderRegistry.getResourceClasses(dataClass, resourceClass);
+                registry.decoderRegistry.getResourceClasses(dataClass, resourceClass);
         for (Class<ResourceType> registeredResourceClass : registeredResourceClasses) {
             List<Class<TranscodeType>> registeredTranscodeClasses =
-                    transcoderRegistry.getTranscodeClasses(registeredResourceClass, transcodeClass);
+                    registry.transcoderRegistry.getTranscodeClasses(registeredResourceClass, transcodeClass);
             for (Class<TranscodeType> registeredTranscodeClass : registeredTranscodeClasses) {
                 List<ResourceDecoder<DataType, ResourceType>> decoders =
-                        decoderRegistry.getDecoders(dataClass, registeredResourceClass);
+                        registry.decoderRegistry.getDecoders(dataClass, registeredResourceClass);
                 ResourceTranscoder<ResourceType, TranscodeType> transcoder =
-                        transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
+                        registry.transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
                 decodePaths.add(new DecodePath<DataType, ResourceType, TranscodeType>(dataClass,
                         registeredResourceClass, registeredTranscodeClass, decoders, transcoder));
             }
@@ -140,9 +120,10 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
 
     public List<Class<?>> getRegisteredResourceClasses(Class<?> modelClass, Class<?> resourceClass) {
         List<Class<?>> result = new ArrayList<Class<?>>();
-        List<Class<?>> dataClasses = modelLoaderRegistry.getDataClasses(modelClass);
+        List<Class<?>> dataClasses = registry.modelLoaderRegistry.getDataClasses(modelClass);
         for (Class<?> dataClass : dataClasses) {
-            List<? extends Class<?>> registeredResourceClasses = decoderRegistry.getResourceClasses(dataClass, resourceClass);
+            List<? extends Class<?>> registeredResourceClasses =
+                    registry.decoderRegistry.getResourceClasses(dataClass, resourceClass);
             result.addAll(registeredResourceClasses);
         }
         return result;
@@ -150,7 +131,8 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
 
     @SuppressWarnings("unchecked")
     public <X> ResourceEncoder<X> getResultEncoder(Resource<X> resource) throws NoResultEncoderAvailableException {
-        ResourceEncoder<X> resourceEncoder = (ResourceEncoder<X>) resultEncoderRegistry.get(resource.get().getClass());
+        ResourceEncoder<X> resourceEncoder = (ResourceEncoder<X>) registry.resourceEncoderRegistry.get(
+                resource.get().getClass());
         if (resourceEncoder != null) {
             return resourceEncoder;
         }
@@ -159,7 +141,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
 
     @SuppressWarnings("unchecked")
     public <X> Encoder<X> getSourceEncoder(X data) throws NoSourceEncoderAvailableException {
-        Encoder<X> encoder = encoderRegistry.getEncoder((Class<X>) data.getClass());
+        Encoder<X> encoder = registry.encoderRegistry.getEncoder((Class<X>) data.getClass());
         if (encoder != null) {
             return encoder;
         }
@@ -167,7 +149,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     }
 
     public <X> DataRewinder<X> getRewinder(X data) {
-        return dataRewinderRegistry.build(data);
+        return registry.dataRewinderRegistry.build(data);
     }
 
     @SuppressWarnings("unchecked")
@@ -175,7 +157,8 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
             throws NoDecoderAvailableException,
             IOException {
         X data = rewinder.rewindAndGet();
-        List<ResourceDecoder<X, Z>> decoders = decoderRegistry.getDecoders((Class<X>) data.getClass(), resourceClass);
+        List<ResourceDecoder<X, Z>> decoders =
+                registry.decoderRegistry.getDecoders((Class<X>) data.getClass(), resourceClass);
         for (ResourceDecoder<X, Z> decoder : decoders) {
             if (decoder.handles(data)) {
                 maybeLogFoundDecoder(decoders, decoder);
@@ -195,7 +178,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     }
 
     public DataFetcherSet<?> getDataFetchers(Object model, int width, int height) {
-        DataFetcherSet<?> result = modelLoaderRegistry.getDataFetchers(model, width, height);
+        DataFetcherSet<?> result = registry.modelLoaderRegistry.getDataFetchers(model, width, height);
         if (result.isEmpty()) {
             throw new NoModelLoaderAvailableException(model);
         }
@@ -203,7 +186,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     }
 
     public <X, Y> ResourceTranscoder<X, Y> getTranscoder(Class<X> resourceClass, Class<Y> transcodeClass) {
-        return transcoderRegistry.get(resourceClass, transcodeClass);
+        return registry.transcoderRegistry.get(resourceClass, transcodeClass);
     }
 
     public <X> Target<X> buildImageViewTarget(ImageView imageView, Class<X> transcodeClass) {

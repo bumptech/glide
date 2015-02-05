@@ -17,7 +17,6 @@ import android.view.View;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.Engine;
@@ -28,9 +27,6 @@ import com.bumptech.glide.load.engine.prefill.PreFillType;
 import com.bumptech.glide.load.model.AssetUriLoader;
 import com.bumptech.glide.load.model.FileLoader;
 import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.model.ModelLoaderFactory;
-import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.load.model.ResourceLoader;
 import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.model.StringLoader;
@@ -55,15 +51,10 @@ import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
-import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
-import com.bumptech.glide.provider.EncoderRegistry;
-import com.bumptech.glide.provider.ResourceDecoderRegistry;
-import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.request.FutureTarget;
-import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
@@ -93,8 +84,8 @@ public class Glide implements ComponentCallbacks2 {
     private final BitmapPool bitmapPool;
     private final MemoryCache memoryCache;
     private final BitmapPreFiller bitmapPreFiller;
-    private final ModelLoaderRegistry modelLoaderRegistry;
     private final GlideContext glideContext;
+    private final Registry registry;
 
     /**
      * Returns a directory with a default name in the private cache directory of the application to use to store
@@ -151,7 +142,7 @@ public class Glide implements ComponentCallbacks2 {
                     }
                     glide = builder.createGlide();
                     for (GlideModule module : modules) {
-                        module.registerComponents(applicationContext, glide);
+                        module.registerComponents(applicationContext, glide.registry);
                     }
                 }
             }
@@ -169,75 +160,60 @@ public class Glide implements ComponentCallbacks2 {
     Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context, DecodeFormat decodeFormat) {
         this.bitmapPool = bitmapPool;
         this.memoryCache = memoryCache;
-        modelLoaderRegistry = new ModelLoaderRegistry(context);
         bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
-        EncoderRegistry encoderRegistry = new EncoderRegistry();
-        encoderRegistry.add(InputStream.class, new StreamEncoder());
-
-        ResourceEncoderRegistry resourceEncoderRegistry = new ResourceEncoderRegistry();
-        ResourceDecoderRegistry decoderRegistry = new ResourceDecoderRegistry();
-
+        registry = new Registry(context)
+                .register(InputStream.class, new StreamEncoder())
         /* Bitmaps */
-        decoderRegistry.append(new StreamBitmapDecoder(bitmapPool), InputStream.class, Bitmap.class);
-        decoderRegistry.append(new FileDescriptorBitmapDecoder(bitmapPool), ParcelFileDescriptor.class,
-                Bitmap.class);
-        resourceEncoderRegistry.add(Bitmap.class, new BitmapEncoder());
-
+                .append(InputStream.class, Bitmap.class, new StreamBitmapDecoder(bitmapPool))
+                .append(ParcelFileDescriptor.class, Bitmap.class, new FileDescriptorBitmapDecoder(bitmapPool))
+                .register(Bitmap.class, new BitmapEncoder())
         /* GlideBitmapDrawables */
-        decoderRegistry.append(new BitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool, new
-                StreamBitmapDecoder(bitmapPool)), InputStream.class, BitmapDrawable.class);
-        decoderRegistry.append(new BitmapDrawableDecoder<ParcelFileDescriptor>(context.getResources(), bitmapPool,
-                new FileDescriptorBitmapDecoder(bitmapPool)), ParcelFileDescriptor.class,
-                BitmapDrawable.class);
-        resourceEncoderRegistry.add(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()));
-
+                .append(InputStream.class, BitmapDrawable.class,
+                        new BitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
+                                new StreamBitmapDecoder(bitmapPool)))
+                .append(ParcelFileDescriptor.class, BitmapDrawable.class,
+                        new BitmapDrawableDecoder<ParcelFileDescriptor>(context.getResources(), bitmapPool,
+                                new FileDescriptorBitmapDecoder(bitmapPool)))
+                .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* Gifs */
-        decoderRegistry.prepend(new GifResourceDecoder(context, bitmapPool), InputStream.class, GifDrawable.class);
-        resourceEncoderRegistry.add(GifDrawable.class, new GifResourceEncoder(bitmapPool));
-
+                .prepend(InputStream.class, GifDrawable.class, new GifResourceDecoder(context, bitmapPool))
+                .register(GifDrawable.class, new GifResourceEncoder(bitmapPool))
         /* Gif Frames */
-        modelLoaderRegistry.append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>());
-        decoderRegistry.append(new GifFrameResourceDecoder(bitmapPool), GifDecoder.class, Bitmap.class);
-
+                 .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
+                 .append(GifDecoder.class, Bitmap.class, new GifFrameResourceDecoder(bitmapPool))
         /* Files */
-        decoderRegistry.append(new FileDecoder(), File.class, File.class);
-
-        DataRewinderRegistry dataRewinderRegistry = new DataRewinderRegistry();
-        dataRewinderRegistry.register(new InputStreamRewinder.Factory());
-
-        modelLoaderRegistry.append(File.class, File.class, new UnitModelLoader.Factory<File>());
-        modelLoaderRegistry.append(File.class, InputStream.class, new FileLoader.StreamFactory());
-        modelLoaderRegistry.append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory());
-        modelLoaderRegistry.append(int.class, InputStream.class, new ResourceLoader.StreamFactory());
-        modelLoaderRegistry.append(int.class, ParcelFileDescriptor.class, new ResourceLoader.FileDescriptorFactory());
-        modelLoaderRegistry.append(Integer.class, InputStream.class, new ResourceLoader.StreamFactory());
-        modelLoaderRegistry.append(Integer.class, ParcelFileDescriptor.class,
-                new ResourceLoader.FileDescriptorFactory());
-        modelLoaderRegistry.append(String.class, InputStream.class, new StringLoader.StreamFactory());
-        modelLoaderRegistry.append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory());
-        modelLoaderRegistry.append(Uri.class, InputStream.class, new HttpUriLoader.Factory());
-        modelLoaderRegistry.append(Uri.class, InputStream.class, new AssetUriLoader.StreamFactory());
-        modelLoaderRegistry.append(Uri.class, ParcelFileDescriptor.class, new AssetUriLoader.FileDescriptorFactory());
-        modelLoaderRegistry.append(Uri.class, InputStream.class, new MediaStoreImageThumbLoader.Factory());
-        modelLoaderRegistry.append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory());
-        modelLoaderRegistry.append(Uri.class, InputStream.class, new UriLoader.StreamFactory());
-        modelLoaderRegistry.append(Uri.class, ParcelFileDescriptor.class, new UriLoader.FileDescriptorFactory());
-        modelLoaderRegistry.append(URL.class, InputStream.class, new UrlLoader.StreamFactory());
-        modelLoaderRegistry.append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory());
-        modelLoaderRegistry.append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory());
-
-        TranscoderRegistry transcoderRegistry = new TranscoderRegistry();
-        transcoderRegistry.register(Bitmap.class, BitmapDrawable.class, new BitmapDrawableTranscoder(context
-                .getResources(), bitmapPool));
-        transcoderRegistry.register(Bitmap.class, byte[].class, new BitmapBytesTranscoder());
-        transcoderRegistry.register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
+                .append(File.class, File.class, new FileDecoder())
+                .register(new InputStreamRewinder.Factory())
+        /* Models */
+                .append(File.class, File.class, new UnitModelLoader.Factory<File>())
+                .append(File.class, InputStream.class, new FileLoader.StreamFactory())
+                .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
+                .append(int.class, InputStream.class, new ResourceLoader.StreamFactory())
+                .append(int.class, ParcelFileDescriptor.class, new ResourceLoader.FileDescriptorFactory())
+                .append(Integer.class, InputStream.class, new ResourceLoader.StreamFactory())
+                .append(Integer.class, ParcelFileDescriptor.class, new ResourceLoader.FileDescriptorFactory())
+                .append(String.class, InputStream.class, new StringLoader.StreamFactory())
+                .append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
+                .append(Uri.class, InputStream.class, new HttpUriLoader.Factory())
+                .append(Uri.class, InputStream.class, new AssetUriLoader.StreamFactory())
+                .append(Uri.class, ParcelFileDescriptor.class, new AssetUriLoader.FileDescriptorFactory())
+                .append(Uri.class, InputStream.class, new MediaStoreImageThumbLoader.Factory())
+                .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory())
+                .append(Uri.class, InputStream.class, new UriLoader.StreamFactory())
+                .append(Uri.class, ParcelFileDescriptor.class, new UriLoader.FileDescriptorFactory())
+                .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
+                .append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory())
+                .append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
+        /* Transcoders */
+                .register(Bitmap.class, BitmapDrawable.class,
+                        new BitmapDrawableTranscoder(context.getResources(), bitmapPool))
+                .register(Bitmap.class, byte[].class, new BitmapBytesTranscoder())
+                .register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
 
         ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
         DecodeOptions options = new DecodeOptions(context).format(decodeFormat);
-        glideContext = new GlideContext(context, modelLoaderRegistry, encoderRegistry, decoderRegistry,
-                resourceEncoderRegistry, dataRewinderRegistry, transcoderRegistry, imageViewTargetFactory, options,
-                engine, this);
+        glideContext = new GlideContext(context, registry, imageViewTargetFactory, options, engine, this);
     }
 
     /**
@@ -380,52 +356,6 @@ public class Glide implements ComponentCallbacks2 {
     }
 
     /**
-     * Use the given factory to build a {@link ModelLoader} for models of the given class. Generally the best use of
-     * this method is to replace one of the default factories or add an implementation for other similar low level
-     * models. Any factory replaced by the given factory will have its {@link ModelLoaderFactory#teardown()}} method
-     * called.
-     *
-     * <p>
-     *     Note - If a factory already exists for the given class, it will be replaced. If that factory is not being
-     *     used for any other model class, {@link ModelLoaderFactory#teardown()}
-     *     will be called.
-     * </p>
-     *
-     * <p>
-     *     Note - The factory must not be an anonymous inner class of an Activity or another object that cannot be
-     *     retained statically.
-     * </p>
-     *
-     * @param modelClass The model class.
-     * @param dataClass the data class.
-     */
-    public <Model, Data> void append(Class<Model> modelClass, Class<Data> dataClass,
-            ModelLoaderFactory<Model, Data> factory) {
-        modelLoaderRegistry.append(modelClass, dataClass, factory);
-    }
-
-    public <Model, Data> void prepend(Class<Model> modelClass, Class<Data> dataClass,
-            ModelLoaderFactory<Model, Data> factory) {
-        modelLoaderRegistry.prepend(modelClass, dataClass, factory);
-    }
-
-    public <Model, Data> void replace(Class<Model> modelClass, Class<Data> dataClass,
-            ModelLoaderFactory<Model, Data> factory) {
-        modelLoaderRegistry.replace(modelClass, dataClass, factory);
-    }
-
-    /**
-     * Removes any {@link ModelLoaderFactory} registered for the given model and resource classes if one exists. If a
-     * {@link ModelLoaderFactory} is removed, its {@link ModelLoaderFactory#teardown()}} method will be called.
-     *
-     * @param modelClass The model class.
-     * @param dataClass The data class.
-     */
-    public <Model, Data> void remove(Class<Model> modelClass, Class<Data> dataClass) {
-        modelLoaderRegistry.remove(modelClass, dataClass);
-    }
-
-    /**
      * Begin a load with Glide by passing in a context.
      *
      * <p>
@@ -503,6 +433,10 @@ public class Glide implements ComponentCallbacks2 {
     public static RequestManager with(Fragment fragment) {
         RequestManagerRetriever retriever = RequestManagerRetriever.get();
         return retriever.get(fragment);
+    }
+
+    public Registry getRegistry() {
+        return registry;
     }
 
     @Override

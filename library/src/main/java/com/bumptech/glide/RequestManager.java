@@ -16,7 +16,6 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.util.Util;
 
 /**

@@ -2,8 +2,8 @@ package com.bumptech.glide.samples.giphy;
 
 import android.content.Context;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.Registry;
 import com.bumptech.glide.module.GlideModule;
 
 import java.io.InputStream;
@@ -18,7 +18,7 @@ public class GiphyGlideModule implements GlideModule {
     }
 
     @Override
-    public void registerComponents(Context context, Glide glide) {
-        glide.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
+    public void registerComponents(Context context, Registry registry) {
+        registry.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
     }
 }

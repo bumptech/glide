@@ -1,18 +1,19 @@
-package com.bumptech.glide.samples.flickr;
+package com.bumptech.svgsample.app;
 
 import android.content.Context;
+import android.graphics.drawable.PictureDrawable;
 
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.module.GlideModule;
-import com.bumptech.glide.samples.flickr.api.Photo;
+import com.caverock.androidsvg.SVG;
 
 import java.io.InputStream;
 
 /**
- * {@link com.bumptech.glide.module.GlideModule} for the Flickr sample app.
+ * Module for the SVG sample app.
  */
-public class FlickrGlideModule implements GlideModule {
+public class SvgModule implements GlideModule {
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
         // Do nothing.
@@ -20,6 +21,7 @@ public class FlickrGlideModule implements GlideModule {
 
     @Override
     public void registerComponents(Context context, Registry registry) {
-        registry.append(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
+        registry.register(SVG.class, PictureDrawable.class, new SvgDrawableTranscoder())
+                .append(InputStream.class, SVG.class, new SvgDecoder());
     }
 }

@@ -14,7 +14,6 @@ import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.FutureTarget;
-import com.bumptech.glide.request.GlideContext;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
 import com.bumptech.glide.request.RequestFutureTarget;

@@ -663,7 +663,7 @@ public class GlideTest {
         ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
         when(failFactory.build(any(Context.class), any(MultiModelLoaderFactory.class))).thenReturn(failLoader);
 
-        Glide.get(getContext()).prepend(failModel, failResource, failFactory);
+        Glide.get(getContext()).getRegistry().prepend(failModel, failResource, failFactory);
     }
 
     private String mockUri(String uriString) {
@@ -701,7 +701,8 @@ public class GlideTest {
         when(modelLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
                 .thenReturn(modelLoader);
 
-        Glide.get(Robolectric.application).prepend(modelClass, InputStream.class, modelLoaderFactory);
+        Glide.get(Robolectric.application).getRegistry()
+                .prepend(modelClass, InputStream.class, modelLoaderFactory);
     }
 
     @SuppressWarnings("unchecked")
@@ -770,7 +771,7 @@ public class GlideTest {
         }
 
         @Override
-        public void registerComponents(Context context, Glide glide) {
+        public void registerComponents(Context context, Registry registry) {
             DataFetcher<InputStream> mockStreamFetcher = mock(DataFetcher.class);
             when(mockStreamFetcher.getId()).thenReturn("fakeId");
             when(mockStreamFetcher.getDataClass()).thenReturn(InputStream.class);
@@ -786,7 +787,7 @@ public class GlideTest {
             when(mockUrlLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
                     .thenReturn(mockUrlLoader);
 
-            glide.prepend(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
+            registry.prepend(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
         }
     }
 

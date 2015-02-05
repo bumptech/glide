@@ -1,5 +1,8 @@
 package com.bumptech.svgsample.app;
 
+import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
+import static com.bumptech.glide.request.RequestOptions.placeholderOf;
+
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.graphics.drawable.PictureDrawable;
@@ -10,14 +13,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.StreamEncoder;
-import com.caverock.androidsvg.SVG;
+import com.bumptech.glide.load.resource.drawable.DrawableAnimationOptions;
 
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * Displays an SVG image loaded from an android raw resource.
@@ -27,7 +28,7 @@ public class MainActivity extends Activity {
 
     private ImageView imageViewRes;
     private ImageView imageViewNet;
-    private RequestBuilder<Uri, InputStream, SVG, PictureDrawable> requestBuilder;
+    private RequestBuilder<PictureDrawable> requestBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,17 +39,11 @@ public class MainActivity extends Activity {
         imageViewNet = (ImageView) findViewById(R.id.svg_image_view2);
 
         requestBuilder = Glide.with(this)
-                .using(Glide.buildStreamModelLoader(Uri.class, this), InputStream.class)
-                .from(Uri.class)
-                .as(SVG.class)
-                .transcode(new SvgDrawableTranscoder(), PictureDrawable.class)
-                .sourceEncoder(new StreamEncoder())
-//                .cacheDecoder(new FileToStreamDecoder<SVG>(new SvgDecoder()))
-                .decoder(new SvgDecoder())
-                .placeholder(R.drawable.image_loading)
-                .error(R.drawable.image_error)
-                .animate(android.R.anim.fade_in)
-                .listener(new SvgSoftwareLayerSetter<Uri>());
+                .as(PictureDrawable.class)
+                .apply(placeholderOf(R.drawable.image_loading)
+                        .error(R.drawable.image_error))
+                .animate(new DrawableAnimationOptions().crossFade())
+                .listener(new SvgSoftwareLayerSetter());
     }
 
     @Override
@@ -96,9 +91,7 @@ public class MainActivity extends Activity {
         Uri uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/"
                 + R.raw.android_toy_h);
         requestBuilder
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        // SVG cannot be serialized so it's not worth to cache it
-                        // and the getResources() should be fast enough when acquiring the InputStream
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.NONE))
                 .load(uri)
                 .into(imageViewRes);
     }
@@ -106,8 +99,7 @@ public class MainActivity extends Activity {
     private void loadNet() {
         Uri uri = Uri.parse("http://www.clker.com/cliparts/u/Z/2/b/a/6/android-toy-h.svg");
         requestBuilder
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                        // SVG cannot be serialized so it's not worth to cache it
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE))
                 .load(uri)
                 .into(imageViewNet);
     }
