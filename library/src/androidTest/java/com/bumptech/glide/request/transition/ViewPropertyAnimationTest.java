@@ -28,7 +28,7 @@ public class ViewPropertyAnimationTest {
     @Before
     public void setUp() {
         animator = mock(ViewPropertyTransition.Animator.class);
-        animation = new ViewPropertyTransition(animator);
+        animation = new ViewPropertyTransition<>(animator);
     }
 
     @Test

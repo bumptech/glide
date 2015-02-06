@@ -43,7 +43,7 @@ public class StringLoaderTest {
         MockitoAnnotations.initMocks(this);
 
         when(uriLoader.handles(any(Uri.class))).thenReturn(true);
-        loader = new StringLoader<Object>(uriLoader);
+        loader = new StringLoader<>(uriLoader);
     }
 
     @Test

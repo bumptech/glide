@@ -19,7 +19,7 @@ public class NullDecoderTest {
 
     @Before
     public void setUp() {
-        decoder = new NullDecoder<Object, Object>();
+        decoder = new NullDecoder<>();
         options = Collections.emptyMap();
     }
 

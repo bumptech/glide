@@ -196,7 +196,7 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     private static Set<Bitmap.Config> getDefaultAllowedConfigs() {
-        Set<Bitmap.Config> configs = new HashSet<Bitmap.Config>();
+        Set<Bitmap.Config> configs = new HashSet<>();
         configs.addAll(Arrays.asList(Bitmap.Config.values()));
         if (Build.VERSION.SDK_INT >= 19) {
             configs.add(null);

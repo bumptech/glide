@@ -42,7 +42,7 @@ public class ViewAnimationFactory<R> implements TransitionFactory<R> {
         }
 
         if (transition == null) {
-            transition = new ViewTransition<R>(viewTransitionAnimationFactory);
+            transition = new ViewTransition<>(viewTransitionAnimationFactory);
         }
 
         return transition;

@@ -101,7 +101,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     }
 
     Map<String, Object> getOptions() {
-        return new HashMap<String, Object>();
+        return new HashMap<>();
     }
 
     boolean isMemoryCacheable() {

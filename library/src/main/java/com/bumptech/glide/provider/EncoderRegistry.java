@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class EncoderRegistry {
     // TODO: This registry should probably contain a set, rather than a list.
-    private final List<Entry<?>> encoders = new ArrayList<Entry<?>>();
+    private final List<Entry<?>> encoders = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     public synchronized <T> Encoder<T> getEncoder(Class<T> dataClass) {
@@ -24,7 +24,7 @@ public class EncoderRegistry {
     }
 
     public synchronized <T> void add(Class<T> dataClass, Encoder<T> encoder) {
-        encoders.add(new Entry<T>(dataClass, encoder));
+        encoders.add(new Entry<>(dataClass, encoder));
     }
 
     private static final class Entry<T> {

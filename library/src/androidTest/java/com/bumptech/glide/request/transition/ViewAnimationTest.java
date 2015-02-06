@@ -33,7 +33,7 @@ public class ViewAnimationTest {
         view = mock(ImageView.class);
         adapter = mock(ViewAdapter.class);
         when(adapter.getView()).thenReturn(view);
-        viewAnimation = new ViewTransition<Object>(viewTransitionAnimationFactory);
+        viewAnimation = new ViewTransition<>(viewTransitionAnimationFactory);
     }
 
     @Test

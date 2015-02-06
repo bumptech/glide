@@ -10,7 +10,7 @@ import java.util.Map;
  * of new types and factories.
  */
 public class DataRewinderRegistry {
-    private final Map<Class, DataRewinder.Factory> rewinders = new HashMap<Class, DataRewinder.Factory>();
+    private final Map<Class, DataRewinder.Factory> rewinders = new HashMap<>();
     private static final DataRewinder.Factory DEFAULT_FACTORY = new DataRewinder.Factory<Object>() {
         @Override
         public DataRewinder<Object> build(Object data) {

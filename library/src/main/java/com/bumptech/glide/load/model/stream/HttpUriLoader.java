@@ -20,7 +20,7 @@ import java.util.Set;
  */
 public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
     private static final Set<String> SCHEMES = Collections.unmodifiableSet(
-            new HashSet<String>(
+            new HashSet<>(
                     Arrays.asList(
                             "http",
                             "https"

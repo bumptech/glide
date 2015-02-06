@@ -102,7 +102,7 @@ public class RequestTracker {
     private List<Request> getSnapshot() {
         // toArray creates a new ArrayList internally and this way we can guarantee entries will not be
         // null. See #322.
-        List<Request> result = new ArrayList<Request>(requests.size());
+        List<Request> result = new ArrayList<>(requests.size());
         // We could also just call new ArrayList<Request>(requests) but that actually creates two new ArrayLists because
         // that constructor in ArrayList calls toArray().
         for (Request request : requests) {

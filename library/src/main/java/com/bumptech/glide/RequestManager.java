@@ -180,7 +180,7 @@ public class RequestManager implements LifecycleListener {
      * @return A new request builder for loading the given resource class.
      */
     public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
-        return new RequestBuilder<ResourceType>(context, resourceClass, requestTracker, lifecycle);
+        return new RequestBuilder<>(context, resourceClass, requestTracker, lifecycle);
     }
 
     private static class RequestManagerConnectivityListener implements ConnectivityMonitor.ConnectivityListener {

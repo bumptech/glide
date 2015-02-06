@@ -62,7 +62,7 @@ public final class BitmapPreFiller {
 
         final float bytesPerWeight = maxSize / (float) totalWeight;
 
-        Map<PreFillType, Integer> attributeToCount = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> attributeToCount = new HashMap<>();
         for (PreFillType size : preFillSizes) {
             int bytesForSize = Math.round(bytesPerWeight * size.getWeight());
             int bytesPerBitmap = getSizeInBytes(size);

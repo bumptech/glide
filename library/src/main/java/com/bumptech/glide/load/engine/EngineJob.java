@@ -26,7 +26,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     private static final int MSG_COMPLETE = 1;
     private static final int MSG_EXCEPTION = 2;
 
-    private final List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
+    private final List<ResourceCallback> cbs = new ArrayList<>();
     private final EngineResourceFactory engineResourceFactory;
     private final EngineJobListener listener;
     private final Key key;
@@ -103,7 +103,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     // the requirement.
     private void addIgnoredCallback(ResourceCallback cb) {
         if (ignoredCallbacks == null) {
-            ignoredCallbacks = new HashSet<ResourceCallback>();
+            ignoredCallbacks = new HashSet<>();
         }
         ignoredCallbacks.add(cb);
     }
@@ -188,7 +188,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     // Visible for testing.
     static class EngineResourceFactory {
         public <R> EngineResource<R> build(Resource<R> resource, boolean isMemoryCacheable) {
-            return new EngineResource<R>(resource, isMemoryCacheable);
+            return new EngineResource<>(resource, isMemoryCacheable);
         }
     }
 

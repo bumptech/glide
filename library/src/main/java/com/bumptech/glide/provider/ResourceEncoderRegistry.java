@@ -10,10 +10,10 @@ import java.util.List;
  */
 public class ResourceEncoderRegistry {
     // TODO: this should probably be a set.
-    final List<Entry<?>> encoders = new ArrayList<Entry<?>>();
+    final List<Entry<?>> encoders = new ArrayList<>();
 
     public synchronized <Z> void add(Class<Z> resourceClass, ResourceEncoder<Z> encoder) {
-        encoders.add(new Entry<Z>(resourceClass, encoder));
+        encoders.add(new Entry<>(resourceClass, encoder));
     }
 
     @SuppressWarnings("unchecked")

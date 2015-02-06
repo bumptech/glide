@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class MultiModelLoaderFactory {
     private static final Factory DEFAULT_FACTORY = new Factory();
-    private final List<Entry<?, ?>> entries = new ArrayList<Entry<?, ?>>();
+    private final List<Entry<?, ?>> entries = new ArrayList<>();
     private final Context context;
     private final Factory factory;
 
@@ -38,7 +38,7 @@ public class MultiModelLoaderFactory {
 
     private <Model, Data> void add(Class<Model> modelClass, Class<Data> dataClass,
             ModelLoaderFactory<Model, Data> factory, boolean append) {
-        Entry<Model, Data> entry = new Entry<Model, Data>(modelClass, dataClass, factory);
+        Entry<Model, Data> entry = new Entry<>(modelClass, dataClass, factory);
         entries.add(append ? entries.size() : 0, entry);
     }
 
@@ -50,7 +50,7 @@ public class MultiModelLoaderFactory {
     }
 
     <Model, Data> List<ModelLoaderFactory<Model, Data>> remove(Class<Model> modelClass, Class<Data> dataClass) {
-        List<ModelLoaderFactory<Model, Data>> factories = new ArrayList<ModelLoaderFactory<Model, Data>>();
+        List<ModelLoaderFactory<Model, Data>> factories = new ArrayList<>();
         for (Iterator<Entry<?, ?>> iterator = entries.iterator(); iterator.hasNext();) {
             Entry<?, ?> entry = iterator.next();
             if (entry.handles(modelClass, dataClass)) {
@@ -62,7 +62,7 @@ public class MultiModelLoaderFactory {
     }
 
     <Model> List<ModelLoader<Model, ?>> build(Class<Model> modelClass) {
-        List<ModelLoader<Model, ?>> loaders = new ArrayList<ModelLoader<Model, ?>>();
+        List<ModelLoader<Model, ?>> loaders = new ArrayList<>();
         for (Entry<?, ?> entry : entries) {
             if (entry.handles(modelClass)) {
                 loaders.add(this.<Model, Object>build(entry));
@@ -72,7 +72,7 @@ public class MultiModelLoaderFactory {
     }
 
     List<Class<?>> getDataClasses(Class<?> modelClass) {
-        List<Class<?>> result = new ArrayList<Class<?>>();
+        List<Class<?>> result = new ArrayList<>();
         for (Entry<?, ?> entry : entries) {
             if (!result.contains(entry.dataClass) && entry.handles(modelClass)) {
                 result.add(entry.dataClass);
@@ -82,7 +82,7 @@ public class MultiModelLoaderFactory {
     }
 
     public <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass, Class<Data> dataClass) {
-        List<ModelLoader<Model, Data>> loaders = new ArrayList<ModelLoader<Model, Data>>();
+        List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
         for (Entry<?, ?> entry : entries) {
             if (entry.handles(modelClass, dataClass)) {
                 loaders.add(this.<Model, Data>build(entry));
@@ -123,7 +123,7 @@ public class MultiModelLoaderFactory {
 
     static class Factory {
         public <Model, Data> MultiModelLoader<Model, Data> build(List<ModelLoader<Model, Data>> modelLoaders) {
-            return new MultiModelLoader<Model, Data>(modelLoaders);
+            return new MultiModelLoader<>(modelLoaders);
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
+import android.util.Log;
+
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.LruCache;
 import com.bumptech.glide.util.Util;
@@ -12,7 +14,8 @@ import java.security.NoSuchAlgorithmException;
  * A class that generates and caches safe and unique string file names from {@link com.bumptech.glide.load.Key}s.
  */
 class SafeKeyGenerator {
-    private final LruCache<Key, String> loadIdToSafeHash = new LruCache<Key, String>(1000);
+    private static final String TAG = "KeyGen";
+    private final LruCache<Key, String> loadIdToSafeHash = new LruCache<>(1000);
 
     public String getSafeKey(Key key) {
         String safeKey;
@@ -24,10 +27,10 @@ class SafeKeyGenerator {
                 MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
                 key.updateDiskCacheKey(messageDigest);
                 safeKey = Util.sha256BytesToHex(messageDigest.digest());
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, "Failed to create cache key", e);
+                }
             }
             synchronized (loadIdToSafeHash) {
                 loadIdToSafeHash.put(key, safeKey);

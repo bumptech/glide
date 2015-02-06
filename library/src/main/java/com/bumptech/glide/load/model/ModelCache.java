@@ -75,7 +75,7 @@ public class ModelCache<A, B> {
                 modelKey = (ModelKey<A>) KEY_QUEUE.poll();
             }
             if (modelKey == null) {
-                modelKey = new ModelKey<A>();
+                modelKey = new ModelKey<>();
             }
 
             modelKey.init(model, width, height);

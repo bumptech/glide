@@ -15,14 +15,14 @@ import java.util.Map;
  * of that size are present. We do not count addition or removal of bitmaps as an access.
  */
 class GroupedLinkedMap<K extends Poolable, V> {
-    private final LinkedEntry<K, V> head = new LinkedEntry<K, V>();
-    private final Map<K, LinkedEntry<K, V>> keyToEntry = new HashMap<K, LinkedEntry<K, V>>();
+    private final LinkedEntry<K, V> head = new LinkedEntry<>();
+    private final Map<K, LinkedEntry<K, V>> keyToEntry = new HashMap<>();
 
     public void put(K key, V value) {
         LinkedEntry<K, V> entry = keyToEntry.get(key);
 
         if (entry == null) {
-            entry = new LinkedEntry<K, V>(key);
+            entry = new LinkedEntry<>(key);
             makeTail(entry);
             keyToEntry.put(key, entry);
         } else {
@@ -35,7 +35,7 @@ class GroupedLinkedMap<K extends Poolable, V> {
     public V get(K key) {
         LinkedEntry<K, V> entry = keyToEntry.get(key);
         if (entry == null) {
-            entry = new LinkedEntry<K, V>(key);
+            entry = new LinkedEntry<>(key);
             keyToEntry.put(key, entry);
         } else {
             key.offer();
@@ -138,7 +138,7 @@ class GroupedLinkedMap<K extends Poolable, V> {
 
         public void add(V value) {
             if (values == null) {
-                values = new ArrayList<V>();
+                values = new ArrayList<>();
             }
             values.add(value);
         }

@@ -16,9 +16,12 @@ import java.net.URL;
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
     private static final int MAXIMUM_REDIRECTS = 5;
-    private static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY = new DefaultHttpUrlConnectionFactory();
+    private static final int DEFAULT_TIMEOUT_MS = 2500;
+    // Visible for testing.
+    static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY = new DefaultHttpUrlConnectionFactory();
 
     private final GlideUrl glideUrl;
+    private final int timeout;
     private final HttpUrlConnectionFactory connectionFactory;
 
     private HttpURLConnection urlConnection;
@@ -26,12 +29,13 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     private volatile boolean isCancelled;
 
     public HttpUrlFetcher(GlideUrl glideUrl) {
-        this(glideUrl, DEFAULT_CONNECTION_FACTORY);
+        this(glideUrl, DEFAULT_TIMEOUT_MS, DEFAULT_CONNECTION_FACTORY);
     }
 
     // Visible for testing.
-    HttpUrlFetcher(GlideUrl glideUrl, HttpUrlConnectionFactory connectionFactory) {
+    HttpUrlFetcher(GlideUrl glideUrl, int timeout, HttpUrlConnectionFactory connectionFactory) {
         this.glideUrl = glideUrl;
+        this.timeout = timeout;
         this.connectionFactory = connectionFactory;
     }
 
@@ -55,8 +59,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
             }
         }
         urlConnection = connectionFactory.build(url);
-        urlConnection.setConnectTimeout(2500);
-        urlConnection.setReadTimeout(2500);
+        urlConnection.setConnectTimeout(timeout);
+        urlConnection.setReadTimeout(timeout);
         urlConnection.setUseCaches(false);
         urlConnection.setDoInput(true);
 

@@ -59,7 +59,7 @@ public class ModelLoaderRegistry {
     public synchronized <A> DataFetcherSet<?> getDataFetchers(A model, int width, int height) {
         List<ModelLoader<A, ?>> modelLoaders = getModelLoaders(model);
 
-        return new DataFetcherSet<A>(model, width, height, modelLoaders);
+        return new DataFetcherSet<>(model, width, height, modelLoaders);
     }
 
     public synchronized <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass, Class<Data> dataClass) {
@@ -86,14 +86,14 @@ public class ModelLoaderRegistry {
     }
 
     private static class ModelLoaderCache {
-        private final Map<Class<?>, Entry<?>> cachedModelLoaders = new HashMap<Class<?>, Entry<?>>();
+        private final Map<Class<?>, Entry<?>> cachedModelLoaders = new HashMap<>();
 
         public void clear() {
             cachedModelLoaders.clear();
         }
 
         public <Model> void put(Class<Model> modelClass, List<ModelLoader<Model, ?>> loaders) {
-            Entry<?> previous = cachedModelLoaders.put(modelClass, new Entry<Model>(loaders));
+            Entry<?> previous = cachedModelLoaders.put(modelClass, new Entry<>(loaders));
             if (previous != null) {
                 throw new IllegalStateException("Already cached loaders for model: " + modelClass);
             }

@@ -40,7 +40,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
 
         @Override
         public ModelLoader<File, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new FileLoader<InputStream>(multiFactory.build(Uri.class, InputStream.class));
+            return new FileLoader<>(multiFactory.build(Uri.class, InputStream.class));
         }
 
         @Override
@@ -56,7 +56,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
 
         @Override
         public ModelLoader<File, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new FileLoader<ParcelFileDescriptor>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
+            return new FileLoader<>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
         }
 
         @Override

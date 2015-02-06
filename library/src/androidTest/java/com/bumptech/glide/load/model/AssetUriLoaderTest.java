@@ -32,7 +32,7 @@ public class AssetUriLoaderTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        loader = new AssetUriLoader<Object>(Robolectric.application.getAssets(), factory);
+        loader = new AssetUriLoader<>(Robolectric.application.getAssets(), factory);
     }
 
     @Test

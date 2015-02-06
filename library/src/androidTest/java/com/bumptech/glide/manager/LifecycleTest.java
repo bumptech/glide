@@ -108,7 +108,7 @@ public class LifecycleTest {
     public void testNotifiesMultipleListeners() {
         lifecycle.onStart();
         int toNotify = 20;
-        List<LifecycleListener> listeners = new ArrayList<LifecycleListener>();
+        List<LifecycleListener> listeners = new ArrayList<>();
         for (int i = 0; i < toNotify; i++) {
             listeners.add(mock(LifecycleListener.class));
         }

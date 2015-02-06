@@ -60,7 +60,7 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
 
         @Override
         public ModelLoader<Uri, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new AssetUriLoader<InputStream>(context.getAssets(), this);
+            return new AssetUriLoader<>(context.getAssets(), this);
         }
 
         @Override
@@ -82,7 +82,7 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
 
         @Override
         public ModelLoader<Uri, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new AssetUriLoader<ParcelFileDescriptor>(context.getAssets(), this);
+            return new AssetUriLoader<>(context.getAssets(), this);
         }
 
         @Override

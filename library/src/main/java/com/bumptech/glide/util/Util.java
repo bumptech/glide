@@ -156,6 +156,6 @@ public final class Util {
      * Creates a {@link java.util.Queue} of the given size using Glide's preferred implementation.
      */
     public static <T> Queue<T> createQueue(int size) {
-        return new ArrayDeque<T>(size);
+        return new ArrayDeque<>(size);
     }
 }

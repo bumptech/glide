@@ -77,7 +77,7 @@ public final class SingleRequest<R> implements Request,
             TransitionFactory<? super R> animationFactory) {
         @SuppressWarnings("unchecked") SingleRequest<R> request = (SingleRequest<R>) REQUEST_POOL.poll();
         if (request == null) {
-            request = new SingleRequest<R>();
+            request = new SingleRequest<>();
         }
         request.init(
                 requestContext,

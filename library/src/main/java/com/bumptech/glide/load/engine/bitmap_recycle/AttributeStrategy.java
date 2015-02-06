@@ -9,7 +9,7 @@ import com.bumptech.glide.util.Util;
  */
 class AttributeStrategy implements LruPoolStrategy {
     private final KeyPool keyPool = new KeyPool();
-    private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<Key, Bitmap>();
+    private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<>();
 
     public void put(Bitmap bitmap) {
         final Key key = keyPool.get(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());

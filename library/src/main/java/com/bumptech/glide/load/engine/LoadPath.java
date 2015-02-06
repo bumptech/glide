@@ -76,7 +76,7 @@ public class LoadPath<Data, ResourceType, Transcode> {
     }
 
     public List<String> getDecodePathDebugStrings() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (DecodePath<?, ?, ?> path : decodePaths) {
             result.add(path.getDebugString());
         }

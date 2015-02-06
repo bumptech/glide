@@ -170,10 +170,10 @@ public class Glide implements ComponentCallbacks2 {
                 .register(Bitmap.class, new BitmapEncoder())
         /* GlideBitmapDrawables */
                 .append(InputStream.class, BitmapDrawable.class,
-                        new BitmapDrawableDecoder<InputStream>(context.getResources(), bitmapPool,
+                        new BitmapDrawableDecoder<>(context.getResources(), bitmapPool,
                                 new StreamBitmapDecoder(bitmapPool)))
                 .append(ParcelFileDescriptor.class, BitmapDrawable.class,
-                        new BitmapDrawableDecoder<ParcelFileDescriptor>(context.getResources(), bitmapPool,
+                        new BitmapDrawableDecoder<>(context.getResources(), bitmapPool,
                                 new FileDescriptorBitmapDecoder(bitmapPool)))
                 .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* Gifs */

@@ -160,7 +160,7 @@ class DecodeJob<R> {
                     continue;
                 }
                 Encoder<Object> encoder = requestContext.getSourceEncoder(data);
-                SourceWriter<Object> writer = new SourceWriter<Object>(encoder, data);
+                SourceWriter<Object> writer = new SourceWriter<>(encoder, data);
                 diskCacheProvider.getDiskCache().put(loadKey.getOriginalKey(), writer);
                 requestContext.getDebugger().appendWriteDataToCache(loadKey.getOriginalKey());
                 requestContext.getDebugger().endEncodeFromFetcher();
@@ -196,7 +196,7 @@ class DecodeJob<R> {
     private <T, Z> Resource<R> runLoadPath(DataFetcherSet<?> fetchers, LoadPath<T, Z, R> path,
             final boolean cacheResult, final boolean transformResult) throws Exception {
         List<DataFetcher<T>> fetchersForData = fetchers.getFetchers(path.getDataClass());
-        DecodeCallback<Z> callback = new DecodeCallback<Z>(cacheResult, transformResult);
+        DecodeCallback<Z> callback = new DecodeCallback<>(cacheResult, transformResult);
         for (DataFetcher<T> fetcher : fetchersForData) {
             Resource<R> result = path.load(fetcher, requestContext, width, height, callback);
             if (result != null) {
@@ -274,7 +274,7 @@ class DecodeJob<R> {
             if (cacheResult) {
                 Key resultCacheKey = loadKey.getResultKey(appliedTransformation, resourceSubClass);
                 diskCacheProvider.getDiskCache().put(resultCacheKey,
-                        new SourceWriter<Resource<Z>>(requestContext.getResultEncoder(result), result));
+                        new SourceWriter<>(requestContext.getResultEncoder(result), result));
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "Encoded resource to cache with key " + resultCacheKey);
                 }

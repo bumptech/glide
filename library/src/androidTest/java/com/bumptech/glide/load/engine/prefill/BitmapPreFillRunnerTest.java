@@ -44,7 +44,7 @@ public class BitmapPreFillRunnerTest {
     private BitmapPreFillRunner.Clock clock;
     private BitmapPool pool;
     private MemoryCache cache;
-    private List<Bitmap> addedBitmaps = new ArrayList<Bitmap>();
+    private List<Bitmap> addedBitmaps = new ArrayList<>();
     private Handler mainHandler;
 
     @Before
@@ -68,7 +68,7 @@ public class BitmapPreFillRunnerTest {
                 .setConfig(Bitmap.Config.ARGB_8888)
                 .build();
         final int toAdd = 3;
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, toAdd);
         BitmapPreFillRunner handler = getHandler(allocationOrder);
         handler.run();
@@ -93,7 +93,7 @@ public class BitmapPreFillRunnerTest {
                 smallHeight,
         };
 
-        HashMap<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        HashMap<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(smallWidth, 2);
         allocationOrder.put(smallHeight, 2);
         BitmapPreFillRunner handler = getHandler(allocationOrder);
@@ -119,7 +119,7 @@ public class BitmapPreFillRunnerTest {
         PreFillType size = new PreFillType.Builder(1)
                 .setConfig(Bitmap.Config.ARGB_8888)
                 .build();
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, 3);
         when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
         BitmapPreFillRunner handler = getHandler(allocationOrder);
@@ -144,7 +144,7 @@ public class BitmapPreFillRunnerTest {
         PreFillType size = new PreFillType.Builder(1)
                 .setConfig(Bitmap.Config.ARGB_8888)
                 .build();
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, 2);
         BitmapPreFillRunner handler = getHandler(allocationOrder);
         when(clock.now()).thenReturn(0L).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
@@ -158,7 +158,7 @@ public class BitmapPreFillRunnerTest {
         PreFillType size = new PreFillType.Builder(1)
                 .setConfig(Bitmap.Config.ARGB_8888)
                 .build();
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, 100);
 
         BitmapPreFillRunner handler = getHandler(allocationOrder);
@@ -193,7 +193,7 @@ public class BitmapPreFillRunnerTest {
         PreFillType size = new PreFillType.Builder(1)
                 .setConfig(Bitmap.Config.ARGB_8888)
                 .build();
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, 2);
 
         BitmapPreFillRunner handler = getHandler(allocationOrder);
@@ -212,7 +212,7 @@ public class BitmapPreFillRunnerTest {
         PreFillType size = new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())
                 .setConfig(bitmap.getConfig())
                 .build();
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, 1);
 
         getHandler(allocationOrder).run();
@@ -230,7 +230,7 @@ public class BitmapPreFillRunnerTest {
         PreFillType size = new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())
                 .setConfig(bitmap.getConfig())
                 .build();
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, 1);
 
         getHandler(allocationOrder).run();
@@ -248,7 +248,7 @@ public class BitmapPreFillRunnerTest {
         PreFillType size = new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())
                 .setConfig(bitmap.getConfig())
                 .build();
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, 1);
 
         getHandler(allocationOrder).run();
@@ -270,7 +270,7 @@ public class BitmapPreFillRunnerTest {
                 .setConfig(second.getConfig())
                 .build();
 
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(firstSize, 1);
         allocationOrder.put(secondSize, 1);
 
@@ -293,7 +293,7 @@ public class BitmapPreFillRunnerTest {
                 .build();
 
         final int numBitmaps = 5;
-        Map<PreFillType, Integer> allocationOrder = new HashMap<PreFillType, Integer>();
+        Map<PreFillType, Integer> allocationOrder = new HashMap<>();
         allocationOrder.put(size, numBitmaps);
 
         getHandler(allocationOrder).run();

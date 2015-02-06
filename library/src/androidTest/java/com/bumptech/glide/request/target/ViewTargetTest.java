@@ -417,7 +417,7 @@ public class ViewTargetTest {
     @Implements(ViewTreeObserver.class)
     public static class PreDrawShadowViewTreeObserver extends ShadowViewTreeObserver {
         private CopyOnWriteArrayList<OnPreDrawListener> preDrawListeners =
-                new CopyOnWriteArrayList<OnPreDrawListener>();
+                new CopyOnWriteArrayList<>();
         private boolean isAlive = true;
 
         @SuppressWarnings("unused")

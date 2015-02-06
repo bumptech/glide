@@ -58,7 +58,7 @@ public class GifResourceDecoderTest {
         when(decoderPool.obtain(any(GifDecoder.BitmapProvider.class))).thenReturn(gifDecoder);
 
         decoder = new GifResourceDecoder(Robolectric.application, bitmapPool, parserPool, decoderPool);
-        options = new HashMap<String, Object>();
+        options = new HashMap<>();
     }
 
     @Test

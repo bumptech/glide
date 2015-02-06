@@ -56,7 +56,7 @@ public class ListPreloaderTest {
                 return super.getPreloadItems(position);
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         preloader.onScroll(null, 1, 10, 30);
         assertEquals(10, calledCount.get());
     }
@@ -64,9 +64,9 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsCalledInOrderIncreasing() {
         final int toPreload = 10;
-        final List<Object> objects = new ArrayList<Object>();
+        final List<Object> objects = new ArrayList<>();
         for (int i = 0; i < toPreload; i++) {
-            objects.add(new Integer(i));
+            objects.add(i);
         }
 
         ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
@@ -90,7 +90,7 @@ public class ListPreloaderTest {
                 return mock(RequestBuilder.class);
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter,
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter,
                 toPreload);
         preloader.onScroll(null, 1, 10, 20);
     }
@@ -112,7 +112,7 @@ public class ListPreloaderTest {
                 return super.getPreloadItems(position);
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         preloader.onScroll(null, 30, 10, 40);
         preloader.onScroll(null, 29, 10, 40);
         assertTrue(called.get());
@@ -121,7 +121,7 @@ public class ListPreloaderTest {
     @Test
     public void testGetItemsIsCalledInOrderDecreasing() {
         final int toPreload = 10;
-        final List<Object> objects = new ArrayList<Object>();
+        final List<Object> objects = new ArrayList<>();
         for (int i = 0; i < toPreload; i++) {
             objects.add(new Object());
         }
@@ -149,7 +149,7 @@ public class ListPreloaderTest {
                 return mock(RequestBuilder.class);
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, toPreload);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, toPreload);
         preloader.onScroll(null, 30, 10, 10);
         preloader.onScroll(null, 29, 10, 10);
     }
@@ -167,7 +167,7 @@ public class ListPreloaderTest {
                 return super.getPreloadItems(position);
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         preloader.onScroll(null, 16, 10, 30);
         assertTrue(called.get());
     }
@@ -189,7 +189,7 @@ public class ListPreloaderTest {
             }
         };
 
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         preloader.onScroll(null, 7, 10, 30);
         preloader.onScroll(null, 6, 10, 30);
         assertTrue(called.get());
@@ -207,7 +207,7 @@ public class ListPreloaderTest {
             }
         };
 
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         preloader.onScroll(null, 1, 10, 30);
         preloader.onScroll(null, 4, 10, 30);
 
@@ -229,7 +229,7 @@ public class ListPreloaderTest {
             }
         };
 
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         preloader.onScroll(null, 21, 10, 30);
         preloader.onScroll(null, 20, 10, 30);
         preloader.onScroll(null, 17, 10, 30);
@@ -238,7 +238,7 @@ public class ListPreloaderTest {
 
     @Test
     public void testMultipleItemsForPositionIncreasing() throws NoSuchFieldException {
-        final List<Object> objects = new ArrayList<Object>();
+        final List<Object> objects = new ArrayList<>();
         objects.add(new Object());
         objects.add(new Object());
         ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
@@ -262,7 +262,7 @@ public class ListPreloaderTest {
                 return request;
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         Iterable<Integer> expected = Arrays.asList(10, 11, 20, 21, 10, 11, 20, 21);
 
         preloader.onScroll(null, 1, 10, 1 + 10 + 2);
@@ -273,7 +273,7 @@ public class ListPreloaderTest {
 
     @Test
     public void testMultipleItemsForPositionDecreasing() throws NoSuchFieldException {
-        final List<Object> objects = new ArrayList<Object>();
+        final List<Object> objects = new ArrayList<>();
         objects.add(new Object());
         objects.add(new Object());
         ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
@@ -297,7 +297,7 @@ public class ListPreloaderTest {
                 return request;
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
         Iterable<Integer> expected = Arrays.asList(20, 21, 10, 11, 20, 21, 10, 11);
 
         preloader.onScroll(null, 3, 2, 3 + 2);
@@ -322,10 +322,10 @@ public class ListPreloaderTest {
 
     @Test
     public void testItemsArePreloadedWithGlide() {
-        final List<Object> objects = new ArrayList<Object>();
+        final List<Object> objects = new ArrayList<>();
         objects.add(new Object());
         objects.add(new Object());
-        final HashSet<Object> loadedObjects = new HashSet<Object>();
+        final HashSet<Object> loadedObjects = new HashSet<>();
         ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
             @Override
             public List<Object> getPreloadItems(int position) {
@@ -338,7 +338,7 @@ public class ListPreloaderTest {
                 return super.getPreloadRequestBuilder(item);
             }
         };
-        ListPreloader<Object> preloader = new ListPreloader<Object>(preloaderAdapter, preloaderAdapter, 10);
+        ListPreloader<Object> preloader = new ListPreloader<>(preloaderAdapter, preloaderAdapter, 10);
 
         preloader.onScroll(null, 1, 10, 13);
         assertThat(loadedObjects).containsAllIn(objects);
@@ -352,7 +352,7 @@ public class ListPreloaderTest {
 
         @Override
         public List<Object> getPreloadItems(int position) {
-            ArrayList<Object> result = new ArrayList<Object>(1);
+            ArrayList<Object> result = new ArrayList<>(1);
             Collections.fill(result, new Object());
             return result;
         }

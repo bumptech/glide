@@ -8,7 +8,7 @@ import java.util.List;
  * retrieved by the classes they convert between.
  */
 public class TranscoderRegistry {
-    private final List<Entry<?, ?>> transcoders = new ArrayList<Entry<?, ?>>();
+    private final List<Entry<?, ?>> transcoders = new ArrayList<>();
 
     /**
      * Registers the given {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} using the given
@@ -22,7 +22,7 @@ public class TranscoderRegistry {
      */
     public synchronized <Z, R> void register(Class<Z> decodedClass, Class<R> transcodedClass,
             ResourceTranscoder<Z, R> transcoder) {
-        transcoders.add(new Entry<Z, R>(decodedClass, transcodedClass, transcoder));
+        transcoders.add(new Entry<>(decodedClass, transcodedClass, transcoder));
     }
 
     /**
@@ -53,7 +53,7 @@ public class TranscoderRegistry {
     }
 
     public synchronized <Z, R> List<Class<R>> getTranscodeClasses(Class<Z> resourceClass, Class<R> transcodeClass) {
-        List<Class<R>> transcodeClasses = new ArrayList<Class<R>>();
+        List<Class<R>> transcodeClasses = new ArrayList<>();
         // GifDrawable -> Drawable is just the UnitTranscoder, as is GifDrawable -> GifDrawable.
         if (transcodeClass.isAssignableFrom(resourceClass)) {
             transcodeClasses.add(transcodeClass);

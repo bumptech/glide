@@ -116,7 +116,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
         private static final int PENDING_SIZE = 0;
 
         private final View view;
-        private final List<SizeReadyCallback> cbs = new ArrayList<SizeReadyCallback>();
+        private final List<SizeReadyCallback> cbs = new ArrayList<>();
 
         private SizeDeterminerLayoutListener layoutListener;
         private Point displayDimens;
@@ -232,7 +232,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
             private final WeakReference<SizeDeterminer> sizeDeterminerRef;
 
             public SizeDeterminerLayoutListener(SizeDeterminer sizeDeterminer) {
-                sizeDeterminerRef = new WeakReference<SizeDeterminer>(sizeDeterminer);
+                sizeDeterminerRef = new WeakReference<>(sizeDeterminer);
             }
 
             @Override

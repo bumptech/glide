@@ -14,7 +14,7 @@ final class PreFillQueue {
     public PreFillQueue(Map<PreFillType, Integer> bitmapsPerType) {
         this.bitmapsPerType = bitmapsPerType;
         // We don't particularly care about the initial order.
-        keyList = new ArrayList<PreFillType>(bitmapsPerType.keySet());
+        keyList = new ArrayList<>(bitmapsPerType.keySet());
 
         for (Integer count : bitmapsPerType.values()) {
             bitmapsRemaining += count;

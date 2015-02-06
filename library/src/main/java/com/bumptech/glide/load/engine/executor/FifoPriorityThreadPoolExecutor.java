@@ -34,7 +34,7 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
 
     @Override
     protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-        return new LoadTask<T>(runnable, value, ordering.getAndIncrement());
+        return new LoadTask<>(runnable, value, ordering.getAndIncrement());
     }
 
     /**

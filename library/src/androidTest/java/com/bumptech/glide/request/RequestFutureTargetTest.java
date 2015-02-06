@@ -45,7 +45,7 @@ public class RequestFutureTargetTest {
         height = 100;
         handler = mock(Handler.class);
         waiter = mock(RequestFutureTarget.Waiter.class);
-        future = new RequestFutureTarget<Object>(handler, width, height, false, waiter);
+        future = new RequestFutureTarget<>(handler, width, height, false, waiter);
         request = mock(Request.class);
         future.setRequest(request);
     }
@@ -200,7 +200,7 @@ public class RequestFutureTargetTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsExceptionIfGetCalledOnMainThread() throws ExecutionException, InterruptedException {
-        future = new RequestFutureTarget<Object>(handler, width, height, true, waiter);
+        future = new RequestFutureTarget<>(handler, width, height, true, waiter);
         future.get();
     }
 
@@ -312,9 +312,7 @@ public class RequestFutureTargetTest {
         long timeout = 1234;
         try {
             future.get(1234, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         } catch (TimeoutException e) {
             // Expected.
@@ -328,9 +326,7 @@ public class RequestFutureTargetTest {
         long timeoutSeconds = 10;
         try {
             future.get(timeoutSeconds, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         } catch (TimeoutException e) {
             // Expected.
@@ -343,9 +339,7 @@ public class RequestFutureTargetTest {
     public void testDoesNotWaitIfGivenTimeOutEqualToZero() throws InterruptedException {
         try {
             future.get(0, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         } catch (TimeoutException e) {
             // Expected.

@@ -32,7 +32,7 @@ public class SimpleResourceTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfGivenNullData() {
-        new SimpleResource<Object>(null);
+        new SimpleResource<>(null);
     }
 
     private static class Anything { }

@@ -445,6 +445,7 @@ public class EngineJobTest {
         verify(harness.diskCacheService).submit(eq(harness.engineRunnable));
     }
 
+    @SafeVarargs
     private static <T> List<T> list(T... items) {
         return Arrays.asList(items);
     }
@@ -456,7 +457,7 @@ public class EngineJobTest {
         EngineJobListener listener = mock(EngineJobListener.class);
         boolean isCacheable = true;
         int numCbs = 10;
-        List<ResourceCallback> cbs = new ArrayList<ResourceCallback>();
+        List<ResourceCallback> cbs = new ArrayList<>();
         EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
         EngineJob job;
         ExecutorService diskCacheService = mock(ExecutorService.class);

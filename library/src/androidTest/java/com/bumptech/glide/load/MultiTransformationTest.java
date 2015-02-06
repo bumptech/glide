@@ -36,7 +36,7 @@ public class MultiTransformationTest {
         final String expected = firstId + secondId + thirdId;
         assertEquals(expected, transformation.getId());
 
-        ArrayList<Transformation> transformations = new ArrayList<Transformation>();
+        ArrayList<Transformation> transformations = new ArrayList<>();
         transformations.add(first);
         transformations.add(second);
         transformations.add(third);

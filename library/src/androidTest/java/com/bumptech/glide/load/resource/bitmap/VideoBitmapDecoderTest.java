@@ -49,7 +49,7 @@ public class VideoBitmapDecoderTest {
                 return factory.build();
             }
         });
-        options = new HashMap<String, Object>();
+        options = new HashMap<>();
     }
 
     @Test

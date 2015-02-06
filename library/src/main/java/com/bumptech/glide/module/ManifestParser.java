@@ -20,7 +20,7 @@ public final class ManifestParser {
     }
 
     public List<GlideModule> parse() {
-        List<GlideModule> modules = new ArrayList<GlideModule>();
+        List<GlideModule> modules = new ArrayList<>();
         try {
             ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(
                     context.getPackageName(), PackageManager.GET_META_DATA);
@@ -49,9 +49,7 @@ public final class ManifestParser {
         Object module;
         try {
             module = clazz.newInstance();
-        } catch (InstantiationException e) {
-            throw new RuntimeException("Unable to instantiate GlideModule implementation for " + clazz, e);
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("Unable to instantiate GlideModule implementation for " + clazz, e);
         }
 

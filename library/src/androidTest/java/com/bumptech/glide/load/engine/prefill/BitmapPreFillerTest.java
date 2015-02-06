@@ -276,7 +276,7 @@ public class BitmapPreFillerTest {
                 new PreFillType[] { smallWidth, smallHeight, }
         );
 
-        List<PreFillType> attributes = new ArrayList<PreFillType>();
+        List<PreFillType> attributes = new ArrayList<>();
         while (!allocationOrder.isEmpty()) {
             attributes.add(allocationOrder.remove());
         }

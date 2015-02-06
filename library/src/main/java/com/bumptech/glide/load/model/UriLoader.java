@@ -24,7 +24,7 @@ import java.util.Set;
  */
 public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     private static final Set<String> SCHEMES = Collections.unmodifiableSet(
-            new HashSet<String>(
+            new HashSet<>(
                     Arrays.asList(
                             ContentResolver.SCHEME_FILE,
                             ContentResolver.SCHEME_ANDROID_RESOURCE,
@@ -73,7 +73,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
 
         @Override
         public ModelLoader<Uri, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new UriLoader<InputStream>(context, this);
+            return new UriLoader<>(context, this);
         }
 
         @Override
@@ -95,7 +95,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
 
         @Override
         public ModelLoader<Uri, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new UriLoader<ParcelFileDescriptor>(context, this);
+            return new UriLoader<>(context, this);
         }
 
         @Override

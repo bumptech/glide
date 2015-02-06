@@ -14,7 +14,7 @@ public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelT
 
     @Override
     public DataFetcher<ModelType> getDataFetcher(ModelType model, int width, int height) {
-        return new UnitFetcher<ModelType>(model);
+        return new UnitFetcher<>(model);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelT
 
         @Override
         public ModelLoader<ResourceType, ResourceType> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new UnitModelLoader<ResourceType>();
+            return new UnitModelLoader<>();
         }
 
         @Override

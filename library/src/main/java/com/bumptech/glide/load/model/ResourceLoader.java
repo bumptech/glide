@@ -52,7 +52,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
 
         @Override
         public ModelLoader<Integer, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new ResourceLoader<InputStream>(context, multiFactory.build(Uri.class, InputStream.class));
+            return new ResourceLoader<>(context, multiFactory.build(Uri.class, InputStream.class));
         }
 
         @Override
@@ -68,8 +68,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
 
         @Override
         public ModelLoader<Integer, ParcelFileDescriptor> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new ResourceLoader<ParcelFileDescriptor>(context,
-                    multiFactory.build(Uri.class, ParcelFileDescriptor.class));
+            return new ResourceLoader<>(context, multiFactory.build(Uri.class, ParcelFileDescriptor.class));
         }
 
         @Override

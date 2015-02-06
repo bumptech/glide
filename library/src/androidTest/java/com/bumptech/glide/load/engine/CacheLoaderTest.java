@@ -42,7 +42,7 @@ public class CacheLoaderTest {
         key = mock(Key.class);
         decoder = mock(ResourceDecoder.class);
         expected =  mock(Resource.class);
-        options = new HashMap<String, Object>();
+        options = new HashMap<>();
     }
 
     @Test

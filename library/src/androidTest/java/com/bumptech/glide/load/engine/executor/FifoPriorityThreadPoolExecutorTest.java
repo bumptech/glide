@@ -25,7 +25,6 @@ public class FifoPriorityThreadPoolExecutorTest {
 
     @Test
     public void testLoadsAreExecutedInOrder() throws InterruptedException {
-        final int numPrioritiesToTest = 5;
         final List<Integer> resultPriorities = Collections.synchronizedList(new ArrayList<Integer>());
         FifoPriorityThreadPoolExecutor executor = new FifoPriorityThreadPoolExecutor(1);
         for (int i = 5; i > 0; i--) {
@@ -40,20 +39,14 @@ public class FifoPriorityThreadPoolExecutorTest {
         executor.shutdown();
         executor.awaitTermination(500, TimeUnit.MILLISECONDS);
 
-        assertThat(resultPriorities).hasSize(numPrioritiesToTest);
-
         // Since no jobs are queued, the first item added will be run immediately, regardless of priority.
-        assertEquals(numPrioritiesToTest, resultPriorities.get(0).intValue());
-
-        for (int i = 1; i < numPrioritiesToTest; i++) {
-            assertEquals(i, resultPriorities.get(i).intValue());
-        }
+        assertThat(resultPriorities).containsExactly(5, 1, 2, 3, 4);
     }
 
     @Test
     public void testLoadsWithSamePriorityAreExecutedInSubmitOrder() throws InterruptedException {
         final int numItemsToTest = 10;
-        final List<Integer> executionOrder = new ArrayList<Integer>();
+        final List<Integer> executionOrder = new ArrayList<>();
         final List<Integer> executedOrder = Collections.synchronizedList(new ArrayList<Integer>());
         FifoPriorityThreadPoolExecutor executor = new FifoPriorityThreadPoolExecutor(1);
         for (int i = 0; i < numItemsToTest; i++) {
@@ -78,21 +71,21 @@ public class FifoPriorityThreadPoolExecutorTest {
     public void testLoadTaskEquality() {
         new EqualsTester()
                 .addEqualityGroup(
-                        new LoadTask<Object>(new MockRunnable(10), new Object(), 1),
-                        new LoadTask<Object>(new MockRunnable(10), new Object(), 1))
+                        new LoadTask<>(new MockRunnable(10), new Object(), 1),
+                        new LoadTask<>(new MockRunnable(10), new Object(), 1))
                 .addEqualityGroup(
-                        new LoadTask<Object>(new MockRunnable(5), new Object(), 1)
+                        new LoadTask<>(new MockRunnable(5), new Object(), 1)
                 )
                 .addEqualityGroup(
-                        new LoadTask<Object>(new MockRunnable(10), new Object(), 3)
+                        new LoadTask<>(new MockRunnable(10), new Object(), 3)
                 )
                 .testEquals();
     }
 
     @Test
     public void testLoadTaskCompareToPrefersHigherPriority() {
-        LoadTask<Object> first = new LoadTask<Object>(new MockRunnable(10), new Object(), 10);
-        LoadTask<Object> second = new LoadTask<Object>(new MockRunnable(0), new Object(), 10);
+        LoadTask<Object> first = new LoadTask<>(new MockRunnable(10), new Object(), 10);
+        LoadTask<Object> second = new LoadTask<>(new MockRunnable(0), new Object(), 10);
 
         assertTrue(first.compareTo(second) > 0);
         assertTrue(second.compareTo(first) < 0);
@@ -100,8 +93,8 @@ public class FifoPriorityThreadPoolExecutorTest {
 
     @Test
     public void testLoadTaskCompareToFallsBackToOrderIfPriorityIsEqual() {
-        LoadTask<Object> first = new LoadTask<Object>(new MockRunnable(0), new Object(), 2);
-        LoadTask<Object> second = new LoadTask<Object>(new MockRunnable(0), new Object(), 1);
+        LoadTask<Object> first = new LoadTask<>(new MockRunnable(0), new Object(), 2);
+        LoadTask<Object> second = new LoadTask<>(new MockRunnable(0), new Object(), 1);
 
         assertTrue(first.compareTo(second) > 0);
         assertTrue(second.compareTo(first) < 0);
@@ -109,8 +102,8 @@ public class FifoPriorityThreadPoolExecutorTest {
 
     @Test
     public void testLoadTaskCompareToReturnsZeroIfPriorityAndOrderAreEqual() {
-        LoadTask<Object> first = new LoadTask<Object>(new MockRunnable(0), new Object(), 1);
-        LoadTask<Object> second = new LoadTask<Object>(new MockRunnable(0), new Object(), 1);
+        LoadTask<Object> first = new LoadTask<>(new MockRunnable(0), new Object(), 1);
+        LoadTask<Object> second = new LoadTask<>(new MockRunnable(0), new Object(), 1);
 
         assertEquals(0, first.compareTo(second));
         assertEquals(0, second.compareTo(first));

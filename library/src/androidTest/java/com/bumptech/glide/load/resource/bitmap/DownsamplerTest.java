@@ -37,7 +37,7 @@ public class DownsamplerTest {
         File cacheDir = Robolectric.application.getCacheDir();
         cacheDir.mkdir();
         tempFile = new File(cacheDir, "temp");
-        options = new HashMap<String, Object>();
+        options = new HashMap<>();
     }
 
     @After

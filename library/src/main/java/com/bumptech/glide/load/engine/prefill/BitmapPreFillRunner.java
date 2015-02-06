@@ -57,7 +57,7 @@ final class BitmapPreFillRunner implements Runnable {
     private final MemoryCache memoryCache;
     private final PreFillQueue toPrefill;
     private final Clock clock;
-    private final Set<PreFillType> seenTypes = new HashSet<PreFillType>();
+    private final Set<PreFillType> seenTypes = new HashSet<>();
     private final Handler handler;
 
     private long currentDelay = INITIAL_BACKOFF_MS;

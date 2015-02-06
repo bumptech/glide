@@ -17,7 +17,7 @@ public class ViewPropertyViewTransitionAnimationFactoryTest {
     @Before
     public void setUp() {
         ViewPropertyTransition.Animator animator = mock(ViewPropertyTransition.Animator.class);
-        factory = new ViewPropertyAnimationFactory<Object>(animator);
+        factory = new ViewPropertyAnimationFactory<>(animator);
     }
 
     @Test

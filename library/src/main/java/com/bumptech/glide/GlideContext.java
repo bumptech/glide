@@ -66,7 +66,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         Class<?> modelClass = model.getClass();
         List<Class<?>> dataClasses = registry.modelLoaderRegistry.getDataClasses(modelClass);
         List<LoadPath<?, ResourceType, TranscodeType>> loadPaths =
-                new ArrayList<LoadPath<?, ResourceType, TranscodeType>>();
+                new ArrayList<>();
         for (Class<?> dataClass : dataClasses) {
             LoadPath<?, ResourceType, TranscodeType> path = getLoadPath(dataClass, resourceClass, transcodeClass);
             if (path != null) {
@@ -88,7 +88,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
                 getDecodePaths(dataClass, resourceClass, transcodeClass);
         // It's possible there is no way to decode or transcode to the desired types from a given data class.
         if (!decodePaths.isEmpty()) {
-            return new LoadPath<DataType, ResourceType, TranscodeType>(dataClass, resourceClass, transcodeClass,
+            return new LoadPath<>(dataClass, resourceClass, transcodeClass,
                     decodePaths);
         } else {
             return null;
@@ -99,7 +99,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
             getDecodePaths(Class<DataType> dataClass, Class<ResourceType> resourceClass,
             Class<TranscodeType> transcodeClass) {
         List<DecodePath<DataType, ResourceType, TranscodeType>> decodePaths =
-                new ArrayList<DecodePath<DataType, ResourceType, TranscodeType>>();
+                new ArrayList<>();
         List<Class<ResourceType>> registeredResourceClasses =
                 registry.decoderRegistry.getResourceClasses(dataClass, resourceClass);
         for (Class<ResourceType> registeredResourceClass : registeredResourceClasses) {
@@ -110,7 +110,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
                         registry.decoderRegistry.getDecoders(dataClass, registeredResourceClass);
                 ResourceTranscoder<ResourceType, TranscodeType> transcoder =
                         registry.transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
-                decodePaths.add(new DecodePath<DataType, ResourceType, TranscodeType>(dataClass,
+                decodePaths.add(new DecodePath<>(dataClass,
                         registeredResourceClass, registeredTranscodeClass, decoders, transcoder));
             }
         }
@@ -118,7 +118,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     }
 
     public List<Class<?>> getRegisteredResourceClasses(Class<?> modelClass, Class<?> resourceClass) {
-        List<Class<?>> result = new ArrayList<Class<?>>();
+        List<Class<?>> result = new ArrayList<>();
         List<Class<?>> dataClasses = registry.modelLoaderRegistry.getDataClasses(modelClass);
         for (Class<?> dataClass : dataClasses) {
             List<? extends Class<?>> registeredResourceClasses =

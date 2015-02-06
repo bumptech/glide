@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Implements(ContentResolver.class)
 public class ContentResolverShadow extends ShadowContentResolver {
-    private Map<Uri, AssetFileDescriptor> fileDescriptorMap = new HashMap<Uri, AssetFileDescriptor>();
+    private Map<Uri, AssetFileDescriptor> fileDescriptorMap = new HashMap<>();
 
     public void registerFileDescriptor(Uri uri, AssetFileDescriptor fileDescriptor) {
         fileDescriptorMap.put(uri, fileDescriptor);

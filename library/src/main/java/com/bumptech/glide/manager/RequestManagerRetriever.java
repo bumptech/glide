@@ -38,13 +38,11 @@ public class RequestManagerRetriever implements Handler.Callback {
 
     // Visible for testing.
     /** Pending adds for RequestManagerFragments. */
-    final Map<android.app.FragmentManager, RequestManagerFragment> pendingRequestManagerFragments =
-            new HashMap<android.app.FragmentManager, RequestManagerFragment>();
+    final Map<android.app.FragmentManager, RequestManagerFragment> pendingRequestManagerFragments = new HashMap<>();
 
     // Visible for testing.
     /** Pending adds for SupportRequestManagerFragments. */
-    final Map<FragmentManager, SupportRequestManagerFragment> pendingSupportRequestManagerFragments =
-            new HashMap<FragmentManager, SupportRequestManagerFragment>();
+    final Map<FragmentManager, SupportRequestManagerFragment> pendingSupportRequestManagerFragments = new HashMap<>();
 
     /** Main thread handler to handle cleaning up pending fragment maps. */
     private final Handler handler;

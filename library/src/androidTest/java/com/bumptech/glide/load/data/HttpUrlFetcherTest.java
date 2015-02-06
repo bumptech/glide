@@ -26,6 +26,7 @@ import java.net.URL;
 
 @RunWith(JUnit4.class)
 public class HttpUrlFetcherTest {
+    private static final int TIMEOUT_MS = 100;
     private HttpURLConnection urlConnection;
     private HttpUrlFetcher fetcher;
     private GlideUrl glideUrl;
@@ -40,7 +41,7 @@ public class HttpUrlFetcherTest {
 
         glideUrl = mock(GlideUrl.class);
         when(glideUrl.toURL()).thenReturn(url);
-        fetcher = new HttpUrlFetcher(glideUrl, connectionFactory);
+        fetcher = new HttpUrlFetcher(glideUrl, TIMEOUT_MS, connectionFactory);
         stream = mock(InputStream.class);
         when(urlConnection.getInputStream()).thenReturn(stream);
         when(urlConnection.getResponseCode()).thenReturn(200);
@@ -56,13 +57,13 @@ public class HttpUrlFetcherTest {
     @Test
     public void testSetsReadTimeout() throws Exception {
         fetcher.loadData(Priority.HIGH);
-        verify(urlConnection).setReadTimeout(eq(2500));
+        verify(urlConnection).setReadTimeout(eq(TIMEOUT_MS));
     }
 
     @Test
     public void testSetsConnectTimeout() throws Exception {
         fetcher.loadData(Priority.IMMEDIATE);
-        verify(urlConnection).setConnectTimeout(eq(2500));
+        verify(urlConnection).setConnectTimeout(eq(TIMEOUT_MS));
     }
 
     @Test

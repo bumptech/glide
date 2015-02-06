@@ -89,33 +89,33 @@
       <excludeFolder url="file://$MODULE_DIR$/build/test-results" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>
-    <orderEntry type="jdk" jdkName="Maven Android API 19 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" scope="TEST" name="commons-codec-1.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-annotations-2.4" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="mockwebserver-1.6.0" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="okhttp-1.6.0" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="okio-1.2.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="objenesis-1.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-5.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="okhttp-2.2.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-2.4" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-commons-5.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
+    <orderEntry type="library" exported="" name="library-1.0.10" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-tree-5.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-analysis-5.0.1" level="project" />
-    <orderEntry type="library" exported="" name="library-1.0.8" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="truth-0.24" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-all-1.9.5" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-1.8.0" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="bcprov-jdk15on-1.50" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-launcher-1.8.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="guava-17.0" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="mockwebserver-2.2.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-util-5.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="maven-ant-tasks-2.1.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="sqlite4java-0.282" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="bcprov-jdk15on-1.48" level="project" />
     <orderEntry type="module" module-name="testutil" exported="" />
     <orderEntry type="module" module-name="glide" exported="" />
-    <orderEntry type="module" module-name="library" />
   </component>
 </module>

@@ -66,7 +66,7 @@ public class Engine implements EngineJobListener,
         this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
 
         if (activeResources == null) {
-            activeResources = new HashMap<Key, WeakReference<EngineResource<?>>>();
+            activeResources = new HashMap<>();
         }
         this.activeResources = activeResources;
 
@@ -76,7 +76,7 @@ public class Engine implements EngineJobListener,
         this.keyFactory = keyFactory;
 
         if (jobs == null) {
-            jobs = new HashMap<Key, EngineJob>();
+            jobs = new HashMap<>();
         }
         this.jobs = jobs;
 
@@ -156,7 +156,7 @@ public class Engine implements EngineJobListener,
         }
 
         EngineJob engineJob = engineJobFactory.build(key, requestContext.isMemoryCacheable());
-        DecodeJob<R> decodeJob = new DecodeJob<R>(requestContext, key, width, height,  diskCacheProvider);
+        DecodeJob<R> decodeJob = new DecodeJob<>(requestContext, key, width, height,  diskCacheProvider);
         EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, requestContext.getPriority());
         jobs.put(key, engineJob);
         engineJob.addCallback(cb);
@@ -273,7 +273,7 @@ public class Engine implements EngineJobListener,
 
     private ReferenceQueue<EngineResource<?>> getReferenceQueue() {
         if (resourceReferenceQueue == null) {
-            resourceReferenceQueue = new ReferenceQueue<EngineResource<?>>();
+            resourceReferenceQueue = new ReferenceQueue<>();
             MessageQueue queue = Looper.myQueue();
             queue.addIdleHandler(new RefQueueIdleHandler(activeResources, resourceReferenceQueue));
         }

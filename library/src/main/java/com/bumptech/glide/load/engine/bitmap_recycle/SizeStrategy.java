@@ -16,8 +16,8 @@ import java.util.TreeMap;
 class SizeStrategy implements LruPoolStrategy {
     private static final int MAX_SIZE_MULTIPLE = 8;
     private final KeyPool keyPool = new KeyPool();
-    private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<Key, Bitmap>();
-    private final TreeMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<Integer, Integer>();
+    private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<>();
+    private final TreeMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<>();
 
     @Override
     public void put(Bitmap bitmap) {

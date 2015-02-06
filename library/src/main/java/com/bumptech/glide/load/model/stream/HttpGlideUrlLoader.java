@@ -24,7 +24,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
      * The default factory for {@link HttpGlideUrlLoader}s.
      */
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
-        private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<GlideUrl, GlideUrl>(500);
+        private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<>(500);
 
         @Override
         public ModelLoader<GlideUrl, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {

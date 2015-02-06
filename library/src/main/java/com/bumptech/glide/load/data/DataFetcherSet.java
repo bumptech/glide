@@ -19,7 +19,7 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
     private final int width;
     private final int height;
     private final List<ModelLoader<Model, ?>> modelLoaders;
-    private final List<DataFetcher<?>> fetchers = new ArrayList<DataFetcher<?>>();
+    private final List<DataFetcher<?>> fetchers = new ArrayList<>();
 
     public DataFetcherSet(Model model, int width, int height, List<ModelLoader<Model, ?>> modelLoaders) {
         this.model = model;
@@ -34,7 +34,7 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
 
     @SuppressWarnings("unchecked")
     public <T> List<DataFetcher<T>> getFetchers(Class<T> dataClass) {
-        List<DataFetcher<T>> result = new ArrayList<DataFetcher<T>>();
+        List<DataFetcher<T>> result = new ArrayList<>();
         for (DataFetcher<?> fetcher : this) {
             if (fetcher != null && fetcher.getDataClass().equals(dataClass)) {
                 result.add((DataFetcher<T>) fetcher);

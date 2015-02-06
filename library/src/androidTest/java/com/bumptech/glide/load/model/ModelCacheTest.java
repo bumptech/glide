@@ -16,7 +16,7 @@ public class ModelCacheTest {
 
     @Before
     public void setUp() {
-        cache = new ModelCache<Object, Object>(10);
+        cache = new ModelCache<>(10);
     }
 
     @Test

@@ -11,11 +11,11 @@ import java.util.List;
  */
 @SuppressWarnings("rawtypes")
 public class ResourceDecoderRegistry {
-    private final List<Entry<?, ?>> decoders = new ArrayList<Entry<?, ?>>();
+    private final List<Entry<?, ?>> decoders = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     public synchronized <T, R> List<ResourceDecoder<T, R>> getDecoders(Class<T> dataClass, Class<R> resourceClass) {
-        List<ResourceDecoder<T, R>> result = new ArrayList<ResourceDecoder<T, R>>();
+        List<ResourceDecoder<T, R>> result = new ArrayList<>();
         for (Entry<?, ?> entry : decoders) {
             if (entry.handles(dataClass, resourceClass)) {
                 result.add((ResourceDecoder<T, R>) entry.decoder);
@@ -28,7 +28,7 @@ public class ResourceDecoderRegistry {
 
     @SuppressWarnings("unchecked")
     public synchronized <T, R> List<Class<R>> getResourceClasses(Class<T> dataClass, Class<R> resourceClass) {
-        List<Class<R>> result = new ArrayList<Class<R>>();
+        List<Class<R>> result = new ArrayList<>();
         for (Entry<?, ?> entry : decoders) {
             if (entry.handles(dataClass, resourceClass)) {
                 result.add((Class<R>) entry.resourceClass);
@@ -38,11 +38,11 @@ public class ResourceDecoderRegistry {
     }
 
     public synchronized <T, R> void append(ResourceDecoder<T, R> decoder, Class<T> dataClass, Class<R> resourceClass) {
-        decoders.add(new Entry<T, R>(dataClass, resourceClass, decoder));
+        decoders.add(new Entry<>(dataClass, resourceClass, decoder));
     }
 
     public synchronized <T, R> void prepend(ResourceDecoder<T, R> decoder, Class<T> dataClass, Class<R> resourceClass) {
-        decoders.add(0, new Entry<T, R>(dataClass, resourceClass, decoder));
+        decoders.add(0, new Entry<>(dataClass, resourceClass, decoder));
     }
 
     private static class Entry<T, R> {

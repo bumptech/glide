@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * name using {@link android.content.pm.PackageInfo#versionCode}.
  */
 public final class ApplicationVersionSignature {
-    private static final ConcurrentHashMap<String, Key> PACKAGE_NAME_TO_KEY = new ConcurrentHashMap<String, Key>();
+    private static final ConcurrentHashMap<String, Key> PACKAGE_NAME_TO_KEY = new ConcurrentHashMap<>();
 
     /**
      * Returns the signature {@link com.bumptech.glide.load.Key} for version code of the Application of the given

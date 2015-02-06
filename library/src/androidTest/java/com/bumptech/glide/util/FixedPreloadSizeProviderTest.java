@@ -15,7 +15,7 @@ public class FixedPreloadSizeProviderTest {
     public void testReturnsGivenSize() {
         int width = 500;
         int height = 1234;
-        FixedPreloadSizeProvider<Object> provider = new FixedPreloadSizeProvider<Object>(width, height);
+        FixedPreloadSizeProvider<Object> provider = new FixedPreloadSizeProvider<>(width, height);
 
         int[] size = provider.getPreloadSize(new Object(), 0, 0);
 

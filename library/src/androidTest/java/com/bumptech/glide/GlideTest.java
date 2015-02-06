@@ -113,9 +113,6 @@ public class GlideTest {
             }
         });
 
-//        ShadowPackageManager spm = Robolectric.shadowOf_(Robolectric.application.getPackageManager());
-//        spm.addGlideModule(SetupModule.class);
-
         Lifecycle lifecycle = mock(Lifecycle.class);
         requestManager = new RequestManager(getContext(), lifecycle);
         requestManager.resumeRequests();
@@ -797,9 +794,8 @@ public class GlideTest {
     // using static maps seems to fix the issue.
     @Implements(value = ContentResolver.class)
     public static class ShadowFileDescriptorContentResolver {
-        private static final Map<Uri, AssetFileDescriptor> URI_TO_FILE_DESCRIPTOR =
-                new HashMap<Uri, AssetFileDescriptor>();
-        private static final Map<Uri, InputStream> URI_TO_INPUT_STREAMS = new HashMap<Uri, InputStream>();
+        private static final Map<Uri, AssetFileDescriptor> URI_TO_FILE_DESCRIPTOR = new HashMap<>();
+        private static final Map<Uri, InputStream> URI_TO_INPUT_STREAMS = new HashMap<>();
 
         public void registerInputStream(Uri uri, InputStream inputStream) {
             URI_TO_INPUT_STREAMS.put(uri, inputStream);

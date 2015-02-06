@@ -256,7 +256,7 @@ public class MultiModelLoaderFactoryTest {
         verify(multiModelLoaderFactory).build(captor.capture());
 
         List<ModelLoader> captured = captor.getValue();
-        List<ModelLoader<X, Y>> result = new ArrayList<ModelLoader<X, Y>>(captured.size());
+        List<ModelLoader<X, Y>> result = new ArrayList<>(captured.size());
         for (ModelLoader modelLoader : captured) {
             result.add(modelLoader);
         }

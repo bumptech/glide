@@ -29,7 +29,7 @@ public class EngineResourceTest {
     @Before
     public void setUp() {
         resource = mock(Resource.class);
-        engineResource = new EngineResource<Object>(resource, true /*isMemoryCacheable*/);
+        engineResource = new EngineResource<>(resource, true /*isMemoryCacheable*/);
         listener = mock(EngineResource.ResourceListener.class);
         engineResource.setResourceListener(cacheKey, listener);
     }
@@ -141,14 +141,14 @@ public class EngineResourceTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfWrappedResourceIsNull() {
-        new EngineResource<Object>(null, false);
+        new EngineResource<>(null, false);
     }
 
     @Test
     public void testCanSetAndGetIsCacheable() {
-        engineResource = new EngineResource<Object>(mock(Resource.class), true);
+        engineResource = new EngineResource<>(mock(Resource.class), true);
         assertTrue(engineResource.isCacheable());
-        engineResource = new EngineResource<Object>(mock(Resource.class), false);
+        engineResource = new EngineResource<>(mock(Resource.class), false);
         assertFalse(engineResource.isCacheable());
     }
 }

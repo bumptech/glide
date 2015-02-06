@@ -420,7 +420,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      */
     public FutureTarget<TranscodeType> into(int width, int height) {
         final RequestFutureTarget<TranscodeType> target =
-                new RequestFutureTarget<TranscodeType>(context.getMainHandler(), width, height);
+                new RequestFutureTarget<>(context.getMainHandler(), width, height);
 
         // TODO: Currently all loads must be started on the main thread...
         context.getMainHandler().post(new Runnable() {
@@ -495,7 +495,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     }
 
     private RequestBuilder<File> getDownloadOnlyRequest() {
-        return new RequestBuilder<File>(File.class, this)
+        return new RequestBuilder<>(File.class, this)
                 .apply(DOWNLOAD_ONLY_OPTIONS);
     }
 
@@ -561,7 +561,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     private Request obtainRequest(Target<TranscodeType> target, RequestOptions requestOptions,
             RequestCoordinator requestCoordinator) {
         RequestContext<TranscodeType> requestContext =
-                new RequestContext<TranscodeType>(context, model, transcodeClass, decodeOptions, requestOptions);
+                new RequestContext<>(context, model, transcodeClass, decodeOptions, requestOptions);
 
         return SingleRequest.obtain(requestContext, model, transcodeClass, requestOptions, target, requestListener,
                 requestCoordinator, context.getEngine(), transitionOptions.getTransitionFactory());

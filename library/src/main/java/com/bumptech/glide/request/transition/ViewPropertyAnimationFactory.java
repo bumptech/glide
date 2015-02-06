@@ -26,7 +26,7 @@ public class ViewPropertyAnimationFactory<R> implements TransitionFactory<R> {
             return NoTransition.get();
         }
         if (animation == null) {
-            animation = new ViewPropertyTransition<R>(animator);
+            animation = new ViewPropertyTransition<>(animator);
         }
 
         return animation;

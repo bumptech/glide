@@ -7,10 +7,10 @@ apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 
 findbugs {
-    toolVersion = "2.0.3"
+    toolVersion = FINDBUGS_VERSION
 }
 jacoco {
-    toolVersion = "0.7.1.201405082137"
+    toolVersion = JACOCO_VERSION
 }
 coveralls {
     jacocoReportPath = 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
@@ -29,8 +29,22 @@ dependencies {
     androidTestCompile "junit:junit:${JUNIT_VERSION}"
     androidTestCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
     androidTestCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    // TODO: increase this to 2.0.+ when we compile against Java 7.
     androidTestCompile "com.squareup.okhttp:mockwebserver:${MOCKWEBSERVER_VERSION}"
+}
+
+robolectric {
+   // configure max heap size of the test JVM
+    maxHeapSize = '2048m'
+
+    // configure the test JVM arguments
+    jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
+
+    // Specify max number of processes (default is 1)
+    maxParallelForks = 4
+
+    // Specify max number of test classes to execute in a test process
+    // before restarting the process (default is unlimited)
+    forkEvery = 150
 }
 
 android {
@@ -49,6 +63,11 @@ android {
         debug {
             testCoverageEnabled = true
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 
@@ -79,6 +98,7 @@ afterEvaluate {
     check.dependsOn('findbugs')
 
     task pmd(type: Pmd) {
+        targetJdk = TargetJdk.VERSION_1_7
 
         description 'Run pmd'
         group 'verification'

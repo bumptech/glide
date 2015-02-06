@@ -35,7 +35,7 @@ public class ResourceLoaderTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        loader = new ResourceLoader<Object>(Robolectric.application, uriLoader);
+        loader = new ResourceLoader<>(Robolectric.application, uriLoader);
     }
 
     @Test

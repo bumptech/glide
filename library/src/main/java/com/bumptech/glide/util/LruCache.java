@@ -11,7 +11,7 @@ import java.util.Map;
  * @param <Y> The type of the values.
  */
 public class LruCache<T, Y> {
-    private final LinkedHashMap<T, Y> cache = new LinkedHashMap<T, Y>(100, 0.75f, true);
+    private final LinkedHashMap<T, Y> cache = new LinkedHashMap<>(100, 0.75f, true);
     private int maxSize;
     private final int initialMaxSize;
     private int currentSize = 0;

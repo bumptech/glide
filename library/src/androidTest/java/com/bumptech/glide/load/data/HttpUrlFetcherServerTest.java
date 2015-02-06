@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class HttpUrlFetcherServerTest {
     private static final String DEFAULT_PATH = "/fakepath";
+    private static final int TIMEOUT_TIME_MS = 100;
 
     private MockWebServer mockWebServer;
     private boolean defaultFollowRedirects;
@@ -200,18 +201,22 @@ public class HttpUrlFetcherServerTest {
 
     @Test(expected = SocketTimeoutException.class)
     public void testSetsReadTimeout() throws Exception {
-        MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.enqueue(new MockResponse().setBody("test").throttleBody(1, 2501, TimeUnit.SECONDS));
-        mockWebServer.play();
+        MockWebServer tempWebServer = new MockWebServer();
+        tempWebServer.enqueue(new MockResponse().setBody("test").throttleBody(1, TIMEOUT_TIME_MS,
+                TimeUnit.MILLISECONDS));
+        tempWebServer.play();
+
         try {
             getFetcher().loadData(Priority.HIGH);
         } finally {
-            mockWebServer.shutdown();
+            tempWebServer.shutdown();
+            // shutdown() called before any enqueue() blocks until it times out.
+            mockWebServer.enqueue(new MockResponse().setResponseCode(200));
         }
     }
 
     private HttpUrlFetcher getFetcher() {
         URL url = mockWebServer.getUrl(DEFAULT_PATH);
-        return new HttpUrlFetcher(new GlideUrl(url));
+        return new HttpUrlFetcher(new GlideUrl(url), TIMEOUT_TIME_MS, HttpUrlFetcher.DEFAULT_CONNECTION_FACTORY);
     }
 }

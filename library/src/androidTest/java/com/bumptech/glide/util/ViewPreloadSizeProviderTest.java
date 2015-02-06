@@ -23,7 +23,7 @@ public class ViewPreloadSizeProviderTest {
     @Before
     public void setUp() {
         view = new View(Robolectric.application);
-        provider = new ViewPreloadSizeProvider<Object>();
+        provider = new ViewPreloadSizeProvider<>();
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ViewPreloadSizeProviderTest {
         int height = 200;
         view.setLayoutParams(new ViewGroup.LayoutParams(width, height));
 
-        provider = new ViewPreloadSizeProvider<Object>(view);
+        provider = new ViewPreloadSizeProvider<>(view);
 
         int[] size = provider.getPreloadSize(new Object(), 0, 0);
         assertThat(size).asList().containsExactly(width, height);

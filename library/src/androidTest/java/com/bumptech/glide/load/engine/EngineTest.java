@@ -442,10 +442,9 @@ public class EngineTest {
         Priority priority = Priority.NORMAL;
         ResourceCallback cb = mock(ResourceCallback.class);
         EngineResource resource = mock(EngineResource.class);
-        Map<Key, EngineJob> jobs = new HashMap<Key, EngineJob>();
+        Map<Key, EngineJob> jobs = new HashMap<>();
         Transformation transformation = mock(Transformation.class);
-        Map<Key, WeakReference<EngineResource<?>>> activeResources =
-                new HashMap<Key, WeakReference<EngineResource<?>>>();
+        Map<Key, WeakReference<EngineResource<?>>> activeResources = new HashMap<>();
         Key signature = mock(Key.class);
         RequestContext<Object> requestContext = mock(RequestContext.class);
 

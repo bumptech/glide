@@ -40,7 +40,7 @@ public class UriLoaderTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        loader = new UriLoader<Object>(Robolectric.application, factory);
+        loader = new UriLoader<>(Robolectric.application, factory);
     }
 
     @Test

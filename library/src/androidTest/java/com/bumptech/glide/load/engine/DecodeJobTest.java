@@ -592,6 +592,7 @@ public class DecodeJobTest {
         }
     }
 
+    @SafeVarargs
     private static <T> List<T> list(T... items) {
         return Arrays.asList(items);
     }
@@ -632,7 +633,7 @@ public class DecodeJobTest {
             when(key.getOriginalKey()).thenReturn(originalKey);
             when(transcoder.transcode(eq(resource))).thenReturn(resource);
             when(transformation.transform(eq(resource), eq(width), eq(height))).thenReturn(resource);
-            List<DataFetcher<?>> dataFetchersList = new ArrayList<DataFetcher<?>>();
+            List<DataFetcher<?>> dataFetchersList = new ArrayList<>();
             dataFetchersList.add(dataFetcher);
             when(dataFetcher.loadData(any(Priority.class))).thenReturn(data);
             when(requestContext.getDiskCacheStrategy()).thenReturn(diskCacheStrategy);
@@ -644,7 +645,7 @@ public class DecodeJobTest {
         }
 
         public DecodeJob<Object> getJob() {
-            return new DecodeJob<Object>(requestContext, key, width, height, diskCacheProvider, fileOpener);
+            return new DecodeJob<>(requestContext, key, width, height, diskCacheProvider, fileOpener);
         }
     }
 

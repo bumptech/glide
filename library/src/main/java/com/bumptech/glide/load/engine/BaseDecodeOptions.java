@@ -30,8 +30,8 @@ import java.util.Map;
 public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> implements Cloneable {
     private final Context context;
 
-    private Map<String, Object> options = new HashMap<String, Object>();
-    private Map<Class<?>, Transformation<?>> transformations = new HashMap<Class<?>, Transformation<?>>();
+    private Map<String, Object> options = new HashMap<>();
+    private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
     private boolean isTransformationSet;
     private Class<?> resourceClass = Object.class;
 
@@ -114,9 +114,9 @@ public abstract class BaseDecodeOptions<CHILD extends BaseDecodeOptions<CHILD>> 
     public final CHILD clone() {
         try {
             BaseDecodeOptions<CHILD> result = (BaseDecodeOptions<CHILD>) super.clone();
-            result.options = new HashMap<String, Object>();
+            result.options = new HashMap<>();
             result.options.putAll(options);
-            result.transformations =  new HashMap<Class<?>, Transformation<?>>();
+            result.transformations =  new HashMap<>();
             result.transformations.putAll(transformations);
             return (CHILD) result;
         } catch (CloneNotSupportedException e) {
