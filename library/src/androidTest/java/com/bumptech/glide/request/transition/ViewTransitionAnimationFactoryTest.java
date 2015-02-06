@@ -15,8 +15,8 @@ import android.view.animation.Animation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -35,14 +35,14 @@ public class ViewTransitionAnimationFactoryTest {
     public void testFactoryReturnsNoAnimationIfFromMemoryCache() {
         Transition<Object> animation = factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/);
         assertEquals(NoTransition.get(), animation);
-        verify(viewTransitionAnimationFactory, never()).build(Robolectric.application);
+        verify(viewTransitionAnimationFactory, never()).build(RuntimeEnvironment.application);
     }
 
     @Test
     public void testFactoryReturnsNoAnimationIfNotFirstResource() {
         Transition<Object> animation = factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/);
         assertEquals(NoTransition.get(), animation);
-        verify(viewTransitionAnimationFactory, never()).build(Robolectric.application);
+        verify(viewTransitionAnimationFactory, never()).build(RuntimeEnvironment.application);
     }
 
     @Test

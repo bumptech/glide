@@ -17,8 +17,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
@@ -51,7 +51,7 @@ public class StringLoaderTest {
         // TODO on windows it will fail with schema being the drive letter (C:\... -> C)
         assumeTrue(!Util.isWindows());
 
-        File f = Robolectric.application.getCacheDir();
+        File f = RuntimeEnvironment.application.getCacheDir();
         Uri expected = Uri.fromFile(f);
         when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
 
@@ -74,7 +74,7 @@ public class StringLoaderTest {
 
     @Test
     public void testHandlesFileUris() throws IOException {
-        File f = Robolectric.application.getCacheDir();
+        File f = RuntimeEnvironment.application.getCacheDir();
 
         Uri expected = Uri.fromFile(f);
         when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);

@@ -25,8 +25,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -51,7 +51,7 @@ public class RequestManagerTest {
                     }
                 });
         requestTracker = mock(RequestTracker.class);
-        manager = new RequestManager(Robolectric.application, lifecycle, requestTracker, factory);
+        manager = new RequestManager(RuntimeEnvironment.application, lifecycle, requestTracker, factory);
     }
 
     @Test

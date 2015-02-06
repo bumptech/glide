@@ -33,8 +33,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -358,11 +358,11 @@ public class GifDrawableTest {
         Transformation<Bitmap> transformation = mock(Transformation.class);
         GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
         Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        drawable = new GifDrawable(Robolectric.application, provider, bitmapPool, transformation, 100, 100,  gifHeader,
-                new byte[0], firstFrame);
+        drawable = new GifDrawable(RuntimeEnvironment.application, provider, bitmapPool, transformation, 100, 100,
+                gifHeader, new byte[0], firstFrame);
 
         assertNotNull(drawable.getConstantState().newDrawable());
-        assertNotNull(drawable.getConstantState().newDrawable(Robolectric.application.getResources()));
+        assertNotNull(drawable.getConstantState().newDrawable(RuntimeEnvironment.application.getResources()));
     }
 
     @Test
@@ -536,7 +536,7 @@ public class GifDrawableTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfConstructedWIthNullFirstFrame() {
-        new GifDrawable(Robolectric.application, mock(GifDecoder.BitmapProvider.class), mock(BitmapPool.class),
+        new GifDrawable(RuntimeEnvironment.application, mock(GifDecoder.BitmapProvider.class), mock(BitmapPool.class),
                 mock(Transformation.class), 100, 100, mock(GifHeader.class), new byte[0], null);
     }
 

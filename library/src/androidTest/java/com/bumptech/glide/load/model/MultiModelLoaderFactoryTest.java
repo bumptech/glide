@@ -15,8 +15,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class MultiModelLoaderFactoryTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        multiFactory = new MultiModelLoaderFactory(Robolectric.application, multiModelLoaderFactory);
+        multiFactory = new MultiModelLoaderFactory(RuntimeEnvironment.application, multiModelLoaderFactory);
         when(singleFactory.build(anyContext(), eq(multiFactory))).thenReturn(modelLoader);
     }
 

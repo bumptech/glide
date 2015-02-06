@@ -17,8 +17,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -40,7 +41,7 @@ public class MemorySizeCalculatorTest {
 
     @Test
     public void testDefaultMemoryCacheSizeIsTwiceScreenSize() {
-        Robolectric.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+        Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
         int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
@@ -52,7 +53,7 @@ public class MemorySizeCalculatorTest {
         final int memoryClassBytes = Math.round(harness.getScreenSize() * harness.memoryCacheScreens
                 * harness.sizeMultiplier);
 
-        Robolectric.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
+        Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
         int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
@@ -61,7 +62,7 @@ public class MemorySizeCalculatorTest {
 
     @Test
     public void testDefaultBitmapPoolSize() {
-        Robolectric.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+        Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
@@ -74,7 +75,7 @@ public class MemorySizeCalculatorTest {
         final int memoryClassBytes = Math.round(harness.getScreenSize() * harness.bitmapPoolScreens
                 * harness.sizeMultiplier);
 
-        Robolectric.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
+        Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
@@ -85,7 +86,7 @@ public class MemorySizeCalculatorTest {
     public void testCumulativePoolAndMemoryCacheSizeAreLimitedByMemoryClass() {
         final int memoryClassBytes = Math.round(harness.getScreenSize()
                 * (harness.bitmapPoolScreens + harness.memoryCacheScreens) * harness.sizeMultiplier);
-        Robolectric.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
+        Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
         int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
@@ -96,7 +97,7 @@ public class MemorySizeCalculatorTest {
 
     @Test
     public void testCumulativePoolAndMemoryCacheSizesAreSmallerOnLowMemoryDevices() {
-        Robolectric.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass() / 2);
+        Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass() / 2);
         final int normalMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
         final int normalBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
@@ -124,13 +125,13 @@ public class MemorySizeCalculatorTest {
         int bitmapPoolScreens = MemorySizeCalculator.BITMAP_POOL_TARGET_SCREENS;
         float sizeMultiplier = MemorySizeCalculator.MAX_SIZE_MULTIPLIER;
         ActivityManager activityManager =
-                (ActivityManager) Robolectric.application.getSystemService(Context.ACTIVITY_SERVICE);
+                (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
         MemorySizeCalculator.ScreenDimensions screenDimensions = mock(MemorySizeCalculator.ScreenDimensions.class);
 
         public MemorySizeCalculator getCalculator() {
             when(screenDimensions.getWidthPixels()).thenReturn(pixelSize);
             when(screenDimensions.getHeightPixels()).thenReturn(pixelSize);
-            return new MemorySizeCalculator(Robolectric.application, activityManager, screenDimensions);
+            return new MemorySizeCalculator(RuntimeEnvironment.application, activityManager, screenDimensions);
         }
 
         public int getScreenSize() {

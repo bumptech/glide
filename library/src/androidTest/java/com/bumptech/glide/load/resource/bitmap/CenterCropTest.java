@@ -19,8 +19,8 @@ import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -78,7 +78,7 @@ public class CenterCropTest {
 
     @Test
     public void testAsksBitmapPoolForArgb8888IfInConfigIsNull() {
-        Robolectric.shadowOf(harness.bitmap).setConfig(null);
+        Shadows.shadowOf(harness.bitmap).setConfig(null);
 
         harness.centerCrop.transform(harness.resource, 10, 10);
 

@@ -24,8 +24,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
@@ -49,7 +49,7 @@ public class EngineJobTest {
     public void testOnResourceReadyPassedToCallbacks() throws Exception {
         harness.getJob().onResourceReady(harness.resource);
 
-        Robolectric.runUiThreadTasks();
+        ShadowLooper.runUiThreadTasks();
         verify(harness.cb).onResourceReady(eq(harness.engineResource));
     }
 
@@ -57,7 +57,7 @@ public class EngineJobTest {
     public void testListenerNotifiedJobCompleteOnOnResourceReady() {
         harness.getJob().onResourceReady(harness.resource);
 
-        Robolectric.runUiThreadTasks();
+        ShadowLooper.runUiThreadTasks();
 
         verify(harness.listener).onEngineJobComplete(eq(harness.key), eq(harness.engineResource));
     }
@@ -99,7 +99,7 @@ public class EngineJobTest {
             harness = new EngineJobHarness();
             harness.getJob().onException(exception);
 
-            Robolectric.runUiThreadTasks();
+            ShadowLooper.runUiThreadTasks();
             verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
         }
     }
@@ -109,7 +109,7 @@ public class EngineJobTest {
         harness.isCacheable = true;
         harness.getJob().onResourceReady(harness.resource);
 
-        Robolectric.runUiThreadTasks();
+        ShadowLooper.runUiThreadTasks();
         verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
     }
 
@@ -118,7 +118,7 @@ public class EngineJobTest {
         harness.isCacheable = false;
         harness.getJob().onResourceReady(harness.resource);
 
-        Robolectric.runUiThreadTasks();
+        ShadowLooper.runUiThreadTasks();
         verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
     }
 
@@ -139,7 +139,7 @@ public class EngineJobTest {
 
         job.onResourceReady(harness.resource);
 
-        Robolectric.runUiThreadTasks();
+        ShadowLooper.runUiThreadTasks();
         verify(harness.cb, never()).onResourceReady(eq(harness.resource));
     }
 
@@ -153,7 +153,7 @@ public class EngineJobTest {
 
             job.onException(exception);
 
-            Robolectric.runUiThreadTasks();
+            ShadowLooper.runUiThreadTasks();
             verify(harness.cb, never()).onException(any(Exception.class));
         }
     }
@@ -217,7 +217,7 @@ public class EngineJobTest {
 
     @Test
     public void testReleasesResourceIfCancelledOnReady() {
-        ShadowLooper shadowLooper = Robolectric.shadowOf(harness.mainHandler.getLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(harness.mainHandler.getLooper());
         shadowLooper.pause();
 
         EngineJob job = harness.getJob();

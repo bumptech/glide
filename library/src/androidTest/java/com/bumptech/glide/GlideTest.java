@@ -56,12 +56,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
+import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowBitmap;
 
@@ -92,14 +94,14 @@ public class GlideTest {
     public void setUp() throws Exception {
         Glide.tearDown();
 
-        RobolectricPackageManager pm = (RobolectricPackageManager) Robolectric.application.getPackageManager();
-        ApplicationInfo info = pm.getApplicationInfo(Robolectric.application.getPackageName(), 0);
+        RobolectricPackageManager pm = (RobolectricPackageManager) RuntimeEnvironment.application.getPackageManager();
+        ApplicationInfo info = pm.getApplicationInfo(RuntimeEnvironment.application.getPackageName(), 0);
         info.metaData = new Bundle();
         info.metaData.putString(SetupModule.class.getName(), "GlideModule");
 
         // Ensure that target's size ready callback will be called synchronously.
         target = mock(Target.class);
-        imageView = new ImageView(Robolectric.application);
+        imageView = new ImageView(RuntimeEnvironment.application);
         imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
         doAnswer(new CallCallback()).when(target).getSize(any(SizeReadyCallback.class));
 
@@ -271,7 +273,7 @@ public class GlideTest {
 
         requestManager
                 .as(byte[].class)
-                .decode(through(Robolectric.application, Bitmap.class))
+                .decode(through(RuntimeEnvironment.application, Bitmap.class))
                 .load(uri)
                 .into(target);
 
@@ -478,7 +480,7 @@ public class GlideTest {
 
         requestManager
                 .as(byte[].class)
-                .decode(through(Robolectric.application, GifDrawable.class))
+                .decode(through(RuntimeEnvironment.application, GifDrawable.class))
                 .load(fakeUri)
                 .into(target);
 
@@ -491,7 +493,7 @@ public class GlideTest {
         mockUri(fakeUri);
         requestManager
                 .as(byte[].class)
-                .decode(through(Robolectric.application, Bitmap.class))
+                .decode(through(RuntimeEnvironment.application, Bitmap.class))
                 .load(fakeUri)
                 .into(target);
 
@@ -675,8 +677,9 @@ public class GlideTest {
         if (is == null) {
             is = new ByteArrayInputStream(new byte[0]);
         }
-        ContentResolver contentResolver = Robolectric.application.getContentResolver();
-        ShadowFileDescriptorContentResolver shadowContentResolver = Robolectric.shadowOf_(contentResolver);
+        ContentResolver contentResolver = RuntimeEnvironment.application.getContentResolver();
+        ShadowFileDescriptorContentResolver shadowContentResolver =
+                (ShadowFileDescriptorContentResolver) ShadowExtractor.extract(contentResolver);
         shadowContentResolver.registerInputStream(uri, is);
 
         AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
@@ -688,7 +691,7 @@ public class GlideTest {
     }
 
     private Context getContext() {
-        return Robolectric.application;
+        return RuntimeEnvironment.application;
     }
 
     @SuppressWarnings("unchecked")
@@ -698,7 +701,7 @@ public class GlideTest {
         when(modelLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
                 .thenReturn(modelLoader);
 
-        Glide.get(Robolectric.application).getRegistry()
+        Glide.get(RuntimeEnvironment.application).getRegistry()
                 .prepend(modelClass, InputStream.class, modelLoaderFactory);
     }
 
@@ -834,7 +837,7 @@ public class GlideTest {
         @Implementation
         public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
             Bitmap bitmap = ShadowBitmap.createBitmap(width, height, config);
-            Robolectric.shadowOf(bitmap).setMutable(true);
+            Shadows.shadowOf(bitmap).setMutable(true);
             return bitmap;
         }
     }
@@ -846,7 +849,7 @@ public class GlideTest {
         @SuppressWarnings("unused")
         public Bitmap getFrameAtTime() {
             Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-            Robolectric.shadowOf(bitmap).appendDescription(" from MediaMetadataRetriever");
+            Shadows.shadowOf(bitmap).appendDescription(" from MediaMetadataRetriever");
             return bitmap;
         }
     }

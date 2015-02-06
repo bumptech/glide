@@ -14,8 +14,8 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -60,7 +60,7 @@ public class BitmapDrawableResourceTest {
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
         public BitmapDrawableResource create() {
-            return new BitmapDrawableResource(new BitmapDrawable(Robolectric.application.getResources(), bitmap),
+            return new BitmapDrawableResource(new BitmapDrawable(RuntimeEnvironment.application.getResources(), bitmap),
                     bitmapPool);
         }
     }

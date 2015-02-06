@@ -14,8 +14,8 @@ import com.bumptech.glide.Priority;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.Closeable;
@@ -29,7 +29,7 @@ public class LocalUriFetcherTest {
 
     @Before
     public void setUp() {
-        fetcher = new TestLocalUriFetcher(Robolectric.application, Uri.parse("content://empty"));
+        fetcher = new TestLocalUriFetcher(RuntimeEnvironment.application, Uri.parse("content://empty"));
     }
 
     @Test

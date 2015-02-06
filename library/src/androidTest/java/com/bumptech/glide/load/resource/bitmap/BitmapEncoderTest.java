@@ -12,8 +12,8 @@ import com.bumptech.glide.load.engine.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -35,7 +35,7 @@ public class BitmapEncoderTest {
     public void testBitmapIsEncoded() {
         String fakeBytes = harness.encode();
 
-        assertContains(fakeBytes, Robolectric.shadowOf(harness.bitmap)
+        assertContains(fakeBytes, Shadows.shadowOf(harness.bitmap)
                 .getDescription());
     }
 

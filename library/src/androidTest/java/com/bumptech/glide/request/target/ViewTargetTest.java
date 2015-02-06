@@ -26,11 +26,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowView;
 import org.robolectric.shadows.ShadowViewTreeObserver;
@@ -44,11 +46,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ViewTargetTest {
     private View view;
     private ViewTarget target;
+    private SizedShadowView shadowView;
+    private PreDrawShadowViewTreeObserver shadowObserver;
 
     @Before
     public void setUp() {
-        view = new View(Robolectric.application);
+        view = new View(RuntimeEnvironment.application);
         target = new TestViewTarget(view);
+
+        shadowView = (SizedShadowView) ShadowExtractor.extract(view);
+        shadowObserver =
+                (PreDrawShadowViewTreeObserver) ShadowExtractor.extract(view.getViewTreeObserver());
     }
 
     @Test
@@ -90,7 +98,6 @@ public class ViewTargetTest {
     @Test
     public void testSizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
         int dimens = 333;
-        SizedShadowView shadowView = Robolectric.shadowOf_(view);
         shadowView.setWidth(dimens);
         shadowView.setHeight(dimens);
 
@@ -113,8 +120,9 @@ public class ViewTargetTest {
     }
 
     private void setDisplayDimens(Integer width, Integer height) {
-        WindowManager windowManager = (WindowManager) Robolectric.application.getSystemService(Context.WINDOW_SERVICE);
-        ShadowDisplay shadowDisplay = Robolectric.shadowOf(windowManager.getDefaultDisplay());
+        WindowManager windowManager =
+                (WindowManager) RuntimeEnvironment.application.getSystemService(Context.WINDOW_SERVICE);
+        ShadowDisplay shadowDisplay = Shadows.shadowOf(windowManager.getDefaultDisplay());
         if (width != null) {
             shadowDisplay.setWidth(width);
         }
@@ -189,10 +197,8 @@ public class ViewTargetTest {
         verify(cb, never()).onSizeReady(anyInt(), anyInt());
 
         int height = 32;
-        SizedShadowView shadowView = Robolectric.shadowOf_(view);
         shadowView.setHeight(height);
 
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(displayWidth), eq(height));
@@ -212,10 +218,7 @@ public class ViewTargetTest {
         verify(cb, never()).onSizeReady(anyInt(), anyInt());
 
         int width = 32;
-        SizedShadowView shadowView = Robolectric.shadowOf_(view);
         shadowView.setWidth(width);
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(width), eq(displayHeight));
@@ -233,11 +236,8 @@ public class ViewTargetTest {
 
         int width = 32;
         int height = 45;
-        SizedShadowView shadowView = Robolectric.shadowOf_(view);
         shadowView.setWidth(width);
         shadowView.setHeight(height);
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(width), eq(height));
@@ -250,11 +250,8 @@ public class ViewTargetTest {
 
         int width = 12;
         int height = 32;
-        SizedShadowView shadowView = Robolectric.shadowOf_(view);
         shadowView.setWidth(width);
         shadowView.setHeight(height);
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(width), eq(height));
@@ -269,11 +266,8 @@ public class ViewTargetTest {
         }
 
         int width = 100, height = 111;
-        SizedShadowView shadowView = Robolectric.shadowOf_(view);
         shadowView.setWidth(width);
         shadowView.setHeight(height);
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         InOrder order = inOrder((Object[]) cbs);
@@ -289,8 +283,6 @@ public class ViewTargetTest {
         target.getSize(cb);
 
         view.setLayoutParams(new LayoutParams(100, 100));
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb, times(1)).onSizeReady(anyInt(), anyInt());
@@ -302,8 +294,6 @@ public class ViewTargetTest {
         SizeReadyCallback cb2 = mock(SizeReadyCallback.class);
         target.getSize(cb1);
         target.getSize(cb2);
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         assertThat(shadowObserver.getPreDrawListeners()).hasSize(1);
     }
 
@@ -313,8 +303,6 @@ public class ViewTargetTest {
         target.getSize(cb1);
 
         view.setLayoutParams(new LayoutParams(100, 100));
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         assertThat(shadowObserver.getPreDrawListeners()).hasSize(0);
@@ -333,8 +321,6 @@ public class ViewTargetTest {
     public void testSizeCallbackIsNotCalledPreDrawIfNoDimensSetOnPreDraw() {
         SizeReadyCallback cb = mock(SizeReadyCallback.class);
         target.getSize(cb);
-
-        PreDrawShadowViewTreeObserver shadowObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
         shadowObserver.fireOnPreDrawListeners();
 
         verify(cb, never()).onSizeReady(anyInt(), anyInt());
@@ -350,9 +336,7 @@ public class ViewTargetTest {
         int height = 354;
         LayoutParams layoutParams = new LayoutParams(width, height);
         view.setLayoutParams(layoutParams);
-
-        PreDrawShadowViewTreeObserver shadowViewTreeObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
-        shadowViewTreeObserver.fireOnPreDrawListeners();
+        shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(width), eq(height));
     }
@@ -364,10 +348,8 @@ public class ViewTargetTest {
 
         LayoutParams layoutParams = new LayoutParams(1234, 4123);
         view.setLayoutParams(layoutParams);
-
-        PreDrawShadowViewTreeObserver shadowViewTreeObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
-        shadowViewTreeObserver.fireOnPreDrawListeners();
-        shadowViewTreeObserver.fireOnPreDrawListeners();
+        shadowObserver.fireOnPreDrawListeners();
+        shadowObserver.fireOnPreDrawListeners();
 
         verify(cb, times(1)).onSizeReady(anyInt(), anyInt());
     }
@@ -383,10 +365,8 @@ public class ViewTargetTest {
         int height = 875;
         LayoutParams layoutParams = new LayoutParams(width, height);
         view.setLayoutParams(layoutParams);
-
-        PreDrawShadowViewTreeObserver shadowViewTreeObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
-        shadowViewTreeObserver.fireOnPreDrawListeners();
-        shadowViewTreeObserver.fireOnPreDrawListeners();
+        shadowObserver.fireOnPreDrawListeners();
+        shadowObserver.fireOnPreDrawListeners();
 
         verify(firstCb, times(1)).onSizeReady(eq(width), eq(height));
         verify(secondCb, times(1)).onSizeReady(eq(width), eq(height));
@@ -401,10 +381,8 @@ public class ViewTargetTest {
         int height = 2;
         LayoutParams layoutParams = new LayoutParams(width, height);
         view.setLayoutParams(layoutParams);
-
-        PreDrawShadowViewTreeObserver shadowViewTreeObserver = Robolectric.shadowOf_(view.getViewTreeObserver());
-        shadowViewTreeObserver.setIsAlive(false);
-        shadowViewTreeObserver.fireOnPreDrawListeners();
+        shadowObserver.setIsAlive(false);
+        shadowObserver.fireOnPreDrawListeners();
 
         verify(cb).onSizeReady(eq(width), eq(height));
     }

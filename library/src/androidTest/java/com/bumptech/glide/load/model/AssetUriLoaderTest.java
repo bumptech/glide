@@ -17,8 +17,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -32,7 +32,7 @@ public class AssetUriLoaderTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        loader = new AssetUriLoader<>(Robolectric.application.getAssets(), factory);
+        loader = new AssetUriLoader<>(RuntimeEnvironment.application.getAssets(), factory);
     }
 
     @Test

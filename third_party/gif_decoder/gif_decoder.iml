@@ -90,19 +90,22 @@
     <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" scope="TEST" name="commons-codec-1.3" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="robolectric-annotations-2.4" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="objenesis-1.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-5.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="support-v4-21.0.3" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="robolectric-2.4" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="robolectric-utils-3.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-commons-5.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="robolectric-annotations-3.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="junit-4.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-tree-5.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="junit-4.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-analysis-5.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="robolectric-resources-3.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="robolectric-3.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="truth-0.24" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-all-1.9.5" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="icu4j-53.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="shadows-core-3.0-SNAPSHOT-21" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-1.8.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="support-annotations-21.0.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-launcher-1.8.0" level="project" />

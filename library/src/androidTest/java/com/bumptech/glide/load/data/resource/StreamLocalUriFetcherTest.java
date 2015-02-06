@@ -11,8 +11,8 @@ import com.bumptech.glide.load.data.StreamLocalUriFetcher;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
@@ -23,7 +23,7 @@ public class StreamLocalUriFetcherTest {
 
     @Test
     public void testLoadsInputStream() throws Exception {
-        final Context context = Robolectric.application;
+        final Context context = RuntimeEnvironment.application;
         Uri uri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
         StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context, uri);
         InputStream is = fetcher.loadData(Priority.NORMAL);

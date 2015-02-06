@@ -16,9 +16,10 @@ import com.bumptech.glide.tests.ContentResolverShadow;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.internal.ShadowExtractor;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = { ContentResolverShadow.class })
@@ -26,11 +27,11 @@ public class FileDescriptorLocalUriFetcherTest {
 
     @Test
     public void testLoadsFileDescriptor() throws Exception {
-        final Context context = Robolectric.application;
+        final Context context = RuntimeEnvironment.application;
         final Uri uri = Uri.parse("file://nothing");
 
         ContentResolver contentResolver = context.getContentResolver();
-        ContentResolverShadow shadow = Robolectric.shadowOf_(contentResolver);
+        ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
 
         AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
         ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);

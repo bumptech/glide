@@ -13,8 +13,8 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -24,7 +24,8 @@ public class BitmapDrawableTranscoderTest {
 
     @Before
     public void setUp() {
-        transcoder = new BitmapDrawableTranscoder(Robolectric.application.getResources(), mock(BitmapPool.class));
+        transcoder = new BitmapDrawableTranscoder(RuntimeEnvironment.application.getResources(),
+                mock(BitmapPool.class));
     }
 
     @Test

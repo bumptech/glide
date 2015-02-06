@@ -29,6 +29,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
@@ -54,7 +56,7 @@ public class RequestManagerRetrieverTest {
     public void tearDown() {
         Util.setSdkVersionInt(initialSdkVersion);
 
-        Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
+        Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
         assertThat(retriever.pendingRequestManagerFragments).isEmpty();
         assertThat(retriever.pendingSupportRequestManagerFragments).isEmpty();
     }
@@ -64,7 +66,7 @@ public class RequestManagerRetrieverTest {
         for (RetrieverHarness harness : harnesses) {
             harness.doGet();
 
-            Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
+            Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
             assertTrue(harness.hasFragmentWithTag(RequestManagerRetriever.TAG));
         }
     }
@@ -262,28 +264,28 @@ public class RequestManagerRetrieverTest {
 
     @Test
     public void testHandlesContextWrappersForApplication() {
-        ContextWrapper contextWrapper = new ContextWrapper(Robolectric.application);
-        RequestManager requestManager = retriever.get(Robolectric.application);
+        ContextWrapper contextWrapper = new ContextWrapper(RuntimeEnvironment.application);
+        RequestManager requestManager = retriever.get(RuntimeEnvironment.application);
 
         assertEquals(requestManager, retriever.get(contextWrapper));
     }
 
     @Test
     public void testReturnsNonNullManagerIfGivenApplicationContext() {
-        assertNotNull(retriever.get(Robolectric.application));
+        assertNotNull(retriever.get(RuntimeEnvironment.application));
     }
 
     @Test
     public void testApplicationRequestManagerIsNotPausedWhenRetrieved() {
-        RequestManager manager = retriever.get(Robolectric.application);
+        RequestManager manager = retriever.get(RuntimeEnvironment.application);
         assertFalse(manager.isPaused());
     }
 
     @Test
     public void testApplicationRequestManagerIsNotReResumedAfterFirstRetrieval() {
-        RequestManager manager = retriever.get(Robolectric.application);
+        RequestManager manager = retriever.get(RuntimeEnvironment.application);
         manager.pauseRequests();
-        manager = retriever.get(Robolectric.application);
+        manager = retriever.get(RuntimeEnvironment.application);
         assertTrue(manager.isPaused());
     }
 
@@ -292,7 +294,7 @@ public class RequestManagerRetrieverTest {
         testInBackground(new BackgroundUtil.BackgroundTester() {
             @Override
             public void runTest() throws Exception {
-                retriever.get(Robolectric.application);
+                retriever.get(RuntimeEnvironment.application);
             }
         });
     }
@@ -303,7 +305,7 @@ public class RequestManagerRetrieverTest {
         // Robolectric by default runs messages posted to the main looper synchronously, the framework does not. We post
         // to the main thread here to work around an issue caused by a recursive method call so we need (and reasonably
         // expect) our message to not run immediately
-        Robolectric.shadowOf(Looper.getMainLooper()).pause();
+        Shadows.shadowOf(Looper.getMainLooper()).pause();
         Robolectric.buildActivity(Issue117Activity.class).create().start().resume().visible();
     }
 
@@ -311,7 +313,7 @@ public class RequestManagerRetrieverTest {
     public void testDoesNotThrowIfAskedToGetManagerForActivityPreHoneycomb() {
         Util.setSdkVersionInt(Build.VERSION_CODES.GINGERBREAD_MR1);
         Activity activity = mock(Activity.class);
-        when(activity.getApplicationContext()).thenReturn(Robolectric.application);
+        when(activity.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
         when(activity.getFragmentManager()).thenThrow(new NoSuchMethodError());
 
         assertNotNull(retriever.get(activity));

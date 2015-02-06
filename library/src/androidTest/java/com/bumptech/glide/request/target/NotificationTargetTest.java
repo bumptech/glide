@@ -14,11 +14,12 @@ import android.widget.RemoteViews;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowNotificationManager;
 
 @RunWith(RobolectricTestRunner.class)
@@ -35,8 +36,8 @@ public class NotificationTargetTest {
     @Before
     public void setUp() {
         NotificationManager notificationManager =
-                (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
-        shadowManager = Robolectric.shadowOf_(notificationManager);
+                (NotificationManager) RuntimeEnvironment.application.getSystemService(Context.NOTIFICATION_SERVICE);
+        shadowManager = (UpdateShadowNotificationManager) ShadowExtractor.extract(notificationManager);
 
         remoteViews = mock(RemoteViews.class);
         viewId = 123;
@@ -44,8 +45,8 @@ public class NotificationTargetTest {
         notificationId = 456;
 
 
-        target = new NotificationTarget(Robolectric.application, remoteViews, viewId, 100 /*width*/, 100 /*height*/,
-                notification, notificationId);
+        target = new NotificationTarget(RuntimeEnvironment.application, remoteViews, viewId, 100 /*width*/,
+                100 /*height*/, notification, notificationId);
     }
 
     @Test
@@ -72,13 +73,13 @@ public class NotificationTargetTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfNotificationIsNull() {
-        new NotificationTarget(Robolectric.application, mock(RemoteViews.class), 123 /*viewId*/, 100 /*width*/,
+        new NotificationTarget(RuntimeEnvironment.application, mock(RemoteViews.class), 123 /*viewId*/, 100 /*width*/,
                 100 /*height*/, null /*notification*/, 456 /*notificationId*/);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsIfRemoteViewsIsNull() {
-        new NotificationTarget(Robolectric.application, null /*remoteViews*/, 123 /*viewId*/, 100 /*width*/,
+        new NotificationTarget(RuntimeEnvironment.application, null /*remoteViews*/, 123 /*viewId*/, 100 /*width*/,
                 100 /*height*/, mock(Notification.class), 456 /*notificationId*/);
     }
 

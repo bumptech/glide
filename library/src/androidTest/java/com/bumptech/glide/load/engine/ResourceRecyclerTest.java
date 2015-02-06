@@ -12,8 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -30,7 +30,7 @@ public class ResourceRecyclerTest {
     @Test
     public void testRecyclesResourceSynchronouslyIfNotAlreadyRecyclingResource() {
         Resource resource = mock(Resource.class);
-        Robolectric.shadowOf(Looper.getMainLooper()).pause();
+        Shadows.shadowOf(Looper.getMainLooper()).pause();
         recycler.recycle(resource);
         verify(resource).recycle();
     }
@@ -47,14 +47,14 @@ public class ResourceRecyclerTest {
             }
         }).when(parent).recycle();
 
-        Robolectric.shadowOf(Looper.getMainLooper()).pause();
+        Shadows.shadowOf(Looper.getMainLooper()).pause();
 
         recycler.recycle(parent);
 
         verify(parent).recycle();
         verify(child, never()).recycle();
 
-        Robolectric.shadowOf(Looper.getMainLooper()).runOneTask();
+        Shadows.shadowOf(Looper.getMainLooper()).runOneTask();
 
         verify(child).recycle();
     }

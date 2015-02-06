@@ -15,8 +15,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 /**
@@ -35,7 +35,7 @@ public class ResourceLoaderTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        loader = new ResourceLoader<>(Robolectric.application, uriLoader);
+        loader = new ResourceLoader<>(RuntimeEnvironment.application, uriLoader);
     }
 
     @Test

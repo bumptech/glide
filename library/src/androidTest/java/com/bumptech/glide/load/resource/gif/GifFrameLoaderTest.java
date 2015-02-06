@@ -34,8 +34,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.UUID;
@@ -58,7 +58,7 @@ public class GifFrameLoaderTest {
 
         requestBuilder = mock(RequestBuilder.class, new ReturnsSelfAnswer());
 
-        loader = new GifFrameLoader(Robolectric.application, callback, gifDecoder, handler, requestBuilder);
+        loader = new GifFrameLoader(RuntimeEnvironment.application, callback, gifDecoder, handler, requestBuilder);
     }
 
     @SuppressWarnings("unchecked")
@@ -153,7 +153,8 @@ public class GifFrameLoaderTest {
     @Test
     public void testOnFrameReadyClearsPreviousFrame() {
         // Force the loader to create a real Handler.
-        loader = new GifFrameLoader(Robolectric.application, callback, gifDecoder, null /*handler*/, requestBuilder);
+        loader = new GifFrameLoader(RuntimeEnvironment.application, callback, gifDecoder, null /*handler*/,
+                requestBuilder);
 
         GifFrameLoader.DelayTarget previous = mock(GifFrameLoader.DelayTarget.class);
         Request previousRequest = mock(Request.class);
@@ -185,7 +186,8 @@ public class GifFrameLoaderTest {
     @Test
     public void testClearsCompletedLoadOnFrameReadyIfCleared() {
         // Force the loader to create a real Handler.
-        loader = new GifFrameLoader(Robolectric.application, callback, gifDecoder, null /*handler*/, requestBuilder);
+        loader = new GifFrameLoader(RuntimeEnvironment.application, callback, gifDecoder, null /*handler*/,
+                requestBuilder);
         loader.clear();
         GifFrameLoader.DelayTarget delayTarget = mock(GifFrameLoader.DelayTarget.class);
         Request request = mock(Request.class);

@@ -21,8 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @SuppressWarnings("unchecked")
@@ -110,7 +110,7 @@ public class RequestBuilderTest {
 
     @Test(expected = RuntimeException.class)
     public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
-        final ImageView imageView = new ImageView(Robolectric.application);
+        final ImageView imageView = new ImageView(RuntimeEnvironment.application);
         testInBackground(new BackgroundUtil.BackgroundTester() {
             @Override
             public void runTest() throws Exception {
@@ -133,7 +133,7 @@ public class RequestBuilderTest {
 
     private RequestBuilder getNullModelRequest() {
         when(glideContext.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(mock(Target.class));
-        when(glideContext.getDecodeOptions()).thenReturn(new DecodeOptions(Robolectric.application));
+        when(glideContext.getDecodeOptions()).thenReturn(new DecodeOptions(RuntimeEnvironment.application));
         return new RequestBuilder(glideContext, Object.class, requestTracker, lifecycle)
                 .load((Object) null);
     }

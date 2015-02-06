@@ -10,8 +10,8 @@ import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
@@ -28,7 +28,7 @@ public class DiskLruCacheWrapperTest {
 
     @Before
     public void setUp() {
-        File dir = Robolectric.application.getCacheDir();
+        File dir = RuntimeEnvironment.application.getCacheDir();
         cache = new DiskLruCacheWrapper(dir, 10 * 1024 * 1024);
         key = new StringKey("test" + Math.random());
         data = new byte[] { 1, 2, 3, 4, 5, 6 };

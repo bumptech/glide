@@ -12,8 +12,8 @@ import android.widget.ImageView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -25,7 +25,7 @@ public class ImageViewTargetFactoryTest {
     @Before
     public void setUp() {
         factory = new ImageViewTargetFactory();
-        view = new ImageView(Robolectric.application);
+        view = new ImageView(RuntimeEnvironment.application);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class ImageViewTargetFactoryTest {
 
     @Test
     public void testReturnsTargetForBitmapDrawables() {
-        BitmapDrawable drawable = new BitmapDrawable(Robolectric.application.getResources(),
+        BitmapDrawable drawable = new BitmapDrawable(RuntimeEnvironment.application.getResources(),
                 Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444));
 
         Target target = factory.buildTarget(view, BitmapDrawable.class);

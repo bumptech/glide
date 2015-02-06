@@ -22,11 +22,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowSystemClock;
 
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class VolleyStreamFetcherServerTest {
 
     @Before
     public void setUp() throws IOException {
-        requestQueue = Volley.newRequestQueue(Robolectric.application);
+        requestQueue = Volley.newRequestQueue(RuntimeEnvironment.application);
         mockWebServer = new MockWebServer();
         mockWebServer.play();
     }
@@ -189,7 +190,7 @@ public class VolleyStreamFetcherServerTest {
             public InputStream get() throws InterruptedException, ExecutionException {
                 for (int i = 0; i < 251 && !isDone(); i++) {
                     Thread.sleep(10);
-                    Robolectric.runUiThreadTasks();
+                    ShadowLooper.runUiThreadTasks();
                 }
                 if (!isDone()) {
                     fail("Failed to get response from Volley in time");

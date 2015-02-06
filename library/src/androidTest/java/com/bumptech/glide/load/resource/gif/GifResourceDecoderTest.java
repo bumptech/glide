@@ -24,8 +24,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
@@ -57,8 +57,8 @@ public class GifResourceDecoderTest {
         decoderPool = mock(GifResourceDecoder.GifDecoderPool.class);
         when(decoderPool.obtain(any(GifDecoder.BitmapProvider.class))).thenReturn(gifDecoder);
 
-        decoder = new GifResourceDecoder(Robolectric.application, bitmapPool, parserPool, decoderPool);
         options = new HashMap<>();
+        decoder = new GifResourceDecoder(RuntimeEnvironment.application, bitmapPool, parserPool, decoderPool);
     }
 
     @Test

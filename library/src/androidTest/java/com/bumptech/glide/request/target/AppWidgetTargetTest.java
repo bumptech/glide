@@ -14,11 +14,12 @@ import android.widget.RemoteViews;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowAppWidgetManager;
 
 @RunWith(RobolectricTestRunner.class)
@@ -31,7 +32,8 @@ public class AppWidgetTargetTest {
 
     @Before
     public void setUp() {
-        shadowManager = Robolectric.shadowOf_(AppWidgetManager.getInstance(Robolectric.application));
+        shadowManager = (UpdateShadowAppWidgetManager) ShadowExtractor.extract(
+                AppWidgetManager.getInstance(RuntimeEnvironment.application));
         viewId = 1234;
         views = mock(RemoteViews.class);
     }
@@ -39,7 +41,7 @@ public class AppWidgetTargetTest {
     @Test
     public void testSetsBitmapOnRemoteViewsWithViewIdWhenCreatedWithComponentName() {
         ComponentName componentName = mock(ComponentName.class);
-        AppWidgetTarget target = new AppWidgetTarget(Robolectric.application, views, viewId, componentName);
+        AppWidgetTarget target = new AppWidgetTarget(RuntimeEnvironment.application, views, viewId, componentName);
 
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         target.onResourceReady(bitmap, null /*glideAnimation*/);
@@ -50,7 +52,7 @@ public class AppWidgetTargetTest {
     @Test
     public void testUpdatesAppWidgetWhenCreatedWithComponentName() {
         ComponentName componentName = mock(ComponentName.class);
-        AppWidgetTarget target = new AppWidgetTarget(Robolectric.application, views, viewId, componentName);
+        AppWidgetTarget target = new AppWidgetTarget(RuntimeEnvironment.application, views, viewId, componentName);
 
         target.onResourceReady(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null /*glideAnimation*/);
 
@@ -61,7 +63,7 @@ public class AppWidgetTargetTest {
     @Test
     public void testSetsBitmapOnRemoteViewsWithViewIdWhenCreatedWithWidgetIds() {
         int[] widgetIds = new int[] { 1 };
-        AppWidgetTarget target = new AppWidgetTarget(Robolectric.application, views, viewId, widgetIds);
+        AppWidgetTarget target = new AppWidgetTarget(RuntimeEnvironment.application, views, viewId, widgetIds);
 
         Bitmap bitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
         target.onResourceReady(bitmap, null /*glideAnimation*/);
@@ -72,7 +74,7 @@ public class AppWidgetTargetTest {
     @Test
     public void testUpdatesAppWidgetWhenCreatedWithWidgetIds() {
         int[] widgetIds = new int[] { 1 };
-        AppWidgetTarget target = new AppWidgetTarget(Robolectric.application, views, viewId, widgetIds);
+        AppWidgetTarget target = new AppWidgetTarget(RuntimeEnvironment.application, views, viewId, widgetIds);
 
         target.onResourceReady(Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888), null /*glideAnimation*/);
 
@@ -92,27 +94,27 @@ public class AppWidgetTargetTest {
 
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenGivenNullRemoteViewsWithWidgetIds() {
-        new AppWidgetTarget(Robolectric.application, null /*remoteViews*/, viewId, 1 /*widgetIds*/);
+        new AppWidgetTarget(RuntimeEnvironment.application, null /*remoteViews*/, viewId, 1 /*widgetIds*/);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenGivenNullRemoteViewsWithComponentName() {
-        new AppWidgetTarget(Robolectric.application, null /*remoteViews*/, viewId, mock(ComponentName.class));
+        new AppWidgetTarget(RuntimeEnvironment.application, null /*remoteViews*/, viewId, mock(ComponentName.class));
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenGivenNullWidgetIds() {
-        new AppWidgetTarget(Robolectric.application, views, viewId, (int[]) null /*widgetIds*/);
+        new AppWidgetTarget(RuntimeEnvironment.application, views, viewId, (int[]) null /*widgetIds*/);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsWhenGivenEmptyWidgetIds() {
-        new AppWidgetTarget(Robolectric.application, views, viewId);
+        new AppWidgetTarget(RuntimeEnvironment.application, views, viewId);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThrowsWhenGivenNullComponentName() {
-        new AppWidgetTarget(Robolectric.application, views, viewId, (ComponentName) null);
+        new AppWidgetTarget(RuntimeEnvironment.application, views, viewId, (ComponentName) null);
     }
 
     @Implements(AppWidgetManager.class)

@@ -10,8 +10,8 @@ import com.bumptech.glide.testutil.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class GifDecoderTest {
         @Override
         public Bitmap obtain(int width, int height, Bitmap.Config config) {
             Bitmap result = Bitmap.createBitmap(width, height, config);
-            Robolectric.shadowOf(result).setMutable(true);
+            Shadows.shadowOf(result).setMutable(true);
             return result;
         }
 

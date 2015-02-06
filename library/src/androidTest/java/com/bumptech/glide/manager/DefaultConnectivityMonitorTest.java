@@ -16,9 +16,11 @@ import android.net.NetworkInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowConnectivityManager;
 import org.robolectric.shadows.ShadowNetworkInfo;
 
@@ -33,7 +35,7 @@ public class DefaultConnectivityMonitorTest {
     @Before
     public void setUp() {
         listener = mock(ConnectivityMonitor.ConnectivityListener.class);
-        monitor = new DefaultConnectivityMonitor(Robolectric.application, listener);
+        monitor = new DefaultConnectivityMonitor(RuntimeEnvironment.application, listener);
     }
 
     @Test
@@ -117,7 +119,7 @@ public class DefaultConnectivityMonitorTest {
 
     private List<BroadcastReceiver> getConnectivityReceivers() {
         Intent connectivity = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        return Robolectric.getShadowApplication().getReceiversForIntent(connectivity);
+        return ShadowApplication.getInstance().getReceiversForIntent(connectivity);
     }
 
     private static class ConnectivityHarness {
@@ -125,10 +127,9 @@ public class DefaultConnectivityMonitorTest {
 
         public ConnectivityHarness() {
             ConnectivityManager connectivityManager =
-                    (ConnectivityManager) Robolectric.application.getSystemService(Context.CONNECTIVITY_SERVICE);
-            shadowConnectivityManager = Robolectric.shadowOf(connectivityManager);
+                    (ConnectivityManager) RuntimeEnvironment.application.getSystemService(Context.CONNECTIVITY_SERVICE);
+            shadowConnectivityManager = Shadows.shadowOf(connectivityManager);
         }
-
         public void disconnect() {
             shadowConnectivityManager.setActiveNetworkInfo(null);
         }
@@ -141,7 +142,7 @@ public class DefaultConnectivityMonitorTest {
 
         public void broadcast() {
             Intent connected = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-            Robolectric.shadowOf(Robolectric.application).sendBroadcast(connected);
+            ShadowApplication.getInstance().sendBroadcast(connected);
         }
     }
 }

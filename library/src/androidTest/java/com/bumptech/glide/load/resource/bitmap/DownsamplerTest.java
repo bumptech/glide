@@ -12,8 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.BufferedOutputStream;
@@ -34,7 +34,7 @@ public class DownsamplerTest {
 
     @Before
     public void setUp() throws Exception {
-        File cacheDir = Robolectric.application.getCacheDir();
+        File cacheDir = RuntimeEnvironment.application.getCacheDir();
         cacheDir.mkdir();
         tempFile = new File(cacheDir, "temp");
         options = new HashMap<>();

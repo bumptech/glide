@@ -22,8 +22,8 @@ import com.bumptech.glide.util.Preconditions;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -156,7 +156,7 @@ public class TransformationUtilsTest {
     @Test
     public void testFitCenterHandlesBitmapsWithNullConfigs() {
       Bitmap toFit = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-      Robolectric.shadowOf(toFit).setConfig(null);
+      Shadows.shadowOf(toFit).setConfig(null);
       Bitmap transformed = TransformationUtils.fitCenter(toFit, mock(BitmapPool.class), 50, 50);
       assertEquals(Bitmap.Config.ARGB_8888, transformed.getConfig());
     }
@@ -206,7 +206,7 @@ public class TransformationUtilsTest {
     @Test
     public void testCenterCropHandlesBitmapsWithNullConfigs() {
       Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-      Robolectric.shadowOf(toTransform).setConfig(null);
+      Shadows.shadowOf(toTransform).setConfig(null);
 
       Bitmap transformed = TransformationUtils.centerCrop(null /*recycled*/, toTransform, 50, 50);
 
@@ -323,7 +323,7 @@ public class TransformationUtilsTest {
         assertTrue(toRotate == zero);
 
         Bitmap ninety = TransformationUtils.rotateImage(toRotate, 90);
-        assertTrue(Robolectric.shadowOf(ninety).getDescription().contains("rotate=90.0"));
+        assertTrue(Shadows.shadowOf(ninety).getDescription().contains("rotate=90.0"));
         assertEquals(toRotate.getWidth(), toRotate.getHeight());
     }
 
@@ -367,7 +367,7 @@ public class TransformationUtilsTest {
     @Test
     public void testRotateImageExifHandlesBitmapsWithNullConfigs() {
       Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-      Robolectric.shadowOf(toRotate).setConfig(null);
+      Shadows.shadowOf(toRotate).setConfig(null);
       BitmapPool bitmapPool = mock(BitmapPool.class);
       Bitmap rotated = TransformationUtils.rotateImageExif(toRotate, bitmapPool,
           ExifInterface.ORIENTATION_ROTATE_180);

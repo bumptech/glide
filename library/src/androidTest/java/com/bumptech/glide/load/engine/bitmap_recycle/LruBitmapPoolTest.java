@@ -17,8 +17,8 @@ import android.graphics.Bitmap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowBitmap;
 
@@ -52,7 +52,7 @@ public class LruBitmapPoolTest {
     @Test
     public void testImmutableBitmapsAreNotAdded() {
         Bitmap bitmap = createMutableBitmap();
-        Robolectric.shadowOf(bitmap).setMutable(false);
+        Shadows.shadowOf(bitmap).setMutable(false);
         pool.put(bitmap);
         assertThat(strategy.bitmaps).isEmpty();
     }
@@ -206,7 +206,7 @@ public class LruBitmapPoolTest {
         pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
 
         Bitmap bitmap = createMutableBitmap();
-        Robolectric.shadowOf(bitmap).setConfig(null);
+        Shadows.shadowOf(bitmap).setConfig(null);
 
         pool.put(bitmap);
 
@@ -225,7 +225,7 @@ public class LruBitmapPoolTest {
 
     private Bitmap createMutableBitmap(Bitmap.Config config) {
         Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, config);
-        Robolectric.shadowOf(bitmap).setMutable(true);
+        Shadows.shadowOf(bitmap).setMutable(true);
         return bitmap;
 
     }
