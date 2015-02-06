@@ -76,6 +76,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
     private Transformation<ResourceType> transformation = UnitTransformation.get();
     private boolean isTransformationSet;
+    private boolean isThumbnailBuilt;
 
     GenericRequestBuilder(LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
             Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
@@ -125,6 +126,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      */
     public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> thumbnail(
             GenericRequestBuilder<?, ?, ?, TranscodeType> thumbnailRequest) {
+        if (this.equals(thumbnailRequest)) {
+            throw new IllegalArgumentException("You cannot set a request as a thumbnail for itself. Consider using "
+                    + "clone() on the request you are passing to thumbnail()");
+        }
         this.thumbnailRequestBuilder = thumbnailRequest;
 
         return this;
@@ -737,11 +742,16 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         if (priority == null) {
             priority = Priority.NORMAL;
         }
+        isThumbnailBuilt = false;
         return buildRequestRecursive(target, null);
     }
 
     private Request buildRequestRecursive(Target<TranscodeType> target, ThumbnailRequestCoordinator parentCoordinator) {
         if (thumbnailRequestBuilder != null) {
+            if (isThumbnailBuilt) {
+                throw new IllegalStateException("You cannot use a request as both the main request and a thumbnail, "
+                        + "consider using clone() on the request(s) passed to thumbnail()");
+            }
             // Recursive case: contains a potentially recursive thumbnail request builder.
             if (thumbnailRequestBuilder.animationFactory.equals(NoAnimation.getFactory())) {
                 thumbnailRequestBuilder.animationFactory = animationFactory;
@@ -759,6 +769,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
             ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
             Request fullRequest = obtainRequest(target, sizeMultiplier, priority, coordinator);
+            isThumbnailBuilt = true;
             // Recursively generate thumbnail requests.
             Request thumbRequest = thumbnailRequestBuilder.buildRequestRecursive(target, coordinator);
             coordinator.setRequests(fullRequest, thumbRequest);

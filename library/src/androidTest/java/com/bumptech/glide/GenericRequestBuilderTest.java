@@ -91,6 +91,29 @@ public class GenericRequestBuilderTest {
                 mock(Lifecycle.class));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testProvidingSelfAsThumbnailThrows() {
+        GenericRequestBuilder request = getNullModelRequest();
+        request.thumbnail(request);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testProvidingSelfAsChildOfThumbnailThrows() {
+        GenericRequestBuilder first = getNullModelRequest();
+        GenericRequestBuilder second = first.clone();
+        second.thumbnail(first);
+        first.thumbnail(second);
+        first.into(mock(Target.class));
+    }
+
+    @Test
+    public void testCanPassedClonedSelfToThumbnail() {
+        GenericRequestBuilder first = getNullModelRequest();
+        GenericRequestBuilder second = first.clone();
+        GenericRequestBuilder third = second.clone();
+        first.thumbnail(second.thumbnail(third)).into(mock(Target.class));
+    }
+
     @Test
     public void testDoesNotThrowWithNullModelWhenDecoderSet() {
         getNullModelRequest().decoder(mock(ResourceDecoder.class));
