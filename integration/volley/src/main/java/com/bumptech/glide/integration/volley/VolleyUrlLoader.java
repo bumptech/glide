@@ -23,6 +23,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
         private static RequestQueue internalQueue;
         private RequestQueue requestQueue;
+        private final VolleyRequestFactory requestFactory;
 
         private static RequestQueue getInternalQueue(Context context) {
             if (internalQueue == null) {
@@ -46,12 +47,21 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
          * Constructor for a new Factory that runs requests using the given {@link RequestQueue}.
          */
         public Factory(RequestQueue requestQueue) {
+            this(requestQueue, VolleyStreamFetcher.DEFAULT_REQUEST_FACTORY);
+        }
+
+        /**
+         * Constructor for a new Factory with a custom Volley request factory that runs requests
+         * using the given {@link RequestQueue}.
+         */
+        public Factory(RequestQueue requestQueue, VolleyRequestFactory requestFactory) {
+            this.requestFactory = requestFactory;
             this.requestQueue = requestQueue;
         }
 
         @Override
         public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {
-            return new VolleyUrlLoader(requestQueue);
+            return new VolleyUrlLoader(requestQueue, requestFactory);
         }
 
         @Override
@@ -61,13 +71,20 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     }
 
     private final RequestQueue requestQueue;
+    private final VolleyRequestFactory requestFactory;
 
     public VolleyUrlLoader(RequestQueue requestQueue) {
+        this(requestQueue, VolleyStreamFetcher.DEFAULT_REQUEST_FACTORY);
+    }
+
+    public VolleyUrlLoader(RequestQueue requestQueue, VolleyRequestFactory requestFactory) {
         this.requestQueue = requestQueue;
+        this.requestFactory = requestFactory;
     }
 
     @Override
     public DataFetcher<InputStream> getResourceFetcher(GlideUrl url, int width, int height) {
-        return new VolleyStreamFetcher(requestQueue, url, new VolleyRequestFuture<InputStream>());
+        return new VolleyStreamFetcher(
+            requestQueue, url, new VolleyRequestFuture<InputStream>(), requestFactory);
     }
 }
