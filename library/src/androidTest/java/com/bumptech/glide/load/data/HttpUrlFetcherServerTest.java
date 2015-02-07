@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class HttpUrlFetcherServerTest {
     private static final String DEFAULT_PATH = "/fakepath";
-    private static final int TIMEOUT_TIME_MS = 100;
+    private static final int TIMEOUT_TIME_MS = 300;
 
     private MockWebServer mockWebServer;
     private boolean defaultFollowRedirects;

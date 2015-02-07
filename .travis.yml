@@ -1,9 +1,20 @@
 language: android
 android:
   components:
-  - build-tools-19.1.0
-  licenses: 
+  - tools
+  - platform-tools
+  - build-tools-21.1.2
+  - android-21
+  - extra-android-m2repository
+  - extra-android-support
+
+  licenses:
   - 'android-sdk-license.*'
+
+jdk:
+  - openjdk7
+  - oraclejdk7
+  - oraclejdk8
 
 sudo: false
 
