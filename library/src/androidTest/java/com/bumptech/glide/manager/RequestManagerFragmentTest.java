@@ -8,7 +8,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
-import android.content.ComponentCallbacks;
 import android.support.v4.app.FragmentActivity;
 
 import com.bumptech.glide.RequestManager;
@@ -112,8 +111,38 @@ public class RequestManagerFragmentTest {
             public void runTest(Harness harness) {
                 RequestManager requestManager = mock(RequestManager.class);
                 harness.setRequestManager(requestManager);
-                harness.getCallbacks().onLowMemory();
+                harness.onLowMemory();
                 verify(requestManager).onLowMemory();
+            }
+        });
+    }
+
+    @Test
+    public void testNonSupportFragmentCallsOnTrimMemory() {
+      RequestManagerHarness requestManagerHarness = new RequestManagerHarness();
+      int level = 100;
+      RequestManager requestManager = mock(RequestManager.class);
+      requestManagerHarness.setRequestManager(requestManager);
+      requestManagerHarness.onTrimMemory(level);
+      verify(requestManager).onTrimMemory(eq(level));
+    }
+
+    @Test
+    public void testOnLowMemoryCallOnNullRequestManagerDoesNotCrash() {
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                harness.onLowMemory();
+            }
+        });
+    }
+
+    @Test
+    public void testOnTrimMemoryCallOnNullRequestManagerDoesNotCrash() {
+        runTest(new TestCase() {
+            @Override
+            public void runTest(Harness harness) {
+                harness.onTrimMemory(100 /*level*/);
             }
         });
     }
@@ -154,7 +183,9 @@ public class RequestManagerFragmentTest {
 
         public ActivityController getController();
 
-        public ComponentCallbacks getCallbacks();
+        public void onLowMemory();
+
+        public void onTrimMemory(int level);
     }
 
     private static class RequestManagerHarness implements Harness {
@@ -204,8 +235,13 @@ public class RequestManagerFragmentTest {
         }
 
         @Override
-        public ComponentCallbacks getCallbacks() {
-            return fragment;
+        public void onLowMemory() {
+          fragment.onLowMemory();
+        }
+
+        @Override
+        public void onTrimMemory(int level) {
+          fragment.onTrimMemory(level);
         }
     }
 
@@ -257,8 +293,13 @@ public class RequestManagerFragmentTest {
         }
 
         @Override
-        public ComponentCallbacks getCallbacks() {
-            return supportFragment;
+        public void onLowMemory() {
+          supportFragment.onLowMemory();
+        }
+
+        @Override
+        public void onTrimMemory(int level) {
+            // Do nothing.
         }
     }
 }
