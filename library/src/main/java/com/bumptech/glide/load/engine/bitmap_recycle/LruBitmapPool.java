@@ -151,12 +151,18 @@ public class LruBitmapPool implements BitmapPool {
 
     @Override
     public void clearMemory() {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.d(TAG, "clearMemory");
+        }
         trimToSize(0);
     }
 
     @SuppressLint("InlinedApi")
     @Override
     public void trimMemory(int level) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.d(TAG, "trimMemory, level=" + level);
+        }
         if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
             clearMemory();
         } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
@@ -167,6 +173,16 @@ public class LruBitmapPool implements BitmapPool {
     private synchronized void trimToSize(int size) {
         while (currentSize > size) {
             final Bitmap removed = strategy.removeLast();
+            // TODO: This shouldn't ever happen, see #331.
+            if (removed == null) {
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Size mismatch, resetting");
+                    dumpUnchecked();
+                }
+                currentSize = 0;
+                return;
+            }
+
             tracker.remove(removed);
             currentSize -= strategy.getSize(removed);
             removed.recycle();
@@ -180,9 +196,18 @@ public class LruBitmapPool implements BitmapPool {
 
     private void dump() {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "Hits=" + hits + " misses=" + misses + " puts=" + puts + " evictions=" + evictions
-                    + " currentSize=" + currentSize + " maxSize=" + maxSize + "\nStrategy=" + strategy);
+            dumpUnchecked();
         }
+    }
+
+    private void dumpUnchecked() {
+        Log.v(TAG, "Hits="  + hits
+                    + ", misses=" + misses
+                    + ", puts=" + puts
+                    + ", evictions=" + evictions
+                    + ", currentSize=" + currentSize
+                    + ", maxSize=" + maxSize
+                    + "\nStrategy=" + strategy);
     }
 
     private static LruPoolStrategy getDefaultStrategy() {
