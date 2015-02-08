@@ -93,24 +93,6 @@ class SizeStrategy implements LruPoolStrategy {
                 + "  SortedSizes" + sortedSizes;
     }
 
-    private static class PrettyPrintTreeMap<K, V> extends TreeMap<K, V> {
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("( ");
-            for (Entry<K, V> entry : entrySet()) {
-                sb.append('{').append(entry.getKey()).append(':').append(entry.getValue()).append("}, ");
-            }
-            final String result;
-            if (!isEmpty()) {
-                result = sb.substring(0, sb.length() - 2);
-            } else {
-                result = sb.toString();
-            }
-            return result + " )";
-        }
-    }
-
     private static String getBitmapString(Bitmap bitmap) {
         int size = Util.getBitmapByteSize(bitmap);
         return getBitmapString(size);

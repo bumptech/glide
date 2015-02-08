@@ -61,7 +61,7 @@ public class StreamBitmapDecoderTest {
     private static class DecoderHarness {
         Downsampler downsampler = mock(Downsampler.class);
         BitmapPool bitmapPool = mock(BitmapPool.class);
-        DecodeFormat decodeFormat = DecodeFormat.ALWAYS_ARGB_8888;
+        DecodeFormat decodeFormat = DecodeFormat.PREFER_ARGB_8888;
         InputStream source = new ByteArrayInputStream(new byte[0]);
         int width = 100;
         int height = 100;
