@@ -935,6 +935,19 @@ public class GenericRequestTest {
                 any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class));
     }
 
+    @Test
+    public void testStartsLoadImmediatelyWhenGivenOverrideWithSizeOriginal() {
+        harness.overrideWidth = Target.SIZE_ORIGINAL;
+        harness.overrideHeight = Target.SIZE_ORIGINAL;
+        GenericRequest<Number, Object, Object, List> request = harness.getRequest();
+        request.begin();
+
+        verify(harness.engine).load(any(Key.class), eq(Target.SIZE_ORIGINAL), eq(Target.SIZE_ORIGINAL),
+                any(DataFetcher.class), any(DataLoadProvider.class), any(Transformation.class),
+                any(ResourceTranscoder.class), any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class),
+                any(ResourceCallback.class));
+    }
+
     private static class CallResourceCallback implements Answer {
 
         private Resource resource;

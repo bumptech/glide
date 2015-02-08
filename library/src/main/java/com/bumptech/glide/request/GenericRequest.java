@@ -255,7 +255,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         }
 
         status = Status.WAITING_FOR_SIZE;
-        if (overrideWidth > 0 && overrideHeight > 0) {
+        if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
             onSizeReady(overrideWidth, overrideHeight);
         } else {
             target.getSize(this);
