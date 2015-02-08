@@ -213,7 +213,7 @@ public class LruBitmapPool implements BitmapPool {
     private static LruPoolStrategy getDefaultStrategy() {
         final LruPoolStrategy strategy;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            strategy = new SizeStrategy();
+            strategy = new SizeConfigStrategy();
         } else {
             strategy = new AttributeStrategy();
         }

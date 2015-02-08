@@ -1,7 +1,5 @@
 package com.bumptech.glide.load;
 
-import android.os.Build;
-
 /**
  * Options for setting the value of {@link android.graphics.Bitmap#getConfig()} for {@link android.graphics.Bitmap}s
  * returned by a {@link com.bumptech.glide.load.resource.bitmap.BitmapDecoder}.
@@ -17,8 +15,25 @@ public enum DecodeFormat {
     /**
      * All bitmaps returned by the {@link com.bumptech.glide.load.resource.bitmap.BitmapDecoder} should return
      * {@link android.graphics.Bitmap.Config#ARGB_8888} for {@link android.graphics.Bitmap#getConfig()}.
+     *
+     * @deprecated Use the equivalent but less misleadingly named {@link #PREFER_ARGB_8888}. Scheduled to be removed
+     * in Glide 4.0
      */
+    @Deprecated
     ALWAYS_ARGB_8888,
+
+    /**
+     * Bitmaps decoded from most image formats (other than GIFs with hidden configs), will be decoded with the
+     * ARGB_8888 config.
+     *
+     * <p>
+     *     {@link android.graphics.BitmapFactory} does not allow us to guarantee that all returned Bitmaps will
+     *     be of a requested config without resorting to expensive copying. As a result, this is a preference only.
+     *     Most GIFs, for example, will still produce {@link android.graphics.Bitmap}s with null
+     *     {@link android.graphics.Bitmap.Config}s.
+     * </p>
+     */
+    PREFER_ARGB_8888,
 
     /**
      * Bitmaps decoded from image formats that support and/or use alpha (some types of PNGs, GIFs etc) should
@@ -29,10 +44,6 @@ public enum DecodeFormat {
      */
     PREFER_RGB_565;
 
-
-    /** There is a rendering issue in KitKat and L (or at least L MR1) when reusing mixed format bitmaps. See #301. */
-    public static final boolean REQUIRE_ARGB_8888 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
     /** The default value for DecodeFormat. */
-    public static final DecodeFormat DEFAULT = REQUIRE_ARGB_8888 ? ALWAYS_ARGB_8888 : PREFER_RGB_565;
+    public static final DecodeFormat DEFAULT = PREFER_RGB_565;
 }

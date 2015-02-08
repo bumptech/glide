@@ -49,7 +49,7 @@ public class DownsamplerTest {
         Downsampler downsampler = Downsampler.AT_LEAST;
         InputStream is = new FileInputStream(tempFile);
         try {
-            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.ALWAYS_ARGB_8888);
+            Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, DecodeFormat.PREFER_ARGB_8888);
             assertEquals(Bitmap.Config.ARGB_8888, result.getConfig());
         } finally {
             try {

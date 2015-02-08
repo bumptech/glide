@@ -38,7 +38,7 @@ public class VideoBitmapDecoderTest {
     @Before
     public void setup() {
         bitmapPool = mock(BitmapPool.class);
-        decodeFormat = DecodeFormat.ALWAYS_ARGB_8888;
+        decodeFormat = DecodeFormat.PREFER_ARGB_8888;
         resource = mock(ParcelFileDescriptor.class);
         factory = mock(VideoBitmapDecoder.MediaMetadataRetrieverFactory.class);
         retriever = mock(MediaMetadataRetriever.class);
