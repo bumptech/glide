@@ -22,7 +22,7 @@ import android.os.Message;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.DecodeOptions;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -67,7 +67,7 @@ public class GifFrameLoaderTest {
         Transformation<Bitmap> transformation = mock(Transformation.class);
         loader.setFrameTransformation(transformation);
 
-        verify(requestBuilder).decode(any(DecodeOptions.class));
+        verify(requestBuilder).apply(any(RequestOptions.class));
     }
 
     @Test(expected = NullPointerException.class)
@@ -88,7 +88,7 @@ public class GifFrameLoaderTest {
 
         InOrder order = inOrder(gifDecoder, requestBuilder);
         order.verify(gifDecoder).advance();
-        order.verify(requestBuilder).apply(any(RequestOptions.class));
+        order.verify(requestBuilder).apply(any(BaseRequestOptions.class));
         order.verify(requestBuilder).into(any(Target.class));
     }
 

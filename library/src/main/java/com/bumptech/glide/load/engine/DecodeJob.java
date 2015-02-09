@@ -265,7 +265,7 @@ class DecodeJob<R> {
         @Override
         public Resource<Z> onResourceDecoded(Resource<Z> resource) {
             Resource<Z> result = resource;
-            Class<Z> resourceSubClass = (Class<Z>) result.get().getClass();
+            Class<Z> resourceSubClass = getResourceClass(resource);
             Transformation<Z> appliedTransformation = null;
             if (transformResult) {
                 appliedTransformation = requestContext.getTransformation(resourceSubClass);
@@ -280,6 +280,11 @@ class DecodeJob<R> {
                 }
             }
             return result;
+        }
+
+        @SuppressWarnings("unchecked")
+        private Class<Z> getResourceClass(Resource<Z> resource) {
+            return (Class<Z>) resource.get().getClass();
         }
     }
 

@@ -1,6 +1,6 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.load.engine.DecodeOptions.through;
+import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
@@ -273,7 +273,7 @@ public class GlideTest {
 
         requestManager
                 .as(byte[].class)
-                .decode(through(RuntimeEnvironment.application, Bitmap.class))
+                .apply(decodeTypeOf(Bitmap.class))
                 .load(uri)
                 .into(target);
 
@@ -480,7 +480,7 @@ public class GlideTest {
 
         requestManager
                 .as(byte[].class)
-                .decode(through(RuntimeEnvironment.application, GifDrawable.class))
+                .apply(decodeTypeOf(GifDrawable.class))
                 .load(fakeUri)
                 .into(target);
 
@@ -493,7 +493,7 @@ public class GlideTest {
         mockUri(fakeUri);
         requestManager
                 .as(byte[].class)
-                .decode(through(RuntimeEnvironment.application, Bitmap.class))
+                .apply(decodeTypeOf(Bitmap.class))
                 .load(fakeUri)
                 .into(target);
 

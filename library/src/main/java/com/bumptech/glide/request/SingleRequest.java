@@ -50,7 +50,7 @@ public final class SingleRequest<R> implements Request,
 
     private RequestContext<R> requestContext;
     private Object model;
-    private RequestOptions requestOptions;
+    private BaseRequestOptions requestOptions;
     private RequestCoordinator requestCoordinator;
     private Class<R> transcodeClass;
     private Target<R> target;
@@ -69,7 +69,7 @@ public final class SingleRequest<R> implements Request,
             RequestContext<R> requestContext,
             Object model,
             Class<R> transcodeClass,
-            RequestOptions requestOptions,
+            BaseRequestOptions requestOptions,
             Target<R> target,
             RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,
@@ -100,7 +100,7 @@ public final class SingleRequest<R> implements Request,
             RequestContext<R> requestContext,
             Object model,
             Class<R> transcodeClass,
-            RequestOptions requestOptions,
+            BaseRequestOptions requestOptions,
             Target<R> target,
             RequestListener<R> requestListener,
             RequestCoordinator requestCoordinator,

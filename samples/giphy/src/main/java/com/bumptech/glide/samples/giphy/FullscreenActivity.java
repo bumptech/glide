@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.giphy;
 
-import static com.bumptech.glide.load.engine.DecodeOptions.through;
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 
 import com.google.gson.Gson;
@@ -65,8 +64,8 @@ public class FullscreenActivity extends Activity {
 
         RequestBuilder<Drawable> thumbnailRequest = Glide.with(this)
                 .asDrawable()
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE))
-                .decode(through(this, Bitmap.class))
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE)
+                        .decode(Bitmap.class))
                 .load(result);
 
         Glide.with(this)

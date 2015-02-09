@@ -95,10 +95,11 @@
     <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-annotations-3.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="guava-18.0" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="truth-0.24" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-3.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="truth-0.24" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-1.8.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="bcprov-jdk15on-1.50" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="bcprov-jdk16-1.46" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockwebserver-2.2.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="sqlite4java-0.282" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="maven-ant-tasks-2.1.3" level="project" />

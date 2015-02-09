@@ -13,7 +13,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
@@ -34,29 +34,27 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     private final GlideContext glideContext;
     private final Object model;
     private final Class<TranscodeClass> transcodeClass;
-    private final BaseDecodeOptions<?> decodeOptions;
-    private final RequestOptions requestOptions;
+    private final BaseRequestOptions<?> requestOptions;
     private final LoadDebugger debugger = Log.isLoggable(TAG, Log.VERBOSE)
             ? new PrettyPrintDebugger() : new EmptyLoadDebugger();
 
     private DataFetcherSet<?> fetchers;
 
     public RequestContext(GlideContext glideContext, Object model, Class<TranscodeClass> transcodeClass,
-            BaseDecodeOptions<?> decodeOptions, RequestOptions requestOptions) {
+            BaseRequestOptions<?> requestOptions) {
         super(glideContext);
         this.glideContext = glideContext;
         this.model = model;
         this.transcodeClass = transcodeClass;
-        this.decodeOptions = decodeOptions;
         this.requestOptions = requestOptions;
     }
 
     List<? extends LoadPath<?, ?, TranscodeClass>> getLoadPaths() {
-        return glideContext.getLoadPaths(model, decodeOptions.getResourceClass(), transcodeClass);
+        return glideContext.getLoadPaths(model, requestOptions.getResourceClass(), transcodeClass);
     }
 
     List<? extends LoadPath<?, ?, TranscodeClass>> getSourceCacheLoadPaths(File sourceCacheFile) {
-        return glideContext.getLoadPaths(sourceCacheFile, decodeOptions.getResourceClass(), transcodeClass);
+        return glideContext.getLoadPaths(sourceCacheFile, requestOptions.getResourceClass(), transcodeClass);
     }
 
     void buildDataFetchers(int width, int height) {
@@ -85,11 +83,11 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     }
 
     List<Class<?>> getRegisteredResourceClasses() {
-        return glideContext.getRegisteredResourceClasses(model.getClass(), decodeOptions.getResourceClass());
+        return glideContext.getRegisteredResourceClasses(model.getClass(), requestOptions.getResourceClass());
     }
 
     Class<?> getResourceClass() {
-        return decodeOptions.getResourceClass();
+        return requestOptions.getResourceClass();
     }
 
     Class<TranscodeClass> getTranscodeClass() {
@@ -97,7 +95,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     }
 
     <DecodedResource> Transformation<DecodedResource> getTransformation(Class<DecodedResource> decodedResourceClass) {
-        return decodeOptions.getTransformation(decodedResourceClass);
+        return requestOptions.getTransformation(decodedResourceClass);
     }
 
     Map<String, Object> getOptions() {
@@ -117,7 +115,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     }
 
     ResourceTranscoder<?, ? extends TranscodeClass> getTranscoder() {
-        return glideContext.getTranscoder(decodeOptions.getResourceClass(), transcodeClass);
+        return glideContext.getTranscoder(requestOptions.getResourceClass(), transcodeClass);
     }
 
     <X> DataRewinder<X> getRewinder(X data) {
@@ -126,7 +124,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
 
     <X> ResourceDecoder<X, ?> getDecoder(DataRewinder<X> rewinder)
             throws IOException, GlideContext.NoDecoderAvailableException {
-        return glideContext.getDecoder(rewinder, decodeOptions.getResourceClass());
+        return glideContext.getDecoder(rewinder, requestOptions.getResourceClass());
     }
 
     <ResourceClass> ResourceEncoder<ResourceClass> getResultEncoder(Resource<ResourceClass> resource)

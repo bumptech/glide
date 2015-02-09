@@ -1,7 +1,7 @@
 package com.bumptech.glide.samples.flickr;
 
-import static com.bumptech.glide.load.engine.DecodeOptions.centerCrop;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.priorityOf;
 
@@ -66,7 +66,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
         fullRequest = Glide.with(this)
                 .asDrawable()
-                .decode(centerCrop(getActivity()))
+                .apply(centerCropTransform(getActivity()))
                 .transition(withCrossFade(R.anim.fade_in, 150));
 
         thumbnailRequest = Glide.with(this)

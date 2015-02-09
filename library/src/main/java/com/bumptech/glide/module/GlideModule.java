@@ -15,7 +15,7 @@ import com.bumptech.glide.Registry;
  *     <ol>
  *         <li>
  *             Implement the GlideModule interface in a class with public visibility, calling
- *             {@link com.bumptech.glide.Glide#register(Class, Class, com.bumptech.glide.load.model.ModelLoaderFactory)}
+ *             {@link com.bumptech.glide.Registry#prepend(Class, Class, com.bumptech.glide.load.ResourceDecoder)}
  *             for each {@link com.bumptech.glide.load.model.ModelLoader} you'd like to register:
  *             <pre>
  *                  <code>

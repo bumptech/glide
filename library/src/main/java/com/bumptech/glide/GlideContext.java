@@ -16,12 +16,12 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
-import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 
@@ -41,24 +41,24 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     private final Handler mainHandler;
     private final Registry registry;
     private final ImageViewTargetFactory imageViewTargetFactory;
-    private final DecodeOptions decodeOptions;
+    private final RequestOptions options;
     private final Engine engine;
     private final ComponentCallbacks2 componentCallbacks;
 
     public GlideContext(Context context, Registry registry, ImageViewTargetFactory imageViewTargetFactory,
-            DecodeOptions decodeOptions, Engine engine, ComponentCallbacks2 componentCallbacks) {
+            RequestOptions options, Engine engine, ComponentCallbacks2 componentCallbacks) {
         super(context.getApplicationContext());
         this.registry = registry;
         this.imageViewTargetFactory = imageViewTargetFactory;
-        this.decodeOptions = decodeOptions;
+        this.options = options;
         this.engine = engine;
         this.componentCallbacks = componentCallbacks;
 
         mainHandler = new Handler(Looper.getMainLooper());
     }
 
-    public DecodeOptions getDecodeOptions() {
-        return decodeOptions;
+    public RequestOptions getOptions() {
+        return options;
     }
 
     public <ResourceType, TranscodeType> List<LoadPath<?, ResourceType, TranscodeType>> getLoadPaths(Object model,

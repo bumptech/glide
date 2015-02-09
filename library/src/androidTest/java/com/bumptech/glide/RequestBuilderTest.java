@@ -9,10 +9,10 @@ import static org.mockito.Mockito.when;
 
 import android.widget.ImageView;
 
-import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.BackgroundUtil;
 
@@ -133,7 +133,7 @@ public class RequestBuilderTest {
 
     private RequestBuilder getNullModelRequest() {
         when(glideContext.buildImageViewTarget(any(ImageView.class), any(Class.class))).thenReturn(mock(Target.class));
-        when(glideContext.getDecodeOptions()).thenReturn(new DecodeOptions(RuntimeEnvironment.application));
+        when(glideContext.getOptions()).thenReturn(new RequestOptions());
         return new RequestBuilder(glideContext, Object.class, requestTracker, lifecycle)
                 .load((Object) null);
     }

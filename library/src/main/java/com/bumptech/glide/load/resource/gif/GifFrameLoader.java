@@ -15,8 +15,8 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
@@ -61,7 +61,7 @@ class GifFrameLoader {
     @SuppressWarnings("unchecked")
     public void setFrameTransformation(Transformation<Bitmap> transformation) {
         Preconditions.checkNotNull(transformation);
-        requestBuilder = requestBuilder.decode(new DecodeOptions(context).transform(transformation));
+        requestBuilder = requestBuilder.apply(new RequestOptions().transform(context, transformation));
     }
 
     public void start() {

@@ -18,7 +18,6 @@ import android.view.View;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.data.InputStreamRewinder;
-import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
@@ -56,6 +55,7 @@ import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
@@ -212,7 +212,7 @@ public class Glide implements ComponentCallbacks2 {
                 .register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
 
         ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
-        DecodeOptions options = new DecodeOptions(context).format(decodeFormat);
+        RequestOptions options = new RequestOptions().format(decodeFormat);
         glideContext = new GlideContext(context, registry, imageViewTargetFactory, options, engine, this);
     }
 

@@ -5,12 +5,11 @@ import static com.bumptech.glide.request.RequestOptions.signatureOf;
 import android.net.Uri;
 import android.widget.ImageView;
 
-import com.bumptech.glide.load.engine.BaseDecodeOptions;
-import com.bumptech.glide.load.engine.DecodeOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
@@ -37,10 +36,10 @@ import java.util.UUID;
  * {@link com.bumptech.glide.request.target.Target}.
  */
 public class RequestBuilder<TranscodeType> implements Cloneable {
-    private static final RequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
+    private static final BaseRequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
     private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
             new GenericTransitionOptions<Object>();
-    private static final RequestOptions DOWNLOAD_ONLY_OPTIONS = new RequestOptions()
+    private static final BaseRequestOptions DOWNLOAD_ONLY_OPTIONS = new RequestOptions()
             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
             .priority(Priority.LOW)
             .skipMemoryCache(true);
@@ -49,8 +48,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     protected final RequestTracker requestTracker;
     protected final Lifecycle lifecycle;
 
-    private BaseDecodeOptions<?> decodeOptions;
-    private RequestOptions requestOptions = DEFAULT_REQUEST_OPTIONS;
+    private BaseRequestOptions<?> requestOptions = DEFAULT_REQUEST_OPTIONS;
+    @SuppressWarnings("unchecked")
     private TransitionOptions<?, ? super TranscodeType> transitionOptions =
             (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
 
@@ -75,10 +74,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         this.transcodeClass = transcodeClass;
         this.requestTracker = requestTracker;
         this.lifecycle = lifecycle;
-        decodeOptions = context.getDecodeOptions().clone();
+        requestOptions = context.getOptions().clone();
     }
 
-    public RequestBuilder<TranscodeType> apply(RequestOptions requestOptions) {
+    public RequestBuilder<TranscodeType> apply(BaseRequestOptions requestOptions) {
         Preconditions.checkNotNull(requestOptions);
         this.requestOptions = DEFAULT_REQUEST_OPTIONS.equals(this.requestOptions)
                 ? requestOptions : this.requestOptions.apply(requestOptions);
@@ -88,11 +87,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     public RequestBuilder<TranscodeType> transition(
             TransitionOptions<?, ? super TranscodeType> transitionOptions) {
         this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
-        return this;
-    }
-
-    public RequestBuilder<TranscodeType> decode(DecodeOptions options) {
-        this.decodeOptions.apply(Preconditions.checkNotNull(options));
         return this;
     }
 
@@ -146,9 +140,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      * <p>
      *     Almost all options will be copied from the original load, including the
      *     {@link com.bumptech.glide.load.model.ModelLoader}, {@link com.bumptech.glide.load.ResourceDecoder}, and
-     *     {@link com.bumptech.glide.load.Transformation}s. However, {@link RequestOptions#placeholder(int)} and
-     *     {@link RequestOptions#error(int)}, and {@link #listener(RequestListener)} will only be used on the fullsize
-     *     load and will not be copied for the thumbnail load.
+     *     {@link com.bumptech.glide.load.Transformation}s. However,
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#placeholder(int)} and
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#error(int)}, and {@link #listener(RequestListener)} will
+     *     only be used on the fullsize load and will not be copied for the thumbnail load.
      * </p>
      *
      * <p>
@@ -199,10 +194,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      *     Note - this method caches data using only the given String as the cache key. If the data is a Uri outside of
      *     your control, or you otherwise expect the data represented by the given String to change without the String
      *     identifier changing, Consider using
-     *     {@link RequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a signature
-     *     you create that identifies the data currently at the given String that will invalidate the cache if that data
-     *     changes. Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
-     *     {@link RequestOptions#skipMemoryCache(boolean)} may be appropriate.
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a
+     *     signature you create that identifies the data currently at the given String that will invalidate the cache if
+     *     that data changes. Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#skipMemoryCache(boolean)} may be appropriate.
      * </p>
      *
      * @see #load(Object)
@@ -220,10 +215,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      *     Note - this method caches data at Uris using only the Uri itself as the cache key. The data represented by
      *     Uris from some content providers may change without the Uri changing, which means using this method
      *     can lead to displaying stale data. Consider using
-     *     {@link RequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a signature
-     *     you create based on the data at the given Uri that will invalidate the cache if that data changes.
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a
+     *     signature you create based on the data at the given Uri that will invalidate the cache if that data changes.
      *     Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
-     *     {@link RequestOptions#skipMemoryCache(boolean)} may be appropriate.
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#skipMemoryCache(boolean)} may be appropriate.
      * </p>
      *
      * @see #load(Object)
@@ -242,10 +237,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      *     Note - this method caches data for Files using only the file path itself as the cache key. The data in the
      *     File can change so using this method can lead to displaying stale data. If you expect the data in the File to
      *     change, Consider using
-     *     {@link RequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a signature
-     *     you create that identifies the data currently in the File that will invalidate the cache if that data
-     *     changes. Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
-     *     {@link RequestOptions#skipMemoryCache(boolean)} may be appropriate.
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#signature(com.bumptech.glide.load.Key)} to mixin a
+     *     signature you create that identifies the data currently in the File that will invalidate the cache if that
+     *     data changes. Alternatively, using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
+     *     {@link com.bumptech.glide.request.BaseRequestOptions#skipMemoryCache(boolean)} may be appropriate.
      * </p>
      *
      * @see #load(Object)
@@ -268,9 +263,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      *     your Drawables, but during development if you do not increment your version code before each install and
      *     you replace a Drawable with different data without changing the Drawable name, you may see inconsistent
      *     cached data. To get around this, consider using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE}
-     *     via {@link RequestOptions#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)}
-     *     during development, and re-enabling the default
-     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT} for release builds.
+     *     via {@link BaseRequestOptions#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)} during
+     *     development, and re-enabling the default {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}
+     *     for release builds.
      * </p>
      *
      * @see #load(Integer)
@@ -331,7 +326,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
                     (RequestBuilder<TranscodeType>) super.clone();
             result.requestOptions = result.requestOptions.clone();
             result.transitionOptions = result.transitionOptions.clone();
-            result.decodeOptions = decodeOptions.clone();
             return result;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -386,15 +380,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
             throw new IllegalArgumentException("You must pass in a non null View");
         }
 
-        if (!decodeOptions.isTransformationSet() && view.getScaleType() != null) {
+        if (!requestOptions.isTransformationSet() && view.getScaleType() != null) {
             switch (view.getScaleType()) {
                 case CENTER_CROP:
-                    decodeOptions.centerCrop();
+                    requestOptions.centerCrop(context);
                     break;
                 case FIT_CENTER:
                 case FIT_START:
                 case FIT_END:
-                    decodeOptions.fitCenter();
+                    requestOptions.fitCenter(context);
                     break;
                 //$CASES-OMITTED$
                 default:
@@ -409,9 +403,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      * Returns a future that can be used to do a blocking get on a background thread.
      *
      * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *             {@link RequestOptions#override * (int, int)} if previously called.
+     *             {@link com.bumptech.glide.request.BaseRequestOptions#override * (int, int)} if previously called.
      * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *              {@link RequestOptions#override * (int, int)}} if previously called).
+     *              {@link com.bumptech.glide.request.BaseRequestOptions#override * (int, int)}} if previously called).
      *
      * @see Glide#clear(com.bumptech.glide.request.FutureTarget)
      *
@@ -447,9 +441,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      * @see com.bumptech.glide.ListPreloader
      *
      * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *             {@link RequestOptions#override * (int, int)} if previously called.
+     *             {@link com.bumptech.glide.request.BaseRequestOptions#override * (int, int)} if previously called.
      * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be overridden by
-     *              {@link RequestOptions#override * (int, int)}} if previously called).
+     *              {@link com.bumptech.glide.request.BaseRequestOptions#override * (int, int)}} if previously called).
      * @return A {@link Target} that can be used to cancel the load via
      *        {@link Glide#clear(com.bumptech.glide.request.target.Target)}.
      */
@@ -558,10 +552,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         }
     }
 
-    private Request obtainRequest(Target<TranscodeType> target, RequestOptions requestOptions,
+    private Request obtainRequest(Target<TranscodeType> target, BaseRequestOptions requestOptions,
             RequestCoordinator requestCoordinator) {
         RequestContext<TranscodeType> requestContext =
-                new RequestContext<>(context, model, transcodeClass, decodeOptions, requestOptions);
+                new RequestContext<>(context, model, transcodeClass, requestOptions);
 
         return SingleRequest.obtain(requestContext, model, transcodeClass, requestOptions, target, requestListener,
                 requestCoordinator, context.getEngine(), transitionOptions.getTransitionFactory());

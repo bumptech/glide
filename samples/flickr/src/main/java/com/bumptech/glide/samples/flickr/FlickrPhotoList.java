@@ -1,9 +1,8 @@
 package com.bumptech.glide.samples.flickr;
 
-import static com.bumptech.glide.load.engine.DecodeOptions.centerCrop;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
-import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -73,8 +72,8 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
 
         fullRequest = Glide.with(FlickrPhotoList.this)
                 .asDrawable()
-                .decode(centerCrop(getActivity()))
-                .apply(placeholderOf(new ColorDrawable(Color.GRAY)));
+                .apply(centerCropTransform(getActivity())
+                        .placeholder(new ColorDrawable(Color.GRAY)));
 
         thumbRequest = Glide.with(FlickrPhotoList.this)
                 .asDrawable()
