@@ -8,6 +8,7 @@ import com.bumptech.glide.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
@@ -42,8 +43,8 @@ public class SizeConfigStrategy implements LruPoolStrategy {
 
     private final KeyPool keyPool = new KeyPool();
     private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<Key, Bitmap>();
-    private final Map<Bitmap.Config, TreeMap<Integer, Integer>> sortedSizes =
-            new HashMap<Bitmap.Config, TreeMap<Integer, Integer>>();
+    private final Map<Bitmap.Config, NavigableMap<Integer, Integer>> sortedSizes =
+            new HashMap<Bitmap.Config, NavigableMap<Integer, Integer>>();
 
     @Override
     public void put(Bitmap bitmap) {
@@ -52,7 +53,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
 
         groupedMap.put(key, bitmap);
 
-        TreeMap<Integer, Integer> sizes = getSizesForConfig(bitmap.getConfig());
+        NavigableMap<Integer, Integer> sizes = getSizesForConfig(bitmap.getConfig());
         Integer current = sizes.get(key.size);
         sizes.put(key.size, current == null ? 1 : current + 1);
     }
@@ -76,7 +77,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
     private Key findBestKey(Key key, int size, Bitmap.Config config) {
         Key result = key;
         for (Bitmap.Config possibleConfig : getInConfigs(config)) {
-            TreeMap<Integer, Integer> sizesForPossibleConfig = getSizesForConfig(possibleConfig);
+            NavigableMap<Integer, Integer> sizesForPossibleConfig = getSizesForConfig(possibleConfig);
             Integer possibleSize = sizesForPossibleConfig.ceilingKey(size);
             if (possibleSize != null && possibleSize <= size * MAX_SIZE_MULTIPLE) {
                 if (possibleSize != size
@@ -101,7 +102,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
     }
 
     private void decrementBitmapOfSize(Integer size, Bitmap.Config config) {
-        TreeMap<Integer, Integer> sizes = getSizesForConfig(config);
+        NavigableMap<Integer, Integer> sizes = getSizesForConfig(config);
         Integer current = sizes.get(size);
         if (current == 1) {
             sizes.remove(size);
@@ -110,8 +111,8 @@ public class SizeConfigStrategy implements LruPoolStrategy {
         }
     }
 
-    private TreeMap<Integer, Integer> getSizesForConfig(Bitmap.Config config) {
-        TreeMap<Integer, Integer> sizes = sortedSizes.get(config);
+    private NavigableMap<Integer, Integer> getSizesForConfig(Bitmap.Config config) {
+        NavigableMap<Integer, Integer> sizes = sortedSizes.get(config);
         if (sizes == null) {
             sizes = new TreeMap<Integer, Integer>();
             sortedSizes.put(config, sizes);
@@ -138,15 +139,17 @@ public class SizeConfigStrategy implements LruPoolStrategy {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Bitmap.Config, TreeMap<Integer, Integer>> entry : sortedSizes.entrySet()) {
-            sb.append(entry.getKey()).append('[').append(entry.getValue()).append(']');
-
+        StringBuilder sb = new StringBuilder()
+                .append("SizeConfigStrategy{groupedMap=")
+                .append(groupedMap)
+                .append(", sortedSizes=(");
+        for (Map.Entry<Bitmap.Config, NavigableMap<Integer, Integer>> entry : sortedSizes.entrySet()) {
+            sb.append(entry.getKey()).append('[').append(entry.getValue()).append("], ");
         }
-        return "SizeConfigStrategy{"
-                + "groupedMap=" + groupedMap
-                + ", sortedSizes=(" + sb.toString()
-                + ")}";
+        if (!sortedSizes.isEmpty()) {
+            sb.replace(sb.length() - 2, sb.length(), "");
+        }
+        return sb.append(")}").toString();
     }
 
     // Visible for testing.

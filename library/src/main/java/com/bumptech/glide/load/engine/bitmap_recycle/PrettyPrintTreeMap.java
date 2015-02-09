@@ -10,12 +10,9 @@ class PrettyPrintTreeMap<K, V> extends TreeMap<K, V> {
         for (Entry<K, V> entry : entrySet()) {
             sb.append('{').append(entry.getKey()).append(':').append(entry.getValue()).append("}, ");
         }
-        final String result;
         if (!isEmpty()) {
-            result = sb.substring(0, sb.length() - 2);
-        } else {
-            result = sb.toString();
+            sb.replace(sb.length() - 2, sb.length(), "");
         }
-        return result + " )";
+        return sb.append(" )").toString();
     }
 }
