@@ -99,7 +99,7 @@ public class MainActivity extends Activity {
     private void loadNet() {
         Uri uri = Uri.parse("http://www.clker.com/cliparts/u/Z/2/b/a/6/android-toy-h.svg");
         requestBuilder
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE))
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA))
                 .load(uri)
                 .into(imageViewNet);
     }

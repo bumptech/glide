@@ -67,7 +67,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDiskCacheIsCheckedForResultWhenCacheStrategyIncludesResult() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.RESULT)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.RESOURCE)) {
             harness = new Harness(strategy);
 
             mockCacheToReturnResultResource();
@@ -78,7 +78,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDiskCacheIsNotCheckedForResultWhenCacheStrategyDoesNotIncludeResult() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
 
             harness.getJob().decodeResultFromCache();
@@ -89,7 +89,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDecodeResultFromCacheReturnsNullIfDiskCacheStrategyDoesNotIncludeResult() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
             mockCacheToReturnResultResource();
 
@@ -99,7 +99,7 @@ public class DecodeJobTest {
 
     @Test
     public void testResultDecodedFromCacheIsTranscodedIfDecodeSucceeds() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         mockCacheToReturnResultResource();
         Resource<Object> transcoded = mock(Resource.class);
         when(harness.transcoder.transcode(eq(harness.resource))).thenReturn(transcoded);
@@ -109,7 +109,7 @@ public class DecodeJobTest {
 
     @Test
     public void testResultDecodedFromCacheIsNotRecycledIfTranscoded() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         mockCacheToReturnResultResource();
         Resource<Object> transcoded = mock(Resource.class);
         when(harness.transcoder.transcode(eq(harness.resource))).thenReturn(transcoded);
@@ -121,7 +121,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDecodeResultFromCacheReturnsNullIfDiskCacheReturnsNull() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(null);
 
         assertNull(harness.getJob().decodeResultFromCache());
@@ -129,7 +129,7 @@ public class DecodeJobTest {
 
     @Test(expected = RuntimeException.class)
     public void testDecodeResultFromCacheThrowsIfCacheDecoderThrows() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("Fake"));
         when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
                 .thenThrow(new RuntimeException("test"));
@@ -141,7 +141,7 @@ public class DecodeJobTest {
 
     @Test
     public void testEntryIsDeletedFromCacheIfCacheDecoderThrowsButResultIsInCache() throws IOException {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("fake"));
         when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
                 .thenThrow(new RuntimeException("test"));
@@ -158,7 +158,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDecodeResultFromCacheReturnsNullIfCacheDecoderReturnsNull() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("fake"));
         when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
                 .thenReturn(null);
@@ -168,7 +168,7 @@ public class DecodeJobTest {
 
     @Test
     public void testEntryIsDeletedFromCacheIfCacheDecoderReturnsNullButResultIsInCache() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("fake"));
         when(harness.cacheDecoder.decode(any(File.class), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
                 .thenReturn(null);
@@ -179,7 +179,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDecodeResultFromCacheReturnsNullIfTranscoderReturnsNull() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         mockCacheToReturnResultResource();
         when(harness.transcoder.transcode(any(Resource.class))).thenReturn(null);
 
@@ -188,7 +188,7 @@ public class DecodeJobTest {
 
     @Test(expected = RuntimeException.class)
     public void testDecodeResultFromCacheThrowsIfTranscoderThrows() throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.RESULT;
+        harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         mockCacheToReturnResultResource();
         when(harness.transcoder.transcode(any(Resource.class))).thenThrow(new RuntimeException("test"));
 
@@ -208,7 +208,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDecodeSourceFromCacheReturnsNullIfCacheStrategyDoesNotCacheSource() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.RESULT)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.RESOURCE)) {
             harness = new Harness(strategy);
 
             mockCacheToReturnSourceResource();
@@ -219,7 +219,7 @@ public class DecodeJobTest {
 
     @Test
     public void testDiskCacheIsCheckedForSourceWhenCacheStrategyIncludesResult() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
 
             mockCacheToReturnSourceResource();
@@ -230,7 +230,7 @@ public class DecodeJobTest {
 
     @Test
     public void testResourceFetcherIsNotCalledIfSourceIsCached() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
 
             mockCacheToReturnSourceResource();
@@ -242,7 +242,7 @@ public class DecodeJobTest {
 
     @Test
     public void testOriginalResourceIsTransformedTranscodedAndReturnedIfSourceIsCached() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
 
             mockCacheToReturnSourceResource();
@@ -258,7 +258,7 @@ public class DecodeJobTest {
 
     @Test
     public void testOriginalResourceIsRecycledIfDifferentThanTransformedResource() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
 
             mockCacheToReturnSourceResource();
@@ -273,7 +273,7 @@ public class DecodeJobTest {
 
     @Test
     public void testOriginalResourceIsNotRecycledIfSameAsTransformedResource() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
 
             mockCacheToReturnSourceResource();
@@ -297,13 +297,13 @@ public class DecodeJobTest {
 
         harness.getJob().decodeSourceFromCache();
 
-        verify(harness.resultEncoder).encode(eq(transformed), any(OutputStream.class));
+        verify(harness.resultEncoder).encode(eq(transformed), any(OutputStream.class), eq(harness.options));
     }
 
     @Test
     public void testTransformedResourceIsNotWrittenToCacheIfSourceIsCachedAndStrategyDoesNotCacheResult()
             throws Exception {
-        harness.diskCacheStrategy = DiskCacheStrategy.SOURCE;
+        harness.diskCacheStrategy = DiskCacheStrategy.DATA;
 
         mockCacheToReturnSourceResource();
         harness.getJob().decodeSourceFromCache();
@@ -399,14 +399,14 @@ public class DecodeJobTest {
     /** decodeFromSource **/
 
     private void mockSourceToReturnResource() throws Exception {
-        // For NONE/RESULT
+        // For NONE/RESOURCE
         Object data = new Object();
         when(harness.dataFetcher.loadData(eq(harness.priority))).thenReturn(data);
         when(harness.sourceDecoder.decode(eq(data), eq(harness.width), eq(harness.height),
                 anyMapOf(String.class, Object.class)))
                 .thenReturn(harness.resource);
 
-        // For ALL/SOURCE
+        // For ALL/DATA
         File cachedSource = new File("source");
         when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(cachedSource);
         when(harness.cacheDecoder.decode(eq(cachedSource), eq(harness.width), eq(harness.height),
@@ -432,7 +432,7 @@ public class DecodeJobTest {
 
     @Test
     public void testSourceDataIsWrittenToCacheIfCacheStrategyCachesSource() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.SOURCE, DiskCacheStrategy.ALL)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.DATA, DiskCacheStrategy.ALL)) {
             harness = new Harness(strategy);
             Object data = new Object();
             when(harness.dataFetcher.loadData(eq(harness.priority))).thenReturn(data);
@@ -442,13 +442,13 @@ public class DecodeJobTest {
 
             harness.getJob().decodeFromSource();
 
-            verify(harness.sourceEncoder).encode(eq(data), any(OutputStream.class));
+            verify(harness.sourceEncoder).encode(eq(data), any(OutputStream.class), eq(harness.options));
         }
     }
 
     @Test
     public void testSourceDataIsNotWrittenToCacheIfCacheStrategyDoesNotCacheSource() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.RESULT)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.RESOURCE)) {
             harness = new Harness(strategy);
             mockSourceToReturnResource();
 
@@ -460,7 +460,7 @@ public class DecodeJobTest {
 
     @Test
     public void testTransformedResourceDecodedFromSourceIsWrittenToCacheIfCacheStrategyCachesResult() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.RESULT)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.ALL, DiskCacheStrategy.RESOURCE)) {
             harness = new Harness(strategy);
 
             mockSourceToReturnResource();
@@ -471,13 +471,13 @@ public class DecodeJobTest {
 
             harness.getJob().decodeFromSource();
 
-            verify(harness.resultEncoder).encode(eq(transformed), any(OutputStream.class));
+            verify(harness.resultEncoder).encode(eq(transformed), any(OutputStream.class), eq(harness.options));
         }
     }
 
     @Test
     public void testTransformedResultResourceIsNotWrittenToCacheIfCacheStrategyDoesNotCacheResult() throws Exception {
-        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.SOURCE)) {
+        for (DiskCacheStrategy strategy : list(DiskCacheStrategy.NONE, DiskCacheStrategy.DATA)) {
             harness = new Harness(strategy);
             mockSourceToReturnResource();
             Resource<Object> transformed = mock(Resource.class);
@@ -624,7 +624,7 @@ public class DecodeJobTest {
         DiskCacheStrategy diskCacheStrategy;
 
         public Harness() throws Exception {
-            this(DiskCacheStrategy.RESULT);
+            this(DiskCacheStrategy.RESOURCE);
         }
 
         public Harness(DiskCacheStrategy diskCacheStrategy) throws Exception {

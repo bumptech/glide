@@ -7,6 +7,7 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.gifencoder.AnimatedGifEncoder;
+import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
@@ -17,12 +18,29 @@ import com.bumptech.glide.util.LogTime;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * An {@link com.bumptech.glide.load.ResourceEncoder} that can write
  * {@link com.bumptech.glide.load.resource.gif.GifDrawable} to cache.
  */
 public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
+    /**
+     * A key for a boolean option that, if set to <code>true</code>, causes the fully transformed GIF to be written to
+     * cache.
+     *
+     * <p>
+     *     Warning - encoding GIFs is slow and often produces larger and less efficient GIFs than the originals.
+     *     Re-encoding may be worth it to decrease the size of very large GIFs.
+     * </p>
+     *
+     * <p>
+     *     Defaults to <code>false</code>.
+     * </p>
+     */
+    public static final String KEY_ENCODE_TRANSFORMATION =
+            "com.bumptech.glide.load.resource.gif.GifResourceEncoder.EncodeTransformation";
+
     private static final Factory FACTORY = new Factory();
     private static final String TAG = "GifEncoder";
     private final GifDecoder.BitmapProvider provider;
@@ -41,10 +59,30 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
     }
 
     @Override
-    public boolean encode(Resource<GifDrawable> resource, OutputStream os) {
-        long startTime = LogTime.getLogTime();
+    public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
+        return encodeTransformation(options) ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
+    }
 
+    @Override
+    public boolean encode(Resource<GifDrawable> resource, OutputStream os, Map<String, Object> options) {
         GifDrawable drawable = resource.get();
+        if (encodeTransformation(options)) {
+            return encodeTransformed(drawable, os);
+        } else {
+            try {
+                os.write(drawable.getData());
+                return true;
+            } catch (IOException e) {
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Failed to write source gif data", e);
+                }
+                return false;
+            }
+        }
+    }
+
+    private boolean encodeTransformed(GifDrawable drawable, OutputStream os) {
+        long startTime = LogTime.getLogTime();
         Transformation<Bitmap> transformation = drawable.getFrameTransformation();
         if (transformation instanceof UnitTransformation) {
             return writeDataDirect(drawable.getData(), os);
@@ -119,6 +157,12 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
             bitmapResource.recycle();
         }
         return transformedResource;
+    }
+
+
+    private boolean encodeTransformation(Map<String, Object> options) {
+        Boolean encodeTransformed = (Boolean) options.get(KEY_ENCODE_TRANSFORMATION);
+        return encodeTransformed != null && encodeTransformed;
     }
 
     // Visible for testing.

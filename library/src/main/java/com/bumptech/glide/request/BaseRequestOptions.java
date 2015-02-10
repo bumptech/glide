@@ -12,6 +12,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableTransformation;
+import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
@@ -20,6 +21,7 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
+import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
 
@@ -50,7 +52,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     private int fields;
 
     private float sizeMultiplier = 1f;
-    private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
+    private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESOURCE;
     private Priority priority = Priority.NORMAL;
     private Drawable errorPlaceholder;
     private int errorId;
@@ -94,15 +96,15 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
     /**
      * Sets the {@link com.bumptech.glide.load.engine.DiskCacheStrategy} to use for this load. Defaults to
-     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}.
+     * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE}.
      *
      * <p>
-     *     For most applications {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT} is ideal.
+     *     For most applications {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE} is ideal.
      *     Applications that use the same resource multiple times in multiple sizes and are willing to trade off some
      *     speed and disk space in return for lower bandwidth usage may want to consider using
-     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#SOURCE} or
-     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}. Any download only operations should
-     *     typically use {@link com.bumptech.glide.load.engine.DiskCacheStrategy#SOURCE}.
+     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#DATA} or
+     *     {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE}. Any download only operations should
+     *     typically use {@link com.bumptech.glide.load.engine.DiskCacheStrategy#DATA}.
      * </p>
      *
      * @param strategy The strategy to use.
@@ -287,6 +289,27 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
     public final boolean isTransformationSet() {
         return isSet(TRANSFORMATION);
+    }
+
+    /**
+     * Sets the value for key {@link com.bumptech.glide.load.resource.gif.GifResourceEncoder#KEY_ENCODE_TRANSFORMATION}.
+     */
+    public CHILD reEncodeGif(Boolean encode) {
+        return set(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, encode);
+    }
+
+    /**
+     * Sets the value for key {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#KEY_COMPRESSION_FORMAT}.
+     */
+    public CHILD encodeFormat(Bitmap.CompressFormat format) {
+        return set(BitmapEncoder.KEY_COMPRESSION_FORMAT, format);
+    }
+
+    /**
+     * Sets the value for key {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#KEY_COMPRESSION_QUALITY}.
+     */
+    public CHILD encodeQuality(Integer quality) {
+        return set(BitmapEncoder.KEY_COMPRESSION_QUALITY, quality);
     }
 
     public CHILD format(DecodeFormat format) {

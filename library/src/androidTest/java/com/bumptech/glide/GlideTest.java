@@ -763,9 +763,13 @@ public class GlideTest {
                     return mock(Future.class);
                 }
             });
+
+            DiskCache.Factory diskCacheFactory = mock(DiskCache.Factory.class);
+            when(diskCacheFactory.build()).thenReturn(mock(DiskCache.class));
+
             builder
                 .setMemoryCache(mock(MemoryCache.class))
-                .setDiskCache(mock(DiskCache.class))
+                .setDiskCache(diskCacheFactory)
                 .setResizeService(service)
                 .setDiskCacheService(service);
         }

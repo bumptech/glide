@@ -11,6 +11,12 @@ public final class Preconditions {
         // Utility class.
     }
 
+    public static void checkArgument(boolean expression, String message) {
+        if (!expression) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     public static <T> T checkNotNull(T arg) {
         return checkNotNull(arg, "Argument must not be null");
     }

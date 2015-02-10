@@ -40,7 +40,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
             new GenericTransitionOptions<Object>();
     private static final BaseRequestOptions DOWNLOAD_ONLY_OPTIONS = new RequestOptions()
-            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
             .priority(Priority.LOW)
             .skipMemoryCache(true);
     protected final GlideContext context;
@@ -264,7 +264,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
      *     you replace a Drawable with different data without changing the Drawable name, you may see inconsistent
      *     cached data. To get around this, consider using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE}
      *     via {@link BaseRequestOptions#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)} during
-     *     development, and re-enabling the default {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESULT}
+     *     development, and re-enabling the default {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE}
      *     for release builds.
      * </p>
      *

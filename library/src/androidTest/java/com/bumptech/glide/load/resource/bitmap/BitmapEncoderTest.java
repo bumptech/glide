@@ -1,12 +1,14 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.engine.Resource;
 
 import org.junit.Before;
@@ -20,6 +22,8 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = { BitmapEncoderTest.AlphaShadowBitmap.class })
@@ -41,25 +45,27 @@ public class BitmapEncoderTest {
 
     @Test
     public void testBitmapIsEncodedWithGivenQuality() {
-        harness.quality = 7;
+        int quality = 7;
+        harness.setQuality(quality);
 
         String fakeBytes = harness.encode();
 
-        assertContains(fakeBytes, String.valueOf(harness.quality));
+        assertContains(fakeBytes, String.valueOf(quality));
     }
 
     @Test
     public void testEncoderObeysNonNullCompressFormat() {
-        harness.compressFormat = Bitmap.CompressFormat.WEBP;
+        Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
+        harness.setFormat(format);
 
         String fakeBytes = harness.encode();
 
-        assertContains(fakeBytes, harness.compressFormat.toString());
+        assertContains(fakeBytes, format.toString());
     }
 
     @Test
     public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() {
-        harness.compressFormat = null;
+        harness.setFormat(null);
         harness.bitmap.setHasAlpha(false);
 
         String fakeBytes = harness.encode();
@@ -69,7 +75,7 @@ public class BitmapEncoderTest {
 
     @Test
     public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() {
-        harness.compressFormat = null;
+        harness.setFormat(null);
         harness.bitmap.setHasAlpha(true);
 
         String fakeBytes = harness.encode();
@@ -79,8 +85,14 @@ public class BitmapEncoderTest {
 
     @Test
     public void testReturnsTrueFromWrite() {
-        BitmapEncoder encoder = new BitmapEncoder(harness.compressFormat, harness.quality);
-        assertTrue(encoder.encode(harness.resource, harness.os));
+        BitmapEncoder encoder = new BitmapEncoder();
+        assertTrue(encoder.encode(harness.resource, harness.os, harness.options));
+    }
+
+    @Test
+    public void testEncodeStrategy_alwaysReturnsTransformed() {
+        BitmapEncoder encoder = new BitmapEncoder();
+        assertEquals(EncodeStrategy.TRANSFORMED, encoder.getEncodeStrategy(harness.options));
     }
 
     private static void assertContains(String string, String expected) {
@@ -89,19 +101,26 @@ public class BitmapEncoderTest {
 
     @SuppressWarnings("unchecked")
     private static class EncoderHarness {
-        Bitmap.CompressFormat compressFormat = null;
         Resource<Bitmap> resource = mock(Resource.class);
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        int quality = 100;
+        Map<String, Object> options = new HashMap<>();
 
         public EncoderHarness() {
             when(resource.get()).thenReturn(bitmap);
         }
 
+        public void setQuality(int quality) {
+            options.put(BitmapEncoder.KEY_COMPRESSION_QUALITY, quality);
+        }
+
+        public void setFormat(Bitmap.CompressFormat format) {
+            options.put(BitmapEncoder.KEY_COMPRESSION_FORMAT, format);
+        }
+
         public String encode() {
-            BitmapEncoder encoder = new BitmapEncoder(compressFormat, quality);
-            encoder.encode(resource, os);
+            BitmapEncoder encoder = new BitmapEncoder();
+            encoder.encode(resource, os, options);
             return new String(os.toByteArray());
         }
     }

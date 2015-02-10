@@ -1,9 +1,11 @@
 package com.bumptech.glide.load.resource;
 
+import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.Resource;
 
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * A simple {@link com.bumptech.glide.load.ResourceEncoder} that never writes data.
@@ -24,7 +26,12 @@ public class NullResourceEncoder<T> implements ResourceEncoder<T> {
     }
 
     @Override
-    public boolean encode(Resource<T> data, OutputStream os) {
+    public boolean encode(Resource<T> data, OutputStream os, Map<String, Object> options) {
         return false;
+    }
+
+    @Override
+    public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
+        return EncodeStrategy.TRANSFORMED;
     }
 }

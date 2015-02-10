@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource;
 import com.bumptech.glide.load.Encoder;
 
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * A simple {@link com.bumptech.glide.load.Encoder} that never writes data.
@@ -24,7 +25,7 @@ public class NullEncoder<T> implements Encoder<T> {
     }
 
     @Override
-    public boolean encode(T data, OutputStream os) {
+    public boolean encode(T data, OutputStream os, Map<String, Object> options) {
         return false;
     }
 }

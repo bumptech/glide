@@ -1,7 +1,5 @@
 package com.bumptech.glide.samples.giphy;
 
-import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
-
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -19,7 +17,6 @@ import android.widget.ListView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import java.util.ArrayList;
@@ -47,8 +44,7 @@ public class MainActivity extends Activity implements Api.Monitor {
         ListView gifList = (ListView) findViewById(R.id.gif_list);
 
         RequestBuilder<Drawable> gifItemRequest = Glide.with(this)
-                .asDrawable()
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE));
+                .asDrawable();
 
         ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider = new ViewPreloadSizeProvider<Api.GifResult>();
         adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);

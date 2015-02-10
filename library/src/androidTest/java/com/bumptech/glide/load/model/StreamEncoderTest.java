@@ -10,6 +10,7 @@ import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -26,7 +27,7 @@ public class StreamEncoderTest {
         String fakeData = "SomeRandomFakeData";
         ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        encoder.encode(is, os);
+        encoder.encode(is, os, Collections.<String, Object>emptyMap());
 
         assertEquals(fakeData, new String(os.toByteArray()));
     }

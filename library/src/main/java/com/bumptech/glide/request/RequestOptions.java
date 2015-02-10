@@ -20,7 +20,7 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
  * </p>
  */
 @SuppressWarnings("PMD.UseUtilityClass")
-public class RequestOptions extends BaseRequestOptions<RequestOptions> {
+public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
     public static RequestOptions sizeMultiplierOf(float sizeMultiplier) {
         return new RequestOptions().sizeMultiplier(sizeMultiplier);
@@ -100,5 +100,29 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
     public static RequestOptions downsampleOf(DownsampleStrategy strategy) {
         return new RequestOptions().downsample(strategy);
+    }
+
+    /**
+     * Returns a new {@link com.bumptech.glide.request.RequestOptions} with
+     * {@link #encodeQuality(Integer)} called with the given quality.
+     */
+    public static RequestOptions encodeQualityOf(Integer quality) {
+        return new RequestOptions().encodeQuality(quality);
+    }
+
+    /**
+     * Returns a new {@link com.bumptech.glide.request.RequestOptions} with
+     * {@link #encodeFormat(android.graphics.Bitmap.CompressFormat)} called with the given format.
+     */
+    public static RequestOptions encodeFormatOf(Bitmap.CompressFormat format) {
+        return new RequestOptions().encodeFormat(format);
+    }
+
+    /**
+     * Returns a new {@link com.bumptech.glide.request.RequestOptions} with
+     * {@link #reEncodeGif(Boolean)} called with the given boolean.
+     */
+    public static RequestOptions forceEncodeGif(Boolean reEncode) {
+        return new RequestOptions().reEncodeGif(reEncode);
     }
 }

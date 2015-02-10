@@ -1,6 +1,6 @@
 package com.bumptech.glide.samples.giphy;
 
-import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
+import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 
 import com.google.gson.Gson;
 
@@ -17,7 +17,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -64,15 +63,13 @@ public class FullscreenActivity extends Activity {
 
         RequestBuilder<Drawable> thumbnailRequest = Glide.with(this)
                 .asDrawable()
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE)
-                        .decode(Bitmap.class))
+                .apply(decodeTypeOf(Bitmap.class))
                 .load(result);
 
         Glide.with(this)
                 .asDrawable()
                 .thumbnail(thumbnailRequest)
                 .load(result.images.original.url)
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE))
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onException(Exception e, Object model, Target<Drawable> target,

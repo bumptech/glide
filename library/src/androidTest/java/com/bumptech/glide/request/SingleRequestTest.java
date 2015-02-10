@@ -68,7 +68,7 @@ public class SingleRequestTest {
         int overrideWidth = -1;
         int overrideHeight = -1;
         List result = new ArrayList();
-        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESULT;
+        DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESOURCE;
         GlideContext glideContext = mock(GlideContext.class);
         RequestOptions requestOptions = new RequestOptions();
         RequestContext<List> requestContext = mock(RequestContext.class);

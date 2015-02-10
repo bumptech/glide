@@ -71,7 +71,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
         thumbnailRequest = Glide.with(this)
                 .asDrawable()
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE)
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
 
         preloadRequest = thumbnail ? thumbnailRequest.clone().apply(priorityOf(Priority.HIGH)) : fullRequest;

@@ -78,7 +78,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
         thumbRequest = Glide.with(FlickrPhotoList.this)
                 .asDrawable()
                 .transition(withCrossFade())
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.SOURCE)
+                .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
                         .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
 
         if (savedInstanceState != null) {

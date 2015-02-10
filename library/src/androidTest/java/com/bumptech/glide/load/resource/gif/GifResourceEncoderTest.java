@@ -1,10 +1,12 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -17,6 +19,7 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.gifencoder.AnimatedGifEncoder;
+import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -26,56 +29,95 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifResourceEncoderTest {
-    private Resource<GifDrawable> resource;
+    @Mock Resource<GifDrawable> resource;
+    @Mock GifDecoder decoder;
+    @Mock GifHeaderParser parser;
+    @Mock AnimatedGifEncoder gifEncoder;
+    @Mock Resource<Bitmap> frameResource;
+    @Mock Transformation frameTransformation;
+    @Mock GifDrawable gifDrawable;
+    @Mock OutputStream os;
+
     private GifResourceEncoder encoder;
-    private GifDecoder decoder;
-    private GifHeaderParser parser;
-    private AnimatedGifEncoder gifEncoder;
-    private GifDrawable gifDrawable;
-    private Resource<Bitmap> frameResource;
-    private Transformation frameTransformation;
+    private HashMap<String, Object> options;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        resource = mock(Resource.class);
+        MockitoAnnotations.initMocks(this);
 
         GifResourceEncoder.Factory factory = mock(GifResourceEncoder.Factory.class);
-        decoder = mock(GifDecoder.class);
         when(factory.buildDecoder(any(GifDecoder.BitmapProvider.class))).thenReturn(decoder);
-        parser = mock(GifHeaderParser.class);
         when(factory.buildParser()).thenReturn(parser);
-        gifEncoder = mock(AnimatedGifEncoder.class);
         when(factory.buildEncoder()).thenReturn(gifEncoder);
-        frameResource = mock(Resource.class);
         when(factory.buildFrameResource(any(Bitmap.class), any(BitmapPool.class))).thenReturn(frameResource);
 
-        frameTransformation = mock(Transformation.class);
         when(frameTransformation.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(frameResource);
 
-        gifDrawable = mock(GifDrawable.class);
         when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
         when(gifDrawable.getData()).thenReturn(new byte[0]);
 
         when(resource.get()).thenReturn(gifDrawable);
 
         encoder = new GifResourceEncoder(mock(BitmapPool.class), factory);
+        options = new HashMap<>();
+        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, true);
+    }
+
+    @Test
+    public void testEncodeStrategy_withEncodeTransformationTrue_returnsTransformed() {
+        assertEquals(EncodeStrategy.TRANSFORMED, encoder.getEncodeStrategy(options));
+    }
+
+    @Test
+    public void testEncodeStrategy_withEncodeTransformationUnSet_returnsSource() {
+        options.remove(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION);
+        assertEquals(EncodeStrategy.SOURCE, encoder.getEncodeStrategy(options));
+    }
+
+    @Test
+    public void testEncodeStrategy_withEncodeTransformationFalse_returnsSource() {
+        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
+        assertEquals(EncodeStrategy.SOURCE, encoder.getEncodeStrategy(options));
+    }
+
+    @Test
+    public void testEncode_withEncodeTransformationFalse_writesSourceDataToStream() throws IOException {
+        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
+        byte[] data = "testString".getBytes("UTF-8");
+        when(gifDrawable.getData()).thenReturn(data);
+
+        assertTrue(encoder.encode(resource, os, options));
+        verify(os).write(eq(data));
+    }
+
+    @Test
+    public void testEncode_WithEncodeTransformationFalse_whenOsThrows_returnsFalse() throws IOException {
+        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
+        byte[] data = "testString".getBytes("UTF-8");
+        when(gifDrawable.getData()).thenReturn(data);
+
+        doThrow(new IOException()).when(os).write(eq(data));
+
+        assertFalse(encoder.encode(resource, os, options));
     }
 
     @Test
     public void testReturnsFalseIfEncoderFailsToStart() {
-        OutputStream os = mock(OutputStream.class);
         when(gifEncoder.start(eq(os))).thenReturn(false);
-        assertFalse(encoder.encode(resource, mock(OutputStream.class)));
+        assertFalse(encoder.encode(resource, os, options));
     }
 
     @Test
@@ -86,7 +128,7 @@ public class GifResourceEncoderTest {
         GifHeader header = mock(GifHeader.class);
         when(parser.parseHeader()).thenReturn(header);
 
-        encoder.encode(resource, mock(OutputStream.class));
+        encoder.encode(resource, os, options);
 
         InOrder order = inOrder(parser, decoder);
         order.verify(parser).setData(eq(data));
@@ -100,7 +142,7 @@ public class GifResourceEncoderTest {
         when(decoder.getFrameCount()).thenReturn(1);
         when(decoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
 
-        encoder.encode(resource, mock(OutputStream.class));
+        encoder.encode(resource, os, options);
 
         InOrder order = inOrder(decoder);
         order.verify(decoder).advance();
@@ -119,7 +161,7 @@ public class GifResourceEncoderTest {
         int expectedDelay = 5000;
         when(decoder.getDelay(eq(expectedIndex))).thenReturn(expectedDelay);
 
-        encoder.encode(resource, mock(OutputStream.class));
+        encoder.encode(resource, os, options);
 
         InOrder order = inOrder(gifEncoder, decoder);
         order.verify(decoder).advance();
@@ -130,7 +172,6 @@ public class GifResourceEncoderTest {
 
     @Test
     public void testWritesSingleFrameToEncoderAndReturnsTrueIfEncoderFinishes() {
-        OutputStream os = mock(OutputStream.class);
         Bitmap frame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         when(frameResource.get()).thenReturn(frame);
 
@@ -141,7 +182,7 @@ public class GifResourceEncoderTest {
         when(gifEncoder.addFrame(eq(frame))).thenReturn(true);
         when(gifEncoder.finish()).thenReturn(true);
 
-        assertTrue(encoder.encode(resource, os));
+        assertTrue(encoder.encode(resource, os, options));
         verify(gifEncoder).addFrame(eq(frame));
     }
 
@@ -153,7 +194,7 @@ public class GifResourceEncoderTest {
         when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
         when(gifEncoder.addFrame(any(Bitmap.class))).thenReturn(false);
 
-        assertFalse(encoder.encode(resource, mock(OutputStream.class)));
+        assertFalse(encoder.encode(resource, os, options));
     }
 
     @Test
@@ -161,7 +202,7 @@ public class GifResourceEncoderTest {
         when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
         when(gifEncoder.finish()).thenReturn(false);
 
-        assertFalse(encoder.encode(resource, mock(OutputStream.class)));
+        assertFalse(encoder.encode(resource, os, options));
     }
 
     @Test
@@ -185,7 +226,7 @@ public class GifResourceEncoderTest {
                 .thenReturn(transformedResource);
         when(gifDrawable.getFrameTransformation()).thenReturn(transformation);
 
-        encoder.encode(resource, mock(OutputStream.class));
+        encoder.encode(resource, os, options);
 
         verify(gifEncoder).addFrame(eq(transformedFrame));
     }
@@ -201,7 +242,7 @@ public class GifResourceEncoderTest {
 
         when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
 
-        encoder.encode(resource, mock(OutputStream.class));
+        encoder.encode(resource, os, options);
 
         InOrder order = inOrder(frameResource, gifEncoder);
         order.verify(frameResource).recycle();
@@ -219,7 +260,7 @@ public class GifResourceEncoderTest {
 
         when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
 
-        encoder.encode(resource, mock(OutputStream.class));
+        encoder.encode(resource, os, options);
 
         InOrder order = inOrder(transformedResource, gifEncoder);
         order.verify(gifEncoder).addFrame(eq(expected));
@@ -236,7 +277,7 @@ public class GifResourceEncoderTest {
 
         when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
 
-        encoder.encode(resource, mock(OutputStream.class));
+        encoder.encode(resource, os, options);
 
         InOrder order = inOrder(frameResource, gifEncoder);
         order.verify(gifEncoder).addFrame(eq(expected));
@@ -249,9 +290,7 @@ public class GifResourceEncoderTest {
         byte[] expected = "expected".getBytes();
         when(gifDrawable.getData()).thenReturn(expected);
 
-        OutputStream os = mock(OutputStream.class);
-
-        encoder.encode(resource, os);
+        encoder.encode(resource, os, options);
 
         verify(os).write(eq(expected));
 

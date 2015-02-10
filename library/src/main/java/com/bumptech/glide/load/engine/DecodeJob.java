@@ -2,8 +2,10 @@ package com.bumptech.glide.load.engine;
 
 import android.util.Log;
 
+import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
@@ -234,7 +236,7 @@ class DecodeJob<R> {
             OutputStream os = null;
             try {
                 os = fileOpener.open(file);
-                success = encoder.encode(data, os);
+                success = encoder.encode(data, os, requestContext.getOptions());
             } catch (FileNotFoundException e) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
                     Log.d(TAG, "Failed to find file to write to disk cache", e);
@@ -272,11 +274,21 @@ class DecodeJob<R> {
                 result = appliedTransformation.transform(resource, width, height);
             }
             if (cacheResult) {
-                Key resultCacheKey = loadKey.getResultKey(appliedTransformation, resourceSubClass);
-                diskCacheProvider.getDiskCache().put(resultCacheKey,
-                        new SourceWriter<>(requestContext.getResultEncoder(result), result));
+                ResourceEncoder<Z> encoder = requestContext.getResultEncoder(resource);
+                EncodeStrategy encodeStrategy = encoder.getEncodeStrategy(requestContext.getOptions());
+                final Key key;
+
+                if (encodeStrategy == EncodeStrategy.SOURCE) {
+                    key = loadKey.getOriginalKey();
+                } else if (encodeStrategy == EncodeStrategy.TRANSFORMED) {
+                    key = loadKey.getResultKey(appliedTransformation, resourceSubClass);
+                } else {
+                    throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
+                }
+
+                diskCacheProvider.getDiskCache().put(key, new SourceWriter<>(encoder, result));
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Encoded resource to cache with key " + resultCacheKey);
+                    Log.v(TAG, "Encoded resource to cache with key: " + key + " and strategy: " + encodeStrategy);
                 }
             }
             return result;
