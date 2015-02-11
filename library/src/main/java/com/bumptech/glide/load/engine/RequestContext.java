@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine;
 
 import android.content.ContextWrapper;
-import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
@@ -18,7 +17,6 @@ import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,15 +27,10 @@ import java.util.Map;
  * @param <TranscodeClass> The type of resources returned using classes from this object.
  */
 public class RequestContext<TranscodeClass> extends ContextWrapper {
-    private static final String TAG = "RequestContext";
-
     private final GlideContext glideContext;
     private final Object model;
     private final Class<TranscodeClass> transcodeClass;
     private final BaseRequestOptions<?> requestOptions;
-    private final LoadDebugger debugger = Log.isLoggable(TAG, Log.VERBOSE)
-            ? new PrettyPrintDebugger() : new EmptyLoadDebugger();
-
     private DataFetcherSet<?> fetchers;
 
     public RequestContext(GlideContext glideContext, Object model, Class<TranscodeClass> transcodeClass,
@@ -49,12 +42,8 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
         this.requestOptions = requestOptions;
     }
 
-    List<? extends LoadPath<?, ?, TranscodeClass>> getLoadPaths() {
-        return glideContext.getLoadPaths(model, requestOptions.getResourceClass(), transcodeClass);
-    }
-
-    List<? extends LoadPath<?, ?, TranscodeClass>> getSourceCacheLoadPaths(File sourceCacheFile) {
-        return glideContext.getLoadPaths(sourceCacheFile, requestOptions.getResourceClass(), transcodeClass);
+    <Data> LoadPath<Data, ?, TranscodeClass> getLoadPath(Class<Data> dataClass) {
+        return glideContext.getLoadPath(dataClass, getResourceClass(), transcodeClass);
     }
 
     void buildDataFetchers(int width, int height) {
@@ -99,7 +88,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     }
 
     Map<String, Object> getOptions() {
-        return new HashMap<>();
+        return requestOptions.getOptions();
     }
 
     boolean isMemoryCacheable() {
@@ -127,6 +116,10 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
         return glideContext.getDecoder(rewinder, requestOptions.getResourceClass());
     }
 
+    boolean isResourceEncoderAvailable(Resource<?> resource) {
+        return glideContext.isResourceEncoderAvailable(resource);
+    }
+
     <ResourceClass> ResourceEncoder<ResourceClass> getResultEncoder(Resource<ResourceClass> resource)
             throws GlideContext.NoResultEncoderAvailableException {
         return glideContext.getResultEncoder(resource);
@@ -139,10 +132,6 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     DataFetcherSet<?> getDataFetchers(File file, int width, int height)
             throws GlideContext.NoModelLoaderAvailableException {
         return glideContext.getDataFetchers(file, width, height);
-    }
-
-    LoadDebugger getDebugger() {
-        return debugger;
     }
 
     String getTag() {

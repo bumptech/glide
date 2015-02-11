@@ -19,37 +19,31 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
     private final int width;
     private final int height;
     private final List<ModelLoader<Model, ?>> modelLoaders;
-    private final List<DataFetcher<?>> fetchers = new ArrayList<>();
+    private final List<DataFetcher<?>> fetchers;
+    private volatile String id;
 
     public DataFetcherSet(Model model, int width, int height, List<ModelLoader<Model, ?>> modelLoaders) {
         this.model = model;
         this.width = width;
         this.height = height;
         this.modelLoaders = modelLoaders;
+        fetchers = new ArrayList<>(modelLoaders.size());
     }
 
     public boolean isEmpty() {
         return modelLoaders.isEmpty();
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> List<DataFetcher<T>> getFetchers(Class<T> dataClass) {
-        List<DataFetcher<T>> result = new ArrayList<>();
-        for (DataFetcher<?> fetcher : this) {
-            if (fetcher != null && fetcher.getDataClass().equals(dataClass)) {
-                result.add((DataFetcher<T>) fetcher);
+    public String getId() {
+        if (id == null) {
+            for (DataFetcher<?> fetcher : this) {
+                if (fetcher != null) {
+                    id = fetcher.getId();
+                    break;
+                }
             }
         }
-        if (result.isEmpty()) {
-            throw new IllegalArgumentException("Failed to find fetcher for " + dataClass);
-        }
-
-        return result;
-    }
-
-    public String getId() {
-        Iterator<DataFetcher<?>> iterator = iterator();
-        return iterator.hasNext() ? iterator.next().getId() : null;
+        return id;
     }
 
     public void cancel() {
@@ -85,7 +79,14 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
             if (currentIndex < fetchers.size()) {
                 next = fetchers.get(currentIndex);
             } else {
-                next = modelLoaders.get(currentIndex).getDataFetcher(model, width, height);
+                // We want to cache ModelClass -> [ModelLoader], so we may end up with some ModelLoaders here that
+                // don't want to handle our specific Model. We filter those ModelLoaders out here.
+                ModelLoader<Model, ?> modelLoader = modelLoaders.get(currentIndex);
+                if (modelLoader.handles(model)) {
+                    next = modelLoader.getDataFetcher(model, width, height);
+                } else {
+                    next = null;
+                }
                 fetchers.add(next);
             }
             currentIndex++;

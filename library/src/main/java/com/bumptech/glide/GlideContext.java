@@ -61,26 +61,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         return options;
     }
 
-    public <ResourceType, TranscodeType> List<LoadPath<?, ResourceType, TranscodeType>> getLoadPaths(Object model,
-            Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass) {
-        Class<?> modelClass = model.getClass();
-        List<Class<?>> dataClasses = registry.modelLoaderRegistry.getDataClasses(modelClass);
-        List<LoadPath<?, ResourceType, TranscodeType>> loadPaths =
-                new ArrayList<>();
-        for (Class<?> dataClass : dataClasses) {
-            LoadPath<?, ResourceType, TranscodeType> path = getLoadPath(dataClass, resourceClass, transcodeClass);
-            if (path != null) {
-                loadPaths.add(path);
-            }
-        }
-        if (loadPaths.isEmpty()) {
-            throw new IllegalArgumentException("No load path found for path " + modelClass + "->" + resourceClass
-                    + "->" + transcodeClass);
-        }
-        return loadPaths;
-    }
-
-    private <DataType, ResourceType, TranscodeType>
+    public <DataType, ResourceType, TranscodeType>
             LoadPath<DataType, ResourceType, TranscodeType> getLoadPath(Class<DataType> dataClass,
             Class<ResourceType> resourceClass, Class<TranscodeType> transcodeClass) {
 
@@ -88,8 +69,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
                 getDecodePaths(dataClass, resourceClass, transcodeClass);
         // It's possible there is no way to decode or transcode to the desired types from a given data class.
         if (!decodePaths.isEmpty()) {
-            return new LoadPath<>(dataClass, resourceClass, transcodeClass,
-                    decodePaths);
+            return new LoadPath<>(dataClass, decodePaths);
         } else {
             return null;
         }
@@ -126,6 +106,10 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
             result.addAll(registeredResourceClasses);
         }
         return result;
+    }
+
+    public boolean isResourceEncoderAvailable(Resource<?> resource) {
+        return  registry.resourceEncoderRegistry.get(resource.get().getClass()) != null;
     }
 
     @SuppressWarnings("unchecked")

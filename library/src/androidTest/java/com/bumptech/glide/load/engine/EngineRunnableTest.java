@@ -46,7 +46,7 @@ public class EngineRunnableTest {
     @Test
     public void testNotifiesManagerOfResultIfDecodeJobDecodesFromCache() throws Exception {
         Resource expected = mock(Resource.class);
-        when(job.decodeResultFromCache()).thenReturn(expected);
+        when(job.decodeFromCachedResource()).thenReturn(expected);
 
         runnable.run();
 
@@ -55,7 +55,7 @@ public class EngineRunnableTest {
 
     @Test
     public void testDoesNotNotifyManagerOfFailureIfDecodeJobReturnsNullFromCache() throws Exception {
-        when(job.decodeResultFromCache()).thenReturn(null);
+        when(job.decodeFromCachedResource()).thenReturn(null);
 
         runnable.run();
 
@@ -64,7 +64,7 @@ public class EngineRunnableTest {
 
     @Test
     public void testDoesNotNotifyManagerOfFailureIfDecodeJobThrowsExceptionFromCache() throws Exception {
-        when(job.decodeResultFromCache()).thenThrow(new RuntimeException("test"));
+        when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
 
         runnable.run();
 
@@ -74,7 +74,7 @@ public class EngineRunnableTest {
     @Test
     public void testNotifiesManagerOfResultIfDecodeJobDecodesFromSourceCache() throws Exception {
         Resource expected = mock(Resource.class);
-        when(job.decodeSourceFromCache()).thenReturn(expected);
+        when(job.decodeFromCachedData()).thenReturn(expected);
 
         runnable.run();
 
@@ -84,9 +84,9 @@ public class EngineRunnableTest {
     @Test
     public void testNotifiesManagerOfResultIfDecodeJobThrowsGettingResultFromCacheButDecodesFromSourceCache()
             throws Exception {
-        when(job.decodeResultFromCache()).thenThrow(new RuntimeException("test"));
+        when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
         Resource expected = mock(Resource.class);
-        when(job.decodeSourceFromCache()).thenReturn(expected);
+        when(job.decodeFromCachedData()).thenReturn(expected);
 
         runnable.run();
 
@@ -102,8 +102,8 @@ public class EngineRunnableTest {
 
     @Test
     public void testDoesNotNotifyManagerOfFailureIfDecodeJobThrowsFromSourceAndResultCache() throws Exception {
-        when(job.decodeResultFromCache()).thenThrow(new RuntimeException("test"));
-        when(job.decodeSourceFromCache()).thenThrow(new RuntimeException("test"));
+        when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
+        when(job.decodeFromCachedData()).thenThrow(new RuntimeException("test"));
 
         runnable.run();
 
@@ -119,8 +119,8 @@ public class EngineRunnableTest {
 
     @Test
     public void testSubmitsForSourceIfDecodeJobThrowsFromSourceAndResultCache() throws Exception {
-        when(job.decodeResultFromCache()).thenThrow(new RuntimeException("test"));
-        when(job.decodeSourceFromCache()).thenThrow(new RuntimeException("test"));
+        when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
+        when(job.decodeFromCachedData()).thenThrow(new RuntimeException("test"));
 
         runnable.run();
 
@@ -162,8 +162,8 @@ public class EngineRunnableTest {
         runnable.cancel();
         runnable.run();
 
-        verify(job, never()).decodeResultFromCache();
-        verify(job, never()).decodeSourceFromCache();
+        verify(job, never()).decodeFromCachedResource();
+        verify(job, never()).decodeFromCachedData();
     }
 
     @Test

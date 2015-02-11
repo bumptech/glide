@@ -1,10 +1,12 @@
 package com.bumptech.glide.load.data;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.util.LogTime;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +18,7 @@ import java.net.URL;
  * A DataFetcher that retrieves an {@link java.io.InputStream} for a Url.
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
+    private static final String TAG = "HttpUrlFetcher";
     private static final int MAXIMUM_REDIRECTS = 5;
     private static final int DEFAULT_TIMEOUT_MS = 2500;
     // Visible for testing.
@@ -42,7 +45,12 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
     @Override
     public InputStream loadData(Priority priority) throws Exception {
-        return loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
+        long startTime = LogTime.getLogTime();
+        InputStream result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "Retrieved result in " + LogTime.getElapsedMillis(startTime) + " ms");
+        }
+        return result;
     }
 
     private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl) throws IOException {

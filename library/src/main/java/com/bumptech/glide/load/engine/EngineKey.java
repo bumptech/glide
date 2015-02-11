@@ -86,8 +86,8 @@ class EngineKey implements Key {
         private final Key signature;
         private final int width;
         private final int height;
-        private final Transformation<?> appliedTransformation;
         private final Class<?> decodedResourceClass;
+        private final String transformationId;
 
         public ResultKey(String id, Key signature, int width, int height, Transformation<?> appliedTransformation,
                 Class<?> decodedResourceClass) {
@@ -95,7 +95,7 @@ class EngineKey implements Key {
             this.signature = signature;
             this.width = width;
             this.height = height;
-            this.appliedTransformation = appliedTransformation;
+            transformationId = appliedTransformation != null ? appliedTransformation.getId() : null;
             this.decodedResourceClass = decodedResourceClass;
         }
 
@@ -104,7 +104,8 @@ class EngineKey implements Key {
             if (o instanceof ResultKey) {
                 ResultKey other = (ResultKey) o;
                 return height == other.height && width == other.width
-                        && appliedTransformation.getId().equals(other.appliedTransformation.getId())
+                        && (transformationId == null
+                                ? other.transformationId == null : transformationId.equals(other.transformationId))
                         && decodedResourceClass.equals(other.decodedResourceClass)
                         && id.equals(other.id)
                         && signature.equals(other.signature);
@@ -118,7 +119,9 @@ class EngineKey implements Key {
             result = 31 * result + signature.hashCode();
             result = 31 * result + width;
             result = 31 * result + height;
-            result = 31 * result + appliedTransformation.getId().hashCode();
+            if (transformationId != null) {
+                result = 31 * result + transformationId.hashCode();
+            }
             result = 31 * result + decodedResourceClass.hashCode();
             return result;
         }
@@ -132,7 +135,9 @@ class EngineKey implements Key {
             signature.updateDiskCacheKey(messageDigest);
             messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
             messageDigest.update(dimensions);
-            messageDigest.update(appliedTransformation.getId().getBytes(STRING_CHARSET_NAME));
+            if (transformationId != null) {
+                messageDigest.update(transformationId.getBytes(STRING_CHARSET_NAME));
+            }
         }
 
         @Override
@@ -142,7 +147,7 @@ class EngineKey implements Key {
                     + ", signature=" + signature
                     + ", width=" + width
                     + ", height=" + height
-                    + ", appliedTransformation=" + appliedTransformation.getId()
+                    + ", appliedTransformation=" + transformationId
                     + ", decodedResourceClass=" + decodedResourceClass
                     + '}';
         }

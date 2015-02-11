@@ -1,10 +1,11 @@
 package com.bumptech.glide.load.engine;
 
+import android.util.Log;
+
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.util.Preconditions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,41 +21,34 @@ import java.util.Map;
  *                   decode paths succeeds..
  */
 public class LoadPath<Data, ResourceType, Transcode> {
+    private static final String TAG = "LoadPath";
     private final Class<Data> dataClass;
-    private final Class<ResourceType> resourceClass;
-    private final Class<Transcode> transcodeClass;
     private final List<? extends DecodePath<Data, ResourceType, Transcode>> decodePaths;
 
-    public LoadPath(Class<Data> dataClass, Class<ResourceType> resourceClass, Class<Transcode> transcodeClass,
-            List<DecodePath<Data, ResourceType, Transcode>> decodePaths) {
+    public LoadPath(Class<Data> dataClass, List<DecodePath<Data, ResourceType, Transcode>> decodePaths) {
         this.dataClass = dataClass;
-        this.resourceClass = resourceClass;
-        this.transcodeClass = transcodeClass;
         this.decodePaths = Preconditions.checkNotEmpty(decodePaths);
     }
 
     public Resource<Transcode> load(DataFetcher<Data> fetcher, RequestContext<Transcode> context, int width, int height,
             DecodePath.DecodeCallback<ResourceType> decodeCallback) throws Exception {
-        context.getDebugger().appendStartLoadPath(fetcher);
-        final Data data;
+        Data data = null;
         try {
             data = fetcher.loadData(context.getPriority());
         } catch (Exception e) {
-            context.getDebugger().appendEndLoadPath(e);
-            return null;
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Load path caught exception retrieving data, " + this, e);
+            }
         }
         if (data == null) {
-            context.getDebugger().appendEndLoadPath((Exception) null /*exception*/);
             return null;
         }
-        context.getDebugger().appendLoadPathData(data);
         Resource<Transcode> result = null;
         DataRewinder<Data> rewinder = context.getRewinder(data);
         Map<String, Object> options = context.getOptions();
         try {
             for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {
                 result = path.decode(rewinder, width, height, options, decodeCallback);
-                context.getDebugger().appendDecodePath(path, result);
                 if (result != null) {
                     break;
                 }
@@ -63,24 +57,11 @@ public class LoadPath<Data, ResourceType, Transcode> {
             rewinder.cleanup();
             fetcher.cleanup();
         }
-        context.getDebugger().appendEndLoadPath(result);
         return result;
     }
 
     public Class<Data> getDataClass() {
         return dataClass;
-    }
-
-    public String getDebugString() {
-        return "[" + dataClass + "->" + resourceClass + "->" + transcodeClass + "]";
-    }
-
-    public List<String> getDecodePathDebugStrings() {
-        List<String> result = new ArrayList<>();
-        for (DecodePath<?, ?, ?> path : decodePaths) {
-            result.add(path.getDebugString());
-        }
-        return result;
     }
 
     @Override

@@ -82,9 +82,6 @@ class EngineRunnable implements Runnable, Prioritized {
     }
 
     private void onLoadComplete(Resource resource) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            decodeJob.maybeWriteDebugLogs();
-        }
         manager.onResourceReady(resource);
     }
 
@@ -93,9 +90,6 @@ class EngineRunnable implements Runnable, Prioritized {
             stage = Stage.SOURCE;
             manager.submitForSource(this);
         } else {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                decodeJob.maybeWriteDebugLogs();
-            }
             manager.onException(e);
         }
     }
@@ -111,7 +105,7 @@ class EngineRunnable implements Runnable, Prioritized {
     private Resource<?> decodeFromCache() throws Exception {
         Resource<?> result = null;
         try {
-            result = decodeJob.decodeResultFromCache();
+            result = decodeJob.decodeFromCachedResource();
         } catch (Exception e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Exception decoding result from cache: " + e);
@@ -119,7 +113,7 @@ class EngineRunnable implements Runnable, Prioritized {
         }
 
         if (result == null) {
-            result = decodeJob.decodeSourceFromCache();
+            result = decodeJob.decodeFromCachedData();
         }
         return result;
     }

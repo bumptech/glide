@@ -62,7 +62,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     private int overrideWidth = UNSET;
     private Key signature = EmptySignature.obtain();
     private String tag;
-
+    private boolean isTransformationRequired;
 
     private Map<String, Object> options = new HashMap<>();
     private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
@@ -260,21 +260,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
         }
     }
 
-
-    public final <T> CHILD transform(Class<T> resourceClass, Transformation<T> transformation) {
-        Preconditions.checkNotNull(resourceClass);
-        Preconditions.checkNotNull(transformation);
-        fields |= TRANSFORMATION;
-        transformations.put(resourceClass, transformation);
-        return self();
-    }
-
-    public final CHILD dontTransform() {
-        fields &= ~TRANSFORMATION;
-        transformations.clear();
-        return self();
-    }
-
     public final CHILD set(String key, Object option) {
         options.put(key, option);
         return self();
@@ -316,19 +301,145 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
         return set(StreamBitmapDecoder.KEY_DOWNSAMPLE_STRATEGY, strategy);
     }
 
+    /**
+     * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterCrop} to all default types, and ignores unknown
+     * types.
+     *
+     * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
+     * @see #centerCrop(android.content.Context)
+     *
+     * @param context Any {@link android.content.Context}.
+     */
+    public CHILD optionalCenterCrop(Context context) {
+        return optionalTransform(context, new CenterCrop(context));
+    }
+
+    /**
+     * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterCrop} to all default types and throws an exception
+     * if asked to transform an unknown type.
+     *
+     * @see #transform(Class, com.bumptech.glide.load.Transformation)
+     * @see #optionalCenterCrop(android.content.Context)
+     *
+     * @param context Any {@link android.content.Context}.
+     */
     public CHILD centerCrop(Context context) {
         return transform(context, new CenterCrop(context));
     }
 
+    /**
+     * Applies {@link com.bumptech.glide.load.resource.bitmap.FitCenter} to all default types, and ignores unknown
+     * types.
+     *
+     * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
+     * @see #fitCenter(android.content.Context)
+     *
+     * @param context Any {@link android.content.Context}.
+     */
+    public CHILD optionalFitCenter(Context context) {
+        return optionalTransform(context, new FitCenter(context));
+    }
+
+     /**
+     * Applies {@link com.bumptech.glide.load.resource.bitmap.FitCenter} to all default types and throws an exception
+     * if asked to transform an unknown type.
+     *
+     * @see #transform(Class, com.bumptech.glide.load.Transformation)
+     * @see #optionalFitCenter(android.content.Context)
+     *
+     * @param context Any {@link android.content.Context}.
+     */
     public CHILD fitCenter(Context context) {
         return transform(context, new FitCenter(context));
     }
 
+    /**
+     * Applies the given {@link com.bumptech.glide.load.Transformation} for {@link android.graphics.Bitmap Bitmaps} to
+     * the default types ({@link android.graphics.Bitmap}, {@link android.graphics.drawable.BitmapDrawable}, and
+     * {@link com.bumptech.glide.load.resource.gif.GifDrawable}) and throws an exception if asked to transform an
+     * unknown type.
+     *
+     * @see #optionalTransform(android.content.Context, com.bumptech.glide.load.Transformation)
+     * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
+     *
+     * @param context Any {@link android.content.Context}.
+     * @param transformation Any {@link com.bumptech.glide.load.Transformation} for {@link android.graphics.Bitmap}s.
+     */
     public CHILD transform(Context context, Transformation<Bitmap> transformation) {
-        transform(Bitmap.class, transformation);
+        optionalTransform(context, transformation);
+        isTransformationRequired = true;
+        return self();
+    }
+
+    /**
+     * Applies the given {@link com.bumptech.glide.load.Transformation} for {@link android.graphics.Bitmap Bitmaps} to
+     * the default types ({@link android.graphics.Bitmap}, {@link android.graphics.drawable.BitmapDrawable}, and
+     * {@link com.bumptech.glide.load.resource.gif.GifDrawable}) and ignores unknown types.
+     *
+     * @see #transform(android.content.Context, com.bumptech.glide.load.Transformation)
+     * @see #transform(Class, com.bumptech.glide.load.Transformation)
+     *
+     * @param context Any {@link android.content.Context}.
+     * @param transformation Any {@link com.bumptech.glide.load.Transformation} for {@link android.graphics.Bitmap}s.
+     */
+    public CHILD optionalTransform(Context context, Transformation<Bitmap> transformation) {
+        optionalTransform(Bitmap.class, transformation);
         // TODO: remove BitmapDrawable decoder and this transformation.
-        transform(BitmapDrawable.class, new BitmapDrawableTransformation(context, transformation));
-        transform(GifDrawable.class, new GifDrawableTransformation(context, transformation));
+        optionalTransform(BitmapDrawable.class, new BitmapDrawableTransformation(context, transformation));
+        optionalTransform(GifDrawable.class, new GifDrawableTransformation(context, transformation));
+        return self();
+    }
+
+    /**
+     * Applies the given {@link com.bumptech.glide.load.Transformation} for any decoded resource of the given type and
+     * allows unknown resource types to be ignored.
+     *
+     * <p>
+     *     Users can apply different transformations for each resource class. Applying a
+     *     {@link com.bumptech.glide.load.Transformation} for a resource type that already has a
+     *     {@link com.bumptech.glide.load.Transformation} will override the previous call.
+     * </p>
+     *
+     * <p>
+     *     If any calls are made to the non-optional transform methods, then attempting to transform an unknown resource
+     *     class will throw an exception. To allow unknown types, users must always call the optional version of each
+     *     method.
+     * </p>
+     *
+     * @param resourceClass The type of resource to transform.
+     * @param transformation The {@link com.bumptech.glide.load.Transformation} to apply.
+     */
+    public final <T> CHILD optionalTransform(Class<T> resourceClass, Transformation<T> transformation) {
+        Preconditions.checkNotNull(resourceClass);
+        Preconditions.checkNotNull(transformation);
+        fields |= TRANSFORMATION;
+        transformations.put(resourceClass, transformation);
+        return self();
+    }
+
+    /**
+     * Applies the given {@link com.bumptech.glide.load.Transformation} for any decoded resource of the given type
+     * and throws if asked to transform an unknown resource type.
+     *
+     * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
+     *
+     * @param resourceClass The type of resource to transform.
+     * @param transformation The {@link com.bumptech.glide.load.Transformation} to apply.
+     */
+    public final <T> CHILD transform(Class<T> resourceClass, Transformation<T> transformation) {
+        optionalTransform(resourceClass, transformation);
+        isTransformationRequired = true;
+        return self();
+    }
+
+    /**
+     * Removes all applied {@link com.bumptech.glide.load.Transformation Transformations} for all resource classes
+     * and allows unknown resource types to be transformed without throwing an exception.
+     */
+    public final CHILD dontTransform() {
+        fields &= ~TRANSFORMATION;
+        transformations.clear();
+        isTransformationRequired = false;
         return self();
     }
 
@@ -336,8 +447,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     public final <T> Transformation<T> getTransformation(Class<T> resourceClass) {
         Transformation<T> result = (Transformation<T>) transformations.get(resourceClass);
         if (result == null) {
-            if (!transformations.isEmpty()) {
-                throw new IllegalArgumentException("Missing transformation for " + resourceClass);
+            if (!transformations.isEmpty() && isTransformationRequired) {
+                throw new IllegalArgumentException("Missing transformation for " + resourceClass + ". If you wish to"
+                        + " ignore unknown resource types, use the optional transformation methods.");
             } else {
                 return UnitTransformation.get();
             }
@@ -345,7 +457,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
         return result;
     }
 
-    final Map<String, Object> getOptions() {
+    public final Map<String, Object> getOptions() {
         return options;
     }
 
@@ -392,6 +504,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
             resourceClass = other.resourceClass;
         }
 
+        isTransformationRequired |= other.isTransformationRequired;
         transformations.putAll(other.transformations);
         options.putAll(other.options);
 
