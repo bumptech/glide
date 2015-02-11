@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 
 /**
  * An interface for lazily retrieving data that can be used to load a resource. A new instance is created per
@@ -75,4 +76,9 @@ public interface DataFetcher<T> {
     void cancel();
 
     Class<T> getDataClass();
+
+    /**
+     * Returns the {@link com.bumptech.glide.load.DataSource} this fetcher will return data from.
+     */
+    DataSource getDataSource();
 }

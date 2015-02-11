@@ -3,6 +3,7 @@ package com.bumptech.glide.load.data;
 import android.text.TextUtils;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.model.GlideUrl;
 
 import java.io.IOException;
@@ -117,6 +118,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     @Override
     public Class<InputStream> getDataClass() {
         return InputStream.class;
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.REMOTE;
     }
 
     interface HttpUrlConnectionFactory {

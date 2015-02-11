@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -39,5 +40,10 @@ public class ByteArrayFetcher implements DataFetcher<InputStream> {
     @Override
     public Class<InputStream> getDataClass() {
         return InputStream.class;
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.LOCAL;
     }
 }

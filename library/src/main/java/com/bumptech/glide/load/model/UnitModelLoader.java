@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import android.content.Context;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 
 /**
@@ -54,6 +55,11 @@ public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelT
         @Override
         public Class<ModelType> getDataClass() {
             return (Class<ModelType>) resource.getClass();
+        }
+
+        @Override
+        public DataSource getDataSource() {
+            return DataSource.LOCAL;
         }
     }
 

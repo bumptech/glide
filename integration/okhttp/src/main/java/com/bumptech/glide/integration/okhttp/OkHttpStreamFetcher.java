@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.okhttp;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.squareup.okhttp.OkHttpClient;
@@ -60,5 +61,10 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     @Override
     public Class<InputStream> getDataClass() {
         return InputStream.class;
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.REMOTE;
     }
 }

@@ -4,6 +4,7 @@ import android.content.res.AssetManager;
 import android.util.Log;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 
 import java.io.IOException;
 
@@ -52,6 +53,11 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
     @Override
     public void cancel() {
         // Do nothing.
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.LOCAL;
     }
 
     /**

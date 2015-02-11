@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -69,6 +70,10 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
         return uri.toString();
     }
 
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.LOCAL;
+    }
 
     /**
      * Returns a concrete data type from the given {@link android.net.Uri} using the given

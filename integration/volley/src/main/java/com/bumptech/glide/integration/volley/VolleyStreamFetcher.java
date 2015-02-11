@@ -6,6 +6,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 
@@ -67,6 +68,11 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     @Override
     public Class<InputStream> getDataClass() {
         return InputStream.class;
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.REMOTE;
     }
 
     private static Request.Priority glideToVolleyPriority(Priority priority) {

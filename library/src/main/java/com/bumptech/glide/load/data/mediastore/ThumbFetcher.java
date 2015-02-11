@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.IOException;
@@ -70,6 +71,11 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     @Override
     public Class<InputStream> getDataClass() {
         return InputStream.class;
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.LOCAL;
     }
 
     // Visible for testing.
