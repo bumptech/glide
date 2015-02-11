@@ -44,9 +44,9 @@ import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.load.resource.gif.GifDrawableEncoder;
 import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
 import com.bumptech.glide.load.resource.gif.GifResourceDecoder;
-import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
@@ -178,7 +178,7 @@ public class Glide implements ComponentCallbacks2 {
                 .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* Gifs */
                 .prepend(InputStream.class, GifDrawable.class, new GifResourceDecoder(context, bitmapPool))
-                .register(GifDrawable.class, new GifResourceEncoder(bitmapPool))
+                .register(GifDrawable.class, new GifDrawableEncoder())
         /* Gif Frames */
                  .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
                  .append(GifDecoder.class, Bitmap.class, new GifFrameResourceDecoder(bitmapPool))

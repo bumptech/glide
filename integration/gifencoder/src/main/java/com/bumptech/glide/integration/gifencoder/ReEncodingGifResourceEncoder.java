@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.gif;
+package com.bumptech.glide.integration.gifencoder;
 
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -14,6 +14,8 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.load.resource.gif.GifBitmapProvider;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.LogTime;
 
 import java.io.IOException;
@@ -24,7 +26,7 @@ import java.util.Map;
  * An {@link com.bumptech.glide.load.ResourceEncoder} that can write
  * {@link com.bumptech.glide.load.resource.gif.GifDrawable} to cache.
  */
-public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
+public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable> {
     /**
      * A key for a boolean option that, if set to <code>true</code>, causes the fully transformed GIF to be written to
      * cache.
@@ -47,12 +49,12 @@ public class GifResourceEncoder implements ResourceEncoder<GifDrawable> {
     private final BitmapPool bitmapPool;
     private final Factory factory;
 
-    public GifResourceEncoder(BitmapPool bitmapPool) {
+    public ReEncodingGifResourceEncoder(BitmapPool bitmapPool) {
         this(bitmapPool, FACTORY);
     }
 
     // Visible for testing.
-    GifResourceEncoder(BitmapPool bitmapPool, Factory factory) {
+    ReEncodingGifResourceEncoder(BitmapPool bitmapPool, Factory factory) {
         this.bitmapPool = bitmapPool;
         provider = new GifBitmapProvider(bitmapPool);
         this.factory = factory;

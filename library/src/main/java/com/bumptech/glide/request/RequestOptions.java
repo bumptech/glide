@@ -117,12 +117,4 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     public static RequestOptions encodeFormatOf(Bitmap.CompressFormat format) {
         return new RequestOptions().encodeFormat(format);
     }
-
-    /**
-     * Returns a new {@link com.bumptech.glide.request.RequestOptions} with
-     * {@link #reEncodeGif(Boolean)} called with the given boolean.
-     */
-    public static RequestOptions forceEncodeGif(Boolean reEncode) {
-        return new RequestOptions().reEncodeGif(reEncode);
-    }
 }

@@ -6,7 +6,11 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
-class GifBitmapProvider implements GifDecoder.BitmapProvider {
+/**
+ * Implements {@link com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider} by wrapping Glide's
+ * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}.
+ */
+public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     private final BitmapPool bitmapPool;
 
     public GifBitmapProvider(BitmapPool bitmapPool) {

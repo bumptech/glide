@@ -124,6 +124,5 @@
     <orderEntry type="module" module-name="gif_decoder" exported="" />
     <orderEntry type="module" module-name="testutil" exported="" />
     <orderEntry type="module" module-name="disklrucache" exported="" />
-    <orderEntry type="module" module-name="gif_encoder" exported="" />
   </component>
 </module>

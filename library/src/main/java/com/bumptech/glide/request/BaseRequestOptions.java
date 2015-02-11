@@ -21,7 +21,6 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
-import com.bumptech.glide.load.resource.gif.GifResourceEncoder;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
 
@@ -289,13 +288,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
     public final boolean isTransformationSet() {
         return isSet(TRANSFORMATION);
-    }
-
-    /**
-     * Sets the value for key {@link com.bumptech.glide.load.resource.gif.GifResourceEncoder#KEY_ENCODE_TRANSFORMATION}.
-     */
-    public CHILD reEncodeGif(Boolean encode) {
-        return set(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, encode);
     }
 
     /**

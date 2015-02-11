@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.resource.gif;
+package com.bumptech.glide.integration.gifencoder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,6 +24,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,9 +39,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
+/**
+ * Tests for {@link com.bumptech.glide.integration.gifencoder.ReEncodingGifResourceEncoder}.
+ */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
-public class GifResourceEncoderTest {
+public class ReEncodingGifResourceEncoderTest {
     @Mock Resource<GifDrawable> resource;
     @Mock GifDecoder decoder;
     @Mock GifHeaderParser parser;
@@ -50,7 +54,7 @@ public class GifResourceEncoderTest {
     @Mock GifDrawable gifDrawable;
     @Mock OutputStream os;
 
-    private GifResourceEncoder encoder;
+    private ReEncodingGifResourceEncoder encoder;
     private HashMap<String, Object> options;
 
     @SuppressWarnings("unchecked")
@@ -58,7 +62,7 @@ public class GifResourceEncoderTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        GifResourceEncoder.Factory factory = mock(GifResourceEncoder.Factory.class);
+        ReEncodingGifResourceEncoder.Factory factory = mock(ReEncodingGifResourceEncoder.Factory.class);
         when(factory.buildDecoder(any(GifDecoder.BitmapProvider.class))).thenReturn(decoder);
         when(factory.buildParser()).thenReturn(parser);
         when(factory.buildEncoder()).thenReturn(gifEncoder);
@@ -71,9 +75,9 @@ public class GifResourceEncoderTest {
 
         when(resource.get()).thenReturn(gifDrawable);
 
-        encoder = new GifResourceEncoder(mock(BitmapPool.class), factory);
+        encoder = new ReEncodingGifResourceEncoder(mock(BitmapPool.class), factory);
         options = new HashMap<>();
-        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, true);
+        options.put(ReEncodingGifResourceEncoder.KEY_ENCODE_TRANSFORMATION, true);
     }
 
     @Test
@@ -83,19 +87,19 @@ public class GifResourceEncoderTest {
 
     @Test
     public void testEncodeStrategy_withEncodeTransformationUnSet_returnsSource() {
-        options.remove(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION);
+        options.remove(ReEncodingGifResourceEncoder.KEY_ENCODE_TRANSFORMATION);
         assertEquals(EncodeStrategy.SOURCE, encoder.getEncodeStrategy(options));
     }
 
     @Test
     public void testEncodeStrategy_withEncodeTransformationFalse_returnsSource() {
-        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
+        options.put(ReEncodingGifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
         assertEquals(EncodeStrategy.SOURCE, encoder.getEncodeStrategy(options));
     }
 
     @Test
     public void testEncode_withEncodeTransformationFalse_writesSourceDataToStream() throws IOException {
-        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
+        options.put(ReEncodingGifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
         byte[] data = "testString".getBytes("UTF-8");
         when(gifDrawable.getData()).thenReturn(data);
 
@@ -105,7 +109,7 @@ public class GifResourceEncoderTest {
 
     @Test
     public void testEncode_WithEncodeTransformationFalse_whenOsThrows_returnsFalse() throws IOException {
-        options.put(GifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
+        options.put(ReEncodingGifResourceEncoder.KEY_ENCODE_TRANSFORMATION, false);
         byte[] data = "testString".getBytes("UTF-8");
         when(gifDrawable.getData()).thenReturn(data);
 
