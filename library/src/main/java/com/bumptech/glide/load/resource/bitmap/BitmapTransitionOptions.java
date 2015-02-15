@@ -9,5 +9,6 @@ import com.bumptech.glide.TransitionOptions;
  *
  * TODO: we should probably just use GenericAnimationOptions instead.
  */
-public final class BitmapTransitionOptions extends TransitionOptions<BitmapTransitionOptions, Bitmap> {
+public final class BitmapTransitionOptions extends TransitionOptions<BitmapTransitionOptions,
+    Bitmap> {
 }

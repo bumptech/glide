@@ -14,28 +14,28 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class GifDrawableBytesTranscoderTest {
-    private GifDrawableBytesTranscoder transcoder;
-    private GifDrawable gifDrawable;
-    private Resource<GifDrawable> resource;
+  private GifDrawableBytesTranscoder transcoder;
+  private GifDrawable gifDrawable;
+  private Resource<GifDrawable> resource;
 
-    @SuppressWarnings("unchecked")
-    @Before
-    public void setUp() {
-        gifDrawable = mock(GifDrawable.class);
-        resource = mock(Resource.class);
-        when(resource.get()).thenReturn(gifDrawable);
-        transcoder = new GifDrawableBytesTranscoder();
+  @SuppressWarnings("unchecked")
+  @Before
+  public void setUp() {
+    gifDrawable = mock(GifDrawable.class);
+    resource = mock(Resource.class);
+    when(resource.get()).thenReturn(gifDrawable);
+    transcoder = new GifDrawableBytesTranscoder();
+  }
+
+  @Test
+  public void testReturnsBytesOfGivenGifDrawable() {
+    for (String fakeData : new String[] { "test", "1235asfklaw3", "@$@#" }) {
+      byte[] expected = fakeData.getBytes();
+      when(gifDrawable.getData()).thenReturn(expected);
+
+      Resource<byte[]> transcoded = transcoder.transcode(resource);
+
+      assertArrayEquals(expected, transcoded.get());
     }
-
-    @Test
-    public void testReturnsBytesOfGivenGifDrawable() {
-        for (String fakeData : new String[] { "test", "1235asfklaw3", "@$@#"}) {
-            byte[] expected = fakeData.getBytes();
-            when(gifDrawable.getData()).thenReturn(expected);
-
-            Resource<byte[]> transcoded = transcoder.transcode(resource);
-
-            assertArrayEquals(expected, transcoded.get());
-        }
-    }
+  }
 }

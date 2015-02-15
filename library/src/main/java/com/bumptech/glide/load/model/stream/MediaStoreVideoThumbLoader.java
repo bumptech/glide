@@ -13,44 +13,45 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import java.io.InputStream;
 
 /**
- * Loads {@link InputStream}s from media store video {@link Uri}s that point to pre-generated thumbnails for those
- * {@link Uri}s in the media store.
+ * Loads {@link InputStream}s from media store video {@link Uri}s that point to pre-generated
+ * thumbnails for those {@link Uri}s in the media store.
  */
 public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream> {
-    private final Context context;
+  private final Context context;
 
-    MediaStoreVideoThumbLoader(Context context) {
-        this.context = context.getApplicationContext();
+  MediaStoreVideoThumbLoader(Context context) {
+    this.context = context.getApplicationContext();
+  }
+
+  @Override
+  public DataFetcher<InputStream> getDataFetcher(Uri model, int width, int height) {
+    if (MediaStoreUtil.isThumbnailSize(width, height)) {
+      return ThumbFetcher.buildVideoFetcher(context, model);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public boolean handles(Uri model) {
+    return MediaStoreUtil.isMediaStoreVideoUri(model);
+  }
+
+  /**
+   * Loads {@link InputStream}s from media store image {@link Uri}s that point to pre-generated
+   * thumbnails for those {@link Uri}s in the media store.
+   */
+  public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
+
+    @Override
+    public ModelLoader<Uri, InputStream> build(Context context,
+        MultiModelLoaderFactory multiFactory) {
+      return new MediaStoreVideoThumbLoader(context);
     }
 
     @Override
-    public DataFetcher<InputStream> getDataFetcher(Uri model, int width, int height) {
-        if (MediaStoreUtil.isThumbnailSize(width, height)) {
-            return ThumbFetcher.buildVideoFetcher(context, model);
-        } else {
-            return null;
-        }
+    public void teardown() {
+      // Do nothing.
     }
-
-    @Override
-    public boolean handles(Uri model) {
-        return MediaStoreUtil.isMediaStoreVideoUri(model);
-    }
-
-    /**
-     * Loads {@link InputStream}s from media store image {@link Uri}s that point to pre-generated thumbnails for those
-     * {@link Uri}s in the media store.
-     */
-    public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
-
-        @Override
-        public ModelLoader<Uri, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new MediaStoreVideoThumbLoader(context);
-        }
-
-        @Override
-        public void teardown() {
-            // Do nothing.
-        }
-    }
+  }
 }

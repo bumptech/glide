@@ -16,43 +16,44 @@ import java.util.regex.Pattern;
 
 @RunWith(JUnit4.class)
 public class KeyGeneratorTest {
-    private SafeKeyGenerator keyGenerator;
-    private int nextId;
+  private SafeKeyGenerator keyGenerator;
+  private int nextId;
 
-    @Before
-    public void setUp() throws Exception {
-        nextId = 0;
-        keyGenerator = new SafeKeyGenerator();
+  @Before
+  public void setUp() throws Exception {
+    nextId = 0;
+    keyGenerator = new SafeKeyGenerator();
+  }
+
+  @Test
+  public void testKeysAreValidForDiskCache() {
+    final Pattern diskCacheRegex = Pattern.compile("[a-z0-9_-]{64}");
+    for (int i = 0; i < 1000; i++) {
+      String key = getRandomKeyFromGenerator();
+      Matcher matcher = diskCacheRegex.matcher(key);
+      assertTrue(key, matcher.matches());
+    }
+  }
+
+  private String getRandomKeyFromGenerator() {
+    return keyGenerator.getSafeKey(new MockKey(getNextId()));
+  }
+
+  private String getNextId() {
+    return String.valueOf(nextId++);
+  }
+
+  private static class MockKey implements Key {
+    private String id;
+
+    public MockKey(String id) {
+      this.id = id;
     }
 
-    @Test
-    public void testKeysAreValidForDiskCache() {
-        final Pattern diskCacheRegex = Pattern.compile("[a-z0-9_-]{64}");
-        for (int i = 0; i < 1000; i++) {
-            String key = getRandomKeyFromGenerator();
-            Matcher matcher = diskCacheRegex.matcher(key);
-            assertTrue(key, matcher.matches());
-        }
+    @Override
+    public void updateDiskCacheKey(MessageDigest messageDigest)
+        throws UnsupportedEncodingException {
+      messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
     }
-
-    private String getRandomKeyFromGenerator() {
-        return keyGenerator.getSafeKey(new MockKey(getNextId()));
-    }
-
-    private String getNextId() {
-        return String.valueOf(nextId++);
-    }
-
-    private static class MockKey implements Key {
-        private String id;
-
-        public MockKey(String id) {
-            this.id = id;
-        }
-
-        @Override
-        public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
-            messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
-        }
-    }
+  }
 }

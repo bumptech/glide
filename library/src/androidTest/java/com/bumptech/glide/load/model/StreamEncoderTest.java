@@ -15,20 +15,20 @@ import java.util.Collections;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class StreamEncoderTest {
-    private StreamEncoder encoder;
+  private StreamEncoder encoder;
 
-    @Before
-    public void setUp() {
-        encoder = new StreamEncoder();
-    }
+  @Before
+  public void setUp() {
+    encoder = new StreamEncoder();
+  }
 
-    @Test
-    public void testWritesDataFromInputStreamToOutputStream() {
-        String fakeData = "SomeRandomFakeData";
-        ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        encoder.encode(is, os, Collections.<String, Object>emptyMap());
+  @Test
+  public void testWritesDataFromInputStreamToOutputStream() {
+    String fakeData = "SomeRandomFakeData";
+    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    encoder.encode(is, os, Collections.<String, Object>emptyMap());
 
-        assertEquals(fakeData, new String(os.toByteArray()));
-    }
+    assertEquals(fakeData, new String(os.toByteArray()));
+  }
 }

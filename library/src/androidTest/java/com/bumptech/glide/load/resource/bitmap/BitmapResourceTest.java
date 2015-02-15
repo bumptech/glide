@@ -25,74 +25,75 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class BitmapResourceTest {
-    private int currentBuildVersion;
-    private BitmapResourceHarness harness;
+  private int currentBuildVersion;
+  private BitmapResourceHarness harness;
 
-    @Before
-    public void setUp() {
-        currentBuildVersion = Build.VERSION.SDK_INT;
-        harness = new BitmapResourceHarness();
-    }
+  @Before
+  public void setUp() {
+    currentBuildVersion = Build.VERSION.SDK_INT;
+    harness = new BitmapResourceHarness();
+  }
 
-    @After
-    public void tearDown() {
-        Util.setSdkVersionInt(currentBuildVersion);
-    }
+  @After
+  public void tearDown() {
+    Util.setSdkVersionInt(currentBuildVersion);
+  }
 
-    @Test
-    public void testCanGetBitmap() {
-        assertEquals(harness.bitmap, harness.resource.get());
-    }
+  @Test
+  public void testCanGetBitmap() {
+    assertEquals(harness.bitmap, harness.resource.get());
+  }
 
-    @Test
-    public void testSizeIsBasedOnDimensPreKitKat() {
-        Util.setSdkVersionInt(18);
-        assertEquals(harness.bitmap.getWidth() * harness.bitmap.getHeight() * 4, harness.resource.getSize());
-    }
+  @Test
+  public void testSizeIsBasedOnDimensPreKitKat() {
+    Util.setSdkVersionInt(18);
+    assertEquals(harness.bitmap.getWidth() * harness.bitmap.getHeight() * 4,
+        harness.resource.getSize());
+  }
 
-    @Test
-    public void testPutsBitmapInPoolOnRecycle() {
-        harness.resource.recycle();
+  @Test
+  public void testPutsBitmapInPoolOnRecycle() {
+    harness.resource.recycle();
 
-        verify(harness.bitmapPool).put(eq(harness.bitmap));
-    }
+    verify(harness.bitmapPool).put(eq(harness.bitmap));
+  }
 
-    @Test
-    public void testBitmapIsNotRecycledIfAcceptedByPool() {
-        when(harness.bitmapPool.put(eq(harness.bitmap))).thenReturn(true);
+  @Test
+  public void testBitmapIsNotRecycledIfAcceptedByPool() {
+    when(harness.bitmapPool.put(eq(harness.bitmap))).thenReturn(true);
 
-        harness.resource.recycle();
+    harness.resource.recycle();
 
-        assertFalse(harness.bitmap.isRecycled());
-    }
+    assertFalse(harness.bitmap.isRecycled());
+  }
 
-    @Test
-    public void testRecyclesBitmapIfRejectedByPool() {
-        when(harness.bitmapPool.put(eq(harness.bitmap))).thenReturn(false);
+  @Test
+  public void testRecyclesBitmapIfRejectedByPool() {
+    when(harness.bitmapPool.put(eq(harness.bitmap))).thenReturn(false);
 
-        harness.resource.recycle();
+    harness.resource.recycle();
 
-        assertTrue(harness.bitmap.isRecycled());
-    }
+    assertTrue(harness.bitmap.isRecycled());
+  }
 
-    @Test(expected = NullPointerException.class)
-    public void testThrowsIfBitmapIsNull() {
-        new BitmapResource(null, mock(BitmapPool.class));
-    }
+  @Test(expected = NullPointerException.class)
+  public void testThrowsIfBitmapIsNull() {
+    new BitmapResource(null, mock(BitmapPool.class));
+  }
 
-    @Test(expected = NullPointerException.class)
-    public void testThrowsIfBitmapPoolIsNull() {
-        new BitmapResource(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), null);
-    }
+  @Test(expected = NullPointerException.class)
+  public void testThrowsIfBitmapPoolIsNull() {
+    new BitmapResource(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), null);
+  }
 
-    @Test(expected = NullPointerException.class)
-    public void testThrowsIfBitmapAndBitmapPoolAreNull() {
-        new BitmapResource(null, null);
-    }
+  @Test(expected = NullPointerException.class)
+  public void testThrowsIfBitmapAndBitmapPoolAreNull() {
+    new BitmapResource(null, null);
+  }
 
-    private static class BitmapResourceHarness {
-        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        BitmapPool bitmapPool = mock(BitmapPool.class);
-        BitmapResource resource = new BitmapResource(bitmap, bitmapPool);
-    }
+  private static class BitmapResourceHarness {
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    BitmapPool bitmapPool = mock(BitmapPool.class);
+    BitmapResource resource = new BitmapResource(bitmap, bitmapPool);
+  }
 }

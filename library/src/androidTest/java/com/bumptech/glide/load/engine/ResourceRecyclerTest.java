@@ -20,42 +20,42 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ResourceRecyclerTest {
 
-    private ResourceRecycler recycler;
+  private ResourceRecycler recycler;
 
-    @Before
-    public void setUp() {
-        recycler = new ResourceRecycler();
-    }
+  @Before
+  public void setUp() {
+    recycler = new ResourceRecycler();
+  }
 
-    @Test
-    public void testRecyclesResourceSynchronouslyIfNotAlreadyRecyclingResource() {
-        Resource resource = mock(Resource.class);
-        Shadows.shadowOf(Looper.getMainLooper()).pause();
-        recycler.recycle(resource);
-        verify(resource).recycle();
-    }
+  @Test
+  public void testRecyclesResourceSynchronouslyIfNotAlreadyRecyclingResource() {
+    Resource resource = mock(Resource.class);
+    Shadows.shadowOf(Looper.getMainLooper()).pause();
+    recycler.recycle(resource);
+    verify(resource).recycle();
+  }
 
-    @Test
-    public void testDoesNotRecycleChildResourceSynchronously() {
-        Resource parent = mock(Resource.class);
-        final Resource child = mock(Resource.class);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                recycler.recycle(child);
-                return null;
-            }
-        }).when(parent).recycle();
+  @Test
+  public void testDoesNotRecycleChildResourceSynchronously() {
+    Resource parent = mock(Resource.class);
+    final Resource child = mock(Resource.class);
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+        recycler.recycle(child);
+        return null;
+      }
+    }).when(parent).recycle();
 
-        Shadows.shadowOf(Looper.getMainLooper()).pause();
+    Shadows.shadowOf(Looper.getMainLooper()).pause();
 
-        recycler.recycle(parent);
+    recycler.recycle(parent);
 
-        verify(parent).recycle();
-        verify(child, never()).recycle();
+    verify(parent).recycle();
+    verify(child, never()).recycle();
 
-        Shadows.shadowOf(Looper.getMainLooper()).runOneTask();
+    Shadows.shadowOf(Looper.getMainLooper()).runOneTask();
 
-        verify(child).recycle();
-    }
+    verify(child).recycle();
+  }
 }

@@ -22,97 +22,100 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Tests if {@link EngineKey} {@link Object#hashCode() hashCode} and {@link Object#equals(Object) equals}
- * and SHA-1 disk cache key are different on any difference in ID or existence of a certain workflow part.
- * Also checking whether the equals method is symmetric.
+ * Tests if {@link EngineKey} {@link Object#hashCode() hashCode} and {@link Object#equals(Object)
+ * equals} and SHA-1 disk cache key are different on any difference in ID or existence of a certain
+ * workflow part. Also checking whether the equals method is symmetric.
  */
 @RunWith(JUnit4.class)
 public class EngineKeyTest {
-    private Harness harness;
+  private Harness harness;
 
-    @Before
-    public void setUp() {
-        harness = new Harness();
+  @Before
+  public void setUp() {
+    harness = new Harness();
+  }
+
+  private static class Harness {
+    String id = "testId";
+    int width = 1;
+    int height = 2;
+    Class resourceClass = Object.class;
+    Class transcodeClass = Integer.class;
+    ResourceDecoder decoder = mock(ResourceDecoder.class);
+    ResourceEncoder encoder = mock(ResourceEncoder.class);
+    Key signature = mock(Key.class);
+
+    public EngineKey build() {
+      return new EngineKey(id, signature, width, height, resourceClass, transcodeClass);
     }
+  }
 
-    private static class Harness {
-        String id = "testId";
-        int width = 1;
-        int height = 2;
-        Class resourceClass = Object.class;
-        Class transcodeClass = Integer.class;
-        ResourceDecoder decoder = mock(ResourceDecoder.class);
-        ResourceEncoder encoder = mock(ResourceEncoder.class);
-        Key signature = mock(Key.class);
+  @Test
+  public void testIsIdenticalWithSameArguments() {
+    assertEquals(harness.build(), harness.build());
+  }
 
-        public EngineKey build() {
-            return new EngineKey(id, signature, width, height, resourceClass, transcodeClass);
-        }
-    }
+  @Test
+  public void testDiffersIfIdDiffers() throws Exception {
+    EngineKey first = harness.build();
+    harness.id = harness.id + "2";
+    EngineKey second = harness.build();
 
-    @Test
-    public void testIsIdenticalWithSameArguments() {
-        assertEquals(harness.build(), harness.build());
-    }
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
 
-    @Test
-    public void testDiffersIfIdDiffers() throws Exception {
-        EngineKey first = harness.build();
-        harness.id = harness.id + "2";
-        EngineKey second = harness.build();
+  @Test
+  public void testDiffersIfHeightDiffers() throws Exception {
+    EngineKey first = harness.build();
+    harness.height += 1;
+    EngineKey second = harness.build();
 
-        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-    }
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
 
-    @Test
-    public void testDiffersIfHeightDiffers() throws Exception {
-        EngineKey first = harness.build();
-        harness.height += 1;
-        EngineKey second = harness.build();
+  @Test
+  public void testDiffersIfWidthDiffers() throws Exception {
+    EngineKey first = harness.build();
+    harness.width += 1;
+    EngineKey second = harness.build();
 
-        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-    }
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
 
-    @Test
-    public void testDiffersIfWidthDiffers() throws Exception {
-        EngineKey first = harness.build();
-        harness.width += 1;
-        EngineKey second = harness.build();
+  @Test
+  public void testDiffersIfSignatureDiffers()
+      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    EngineKey first = harness.build();
+    Key signature = mock(Key.class);
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+        MessageDigest digest = (MessageDigest) invocationOnMock.getArguments()[0];
+        digest.update("signature".getBytes("UTF-8"));
+        return null;
+      }
+    }).when(signature).updateDiskCacheKey(any(MessageDigest.class));
+    harness.signature = signature;
+    EngineKey second = harness.build();
 
-        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-    }
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
 
-    @Test
-    public void testDiffersIfSignatureDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        EngineKey first = harness.build();
-        Key signature = mock(Key.class);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                MessageDigest digest = (MessageDigest) invocationOnMock.getArguments()[0];
-                digest.update("signature".getBytes("UTF-8"));
-                return null;
-            }
-        }).when(signature).updateDiskCacheKey(any(MessageDigest.class));
-        harness.signature = signature;
-        EngineKey second = harness.build();
+  @Test
+  public void testDiffersIfResourceClassDiffers()
+      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    EngineKey first = harness.build();
+    harness.resourceClass = Long.class;
+    EngineKey second = harness.build();
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
 
-        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-    }
-
-    @Test
-    public void testDiffersIfResourceClassDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        EngineKey first = harness.build();
-        harness.resourceClass = Long.class;
-        EngineKey second = harness.build();
-        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-    }
-
-    @Test
-    public void testDiffersIfTranscodeClassDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        EngineKey first = harness.build();
-        harness.transcodeClass = Long.class;
-        EngineKey second = harness.build();
-        KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-    }
+  @Test
+  public void testDiffersIfTranscodeClassDiffers()
+      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    EngineKey first = harness.build();
+    harness.transcodeClass = Long.class;
+    EngineKey second = harness.build();
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
 }

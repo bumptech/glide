@@ -11,21 +11,21 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
  * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}.
  */
 public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
-    private final BitmapPool bitmapPool;
+  private final BitmapPool bitmapPool;
 
-    public GifBitmapProvider(BitmapPool bitmapPool) {
-        this.bitmapPool = bitmapPool;
-    }
+  public GifBitmapProvider(BitmapPool bitmapPool) {
+    this.bitmapPool = bitmapPool;
+  }
 
-    @Override
-    public Bitmap obtain(int width, int height, Bitmap.Config config) {
-        return bitmapPool.getDirty(width, height, config);
-    }
+  @Override
+  public Bitmap obtain(int width, int height, Bitmap.Config config) {
+    return bitmapPool.getDirty(width, height, config);
+  }
 
-    @Override
-    public void release(Bitmap bitmap) {
-        if (!bitmapPool.put(bitmap)) {
-            bitmap.recycle();
-        }
+  @Override
+  public void release(Bitmap bitmap) {
+    if (!bitmapPool.put(bitmap)) {
+      bitmap.recycle();
     }
+  }
 }

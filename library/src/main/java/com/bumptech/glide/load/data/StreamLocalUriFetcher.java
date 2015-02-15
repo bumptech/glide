@@ -12,22 +12,23 @@ import java.io.InputStream;
  * Fetches an {@link java.io.InputStream} for a local {@link android.net.Uri}.
  */
 public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
-    public StreamLocalUriFetcher(Context context, Uri uri) {
-        super(context, uri);
-    }
+  public StreamLocalUriFetcher(Context context, Uri uri) {
+    super(context, uri);
+  }
 
-    @Override
-    protected InputStream loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException {
-        return contentResolver.openInputStream(uri);
-    }
+  @Override
+  protected InputStream loadResource(Uri uri, ContentResolver contentResolver)
+      throws FileNotFoundException {
+    return contentResolver.openInputStream(uri);
+  }
 
-    @Override
-    protected void close(InputStream data) throws IOException {
-        data.close();
-    }
+  @Override
+  protected void close(InputStream data) throws IOException {
+    data.close();
+  }
 
-    @Override
-    public Class<InputStream> getDataClass() {
-        return InputStream.class;
-    }
+  @Override
+  public Class<InputStream> getDataClass() {
+    return InputStream.class;
+  }
 }

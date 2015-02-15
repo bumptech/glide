@@ -11,21 +11,21 @@ import java.util.Map;
  * @param <T> type discarded by this Encoder
  */
 public class NullEncoder<T> implements Encoder<T> {
-    private static final NullEncoder<?> NULL_ENCODER = new NullEncoder<Object>();
+  private static final NullEncoder<?> NULL_ENCODER = new NullEncoder<Object>();
 
-    /**
-     * Returns an Encoder for the given data type.
-     *
-     * @param <T> The type of data to be written (or not in this case).
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> Encoder<T> get() {
-        return (Encoder<T>) NULL_ENCODER;
+  /**
+   * Returns an Encoder for the given data type.
+   *
+   * @param <T> The type of data to be written (or not in this case).
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Encoder<T> get() {
+    return (Encoder<T>) NULL_ENCODER;
 
-    }
+  }
 
-    @Override
-    public boolean encode(T data, OutputStream os, Map<String, Object> options) {
-        return false;
-    }
+  @Override
+  public boolean encode(T data, OutputStream os, Map<String, Object> options) {
+    return false;
+  }
 }

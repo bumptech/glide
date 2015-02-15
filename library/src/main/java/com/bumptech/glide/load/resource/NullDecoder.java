@@ -12,27 +12,27 @@ import java.util.Map;
  * @param <Z> The type of the decoded resource that will always be null.
  */
 public class NullDecoder<T, Z> implements ResourceDecoder<T, Z> {
-    private static final NullDecoder<?, ?> NULL_DECODER = new NullDecoder<Object, Object>();
+  private static final NullDecoder<?, ?> NULL_DECODER = new NullDecoder<Object, Object>();
 
-    /**
-     * Returns an instance of the NullDecoder for the given types.
-     *
-     * @param <T> The data type.
-     * @param <Z> The resource type.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T, Z> NullDecoder<T, Z> get() {
-        return (NullDecoder<T, Z>) NULL_DECODER;
-    }
+  /**
+   * Returns an instance of the NullDecoder for the given types.
+   *
+   * @param <T> The data type.
+   * @param <Z> The resource type.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T, Z> NullDecoder<T, Z> get() {
+    return (NullDecoder<T, Z>) NULL_DECODER;
+  }
 
-    @Override
-    public boolean handles(T source) {
-        // TODO: fixme.
-        return true;
-    }
+  @Override
+  public boolean handles(T source) {
+    // TODO: fixme.
+    return true;
+  }
 
-    @Override
-    public Resource<Z> decode(T source, int width, int height, Map<String, Object> options) {
-        return null;
-    }
+  @Override
+  public Resource<Z> decode(T source, int width, int height, Map<String, Object> options) {
+    return null;
+  }
 }

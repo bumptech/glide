@@ -10,14 +10,11 @@ import com.bumptech.glide.Registry;
  * {@link com.bumptech.glide.GlideBuilder} and registering
  * {@link com.bumptech.glide.load.model.ModelLoader ModelLoaders}.
  *
- * <p>
- *     To use this interface:
- *     <ol>
- *         <li>
- *             Implement the GlideModule interface in a class with public visibility, calling
- *             {@link com.bumptech.glide.Registry#prepend(Class, Class, com.bumptech.glide.load.ResourceDecoder)}
- *             for each {@link com.bumptech.glide.load.model.ModelLoader} you'd like to register:
- *             <pre>
+ * <p> To use this interface: <ol> <li> Implement the GlideModule interface in a class with public
+ * visibility, calling
+ * {@link Registry#prepend(Class, Class, com.bumptech.glide.load.ResourceDecoder)} for each
+ * {@link com.bumptech.glide.load.model.ModelLoader} you'd like to register:
+ * <pre>
  *                  <code>
  *                      public class FlickrGlideModule implements GlideModule {
  *                          {@literal @}Override
@@ -32,66 +29,52 @@ import com.bumptech.glide.Registry;
  *                      }
  *                  </code>
  *             </pre>
- *         </li>
- *         <li>
- *              Add your implementation to your list of keeps in your proguard.cfg file:
- *              <pre>
+ * </li> <li> Add your implementation to your list of keeps in your proguard.cfg file:
+ * <pre>
  *                  {@code
  *                      -keepnames class * com.bumptech.glide.samples.flickr.FlickrGlideModule
  *                  }
  *              </pre>
- *         </li>
- *         <li>
- *             Add a metadata tag to your AndroidManifest.xml with your GlideModule implementation's fully qualified
- *             classname as the key, and {@code GlideModule} as the value:
- *             <pre>
+ * </li> <li> Add a metadata tag to your AndroidManifest.xml with your GlideModule implementation's
+ * fully qualified classname as the key, and {@code GlideModule} as the value:
+ * <pre>
  *                 {@code
  *                      <meta-data
  *                          android:name="com.bumptech.glide.samples.flickr.FlickrGlideModule"
  *                          android:value="GlideModule" />
  *                 }
  *             </pre>
- *         </li>
- *     </ol>
- * </p>
+ * </li> </ol> </p>
  *
- * <p>
- *     All implementations must be publicly visible and contain only an empty constructor so they can be instantiated
- *     via reflection when Glide is lazily initialized.
- * </p>
+ * <p> All implementations must be publicly visible and contain only an empty constructor so they
+ * can be instantiated via reflection when Glide is lazily initialized. </p>
  *
- * <p>
- *     There is no defined order in which modules are called, so projects should be careful to avoid applying
- *     conflicting settings in different modules. If an application depends on libraries that have conflicting
- *     modules, the application should consider avoiding the library modules and instead providing their required
- *     dependencies in a single application module.
- * </p>
+ * <p> There is no defined order in which modules are called, so projects should be careful to avoid
+ * applying conflicting settings in different modules. If an application depends on libraries that
+ * have conflicting modules, the application should consider avoiding the library modules and
+ * instead providing their required dependencies in a single application module. </p>
  */
 public interface GlideModule {
 
-    /**
-     * Lazily apply options to a {@link com.bumptech.glide.GlideBuilder} immediately before the Glide singleton is
-     * created.
-     *
-     * <p>
-     *     This method will be called once and only once per implementation.
-     * </p>
-     *
-     * @param context An Application {@link android.content.Context}.
-     * @param builder The {@link com.bumptech.glide.GlideBuilder} that will be used to create Glide.
-     */
-    void applyOptions(Context context, GlideBuilder builder);
+  /**
+   * Lazily apply options to a {@link com.bumptech.glide.GlideBuilder} immediately before the Glide
+   * singleton is created.
+   *
+   * <p> This method will be called once and only once per implementation. </p>
+   *
+   * @param context An Application {@link android.content.Context}.
+   * @param builder The {@link com.bumptech.glide.GlideBuilder} that will be used to create Glide.
+   */
+  void applyOptions(Context context, GlideBuilder builder);
 
-    /**
-     * Lazily register components immediately after the Glide singleton is created but before any requests can be
-     * started.
-     *
-     * <p>
-     *     This method will be called once and only once per implementation.
-     * </p>
-     *
-     * @param context An Application {@link android.content.Context}.
-     * @param registry An {@link com.bumptech.glide.Registry} to use to register components.
-     */
-    void registerComponents(Context context, Registry registry);
+  /**
+   * Lazily register components immediately after the Glide singleton is created but before any
+   * requests can be started.
+   *
+   * <p> This method will be called once and only once per implementation. </p>
+   *
+   * @param context  An Application {@link android.content.Context}.
+   * @param registry An {@link com.bumptech.glide.Registry} to use to register components.
+   */
+  void registerComponents(Context context, Registry registry);
 }

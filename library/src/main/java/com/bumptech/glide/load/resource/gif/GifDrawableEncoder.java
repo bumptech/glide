@@ -15,24 +15,24 @@ import java.util.Map;
  * {@link java.io.OutputStream}.
  */
 public class GifDrawableEncoder implements ResourceEncoder<GifDrawable> {
-    private static final String TAG = "GifEncoder";
+  private static final String TAG = "GifEncoder";
 
-    @Override
-    public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
-        return EncodeStrategy.SOURCE;
-    }
+  @Override
+  public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
+    return EncodeStrategy.SOURCE;
+  }
 
-    @Override
-    public boolean encode(Resource<GifDrawable> data, OutputStream os, Map<String, Object> options) {
-        GifDrawable drawable = data.get();
-        try {
-            os.write(drawable.getData());
-            return true;
-        } catch (IOException e) {
-            if (Log.isLoggable(TAG, Log.WARN)) {
-                Log.w(TAG, "Failed to encode gif drawable data", e);
-            }
-            return false;
-        }
+  @Override
+  public boolean encode(Resource<GifDrawable> data, OutputStream os, Map<String, Object> options) {
+    GifDrawable drawable = data.get();
+    try {
+      os.write(drawable.getData());
+      return true;
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Failed to encode gif drawable data", e);
+      }
+      return false;
     }
+  }
 }

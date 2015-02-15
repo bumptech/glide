@@ -12,17 +12,17 @@ import java.io.File;
 @RunWith(JUnit4.class)
 public class FileResourceTest {
 
-    private File file;
-    private FileResource resource;
+  private File file;
+  private FileResource resource;
 
-    @Before
-    public void setUp() {
-        file = new File("Test");
-        resource = new FileResource(file);
-    }
+  @Before
+  public void setUp() {
+    file = new File("Test");
+    resource = new FileResource(file);
+  }
 
-    @Test
-    public void testReturnsGivenFile() {
-        assertEquals(file, resource.get());
-    }
+  @Test
+  public void testReturnsGivenFile() {
+    assertEquals(file, resource.get());
+  }
 }

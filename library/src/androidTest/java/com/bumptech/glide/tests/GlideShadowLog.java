@@ -14,8 +14,8 @@ import org.robolectric.shadows.ShadowLog;
 @Implements(Log.class)
 public class GlideShadowLog extends ShadowLog {
 
-    @Implementation
-    public static boolean isLoggable(String tag, int level) {
-        return true;
-    }
+  @Implementation
+  public static boolean isLoggable(String tag, int level) {
+    return true;
+  }
 }

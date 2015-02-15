@@ -19,17 +19,16 @@ import java.util.concurrent.Future;
  * }
  * </pre>
  *
- * <p>
- *     Note - {@link #get()} and {@link #get(long, java.util.concurrent.TimeUnit)} must be called
- *     off of the main thread or they will block forever.
- * </p>
+ * <p> Note - {@link #get()} and {@link #get(long, java.util.concurrent.TimeUnit)} must be called
+ * off of the main thread or they will block forever. </p>
  *
  * @param <R> The type of resource this FutureTarget will retrieve.
  */
-public interface FutureTarget<R> extends Future<R>, Target<R>  {
+public interface FutureTarget<R> extends Future<R>,
+    Target<R> {
 
-    /**
-     * Safely clears the target from a background thread to release its resources.
-     */
-    void clear();
+  /**
+   * Safely clears the target from a background thread to release its resources.
+   */
+  void clear();
 }

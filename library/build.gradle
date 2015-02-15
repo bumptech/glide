@@ -33,7 +33,7 @@ dependencies {
 }
 
 robolectric {
-   // configure max heap size of the test JVM
+    // configure max heap size of the test JVM
     maxHeapSize = '2048m'
 
     // configure the test JVM arguments
@@ -121,7 +121,7 @@ afterEvaluate {
 
     check.dependsOn('pmd')
 
-    task jacocoTestReport(type:JacocoReport, dependsOn: testDebug) {
+    task jacocoTestReport(type: JacocoReport, dependsOn: testDebug) {
         def coverageSourceDirs = ['src/main/java']
         group = "Reporting"
         description = "Generate Jacoco coverage reports"
@@ -134,7 +134,7 @@ afterEvaluate {
                            '**/Manifest*.*',
                            '**/BitmapRequestBuilder.class',
                            '**/DrawableRequestBuilder.class',
-                           '**/GifRequestBuilder.class', ]
+                           '**/GifRequestBuilder.class',]
         )
 
         additionalSourceDirs = files(coverageSourceDirs)

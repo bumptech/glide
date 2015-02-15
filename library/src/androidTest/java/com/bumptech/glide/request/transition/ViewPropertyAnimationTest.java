@@ -22,35 +22,35 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ViewPropertyAnimationTest {
-    private ViewPropertyTransition.Animator animator;
-    private ViewPropertyTransition<Object> animation;
+  private ViewPropertyTransition.Animator animator;
+  private ViewPropertyTransition<Object> animation;
 
-    @Before
-    public void setUp() {
-        animator = mock(ViewPropertyTransition.Animator.class);
-        animation = new ViewPropertyTransition<>(animator);
-    }
+  @Before
+  public void setUp() {
+    animator = mock(ViewPropertyTransition.Animator.class);
+    animation = new ViewPropertyTransition<>(animator);
+  }
 
-    @Test
-    public void testAlwaysReturnsFalse() {
-        assertFalse(animation.transition(new Object(), mock(ViewAdapter.class)));
-    }
+  @Test
+  public void testAlwaysReturnsFalse() {
+    assertFalse(animation.transition(new Object(), mock(ViewAdapter.class)));
+  }
 
-    @Test
-    public void testCallsAnimatorWithGivenView() {
-        ImageView view = new ImageView(RuntimeEnvironment.application);
-        ViewAdapter adapter = mock(ViewAdapter.class);
-        when(adapter.getView()).thenReturn(view);
-        animation.transition(new Object(), adapter);
+  @Test
+  public void testCallsAnimatorWithGivenView() {
+    ImageView view = new ImageView(RuntimeEnvironment.application);
+    ViewAdapter adapter = mock(ViewAdapter.class);
+    when(adapter.getView()).thenReturn(view);
+    animation.transition(new Object(), adapter);
 
-        verify(animator).animate(eq(view));
-    }
+    verify(animator).animate(eq(view));
+  }
 
-    @Test
-    public void testDoesNotCallAnimatorIfGivenAdapterWithNullView() {
-        ViewAdapter adapter = mock(ViewAdapter.class);
-        animation.transition(new Object(), adapter);
+  @Test
+  public void testDoesNotCallAnimatorIfGivenAdapterWithNullView() {
+    ViewAdapter adapter = mock(ViewAdapter.class);
+    animation.transition(new Object(), adapter);
 
-        verify(animator, never()).animate(any(View.class));
-    }
+    verify(animator, never()).animate(any(View.class));
+  }
 }

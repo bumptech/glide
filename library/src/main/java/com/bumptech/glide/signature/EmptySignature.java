@@ -9,18 +9,18 @@ import java.security.MessageDigest;
  * An empty key that is always equal to all other empty keys.
  */
 public final class EmptySignature implements Key {
-    private static final EmptySignature EMPTY_KEY = new EmptySignature();
+  private static final EmptySignature EMPTY_KEY = new EmptySignature();
 
-    public static EmptySignature obtain() {
-        return EMPTY_KEY;
-    }
+  public static EmptySignature obtain() {
+    return EMPTY_KEY;
+  }
 
-    private EmptySignature() {
-        // Empty.
-    }
+  private EmptySignature() {
+    // Empty.
+  }
 
-    @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
-        // Do nothing.
-    }
+  @Override
+  public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
+    // Do nothing.
+  }
 }

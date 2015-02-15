@@ -28,48 +28,49 @@ import java.io.InputStream;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ThumbFetcherTest {
 
-    @Mock ThumbnailStreamOpener opener;
-    private ThumbFetcher fetcher;
-    private Uri uri;
+  @Mock
+  ThumbnailStreamOpener opener;
+  private ThumbFetcher fetcher;
+  private Uri uri;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
 
-        uri = Uri.withAppendedPath(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "123");
-        fetcher = new ThumbFetcher(RuntimeEnvironment.application, uri, opener);
-    }
+    uri = Uri.withAppendedPath(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "123");
+    fetcher = new ThumbFetcher(RuntimeEnvironment.application, uri, opener);
+  }
 
-    @Test
-    public void testReturnsInputStreamFromThumbnailOpener() throws Exception {
-        InputStream expected = new ByteArrayInputStream(new byte[0]);
+  @Test
+  public void testReturnsInputStreamFromThumbnailOpener() throws Exception {
+    InputStream expected = new ByteArrayInputStream(new byte[0]);
 
-        when(opener.open(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(expected);
+    when(opener.open(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(expected);
 
-        InputStream result = fetcher.loadData(Priority.LOW);
-        assertEquals(expected, result);
-    }
+    InputStream result = fetcher.loadData(Priority.LOW);
+    assertEquals(expected, result);
+  }
 
-    @Test
-    public void testClosesInputStreamFromThumbnailOpenerOnCleanup() throws Exception {
-        InputStream expected = mock(InputStream.class);
+  @Test
+  public void testClosesInputStreamFromThumbnailOpenerOnCleanup() throws Exception {
+    InputStream expected = mock(InputStream.class);
 
-        when(opener.open(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(expected);
+    when(opener.open(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(expected);
 
-        fetcher.loadData(Priority.HIGH);
+    fetcher.loadData(Priority.HIGH);
 
-        fetcher.cleanup();
-        verify(expected).close();
-    }
+    fetcher.cleanup();
+    verify(expected).close();
+  }
 
-    @Test
-    public void testDoesNotThrowIfCleanupWithNullInputStream() {
-        fetcher.cleanup();
-    }
+  @Test
+  public void testDoesNotThrowIfCleanupWithNullInputStream() {
+    fetcher.cleanup();
+  }
 
-    @Test
-    public void testContainsAllRelevantPartsInId() {
-        String id = fetcher.getId();
-        assertThat(id).contains(uri.toString());
-    }
+  @Test
+  public void testContainsAllRelevantPartsInId() {
+    String id = fetcher.getId();
+    assertThat(id).contains(uri.toString());
+  }
 }

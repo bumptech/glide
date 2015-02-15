@@ -26,119 +26,119 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = { BitmapEncoderTest.AlphaShadowBitmap.class })
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows = {
+    BitmapEncoderTest.AlphaShadowBitmap.class })
 public class BitmapEncoderTest {
-    private EncoderHarness harness;
+  private EncoderHarness harness;
 
-    @Before
-    public void setUp() {
-        harness = new EncoderHarness();
+  @Before
+  public void setUp() {
+    harness = new EncoderHarness();
+  }
+
+  @Test
+  public void testBitmapIsEncoded() {
+    String fakeBytes = harness.encode();
+
+    assertContains(fakeBytes, Shadows.shadowOf(harness.bitmap).getDescription());
+  }
+
+  @Test
+  public void testBitmapIsEncodedWithGivenQuality() {
+    int quality = 7;
+    harness.setQuality(quality);
+
+    String fakeBytes = harness.encode();
+
+    assertContains(fakeBytes, String.valueOf(quality));
+  }
+
+  @Test
+  public void testEncoderObeysNonNullCompressFormat() {
+    Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
+    harness.setFormat(format);
+
+    String fakeBytes = harness.encode();
+
+    assertContains(fakeBytes, format.toString());
+  }
+
+  @Test
+  public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() {
+    harness.setFormat(null);
+    harness.bitmap.setHasAlpha(false);
+
+    String fakeBytes = harness.encode();
+
+    assertContains(fakeBytes, Bitmap.CompressFormat.JPEG.toString());
+  }
+
+  @Test
+  public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() {
+    harness.setFormat(null);
+    harness.bitmap.setHasAlpha(true);
+
+    String fakeBytes = harness.encode();
+
+    assertContains(fakeBytes, Bitmap.CompressFormat.PNG.toString());
+  }
+
+  @Test
+  public void testReturnsTrueFromWrite() {
+    BitmapEncoder encoder = new BitmapEncoder();
+    assertTrue(encoder.encode(harness.resource, harness.os, harness.options));
+  }
+
+  @Test
+  public void testEncodeStrategy_alwaysReturnsTransformed() {
+    BitmapEncoder encoder = new BitmapEncoder();
+    assertEquals(EncodeStrategy.TRANSFORMED, encoder.getEncodeStrategy(harness.options));
+  }
+
+  private static void assertContains(String string, String expected) {
+    assertThat(string).contains(expected);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static class EncoderHarness {
+    Resource<Bitmap> resource = mock(Resource.class);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    Map<String, Object> options = new HashMap<>();
+
+    public EncoderHarness() {
+      when(resource.get()).thenReturn(bitmap);
     }
 
-    @Test
-    public void testBitmapIsEncoded() {
-        String fakeBytes = harness.encode();
-
-        assertContains(fakeBytes, Shadows.shadowOf(harness.bitmap)
-                .getDescription());
+    public void setQuality(int quality) {
+      options.put(BitmapEncoder.KEY_COMPRESSION_QUALITY, quality);
     }
 
-    @Test
-    public void testBitmapIsEncodedWithGivenQuality() {
-        int quality = 7;
-        harness.setQuality(quality);
-
-        String fakeBytes = harness.encode();
-
-        assertContains(fakeBytes, String.valueOf(quality));
+    public void setFormat(Bitmap.CompressFormat format) {
+      options.put(BitmapEncoder.KEY_COMPRESSION_FORMAT, format);
     }
 
-    @Test
-    public void testEncoderObeysNonNullCompressFormat() {
-        Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
-        harness.setFormat(format);
+    public String encode() {
+      BitmapEncoder encoder = new BitmapEncoder();
+      encoder.encode(resource, os, options);
+      return new String(os.toByteArray());
+    }
+  }
 
-        String fakeBytes = harness.encode();
+  @Implements(Bitmap.class)
+  public static class AlphaShadowBitmap extends ShadowBitmap {
+    private boolean hasAlpha;
 
-        assertContains(fakeBytes, format.toString());
+    @SuppressWarnings("unused")
+    @Implementation
+    public void setHasAlpha(boolean hasAlpha) {
+      this.hasAlpha = hasAlpha;
     }
 
-    @Test
-    public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() {
-        harness.setFormat(null);
-        harness.bitmap.setHasAlpha(false);
-
-        String fakeBytes = harness.encode();
-
-        assertContains(fakeBytes, Bitmap.CompressFormat.JPEG.toString());
+    @SuppressWarnings("unused")
+    @Implementation
+    public boolean hasAlpha() {
+      return hasAlpha;
     }
-
-    @Test
-    public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() {
-        harness.setFormat(null);
-        harness.bitmap.setHasAlpha(true);
-
-        String fakeBytes = harness.encode();
-
-        assertContains(fakeBytes, Bitmap.CompressFormat.PNG.toString());
-    }
-
-    @Test
-    public void testReturnsTrueFromWrite() {
-        BitmapEncoder encoder = new BitmapEncoder();
-        assertTrue(encoder.encode(harness.resource, harness.os, harness.options));
-    }
-
-    @Test
-    public void testEncodeStrategy_alwaysReturnsTransformed() {
-        BitmapEncoder encoder = new BitmapEncoder();
-        assertEquals(EncodeStrategy.TRANSFORMED, encoder.getEncodeStrategy(harness.options));
-    }
-
-    private static void assertContains(String string, String expected) {
-        assertThat(string).contains(expected);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static class EncoderHarness {
-        Resource<Bitmap> resource = mock(Resource.class);
-        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        Map<String, Object> options = new HashMap<>();
-
-        public EncoderHarness() {
-            when(resource.get()).thenReturn(bitmap);
-        }
-
-        public void setQuality(int quality) {
-            options.put(BitmapEncoder.KEY_COMPRESSION_QUALITY, quality);
-        }
-
-        public void setFormat(Bitmap.CompressFormat format) {
-            options.put(BitmapEncoder.KEY_COMPRESSION_FORMAT, format);
-        }
-
-        public String encode() {
-            BitmapEncoder encoder = new BitmapEncoder();
-            encoder.encode(resource, os, options);
-            return new String(os.toByteArray());
-        }
-    }
-
-    @Implements(Bitmap.class)
-    public static class AlphaShadowBitmap extends ShadowBitmap {
-        private boolean hasAlpha;
-
-        @SuppressWarnings("unused")
-        @Implementation
-        public void setHasAlpha(boolean hasAlpha) {
-            this.hasAlpha = hasAlpha;
-        }
-
-        @SuppressWarnings("unused")
-        @Implementation
-        public boolean hasAlpha() {
-            return hasAlpha;
-        }
-    }
+  }
 }

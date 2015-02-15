@@ -21,14 +21,14 @@ import java.io.InputStream;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class StreamLocalUriFetcherTest {
 
-    @Test
-    public void testLoadsInputStream() throws Exception {
-        final Context context = RuntimeEnvironment.application;
-        Uri uri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
-        StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context, uri);
-        InputStream is = fetcher.loadData(Priority.NORMAL);
-        assertNotNull(is);
-        assertNotNull(BitmapFactory.decodeStream(is));
-        is.close();
-    }
+  @Test
+  public void testLoadsInputStream() throws Exception {
+    final Context context = RuntimeEnvironment.application;
+    Uri uri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
+    StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context, uri);
+    InputStream is = fetcher.loadData(Priority.NORMAL);
+    assertNotNull(is);
+    assertNotNull(BitmapFactory.decodeStream(is));
+    is.close();
+  }
 }

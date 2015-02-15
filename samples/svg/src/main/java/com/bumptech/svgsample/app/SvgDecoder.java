@@ -15,19 +15,19 @@ import java.util.Map;
  */
 public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
 
-    @Override
-    public boolean handles(InputStream source) throws IOException {
-        // TODO: Can we tell?
-        return true;
-    }
+  @Override
+  public boolean handles(InputStream source) throws IOException {
+    // TODO: Can we tell?
+    return true;
+  }
 
-    public Resource<SVG> decode(InputStream source, int width, int height, Map<String, Object> options)
-            throws IOException {
-        try {
-            SVG svg = SVG.getFromInputStream(source);
-            return new SimpleResource<SVG>(svg);
-        } catch (SVGParseException ex) {
-            throw new IOException("Cannot load SVG from stream", ex);
-        }
+  public Resource<SVG> decode(InputStream source, int width, int height,
+      Map<String, Object> options) throws IOException {
+    try {
+      SVG svg = SVG.getFromInputStream(source);
+      return new SimpleResource<SVG>(svg);
+    } catch (SVGParseException ex) {
+      throw new IOException("Cannot load SVG from stream", ex);
     }
+  }
 }

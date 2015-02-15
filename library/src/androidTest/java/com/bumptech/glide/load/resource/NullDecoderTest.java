@@ -14,17 +14,17 @@ import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class NullDecoderTest {
-    private NullDecoder<Object, Object> decoder;
-    private Map<String, Object> options;
+  private NullDecoder<Object, Object> decoder;
+  private Map<String, Object> options;
 
-    @Before
-    public void setUp() {
-        decoder = new NullDecoder<>();
-        options = Collections.emptyMap();
-    }
+  @Before
+  public void setUp() {
+    decoder = new NullDecoder<>();
+    options = Collections.emptyMap();
+  }
 
-    @Test
-    public void testReturnsNull() throws IOException {
-        assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
-    }
+  @Test
+  public void testReturnsNull() throws IOException {
+    assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
+  }
 }

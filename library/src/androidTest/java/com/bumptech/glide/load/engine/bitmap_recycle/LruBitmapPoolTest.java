@@ -31,240 +31,241 @@ import java.util.Set;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class LruBitmapPoolTest {
-    private static final int MAX_SIZE = 10;
-    private static final Set<Bitmap.Config> ALLOWED_CONFIGS = Collections.singleton(Bitmap.Config.ARGB_8888);
-    private MockStrategy strategy;
-    private LruBitmapPool pool;
+  private static final int MAX_SIZE = 10;
+  private static final Set<Bitmap.Config> ALLOWED_CONFIGS =
+      Collections.singleton(Bitmap.Config.ARGB_8888);
+  private MockStrategy strategy;
+  private LruBitmapPool pool;
 
-    @Before
-    public void setUp() throws Exception {
-        strategy = new MockStrategy();
-        pool = new LruBitmapPool(MAX_SIZE, strategy, ALLOWED_CONFIGS);
+  @Before
+  public void setUp() throws Exception {
+    strategy = new MockStrategy();
+    pool = new LruBitmapPool(MAX_SIZE, strategy, ALLOWED_CONFIGS);
+  }
+
+  @Test
+  public void testICanAddAndGetABitmap() {
+    fillPool(pool, 1);
+    pool.put(createMutableBitmap());
+    assertNotNull(pool.get(100, 100, Bitmap.Config.ARGB_8888));
+  }
+
+  @Test
+  public void testImmutableBitmapsAreNotAdded() {
+    Bitmap bitmap = createMutableBitmap();
+    Shadows.shadowOf(bitmap).setMutable(false);
+    pool.put(bitmap);
+    assertThat(strategy.bitmaps).isEmpty();
+  }
+
+  @Test
+  public void testItIsSizeLimited() {
+    fillPool(pool, MAX_SIZE + 2);
+    assertEquals(2, strategy.numRemoves);
+  }
+
+  @Test
+  public void testBitmapLargerThanPoolIsNotAdded() {
+    strategy = new MockStrategy() {
+      @Override
+      public int getSize(Bitmap bitmap) {
+        return 4;
+      }
+    };
+    pool = new LruBitmapPool(3, strategy, ALLOWED_CONFIGS);
+    pool.put(createMutableBitmap());
+    assertEquals(0, strategy.numRemoves);
+    assertEquals(0, strategy.numPuts);
+  }
+
+  @Test
+  public void testClearMemoryRemovesAllBitmaps() {
+    fillPool(pool, MAX_SIZE);
+    pool.clearMemory();
+
+    assertEquals(MAX_SIZE, strategy.numRemoves);
+  }
+
+  @Test
+  public void testEvictedBitmapsAreRecycled() {
+    fillPool(pool, MAX_SIZE);
+    List<Bitmap> bitmaps = new ArrayList<>(MAX_SIZE);
+    for (Bitmap b : strategy.bitmaps) {
+      bitmaps.add(b);
     }
 
-    @Test
-    public void testICanAddAndGetABitmap() {
-        fillPool(pool, 1);
-        pool.put(createMutableBitmap());
-        assertNotNull(pool.get(100, 100, Bitmap.Config.ARGB_8888));
+    pool.clearMemory();
+
+    for (Bitmap b : bitmaps) {
+      assertTrue(b.isRecycled());
+    }
+  }
+
+  @Test
+  public void testTrimMemoryBackgroundOrLessRemovesHalfOfBitmaps() {
+    testTrimMemory(MAX_SIZE, TRIM_MEMORY_BACKGROUND, MAX_SIZE / 2);
+  }
+
+  @Test
+  public void testTrimMemoryBackgroundOrLessRemovesNoBitmapsIfPoolLessThanHalfFull() {
+    testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_BACKGROUND, 0);
+  }
+
+  @Test
+  public void testTrimMemoryModerateOrGreaterRemovesAllBitmaps() {
+    for (int trimLevel : new int[] { TRIM_MEMORY_MODERATE, TRIM_MEMORY_COMPLETE }) {
+      testTrimMemory(MAX_SIZE, trimLevel, MAX_SIZE);
+    }
+  }
+
+  @Test
+  public void testPassesArgb888ToStrategyAsConfigForRequestsWithNullConfigsOnGet() {
+    LruPoolStrategy strategy = mock(LruPoolStrategy.class);
+    LruBitmapPool pool = new LruBitmapPool(100, strategy, ALLOWED_CONFIGS);
+
+    Bitmap expected = createMutableBitmap();
+    when(strategy.get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888))).thenReturn(expected);
+    Bitmap result = pool.get(100, 100, null);
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void testPassesArgb8888ToStrategyAsConfigForRequestsWithNullConfigsOnGetDirty() {
+    LruPoolStrategy strategy = mock(LruPoolStrategy.class);
+    LruBitmapPool pool = new LruBitmapPool(100, strategy, ALLOWED_CONFIGS);
+
+    Bitmap expected = createMutableBitmap();
+    when(strategy.get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888))).thenReturn(expected);
+    Bitmap result = pool.getDirty(100, 100, null);
+
+    assertEquals(expected, result);
+  }
+
+  private void testTrimMemory(int fillSize, int trimLevel, int expectedSize) {
+    MockStrategy strategy = new MockStrategy();
+    LruBitmapPool pool = new LruBitmapPool(MAX_SIZE, strategy, ALLOWED_CONFIGS);
+    fillPool(pool, fillSize);
+    pool.trimMemory(trimLevel);
+    assertEquals("Failed level=" + trimLevel, expectedSize, strategy.numRemoves);
+  }
+
+  @Test
+  public void testCanIncreaseSizeDynamically() {
+    int sizeMultiplier = 2;
+    pool.setSizeMultiplier(2);
+    fillPool(pool, MAX_SIZE * sizeMultiplier);
+
+    assertEquals(0, strategy.numRemoves);
+  }
+
+  @Test
+  public void testCanDecreaseSizeDynamically() {
+    fillPool(pool, MAX_SIZE);
+    assertEquals(0, strategy.numRemoves);
+
+    float sizeMultiplier = 0.5f;
+    pool.setSizeMultiplier(sizeMultiplier);
+
+    assertEquals(Math.round(MAX_SIZE * sizeMultiplier), strategy.numRemoves);
+  }
+
+  @Test
+  public void testCanResetSizeDynamically() {
+    int sizeMultiplier = 2;
+    pool.setSizeMultiplier(sizeMultiplier);
+    fillPool(pool, MAX_SIZE * sizeMultiplier);
+
+    pool.setSizeMultiplier(1);
+
+    assertEquals(Math.round(MAX_SIZE * sizeMultiplier) - MAX_SIZE, strategy.numRemoves);
+  }
+
+  @Test
+  public void testCanGetCurrentMaxSize() {
+    assertEquals(MAX_SIZE, pool.getMaxSize());
+  }
+
+  @Test
+  public void testMaxSizeChangesAfterSizeMultiplier() {
+    pool.setSizeMultiplier(2);
+    assertEquals(2 * MAX_SIZE, pool.getMaxSize());
+  }
+
+  @Test
+  public void testBitmapsWithDisallowedConfigsAreIgnored() {
+    pool = new LruBitmapPool(100, strategy, Collections.singleton(Bitmap.Config.ARGB_4444));
+
+    Bitmap bitmap = createMutableBitmap(Bitmap.Config.RGB_565);
+    pool.put(bitmap);
+
+    assertEquals(0, strategy.numPuts);
+  }
+
+  @Test
+  public void testBitmapsWithAllowedNullConfigsAreAllowed() {
+    pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
+
+    Bitmap bitmap = createMutableBitmap();
+    Shadows.shadowOf(bitmap).setConfig(null);
+
+    pool.put(bitmap);
+
+    assertEquals(1, strategy.numPuts);
+  }
+
+  private void fillPool(LruBitmapPool pool, int fillCount) {
+    for (int i = 0; i < fillCount; i++) {
+      pool.put(createMutableBitmap());
+    }
+  }
+
+  private Bitmap createMutableBitmap() {
+    return createMutableBitmap(Bitmap.Config.ARGB_8888);
+  }
+
+  private Bitmap createMutableBitmap(Bitmap.Config config) {
+    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, config);
+    Shadows.shadowOf(bitmap).setMutable(true);
+    return bitmap;
+
+  }
+
+  private static class MockStrategy implements LruPoolStrategy {
+    private LinkedList<Bitmap> bitmaps = new LinkedList<>();
+    private int numRemoves;
+    private int numPuts;
+
+    @Override
+    public void put(Bitmap bitmap) {
+      numPuts++;
+      bitmaps.add(bitmap);
     }
 
-    @Test
-    public void testImmutableBitmapsAreNotAdded() {
-        Bitmap bitmap = createMutableBitmap();
-        Shadows.shadowOf(bitmap).setMutable(false);
-        pool.put(bitmap);
-        assertThat(strategy.bitmaps).isEmpty();
+    @Override
+    public Bitmap get(int width, int height, Bitmap.Config config) {
+      return bitmaps.removeLast();
     }
 
-    @Test
-    public void testItIsSizeLimited() {
-        fillPool(pool, MAX_SIZE + 2);
-        assertEquals(2, strategy.numRemoves);
+    @Override
+    public Bitmap removeLast() {
+      numRemoves++;
+      return bitmaps.removeLast();
     }
 
-    @Test
-    public void testBitmapLargerThanPoolIsNotAdded() {
-        strategy = new MockStrategy() {
-            @Override
-            public int getSize(Bitmap bitmap) {
-                return 4;
-            }
-        };
-        pool = new LruBitmapPool(3, strategy, ALLOWED_CONFIGS);
-        pool.put(createMutableBitmap());
-        assertEquals(0, strategy.numRemoves);
-        assertEquals(0, strategy.numPuts);
+    @Override
+    public String logBitmap(Bitmap bitmap) {
+      return null;
     }
 
-    @Test
-    public void testClearMemoryRemovesAllBitmaps() {
-        fillPool(pool, MAX_SIZE);
-        pool.clearMemory();
-
-        assertEquals(MAX_SIZE, strategy.numRemoves);
+    @Override
+    public String logBitmap(int width, int height, Bitmap.Config config) {
+      return null;
     }
 
-    @Test
-    public void testEvictedBitmapsAreRecycled() {
-        fillPool(pool, MAX_SIZE);
-        List<Bitmap> bitmaps = new ArrayList<>(MAX_SIZE);
-        for (Bitmap b : strategy.bitmaps) {
-            bitmaps.add(b);
-        }
-
-        pool.clearMemory();
-
-        for (Bitmap b : bitmaps) {
-            assertTrue(b.isRecycled());
-        }
+    @Override
+    public int getSize(Bitmap bitmap) {
+      return 1;
     }
-
-    @Test
-    public void testTrimMemoryBackgroundOrLessRemovesHalfOfBitmaps() {
-        testTrimMemory(MAX_SIZE, TRIM_MEMORY_BACKGROUND, MAX_SIZE / 2);
-    }
-
-    @Test
-    public void testTrimMemoryBackgroundOrLessRemovesNoBitmapsIfPoolLessThanHalfFull() {
-        testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_BACKGROUND, 0);
-    }
-
-    @Test
-    public void testTrimMemoryModerateOrGreaterRemovesAllBitmaps() {
-        for (int trimLevel : new int[] { TRIM_MEMORY_MODERATE, TRIM_MEMORY_COMPLETE }) {
-            testTrimMemory(MAX_SIZE, trimLevel, MAX_SIZE);
-        }
-    }
-
-    @Test
-    public void testPassesArgb888ToStrategyAsConfigForRequestsWithNullConfigsOnGet() {
-        LruPoolStrategy strategy = mock(LruPoolStrategy.class);
-        LruBitmapPool pool = new LruBitmapPool(100, strategy, ALLOWED_CONFIGS);
-
-        Bitmap expected = createMutableBitmap();
-        when(strategy.get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888))).thenReturn(expected);
-        Bitmap result = pool.get(100, 100, null);
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    public void testPassesArgb8888ToStrategyAsConfigForRequestsWithNullConfigsOnGetDirty() {
-        LruPoolStrategy strategy = mock(LruPoolStrategy.class);
-        LruBitmapPool pool = new LruBitmapPool(100, strategy, ALLOWED_CONFIGS);
-
-        Bitmap expected = createMutableBitmap();
-        when(strategy.get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888))).thenReturn(expected);
-        Bitmap result = pool.getDirty(100, 100, null);
-
-        assertEquals(expected, result);
-    }
-
-    private void testTrimMemory(int fillSize, int trimLevel, int expectedSize) {
-        MockStrategy strategy = new MockStrategy();
-        LruBitmapPool pool = new LruBitmapPool(MAX_SIZE, strategy, ALLOWED_CONFIGS);
-        fillPool(pool, fillSize);
-        pool.trimMemory(trimLevel);
-        assertEquals("Failed level=" + trimLevel, expectedSize, strategy.numRemoves);
-    }
-
-    @Test
-    public void testCanIncreaseSizeDynamically() {
-        int sizeMultiplier = 2;
-        pool.setSizeMultiplier(2);
-        fillPool(pool, MAX_SIZE * sizeMultiplier);
-
-        assertEquals(0, strategy.numRemoves);
-    }
-
-    @Test
-    public void testCanDecreaseSizeDynamically() {
-        fillPool(pool, MAX_SIZE);
-        assertEquals(0, strategy.numRemoves);
-
-        float sizeMultiplier = 0.5f;
-        pool.setSizeMultiplier(sizeMultiplier);
-
-        assertEquals(Math.round(MAX_SIZE * sizeMultiplier), strategy.numRemoves);
-    }
-
-    @Test
-    public void testCanResetSizeDynamically() {
-        int sizeMultiplier = 2;
-        pool.setSizeMultiplier(sizeMultiplier);
-        fillPool(pool, MAX_SIZE * sizeMultiplier);
-
-        pool.setSizeMultiplier(1);
-
-        assertEquals(Math.round(MAX_SIZE * sizeMultiplier) - MAX_SIZE, strategy.numRemoves);
-    }
-
-    @Test
-    public void testCanGetCurrentMaxSize() {
-        assertEquals(MAX_SIZE, pool.getMaxSize());
-    }
-
-    @Test
-    public void testMaxSizeChangesAfterSizeMultiplier() {
-        pool.setSizeMultiplier(2);
-        assertEquals(2 * MAX_SIZE, pool.getMaxSize());
-    }
-
-    @Test
-    public void testBitmapsWithDisallowedConfigsAreIgnored() {
-        pool = new LruBitmapPool(100, strategy, Collections.singleton(Bitmap.Config.ARGB_4444));
-
-        Bitmap bitmap = createMutableBitmap(Bitmap.Config.RGB_565);
-        pool.put(bitmap);
-
-        assertEquals(0, strategy.numPuts);
-    }
-
-    @Test
-    public void testBitmapsWithAllowedNullConfigsAreAllowed() {
-        pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
-
-        Bitmap bitmap = createMutableBitmap();
-        Shadows.shadowOf(bitmap).setConfig(null);
-
-        pool.put(bitmap);
-
-        assertEquals(1, strategy.numPuts);
-    }
-
-    private void fillPool(LruBitmapPool pool, int fillCount) {
-        for (int i = 0; i < fillCount; i++) {
-            pool.put(createMutableBitmap());
-        }
-    }
-
-    private Bitmap createMutableBitmap() {
-        return createMutableBitmap(Bitmap.Config.ARGB_8888);
-    }
-
-    private Bitmap createMutableBitmap(Bitmap.Config config) {
-        Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, config);
-        Shadows.shadowOf(bitmap).setMutable(true);
-        return bitmap;
-
-    }
-
-    private static class MockStrategy implements LruPoolStrategy {
-        private LinkedList<Bitmap> bitmaps = new LinkedList<>();
-        private int numRemoves;
-        private int numPuts;
-
-        @Override
-        public void put(Bitmap bitmap) {
-            numPuts++;
-            bitmaps.add(bitmap);
-        }
-
-        @Override
-        public Bitmap get(int width, int height, Bitmap.Config config) {
-            return bitmaps.removeLast();
-        }
-
-        @Override
-        public Bitmap removeLast() {
-            numRemoves++;
-            return bitmaps.removeLast();
-        }
-
-        @Override
-        public String logBitmap(Bitmap bitmap) {
-            return null;
-        }
-
-        @Override
-        public String logBitmap(int width, int height, Bitmap.Config config) {
-            return null;
-        }
-
-        @Override
-        public int getSize(Bitmap bitmap) {
-            return 1;
-        }
-    }
+  }
 }

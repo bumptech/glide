@@ -11,34 +11,34 @@ import java.io.IOException;
 import java.util.Map;
 
 class CacheLoader {
-    private static final String TAG = "CacheLoader";
-    private final DiskCache diskCache;
+  private static final String TAG = "CacheLoader";
+  private final DiskCache diskCache;
 
-    public CacheLoader(DiskCache diskCache) {
-        this.diskCache = diskCache;
+  public CacheLoader(DiskCache diskCache) {
+    this.diskCache = diskCache;
+  }
+
+  public <Z> Resource<Z> load(Key key, ResourceDecoder<File, Z> decoder, int width, int height,
+      Map<String, Object> options) {
+    File fromCache = diskCache.get(key);
+    if (fromCache == null) {
+      return null;
     }
 
-    public <Z> Resource<Z> load(Key key, ResourceDecoder<File, Z> decoder, int width, int height,
-            Map<String, Object> options) {
-        File fromCache = diskCache.get(key);
-        if (fromCache == null) {
-            return null;
-        }
-
-        Resource<Z> result = null;
-        try {
-            result = decoder.decode(fromCache, width, height, options);
-        } catch (IOException e) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Exception decoding image from cache", e);
-            }
-        }
-        if (result == null) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Failed to decode image from cache or not present in cache");
-            }
-            diskCache.delete(key);
-        }
-        return result;
+    Resource<Z> result = null;
+    try {
+      result = decoder.decode(fromCache, width, height, options);
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Exception decoding image from cache", e);
+      }
     }
+    if (result == null) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to decode image from cache or not present in cache");
+      }
+      diskCache.delete(key);
+    }
+    return result;
+  }
 }

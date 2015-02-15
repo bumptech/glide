@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {

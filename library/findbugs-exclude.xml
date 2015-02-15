@@ -9,27 +9,27 @@
 
     <!-- BytesResource is the wrapper that is given control of the data. -->
     <Match>
-      <Class name="com.bumptech.glide.load.resource.bytes.BytesResource" />
-      <Method name="get" />
-      <Bug pattern="EI_EXPOSE_REP" />
+        <Class name="com.bumptech.glide.load.resource.bytes.BytesResource"/>
+        <Method name="get"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
 
     <!-- We would rather expose the internal bytes than box or copy them. -->
     <Match>
-      <Class name="com.bumptech.glide.load.resource.bytes.BytesResource" />
-      <Bug pattern="EI_EXPOSE_REP2" />
+        <Class name="com.bumptech.glide.load.resource.bytes.BytesResource"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
     <!-- Byte array fetcher just wraps a byte array to return an InputStream, data is not mutated. -->
     <Match>
-      <Class name="com.bumptech.glide.load.data.ByteArrayFetcher" />
-      <Bug pattern="EI_EXPOSE_REP2" />
+        <Class name="com.bumptech.glide.load.data.ByteArrayFetcher"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
     <!-- RecyclableBufferedInputStream safely re-uses pooled byte arrays -->
     <Match>
-      <Class name="com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream" />
-      <Bug pattern="EI_EXPOSE_REP2" />
+        <Class name="com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
 </FindBugsFilter>

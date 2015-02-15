@@ -16,29 +16,30 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class DrawableCrossFadeFactoryTest {
 
-    private DrawableCrossFadeFactory factory;
+  private DrawableCrossFadeFactory factory;
 
-    @SuppressWarnings("unchecked")
-    @Before
-    public void setUp() {
-        ViewAnimationFactory<Drawable> viewAnimationFactory = mock(ViewAnimationFactory.class);
-        factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/);
-    }
+  @SuppressWarnings("unchecked")
+  @Before
+  public void setUp() {
+    ViewAnimationFactory<Drawable> viewAnimationFactory = mock(ViewAnimationFactory.class);
+    factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/);
+  }
 
-    @Test
-    public void testReturnsNoAnimationIfFromMemoryCache() {
-        assertEquals(NoTransition.<Drawable>get(), factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/));
-    }
+  @Test
+  public void testReturnsNoAnimationIfFromMemoryCache() {
+    assertEquals(NoTransition.<Drawable>get(),
+        factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/));
+  }
 
-    @Test
-    public void testReturnsReturnsAnimationIfNotFromMemoryCacheAndIsFirstResource() {
-        assertNotEquals(NoTransition.<Drawable>get(),
-                factory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/));
-    }
+  @Test
+  public void testReturnsReturnsAnimationIfNotFromMemoryCacheAndIsFirstResource() {
+    assertNotEquals(NoTransition.<Drawable>get(),
+        factory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/));
+  }
 
-    @Test
-    public void testReturnsAnimationIfNotFromMemocyCacheAndNotIsFirstResource() {
-        assertNotEquals(NoTransition.<Drawable>get(),
-                factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/));
-    }
+  @Test
+  public void testReturnsAnimationIfNotFromMemocyCacheAndNotIsFirstResource() {
+    assertNotEquals(NoTransition.<Drawable>get(),
+        factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/));
+  }
 }

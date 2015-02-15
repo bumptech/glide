@@ -24,47 +24,47 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifDrawableTransformationTest {
-    Transformation<Bitmap> wrapped;
-    GifDrawableTransformation transformation;
+  Transformation<Bitmap> wrapped;
+  GifDrawableTransformation transformation;
 
-    @SuppressWarnings("unchecked")
-    @Before
-    public void setUp() {
-        wrapped = mock(Transformation.class);
-        BitmapPool bitmapPool = mock(BitmapPool.class);
-        transformation = new GifDrawableTransformation(wrapped, bitmapPool);
-    }
+  @SuppressWarnings("unchecked")
+  @Before
+  public void setUp() {
+    wrapped = mock(Transformation.class);
+    BitmapPool bitmapPool = mock(BitmapPool.class);
+    transformation = new GifDrawableTransformation(wrapped, bitmapPool);
+  }
 
-    @Test
-    public void testReturnsWrappedTransformationId() {
-        final String id = "testId";
-        when(wrapped.getId()).thenReturn(id);
+  @Test
+  public void testReturnsWrappedTransformationId() {
+    final String id = "testId";
+    when(wrapped.getId()).thenReturn(id);
 
-        assertEquals(id, transformation.getId());
-    }
+    assertEquals(id, transformation.getId());
+  }
 
-    @Test
-    public void testSetsTransformationAsFrameTransformation() {
-        Resource<GifDrawable> resource = mock(Resource.class);
-        GifDrawable gifDrawable = mock(GifDrawable.class);
-        Transformation<Bitmap> unitTransformation = UnitTransformation.get();
-        when(gifDrawable.getFrameTransformation()).thenReturn(unitTransformation);
-        when(gifDrawable.getIntrinsicWidth()).thenReturn(500);
-        when(gifDrawable.getIntrinsicHeight()).thenReturn(500);
-        when(resource.get()).thenReturn(gifDrawable);
+  @Test
+  public void testSetsTransformationAsFrameTransformation() {
+    Resource<GifDrawable> resource = mock(Resource.class);
+    GifDrawable gifDrawable = mock(GifDrawable.class);
+    Transformation<Bitmap> unitTransformation = UnitTransformation.get();
+    when(gifDrawable.getFrameTransformation()).thenReturn(unitTransformation);
+    when(gifDrawable.getIntrinsicWidth()).thenReturn(500);
+    when(gifDrawable.getIntrinsicHeight()).thenReturn(500);
+    when(resource.get()).thenReturn(gifDrawable);
 
-        Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        when(gifDrawable.getFirstFrame()).thenReturn(firstFrame);
+    Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    when(gifDrawable.getFirstFrame()).thenReturn(firstFrame);
 
-        final int width = 123;
-        final int height = 456;
-        Bitmap expectedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Resource<Bitmap> expectedResource = mock(Resource.class);
-        when(expectedResource.get()).thenReturn(expectedBitmap);
-        when(wrapped.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(expectedResource);
+    final int width = 123;
+    final int height = 456;
+    Bitmap expectedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    Resource<Bitmap> expectedResource = mock(Resource.class);
+    when(expectedResource.get()).thenReturn(expectedBitmap);
+    when(wrapped.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(expectedResource);
 
-        transformation.transform(resource, width, height);
+    transformation.transform(resource, width, height);
 
-        verify(gifDrawable).setFrameTransformation(any(Transformation.class), eq(expectedBitmap));
-    }
+    verify(gifDrawable).setFrameTransformation(any(Transformation.class), eq(expectedBitmap));
+  }
 }

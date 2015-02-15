@@ -20,22 +20,22 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class BitmapDrawableTranscoderTest {
-    private BitmapDrawableTranscoder transcoder;
+  private BitmapDrawableTranscoder transcoder;
 
-    @Before
-    public void setUp() {
-        transcoder = new BitmapDrawableTranscoder(RuntimeEnvironment.application.getResources(),
-                mock(BitmapPool.class));
-    }
+  @Before
+  public void setUp() {
+    transcoder = new BitmapDrawableTranscoder(RuntimeEnvironment.application.getResources(),
+        mock(BitmapPool.class));
+  }
 
-    @Test
-    public void testReturnsBitmapDrawableResourceContainingGivenBitmap() {
-        Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        Resource<Bitmap> resource = mock(Resource.class);
-        when(resource.get()).thenReturn(expected);
+  @Test
+  public void testReturnsBitmapDrawableResourceContainingGivenBitmap() {
+    Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Resource<Bitmap> resource = mock(Resource.class);
+    when(resource.get()).thenReturn(expected);
 
-        Resource<BitmapDrawable> transcoded = transcoder.transcode(resource);
+    Resource<BitmapDrawable> transcoded = transcoder.transcode(resource);
 
-        assertEquals(expected, transcoded.get().getBitmap());
-    }
+    assertEquals(expected, transcoded.get().getBitmap());
+  }
 }

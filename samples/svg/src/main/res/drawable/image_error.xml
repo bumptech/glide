@@ -6,10 +6,10 @@
             <shape android:shape="line">
                 <size
                     android:width="128dp"
-                    android:height="128dp" />
+                    android:height="128dp"/>
                 <stroke
                     android:color="#f00"
-                    android:width="4dp" />
+                    android:width="4dp"/>
             </shape>
         </rotate>
     </item>
@@ -20,10 +20,10 @@
             <shape android:shape="line">
                 <size
                     android:width="128dp"
-                    android:height="128dp" />
+                    android:height="128dp"/>
                 <stroke
                     android:color="#f00"
-                    android:width="4dp" />
+                    android:width="4dp"/>
             </shape>
         </rotate>
     </item>

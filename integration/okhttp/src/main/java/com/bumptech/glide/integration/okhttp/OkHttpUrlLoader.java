@@ -16,62 +16,63 @@ import java.io.InputStream;
  */
 public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
-    private final OkHttpClient client;
+  private final OkHttpClient client;
 
-    public OkHttpUrlLoader(OkHttpClient client) {
-        this.client = client;
-    }
+  public OkHttpUrlLoader(OkHttpClient client) {
+    this.client = client;
+  }
 
-    @Override
-    public boolean handles(GlideUrl url) {
-        return true;
-    }
+  @Override
+  public boolean handles(GlideUrl url) {
+    return true;
+  }
 
-    @Override
-    public DataFetcher<InputStream> getDataFetcher(GlideUrl model, int width, int height) {
-        return new OkHttpStreamFetcher(client, model);
+  @Override
+  public DataFetcher<InputStream> getDataFetcher(GlideUrl model, int width, int height) {
+    return new OkHttpStreamFetcher(client, model);
+  }
+
+  /**
+   * The default factory for {@link OkHttpUrlLoader}s.
+   */
+  public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
+    private static volatile OkHttpClient internalClient;
+    private OkHttpClient client;
+
+    private static OkHttpClient getInternalClient() {
+      if (internalClient == null) {
+        synchronized (Factory.class) {
+          if (internalClient == null) {
+            internalClient = new OkHttpClient();
+          }
+        }
+      }
+      return internalClient;
     }
 
     /**
-     * The default factory for {@link OkHttpUrlLoader}s.
+     * Constructor for a new Factory that runs requests using a static singleton client.
      */
-    public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
-        private static volatile OkHttpClient internalClient;
-        private OkHttpClient client;
-
-        private static OkHttpClient getInternalClient() {
-            if (internalClient == null) {
-                synchronized (Factory.class) {
-                    if (internalClient == null) {
-                        internalClient = new OkHttpClient();
-                    }
-                }
-            }
-            return internalClient;
-        }
-
-        /**
-         * Constructor for a new Factory that runs requests using a static singleton client.
-         */
-        public Factory() {
-            this(getInternalClient());
-        }
-
-        /**
-         * Constructor for a new Factory that runs requests using given client.
-         */
-        public Factory(OkHttpClient client) {
-            this.client = client;
-        }
-
-        @Override
-        public ModelLoader<GlideUrl, InputStream> build(Context context, MultiModelLoaderFactory multiFactory) {
-            return new OkHttpUrlLoader(client);
-        }
-
-        @Override
-        public void teardown() {
-            // Do nothing, this instance doesn't own the client.
-        }
+    public Factory() {
+      this(getInternalClient());
     }
+
+    /**
+     * Constructor for a new Factory that runs requests using given client.
+     */
+    public Factory(OkHttpClient client) {
+      this.client = client;
+    }
+
+    @Override
+    public ModelLoader<GlideUrl, InputStream> build(Context context,
+        MultiModelLoaderFactory multiFactory) {
+      return new OkHttpUrlLoader(client);
+    }
+
+    @Override
+    public void teardown() {
+      // Do nothing, this instance doesn't own the client.
+    }
+  }
 }

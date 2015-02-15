@@ -16,21 +16,22 @@ import java.util.Map;
  */
 public class BitmapDrawableEncoder implements ResourceEncoder<BitmapDrawable> {
 
-    private final BitmapPool bitmapPool;
-    private final ResourceEncoder<Bitmap> encoder;
+  private final BitmapPool bitmapPool;
+  private final ResourceEncoder<Bitmap> encoder;
 
-    public BitmapDrawableEncoder(BitmapPool bitmapPool, ResourceEncoder<Bitmap> encoder) {
-        this.bitmapPool = bitmapPool;
-        this.encoder = encoder;
-    }
+  public BitmapDrawableEncoder(BitmapPool bitmapPool, ResourceEncoder<Bitmap> encoder) {
+    this.bitmapPool = bitmapPool;
+    this.encoder = encoder;
+  }
 
-    @Override
-    public boolean encode(Resource<BitmapDrawable> data, OutputStream os, Map<String, Object> options) {
-        return encoder.encode(new BitmapResource(data.get().getBitmap(), bitmapPool), os, options);
-    }
+  @Override
+  public boolean encode(Resource<BitmapDrawable> data, OutputStream os,
+      Map<String, Object> options) {
+    return encoder.encode(new BitmapResource(data.get().getBitmap(), bitmapPool), os, options);
+  }
 
-    @Override
-    public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
-        return encoder.getEncodeStrategy(options);
-    }
+  @Override
+  public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
+    return encoder.getEncodeStrategy(options);
+  }
 }

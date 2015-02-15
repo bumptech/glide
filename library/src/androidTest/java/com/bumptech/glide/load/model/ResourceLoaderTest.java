@@ -26,25 +26,27 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ResourceLoaderTest {
 
-    @Mock ModelLoader<Uri, Object> uriLoader;
-    @Mock DataFetcher<Object> fetcher;
+  @Mock
+  ModelLoader<Uri, Object> uriLoader;
+  @Mock
+  DataFetcher<Object> fetcher;
 
-    private ResourceLoader<Object> loader;
+  private ResourceLoader<Object> loader;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
 
-        loader = new ResourceLoader<>(RuntimeEnvironment.application, uriLoader);
-    }
+    loader = new ResourceLoader<>(RuntimeEnvironment.application, uriLoader);
+  }
 
-    @Test
-    public void testCanHandleId() {
-        int id = android.R.drawable.star_off;
-        Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
-        when(uriLoader.getDataFetcher(eq(contentUri), anyInt(), anyInt())).thenReturn(fetcher);
+  @Test
+  public void testCanHandleId() {
+    int id = android.R.drawable.star_off;
+    Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
+    when(uriLoader.getDataFetcher(eq(contentUri), anyInt(), anyInt())).thenReturn(fetcher);
 
-        assertTrue(loader.handles(id));
-        assertEquals(fetcher, loader.getDataFetcher(id, 100, 100));
-    }
+    assertTrue(loader.handles(id));
+    assertEquals(fetcher, loader.getDataFetcher(id, 100, 100));
+  }
 }

@@ -25,23 +25,23 @@ import org.robolectric.internal.ShadowExtractor;
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = { ContentResolverShadow.class })
 public class FileDescriptorLocalUriFetcherTest {
 
-    @Test
-    public void testLoadsFileDescriptor() throws Exception {
-        final Context context = RuntimeEnvironment.application;
-        final Uri uri = Uri.parse("file://nothing");
+  @Test
+  public void testLoadsFileDescriptor() throws Exception {
+    final Context context = RuntimeEnvironment.application;
+    final Uri uri = Uri.parse("file://nothing");
 
-        ContentResolver contentResolver = context.getContentResolver();
-        ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
+    ContentResolver contentResolver = context.getContentResolver();
+    ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
 
-        AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
-        ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
-        when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(parcelFileDescriptor);
-        shadow.registerFileDescriptor(uri, assetFileDescriptor);
+    AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
+    ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
+    when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(parcelFileDescriptor);
+    shadow.registerFileDescriptor(uri, assetFileDescriptor);
 
-        FileDescriptorLocalUriFetcher fetcher = new FileDescriptorLocalUriFetcher(context, uri);
-        ParcelFileDescriptor descriptor = fetcher.loadData(Priority.NORMAL);
+    FileDescriptorLocalUriFetcher fetcher = new FileDescriptorLocalUriFetcher(context, uri);
+    ParcelFileDescriptor descriptor = fetcher.loadData(Priority.NORMAL);
 
-        assertEquals(parcelFileDescriptor, descriptor);
-    }
+    assertEquals(parcelFileDescriptor, descriptor);
+  }
 
 }

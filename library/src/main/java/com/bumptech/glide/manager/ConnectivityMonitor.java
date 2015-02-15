@@ -5,15 +5,15 @@ package com.bumptech.glide.manager;
  */
 public interface ConnectivityMonitor extends LifecycleListener {
 
+  /**
+   * An interface for listening to network connectivity events picked up by the monitor.
+   */
+  interface ConnectivityListener {
     /**
-     * An interface for listening to network connectivity events picked up by the monitor.
+     * Called when the connectivity state changes.
+     *
+     * @param isConnected True if we're currently connected to a network, false otherwise.
      */
-    interface ConnectivityListener {
-        /**
-         * Called when the connectivity state changes.
-         *
-         * @param isConnected True if we're currently connected to a network, false otherwise.
-         */
-        void onConnectivityChanged(boolean isConnected);
-    }
+    void onConnectivityChanged(boolean isConnected);
+  }
 }

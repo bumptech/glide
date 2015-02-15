@@ -16,18 +16,19 @@ import java.io.InputStream;
 
 @RunWith(JUnit4.class)
 public class HttpGlideUrlLoaderTest {
-    private HttpGlideUrlLoader loader;
-    private GlideUrl model;
+  private HttpGlideUrlLoader loader;
+  private GlideUrl model;
 
-    @SuppressWarnings("unchecked")
-    @Before
-    public void setUp() {
-        loader = new HttpGlideUrlLoader();
-        model = mock(GlideUrl.class);
-    }
-    @Test
-    public void testReturnsValidFetcher() {
-        DataFetcher<InputStream> result = loader.getDataFetcher(model, 100, 100);
-        assertThat(result).isInstanceOf(HttpUrlFetcher.class);
-    }
+  @SuppressWarnings("unchecked")
+  @Before
+  public void setUp() {
+    loader = new HttpGlideUrlLoader();
+    model = mock(GlideUrl.class);
+  }
+
+  @Test
+  public void testReturnsValidFetcher() {
+    DataFetcher<InputStream> result = loader.getDataFetcher(model, 100, 100);
+    assertThat(result).isInstanceOf(HttpUrlFetcher.class);
+  }
 }

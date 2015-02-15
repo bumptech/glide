@@ -13,12 +13,12 @@ import java.io.InputStream;
 @RunWith(JUnit4.class)
 public class ByteArrayLoaderTest {
 
-    @Test
-    public void testCanHandleByteArray() {
-        ByteArrayLoader loader = new ByteArrayLoader();
+  @Test
+  public void testCanHandleByteArray() {
+    ByteArrayLoader loader = new ByteArrayLoader();
 
-        byte[] data = new byte[10];
-        DataFetcher<InputStream> fetcher = loader.getDataFetcher(data, -1, -1);
-        assertNotNull(fetcher);
-    }
+    byte[] data = new byte[10];
+    DataFetcher<InputStream> fetcher = loader.getDataFetcher(data, -1, -1);
+    assertNotNull(fetcher);
+  }
 }

@@ -10,10 +10,10 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowLooper;
 
 @Implements(Looper.class)
-public class GlideShadowLooper extends ShadowLooper  {
+public class GlideShadowLooper extends ShadowLooper {
 
-    @Implementation
-    public static MessageQueue myQueue() {
-        return mock(MessageQueue.class);
-    }
+  @Implementation
+  public static MessageQueue myQueue() {
+    return mock(MessageQueue.class);
+  }
 }

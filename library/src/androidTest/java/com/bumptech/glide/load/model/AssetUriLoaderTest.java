@@ -24,23 +24,24 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class AssetUriLoaderTest {
-    private static final int IMAGE_SIDE = 10;
+  private static final int IMAGE_SIDE = 10;
 
-    @Mock AssetUriLoader.AssetFetcherFactory<Object> factory;
-    private AssetUriLoader<Object> loader;
+  @Mock
+  AssetUriLoader.AssetFetcherFactory<Object> factory;
+  private AssetUriLoader<Object> loader;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        loader = new AssetUriLoader<>(RuntimeEnvironment.application.getAssets(), factory);
-    }
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    loader = new AssetUriLoader<>(RuntimeEnvironment.application.getAssets(), factory);
+  }
 
-    @Test
-    public void testHandlesAssetUris() {
-        Uri assetUri = Uri.parse("file:///android_asset/assetName");
-        DataFetcher<Object> expected = mock(DataFetcher.class);
-        when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(expected);
-        assertTrue(loader.handles(assetUri));
-        assertEquals(expected, loader.getDataFetcher(assetUri, IMAGE_SIDE, IMAGE_SIDE));
-    }
+  @Test
+  public void testHandlesAssetUris() {
+    Uri assetUri = Uri.parse("file:///android_asset/assetName");
+    DataFetcher<Object> expected = mock(DataFetcher.class);
+    when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(expected);
+    assertTrue(loader.handles(assetUri));
+    assertEquals(expected, loader.getDataFetcher(assetUri, IMAGE_SIDE, IMAGE_SIDE));
+  }
 }

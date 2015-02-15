@@ -27,186 +27,182 @@ import java.util.UUID;
 
 class GifFrameLoader {
 
-    private final FrameCallback callback;
-    private final GifDecoder gifDecoder;
+  private final FrameCallback callback;
+  private final GifDecoder gifDecoder;
+  private final Handler handler;
+  private final Context context;
+
+  private boolean isRunning = false;
+  private boolean isLoadPending = false;
+  private RequestBuilder<Bitmap> requestBuilder;
+  private DelayTarget current;
+  private boolean isCleared;
+
+  public interface FrameCallback {
+    void onFrameReady(int index);
+  }
+
+  public GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, int width,
+      int height) {
+    this(context, callback, gifDecoder, null, getRequestBuilder(context, width, height));
+  }
+
+  GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, Handler handler,
+      RequestBuilder<Bitmap> requestBuilder) {
+    if (handler == null) {
+      handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
+    }
+    this.context = context.getApplicationContext();
+    this.callback = callback;
+    this.gifDecoder = gifDecoder;
+    this.handler = handler;
+    this.requestBuilder = requestBuilder;
+  }
+
+  @SuppressWarnings("unchecked")
+  public void setFrameTransformation(Transformation<Bitmap> transformation) {
+    Preconditions.checkNotNull(transformation);
+    requestBuilder = requestBuilder.apply(new RequestOptions().transform(context, transformation));
+  }
+
+  public void start() {
+    if (isRunning) {
+      return;
+    }
+    isRunning = true;
+    isCleared = false;
+
+    loadNextFrame();
+  }
+
+  public void stop() {
+    isRunning = false;
+  }
+
+  public void clear() {
+    stop();
+    if (current != null) {
+      Glide.clear(current);
+      current = null;
+    }
+    isCleared = true;
+    // test.
+  }
+
+  public Bitmap getCurrentFrame() {
+    return current != null ? current.getResource() : null;
+  }
+
+  private void loadNextFrame() {
+    if (!isRunning || isLoadPending) {
+      return;
+    }
+    isLoadPending = true;
+
+    gifDecoder.advance();
+    long targetTime = SystemClock.uptimeMillis() + gifDecoder.getNextDelay();
+    DelayTarget next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
+    requestBuilder.apply(signatureOf(new FrameSignature())).load(gifDecoder).into(next);
+  }
+
+  // Visible for testing.
+  void onFrameReady(DelayTarget delayTarget) {
+    if (isCleared) {
+      handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, delayTarget).sendToTarget();
+      return;
+    }
+
+    DelayTarget previous = current;
+    current = delayTarget;
+    callback.onFrameReady(delayTarget.index);
+
+    if (previous != null) {
+      handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, previous).sendToTarget();
+    }
+
+    isLoadPending = false;
+    loadNextFrame();
+  }
+
+  private class FrameLoaderCallback implements Handler.Callback {
+    public static final int MSG_DELAY = 1;
+    public static final int MSG_CLEAR = 2;
+
+    @Override
+    public boolean handleMessage(Message msg) {
+      if (msg.what == MSG_DELAY) {
+        GifFrameLoader.DelayTarget target = (DelayTarget) msg.obj;
+        onFrameReady(target);
+        return true;
+      } else if (msg.what == MSG_CLEAR) {
+        GifFrameLoader.DelayTarget target = (DelayTarget) msg.obj;
+        Glide.clear(target);
+      }
+      return false;
+    }
+  }
+
+  // Visible for testing.
+  static class DelayTarget extends SimpleTarget<Bitmap> {
     private final Handler handler;
-    private final Context context;
+    private final int index;
+    private final long targetTime;
+    private Bitmap resource;
 
-    private boolean isRunning = false;
-    private boolean isLoadPending = false;
-    private RequestBuilder<Bitmap> requestBuilder;
-    private DelayTarget current;
-    private boolean isCleared;
-
-    public interface FrameCallback {
-        void onFrameReady(int index);
+    public DelayTarget(Handler handler, int index, long targetTime) {
+      this.handler = handler;
+      this.index = index;
+      this.targetTime = targetTime;
     }
 
-    public GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, int width, int height) {
-        this(context, callback, gifDecoder, null, getRequestBuilder(context, width, height));
+    public Bitmap getResource() {
+      return resource;
     }
 
-    GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, Handler handler,
-            RequestBuilder<Bitmap> requestBuilder) {
-        if (handler == null) {
-            handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
-        }
-        this.context = context.getApplicationContext();
-        this.callback = callback;
-        this.gifDecoder = gifDecoder;
-        this.handler = handler;
-        this.requestBuilder = requestBuilder;
+    @Override
+    public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+      this.resource = resource;
+      Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
+      handler.sendMessageAtTime(msg, targetTime);
+    }
+  }
+
+  private static RequestBuilder<Bitmap> getRequestBuilder(Context context, int width, int height) {
+    return Glide.with(context).asBitmap().apply(
+        diskCacheStrategyOf(DiskCacheStrategy.NONE).skipMemoryCache(true).override(width, height));
+  }
+
+  // Visible for testing.
+  static class FrameSignature implements Key {
+    private final UUID uuid;
+
+    public FrameSignature() {
+      this(UUID.randomUUID());
     }
 
-    @SuppressWarnings("unchecked")
-    public void setFrameTransformation(Transformation<Bitmap> transformation) {
-        Preconditions.checkNotNull(transformation);
-        requestBuilder = requestBuilder.apply(new RequestOptions().transform(context, transformation));
+    // VisibleForTesting.
+    FrameSignature(UUID uuid) {
+      this.uuid = uuid;
     }
 
-    public void start() {
-        if (isRunning) {
-            return;
-        }
-        isRunning = true;
-        isCleared = false;
-
-        loadNextFrame();
+    @Override
+    public boolean equals(Object o) {
+      if (o instanceof FrameSignature) {
+        FrameSignature other = (FrameSignature) o;
+        return other.uuid.equals(uuid);
+      }
+      return false;
     }
 
-    public void stop() {
-        isRunning = false;
+    @Override
+    public int hashCode() {
+      return uuid.hashCode();
     }
 
-    public void clear() {
-        stop();
-        if (current != null) {
-            Glide.clear(current);
-            current = null;
-        }
-        isCleared = true;
-        // test.
+    @Override
+    public void updateDiskCacheKey(MessageDigest messageDigest)
+        throws UnsupportedEncodingException {
+      throw new UnsupportedOperationException("Not implemented");
     }
-
-    public Bitmap getCurrentFrame() {
-        return current != null ? current.getResource() : null;
-    }
-
-    private void loadNextFrame() {
-        if (!isRunning || isLoadPending) {
-            return;
-        }
-        isLoadPending = true;
-
-        gifDecoder.advance();
-        long targetTime = SystemClock.uptimeMillis() + gifDecoder.getNextDelay();
-        DelayTarget next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
-        requestBuilder
-                .apply(signatureOf(new FrameSignature()))
-                .load(gifDecoder)
-                .into(next);
-    }
-
-    // Visible for testing.
-    void onFrameReady(DelayTarget delayTarget) {
-        if (isCleared) {
-            handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, delayTarget).sendToTarget();
-            return;
-        }
-
-        DelayTarget previous = current;
-        current = delayTarget;
-        callback.onFrameReady(delayTarget.index);
-
-        if (previous != null) {
-            handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, previous).sendToTarget();
-        }
-
-        isLoadPending = false;
-        loadNextFrame();
-    }
-
-    private class FrameLoaderCallback implements Handler.Callback {
-        public static final int MSG_DELAY = 1;
-        public static final int MSG_CLEAR = 2;
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            if (msg.what == MSG_DELAY) {
-                GifFrameLoader.DelayTarget target = (DelayTarget) msg.obj;
-                onFrameReady(target);
-                return true;
-            } else if (msg.what == MSG_CLEAR) {
-                GifFrameLoader.DelayTarget target = (DelayTarget) msg.obj;
-                Glide.clear(target);
-            }
-            return false;
-        }
-    }
-
-    // Visible for testing.
-    static class DelayTarget extends SimpleTarget<Bitmap> {
-        private final Handler handler;
-        private final int index;
-        private final long targetTime;
-        private Bitmap resource;
-
-        public DelayTarget(Handler handler, int index, long targetTime) {
-            this.handler = handler;
-            this.index = index;
-            this.targetTime = targetTime;
-        }
-
-        public Bitmap getResource() {
-            return resource;
-        }
-
-        @Override
-        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-            this.resource = resource;
-            Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
-            handler.sendMessageAtTime(msg, targetTime);
-        }
-    }
-
-    private static RequestBuilder<Bitmap> getRequestBuilder(Context context, int width, int height) {
-        return Glide.with(context)
-                .asBitmap()
-                .apply(diskCacheStrategyOf(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .override(width, height));
-    }
-
-    // Visible for testing.
-    static class FrameSignature implements Key {
-        private final UUID uuid;
-
-        public FrameSignature() {
-            this(UUID.randomUUID());
-        }
-
-        // VisibleForTesting.
-        FrameSignature(UUID uuid) {
-            this.uuid = uuid;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof FrameSignature) {
-                FrameSignature other = (FrameSignature) o;
-                return other.uuid.equals(uuid);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return uuid.hashCode();
-        }
-
-        @Override
-        public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-    }
+  }
 }

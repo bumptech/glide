@@ -25,30 +25,30 @@ import java.util.Map;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class FileDescriptorBitmapDecoderTest {
 
-    private FileDescriptorBitmapDecoder decoder;
-    private BitmapPool bitmapPool;
-    private VideoBitmapDecoder videoDecoder;
-    private Map<String, Object> options;
+  private FileDescriptorBitmapDecoder decoder;
+  private BitmapPool bitmapPool;
+  private VideoBitmapDecoder videoDecoder;
+  private Map<String, Object> options;
 
-    @Before
-    public void setUp() {
-        bitmapPool = mock(BitmapPool.class);
-        videoDecoder = mock(VideoBitmapDecoder.class);
-        decoder = new FileDescriptorBitmapDecoder(videoDecoder, bitmapPool);
-        options = Collections.emptyMap();
-    }
+  @Before
+  public void setUp() {
+    bitmapPool = mock(BitmapPool.class);
+    videoDecoder = mock(VideoBitmapDecoder.class);
+    decoder = new FileDescriptorBitmapDecoder(videoDecoder, bitmapPool);
+    options = Collections.emptyMap();
+  }
 
-    @Test
-    public void testReturnsBitmapFromWrappedDecoderAsResource() throws IOException {
-        ParcelFileDescriptor source = mock(ParcelFileDescriptor.class);
-        int width = 100;
-        int height = 200;
-        Bitmap expected = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
-        when(videoDecoder.decode(eq(source), eq(bitmapPool), eq(width), eq(height), eq(options)))
-                .thenReturn(expected);
+  @Test
+  public void testReturnsBitmapFromWrappedDecoderAsResource() throws IOException {
+    ParcelFileDescriptor source = mock(ParcelFileDescriptor.class);
+    int width = 100;
+    int height = 200;
+    Bitmap expected = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
+    when(videoDecoder.decode(eq(source), eq(bitmapPool), eq(width), eq(height), eq(options)))
+        .thenReturn(expected);
 
-        Resource<Bitmap> bitmapResource = decoder.decode(source, width, height, options);
+    Resource<Bitmap> bitmapResource = decoder.decode(source, width, height, options);
 
-        assertEquals(expected, bitmapResource.get());
-    }
+    assertEquals(expected, bitmapResource.get());
+  }
 }

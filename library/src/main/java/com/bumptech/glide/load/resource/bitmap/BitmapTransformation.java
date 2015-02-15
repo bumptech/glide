@@ -11,8 +11,9 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 
 /**
- * A simple {@link com.bumptech.glide.load.Transformation} for transforming {@link android.graphics.Bitmap}s that
- * abstracts away dealing with {@link com.bumptech.glide.load.engine.Resource} objects for subclasses.
+ * A simple {@link com.bumptech.glide.load.Transformation} for transforming
+ * {@link android.graphics.Bitmap}s that abstracts away dealing with
+ * {@link com.bumptech.glide.load.engine.Resource} objects for subclasses.
  *
  * Use cases will look something like this:
  * <pre>
@@ -32,54 +33,58 @@ import com.bumptech.glide.util.Util;
  */
 public abstract class BitmapTransformation implements Transformation<Bitmap> {
 
-    private BitmapPool bitmapPool;
+  private BitmapPool bitmapPool;
 
-    public BitmapTransformation(Context context) {
-        this(Glide.get(context).getBitmapPool());
+  public BitmapTransformation(Context context) {
+    this(Glide.get(context).getBitmapPool());
+  }
+
+  public BitmapTransformation(BitmapPool bitmapPool) {
+    this.bitmapPool = bitmapPool;
+  }
+
+  @Override
+  public final Resource<Bitmap> transform(Resource<Bitmap> resource, int outWidth, int outHeight) {
+    if (!Util.isValidDimensions(outWidth, outHeight)) {
+      throw new IllegalArgumentException(
+          "Cannot apply transformation on width: " + outWidth + " or height: " + outHeight
+              + " less than or equal to zero and not Target.SIZE_ORIGINAL");
+    }
+    Bitmap toTransform = resource.get();
+    int targetWidth = outWidth == Target.SIZE_ORIGINAL ? toTransform.getWidth() : outWidth;
+    int targetHeight = outHeight == Target.SIZE_ORIGINAL ? toTransform.getHeight() : outHeight;
+    Bitmap transformed = transform(bitmapPool, toTransform, targetWidth, targetHeight);
+
+    final Resource<Bitmap> result;
+    if (toTransform.equals(transformed)) {
+      result = resource;
+    } else {
+      result = BitmapResource.obtain(transformed, bitmapPool);
     }
 
-    public BitmapTransformation(BitmapPool bitmapPool) {
-        this.bitmapPool = bitmapPool;
-    }
+    return result;
+  }
 
-    @Override
-    public final Resource<Bitmap> transform(Resource<Bitmap> resource, int outWidth, int outHeight) {
-        if (!Util.isValidDimensions(outWidth, outHeight)) {
-            throw new IllegalArgumentException("Cannot apply transformation on width: " + outWidth + " or height: "
-                    + outHeight + " less than or equal to zero and not Target.SIZE_ORIGINAL");
-        }
-        Bitmap toTransform = resource.get();
-        int targetWidth = outWidth == Target.SIZE_ORIGINAL ? toTransform.getWidth() : outWidth;
-        int targetHeight = outHeight == Target.SIZE_ORIGINAL ? toTransform.getHeight() : outHeight;
-        Bitmap transformed = transform(bitmapPool, toTransform, targetWidth, targetHeight);
-
-        final Resource<Bitmap> result;
-        if (toTransform.equals(transformed)) {
-            result = resource;
-        } else {
-            result = BitmapResource.obtain(transformed, bitmapPool);
-        }
-
-        return result;
-    }
-
-    /**
-     * Transforms the given {@link android.graphics.Bitmap} based on the given dimensions and returns the transformed
-     * result.
-     *
-     * <p>
-     *     outWidth and outHeight will never be {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL}, this
-     *     class converts them to be the size of the Bitmap we're going to transform before calling this method.
-     * </p>
-     *
-     * @param pool A {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} that can be used to obtain and
-     *             return intermediate {@link Bitmap}s used in this transformation. For every
-     *             {@link android.graphics.Bitmap} obtained from the pool during this transformation, a
-     *             {@link android.graphics.Bitmap} must also be returned.
-     * @param toTransform The {@link android.graphics.Bitmap} to transform.
-     * @param outWidth The ideal width of the transformed bitmap (the transformed width does not need to match exactly).
-     * @param outHeight The ideal height of the transformed bitmap (the transformed heightdoes not need to match
-     *                  exactly).
-     */
-    protected abstract Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight);
+  /**
+   * Transforms the given {@link android.graphics.Bitmap} based on the given dimensions and returns
+   * the transformed result.
+   *
+   * <p> outWidth and outHeight will never be
+   * {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL},
+   * this class converts them to be the size of the Bitmap we're going to transform before calling
+   * this method. </p>
+   *
+   * @param pool        A {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} that can
+   *                    be used to obtain and return intermediate {@link Bitmap}s used in this
+   *                    transformation. For every {@link android.graphics.Bitmap} obtained from the
+   *                    pool during this transformation, a {@link android.graphics.Bitmap} must also
+   *                    be returned.
+   * @param toTransform The {@link android.graphics.Bitmap} to transform.
+   * @param outWidth    The ideal width of the transformed bitmap (the transformed width does not
+   *                    need to match exactly).
+   * @param outHeight   The ideal height of the transformed bitmap (the transformed heightdoes not
+   *                    need to match exactly).
+   */
+  protected abstract Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth,
+      int outHeight);
 }

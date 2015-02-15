@@ -29,97 +29,96 @@ import java.util.Map;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class VideoBitmapDecoderTest {
-    private BitmapPool bitmapPool;
-    private ParcelFileDescriptor resource;
-    private VideoBitmapDecoder decoder;
-    private VideoBitmapDecoder.MediaMetadataRetrieverFactory factory;
-    private MediaMetadataRetriever retriever;
-    private Map<String, Object> options;
+  private BitmapPool bitmapPool;
+  private ParcelFileDescriptor resource;
+  private VideoBitmapDecoder decoder;
+  private VideoBitmapDecoder.MediaMetadataRetrieverFactory factory;
+  private MediaMetadataRetriever retriever;
+  private Map<String, Object> options;
 
-    @Before
-    public void setup() {
-        bitmapPool = mock(BitmapPool.class);
-        resource = mock(ParcelFileDescriptor.class);
-        factory = mock(VideoBitmapDecoder.MediaMetadataRetrieverFactory.class);
-        retriever = mock(MediaMetadataRetriever.class);
-        when(factory.build()).thenReturn(retriever);
-        decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory() {
-            @Override
-            public MediaMetadataRetriever build() {
-                return factory.build();
-            }
-        });
-        options = new HashMap<>();
-    }
+  @Before
+  public void setup() {
+    bitmapPool = mock(BitmapPool.class);
+    resource = mock(ParcelFileDescriptor.class);
+    factory = mock(VideoBitmapDecoder.MediaMetadataRetrieverFactory.class);
+    retriever = mock(MediaMetadataRetriever.class);
+    when(factory.build()).thenReturn(retriever);
+    decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory() {
+      @Override
+      public MediaMetadataRetriever build() {
+        return factory.build();
+      }
+    });
+    options = new HashMap<>();
+  }
 
-    @Test
-    public void testReturnsRetrievedFrameForResource() throws IOException {
-        Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        when(retriever.getFrameAtTime()).thenReturn(expected);
+  @Test
+  public void testReturnsRetrievedFrameForResource() throws IOException {
+    Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    when(retriever.getFrameAtTime()).thenReturn(expected);
 
-        FileDescriptor toSet = FileDescriptor.in;
-        when(resource.getFileDescriptor()).thenReturn(toSet);
-        Bitmap result = decoder.decode(resource, bitmapPool, 100, 100, options);
+    FileDescriptor toSet = FileDescriptor.in;
+    when(resource.getFileDescriptor()).thenReturn(toSet);
+    Bitmap result = decoder.decode(resource, bitmapPool, 100, 100, options);
 
-        verify(retriever).setDataSource(eq(toSet));
-        assertEquals(expected, result);
-    }
+    verify(retriever).setDataSource(eq(toSet));
+    assertEquals(expected, result);
+  }
 
-    @Test
-    public void testReleasesMediaMetadataRetriever() throws IOException {
-        decoder.decode(resource, bitmapPool, 1, 2, options);
+  @Test
+  public void testReleasesMediaMetadataRetriever() throws IOException {
+    decoder.decode(resource, bitmapPool, 1, 2, options);
 
-        verify(retriever).release();
-    }
+    verify(retriever).release();
+  }
 
-    @Test
-    public void testClosesResource() throws IOException {
-        decoder.decode(resource, bitmapPool, 1, 2, options);
+  @Test
+  public void testClosesResource() throws IOException {
+    decoder.decode(resource, bitmapPool, 1, 2, options);
 
-        verify(resource).close();
-    }
+    verify(resource).close();
+  }
 
-    @Test
-    public void testHasValidId() {
-        Util.assertClassHasValidId(VideoBitmapDecoder.class, decoder.getId());
-    }
+  @Test
+  public void testHasValidId() {
+    Util.assertClassHasValidId(VideoBitmapDecoder.class, decoder.getId());
+  }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testThrowsExceptionIfCalledWithInvalidFrame() throws IOException {
-        options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, -5);
-        new VideoBitmapDecoder().decode(resource, bitmapPool, 100, 100, options);
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void testThrowsExceptionIfCalledWithInvalidFrame() throws IOException {
+    options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, -5);
+    new VideoBitmapDecoder().decode(resource, bitmapPool, 100, 100, options);
+  }
 
-    @Test
-    public void testSpecifiesThumbnailFrameIfICalledWithFrameNumber() throws IOException {
-        int frame = 5;
-        options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, frame);
-        decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory()  {
-          @Override
-          public MediaMetadataRetriever build() {
-            return factory.build();
-          }
-        });
+  @Test
+  public void testSpecifiesThumbnailFrameIfICalledWithFrameNumber() throws IOException {
+    int frame = 5;
+    options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, frame);
+    decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory() {
+      @Override
+      public MediaMetadataRetriever build() {
+        return factory.build();
+      }
+    });
 
-        decoder.decode(resource, bitmapPool, 100, 100, options);
+    decoder.decode(resource, bitmapPool, 100, 100, options);
 
-        verify(retriever).getFrameAtTime(frame);
-        verify(retriever, never()).getFrameAtTime();
-    }
+    verify(retriever).getFrameAtTime(frame);
+    verify(retriever, never()).getFrameAtTime();
+  }
 
-    @Test
-    public void testDoesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber()
-        throws IOException {
-      decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory()  {
-        @Override
-        public MediaMetadataRetriever build() {
-          return factory.build();
-        }
-      });
+  @Test
+  public void testDoesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber() throws IOException {
+    decoder = new VideoBitmapDecoder(new VideoBitmapDecoder.MediaMetadataRetrieverFactory() {
+      @Override
+      public MediaMetadataRetriever build() {
+        return factory.build();
+      }
+    });
 
-      decoder.decode(resource, bitmapPool, 100, 100, options);
+    decoder.decode(resource, bitmapPool, 100, 100, options);
 
-      verify(retriever).getFrameAtTime();
-      verify(retriever, never()).getFrameAtTime(anyLong());
-    }
+    verify(retriever).getFrameAtTime();
+    verify(retriever, never()).getFrameAtTime(anyLong());
+  }
 }

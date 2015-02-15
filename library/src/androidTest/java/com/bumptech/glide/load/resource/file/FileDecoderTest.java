@@ -17,20 +17,20 @@ import java.util.Map;
 @RunWith(JUnit4.class)
 public class FileDecoderTest {
 
-    private FileDecoder decoder;
-    private Map<String, Object> options;
+  private FileDecoder decoder;
+  private Map<String, Object> options;
 
-    @Before
-    public void setUp() {
-        decoder = new FileDecoder();
-        options = Collections.emptyMap();
-    }
+  @Before
+  public void setUp() {
+    decoder = new FileDecoder();
+    options = Collections.emptyMap();
+  }
 
-    @Test
-    public void testReturnsGivenFileAsResource() throws IOException {
-        File expected = new File("testFile");
-        Resource<File> decoded = decoder.decode(expected, 1, 1, options);
+  @Test
+  public void testReturnsGivenFileAsResource() throws IOException {
+    File expected = new File("testFile");
+    Resource<File> decoded = decoder.decode(expected, 1, 1, options);
 
-        assertEquals(expected, decoded.get());
-    }
+    assertEquals(expected, decoded.get());
+  }
 }

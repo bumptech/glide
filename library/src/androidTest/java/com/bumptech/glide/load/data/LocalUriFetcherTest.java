@@ -25,56 +25,58 @@ import java.io.IOException;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class LocalUriFetcherTest {
-    private TestLocalUriFetcher fetcher;
+  private TestLocalUriFetcher fetcher;
 
-    @Before
-    public void setUp() {
-        fetcher = new TestLocalUriFetcher(RuntimeEnvironment.application, Uri.parse("content://empty"));
+  @Before
+  public void setUp() {
+    fetcher = new TestLocalUriFetcher(RuntimeEnvironment.application, Uri.parse("content://empty"));
+  }
+
+  @Test
+  public void testClosesDataOnCleanup() throws Exception {
+    Closeable closeable = fetcher.loadData(Priority.NORMAL);
+    fetcher.cleanup();
+
+    verify(closeable).close();
+  }
+
+  @Test
+  public void testDoesNotCloseNullData() throws IOException {
+    fetcher.cleanup();
+
+    verify(fetcher.closeable, never()).close();
+  }
+
+  @Test
+  public void testHandlesExceptionOnClose() throws Exception {
+    Closeable closeable = fetcher.loadData(Priority.NORMAL);
+
+    doThrow(new IOException("Test")).when(closeable).close();
+    fetcher.cleanup();
+    verify(closeable).close();
+  }
+
+  private static class TestLocalUriFetcher extends LocalUriFetcher<Closeable> {
+    final Closeable closeable = mock(Closeable.class);
+
+    public TestLocalUriFetcher(Context context, Uri uri) {
+      super(context, uri);
     }
 
-    @Test
-    public void testClosesDataOnCleanup() throws Exception {
-        Closeable closeable = fetcher.loadData(Priority.NORMAL);
-        fetcher.cleanup();
-
-        verify(closeable).close();
+    @Override
+    protected Closeable loadResource(Uri uri, ContentResolver contentResolver)
+        throws FileNotFoundException {
+      return closeable;
     }
 
-    @Test
-    public void testDoesNotCloseNullData() throws IOException {
-        fetcher.cleanup();
-
-        verify(fetcher.closeable, never()).close();
+    @Override
+    protected void close(Closeable data) throws IOException {
+      data.close();
     }
 
-    @Test
-    public void testHandlesExceptionOnClose() throws Exception {
-        Closeable closeable = fetcher.loadData(Priority.NORMAL);
-
-        doThrow(new IOException("Test")).when(closeable).close();
-        fetcher.cleanup();
-        verify(closeable).close();
+    @Override
+    public Class<Closeable> getDataClass() {
+      return Closeable.class;
     }
-
-    private static class TestLocalUriFetcher extends LocalUriFetcher<Closeable> {
-        final Closeable closeable = mock(Closeable.class);
-        public TestLocalUriFetcher(Context context, Uri uri) {
-            super(context, uri);
-        }
-
-        @Override
-        protected Closeable loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException {
-            return closeable;
-        }
-
-        @Override
-        protected void close(Closeable data) throws IOException {
-            data.close();
-        }
-
-        @Override
-        public Class<Closeable> getDataClass() {
-            return Closeable.class;
-        }
-    }
+  }
 }

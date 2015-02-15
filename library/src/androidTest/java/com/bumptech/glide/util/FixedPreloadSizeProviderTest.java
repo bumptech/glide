@@ -11,14 +11,14 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class FixedPreloadSizeProviderTest {
 
-    @Test
-    public void testReturnsGivenSize() {
-        int width = 500;
-        int height = 1234;
-        FixedPreloadSizeProvider<Object> provider = new FixedPreloadSizeProvider<>(width, height);
+  @Test
+  public void testReturnsGivenSize() {
+    int width = 500;
+    int height = 1234;
+    FixedPreloadSizeProvider<Object> provider = new FixedPreloadSizeProvider<>(width, height);
 
-        int[] size = provider.getPreloadSize(new Object(), 0, 0);
+    int[] size = provider.getPreloadSize(new Object(), 0, 0);
 
-        assertThat(size).asList().containsExactly(width, height);
-    }
+    assertThat(size).asList().containsExactly(width, height);
+  }
 }

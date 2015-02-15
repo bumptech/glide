@@ -30,99 +30,109 @@ import java.io.IOException;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class StringLoaderTest {
-    // Not a magic number, just an arbitrary non zero value.
-    private static final int IMAGE_SIDE = 100;
+  // Not a magic number, just an arbitrary non zero value.
+  private static final int IMAGE_SIDE = 100;
 
-    @Mock ModelLoader<Uri, Object> uriLoader;
-    @Mock DataFetcher<Object> fetcher;
+  @Mock
+  ModelLoader<Uri, Object> uriLoader;
+  @Mock
+  DataFetcher<Object> fetcher;
 
-    private StringLoader<Object> loader;
+  private StringLoader<Object> loader;
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+  @Before
+  public void setUp() throws Exception {
+    MockitoAnnotations.initMocks(this);
 
-        when(uriLoader.handles(any(Uri.class))).thenReturn(true);
-        loader = new StringLoader<>(uriLoader);
-    }
+    when(uriLoader.handles(any(Uri.class))).thenReturn(true);
+    loader = new StringLoader<>(uriLoader);
+  }
 
-    @Test
-    public void testHandlesPaths() throws IOException {
-        // TODO on windows it will fail with schema being the drive letter (C:\... -> C)
-        assumeTrue(!Util.isWindows());
+  @Test
+  public void testHandlesPaths() throws IOException {
+    // TODO on windows it will fail with schema being the drive letter (C:\... -> C)
+    assumeTrue(!Util.isWindows());
 
-        File f = RuntimeEnvironment.application.getCacheDir();
-        Uri expected = Uri.fromFile(f);
-        when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
+    File f = RuntimeEnvironment.application.getCacheDir();
+    Uri expected = Uri.fromFile(f);
+    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(fetcher);
 
-        assertTrue(loader.handles(f.getAbsolutePath()));
-        assertEquals(fetcher, loader.getDataFetcher(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE));
-    }
+    assertTrue(loader.handles(f.getAbsolutePath()));
+    assertEquals(fetcher, loader.getDataFetcher(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE));
+  }
 
-    @Test
-    public void testCanHandleComplexFilePaths() {
-        assumeTrue(!Util.isWindows());
+  @Test
+  public void testCanHandleComplexFilePaths() {
+    assumeTrue(!Util.isWindows());
 
-        String testPath = "/storage/emulated/0/DCIM/Camera/IMG_20140520_100001:nopm:.jpg,mimeType=image/jpeg,"
-                + "2448x3264,orientation=0,date=Tue";
-        Uri expected = Uri.fromFile(new File(testPath));
-        when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
+    String testPath =
+        "/storage/emulated/0/DCIM/Camera/IMG_20140520_100001:nopm:.jpg,mimeType=image/jpeg,"
+            + "2448x3264,orientation=0,date=Tue";
+    Uri expected = Uri.fromFile(new File(testPath));
+    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(fetcher);
 
-        assertTrue(loader.handles(testPath));
-        assertEquals(fetcher, loader.getDataFetcher(testPath, IMAGE_SIDE, IMAGE_SIDE));
-    }
+    assertTrue(loader.handles(testPath));
+    assertEquals(fetcher, loader.getDataFetcher(testPath, IMAGE_SIDE, IMAGE_SIDE));
+  }
 
-    @Test
-    public void testHandlesFileUris() throws IOException {
-        File f = RuntimeEnvironment.application.getCacheDir();
+  @Test
+  public void testHandlesFileUris() throws IOException {
+    File f = RuntimeEnvironment.application.getCacheDir();
 
-        Uri expected = Uri.fromFile(f);
-        when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
+    Uri expected = Uri.fromFile(f);
+    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(fetcher);
 
-        assertTrue(loader.handles(f.getAbsolutePath()));
-        assertEquals(fetcher, loader.getDataFetcher(expected.toString(), IMAGE_SIDE, IMAGE_SIDE));
-    }
+    assertTrue(loader.handles(f.getAbsolutePath()));
+    assertEquals(fetcher, loader.getDataFetcher(expected.toString(), IMAGE_SIDE, IMAGE_SIDE));
+  }
 
-    @Test
-    public void testHandlesResourceUris() throws IOException {
-        Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
+  @Test
+  public void testHandlesResourceUris() throws IOException {
+    Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
 
-        when(uriLoader.getDataFetcher(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
+    when(uriLoader.getDataFetcher(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(fetcher);
 
-        assertTrue(loader.handles(resourceUri.toString()));
-        assertEquals(fetcher, loader.getDataFetcher(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE));
-    }
+    assertTrue(loader.handles(resourceUri.toString()));
+    assertEquals(fetcher, loader.getDataFetcher(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE));
+  }
 
-    @Test
-    public void testHandlesHttp() {
-        String url = "http://www.google.com";
+  @Test
+  public void testHandlesHttp() {
+    String url = "http://www.google.com";
 
-        Uri expected = Uri.parse(url);
-        when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
+    Uri expected = Uri.parse(url);
+    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(fetcher);
 
-        assertTrue(loader.handles(url));
-        assertEquals(fetcher, loader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE));
-    }
+    assertTrue(loader.handles(url));
+    assertEquals(fetcher, loader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE));
+  }
 
-    @Test
-    public void testHandlesHttps() {
-        String url = "https://www.google.com";
+  @Test
+  public void testHandlesHttps() {
+    String url = "https://www.google.com";
 
-        Uri expected = Uri.parse(url);
-        when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
+    Uri expected = Uri.parse(url);
+    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(fetcher);
 
-        assertTrue(loader.handles(url));
-        assertEquals(fetcher, loader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE));
-    }
+    assertTrue(loader.handles(url));
+    assertEquals(fetcher, loader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE));
+  }
 
-    @Test
-    public void testHandlesContent() {
-        String content = "content://com.bumptech.glide";
+  @Test
+  public void testHandlesContent() {
+    String content = "content://com.bumptech.glide";
 
-        Uri expected = Uri.parse(content);
-        when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE))).thenReturn(fetcher);
+    Uri expected = Uri.parse(content);
+    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(fetcher);
 
-        assertTrue(loader.handles(content));
-        assertEquals(fetcher, loader.getDataFetcher(content, IMAGE_SIDE, IMAGE_SIDE));
-    }
+    assertTrue(loader.handles(content));
+    assertEquals(fetcher, loader.getDataFetcher(content, IMAGE_SIDE, IMAGE_SIDE));
+  }
 }
