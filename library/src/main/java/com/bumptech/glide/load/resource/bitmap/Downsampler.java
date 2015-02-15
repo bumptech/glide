@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.target.Target;
@@ -29,9 +30,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
       "com.bumptech.glide.load.resource.bitmap.Downsampler.DecodeFormat";
   private static final String TAG = "Downsampler";
 
-  private static final Set<ImageHeaderParser.ImageType> TYPES_THAT_USE_POOL = EnumSet
-      .of(ImageHeaderParser.ImageType.JPEG, ImageHeaderParser.ImageType.PNG_A,
-          ImageHeaderParser.ImageType.PNG);
+  private static final Set<ImageHeaderParser.ImageType> TYPES_THAT_USE_POOL_PRE_KITKAT = EnumSet.of(
+      ImageHeaderParser.ImageType.JPEG,
+      ImageHeaderParser.ImageType.PNG_A,
+      ImageHeaderParser.ImageType.PNG
+  );
 
   private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
 
@@ -86,6 +89,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
   // but will resize up to this amount if necessary.
   private static final int MARK_POSITION = 5 * 1024 * 1024;
 
+  @Override
+  public boolean handles(InputStream data) {
+    // BitmapFactory should handle any valid image type.
+    return true;
+  }
 
   /**
    * Load the image for the given InputStream. If a recycled Bitmap whose dimensions exactly match
@@ -106,91 +114,104 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
   // see BitmapDecoder.decode
   @Override
   public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight,
-      Map<String, Object> options) {
-    final ByteArrayPool byteArrayPool = ByteArrayPool.get();
-    final byte[] bytesForOptions = byteArrayPool.getBytes();
-    final byte[] bytesForStream = byteArrayPool.getBytes();
-    final BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
+      Map<String, Object> options) throws IOException {
+    ByteArrayPool byteArrayPool = ByteArrayPool.get();
+    byte[] bytesForOptions = byteArrayPool.getBytes();
+    byte[] bytesForStream = byteArrayPool.getBytes();
+    BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
+
+    DecodeFormat decodeFormat = getDecodeFormat(options);
 
     // Use to fix the mark limit to avoid allocating buffers that fit entire images.
     RecyclableBufferedInputStream bufferedStream =
         new RecyclableBufferedInputStream(is, bytesForStream);
+
     // Use to retrieve exceptions thrown while reading.
     // TODO(#126): when the framework no longer returns partially decoded Bitmaps or provides a
-    // way to determine
-    // if a Bitmap is partially decoded, consider removing.
+    // way to determine if a Bitmap is partially decoded, consider removing.
     ExceptionCatchingInputStream exceptionStream =
         ExceptionCatchingInputStream.obtain(bufferedStream);
+
     // Use to read data.
     // Ensures that we can always reset after reading an image header so that we can still
-    // attempt to decode the
-    // full image even when the header decode fails and/or overflows our read buffer. See #283.
+    // attempt to decode the full image even when the header decode fails and/or overflows our read
+    // buffer. See #283.
     MarkEnforcingInputStream invalidatingStream = new MarkEnforcingInputStream(exceptionStream);
+
     try {
-      exceptionStream.mark(MARK_POSITION);
-      int orientation = 0;
-      try {
-        orientation = new ImageHeaderParser(exceptionStream).getOrientation();
-      } catch (IOException e) {
-        if (Log.isLoggable(TAG, Log.WARN)) {
-          Log.w(TAG, "Cannot determine the image orientation from header", e);
-        }
-      } finally {
-        try {
-          exceptionStream.reset();
-        } catch (IOException e) {
-          if (Log.isLoggable(TAG, Log.WARN)) {
-            Log.w(TAG, "Cannot reset the input stream", e);
-          }
-        }
-      }
-
-      bitmapFactoryOptions.inTempStorage = bytesForOptions;
-
-      final int[] inDimens =
-          getDimensions(invalidatingStream, bufferedStream, bitmapFactoryOptions);
-      final int inWidth = inDimens[0];
-      final int inHeight = inDimens[1];
-
-      final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
-      final int sampleSize =
-          getRoundedSampleSize(degreesToRotate, inWidth, inHeight, outWidth, outHeight);
-
-      DecodeFormat decodeFormat =
-          options.containsKey(KEY_DECODE_FORMAT) ? (DecodeFormat) options.get(KEY_DECODE_FORMAT)
-              : DecodeFormat.DEFAULT;
-
-      final Bitmap downsampled =
-          downsampleWithSize(invalidatingStream, bufferedStream, bitmapFactoryOptions, pool,
-              inWidth, inHeight, sampleSize, decodeFormat);
-
-      // BitmapFactory swallows exceptions during decodes and in some cases when inBitmap is non
-      // null, may catch
-      // and log a stack trace but still return a non null bitmap. To avoid displaying partially
-      // decoded bitmaps,
-      // we catch exceptions reading from the stream in our ExceptionCatchingInputStream and
-      // throw them here.
-      final Exception streamException = exceptionStream.getException();
-      if (streamException != null) {
-        throw new RuntimeException(streamException);
-      }
-
-      Bitmap rotated = null;
-      if (downsampled != null) {
-        rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
-
-        if (!downsampled.equals(rotated) && !pool.put(downsampled)) {
-          downsampled.recycle();
-        }
-      }
-
-      return rotated;
+      return decodeFromWrappedStreams(exceptionStream, invalidatingStream, bufferedStream,
+          bitmapFactoryOptions, bytesForOptions, decodeFormat, pool, outWidth, outHeight);
     } finally {
       byteArrayPool.releaseBytes(bytesForOptions);
       byteArrayPool.releaseBytes(bytesForStream);
       exceptionStream.release();
       releaseOptions(bitmapFactoryOptions);
     }
+  }
+
+  /**
+   * Determine the amount of downsampling to use for a load given the dimensions of the image to be
+   * downsampled and the dimensions of the view/target the image will be displayed in.
+   *
+   * @param inWidth   The width in pixels of the image to be downsampled.
+   * @param inHeight  The height in piexels of the image to be downsampled.
+   * @param outWidth  The width in pixels of the view/target the image will be displayed in.
+   * @param outHeight The height in pixels of the view/target the imag will be displayed in.
+   * @return An integer to pass in to  {@link BitmapFactory#decodeStream(java.io.InputStream,
+   * android.graphics.Rect, android.graphics.BitmapFactory.Options)}.
+   * @see android.graphics.BitmapFactory.Options#inSampleSize
+   */
+  protected abstract int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight);
+
+  private Bitmap decodeFromWrappedStreams(ExceptionCatchingInputStream exceptionStream,
+      MarkEnforcingInputStream invalidatingStream, RecyclableBufferedInputStream bufferedStream,
+      BitmapFactory.Options bitmapFactoryOptions, byte[] bytesForOptions,
+      DecodeFormat decodeFormat, BitmapPool pool, int outWidth, int outHeight)
+      throws IOException {
+
+    int orientation = getOrientation(exceptionStream);
+
+    bitmapFactoryOptions.inTempStorage = bytesForOptions;
+
+    final int[] inDimens =
+        getDimensions(invalidatingStream, bufferedStream, bitmapFactoryOptions);
+    final int inWidth = inDimens[0];
+    final int inHeight = inDimens[1];
+
+    final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
+    final int sampleSize =
+        getRoundedSampleSize(degreesToRotate, inWidth, inHeight, outWidth, outHeight);
+
+    final Bitmap downsampled =
+        downsampleWithSize(invalidatingStream, bufferedStream, bitmapFactoryOptions, pool,
+            inWidth, inHeight, sampleSize, decodeFormat);
+
+    // BitmapFactory swallows exceptions during decodes and in some cases when inBitmap is non
+    // null, may catch and log a stack trace but still return a non null bitmap. To avoid
+    // displaying partially decoded bitmaps, we catch exceptions reading from the stream in our
+    // ExceptionCatchingInputStream and throw them here.
+    final Exception streamException = exceptionStream.getException();
+    if (streamException != null) {
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Exception thrown reading from stream in Downsampler",
+            streamException);
+      }
+      if (downsampled != null && !pool.put(downsampled)) {
+        downsampled.recycle();
+      }
+      return null;
+    }
+
+    Bitmap rotated = null;
+    if (downsampled != null) {
+      rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
+
+      if (!downsampled.equals(rotated) && !pool.put(downsampled)) {
+        downsampled.recycle();
+      }
+    }
+
+    return rotated;
   }
 
   private int getRoundedSampleSize(int degreesToRotate, int inWidth, int inHeight, int outWidth,
@@ -221,9 +242,30 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     return Math.max(1, powerOfTwoSampleSize);
   }
 
-  private Bitmap downsampleWithSize(MarkEnforcingInputStream is,
+  private static DecodeFormat getDecodeFormat(Map<String, Object> options) {
+    return options.containsKey(KEY_DECODE_FORMAT) ? (DecodeFormat) options.get(KEY_DECODE_FORMAT)
+        : DecodeFormat.DEFAULT;
+  }
+
+  private static int getOrientation(ExceptionCatchingInputStream exceptionStream)
+      throws IOException {
+    exceptionStream.mark(MARK_POSITION);
+    int orientation = 0;
+    try {
+      orientation = new ImageHeaderParser(exceptionStream).getOrientation();
+    } catch (IOException e) {
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Cannot determine the image orientation from header", e);
+      }
+    } finally {
+      exceptionStream.reset();
+    }
+    return orientation;
+  }
+
+  private static Bitmap downsampleWithSize(MarkEnforcingInputStream is,
       RecyclableBufferedInputStream bufferedStream, BitmapFactory.Options options, BitmapPool pool,
-      int inWidth, int inHeight, int sampleSize, DecodeFormat decodeFormat) {
+      int inWidth, int inHeight, int sampleSize, DecodeFormat decodeFormat) throws IOException {
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
     Bitmap.Config config = getConfig(is, decodeFormat);
     options.inSampleSize = sampleSize;
@@ -238,35 +280,29 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     return decodeStream(is, bufferedStream, options);
   }
 
-  private static boolean shouldUsePool(InputStream is) {
+  private static boolean shouldUsePool(InputStream is) throws IOException {
     // On KitKat+, any bitmap can be used to decode any other bitmap.
-    if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       return true;
     }
 
     is.mark(1024);
     try {
       final ImageHeaderParser.ImageType type = new ImageHeaderParser(is).getType();
-      // cannot reuse bitmaps when decoding images that are not PNG or JPG.
-      // look at : https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
-      return TYPES_THAT_USE_POOL.contains(type);
+      // We cannot reuse bitmaps when decoding images that are not PNG or JPG prior to KitKat.
+      // See: https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
+      return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(type);
     } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Cannot determine the image type from header", e);
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Cannot determine the image type from header", e);
       }
     } finally {
-      try {
-        is.reset();
-      } catch (IOException e) {
-        if (Log.isLoggable(TAG, Log.WARN)) {
-          Log.w(TAG, "Cannot reset the input stream", e);
-        }
-      }
+      is.reset();
     }
     return false;
   }
 
-  private static Bitmap.Config getConfig(InputStream is, DecodeFormat format) {
+  private static Bitmap.Config getConfig(InputStream is, DecodeFormat format) throws IOException {
     // Changing configs can cause skewing on 4.1, see issue #128.
     if (format == DecodeFormat.PREFER_ARGB_8888
         || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
@@ -280,36 +316,15 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
       hasAlpha = new ImageHeaderParser(is).hasAlpha();
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG,
-            "Cannot determine whether the image has alpha or not from header for format " + format,
-            e);
+        Log.w(TAG, "Cannot determine whether the image has alpha or not from header for format "
+                + format, e);
       }
     } finally {
-      try {
-        is.reset();
-      } catch (IOException e) {
-        if (Log.isLoggable(TAG, Log.WARN)) {
-          Log.w(TAG, "Cannot reset the input stream", e);
-        }
-      }
+      is.reset();
     }
 
     return hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
   }
-
-  /**
-   * Determine the amount of downsampling to use for a load given the dimensions of the image to be
-   * downsampled and the dimensions of the view/target the image will be displayed in.
-   *
-   * @param inWidth   The width in pixels of the image to be downsampled.
-   * @param inHeight  The height in piexels of the image to be downsampled.
-   * @param outWidth  The width in pixels of the view/target the image will be displayed in.
-   * @param outHeight The height in pixels of the view/target the imag will be displayed in.
-   * @return An integer to pass in to  {@link BitmapFactory#decodeStream(java.io.InputStream,
-   * android.graphics.Rect, android.graphics.BitmapFactory.Options)}.
-   * @see android.graphics.BitmapFactory.Options#inSampleSize
-   */
-  protected abstract int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight);
 
   /**
    * A method for getting the dimensions of an image from the given InputStream.
@@ -319,8 +334,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
    *                android.graphics.Rect, android.graphics.BitmapFactory.Options)}.
    * @return an array containing the dimensions of the image in the form {width, height}.
    */
-  public int[] getDimensions(MarkEnforcingInputStream is,
-      RecyclableBufferedInputStream bufferedStream, BitmapFactory.Options options) {
+  private static int[] getDimensions(MarkEnforcingInputStream is,
+      RecyclableBufferedInputStream bufferedStream, BitmapFactory.Options options)
+      throws IOException {
     options.inJustDecodeBounds = true;
     decodeStream(is, bufferedStream, options);
     options.inJustDecodeBounds = false;
@@ -328,7 +344,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
   }
 
   private static Bitmap decodeStream(MarkEnforcingInputStream is,
-      RecyclableBufferedInputStream bufferedStream, BitmapFactory.Options options) {
+      RecyclableBufferedInputStream bufferedStream, BitmapFactory.Options options)
+      throws IOException {
     if (options.inJustDecodeBounds) {
       // This is large, but jpeg headers are not size bounded so we need something large enough
       // to minimize the possibility of not being able to fit enough of the header in the buffer to
@@ -346,24 +363,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     final Bitmap result = BitmapFactory.decodeStream(is, null, options);
 
-    try {
-      if (options.inJustDecodeBounds) {
-        is.reset();
-      }
-    } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.ERROR)) {
-        Log.e(TAG, "Exception loading inDecodeBounds=" + options.inJustDecodeBounds + " sample="
-            + options.inSampleSize, e);
-      }
+    if (options.inJustDecodeBounds) {
+      is.reset();
     }
 
     return result;
-  }
-
-  @Override
-  public boolean handles(InputStream data) {
-    // BitmapFactory should handle any valid image type.
-    return true;
   }
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)

@@ -45,9 +45,10 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public InputStream loadData(Priority priority) throws Exception {
+  public InputStream loadData(Priority priority) throws IOException {
     long startTime = LogTime.getLogTime();
-    InputStream result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
+    final InputStream result =
+        loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG, "Retrieved result in " + LogTime.getElapsedMillis(startTime) + " ms");
     }
@@ -80,6 +81,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     if (isCancelled) {
       return null;
     }
+
     final int statusCode = urlConnection.getResponseCode();
     if (statusCode / 100 == 2) {
       stream = urlConnection.getInputStream();

@@ -3,6 +3,8 @@ package com.bumptech.glide.load.data;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 
+import java.io.IOException;
+
 /**
  * An interface for lazily retrieving data that can be used to load a resource. A new instance is
  * created per resource load by {@link com.bumptech.glide.load.model.ModelLoader}. {@link
@@ -15,19 +17,22 @@ import com.bumptech.glide.load.DataSource;
 public interface DataFetcher<T> {
 
   /**
-   * Synchronously fetch data from which a resource can be decoded. This will always be called on
+   * Synchronously fetch data from which a resource can be decoded.
+   *
+   * <p> This will always be called on
    * background thread so it is safe to perform long running tasks here. Any third party libraries
    * called must be thread safe since this method will be called from a thread in a {@link
-   * java.util.concurrent.ExecutorService} that may have more than one background thread.
+   * java.util.concurrent.ExecutorService} that may have more than one background thread. </p>
    *
-   * This method will only be called when the corresponding resource is not in the cache.
+   * <p> This method will only be called when the corresponding resource is not in the cache. </p>
    *
    * <p> Note - this method will be run on a background thread so blocking I/O is safe. </p>
    *
    * @param priority The priority with which the request should be completed.
    * @see #cleanup() where the data retuned will be cleaned up
+   * @return A data object or {@code null} if no data could be obtained.
    */
-  T loadData(Priority priority) throws Exception;
+  T loadData(Priority priority) throws IOException;
 
   /**
    * Cleanup or recycle any resources used by this data fetcher. This method will be called in a

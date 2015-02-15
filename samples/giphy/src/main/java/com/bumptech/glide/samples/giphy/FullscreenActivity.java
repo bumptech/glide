@@ -69,7 +69,7 @@ public class FullscreenActivity extends Activity {
     Glide.with(this).asDrawable().thumbnail(thumbnailRequest).load(result.images.original.url)
         .listener(new RequestListener<Drawable>() {
           @Override
-          public boolean onException(Exception e, Object model, Target<Drawable> target,
+          public boolean onLoadFailed(Object model, Target<Drawable> target,
               boolean isFirstResource) {
             return false;
           }

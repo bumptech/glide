@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.data;
 
 import android.content.res.AssetManager;
-import android.util.Log;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -15,7 +14,6 @@ import java.io.IOException;
  * @param <T> The type of data obtained from the asset path (InputStream, FileDescriptor etc).
  */
 public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
-  private static final String TAG = "AssetUriFetcher";
   private final String assetPath;
   private final AssetManager assetManager;
   private T data;
@@ -26,7 +24,7 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public T loadData(Priority priority) throws Exception {
+  public T loadData(Priority priority) throws IOException {
     data = loadResource(assetManager, assetPath);
     return data;
   }
@@ -39,11 +37,8 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
     try {
       close(data);
     } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG, "Failed to close data", e);
-      }
+      // Ignored.
     }
-
   }
 
   @Override

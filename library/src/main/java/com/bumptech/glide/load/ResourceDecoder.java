@@ -16,13 +16,15 @@ public interface ResourceDecoder<T, Z> {
   boolean handles(T source) throws IOException;
 
   /**
-   * Returns a decoded resource from the given data or null if no resource could be decoded. <p> The
-   * {@code source} is managed by the caller, there's no need to close it. The returned {@link
-   * Resource} will be {@link Resource#recycle() released} when the engine sees fit. </p> <p> Note -
-   * The {@code width} and {@code height} arguments are hints only, there is no requirement that the
-   * decoded resource exactly match the given dimensions. A typical use case would be to use the
-   * target dimensions to determine how much to downsample Bitmaps by to avoid overly large
-   * allocations. </p>
+   * Returns a decoded resource from the given data or null if no resource could be decoded.
+   *
+   * <p> The {@code source} is managed by the caller, there's no need to close it. The returned
+   * {@link Resource} will be {@link Resource#recycle() released} when the engine sees fit. </p>
+   *
+   * <p> Note - The {@code width} and {@code height} arguments are hints only, there is no
+   * requirement that the decoded resource exactly match the given dimensions. A typical use case
+   * would be to use the target dimensions to determine how much to downsample Bitmaps by to avoid
+   * overly large allocations. </p>
    *
    * @param source  The data the resource should be decoded from.
    * @param width   The ideal width in pixels of the decoded resource, or {@link

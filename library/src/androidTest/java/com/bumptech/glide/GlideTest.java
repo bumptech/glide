@@ -361,11 +361,8 @@ public class GlideTest {
   private void runTestStringDefaultLoader(String string) {
     requestManager.asDrawable().load(string).listener(new RequestListener<Drawable>() {
       @Override
-      public boolean onException(Exception e, Object model, Target target,
+      public boolean onLoadFailed(Object model, Target target,
           boolean isFirstResource) {
-        if (!(e instanceof IOException)) {
-          throw new RuntimeException(e);
-        }
         return false;
       }
 
@@ -534,7 +531,7 @@ public class GlideTest {
     Drawable drawable = new ColorDrawable(Color.RED);
     requestManager.asDrawable().load(nullString).apply(placeholderOf(drawable)).into(target);
 
-    verify(target).onLoadFailed(any(Exception.class), eq(drawable));
+    verify(target).onLoadFailed(eq(drawable));
   }
 
   @Test
@@ -547,7 +544,7 @@ public class GlideTest {
     requestManager.asDrawable().load(nullString).apply(placeholderOf(placeholder).error(error))
         .into(target);
 
-    verify(target).onLoadFailed(any(Exception.class), eq(error));
+    verify(target).onLoadFailed(eq(error));
   }
 
   // TODO: fixme.

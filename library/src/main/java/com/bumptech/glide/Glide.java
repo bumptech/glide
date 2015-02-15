@@ -186,12 +186,12 @@ public class Glide implements ComponentCallbacks2 {
         .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
         .append(GifDecoder.class, Bitmap.class, new GifFrameResourceDecoder(bitmapPool))
         /* Files */
-        .append(File.class, File.class, new FileDecoder())
-        .register(new InputStreamRewinder.Factory())
-        /* Models */
-        .append(File.class, File.class, new UnitModelLoader.Factory<File>())
         .append(File.class, InputStream.class, new FileLoader.StreamFactory())
+        .append(File.class, File.class, new FileDecoder())
         .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
+        .append(File.class, File.class, new UnitModelLoader.Factory<File>())
+        /* Models */
+        .register(new InputStreamRewinder.Factory())
         .append(int.class, InputStream.class, new ResourceLoader.StreamFactory())
         .append(int.class, ParcelFileDescriptor.class, new ResourceLoader.FileDescriptorFactory())
         .append(Integer.class, InputStream.class, new ResourceLoader.StreamFactory())

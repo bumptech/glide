@@ -1,17 +1,22 @@
 package com.bumptech.glide.integration.volley;
 
+import android.util.Log;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A DataFetcher backed by volley for fetching images via http.
@@ -52,7 +57,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public InputStream loadData(Priority priority) throws Exception {
+  public InputStream loadData(Priority priority) throws IOException {
     // Make sure the string url safely encodes non ascii characters.
     String stringUrl = url.toURL().toString();
     Request<byte[]> request =
@@ -60,7 +65,18 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
     requestFuture.setRequest(requestQueue.add(request));
 
-    return requestFuture.get();
+    try {
+      return requestFuture.get();
+    } catch (InterruptedException e) {
+      if (Logs.isEnabled(Log.VERBOSE)) {
+        Logs.log(Log.VERBOSE, "Interrupted waiting for Volley response", e);
+      }
+    } catch (ExecutionException e) {
+      if (Logs.isEnabled(Log.VERBOSE)) {
+        Logs.log(Log.VERBOSE, "ExecutionException waiting for Volley response", e);
+      }
+    }
+    return null;
   }
 
   @Override

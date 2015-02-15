@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Encoder;
@@ -32,7 +33,6 @@ import java.util.List;
  *            resource.
  */
 class DecodeJob<R> {
-  private static final String TAG = "DecodeJob";
   private static final FileOpener DEFAULT_FILE_OPENER = new FileOpener();
 
   private final RequestContext<R> requestContext;
@@ -63,60 +63,42 @@ class DecodeJob<R> {
   /**
    * Returns a transcoded resource decoded from transformed resource data in the disk cache, or null
    * if no such resource exists.
-   *
-   * @throws Exception
    */
-  public Resource<R> decodeFromCachedResource() throws Exception {
+  public Resource<R> decodeFromCachedResource() {
     if (!requestContext.getDiskCacheStrategy().decodeCachedResource()) {
       return null;
     }
+
     long startTime = LogTime.getLogTime();
     List<Class<?>> resourceClasses = requestContext.getRegisteredResourceClasses();
+    Resource<R> result = null;
     for (Class<?> registeredResourceClass : resourceClasses) {
-      Transformation<?> transformation = requestContext.getTransformation(registeredResourceClass);
+      Transformation<?> transformation =
+          requestContext.getTransformation(registeredResourceClass);
       Key key = loadKey.getResultKey(transformation, registeredResourceClass);
-      Resource<R> result = null;
-      try {
-        result = decodeFromCache(key, DataSource.RESOURCE_DISK_CACHE);
-      } catch (Exception e) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(TAG,
-              "Failed to decode " + registeredResourceClass + " from cached resource with key: "
-                  + key, e);
-        }
-      }
-
+      result = decodeFromCache(key, DataSource.RESOURCE_DISK_CACHE);
       if (result != null) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          logWithTimeAndKey("Decoded from cached resource: " + result, startTime);
-        }
-        return result;
+        break;
       }
     }
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      logWithTimeAndKey("Failed to decode any resource from cached resource", startTime);
+    if (Logs.isEnabled(Log.VERBOSE)) {
+      logWithTimeAndKey("Finished decode from cached resource", startTime);
     }
-    return null;
+    return result;
   }
 
   /**
    * Returns a transformed and transcoded resource decoded from source data in the disk cache, or
    * null if no such resource exists.
-   *
-   * @throws Exception
    */
-  public Resource<R> decodeFromCachedData() throws Exception {
+  public Resource<R> decodeFromCachedData() {
     if (!requestContext.getDiskCacheStrategy().decodeCachedData()) {
       return null;
     }
     long startTime = LogTime.getLogTime();
     Resource<R> result = decodeFromCache(loadKey.getOriginalKey(), DataSource.DATA_DISK_CACHE);
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      if (result == null) {
-        logWithTimeAndKey("Failed to decode any resource from cached data", startTime);
-      } else {
-        logWithTimeAndKey("Decoded from cached data: " + result, startTime);
-      }
+    if (Logs.isEnabled(Log.VERBOSE)) {
+      logWithTimeAndKey("Finished decode from cached data", startTime);
     }
     return result;
   }
@@ -126,11 +108,10 @@ class DecodeJob<R> {
    * data could be obtained or no resource could be decoded. <p> Depending on the {@link
    * com.bumptech.glide.load.engine.DiskCacheStrategy} used, source data is either decoded directly
    * or first written to the disk cache and then decoded from the disk cache. </p>
-   *
-   * @throws Exception
    */
-  public Resource<R> decodeFromSource() throws Exception {
+  public Resource<R> decodeFromSource() {
     long startTime = LogTime.getLogTime();
+    DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
     Resource<R> result = null;
     for (DataFetcher<?> fetcher : requestContext.getDataFetchers()) {
       if (fetcher == null) {
@@ -138,7 +119,6 @@ class DecodeJob<R> {
       }
 
       DataSource dataSource = fetcher.getDataSource();
-      DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
       if (diskCacheStrategy.cacheSource(dataSource)) {
         result = cacheAndDecodeSource(fetcher);
       } else {
@@ -149,22 +129,28 @@ class DecodeJob<R> {
         break;
       }
     }
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      if (result == null) {
-        logWithTimeAndKey("Failed to decode any resource from source", startTime);
-      } else {
-        logWithTimeAndKey("Decoded from source: " + result, startTime);
-      }
+
+    if (Logs.isEnabled(Log.VERBOSE)) {
+      logWithTimeAndKey("Decoded from source completed", startTime);
     }
+
     return result;
   }
 
-  private <Data> Resource<R> cacheAndDecodeSource(DataFetcher<Data> fetcher) throws Exception {
-    Data data = fetcher.loadData(requestContext.getPriority());
+  private <Data> Resource<R> cacheAndDecodeSource(DataFetcher<Data> fetcher) {
+    Data data = null;
     try {
-      if (data == null) {
-        return null;
+      data = fetcher.loadData(requestContext.getPriority());
+    } catch (IOException e) {
+      if (Logs.isEnabled(Log.VERBOSE)) {
+        Logs.log(Log.VERBOSE, "fetcher threw obtaining data", e);
       }
+    }
+    if (data == null) {
+      return null;
+    }
+
+    try {
       Encoder<Data> encoder = requestContext.getSourceEncoder(data);
       SourceWriter<Data> writer = new SourceWriter<>(encoder, data);
       diskCacheProvider.getDiskCache().put(loadKey.getOriginalKey(), writer);
@@ -174,33 +160,31 @@ class DecodeJob<R> {
     }
   }
 
-  private Resource<R> decodeFromCache(Key key, DataSource dataSource) throws Exception {
-    final Resource<R> result;
+  private Resource<R> decodeFromCache(Key key, DataSource dataSource) {
     File cacheFile = diskCacheProvider.getDiskCache().get(key);
-    if (cacheFile != null) {
-      result = decodeFromCacheFile(cacheFile, dataSource);
-    } else {
-      result = null;
+    if (cacheFile == null) {
+      return null;
+    }
+    return decodeFromCacheFile(cacheFile, dataSource);
+  }
+
+  private Resource<R> decodeFromCacheFile(File cacheFile, DataSource dataSource) {
+    DataFetcherSet<?> fetchers = requestContext.getDataFetchers(cacheFile, width, height);
+    Resource<R> result = null;
+    for (DataFetcher<?> fetcher : fetchers) {
+      if (fetcher == null) {
+        continue;
+      }
+
+      result = decodeFromFetcher(fetcher, dataSource);
+      if (result != null || isCancelled) {
+        break;
+      }
     }
     return result;
   }
 
-  private Resource<R> decodeFromCacheFile(File cacheFile, DataSource dataSource) throws Exception {
-    DataFetcherSet<?> fetchers = requestContext.getDataFetchers(cacheFile, width, height);
-    for (DataFetcher<?> fetcher : fetchers) {
-      Resource<R> result = decodeFromFetcher(fetcher, dataSource);
-      if (result != null) {
-        return result;
-      }
-      if (isCancelled) {
-        break;
-      }
-    }
-    return null;
-  }
-
-  private <Data> Resource<R> decodeFromFetcher(DataFetcher<Data> fetcher, DataSource dataSource)
-      throws Exception {
+  private <Data> Resource<R> decodeFromFetcher(DataFetcher<Data> fetcher, DataSource dataSource) {
     LoadPath<Data, ?, R> path = requestContext.getLoadPath(fetcher.getDataClass());
     if (path != null) {
       return runLoadPath(fetcher, dataSource, path);
@@ -210,9 +194,9 @@ class DecodeJob<R> {
   }
 
   private <Data, ResourceType> Resource<R> runLoadPath(DataFetcher<Data> fetcher,
-      DataSource dataSource, LoadPath<Data, ResourceType, R> path) throws Exception {
-    return path
-        .load(fetcher, requestContext, width, height, new DecodeCallback<ResourceType>(dataSource));
+      DataSource dataSource, LoadPath<Data, ResourceType, R> path) {
+    return path.load(fetcher, requestContext, width, height,
+        new DecodeCallback<ResourceType>(dataSource));
   }
 
   public void cancel() {
@@ -221,7 +205,8 @@ class DecodeJob<R> {
   }
 
   private void logWithTimeAndKey(String message, long startTime) {
-    Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + ", key: " + loadKey);
+    Logs.log(Log.VERBOSE, message + " in " + LogTime.getElapsedMillis(startTime) + ", key: "
+        + loadKey);
   }
 
   class SourceWriter<DataType> implements DiskCache.Writer {
@@ -242,8 +227,8 @@ class DecodeJob<R> {
         os = fileOpener.open(file);
         success = encoder.encode(data, os, requestContext.getOptions());
       } catch (FileNotFoundException e) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Failed to find file to write to disk cache", e);
+        if (Logs.isEnabled(Log.DEBUG)) {
+          Logs.log(Log.DEBUG, "Failed to find file to write to disk cache", e);
         }
       } finally {
         if (os != null) {
@@ -254,8 +239,8 @@ class DecodeJob<R> {
           }
         }
       }
-      if (!success && Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG, "Failed to write to cache");
+      if (!success && Logs.isEnabled(Log.VERBOSE)) {
+        Logs.log(Log.VERBOSE, "Failed to write to cache");
       }
       return success;
     }
@@ -307,11 +292,12 @@ class DecodeJob<R> {
         }
 
         diskCacheProvider.getDiskCache().put(key, new SourceWriter<>(encoder, transformed));
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(TAG,
-              "Encoded resource to cache with key: " + key + ", encode strategy: " + encodeStrategy
-                  + " disk cache strategy: " + requestContext.getDiskCacheStrategy() + ", source: "
-                  + dataSource);
+        if (Logs.isEnabled(Log.VERBOSE)) {
+          Logs.log(Log.VERBOSE, "Encoded resource to cache"
+              + ", key: " + key
+              + ", encode strategy: " + encodeStrategy
+              + ", disk cache strategy: " + requestContext.getDiskCacheStrategy()
+              + ", source: " + dataSource);
         }
       }
       return transformed;

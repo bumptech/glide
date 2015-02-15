@@ -41,8 +41,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   // we've received them instead of relying on them to be non-null. See issue #180.
   private Resource<?> resource;
   private boolean hasResource;
-  private Exception exception;
-  private boolean hasException;
+  private boolean hasLoadFailed;
   // A set of callbacks that are removed while we're notifying other callbacks of a change in
   // status.
   private Set<ResourceCallback> ignoredCallbacks;
@@ -81,8 +80,8 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     Util.assertMainThread();
     if (hasResource) {
       cb.onResourceReady(engineResource);
-    } else if (hasException) {
-      cb.onException(exception);
+    } else if (hasLoadFailed) {
+      cb.onLoadFailed();
     } else {
       cbs.add(cb);
     }
@@ -90,7 +89,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
 
   public void removeCallback(ResourceCallback cb) {
     Util.assertMainThread();
-    if (hasResource || hasException) {
+    if (hasResource || hasLoadFailed) {
       addIgnoredCallback(cb);
     } else {
       cbs.remove(cb);
@@ -101,14 +100,10 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   }
 
   // We cannot remove callbacks while notifying our list of callbacks directly because doing so
-  // would cause a
-  // ConcurrentModificationException. However, we need to obey the cancellation request such that
-  // if notifying a
-  // callback early in the callbacks list cancels a callback later in the request list, the
-  // cancellation for the later
-  // request is still obeyed. Using a set of ignored callbacks allows us to avoid the exception
-  // while still meeting
-  // the requirement.
+  // would cause a ConcurrentModificationException. However, we need to obey the cancellation
+  // request such that if notifying a callback early in the callbacks list cancels a callback later
+  // in the request list, the cancellation for the later request is still obeyed. Using a set of
+  // ignored callbacks allows us to avoid the exception while still meeting the requirement.
   private void addIgnoredCallback(ResourceCallback cb) {
     if (ignoredCallbacks == null) {
       ignoredCallbacks = new HashSet<>();
@@ -122,7 +117,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
 
   // Exposed for testing.
   void cancel() {
-    if (hasException || hasResource || isCancelled) {
+    if (hasLoadFailed || hasResource || isCancelled) {
       return;
     }
     engineRunnable.cancel();
@@ -156,8 +151,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     hasResource = true;
 
     // Hold on to resource for duration of request so we don't recycle it in the middle of
-    // notifying if it
-    // synchronously released by one of the callbacks.
+    // notifying if it synchronously released by one of the callbacks.
     engineResource.acquire();
     listener.onEngineJobComplete(key, engineResource);
 
@@ -172,8 +166,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   }
 
   @Override
-  public void onException(final Exception e) {
-    this.exception = e;
+  public void onLoadFailed() {
     MAIN_THREAD_HANDLER.obtainMessage(MSG_EXCEPTION, this).sendToTarget();
   }
 
@@ -183,13 +176,13 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     } else if (cbs.isEmpty()) {
       throw new IllegalStateException("Received an exception without any callbacks to notify");
     }
-    hasException = true;
+    hasLoadFailed = true;
 
     listener.onEngineJobComplete(key, null);
 
     for (ResourceCallback cb : cbs) {
       if (!isInIgnoredCallbacks(cb)) {
-        cb.onException(exception);
+        cb.onLoadFailed();
       }
     }
   }

@@ -1,7 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import android.util.Log;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.request.ResourceCallback;
@@ -22,8 +20,6 @@ import com.bumptech.glide.request.ResourceCallback;
  */
 class EngineRunnable implements Runnable,
     Prioritized {
-  private static final String TAG = "EngineRunnable";
-
   private final Priority priority;
   private final EngineRunnableManager manager;
   private final DecodeJob<?> decodeJob;
@@ -50,16 +46,7 @@ class EngineRunnable implements Runnable,
       return;
     }
 
-    Exception exception = null;
-    Resource<?> resource = null;
-    try {
-      resource = decode();
-    } catch (Exception e) {
-      if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG, "Exception decoding", e);
-      }
-      exception = e;
-    }
+    Resource<?> resource = decode();
 
     if (isCancelled) {
       if (resource != null) {
@@ -69,7 +56,7 @@ class EngineRunnable implements Runnable,
     }
 
     if (resource == null) {
-      onLoadFailed(exception);
+      onLoadFailed();
     } else {
       onLoadComplete(resource);
     }
@@ -83,16 +70,16 @@ class EngineRunnable implements Runnable,
     manager.onResourceReady(resource);
   }
 
-  private void onLoadFailed(Exception e) {
+  private void onLoadFailed() {
     if (isDecodingFromCache()) {
       stage = Stage.SOURCE;
       manager.submitForSource(this);
     } else {
-      manager.onException(e);
+      manager.onLoadFailed();
     }
   }
 
-  private Resource<?> decode() throws Exception {
+  private Resource<?> decode() {
     if (isDecodingFromCache()) {
       return decodeFromCache();
     } else {
@@ -100,23 +87,17 @@ class EngineRunnable implements Runnable,
     }
   }
 
-  private Resource<?> decodeFromCache() throws Exception {
-    Resource<?> result = null;
-    try {
-      result = decodeJob.decodeFromCachedResource();
-    } catch (Exception e) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Exception decoding result from cache: " + e);
-      }
-    }
+  private Resource<?> decodeFromCache() {
+    Resource<?> result = decodeJob.decodeFromCachedResource();
 
     if (result == null) {
       result = decodeJob.decodeFromCachedData();
     }
+
     return result;
   }
 
-  private Resource<?> decodeFromSource() throws Exception {
+  private Resource<?> decodeFromSource() {
     return decodeJob.decodeFromSource();
   }
 

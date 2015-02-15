@@ -46,11 +46,9 @@ public interface Target<R> extends LifecycleListener {
    * <p> Note - This may be called before {@link #onLoadStarted(android.graphics.drawable.Drawable)
    * } if the model object is null. </p>
    *
-   * @param e             The exception causing the load to fail, or null if no exception occurred
-   *                      (usually because a decoder simply returned null).
    * @param errorDrawable The error drawable to optionally show, or null.
    */
-  void onLoadFailed(Exception e, Drawable errorDrawable);
+  void onLoadFailed(Drawable errorDrawable);
 
   /**
    * The method that will be called when the resource load has finished.

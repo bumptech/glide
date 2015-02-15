@@ -60,7 +60,7 @@ public class ImageViewTargetTest {
 
   @Test
   public void testSetDrawableOnLoadFailed() {
-    target.onLoadFailed(null, drawable);
+    target.onLoadFailed(drawable);
 
     assertEquals(drawable, view.getDrawable());
   }

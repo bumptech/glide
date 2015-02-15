@@ -6,10 +6,7 @@ import static org.junit.Assert.fail;
 
 import android.os.SystemClock;
 
-import com.android.volley.NoConnectionError;
 import com.android.volley.RequestQueue;
-import com.android.volley.ServerError;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -32,7 +29,6 @@ import org.robolectric.shadows.ShadowSystemClock;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
@@ -41,8 +37,8 @@ import java.util.concurrent.ExecutionException;
  * responses.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = VolleyStreamFetcherServerTest
-    .FakeSystemClock.class)
+@Config(manifest = Config.NONE, emulateSdk = 18, shadows =
+    VolleyStreamFetcherServerTest.FakeSystemClock.class)
 public class VolleyStreamFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
 
@@ -112,66 +108,39 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testThrowsIfRedirectLocationIsEmpty() throws Exception {
+  public void testReturnsNullIfRedirectLocationIsEmpty() throws Exception {
     for (int i = 0; i < 2; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301));
     }
 
-    try {
-      getFetcher().loadData(Priority.NORMAL);
-      fail("Didn't get expected IOException");
-    } catch (ExecutionException e) {
-      assertThat(e.getCause()).isInstanceOf(VolleyError.class);
-    }
+    assertThat(getFetcher().loadData(Priority.NORMAL)).isNull();
   }
 
   @Test
-  public void testThrowsIfStatusCodeIsNegativeOne() throws Exception {
+  public void testReturnsNullIfStatusCodeIsNegativeOne() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
-    try {
-      getFetcher().loadData(Priority.LOW);
-      fail("Failed to get expected exception");
-    } catch (ExecutionException e) {
-      assertThat(e.getCause()).isInstanceOf(NoConnectionError.class);
-    }
+    assertThat(getFetcher().loadData(Priority.LOW)).isNull();
   }
 
   @Test
-  public void testThrowsAfterTooManyRedirects() throws Exception {
+  public void testReturnsNullAfterTooManyRedirects() throws Exception {
     for (int i = 0; i < 20; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301)
           .setHeader("Location", mockWebServer.getUrl("/redirect" + i)));
     }
-    try {
-      getFetcher().loadData(Priority.NORMAL);
-      fail("Failed to get expected exception");
-    } catch (ExecutionException e) {
-      assertThat(e.getCause()).isInstanceOf(NoConnectionError.class);
-      assertThat(e.getCause().getCause()).isInstanceOf(ProtocolException.class);
-    }
+    assertThat(getFetcher().loadData(Priority.NORMAL)).isNull();
   }
 
-
   @Test
-  public void testThrowsIfStatusCodeIs500() throws Exception {
+  public void testReturnsNullIfStatusCodeIs500() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500).setBody("error"));
-    try {
-      getFetcher().loadData(Priority.NORMAL);
-      fail("Failed to get expected exception");
-    } catch (ExecutionException e) {
-      assertThat(e.getCause()).isInstanceOf(ServerError.class);
-    }
+    assertThat(getFetcher().loadData(Priority.NORMAL)).isNull();
   }
 
   @Test
-  public void testThrowsIfStatusCodeIs400() throws Exception {
+  public void testReturnsNullIfStatusCodeIs400() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400).setBody("error"));
-    try {
-      getFetcher().loadData(Priority.LOW);
-      fail("Failed to get expected exception");
-    } catch (ExecutionException e) {
-      assertThat(e.getCause()).isInstanceOf(ServerError.class);
-    }
+    assertThat(getFetcher().loadData(Priority.LOW)).isNull();
   }
 
   private DataFetcher<InputStream> getFetcher() {

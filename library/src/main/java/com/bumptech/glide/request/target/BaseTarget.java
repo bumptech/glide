@@ -43,7 +43,7 @@ public abstract class BaseTarget<Z> implements Target<Z> {
   }
 
   @Override
-  public void onLoadFailed(Exception e, Drawable errorDrawable) {
+  public void onLoadFailed(Drawable errorDrawable) {
     // Do nothing.
   }
 

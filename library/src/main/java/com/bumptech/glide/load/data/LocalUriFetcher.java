@@ -3,7 +3,6 @@ package com.bumptech.glide.load.data;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -19,7 +18,6 @@ import java.io.IOException;
  *            java.io.InputStream} or {@link android.os.ParcelFileDescriptor}.
  */
 public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
-  private static final String TAG = "LocalUriFetcher";
   private final Uri uri;
   private final Context context;
   private T data;
@@ -39,7 +37,7 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public final T loadData(Priority priority) throws Exception {
+  public final T loadData(Priority priority) throws IOException {
     ContentResolver contentResolver = context.getContentResolver();
     data = loadResource(uri, contentResolver);
     return data;
@@ -51,11 +49,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
       try {
         close(data);
       } catch (IOException e) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(TAG, "failed to close data", e);
-        }
+        // Ignored.
       }
-
     }
   }
 
@@ -77,8 +72,6 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   /**
    * Returns a concrete data type from the given {@link android.net.Uri} using the given {@link
    * android.content.ContentResolver}.
-   *
-   * @throws FileNotFoundException
    */
   protected abstract T loadResource(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException;
@@ -90,7 +83,6 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
    * level. See issue #157. </p>
    *
    * @param data The data to close.
-   * @throws IOException
    */
   protected abstract void close(T data) throws IOException;
 }

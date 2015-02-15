@@ -24,7 +24,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public InputStream loadData(Priority priority) throws Exception {
+  public InputStream loadData(Priority priority) throws IOException {
     Request request = new Request.Builder().url(url.toString()).build();
 
     stream = client.newCall(request).execute().body().byteStream();

@@ -3,6 +3,7 @@ package com.bumptech.glide.request;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
@@ -135,7 +136,7 @@ public final class SingleRequest<R> implements Request,
   public void begin() {
     startTime = LogTime.getLogTime();
     if (model == null) {
-      onException(null);
+      onLoadFailed();
       return;
     }
 
@@ -239,7 +240,7 @@ public final class SingleRequest<R> implements Request,
     return status == Status.FAILED;
   }
 
-  private void setErrorPlaceholder(Exception e) {
+  private void setErrorPlaceholder() {
     if (!canNotifyStatusChanged()) {
       return;
     }
@@ -248,7 +249,7 @@ public final class SingleRequest<R> implements Request,
     if (error == null) {
       error = getPlaceholderDrawable();
     }
-    target.onLoadFailed(e, error);
+    target.onLoadFailed(error);
   }
 
   private Drawable getErrorDrawable() {
@@ -325,21 +326,26 @@ public final class SingleRequest<R> implements Request,
   @Override
   public void onResourceReady(Resource<?> resource) {
     if (resource == null) {
-      onException(new Exception(
-          "Expected to receive a Resource<R> with an object of " + transcodeClass
-              + " inside, but instead got null."));
+      if (Logs.isEnabled(Log.ERROR)) {
+        Logs.log(Log.ERROR, "Expected to receive a Resource<R> with an object of " + transcodeClass
+            + " inside, but instead got null.");
+      }
+      onLoadFailed();
       return;
     }
 
     Object received = resource.get();
     if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
       releaseResource(resource);
-      onException(new Exception(
-          "Expected to receive an object of " + transcodeClass + " but instead got " + (
-              received != null ? received.getClass() : "") + "{" + received + "}"
-              + " inside Resource{" + resource + "}." + (received != null ? ""
-              : " " + "To indicate failure return a null Resource object, "
-                  + "rather than a Resource object containing null data.")));
+      if (Logs.isEnabled(Log.ERROR)) {
+        Logs.log(Log.ERROR,
+            "Expected to receive an object of " + transcodeClass + " but instead" + " got "
+                + (received != null ? received.getClass() : "") + "{" + received + "} inside" + " "
+                + "Resource{" + resource + "}."
+                + (received != null ? "" : " " + "To indicate failure return a null Resource "
+                + "object, rather than a Resource object containing null data."));
+      }
+      onLoadFailed();
       return;
     }
 
@@ -382,16 +388,16 @@ public final class SingleRequest<R> implements Request,
    * A callback method that should never be invoked directly.
    */
   @Override
-  public void onException(Exception e) {
+  public void onLoadFailed() {
     if (Log.isLoggable(TAG, Log.DEBUG)) {
-      Log.d(TAG, "load failed", e);
+      Log.d(TAG, "Load failed");
     }
 
     status = Status.FAILED;
     //TODO: what if this is a thumbnail request?
-    if (requestListener == null || !requestListener
-        .onException(e, model, target, isFirstReadyResource())) {
-      setErrorPlaceholder(e);
+    if (requestListener == null
+        || !requestListener.onLoadFailed(model, target, isFirstReadyResource())) {
+      setErrorPlaceholder();
     }
   }
 

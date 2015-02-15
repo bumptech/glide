@@ -1,5 +1,8 @@
 package com.bumptech.glide.load.engine;
 
+import android.util.Log;
+
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -17,53 +20,49 @@ import java.util.Map;
  *                       returned to the caller.
  */
 public class DecodePath<DataType, ResourceType, Transcode> {
-
   private final Class<DataType> dataClass;
-  private final Class<ResourceType> resourceClass;
-  private final Class<Transcode> transcodeClass;
   private final List<? extends ResourceDecoder<DataType, ResourceType>> decoders;
   private final ResourceTranscoder<ResourceType, Transcode> transcoder;
 
-  public DecodePath(Class<DataType> dataClass, Class<ResourceType> resourceClass,
-      Class<Transcode> transcodeClass,
+  public DecodePath(Class<DataType> dataClass,
       List<? extends ResourceDecoder<DataType, ResourceType>> decoders,
       ResourceTranscoder<ResourceType, Transcode> transcoder) {
     this.dataClass = dataClass;
-    this.resourceClass = resourceClass;
-    this.transcodeClass = transcodeClass;
     this.decoders = decoders;
     this.transcoder = transcoder;
   }
 
   public Resource<Transcode> decode(DataRewinder<DataType> rewinder, int width, int height,
-      Map<String, Object> options, DecodeCallback<ResourceType> callback) throws IOException {
-    Resource<ResourceType> resource = decodeResource(rewinder, width, height, options);
-    if (resource == null) {
+      Map<String, Object> options, DecodeCallback<ResourceType> callback) {
+    Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
+    if (decoded == null) {
       return null;
-    } else {
-      resource = callback.onResourceDecoded(resource);
-      return transcoder.transcode(resource);
     }
+    Resource<ResourceType> transformed = callback.onResourceDecoded(decoded);
+    return transcoder.transcode(transformed);
   }
 
   private Resource<ResourceType> decodeResource(DataRewinder<DataType> rewinder, int width,
-      int height, Map<String, Object> options) throws IOException {
+      int height, Map<String, Object> options) {
     Resource<ResourceType> result = null;
     for (ResourceDecoder<DataType, ResourceType> decoder : decoders) {
-      DataType data = rewinder.rewindAndGet();
-      if (decoder.handles(data)) {
-        data = rewinder.rewindAndGet();
-        result = decoder.decode(data, width, height, options);
-        if (result != null) {
-          break;
+      try {
+        DataType data = rewinder.rewindAndGet();
+        if (decoder.handles(data)) {
+          data = rewinder.rewindAndGet();
+          result = decoder.decode(data, width, height, options);
         }
+      } catch (IOException e) {
+        if (Logs.isEnabled(Log.VERBOSE)) {
+          Logs.log(Log.VERBOSE, "Failed to decode data for " + decoder, e);
+        }
+      }
+
+      if (result != null) {
+        break;
       }
     }
     return result;
-  }
-
-  public String getDebugString() {
-    return "[" + dataClass + "->" + resourceClass + "->" + transcodeClass + "]";
   }
 
   @Override

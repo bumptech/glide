@@ -12,8 +12,8 @@ import com.bumptech.glide.request.transition.Transition;
  * @param <Z> The type of resource that this target will display in the wrapped {@link
  *            android.widget.ImageView}.
  */
-public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implements Transition
-    .ViewAdapter {
+public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
+    implements Transition.ViewAdapter {
 
   public ImageViewTarget(ImageView view) {
     super(view);
@@ -57,7 +57,7 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
    * @param errorDrawable {@inheritDoc}
    */
   @Override
-  public void onLoadFailed(Exception e, Drawable errorDrawable) {
+  public void onLoadFailed(Drawable errorDrawable) {
     view.setImageDrawable(errorDrawable);
   }
 

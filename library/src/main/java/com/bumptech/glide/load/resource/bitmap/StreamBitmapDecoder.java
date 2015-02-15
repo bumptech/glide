@@ -8,6 +8,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
 
   @Override
   public Resource<Bitmap> decode(InputStream source, int width, int height,
-      Map<String, Object> options) {
+      Map<String, Object> options) throws IOException {
     DownsampleStrategy strategy =
         options.containsKey(KEY_DOWNSAMPLE_STRATEGY) ? (DownsampleStrategy) options
             .get(KEY_DOWNSAMPLE_STRATEGY) : DownsampleStrategy.DEFAULT;

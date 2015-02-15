@@ -36,7 +36,7 @@ public interface DiskCache {
    * Get the cache for the value at the given key.
    *
    * <p> Note - This is potentially dangerous, someone may write a new value to the file at any
-   * point in timeand we won't know about it. </p>
+   * point in time and we won't know about it. </p>
    *
    * @param key The key in the cache.
    * @return An InputStream representing the data at key at the time get is called.

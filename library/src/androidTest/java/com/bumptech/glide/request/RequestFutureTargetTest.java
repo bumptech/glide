@@ -176,21 +176,21 @@ public class RequestFutureTargetTest {
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGet()
       throws ExecutionException, InterruptedException {
-    future.onLoadFailed(new RuntimeException(), null);
+    future.onLoadFailed(null);
     future.get();
   }
 
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
       throws ExecutionException, InterruptedException, TimeoutException {
-    future.onLoadFailed(null, null);
+    future.onLoadFailed(null);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
       throws ExecutionException, InterruptedException, TimeoutException {
-    future.onLoadFailed(new RuntimeException(), null);
+    future.onLoadFailed(null);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
@@ -227,7 +227,7 @@ public class RequestFutureTargetTest {
     doAnswer(new Answer() {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        future.onLoadFailed(new IllegalArgumentException("test"), null);
+        future.onLoadFailed(null);
         return null;
       }
     }).when(waiter).waitForTimeout(eq(future), anyLong());
@@ -261,7 +261,7 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testNotifiesAllWhenLoadFails() {
-    future.onLoadFailed(null, null);
+    future.onLoadFailed(null);
     verify(waiter).notifyAll(eq(future));
   }
 

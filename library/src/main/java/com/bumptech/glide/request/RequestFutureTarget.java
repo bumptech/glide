@@ -47,9 +47,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   private R resource;
   private Request request;
   private boolean isCancelled;
-  private Exception exception;
   private boolean resultReceived;
-  private boolean exceptionReceived;
+  private boolean loadFailed;
 
   /**
    * Constructor for a RequestFutureTarget. Should not be used directly.
@@ -67,9 +66,6 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     this.waiter = waiter;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public synchronized boolean cancel(boolean b) {
     if (isCancelled) {
@@ -85,25 +81,16 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     return result;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public synchronized boolean isCancelled() {
     return isCancelled;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public synchronized boolean isDone() {
     return isCancelled || resultReceived;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public R get() throws InterruptedException, ExecutionException {
     try {
@@ -113,9 +100,6 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public R get(long time, TimeUnit timeUnit)
       throws InterruptedException, ExecutionException, TimeoutException {
@@ -138,9 +122,6 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     this.request = request;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Request getRequest() {
     return request;
@@ -166,10 +147,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public synchronized void onLoadFailed(Exception e, Drawable errorDrawable) {
-    // We might get a null exception.
-    exceptionReceived = true;
-    this.exception = e;
+  public synchronized void onLoadFailed(Drawable errorDrawable) {
+    loadFailed = true;
     waiter.notifyAll(this);
   }
 
@@ -192,8 +171,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
     if (isCancelled) {
       throw new CancellationException();
-    } else if (exceptionReceived) {
-      throw new ExecutionException(exception);
+    } else if (loadFailed) {
+      throw new ExecutionException(new IllegalStateException("Load failed"));
     } else if (resultReceived) {
       return resource;
     }
@@ -206,8 +185,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
     if (Thread.interrupted()) {
       throw new InterruptedException();
-    } else if (exceptionReceived) {
-      throw new ExecutionException(exception);
+    } else if (loadFailed) {
+      throw new ExecutionException(new IllegalStateException("Load failed"));
     } else if (isCancelled) {
       throw new CancellationException();
     } else if (!resultReceived) {
@@ -234,25 +213,16 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     mainHandler.post(this);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void onStart() {
     // Do nothing.
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void onStop() {
     // Do nothing.
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void onDestroy() {
     // Do nothing.

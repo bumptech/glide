@@ -17,9 +17,6 @@ public interface ResourceCallback {
 
   /**
    * Called when a resource fails to load successfully.
-   *
-   * @param e The exception that caused the failure, or null it the load failed for some reason
-   *          other than an exception.
    */
-  void onException(Exception e);
+  void onLoadFailed();
 }

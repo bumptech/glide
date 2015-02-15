@@ -19,7 +19,7 @@ public interface RequestListener<R> {
    * this point. For example:
    * <pre>
    * {@code
-   * public void onException(Exception e, T model, Target target, boolean isFirstResource) {
+   * public void onLoadFailed(Exception e, T model, Target target, boolean isFirstResource) {
    *     target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
    *     Glide.load(model).into(target);
    * }
@@ -30,14 +30,13 @@ public interface RequestListener<R> {
    * <p> Note - if you want to reload this or any other model after an exception, you will need to
    * include all relevant builder calls (like centerCrop, placeholder etc). </p>
    *
-   * @param e               The exception, or null.
    * @param model           The model we were trying to load when the exception occurred.
    * @param target          The {@link Target} we were trying to load the image into.
    * @param isFirstResource True if this exception is for the first resource to load.
    * @return True if the listener has handled updating the target for the given exception, false to
    * allow Glide's request to update the target.
    */
-  boolean onException(Exception e, Object model, Target<R> target, boolean isFirstResource);
+  boolean onLoadFailed(Object model, Target<R> target, boolean isFirstResource);
 
   /**
    * Called when a load completes successfully, immediately after {@link

@@ -58,19 +58,19 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testSetsReadTimeout() throws Exception {
+  public void testSetsReadTimeout() throws IOException {
     fetcher.loadData(Priority.HIGH);
     verify(urlConnection).setReadTimeout(eq(TIMEOUT_MS));
   }
 
   @Test
-  public void testSetsConnectTimeout() throws Exception {
+  public void testSetsConnectTimeout() throws IOException {
     fetcher.loadData(Priority.IMMEDIATE);
     verify(urlConnection).setConnectTimeout(eq(TIMEOUT_MS));
   }
 
   @Test
-  public void testReturnsNullIfCancelledBeforeConnects() throws Exception {
+  public void testReturnsNullIfCancelledBeforeConnects() throws IOException {
     InputStream notExpected = new ByteArrayInputStream(new byte[0]);
     when(urlConnection.getInputStream()).thenReturn(notExpected);
 
@@ -79,7 +79,7 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testDisconnectsUrlOnCleanup() throws Exception {
+  public void testDisconnectsUrlOnCleanup() throws IOException {
     fetcher.loadData(Priority.HIGH);
     fetcher.cleanup();
 
@@ -97,7 +97,8 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testCancelDoesNotDisconnectIfAlreadyConnected() throws Exception {
+  public void testCancelDoesNotDisconnectIfAlreadyConnected()
+      throws IOException {
     fetcher.loadData(Priority.HIGH);
     fetcher.cancel();
 
@@ -105,7 +106,7 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testClosesStreamInCleanupIfNotNull() throws Exception {
+  public void testClosesStreamInCleanupIfNotNull() throws IOException {
     fetcher.loadData(Priority.HIGH);
     fetcher.cleanup();
 
@@ -113,7 +114,7 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testClosesStreamBeforeDisconnectingConnection() throws Exception {
+  public void testClosesStreamBeforeDisconnectingConnection() throws IOException {
     fetcher.loadData(Priority.NORMAL);
     fetcher.cleanup();
 

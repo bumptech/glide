@@ -38,7 +38,6 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +109,7 @@ public class SingleRequestTest {
 
     assertTrue(request.isFailed());
     verify(harness.requestListener)
-        .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean());
+        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean());
   }
 
   @Test
@@ -123,7 +122,7 @@ public class SingleRequestTest {
     assertTrue(request.isFailed());
     verify(harness.engine).release(eq(harness.resource));
     verify(harness.requestListener)
-        .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean());
+        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean());
   }
 
   @Test
@@ -137,7 +136,7 @@ public class SingleRequestTest {
     assertTrue(request.isFailed());
     verify(harness.engine).release(eq(harness.resource));
     verify(harness.requestListener)
-        .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean());
+        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean());
   }
 
   @Test
@@ -252,7 +251,7 @@ public class SingleRequestTest {
   public void testIsFailedAfterException() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onException(new Exception("test"));
+    request.onLoadFailed();
     assertTrue(request.isFailed());
   }
 
@@ -271,7 +270,7 @@ public class SingleRequestTest {
   public void testIsFailedAfterNoResultAndNullException() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onException(null);
+    request.onLoadFailed();
     assertTrue(request.isFailed());
   }
 
@@ -344,7 +343,7 @@ public class SingleRequestTest {
     harness.target = target;
     SingleRequest<List> request = harness.getRequest();
 
-    request.onException(null);
+    request.onLoadFailed();
 
     assertEquals(expected, target.currentPlaceholder);
   }
@@ -359,7 +358,7 @@ public class SingleRequestTest {
     harness.target = target;
     SingleRequest<List> request = harness.getRequest();
 
-    request.onException(null);
+    request.onLoadFailed();
 
     assertEquals(expected, target.currentPlaceholder);
   }
@@ -423,7 +422,7 @@ public class SingleRequestTest {
   public void testIsNotRunningAfterFailing() {
     SingleRequest<List> request = harness.getRequest();
     request.begin();
-    request.onException(new RuntimeException("Test"));
+    request.onLoadFailed();
 
     assertFalse(request.isRunning());
   }
@@ -472,34 +471,32 @@ public class SingleRequestTest {
   public void testCallsTargetOnExceptionIfNoRequestListener() {
     harness.requestListener = null;
     SingleRequest<List> request = harness.getRequest();
-    Exception exception = new IOException("test");
-    request.onException(exception);
+    request.onLoadFailed();
 
-    verify(harness.target).onLoadFailed(eq(exception), eq(harness.errorDrawable));
+    verify(harness.target).onLoadFailed(eq(harness.errorDrawable));
   }
 
   @Test
   public void testCallsTargetOnExceptionIfRequestListenerReturnsFalse() {
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestListener
-        .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean()))
+        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean()))
         .thenReturn(false);
-    Exception exception = new IOException("Test");
-    request.onException(exception);
+    request.onLoadFailed();
 
-    verify(harness.target).onLoadFailed(eq(exception), eq(harness.errorDrawable));
+    verify(harness.target).onLoadFailed(eq(harness.errorDrawable));
   }
 
   @Test
   public void testDoesNotCallTargetOnExceptionIfRequestListenerReturnsTrue() {
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestListener
-        .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean()))
+        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean()))
         .thenReturn(true);
 
-    request.onException(new IllegalArgumentException("test"));
+    request.onLoadFailed();
 
-    verify(harness.target, never()).onLoadFailed(any(Exception.class), any(Drawable.class));
+    verify(harness.target, never()).onLoadFailed(any(Drawable.class));
   }
 
   @Test
@@ -657,9 +654,9 @@ public class SingleRequestTest {
     harness.errorDrawable = new ColorDrawable(Color.RED);
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(false);
-    request.onException(new IOException("Test"));
+    request.onLoadFailed();
 
-    verify(harness.target, never()).onLoadFailed(any(Exception.class), any(Drawable.class));
+    verify(harness.target, never()).onLoadFailed(any(Drawable.class));
   }
 
   @Test
@@ -754,7 +751,7 @@ public class SingleRequestTest {
     }
 
     @Override
-    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+    public void onLoadFailed(Drawable errorDrawable) {
       currentPlaceholder = errorDrawable;
 
     }

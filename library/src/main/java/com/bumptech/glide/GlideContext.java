@@ -8,7 +8,6 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.Encoder;
@@ -25,9 +24,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,8 +33,6 @@ import java.util.List;
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class GlideContext extends ContextWrapper implements ComponentCallbacks2 {
-  private static final String TAG = "RequestContext";
-
   private final Handler mainHandler;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
@@ -71,10 +66,10 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
         getDecodePaths(dataClass, resourceClass, transcodeClass);
     // It's possible there is no way to decode or transcode to the desired types from a given
     // data class.
-    if (!decodePaths.isEmpty()) {
-      return new LoadPath<>(dataClass, decodePaths);
-    } else {
+    if (decodePaths.isEmpty()) {
       return null;
+    } else {
+      return new LoadPath<>(dataClass, decodePaths);
     }
   }
 
@@ -93,9 +88,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
             registry.decoderRegistry.getDecoders(dataClass, registeredResourceClass);
         ResourceTranscoder<ResourceType, TranscodeType> transcoder =
             registry.transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
-        decodePaths.add(
-            new DecodePath<>(dataClass, registeredResourceClass, registeredTranscodeClass, decoders,
-                transcoder));
+        decodePaths.add(new DecodePath<>(dataClass, decoders, transcoder));
       }
     }
     return decodePaths;
@@ -138,30 +131,6 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
 
   public <X> DataRewinder<X> getRewinder(X data) {
     return registry.dataRewinderRegistry.build(data);
-  }
-
-  @SuppressWarnings("unchecked")
-  public <X, Z> ResourceDecoder<X, Z> getDecoder(DataRewinder<X> rewinder, Class<Z> resourceClass)
-      throws NoDecoderAvailableException, IOException {
-    X data = rewinder.rewindAndGet();
-    List<ResourceDecoder<X, Z>> decoders =
-        registry.decoderRegistry.getDecoders((Class<X>) data.getClass(), resourceClass);
-    for (ResourceDecoder<X, Z> decoder : decoders) {
-      if (decoder.handles(data)) {
-        maybeLogFoundDecoder(decoders, decoder);
-        return decoder;
-      }
-      data = rewinder.rewindAndGet();
-    }
-    throw new NoDecoderAvailableException(data.getClass(), resourceClass);
-  }
-
-  private static <X, Z> void maybeLogFoundDecoder(List<ResourceDecoder<X, Z>> decoders,
-      ResourceDecoder<X, Z> handles) {
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Found decoder: " + handles + " from " + Arrays
-          .toString(decoders.toArray(new Object[decoders.size()])));
-    }
   }
 
   public DataFetcherSet<?> getDataFetchers(Object model, int width, int height) {
@@ -208,7 +177,7 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
    * Thrown when no {@link com.bumptech.glide.load.model.ModelLoader} is registered for a given
    * model class.
    */
-  public static class NoModelLoaderAvailableException extends RuntimeException {
+  public static class NoModelLoaderAvailableException extends MissingComponentException {
     public NoModelLoaderAvailableException(Object model) {
       super("Failed to find any ModelLoaders for model: " + model);
     }

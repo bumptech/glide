@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine.executor;
 
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RunnableFuture;
@@ -74,6 +76,19 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
       }
       priority = ((Prioritized) runnable).getPriority();
       this.order = order;
+    }
+
+    @SuppressWarnings("PMD.PreserveStackTrace")
+    @Override
+    protected void done() {
+      super.done();
+      try {
+        get();
+      } catch (ExecutionException e) {
+        throw new RuntimeException(e.getCause());
+      } catch (CancellationException | InterruptedException e) {
+        // Ignore.
+      }
     }
 
     @SuppressWarnings("unchecked")

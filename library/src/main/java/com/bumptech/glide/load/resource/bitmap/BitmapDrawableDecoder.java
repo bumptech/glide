@@ -25,8 +25,7 @@ public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType
   private final ResourceDecoder<DataType, Bitmap> wrapped;
 
   public BitmapDrawableDecoder(Context context, ResourceDecoder<DataType, Bitmap> decoder) {
-    this(context.getApplicationContext().getResources(), Glide.get(context).getBitmapPool(),
-        decoder);
+    this(context.getResources(), Glide.get(context).getBitmapPool(), decoder);
   }
 
   public BitmapDrawableDecoder(Resources resources, BitmapPool bitmapPool,

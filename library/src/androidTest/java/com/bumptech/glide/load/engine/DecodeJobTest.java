@@ -37,7 +37,6 @@ import org.robolectric.annotation.Config;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +55,7 @@ public class DecodeJobTest {
     harness = new Harness();
   }
 
-  private void mockCacheToReturnResultResource() throws IOException {
+  private void mockCacheToReturnResultResource() throws IOException, GlideException {
     File cacheFile = new File("fake");
     when(harness.diskCache.get(eq(harness.key))).thenReturn(cacheFile);
     when(harness.cacheDecoder
@@ -149,7 +148,7 @@ public class DecodeJobTest {
 
   @Test
   public void testEntryIsDeletedFromCacheIfCacheDecoderThrowsButResultIsInCache()
-      throws IOException {
+      throws IOException, GlideException {
     harness.diskCacheStrategy = DiskCacheStrategy.RESOURCE;
     when(harness.diskCache.get(eq(harness.key))).thenReturn(new File("fake"));
     when(harness.cacheDecoder
@@ -214,7 +213,7 @@ public class DecodeJobTest {
    * decodeFromCachedData *
    */
 
-  private void mockCacheToReturnSourceResource() throws IOException {
+  private void mockCacheToReturnSourceResource() throws IOException, GlideException {
     File file = new File("Test");
     when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(file);
     when(harness.cacheDecoder
@@ -351,7 +350,8 @@ public class DecodeJobTest {
   }
 
   @Test
-  public void testSourceIsDeletedFromCacheIfCacheDecoderThrows() throws IOException {
+  public void testSourceIsDeletedFromCacheIfCacheDecoderThrows() throws IOException,
+      GlideException {
     harness.diskCacheStrategy = DiskCacheStrategy.ALL;
     when(harness.diskCache.get(eq(harness.originalKey))).thenReturn(new File("test"));
     when(harness.cacheDecoder
@@ -578,12 +578,8 @@ public class DecodeJobTest {
         .decode(anyObject(), anyInt(), anyInt(), anyMapOf(String.class, Object.class)))
         .thenThrow(new IOException("test"));
 
-    try {
-      harness.getJob().decodeFromSource();
-      fail("Failed to get expected exception");
-    } catch (IOException e) {
-      // Expected.`
-    }
+    harness.getJob().decodeFromSource();
+    fail("Failed to get expected exception");
 
     verify(harness.dataFetcher).cleanup();
   }
@@ -592,12 +588,8 @@ public class DecodeJobTest {
   public void testFetcherIsCleanedUpIfFetcherThrows() throws Exception {
     when(harness.dataFetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
 
-    try {
-      harness.getJob().decodeFromSource();
-      fail("Failed to get expected exception");
-    } catch (IOException e) {
-      // Expected.
-    }
+    harness.getJob().decodeFromSource();
+    fail("Failed to get expected exception");
 
     verify(harness.dataFetcher).cleanup();
   }
@@ -682,11 +674,8 @@ public class DecodeJobTest {
       when(key.getOriginalKey()).thenReturn(originalKey);
       when(transcoder.transcode(eq(resource))).thenReturn(resource);
       when(transformation.transform(eq(resource), eq(width), eq(height))).thenReturn(resource);
-      List<DataFetcher<?>> dataFetchersList = new ArrayList<>();
-      dataFetchersList.add(dataFetcher);
       when(dataFetcher.loadData(any(Priority.class))).thenReturn(data);
       when(requestContext.getDiskCacheStrategy()).thenReturn(diskCacheStrategy);
-      when(requestContext.getDecoder(any(DataRewinder.class))).thenReturn(cacheDecoder);
       when(requestContext.getResultEncoder(any(Resource.class))).thenReturn(resultEncoder);
       when(requestContext.getSourceEncoder(anyObject())).thenReturn(sourceEncoder);
       when(requestContext.getRewinder(anyObject())).thenReturn(rewinder);

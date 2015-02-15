@@ -6,7 +6,6 @@ import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcherSet;
@@ -16,7 +15,6 @@ import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -111,11 +109,6 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
 
   <X> DataRewinder<X> getRewinder(X data) {
     return glideContext.getRewinder(data);
-  }
-
-  <X> ResourceDecoder<X, ?> getDecoder(DataRewinder<X> rewinder)
-      throws IOException, GlideContext.NoDecoderAvailableException {
-    return glideContext.getDecoder(rewinder, requestOptions.getResourceClass());
   }
 
   boolean isResourceEncoderAvailable(Resource<?> resource) {

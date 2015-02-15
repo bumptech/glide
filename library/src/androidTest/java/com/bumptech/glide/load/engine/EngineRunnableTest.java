@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -44,7 +43,7 @@ public class EngineRunnableTest {
   }
 
   @Test
-  public void testNotifiesManagerOfResultIfDecodeJobDecodesFromCache() throws Exception {
+  public void testNotifiesManagerOfResultIfDecodeJobDecodesFromCache() {
     Resource expected = mock(Resource.class);
     when(job.decodeFromCachedResource()).thenReturn(expected);
 
@@ -54,26 +53,16 @@ public class EngineRunnableTest {
   }
 
   @Test
-  public void testDoesNotNotifyManagerOfFailureIfDecodeJobReturnsNullFromCache() throws Exception {
+  public void testDoesNotNotifyManagerOfFailureIfDecodeJobReturnsNullFromCache() {
     when(job.decodeFromCachedResource()).thenReturn(null);
 
     runnable.run();
 
-    verify(manager, never()).onException(any(Exception.class));
+    verify(manager, never()).onLoadFailed();
   }
 
   @Test
-  public void testDoesNotNotifyManagerOfFailureIfDecodeJobThrowsExceptionFromCache()
-      throws Exception {
-    when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
-
-    runnable.run();
-
-    verify(manager, never()).onException(any(Exception.class));
-  }
-
-  @Test
-  public void testNotifiesManagerOfResultIfDecodeJobDecodesFromSourceCache() throws Exception {
+  public void testNotifiesManagerOfResultIfDecodeJobDecodesFromSourceCache() {
     Resource expected = mock(Resource.class);
     when(job.decodeFromCachedData()).thenReturn(expected);
 
@@ -84,9 +73,9 @@ public class EngineRunnableTest {
 
   @Test
   public void
-  testNotifiesManagerOfResultIfDecodeJobThrowsGettingResultFromCacheButDecodesFromSourceCache()
+  testNotifiesManagerOfResultIfDecodeJobReturnsNullFromCacheButDecodesFromSourceCache()
       throws Exception {
-    when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
+    when(job.decodeFromCachedResource()).thenReturn(null);
     Resource expected = mock(Resource.class);
     when(job.decodeFromCachedData()).thenReturn(expected);
 
@@ -96,61 +85,39 @@ public class EngineRunnableTest {
   }
 
   @Test
-  public void testDoesNotNotifyManagerOfFailureIfDecodeJobReturnsNullFromSourceAndResultCache() {
+  public void testDoesNotNotifyManagerOfFailureIfDecodeJobReturnsNullFromDataAndResource() {
     runnable.run();
 
-    verify(manager, never()).onException(any(Exception.class));
+    verify(manager, never()).onLoadFailed();
   }
 
   @Test
-  public void testDoesNotNotifyManagerOfFailureIfDecodeJobThrowsFromSourceAndResultCache()
-      throws Exception {
-    when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
-    when(job.decodeFromCachedData()).thenThrow(new RuntimeException("test"));
-
-    runnable.run();
-
-    verify(manager, never()).onException(any(Exception.class));
-  }
-
-  @Test
-  public void testSubmitsForSourceIfDecodeJobReturnsNullFromSourceAndResultCache() {
+  public void testSubmitsForSourceIfDecodeJobReturnsNullFromDataAndResource() {
     runnable.run();
 
     verify(manager).submitForSource(eq(runnable));
   }
 
   @Test
-  public void testSubmitsForSourceIfDecodeJobThrowsFromSourceAndResultCache() throws Exception {
-    when(job.decodeFromCachedResource()).thenThrow(new RuntimeException("test"));
-    when(job.decodeFromCachedData()).thenThrow(new RuntimeException("test"));
-
+  public void testNotifiesManagerOfFailureIfJobReturnsNullDecodingFromData() {
+    runnable.run();
     runnable.run();
 
-    verify(manager).submitForSource(eq(runnable));
+    verify(manager).onLoadFailed();
   }
 
   @Test
   public void testNotifiesManagerOfFailureIfJobReturnsNullDecodingFromSource() {
     runnable.run();
+
+    when(job.decodeFromSource()).thenReturn(null);
     runnable.run();
 
-    verify(manager).onException((Exception) isNull());
+    verify(manager).onLoadFailed();
   }
 
   @Test
-  public void testNotifiesManagerOfFailureIfJobThrowsDecodingFromSource() throws Exception {
-    runnable.run();
-
-    Exception expected = new RuntimeException("test");
-    when(job.decodeFromSource()).thenThrow(expected);
-    runnable.run();
-
-    verify(manager).onException(eq(expected));
-  }
-
-  @Test
-  public void testNotifiesManagerOfResultIfDecodeFromSourceSucceeds() throws Exception {
+  public void testNotifiesManagerOfResultIfDecodeFromSourceSucceeds() {
     runnable.run();
 
     Resource expected = mock(Resource.class);
@@ -161,7 +128,7 @@ public class EngineRunnableTest {
   }
 
   @Test
-  public void testDoesNotDecodeFromCacheIfCancelled() throws Exception {
+  public void testDoesNotDecodeFromCacheIfCancelled() {
     runnable.cancel();
     runnable.run();
 
@@ -170,7 +137,7 @@ public class EngineRunnableTest {
   }
 
   @Test
-  public void testDoesNotDecodeFromSourceIfCancelled() throws Exception {
+  public void testDoesNotDecodeFromSourceIfCancelled() {
     runnable.run();
     runnable.cancel();
     runnable.run();
@@ -187,22 +154,22 @@ public class EngineRunnableTest {
   }
 
   @Test
-  public void testDoesNotNotifyManagerOfFailureIfCancelled() throws Exception {
+  public void testDoesNotNotifyManagerOfFailureIfCancelled() {
     runnable.run();
     when(job.decodeFromSource()).thenAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
         runnable.cancel();
-        throw new RuntimeException("test");
+        return null;
       }
     });
     runnable.run();
 
-    verify(manager, never()).onException(any(Exception.class));
+    verify(manager, never()).onLoadFailed();
   }
 
   @Test
-  public void testDoesNotNotifyManagerOfSuccessIfCancelled() throws Exception {
+  public void testDoesNotNotifyManagerOfSuccessIfCancelled() {
     runnable.run();
     when(job.decodeFromSource()).thenAnswer(new Answer<Object>() {
       @Override
@@ -217,7 +184,7 @@ public class EngineRunnableTest {
   }
 
   @Test
-  public void testRecyclesResourceIfAvailableWhenCancelled() throws Exception {
+  public void testRecyclesResourceIfAvailableWhenCancelled() {
     final Resource resource = mock(Resource.class);
     runnable.run();
     when(job.decodeFromSource()).thenAnswer(new Answer<Object>() {
