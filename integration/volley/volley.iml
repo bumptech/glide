@@ -121,5 +121,6 @@
     <orderEntry type="library" exported="" scope="TEST" name="asm-util-5.0.1" level="project" />
     <orderEntry type="module" module-name="testutil" exported="" />
     <orderEntry type="module" module-name="glide" exported="" />
+    <orderEntry type="module" module-name="library" />
   </component>
 </module>

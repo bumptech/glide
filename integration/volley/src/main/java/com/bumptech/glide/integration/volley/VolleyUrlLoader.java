@@ -17,39 +17,14 @@ import java.io.InputStream;
  */
 public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
-  private final RequestQueue requestQueue;
-
-  public VolleyUrlLoader(RequestQueue requestQueue) {
-    this.requestQueue = requestQueue;
-  }
-
-  @Override
-  public DataFetcher<InputStream> getDataFetcher(GlideUrl url, int width, int height) {
-    return new VolleyStreamFetcher(requestQueue, url, new VolleyRequestFuture<InputStream>());
-  }
-
-  @Override
-  public boolean handles(GlideUrl url) {
-    return true;
-  }
-
   /**
    * The default factory for {@link VolleyUrlLoader}s.
    */
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
-    private static RequestQueue internalQueue;
-    private RequestQueue requestQueue;
+    private static volatile RequestQueue internalQueue;
 
-    private static RequestQueue getInternalQueue(Context context) {
-      if (internalQueue == null) {
-        synchronized (Factory.class) {
-          if (internalQueue == null) {
-            internalQueue = Volley.newRequestQueue(context);
-          }
-        }
-      }
-      return internalQueue;
-    }
+    private final VolleyRequestFactory requestFactory;
+    private final RequestQueue requestQueue;
 
     /**
      * Constructor for a new Factory that runs requests using a static singleton request queue.
@@ -62,18 +37,61 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
      * Constructor for a new Factory that runs requests using the given {@link RequestQueue}.
      */
     public Factory(RequestQueue requestQueue) {
+      this(requestQueue, VolleyStreamFetcher.DEFAULT_REQUEST_FACTORY);
+    }
+
+    /**
+     * Constructor for a new Factory with a custom Volley request factory that runs requests using
+     * the given {@link RequestQueue}.
+     */
+    public Factory(RequestQueue requestQueue, VolleyRequestFactory requestFactory) {
+      this.requestFactory = requestFactory;
       this.requestQueue = requestQueue;
     }
 
     @Override
     public ModelLoader<GlideUrl, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
-      return new VolleyUrlLoader(requestQueue);
+        MultiModelLoaderFactory factory) {
+      return new VolleyUrlLoader(requestQueue, requestFactory);
     }
 
     @Override
     public void teardown() {
-      // Do nothing, this instance doesn't own the request queue.
+      // Do nothing.
     }
+
+    private static RequestQueue getInternalQueue(Context context) {
+      if (internalQueue == null) {
+        synchronized (Factory.class) {
+          if (internalQueue == null) {
+            internalQueue = Volley.newRequestQueue(context);
+          }
+        }
+      }
+      return internalQueue;
+    }
+  }
+
+  private final RequestQueue requestQueue;
+  private final VolleyRequestFactory requestFactory;
+
+  public VolleyUrlLoader(RequestQueue requestQueue) {
+    this(requestQueue, VolleyStreamFetcher.DEFAULT_REQUEST_FACTORY);
+  }
+
+  public VolleyUrlLoader(RequestQueue requestQueue, VolleyRequestFactory requestFactory) {
+    this.requestQueue = requestQueue;
+    this.requestFactory = requestFactory;
+  }
+
+  @Override
+  public boolean handles(GlideUrl url) {
+    return true;
+  }
+
+  @Override
+  public DataFetcher<InputStream> getDataFetcher(GlideUrl url, int width, int height) {
+    return new VolleyStreamFetcher(requestQueue, url, new VolleyRequestFuture<InputStream>(),
+        requestFactory);
   }
 }

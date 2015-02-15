@@ -155,7 +155,7 @@ anything else, join or email [Glide's discussion group][6], or join our irc chan
 
 Contributing
 ------------
-Before submitting pull requests, contributors must sign Google's [individual contribution license agreement][7].
+Before submitting pull requests, contributors must sign Google's [individual contributor license agreement][7].
 
 Thanks
 ------
@@ -177,7 +177,7 @@ This is not an official Google product.
 [2]: https://github.com/bumptech/glide/wiki
 [3]: http://bumptech.github.io/glide/javadocs/latest/index.html
 [4]: https://www.jetbrains.com/idea/download/
-[5]: https://github.com/bumptech/glide/issues/new
+[5]: https://github.com/bumptech/glide/issues/new?body=**Glide%20Version/Integration%20library%20(if%20any)**:%0A**Device/Android%20Version**:%0A**Issue%20details/Repro%20steps**:%0A%0A**Glide%20load%20line**:%0A```%0AGlide.with(context)...%3B%0A```%0A%0A**Stack%20trace**:%0A```%0Apaste%20stack%20trace%20here%0A```
 [6]: https://groups.google.com/forum/#!forum/glidelibrary
 [7]: https://developers.google.com/open-source/cla/individual
 [8]: https://github.com/JakeWharton/DiskLruCache

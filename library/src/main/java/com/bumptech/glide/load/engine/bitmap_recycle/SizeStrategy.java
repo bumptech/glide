@@ -9,9 +9,10 @@ import com.bumptech.glide.util.Util;
 import java.util.TreeMap;
 
 /**
- * A strategy for reusing bitmaps that relies on {@link Bitmap#reconfigure(int, int,
- * Bitmap.Config)}. Requires {@link Build.VERSION_CODES#KITKAT KitKat} (API {@value
- * Build.VERSION_CODES#KITKAT}) or higher.
+ * A strategy for reusing bitmaps that relies on
+ * {@link Bitmap#reconfigure(int, int, Bitmap.Config)}.
+ *
+ * <p> Requires {@link Build.VERSION_CODES#KITKAT KitKat} or higher. </p>
  */
 @TargetApi(Build.VERSION_CODES.KITKAT)
 class SizeStrategy implements LruPoolStrategy {
@@ -91,24 +92,6 @@ class SizeStrategy implements LruPoolStrategy {
   @Override
   public String toString() {
     return "SizeStrategy:\n  " + groupedMap + "\n" + "  SortedSizes" + sortedSizes;
-  }
-
-  private static class PrettyPrintTreeMap<K, V> extends TreeMap<K, V> {
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append("( ");
-      for (Entry<K, V> entry : entrySet()) {
-        sb.append('{').append(entry.getKey()).append(':').append(entry.getValue()).append("}, ");
-      }
-      final String result;
-      if (!isEmpty()) {
-        result = sb.substring(0, sb.length() - 2);
-      } else {
-        result = sb.toString();
-      }
-      return result + " )";
-    }
   }
 
   private static String getBitmapString(Bitmap bitmap) {

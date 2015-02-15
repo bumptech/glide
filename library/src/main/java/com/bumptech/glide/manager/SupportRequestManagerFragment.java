@@ -69,6 +69,10 @@ public class SupportRequestManagerFragment extends Fragment {
   @Override
   public void onLowMemory() {
     super.onLowMemory();
-    requestManager.onLowMemory();
+    // If an activity is re-created, onLowMemory may be called before a manager is ever set.
+    // See #329.
+    if (requestManager != null) {
+      requestManager.onLowMemory();
+    }
   }
 }

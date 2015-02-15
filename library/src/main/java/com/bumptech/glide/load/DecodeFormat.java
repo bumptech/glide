@@ -18,7 +18,7 @@ public enum DecodeFormat {
    * should return {@link android.graphics.Bitmap.Config#ARGB_8888} for
    * {@link android.graphics.Bitmap#getConfig()}.
    */
-  ALWAYS_ARGB_8888,
+  PREFER_ARGB_8888,
 
   /**
    * Bitmaps decoded from image formats that support and/or use alpha (some types of PNGs, GIFs etc)
@@ -40,5 +40,5 @@ public enum DecodeFormat {
   /**
    * The default value for DecodeFormat.
    */
-  public static final DecodeFormat DEFAULT = REQUIRE_ARGB_8888 ? ALWAYS_ARGB_8888 : PREFER_RGB_565;
+  public static final DecodeFormat DEFAULT = REQUIRE_ARGB_8888 ? PREFER_ARGB_8888 : PREFER_RGB_565;
 }

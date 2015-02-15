@@ -80,8 +80,8 @@ public class LruBitmapPool implements BitmapPool {
     if (bitmap == null) {
       throw new NullPointerException("Bitmap must not be null");
     }
-    if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize || !allowedConfigs
-        .contains(bitmap.getConfig())) {
+    if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize
+        || !allowedConfigs.contains(bitmap.getConfig())) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG,
             "Reject bitmap from pool" + ", bitmap: " + strategy.logBitmap(bitmap) + ", is mutable: "
@@ -116,10 +116,8 @@ public class LruBitmapPool implements BitmapPool {
     Bitmap result = getDirty(width, height, config);
     if (result != null) {
       // Bitmaps in the pool contain random data that in some cases must be cleared for an image
-      // to be rendered
-      // correctly. we shouldn't force all consumers to independently erase the contents
-      // individually, so we do so
-      // here. See issue #131.
+      // to be rendered correctly. we shouldn't force all consumers to independently erase the
+      // contents individually, so we do so here. See issue #131.
       result.eraseColor(Color.TRANSPARENT);
     }
 
@@ -130,8 +128,7 @@ public class LruBitmapPool implements BitmapPool {
   @Override
   public synchronized Bitmap getDirty(int width, int height, Bitmap.Config config) {
     // Config will be null for non public config types, which can lead to transformations naively
-    // passing in
-    // null as the requested config here. See issue #194.
+    // passing in null as the requested config here. See issue #194.
     final Bitmap result = strategy.get(width, height, config != null ? config : DEFAULT_CONFIG);
     if (result == null) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -162,6 +159,9 @@ public class LruBitmapPool implements BitmapPool {
   @SuppressLint("InlinedApi")
   @Override
   public void trimMemory(int level) {
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.d(TAG, "trimMemory, level=" + level);
+    }
     if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
       clearMemory();
     } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
@@ -172,6 +172,15 @@ public class LruBitmapPool implements BitmapPool {
   private synchronized void trimToSize(int size) {
     while (currentSize > size) {
       final Bitmap removed = strategy.removeLast();
+      // TODO: This shouldn't ever happen, see #331.
+      if (removed == null) {
+        if (Log.isLoggable(TAG, Log.WARN)) {
+          Log.w(TAG, "Size mismatch, resetting");
+          dumpUnchecked();
+        }
+        currentSize = 0;
+        return;
+      }
       tracker.remove(removed);
       currentSize -= strategy.getSize(removed);
       removed.recycle();
@@ -185,15 +194,19 @@ public class LruBitmapPool implements BitmapPool {
 
   private void dump() {
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Hits=" + hits + " misses=" + misses + " puts=" + puts + " evictions=" + evictions
-          + " currentSize=" + currentSize + " maxSize=" + maxSize + "\nStrategy=" + strategy);
+      dumpUnchecked();
     }
+  }
+
+  private void dumpUnchecked() {
+    Log.v(TAG, "Hits=" + hits + ", misses=" + misses + ", puts=" + puts + ", evictions=" + evictions
+        + ", currentSize=" + currentSize + ", maxSize=" + maxSize + "\nStrategy=" + strategy);
   }
 
   private static LruPoolStrategy getDefaultStrategy() {
     final LruPoolStrategy strategy;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      strategy = new SizeStrategy();
+      strategy = new SizeConfigStrategy();
     } else {
       strategy = new AttributeStrategy();
     }

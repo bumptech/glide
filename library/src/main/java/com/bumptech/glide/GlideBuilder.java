@@ -147,8 +147,8 @@ public class GlideBuilder {
    * @return This builder.
    */
   public GlideBuilder setDecodeFormat(DecodeFormat decodeFormat) {
-    if (DecodeFormat.REQUIRE_ARGB_8888 && decodeFormat != DecodeFormat.ALWAYS_ARGB_8888) {
-      this.decodeFormat = DecodeFormat.ALWAYS_ARGB_8888;
+    if (DecodeFormat.REQUIRE_ARGB_8888 && decodeFormat != DecodeFormat.PREFER_ARGB_8888) {
+      this.decodeFormat = DecodeFormat.PREFER_ARGB_8888;
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Unsafe to use RGB_565 on KitKat or Lollipop, ignoring setDecodeFormat");
       }

@@ -83,8 +83,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
   };
 
   // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer
-  // but will resize up to
-  // this amount if necessary.
+  // but will resize up to this amount if necessary.
   private static final int MARK_POSITION = 5 * 1024 * 1024;
 
 
@@ -202,20 +201,17 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     final int exactSampleSize;
     if (degreesToRotate == 90 || degreesToRotate == 270) {
       // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image
-      // width is
-      // decreased to near our target's height and the image height is decreased to near our
-      // target width.
+      // width is decreased to near our target's height and the image height is decreased to near
+      // our target width.
       exactSampleSize = getSampleSize(inHeight, inWidth, targetWidth, targetHeight);
     } else {
       exactSampleSize = getSampleSize(inWidth, inHeight, targetWidth, targetHeight);
     }
 
     // BitmapFactory only accepts powers of 2, so it will round down to the nearest power of two
-    // that is less than
-    // or equal to the sample size we provide. Because we need to estimate the final image width
-    // and height to
-    // re-use Bitmaps, we mirror BitmapFactory's calculation here. For bug, see issue #224. For
-    // algorithm see
+    // that is less than or equal to the sample size we provide. Because we need to estimate the
+    // final image width and height to re-use Bitmaps, we mirror BitmapFactory's calculation here.
+    // For bug, see issue #224. For algorithm see
     // http://stackoverflow.com/a/17379704/800716.
     final int powerOfTwoSampleSize =
         exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize);
@@ -272,7 +268,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
   private static Bitmap.Config getConfig(InputStream is, DecodeFormat format) {
     // Changing configs can cause skewing on 4.1, see issue #128.
-    if (format == DecodeFormat.ALWAYS_ARGB_8888
+    if (format == DecodeFormat.PREFER_ARGB_8888
         || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
       return Bitmap.Config.ARGB_8888;
     }
@@ -309,7 +305,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
    * @param inHeight  The height in piexels of the image to be downsampled.
    * @param outWidth  The width in pixels of the view/target the image will be displayed in.
    * @param outHeight The height in pixels of the view/target the imag will be displayed in.
-   * @return An integer to pass in to {@link BitmapFactory#decodeStream(java.io.InputStream,
+   * @return An integer to pass in to  {@link BitmapFactory#decodeStream(java.io.InputStream,
    * android.graphics.Rect, android.graphics.BitmapFactory.Options)}.
    * @see android.graphics.BitmapFactory.Options#inSampleSize
    */
@@ -335,22 +331,16 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
       RecyclableBufferedInputStream bufferedStream, BitmapFactory.Options options) {
     if (options.inJustDecodeBounds) {
       // This is large, but jpeg headers are not size bounded so we need something large enough
-      // to minimize
-      // the possibility of not being able to fit enough of the header in the buffer to get the
-      // image size so
-      // that we don't fail to load images. The BufferedInputStream will create a new buffer of
-      // 2x the
-      // original size each time we use up the buffer space without passing the mark so this is a
-      // maximum
-      // bound on the buffer size, not a default. Most of the time we won't go past our
-      // pre-allocated 16kb.
+      // to minimize the possibility of not being able to fit enough of the header in the buffer to
+      // get the image size so that we don't fail to load images. The BufferedInputStream will
+      // create a new buffer of 2x the original size each time we use up the buffer space without
+      // passing the mark so this is a maximum bound on the buffer size, not a default. Most of the
+      // time we won't go past our pre-allocated 16kb.
       is.mark(MARK_POSITION);
     } else {
       // Once we've read the image header, we no longer need to allow the buffer to expand in
-      // size. To avoid
-      // unnecessary allocations reading image data, we fix the mark limit so that it is no
-      // larger than our
-      // current buffer size here. See issue #225.
+      // size. To avoid unnecessary allocations reading image data, we fix the mark limit so that it
+      // is no larger than our current buffer size here. See issue #225.
       bufferedStream.fixMarkLimit();
     }
 

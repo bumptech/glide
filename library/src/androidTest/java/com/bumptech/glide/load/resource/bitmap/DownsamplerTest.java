@@ -51,7 +51,7 @@ public class DownsamplerTest {
     compressBitmap(rgb565, Bitmap.CompressFormat.JPEG);
     Downsampler downsampler = Downsampler.AT_LEAST;
     InputStream is = new FileInputStream(tempFile);
-    options.put(Downsampler.KEY_DECODE_FORMAT, DecodeFormat.ALWAYS_ARGB_8888);
+    options.put(Downsampler.KEY_DECODE_FORMAT, DecodeFormat.PREFER_ARGB_8888);
     try {
       Bitmap result = downsampler.decode(is, mock(BitmapPool.class), 100, 100, options);
       assertEquals(Bitmap.Config.ARGB_8888, result.getConfig());

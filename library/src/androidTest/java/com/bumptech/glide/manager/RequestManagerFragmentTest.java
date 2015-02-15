@@ -8,7 +8,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
-import android.content.ComponentCallbacks;
 import android.support.v4.app.FragmentActivity;
 
 import com.bumptech.glide.RequestManager;
@@ -109,21 +108,40 @@ public class RequestManagerFragmentTest {
       public void runTest(Harness harness) {
         RequestManager requestManager = mock(RequestManager.class);
         harness.setRequestManager(requestManager);
-        harness.getCallbacks().onLowMemory();
+        harness.onLowMemory();
         verify(requestManager).onLowMemory();
       }
     });
   }
 
   @Test
-  public void testNonSupportFragmentCallsRequestManagerOnTrimMemory() {
+  public void testNonSupportFragmentCallsOnTrimMemory() {
     RequestManagerHarness requestManagerHarness = new RequestManagerHarness();
+    int level = 100;
     RequestManager requestManager = mock(RequestManager.class);
     requestManagerHarness.setRequestManager(requestManager);
-    int level = 123;
-    requestManagerHarness.fragment.onTrimMemory(level);
-
+    requestManagerHarness.onTrimMemory(level);
     verify(requestManager).onTrimMemory(eq(level));
+  }
+
+  @Test
+  public void testOnLowMemoryCallOnNullRequestManagerDoesNotCrash() {
+    runTest(new TestCase() {
+      @Override
+      public void runTest(Harness harness) {
+        harness.onLowMemory();
+      }
+    });
+  }
+
+  @Test
+  public void testOnTrimMemoryCallOnNullRequestManagerDoesNotCrash() {
+    runTest(new TestCase() {
+      @Override
+      public void runTest(Harness harness) {
+        harness.onTrimMemory(100 /*level*/);
+      }
+    });
   }
 
   private void runTest(TestCase testCase) {
@@ -141,17 +159,19 @@ public class RequestManagerFragmentTest {
   }
 
   private interface Harness {
-    public RequestManager getManager();
+    RequestManager getManager();
 
-    public void setRequestManager(RequestManager manager);
+    void setRequestManager(RequestManager manager);
 
-    public ActivityFragmentLifecycle getHarnessLifecycle();
+    ActivityFragmentLifecycle getHarnessLifecycle();
 
-    public ActivityFragmentLifecycle getFragmentLifecycle();
+    ActivityFragmentLifecycle getFragmentLifecycle();
 
-    public ActivityController getController();
+    ActivityController getController();
 
-    public ComponentCallbacks getCallbacks();
+    void onLowMemory();
+
+    void onTrimMemory(int level);
   }
 
   private static class RequestManagerHarness implements Harness {
@@ -162,8 +182,14 @@ public class RequestManagerFragmentTest {
     public RequestManagerHarness() {
       fragment = new RequestManagerFragment(lifecycle);
       controller = Robolectric.buildActivity(Activity.class).create();
-      controller.get().getFragmentManager().beginTransaction().add(fragment, TAG).commit();
-      controller.get().getFragmentManager().executePendingTransactions();
+      controller.get()
+          .getFragmentManager()
+          .beginTransaction()
+          .add(fragment, TAG)
+          .commit();
+      controller.get()
+          .getFragmentManager()
+          .executePendingTransactions();
     }
 
     @Override
@@ -197,8 +223,13 @@ public class RequestManagerFragmentTest {
     }
 
     @Override
-    public ComponentCallbacks getCallbacks() {
-      return fragment;
+    public void onLowMemory() {
+      fragment.onLowMemory();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+      fragment.onTrimMemory(level);
     }
   }
 
@@ -211,8 +242,11 @@ public class RequestManagerFragmentTest {
       supportFragment = new SupportRequestManagerFragment(lifecycle);
       supportController = Robolectric.buildActivity(FragmentActivity.class).create();
 
-      supportController.get().getSupportFragmentManager().beginTransaction()
-          .add(supportFragment, TAG).commit();
+      supportController.get()
+          .getSupportFragmentManager()
+          .beginTransaction()
+          .add(supportFragment, TAG)
+          .commit();
       supportController.get().getSupportFragmentManager().executePendingTransactions();
     }
 
@@ -247,8 +281,13 @@ public class RequestManagerFragmentTest {
     }
 
     @Override
-    public ComponentCallbacks getCallbacks() {
-      return supportFragment;
+    public void onLowMemory() {
+      supportFragment.onLowMemory();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+      // Do nothing.
     }
   }
 }
