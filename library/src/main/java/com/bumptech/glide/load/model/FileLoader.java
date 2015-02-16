@@ -1,12 +1,16 @@
 package com.bumptech.glide.load.model;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -17,15 +21,15 @@ import java.io.InputStream;
  */
 public class FileLoader<Data> implements ModelLoader<File, Data> {
 
-  private final ModelLoader<Uri, Data> uriLoader;
+  private final FileOpener<Data> fileOpener;
 
-  public FileLoader(ModelLoader<Uri, Data> uriLoader) {
-    this.uriLoader = uriLoader;
+  public FileLoader(FileOpener<Data> fileOpener) {
+    this.fileOpener = fileOpener;
   }
 
   @Override
   public DataFetcher<Data> getDataFetcher(File model, int width, int height) {
-    return uriLoader.getDataFetcher(Uri.fromFile(model), width, height);
+    return new FileFetcher<>(model, fileOpener);
   }
 
   @Override
@@ -34,37 +38,132 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
   }
 
   /**
-   * Factory for loading {@link InputStream}s from {@link File}s.
+   * Allows opening a specific type of data from a {@link java.io.File}.
+   * @param <Data> The type of data that can be opened.
    */
-  public static class StreamFactory implements ModelLoaderFactory<File, InputStream> {
+  public interface FileOpener<Data> {
+    Data open(File file) throws FileNotFoundException;
+    void close(Data data) throws IOException;
+    Class<Data> getDataClass();
+  }
 
-    @Override
-    public ModelLoader<File, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
-      return new FileLoader<>(multiFactory.build(Uri.class, InputStream.class));
+  private static class FileFetcher<Data> implements DataFetcher<Data> {
+    private final File file;
+    private final FileOpener<Data> opener;
+    private Data data;
+
+    public FileFetcher(File file, FileOpener<Data> opener) {
+      this.file = file;
+      this.opener = opener;
     }
 
     @Override
-    public void teardown() {
+    public Data loadData(Priority priority) throws IOException {
+      data = opener.open(file);
+      return data;
+    }
+
+    @Override
+    public void cleanup() {
+      if (data != null) {
+        try {
+          opener.close(data);
+        } catch (IOException e) {
+          // Ignored.
+        }
+      }
+    }
+
+    @Override
+    public String getId() {
+      return file.getPath();
+    }
+
+    @Override
+    public void cancel() {
       // Do nothing.
+    }
+
+    @Override
+    public Class<Data> getDataClass() {
+      return opener.getDataClass();
+    }
+
+    @Override
+    public DataSource getDataSource() {
+      return DataSource.LOCAL;
+    }
+  }
+
+  /**
+   * Base factory for loading data from {@link java.io.File files}.
+   * @param <Data> The type of data that will be loaded for a given {@link java.io.File}.
+   */
+  public static class Factory<Data> implements ModelLoaderFactory<File, Data> {
+    private final FileOpener<Data> opener;
+
+    public Factory(FileOpener<Data> opener) {
+      this.opener = opener;
+    }
+
+    @Override
+    public final ModelLoader<File, Data> build(Context context,
+        MultiModelLoaderFactory multiFactory) {
+      return new FileLoader<>(opener);
+    }
+
+    @Override
+    public final void teardown() {
+      // Do nothing.
+    }
+  }
+
+  /**
+   * Factory for loading {@link InputStream}s from {@link File}s.
+   */
+  public static class StreamFactory extends Factory<InputStream> {
+    public StreamFactory() {
+      super(new FileOpener<InputStream>() {
+        @Override
+        public InputStream open(File file) throws FileNotFoundException {
+          return new FileInputStream(file);
+        }
+
+        @Override
+        public void close(InputStream inputStream) throws IOException {
+          inputStream.close();
+        }
+
+        @Override
+        public Class<InputStream> getDataClass() {
+          return InputStream.class;
+        }
+      });
     }
   }
 
   /**
    * Factory for loading {@link ParcelFileDescriptor}s from {@link File}s.
    */
-  public static class FileDescriptorFactory implements ModelLoaderFactory<File,
-      ParcelFileDescriptor> {
+  public static class FileDescriptorFactory extends Factory<ParcelFileDescriptor> {
 
-    @Override
-    public ModelLoader<File, ParcelFileDescriptor> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
-      return new FileLoader<>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
-    }
+    public FileDescriptorFactory() {
+      super(new FileOpener<ParcelFileDescriptor>() {
+        @Override
+        public ParcelFileDescriptor open(File file) throws FileNotFoundException {
+          return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        }
 
-    @Override
-    public void teardown() {
-      // Do nothing.
+        @Override
+        public void close(ParcelFileDescriptor parcelFileDescriptor) throws IOException {
+          parcelFileDescriptor.close();
+        }
+
+        @Override
+        public Class<ParcelFileDescriptor> getDataClass() {
+          return ParcelFileDescriptor.class;
+        }
+      });
     }
   }
 }
