@@ -18,7 +18,7 @@ public class GifDrawableResource extends DrawableResource<GifDrawable> {
 
   @Override
   public int getSize() {
-    return drawable.getData().length + Util.getBitmapByteSize(drawable.getFirstFrame());
+   return drawable.getBuffer().limit() + Util.getBitmapByteSize(drawable.getFirstFrame());
   }
 
   @Override

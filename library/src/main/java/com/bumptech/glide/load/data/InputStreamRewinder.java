@@ -47,9 +47,8 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
     }
 
     @Override
-    public Class getDataClass() {
+    public Class<InputStream> getDataClass() {
       return InputStream.class;
     }
   }
-
 }

@@ -18,7 +18,7 @@ public class DataRewinderRegistry {
     }
 
     @Override
-    public Class getDataClass() {
+    public Class<Object> getDataClass() {
       throw new UnsupportedOperationException("Not implemented");
     }
   };

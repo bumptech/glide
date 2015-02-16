@@ -8,10 +8,12 @@ import com.bumptech.glide.testutil.TestResourceUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.robolectric.util.Util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 @RunWith(JUnit4.class)
 public class ImageHeaderParserTest {
@@ -23,19 +25,25 @@ public class ImageHeaderParserTest {
   @Test
   public void testCanParsePngType() throws IOException {
     // PNG magic number from: http://en.wikipedia.org/wiki/Portable_Network_Graphics.
-    InputStream is = new ByteArrayInputStream(
-        new byte[] { (byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a });
-    ImageHeaderParser parser = new ImageHeaderParser(is);
-    assertEquals(ImageType.PNG, parser.getType());
+    byte[] data = new byte[] { (byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
+    runTest(data, new ParserTestCase() {
+      @Override
+      public void run(ImageHeaderParser parser) throws IOException {
+        assertEquals(ImageType.PNG, parser.getType());
+      }
+    });
   }
 
   @Test
   public void testCanParsePngWithAlpha() throws IOException {
     for (int i = 3; i <= 6; i++) {
       byte[] pngHeaderWithIhdrChunk = generatePngHeaderWithIhdr(i);
-      InputStream is = new ByteArrayInputStream(pngHeaderWithIhdrChunk);
-      ImageHeaderParser parser = new ImageHeaderParser(is);
-      assertEquals(ImageType.PNG_A, parser.getType());
+      runTest(pngHeaderWithIhdrChunk, new ParserTestCase() {
+        @Override
+        public void run(ImageHeaderParser parser) throws IOException {
+          assertEquals(ImageType.PNG_A, parser.getType());
+        }
+      });
     }
   }
 
@@ -43,40 +51,83 @@ public class ImageHeaderParserTest {
   public void testCanParsePngWithoutAlpha() throws IOException {
     for (int i = 0; i < 3; i++) {
       byte[] pngHeaderWithIhdrChunk = generatePngHeaderWithIhdr(i);
-      InputStream is = new ByteArrayInputStream(pngHeaderWithIhdrChunk);
-      ImageHeaderParser parser = new ImageHeaderParser(is);
-      assertEquals(ImageType.PNG, parser.getType());
+      runTest(pngHeaderWithIhdrChunk, new ParserTestCase() {
+        @Override
+        public void run(ImageHeaderParser parser) throws IOException {
+          assertEquals(ImageType.PNG, parser.getType());
+        }
+      });
     }
   }
 
   @Test
   public void testCanParseJpegType() throws IOException {
-    InputStream is = new ByteArrayInputStream(new byte[] { (byte) 0xFF, (byte) 0xD8 });
-    ImageHeaderParser parser = new ImageHeaderParser(is);
-    assertEquals(ImageType.JPEG, parser.getType());
+    byte[] data = new byte[] { (byte) 0xFF, (byte) 0xD8 };
+    runTest(data, new ParserTestCase() {
+      @Override
+      public void run(ImageHeaderParser parser) throws IOException {
+        assertEquals(ImageType.JPEG, parser.getType());
+      }
+    });
   }
 
   @Test
   public void testCanParseGifType() throws IOException {
-    InputStream is = new ByteArrayInputStream(new byte[] { 'G', 'I', 'F' });
-    ImageHeaderParser parser = new ImageHeaderParser(is);
-    assertEquals(ImageType.GIF, parser.getType());
+    byte[] data = new byte[] { 'G', 'I', 'F' };
+    runTest(data, new ParserTestCase() {
+      @Override
+      public void run(ImageHeaderParser parser) throws IOException {
+        assertEquals(ImageType.GIF, parser.getType());
+      }
+    });
   }
 
   @Test
   public void testReturnsUnknownTypeForUnknownImageHeaders() throws IOException {
-    InputStream is =
-        new ByteArrayInputStream(new byte[] { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 });
-    ImageHeaderParser parser = new ImageHeaderParser(is);
-    assertEquals(ImageType.UNKNOWN, parser.getType());
+    byte[] data = new byte[] { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
+    runTest(data, new ParserTestCase() {
+      @Override
+      public void run(ImageHeaderParser parser) throws IOException {
+        assertEquals(ImageType.UNKNOWN, parser.getType());
+      }
+    });
   }
 
   // Test for #286.
   @Test
   public void testHandlesParsingOrientationWithMinimalExifSegment() throws IOException {
-    InputStream is = TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg");
+    byte[] data =
+        Util.readBytes(TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg"));
+    runTest(data, new ParserTestCase() {
+      @Override
+      public void run(ImageHeaderParser parser) throws IOException {
+        assertEquals(-1, parser.getOrientation());
+      }
+    });
+  }
+
+  @Test
+  public void testReturnsUnknownForEmptyData() throws IOException {
+    runTest(new byte[0], new ParserTestCase() {
+      @Override
+      public void run(ImageHeaderParser parser) throws IOException {
+        assertEquals(ImageType.UNKNOWN, parser.getType());
+      }
+    });
+  }
+
+  private interface ParserTestCase {
+    void run(ImageHeaderParser parser) throws IOException;
+  }
+
+  private static void runTest(byte[] data, ParserTestCase test) throws IOException {
+    InputStream is = new ByteArrayInputStream(data);
     ImageHeaderParser parser = new ImageHeaderParser(is);
-    assertEquals(-1, parser.getOrientation());
+    test.run(parser);
+
+    ByteBuffer buffer = ByteBuffer.wrap(data);
+    parser = new ImageHeaderParser(buffer);
+    test.run(parser);
   }
 
   private static byte[] generatePngHeaderWithIhdr(int bitDepth) {

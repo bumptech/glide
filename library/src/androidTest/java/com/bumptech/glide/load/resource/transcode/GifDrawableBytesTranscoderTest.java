@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.nio.ByteBuffer;
+
 @RunWith(JUnit4.class)
 public class GifDrawableBytesTranscoderTest {
   private GifDrawableBytesTranscoder transcoder;
@@ -30,12 +32,12 @@ public class GifDrawableBytesTranscoderTest {
   @Test
   public void testReturnsBytesOfGivenGifDrawable() {
     for (String fakeData : new String[] { "test", "1235asfklaw3", "@$@#" }) {
-      byte[] expected = fakeData.getBytes();
-      when(gifDrawable.getData()).thenReturn(expected);
+      ByteBuffer expected = ByteBuffer.wrap(fakeData.getBytes());
+      when(gifDrawable.getBuffer()).thenReturn(expected);
 
       Resource<byte[]> transcoded = transcoder.transcode(resource);
 
-      assertArrayEquals(expected, transcoded.get());
+      assertArrayEquals(expected.array(), transcoded.get());
     }
   }
 }

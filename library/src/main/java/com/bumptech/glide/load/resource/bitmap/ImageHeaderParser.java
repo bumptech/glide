@@ -72,7 +72,7 @@ public class ImageHeaderParser {
   private static final int ORIENTATION_TAG_TYPE = 0x0112;
   private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
 
-  private final StreamReader streamReader;
+  private final Reader reader;
 
   static {
     byte[] bytes = new byte[0];
@@ -85,7 +85,11 @@ public class ImageHeaderParser {
   }
 
   public ImageHeaderParser(InputStream is) {
-    streamReader = new StreamReader(is);
+    reader = new StreamReader(is);
+  }
+
+  public ImageHeaderParser(ByteBuffer byteBuffer) {
+    reader = new ByteBufferReader(byteBuffer);
   }
 
   // 0xD0A3C68 -> <htm
@@ -95,21 +99,20 @@ public class ImageHeaderParser {
   }
 
   public ImageType getType() throws IOException {
-    int firstByte = streamReader.getUInt8();
+    int firstTwoBytes = reader.getUInt16();
 
     // JPEG.
-    if (firstByte == EXIF_MAGIC_NUMBER >> 8) {
+    if (firstTwoBytes == EXIF_MAGIC_NUMBER) {
       return JPEG;
     }
 
-    final int firstTwoBytes = firstByte << 8 & 0xFF00 | streamReader.getUInt8() & 0xFF;
-    final int firstFourBytes = firstTwoBytes << 16 & 0xFFFF0000 | streamReader.getUInt16() & 0xFFFF;
+    final int firstFourBytes = firstTwoBytes << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
     // PNG.
     if (firstFourBytes == PNG_HEADER) {
       // See: http://stackoverflow.com/questions/2057923/how-to-check-a-png-for-grayscale-alpha
       // -color-type
-      streamReader.skip(25 - 4);
-      int alpha = streamReader.getByte();
+      reader.skip(25 - 4);
+      int alpha = reader.getByte();
       // A RGB indexed PNG can also have transparency. Better safe than sorry!
       return alpha >= 3 ? PNG_A : PNG;
     }
@@ -131,7 +134,7 @@ public class ImageHeaderParser {
    * @throws IOException
    */
   public int getOrientation() throws IOException {
-    final int magicNumber = streamReader.getUInt16();
+    final int magicNumber = reader.getUInt16();
 
     if (!handles(magicNumber)) {
       return -1;
@@ -161,7 +164,7 @@ public class ImageHeaderParser {
     short segmentId, segmentType;
     int segmentLength;
     while (true) {
-      segmentId = streamReader.getUInt8();
+      segmentId = reader.getUInt8();
 
       if (segmentId != SEGMENT_START_ID) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -170,7 +173,7 @@ public class ImageHeaderParser {
         return null;
       }
 
-      segmentType = streamReader.getUInt8();
+      segmentType = reader.getUInt8();
 
       if (segmentType == SEGMENT_SOS) {
         return null;
@@ -182,10 +185,10 @@ public class ImageHeaderParser {
       }
 
       // Segment length includes bytes for segment length.
-      segmentLength = streamReader.getUInt16() - 2;
+      segmentLength = reader.getUInt16() - 2;
 
       if (segmentType != EXIF_SEGMENT_TYPE) {
-        if (segmentLength != streamReader.skip(segmentLength)) {
+        if (segmentLength != reader.skip(segmentLength)) {
           if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "Unable to skip enough data for type=" + segmentType);
           }
@@ -194,7 +197,7 @@ public class ImageHeaderParser {
       } else {
         byte[] segmentData = new byte[segmentLength];
 
-        if (segmentLength != streamReader.read(segmentData)) {
+        if (segmentLength != reader.read(segmentData)) {
           if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG,
                 "Unable to read segment data for type=" + segmentType + " length=" + segmentLength);
@@ -330,30 +333,85 @@ public class ImageHeaderParser {
     }
   }
 
-  private static class StreamReader {
+  private interface Reader {
+    int getUInt16() throws IOException;
+    short getUInt8() throws IOException;
+    long skip(long total) throws IOException;
+    int read(byte[] buffer) throws IOException;
+    int getByte() throws IOException;
+  }
+
+  private static class ByteBufferReader implements Reader {
+
+    private final ByteBuffer byteBuffer;
+
+    public ByteBufferReader(ByteBuffer byteBuffer) {
+      this.byteBuffer = byteBuffer;
+      byteBuffer.order(ByteOrder.BIG_ENDIAN);
+    }
+
+    @Override
+    public int getUInt16() throws IOException {
+      return (getByte() << 8 & 0xFF00) | (getByte() & 0xFF);
+    }
+
+    @Override
+    public short getUInt8() throws IOException {
+      return (short) (getByte() & 0xFF);
+    }
+
+    @Override
+    public long skip(long total) throws IOException {
+      int toSkip = (int) Math.min(byteBuffer.remaining(), total);
+      byteBuffer.position(byteBuffer.position() + toSkip);
+      return toSkip;
+    }
+
+    @Override
+    public int read(byte[] buffer) throws IOException {
+      int toRead = Math.min(buffer.length, byteBuffer.remaining());
+      byteBuffer.get(buffer);
+      return toRead;
+    }
+
+    @Override
+    public int getByte() throws IOException {
+      if (byteBuffer.remaining() < 1) {
+        return -1;
+      }
+      return byteBuffer.get();
+    }
+  }
+
+  private static class StreamReader implements Reader {
     private final InputStream is;
-    //motorola / big endian byte order
+    // Motorola / big endian byte order.
 
     public StreamReader(InputStream is) {
       this.is = is;
     }
 
+    @Override
     public int getUInt16() throws IOException {
       return (is.read() << 8 & 0xFF00) | (is.read() & 0xFF);
     }
 
+    @Override
     public short getUInt8() throws IOException {
       return (short) (is.read() & 0xFF);
     }
 
+    @Override
     public long skip(long total) throws IOException {
       return is.skip(total);
     }
 
+    @Override
     public int read(byte[] buffer) throws IOException {
       return is.read(buffer);
     }
 
+    @Override
     public int getByte() throws IOException {
       return is.read();
     }

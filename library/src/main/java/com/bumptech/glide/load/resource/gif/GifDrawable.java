@@ -20,6 +20,8 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 
+import java.nio.ByteBuffer;
+
 /**
  * An animated {@link android.graphics.drawable.Drawable} that plays the frames of an animated GIF.
  */
@@ -92,14 +94,16 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    *                            {@link com.bumptech.glide.request.target.Target}
    *                            this drawable is being loaded into).
    * @param gifHeader           The header data for this gif.
-   * @param data                The full bytes of the gif.
+   * @param buffer              A {@link java.nio.ByteBuffer} containing the compressed bytes of the
+   *                            gif.
    * @param firstFrame          The decoded and transformed first frame of this gif.
    * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
    */
   public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider,
       BitmapPool bitmapPool, Transformation<Bitmap> frameTransformation, int targetFrameWidth,
-      int targetFrameHeight, GifHeader gifHeader, byte[] data, Bitmap firstFrame) {
-    this(new GifState(gifHeader, data, context, frameTransformation, targetFrameWidth,
+      int targetFrameHeight, GifHeader gifHeader, ByteBuffer buffer,
+      Bitmap firstFrame) {
+    this(new GifState(gifHeader, buffer, context, frameTransformation, targetFrameWidth,
         targetFrameHeight, bitmapProvider, bitmapPool, firstFrame));
   }
 
@@ -107,7 +111,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     this.state = Preconditions.checkNotNull(state);
     this.decoder = new GifDecoder(state.bitmapProvider);
     this.paint = new Paint();
-    decoder.setData(state.gifHeader, state.data);
+    decoder.setData(state.gifHeader, state.buffer);
     frameLoader =
         new GifFrameLoader(state.context, this, decoder, state.targetWidth, state.targetHeight);
   }
@@ -144,8 +148,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     return state.frameTransformation;
   }
 
-  public byte[] getData() {
-    return state.data;
+  public ByteBuffer getBuffer() {
+    return state.buffer;
   }
 
   public int getFrameCount() {
@@ -303,9 +307,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    */
   public void recycle() {
     isRecycled = true;
+    decoder.clear();
     state.bitmapPool.put(state.firstFrame);
     frameLoader.clear();
-    frameLoader.stop();
   }
 
   // For testing.
@@ -332,8 +336,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   static class GifState extends ConstantState {
     private static final int GRAVITY = Gravity.FILL;
+    ByteBuffer buffer;
     GifHeader gifHeader;
-    byte[] data;
     Context context;
     Transformation<Bitmap> frameTransformation;
     int targetWidth;
@@ -342,13 +346,13 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     BitmapPool bitmapPool;
     Bitmap firstFrame;
 
-    public GifState(GifHeader header, byte[] data, Context context,
+    public GifState(GifHeader header, ByteBuffer buffer, Context context,
         Transformation<Bitmap> frameTransformation, int targetWidth, int targetHeight,
         GifDecoder.BitmapProvider provider, BitmapPool bitmapPool, Bitmap firstFrame) {
       this.firstFrame =
           Preconditions.checkNotNull(firstFrame, "The first frame of the GIF must not be null");
       this.gifHeader = header;
-      this.data = data;
+      this.buffer = buffer;
       this.bitmapPool = bitmapPool;
       this.context = context.getApplicationContext();
       this.frameTransformation = frameTransformation;
@@ -360,7 +364,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     public GifState(GifState original) {
       if (original != null) {
         gifHeader = original.gifHeader;
-        data = original.data;
+        buffer = original.buffer;
         context = original.context;
         frameTransformation = original.frameTransformation;
         targetWidth = original.targetWidth;

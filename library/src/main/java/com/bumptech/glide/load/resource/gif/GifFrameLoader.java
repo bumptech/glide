@@ -37,6 +37,7 @@ class GifFrameLoader {
   private RequestBuilder<Bitmap> requestBuilder;
   private DelayTarget current;
   private boolean isCleared;
+  private DelayTarget next;
 
   public interface FrameCallback {
     void onFrameReady(int index);
@@ -85,6 +86,10 @@ class GifFrameLoader {
       Glide.clear(current);
       current = null;
     }
+    if (next != null) {
+      Glide.clear(next);
+      next = null;
+    }
     isCleared = true;
     // test.
   }
@@ -101,7 +106,7 @@ class GifFrameLoader {
 
     gifDecoder.advance();
     long targetTime = SystemClock.uptimeMillis() + gifDecoder.getNextDelay();
-    DelayTarget next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
+    next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
     requestBuilder.apply(signatureOf(new FrameSignature())).load(gifDecoder).into(next);
   }
 

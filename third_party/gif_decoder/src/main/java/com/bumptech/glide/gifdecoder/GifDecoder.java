@@ -353,16 +353,19 @@ public class GifDecoder {
     previousImage = null;
   }
 
-  public void setData(GifHeader header, byte[] data) {
-    this.header = header;
+  public synchronized void setData(GifHeader header, byte[] data) {
     this.data = data;
+    setData(header, ByteBuffer.wrap(data));
+  }
+
+  public synchronized void setData(GifHeader header, ByteBuffer buffer) {
     this.status = STATUS_OK;
+    this.header = header;
     framePointer = INITIAL_FRAME_POINTER;
     // Initialize the raw data buffer.
-    rawData = ByteBuffer.wrap(data);
+    rawData = buffer.asReadOnlyBuffer();
     rawData.rewind();
     rawData.order(ByteOrder.LITTLE_ENDIAN);
-
 
     // No point in specially saving an old frame if we're never going to use it.
     savePrevious = false;
@@ -391,7 +394,7 @@ public class GifDecoder {
    * @param data containing GIF file.
    * @return read status code (0 = no errors).
    */
-  public int read(byte[] data) {
+  public synchronized int read(byte[] data) {
     this.data = data;
     this.header = getHeaderParser().setData(data).parseHeader();
     if (data != null) {
@@ -504,8 +507,8 @@ public class GifDecoder {
     }
 
     // Copy pixels into previous image
-    if (savePrevious && currentFrame.dispose == DISPOSAL_UNSPECIFIED
-        || currentFrame.dispose == DISPOSAL_NONE) {
+    if (savePrevious && (currentFrame.dispose == DISPOSAL_UNSPECIFIED
+        || currentFrame.dispose == DISPOSAL_NONE)) {
       if (previousImage == null) {
         previousImage = getNextBitmap();
       }

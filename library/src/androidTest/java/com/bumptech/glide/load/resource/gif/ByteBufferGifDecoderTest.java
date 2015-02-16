@@ -28,17 +28,17 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
-public class GifResourceDecoderTest {
-  private GifResourceDecoder decoder;
+public class ByteBufferGifDecoderTest {
+  private ByteBufferGifDecoder decoder;
   private GifHeaderParser parser;
-  private GifResourceDecoder.GifHeaderParserPool parserPool;
-  private GifResourceDecoder.GifDecoderPool decoderPool;
+  private ByteBufferGifDecoder.GifHeaderParserPool parserPool;
+  private ByteBufferGifDecoder.GifDecoderPool decoderPool;
   private GifDecoder gifDecoder;
   private GifHeader gifHeader;
   private HashMap<String, Object> options;
@@ -50,42 +50,42 @@ public class GifResourceDecoderTest {
     gifHeader = Mockito.spy(new GifHeader());
     parser = mock(GifHeaderParser.class);
     when(parser.parseHeader()).thenReturn(gifHeader);
-    parserPool = mock(GifResourceDecoder.GifHeaderParserPool.class);
-    when(parserPool.obtain(any(byte[].class))).thenReturn(parser);
+    parserPool = mock(ByteBufferGifDecoder.GifHeaderParserPool.class);
+    when(parserPool.obtain(any(ByteBuffer.class))).thenReturn(parser);
 
     gifDecoder = mock(GifDecoder.class);
-    decoderPool = mock(GifResourceDecoder.GifDecoderPool.class);
+    decoderPool = mock(ByteBufferGifDecoder.GifDecoderPool.class);
     when(decoderPool.obtain(any(GifDecoder.BitmapProvider.class))).thenReturn(gifDecoder);
 
     options = new HashMap<>();
-    decoder =
-        new GifResourceDecoder(RuntimeEnvironment.application, bitmapPool, parserPool, decoderPool);
+    decoder = new ByteBufferGifDecoder(RuntimeEnvironment.application, bitmapPool, parserPool,
+        decoderPool);
   }
 
   @Test
   public void testReturnsNullIfParsedHeaderHasZeroFrames() throws IOException {
     when(gifHeader.getNumFrames()).thenReturn(0);
 
-    assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
+    assertNull(decoder.decode(ByteBuffer.allocate(10), 100, 100, options));
   }
 
   @Test
   public void testReturnsNullIfParsedHeaderHasFormatError() {
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_FORMAT_ERROR);
 
-    assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
+    assertNull(decoder.decode(ByteBuffer.allocate(10), 100, 100, options));
   }
 
   @Test
   public void testReturnsNullIfParsedHeaderHasOpenError() {
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OPEN_ERROR);
 
-    assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
+    assertNull(decoder.decode(ByteBuffer.allocate(10), 100, 100, options));
   }
 
   @Test
   public void testReturnsParserToPool() throws IOException {
-    decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
+    decoder.decode(ByteBuffer.allocate(10), 100, 100, options);
     verify(parserPool).release(eq(parser));
   }
 
@@ -93,7 +93,7 @@ public class GifResourceDecoderTest {
   public void testReturnsParserToPoolWhenParserThrows() {
     when(parser.parseHeader()).thenThrow(new RuntimeException("Test"));
     try {
-      decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
+      decoder.decode(ByteBuffer.allocate(10), 100, 100, options);
       fail("Failed to receive expected exception");
     } catch (RuntimeException e) {
       // Expected.
@@ -109,8 +109,8 @@ public class GifResourceDecoderTest {
     when(gifDecoder.getNextFrame())
         .thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
 
-    byte[] data = new byte[100];
-    decoder.decode(new ByteArrayInputStream(data), 100, 100, options);
+    ByteBuffer data = ByteBuffer.allocate(10);
+    decoder.decode(data, 100, 100, options);
 
     InOrder order = inOrder(decoderPool, gifDecoder);
     order.verify(decoderPool).obtain(any(GifDecoder.BitmapProvider.class));
@@ -126,7 +126,7 @@ public class GifResourceDecoderTest {
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
     when(gifDecoder.getNextFrame()).thenThrow(new RuntimeException("test"));
     try {
-      decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
+      decoder.decode(ByteBuffer.allocate(10), 100, 100, options);
       fail("Failed to receive expected exception");
     } catch (RuntimeException e) {
       // Expected.
@@ -141,7 +141,7 @@ public class GifResourceDecoderTest {
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
     when(gifDecoder.getNextFrame()).thenReturn(null);
 
-    assertNull(decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options));
+    assertNull(decoder.decode(ByteBuffer.allocate(10), 100, 100, options));
   }
 
   @Test
@@ -150,7 +150,7 @@ public class GifResourceDecoderTest {
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
     when(gifDecoder.getNextFrame()).thenReturn(null);
 
-    decoder.decode(new ByteArrayInputStream(new byte[0]), 100, 100, options);
+    decoder.decode(ByteBuffer.allocate(10), 100, 100, options);
 
     verify(decoderPool).release(eq(gifDecoder));
   }
@@ -158,13 +158,13 @@ public class GifResourceDecoderTest {
   @Test
   public void testCanObtainNonNullDecoderFromPool() {
     GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
-    GifResourceDecoder.GifDecoderPool pool = new GifResourceDecoder.GifDecoderPool();
+    ByteBufferGifDecoder.GifDecoderPool pool = new ByteBufferGifDecoder.GifDecoderPool();
     assertNotNull(pool.obtain(provider));
   }
 
   @Test
   public void testCanPutAndObtainDecoderFromPool() {
-    GifResourceDecoder.GifDecoderPool pool = new GifResourceDecoder.GifDecoderPool();
+    ByteBufferGifDecoder.GifDecoderPool pool = new ByteBufferGifDecoder.GifDecoderPool();
     pool.release(gifDecoder);
     GifDecoder fromPool = pool.obtain(mock(GifDecoder.BitmapProvider.class));
     assertEquals(gifDecoder, fromPool);
@@ -172,7 +172,7 @@ public class GifResourceDecoderTest {
 
   @Test
   public void testDecoderPoolClearsDecoders() {
-    GifResourceDecoder.GifDecoderPool pool = new GifResourceDecoder.GifDecoderPool();
+    ByteBufferGifDecoder.GifDecoderPool pool = new ByteBufferGifDecoder.GifDecoderPool();
     pool.release(gifDecoder);
     verify(gifDecoder).clear();
   }

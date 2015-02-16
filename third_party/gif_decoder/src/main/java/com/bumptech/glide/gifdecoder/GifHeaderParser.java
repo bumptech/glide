@@ -30,12 +30,17 @@ public class GifHeaderParser {
   private GifHeader header;
   private int blockSize = 0;
 
-  public GifHeaderParser setData(byte[] data) {
+  public GifHeaderParser setData(ByteBuffer data) {
     reset();
+    rawData = data.asReadOnlyBuffer();
+    rawData.rewind();
+    rawData.order(ByteOrder.LITTLE_ENDIAN);
+    return this;
+  }
+
+  public GifHeaderParser setData(byte[] data) {
     if (data != null) {
-      rawData = ByteBuffer.wrap(data);
-      rawData.rewind();
-      rawData.order(ByteOrder.LITTLE_ENDIAN);
+      setData(ByteBuffer.wrap(data));
     } else {
       rawData = null;
       header.status = GifDecoder.STATUS_OPEN_ERROR;

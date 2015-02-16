@@ -20,12 +20,6 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
-    <!-- Byte array fetcher just wraps a byte array to return an InputStream, data is not mutated. -->
-    <Match>
-        <Class name="com.bumptech.glide.load.data.ByteArrayFetcher"/>
-        <Bug pattern="EI_EXPOSE_REP2"/>
-    </Match>
-
     <!-- RecyclableBufferedInputStream safely re-uses pooled byte arrays -->
     <Match>
         <Class name="com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream"/>

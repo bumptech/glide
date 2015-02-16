@@ -5,6 +5,7 @@ import android.util.Log;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.util.ByteBufferUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,13 +27,13 @@ public class GifDrawableEncoder implements ResourceEncoder<GifDrawable> {
   public boolean encode(Resource<GifDrawable> data, OutputStream os, Map<String, Object> options) {
     GifDrawable drawable = data.get();
     try {
-      os.write(drawable.getData());
-      return true;
+      ByteBufferUtil.encode(drawable.getBuffer(), os);
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Failed to encode gif drawable data", e);
       }
       return false;
     }
+    return true;
   }
 }

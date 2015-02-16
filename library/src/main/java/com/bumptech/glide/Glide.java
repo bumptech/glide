@@ -25,6 +25,8 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
 import com.bumptech.glide.load.model.AssetUriLoader;
+import com.bumptech.glide.load.model.ByteArrayLoader;
+import com.bumptech.glide.load.model.ByteBufferFileLoader;
 import com.bumptech.glide.load.model.FileLoader;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ResourceLoader;
@@ -32,7 +34,6 @@ import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.model.StringLoader;
 import com.bumptech.glide.load.model.UnitModelLoader;
 import com.bumptech.glide.load.model.UriLoader;
-import com.bumptech.glide.load.model.stream.ByteArrayLoader;
 import com.bumptech.glide.load.model.stream.HttpGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.HttpUriLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreImageThumbLoader;
@@ -43,11 +44,13 @@ import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
+import com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableEncoder;
 import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
-import com.bumptech.glide.load.resource.gif.GifResourceDecoder;
+import com.bumptech.glide.load.resource.gif.StreamGifDecoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
@@ -66,6 +69,7 @@ import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -179,12 +183,16 @@ public class Glide implements ComponentCallbacks2 {
                 new FileDescriptorBitmapDecoder(bitmapPool)))
         .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* Gifs */
-        .prepend(InputStream.class, GifDrawable.class, new GifResourceDecoder(context, bitmapPool))
+        .prepend(InputStream.class, GifDrawable.class,
+            new StreamGifDecoder(new ByteBufferGifDecoder(context, bitmapPool)))
+        .prepend(ByteBuffer.class, GifDrawable.class, new ByteBufferGifDecoder(context, bitmapPool))
         .register(GifDrawable.class, new GifDrawableEncoder())
         /* Gif Frames */
         .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
         .append(GifDecoder.class, Bitmap.class, new GifFrameResourceDecoder(bitmapPool))
         /* Files */
+        .register(new ByteBufferRewinder.Factory())
+        .append(File.class, ByteBuffer.class, new ByteBufferFileLoader.Factory())
         .append(File.class, InputStream.class, new FileLoader.StreamFactory())
         .append(File.class, File.class, new FileDecoder())
         .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
@@ -206,8 +214,9 @@ public class Glide implements ComponentCallbacks2 {
         .append(Uri.class, InputStream.class, new UriLoader.StreamFactory())
         .append(Uri.class, ParcelFileDescriptor.class, new UriLoader.FileDescriptorFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
-        .append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory()).append(
-            byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
+        .append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory())
+        .append(byte[].class, ByteBuffer.class, new ByteArrayLoader.ByteBufferFactory())
+        .append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
         /* Transcoders */
         .register(Bitmap.class, BitmapDrawable.class,
             new BitmapDrawableTranscoder(resources, bitmapPool))

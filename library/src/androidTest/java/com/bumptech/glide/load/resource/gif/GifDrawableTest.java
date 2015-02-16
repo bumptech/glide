@@ -37,6 +37,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.nio.ByteBuffer;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
 public class GifDrawableTest {
@@ -360,7 +362,7 @@ public class GifDrawableTest {
     Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     drawable =
         new GifDrawable(RuntimeEnvironment.application, provider, bitmapPool, transformation, 100,
-            100, gifHeader, new byte[0], firstFrame);
+            100, gifHeader, ByteBuffer.allocate(10), firstFrame);
 
     assertNotNull(drawable.getConstantState().newDrawable());
     assertNotNull(
@@ -540,7 +542,7 @@ public class GifDrawableTest {
   public void testThrowsIfConstructedWIthNullFirstFrame() {
     new GifDrawable(RuntimeEnvironment.application, mock(GifDecoder.BitmapProvider.class),
         mock(BitmapPool.class), mock(Transformation.class), 100, 100, mock(GifHeader.class),
-        new byte[0], null);
+        ByteBuffer.allocate(10), null);
   }
 
   @Test

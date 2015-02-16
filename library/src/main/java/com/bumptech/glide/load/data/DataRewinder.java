@@ -26,7 +26,7 @@ public interface DataRewinder<T> {
      * Returns the class of data this factory can produce
      * {@link com.bumptech.glide.load.data.DataRewinder}s for.
      */
-    Class getDataClass();
+    Class<T> getDataClass();
   }
 
   /**

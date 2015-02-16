@@ -3,6 +3,7 @@ package com.bumptech.glide.integration.gifencoder;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -16,10 +17,12 @@ import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.gif.GifBitmapProvider;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.LogTime;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
@@ -68,15 +71,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
     if (encodeTransformation(options)) {
       return encodeTransformed(drawable, os);
     } else {
-      try {
-        os.write(drawable.getData());
-        return true;
-      } catch (IOException e) {
-        if (Log.isLoggable(TAG, Log.WARN)) {
-          Log.w(TAG, "Failed to write source gif data", e);
-        }
-        return false;
-      }
+      return writeDataDirect(drawable.getBuffer(), os);
     }
   }
 
@@ -84,10 +79,10 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
     long startTime = LogTime.getLogTime();
     Transformation<Bitmap> transformation = drawable.getFrameTransformation();
     if (transformation instanceof UnitTransformation) {
-      return writeDataDirect(drawable.getData(), os);
+      return writeDataDirect(drawable.getBuffer(), os);
     }
 
-    GifDecoder decoder = decodeHeaders(drawable.getData());
+    GifDecoder decoder = decodeHeaders(drawable.getBuffer());
 
     AnimatedGifEncoder encoder = factory.buildEncoder();
     if (!encoder.start(os)) {
@@ -116,27 +111,27 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG,
-          "Encoded gif with " + decoder.getFrameCount() + " frames and " + drawable.getData().length
-              + " bytes in " + LogTime.getElapsedMillis(startTime) + " ms");
+          "Encoded gif with " + decoder.getFrameCount() + " frames and "
+              + drawable.getBuffer().limit() + " bytes in " + LogTime.getElapsedMillis(startTime)
+              + " ms");
     }
 
     return result;
   }
 
-  private boolean writeDataDirect(byte[] data, OutputStream os) {
-    boolean success = true;
+  private boolean writeDataDirect(ByteBuffer data, OutputStream os) {
     try {
-      os.write(data);
+      ByteBufferUtil.encode(data, os);
     } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Failed to write data to output stream in GifResourceEncoder", e);
+      if (Logs.isEnabled(Log.WARN)) {
+        Logs.log(Log.WARN, "Failed to write gif data", e);
       }
-      success = false;
+      return false;
     }
-    return success;
+    return true;
   }
 
-  private GifDecoder decodeHeaders(byte[] data) {
+  private GifDecoder decodeHeaders(ByteBuffer data) {
     GifHeaderParser parser = factory.buildParser();
     parser.setData(data);
     GifHeader header = parser.parseHeader();

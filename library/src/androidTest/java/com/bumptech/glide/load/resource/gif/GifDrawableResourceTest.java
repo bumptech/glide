@@ -16,6 +16,8 @@ import org.mockito.InOrder;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.nio.ByteBuffer;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifDrawableResourceTest {
@@ -33,7 +35,7 @@ public class GifDrawableResourceTest {
     final int size = 2134;
     Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(drawable.getFirstFrame()).thenReturn(firstFrame);
-    when(drawable.getData()).thenReturn(new byte[size]);
+    when(drawable.getBuffer()).thenReturn(ByteBuffer.allocate(size));
 
     assertEquals(size + Util.getBitmapByteSize(firstFrame), resource.getSize());
   }

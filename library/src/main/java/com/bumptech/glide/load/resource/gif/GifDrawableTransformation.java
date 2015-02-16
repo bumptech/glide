@@ -37,7 +37,7 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
     // modify the dimensions of our gif, here we create a stand in for a frame and pass it to the
     // transformation to see what the final transformed dimensions will be so that our drawable can
     // report the correct intrinsic width and height.
-    Bitmap firstFrame = resource.get().getFirstFrame();
+    Bitmap firstFrame = drawable.getFirstFrame();
     Resource<Bitmap> bitmapResource = new BitmapResource(firstFrame, bitmapPool);
     Resource<Bitmap> transformed = wrapped.transform(bitmapResource, outWidth, outHeight);
     if (!bitmapResource.equals(transformed)) {
