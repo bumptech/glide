@@ -10,7 +10,7 @@ import java.util.List;
  * types.
  */
 public class ResourceEncoderRegistry {
-  // TODO: this should probably be a set.
+  // TODO: this should probably be a put.
   final List<Entry<?>> encoders = new ArrayList<>();
 
   public synchronized <Z> void add(Class<Z> resourceClass, ResourceEncoder<Z> encoder) {

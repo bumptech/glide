@@ -44,8 +44,11 @@ public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType
   public Resource<BitmapDrawable> decode(DataType source, int width, int height,
       Map<String, Object> options) throws IOException {
     Resource<Bitmap> bitmapResource = wrapped.decode(source, width, height, options);
-    BitmapDrawable drawable = new BitmapDrawable(resources, bitmapResource.get());
+    if (bitmapResource == null) {
+      return null;
+    }
 
+    BitmapDrawable drawable = new BitmapDrawable(resources, bitmapResource.get());
     return new BitmapDrawableResource(drawable, bitmapPool);
   }
 }

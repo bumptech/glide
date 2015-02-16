@@ -166,7 +166,7 @@ public final class Api {
   }
 
   /**
-   * A POJO mirroring a JSON object with a set of urls of different sizes and dimensions returned
+   * A POJO mirroring a JSON object with a put of urls of different sizes and dimensions returned
    * for a single image from Giphy's api.
    */
   public static class GifUrlSet {

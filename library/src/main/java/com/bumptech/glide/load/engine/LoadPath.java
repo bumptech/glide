@@ -43,22 +43,25 @@ public class LoadPath<Data, ResourceType, Transcode> {
         Logs.log(Log.VERBOSE, "Fetcher failed: " + fetcher, e);
       }
     }
-    if (data == null) {
-      return null;
-    }
-
-    DataRewinder<Data> rewinder = context.getRewinder(data);
-    Map<String, Object> options = context.getOptions();
     Resource<Transcode> result = null;
     try {
-      for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {
-        result = path.decode(rewinder, width, height, options, decodeCallback);
-        if (result != null) {
-          break;
+      if (data == null) {
+        return null;
+      }
+
+      Map<String, Object> options = context.getOptions();
+      DataRewinder<Data> rewinder = context.getRewinder(data);
+      try {
+        for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {
+          result = path.decode(rewinder, width, height, options, decodeCallback);
+          if (result != null) {
+            break;
+          }
         }
+      } finally {
+        rewinder.cleanup();
       }
     } finally {
-      rewinder.cleanup();
       fetcher.cleanup();
     }
     return result;

@@ -56,8 +56,8 @@ public class LruBitmapPool implements BitmapPool {
    * Constructor for LruBitmapPool.
    *
    * @param maxSize        The initial maximum size of the pool in bytes.
-   * @param allowedConfigs A white listed set of {@link android.graphics.Bitmap.Config} that are
-   *                       allowed to be put into the pool. Configs not in the allowed set will be
+   * @param allowedConfigs A white listed put of {@link android.graphics.Bitmap.Config} that are
+   *                       allowed to be put into the pool. Configs not in the allowed put will be
    *                       rejected.
    */
   public LruBitmapPool(int maxSize, Set<Bitmap.Config> allowedConfigs) {

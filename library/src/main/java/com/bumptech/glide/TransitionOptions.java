@@ -18,8 +18,8 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
   private TransitionFactory<? super TranscodeType> transitionFactory = NoTransition.getFactory();
 
   /**
-   * Removes any existing animation set on the builder. Will be overridden by subsequent calls that
-   * set an animation.
+   * Removes any existing animation put on the builder. Will be overridden by subsequent calls that
+   * put an animation.
    *
    * @return This request builder.
    */

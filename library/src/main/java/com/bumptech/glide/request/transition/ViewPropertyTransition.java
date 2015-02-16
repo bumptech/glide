@@ -25,7 +25,7 @@ public class ViewPropertyTransition<R> implements Transition<R> {
 
   /**
    * Always applies the {@link ViewPropertyTransition.Animator} given in the constructor to the
-   * given view and returns {@code false} because the animator cannot set the new resource on the
+   * given view and returns {@code false} because the animator cannot put the new resource on the
    * view.
    *
    * @param current {@inheritDoc}

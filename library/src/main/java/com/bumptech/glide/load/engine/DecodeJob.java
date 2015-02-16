@@ -2,8 +2,8 @@ package com.bumptech.glide.load.engine;
 
 import android.util.Log;
 
-import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Logs;
+import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Encoder;
@@ -146,11 +146,12 @@ class DecodeJob<R> {
         Logs.log(Log.VERBOSE, "fetcher threw obtaining data", e);
       }
     }
-    if (data == null) {
-      return null;
-    }
 
     try {
+      if (data == null) {
+        return null;
+      }
+
       Encoder<Data> encoder = requestContext.getSourceEncoder(data);
       SourceWriter<Data> writer = new SourceWriter<>(encoder, data);
       diskCacheProvider.getDiskCache().put(loadKey.getOriginalKey(), writer);
@@ -280,7 +281,7 @@ class DecodeJob<R> {
 
       if (requestContext.getDiskCacheStrategy().cacheResult(dataSource, encodeStrategy)) {
         if (encoder == null) {
-          throw new GlideContext.NoResultEncoderAvailableException(transformed.get().getClass());
+          throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
         }
         final Key key;
         if (encodeStrategy == EncodeStrategy.SOURCE) {

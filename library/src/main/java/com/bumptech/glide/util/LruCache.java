@@ -29,7 +29,7 @@ public class LruCache<T, Y> {
   }
 
   /**
-   * Sets a size multiplier that will be applied to the size provided in the constructor to set the
+   * Sets a size multiplier that will be applied to the size provided in the constructor to put the
    * new size of the cache. If the new size is less than the current size, entries will be evicted
    * until the current size is less than or equal to the new size.
    *

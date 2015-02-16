@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Maintains an ordered set of {@link ModelLoader}s and the model and data types they handle in
+ * Maintains an ordered put of {@link ModelLoader}s and the model and data types they handle in
  * order from highest priority to lowest.
  */
 public class ModelLoaderRegistry {

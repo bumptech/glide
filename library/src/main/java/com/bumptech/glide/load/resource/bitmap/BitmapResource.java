@@ -35,6 +35,11 @@ public class BitmapResource implements Resource<Bitmap> {
   }
 
   @Override
+  public Class<Bitmap> getResourceClass() {
+    return Bitmap.class;
+  }
+
+  @Override
   public Bitmap get() {
     return bitmap;
   }

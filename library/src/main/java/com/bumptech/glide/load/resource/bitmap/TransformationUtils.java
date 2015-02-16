@@ -148,7 +148,7 @@ public final class TransformationUtils {
   }
 
   /**
-   * Returns a matrix with rotation set based on Exif orientation tag. If the orientation is
+   * Returns a matrix with rotation put based on Exif orientation tag. If the orientation is
    * undefined or 0 null is returned.
    *
    * @param pathToOriginal Path to original image file that may have exif data.
@@ -174,7 +174,7 @@ public final class TransformationUtils {
 
   /**
    * This is an expensive operation that copies the image in place with the pixels rotated. If
-   * possible rather use getOrientationMatrix, and set that as the imageMatrix on an ImageView.
+   * possible rather use getOrientationMatrix, and put that as the imageMatrix on an ImageView.
    *
    * @param pathToOriginal Path to original image file that may have exif data.
    * @param imageToOrient  Image Bitmap to orient.
@@ -189,7 +189,7 @@ public final class TransformationUtils {
 
   /**
    * This is an expensive operation that copies the image in place with the pixels rotated. If
-   * possible rather use getOrientationMatrix, and set that as the imageMatrix on an ImageView.
+   * possible rather use getOrientationMatrix, and put that as the imageMatrix on an ImageView.
    *
    * @param imageToOrient   Image Bitmap to orient.
    * @param degreesToRotate number of degrees to rotate the image by. If zero the original image is

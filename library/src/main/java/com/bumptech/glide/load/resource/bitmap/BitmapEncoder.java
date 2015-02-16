@@ -68,7 +68,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   private int getQuality(Map<String, Object> options) {
     Integer quality = (Integer) options.get(KEY_COMPRESSION_QUALITY);
     Preconditions.checkArgument(quality == null || quality >= 0 && quality <= 100,
-        "quality must be between 0 and" + " 100, given: " + quality);
+        "quality must be between 0 and 100");
     return quality == null ? DEFAULT_COMPRESSION_QUALITY : quality;
   }
 

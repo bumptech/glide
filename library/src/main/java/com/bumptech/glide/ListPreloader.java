@@ -16,7 +16,7 @@ import java.util.Queue;
  * the appearance of an infinitely large image cache, depending on scrolling speed, cpu speed, and
  * cache size.
  *
- * <p> Must be set using
+ * <p> Must be put using
  * {@link AbsListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener)}, or have its
  * corresponding methods called from another {@link android.widget.AbsListView.OnScrollListener} to
  * function. </p>

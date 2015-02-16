@@ -8,7 +8,7 @@ import android.view.animation.Animation;
 /**
  * A factory class that produces a new {@link Transition} that varies depending on whether or not
  * the drawable was loaded from the memory cache and whether or not the drawable is the first image
- * to be set on the target.
+ * to be put on the target.
  *
  * <p> Resources are usually loaded from the memory cache just before the user can see the view, for
  * example when the user changes screens or scrolls back and forth in a list. In those cases the

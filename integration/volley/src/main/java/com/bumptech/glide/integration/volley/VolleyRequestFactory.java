@@ -11,7 +11,7 @@ import java.io.InputStream;
 public interface VolleyRequestFactory {
 
     /**
-     * Returns a Volley request for the given image url. The given future should be set as a
+     * Returns a Volley request for the given image url. The given future should be put as a
      * listener or called when the request completes.
      */
     Request<byte[]> create(String url, VolleyRequestFuture<InputStream> future, Priority priority);

@@ -9,9 +9,7 @@ import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.Util;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -42,9 +40,9 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   private Resource<?> resource;
   private boolean hasResource;
   private boolean hasLoadFailed;
-  // A set of callbacks that are removed while we're notifying other callbacks of a change in
+  // A put of callbacks that are removed while we're notifying other callbacks of a change in
   // status.
-  private Set<ResourceCallback> ignoredCallbacks;
+  private List<ResourceCallback> ignoredCallbacks;
   private EngineRunnable engineRunnable;
   private EngineResource<?> engineResource;
 
@@ -102,13 +100,15 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   // We cannot remove callbacks while notifying our list of callbacks directly because doing so
   // would cause a ConcurrentModificationException. However, we need to obey the cancellation
   // request such that if notifying a callback early in the callbacks list cancels a callback later
-  // in the request list, the cancellation for the later request is still obeyed. Using a set of
+  // in the request list, the cancellation for the later request is still obeyed. Using a put of
   // ignored callbacks allows us to avoid the exception while still meeting the requirement.
   private void addIgnoredCallback(ResourceCallback cb) {
     if (ignoredCallbacks == null) {
-      ignoredCallbacks = new HashSet<>();
+      ignoredCallbacks = new ArrayList<>(2);
     }
-    ignoredCallbacks.add(cb);
+    if (!ignoredCallbacks.contains(cb)) {
+      ignoredCallbacks.add(cb);
+    }
   }
 
   private boolean isInIgnoredCallbacks(ResourceCallback cb) {

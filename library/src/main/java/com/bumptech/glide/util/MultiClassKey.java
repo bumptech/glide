@@ -6,6 +6,7 @@ package com.bumptech.glide.util;
 public class MultiClassKey {
   private Class<?> first;
   private Class<?> second;
+  private Class<?> third;
 
   public MultiClassKey() {
     // leave them null
@@ -15,9 +16,18 @@ public class MultiClassKey {
     set(first, second);
   }
 
+  public MultiClassKey(Class<?> first, Class<?> second, Class<?> third) {
+    set(first, second, third);
+  }
+
   public void set(Class<?> first, Class<?> second) {
+    set(first, second, null);
+  }
+
+  public void set(Class<?> first, Class<?> second, Class<?> third) {
     this.first = first;
     this.second = second;
+    this.third = third;
   }
 
   @Override
@@ -42,6 +52,12 @@ public class MultiClassKey {
     if (!second.equals(that.second)) {
       return false;
     }
+    if (third == null && that.third != null) {
+      return false;
+    }
+    if (third != null && !third.equals(that.third)) {
+      return false;
+    }
 
     return true;
   }
@@ -50,6 +66,7 @@ public class MultiClassKey {
   public int hashCode() {
     int result = first.hashCode();
     result = 31 * result + second.hashCode();
+    result = 31 * result + (third != null ? third.hashCode() : 0);
     return result;
   }
 }

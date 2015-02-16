@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
- * An interface that uniquely identifies some set of data. Implementations must implement {@link
+ * An interface that uniquely identifies some put of data. Implementations must implement {@link
  * Object#equals(Object)} and {@link Object#hashCode()}. Implementations are generally expected to
  * add all uniquely identifying information used in in {@link java.lang.Object#equals(Object)}} and
  * {@link Object#hashCode()}} to the given {@link java.security.MessageDigest} in {@link

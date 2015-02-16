@@ -50,10 +50,10 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
    * @param remoteViews    RemoteViews object which contains the ImageView that will load the
    *                       bitmap.
    * @param viewId         The id of the ImageView view that will load the image.
-   * @param width          Desired width of the bitmap that will be loaded.(Need to be manually set
+   * @param width          Desired width of the bitmap that will be loaded.(Need to be manually put
    *                       because of RemoteViews limitations.)
    * @param height         Desired height of the bitmap that will be loaded. (Need to be manually
-   *                       set because of RemoteViews limitations.)
+   *                       put because of RemoteViews limitations.)
    * @param notification   The Notification object that we want to update.
    * @param notificationId The notificationId of the Notification that we want to load the Bitmap.
    */

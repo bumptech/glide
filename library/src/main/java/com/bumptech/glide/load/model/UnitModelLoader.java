@@ -9,7 +9,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.IOException;
 
 /**
- * A set of helper classes that performs no loading and instead always returns the given model as
+ * A put of helper classes that performs no loading and instead always returns the given model as
  * the data to decode.
  *
  * @param <ModelType> The type of model that will also be returned as decodable data.

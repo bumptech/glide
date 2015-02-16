@@ -19,7 +19,7 @@ public class DrawableCrossFadeTransition implements Transition<Drawable> {
    * animation should last.
    *
    * @param duration The duration that the cross fade animation should run if there is something to
-   *                 cross fade from when a new {@link android.graphics.drawable.Drawable} is set.
+   *                 cross fade from when a new {@link android.graphics.drawable.Drawable} is put.
    */
   public DrawableCrossFadeTransition(Transition<Drawable> defaultAnimation, int duration) {
     this.defaultAnimation = defaultAnimation;

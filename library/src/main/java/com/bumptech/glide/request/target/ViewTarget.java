@@ -82,7 +82,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * Returns any stored request using {@link android.view.View#getTag()}.
    *
    * <p> For Glide to function correctly, Glide must be the only thing that calls {@link
-   * View#setTag(Object)}. If the tag is cleared or set to another object type, Glide will not be
+   * View#setTag(Object)}. If the tag is cleared or put to another object type, Glide will not be
    * able to retrieve and cancel previous loads which will not only prevent Glide from reusing
    * resource, but will also result in incorrect images being loaded and lots of flashing of images
    * in lists. As a result, this will throw an {@link java.lang.IllegalArgumentException} if {@link

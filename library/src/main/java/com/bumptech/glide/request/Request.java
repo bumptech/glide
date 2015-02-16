@@ -38,7 +38,7 @@ public interface Request {
   boolean isComplete();
 
   /**
-   * Returns true if a non-placeholder resource is set. For Requests that load more than one
+   * Returns true if a non-placeholder resource is put. For Requests that load more than one
    * resource, isResourceSet may return true even if {@link #isComplete()}} returns false.
    */
   boolean isResourceSet();

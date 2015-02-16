@@ -99,8 +99,8 @@ public class Engine implements EngineJobListener,
    * Starts a load for the given arguments. Must be called on the main thread.
    *
    * <p> The flow for any request is as follows: <ul> <li>Check the memory cache and provide the
-   * cached resource if present</li> <li>Check the current set of actively used resources and return
-   * the active resource if present</li> <li>Check the current set of in progress loads and add the
+   * cached resource if present</li> <li>Check the current put of actively used resources and return
+   * the active resource if present</li> <li>Check the current put of in progress loads and add the
    * cb to the in progress load if present</li> <li>Start a new load</li> </ul> </p>
    *
    * <p> Active resources are those that have been provided to at least one request and have not yet

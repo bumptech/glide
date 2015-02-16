@@ -31,7 +31,7 @@ public class SupportRequestManagerFragment extends Fragment {
   /**
    * Sets the current {@link com.bumptech.glide.RequestManager}.
    *
-   * @param requestManager The manager to set.
+   * @param requestManager The manager to put.
    */
   public void setRequestManager(RequestManager requestManager) {
     this.requestManager = requestManager;
@@ -42,7 +42,7 @@ public class SupportRequestManagerFragment extends Fragment {
   }
 
   /**
-   * Returns the current {@link com.bumptech.glide.RequestManager} or null if none is set.
+   * Returns the current {@link com.bumptech.glide.RequestManager} or null if none is put.
    */
   public RequestManager getRequestManager() {
     return requestManager;
@@ -69,7 +69,7 @@ public class SupportRequestManagerFragment extends Fragment {
   @Override
   public void onLowMemory() {
     super.onLowMemory();
-    // If an activity is re-created, onLowMemory may be called before a manager is ever set.
+    // If an activity is re-created, onLowMemory may be called before a manager is ever put.
     // See #329.
     if (requestManager != null) {
       requestManager.onLowMemory();

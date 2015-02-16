@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.util.Preconditions;
 
 /**
- * A container for a set of options used to pre-fill a
+ * A container for a put of options used to pre-fill a
  * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} with {@link Bitmap Bitmaps} of a
  * single size and configuration.
  */

@@ -33,9 +33,9 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
    * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
    * @param viewId      The id of the ImageView view that will load the image.
    * @param width       Desired width in pixels of the bitmap that will be loaded. (Needs to be
-   *                    manually set because of RemoteViews limitations.)
+   *                    manually put because of RemoteViews limitations.)
    * @param height      Desired height in pixels of the bitmap that will be loaded. (Needs to be
-   *                    manually set because of RemoteViews limitations.)
+   *                    manually put because of RemoteViews limitations.)
    * @param widgetIds   The int[] that contains the widget ids of an application.
    */
   public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int width,
@@ -73,9 +73,9 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
    *                      bitmap.
    * @param viewId        The id of the ImageView view that will load the image.
    * @param width         Desired width in pixels of the bitmap that will be loaded. (Needs to be
-   *                      manually set because of RemoteViews limitations.)
+   *                      manually put because of RemoteViews limitations.)
    * @param height        Desired height in pixels of the bitmap that will be loaded. (Needs to be
-   *                      manually set because of RemoteViews limitations.)
+   *                      manually put because of RemoteViews limitations.)
    * @param componentName The ComponentName that refers to our AppWidget.
    */
   public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int width,
@@ -85,13 +85,13 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
     this.remoteViews =
         Preconditions.checkNotNull(remoteViews, "RemoteViews object can not be null!");
     this.componentName =
-        Preconditions.checkNotNull(componentName, "ComponentName can not be " + "null!");
+        Preconditions.checkNotNull(componentName, "ComponentName can not be null!");
     this.viewId = viewId;
     widgetIds = null;
   }
 
   /**
-   * Constructor using a ComponentName, when override has been set to get a handle on the Widget in
+   * Constructor using a ComponentName, when override has been put to get a handle on the Widget in
    * order to update it that uses {@link #SIZE_ORIGINAL} as the target width and height.
    *
    * @param context       Context to use in the AppWidgetManager initialization.

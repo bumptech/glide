@@ -5,26 +5,40 @@ import android.content.Context;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
+import com.bumptech.glide.load.engine.DecodePath;
+import com.bumptech.glide.load.engine.LoadPath;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.provider.EncoderRegistry;
+import com.bumptech.glide.provider.LoadPathCache;
+import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Manages component registration.
  */
 public class Registry {
-  final ModelLoaderRegistry modelLoaderRegistry;
-  final EncoderRegistry encoderRegistry;
-  final ResourceDecoderRegistry decoderRegistry;
-  final ResourceEncoderRegistry resourceEncoderRegistry;
-  final DataRewinderRegistry dataRewinderRegistry;
-  final TranscoderRegistry transcoderRegistry;
+  private final ModelLoaderRegistry modelLoaderRegistry;
+  private final EncoderRegistry encoderRegistry;
+  private final ResourceDecoderRegistry decoderRegistry;
+  private final ResourceEncoderRegistry resourceEncoderRegistry;
+  private final DataRewinderRegistry dataRewinderRegistry;
+  private final TranscoderRegistry transcoderRegistry;
+
+  private final ModelToResourceClassCache modelToResourceClassCache =
+      new ModelToResourceClassCache();
+  private final LoadPathCache loadPathCache = new LoadPathCache();
 
   public Registry(Context context) {
     this.modelLoaderRegistry = new ModelLoaderRegistry(context.getApplicationContext());
@@ -40,20 +54,20 @@ public class Registry {
     return this;
   }
 
-  public <Data, Resource> Registry append(Class<Data> dataClass, Class<Resource> resourceClass,
-      ResourceDecoder<Data, Resource> decoder) {
+  public <Data, TResource> Registry append(Class<Data> dataClass, Class<TResource> resourceClass,
+      ResourceDecoder<Data, TResource> decoder) {
     decoderRegistry.append(decoder, dataClass, resourceClass);
     return this;
   }
 
-  public <Data, Resource> Registry prepend(Class<Data> dataClass, Class<Resource> resourceClass,
-      ResourceDecoder<Data, Resource> decoder) {
+  public <Data, TResource> Registry prepend(Class<Data> dataClass, Class<TResource> resourceClass,
+      ResourceDecoder<Data, TResource> decoder) {
     decoderRegistry.prepend(decoder, dataClass, resourceClass);
     return this;
   }
 
-  public <Resource> Registry register(Class<Resource> resourceClass,
-      ResourceEncoder<Resource> encoder) {
+  public <TResource> Registry register(Class<TResource> resourceClass,
+      ResourceEncoder<TResource> encoder) {
     resourceEncoderRegistry.add(resourceClass, encoder);
     return this;
   }
@@ -63,8 +77,8 @@ public class Registry {
     return this;
   }
 
-  public <Resource, Transcode> Registry register(Class<Resource> resourceClass,
-      Class<Transcode> transcodeClass, ResourceTranscoder<Resource, Transcode> transcoder) {
+  public <TResource, Transcode> Registry register(Class<TResource> resourceClass,
+      Class<Transcode> transcodeClass, ResourceTranscoder<TResource, Transcode> transcoder) {
     transcoderRegistry.register(resourceClass, transcodeClass, transcoder);
     return this;
   }
@@ -101,5 +115,137 @@ public class Registry {
       ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.replace(modelClass, dataClass, factory);
     return this;
+  }
+
+  public <Data, TResource, Transcode> LoadPath<Data, TResource, Transcode> getLoadPath(
+      Class<Data> dataClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
+    LoadPath<Data, TResource, Transcode> result =
+        loadPathCache.get(dataClass, resourceClass, transcodeClass);
+    if (result == null && !loadPathCache.contains(dataClass, resourceClass, transcodeClass)) {
+      List<DecodePath<Data, TResource, Transcode>> decodePaths =
+          getDecodePaths(dataClass, resourceClass, transcodeClass);
+      // It's possible there is no way to decode or transcode to the desired types from a given
+      // data class.
+      if (decodePaths.isEmpty()) {
+        result = null;
+      } else {
+        result = new LoadPath<>(dataClass, decodePaths);
+      }
+      loadPathCache.put(dataClass, resourceClass, transcodeClass, result);
+    }
+    return result;
+  }
+
+  private <Data, TResource, Transcode> List<DecodePath<Data, TResource, Transcode>> getDecodePaths(
+      Class<Data> dataClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
+
+    List<DecodePath<Data, TResource, Transcode>> decodePaths = new ArrayList<>();
+    List<Class<TResource>> registeredResourceClasses =
+        decoderRegistry.getResourceClasses(dataClass, resourceClass);
+
+    for (Class<TResource> registeredResourceClass : registeredResourceClasses) {
+      List<Class<Transcode>> registeredTranscodeClasses =
+          transcoderRegistry.getTranscodeClasses(registeredResourceClass, transcodeClass);
+
+      for (Class<Transcode> registeredTranscodeClass : registeredTranscodeClasses) {
+
+        List<ResourceDecoder<Data, TResource>> decoders =
+            decoderRegistry.getDecoders(dataClass, registeredResourceClass);
+        ResourceTranscoder<TResource, Transcode> transcoder =
+            transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
+        decodePaths.add(new DecodePath<>(dataClass, decoders, transcoder));
+      }
+    }
+    return decodePaths;
+  }
+
+  public List<Class<?>> getRegisteredResourceClasses(Class<?> modelClass,
+      Class<?> resourceClass) {
+    List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
+
+    if (result == null) {
+      result = new ArrayList<>();
+      List<Class<?>> dataClasses = modelLoaderRegistry.getDataClasses(modelClass);
+      for (Class<?> dataClass : dataClasses) {
+        List<? extends Class<?>> registeredResourceClasses =
+            decoderRegistry.getResourceClasses(dataClass, resourceClass);
+        result.addAll(registeredResourceClasses);
+      }
+      modelToResourceClassCache.put(modelClass, resourceClass,
+          Collections.unmodifiableList(result));
+    }
+
+    return result;
+  }
+
+  public boolean isResourceEncoderAvailable(Resource<?> resource) {
+    return resourceEncoderRegistry.get(resource.getResourceClass()) != null;
+  }
+
+  public <X> ResourceEncoder<X> getResultEncoder(Resource<X> resource)
+      throws NoResultEncoderAvailableException {
+    ResourceEncoder<X> resourceEncoder = resourceEncoderRegistry.get(resource.getResourceClass());
+    if (resourceEncoder != null) {
+      return resourceEncoder;
+    }
+    throw new NoResultEncoderAvailableException(resource.getResourceClass());
+  }
+
+  @SuppressWarnings("unchecked")
+  public <X> Encoder<X> getSourceEncoder(X data) throws NoSourceEncoderAvailableException {
+    Encoder<X> encoder = encoderRegistry.getEncoder((Class<X>) data.getClass());
+    if (encoder != null) {
+      return encoder;
+    }
+    throw new NoSourceEncoderAvailableException(data.getClass());
+  }
+
+  public <X> DataRewinder<X> getRewinder(X data) {
+    return dataRewinderRegistry.build(data);
+  }
+
+  public DataFetcherSet<?> getDataFetchers(Object model, int width, int height) {
+    DataFetcherSet<?> result = modelLoaderRegistry.getDataFetchers(model, width, height);
+    if (result.isEmpty()) {
+      throw new NoModelLoaderAvailableException(model);
+    }
+    return result;
+  }
+
+  /**
+   * Thrown when no {@link com.bumptech.glide.load.model.ModelLoader} is registered for a given
+   * model class.
+   */
+  public static class NoModelLoaderAvailableException extends MissingComponentException {
+    public NoModelLoaderAvailableException(Object model) {
+      super("Failed to find any ModelLoaders for model: " + model);
+    }
+  }
+
+  /**
+   * Thrown when no {@link ResourceEncoder} is registered for a given resource class.
+   */
+  public static class NoResultEncoderAvailableException extends MissingComponentException {
+    public NoResultEncoderAvailableException(Class<?> resourceClass) {
+      super("Failed to find result encoder for resource class: " + resourceClass);
+    }
+  }
+
+  /**
+   * Thrown when no {@link Encoder} is registered for a given data class.
+   */
+  public static class NoSourceEncoderAvailableException extends MissingComponentException {
+    public NoSourceEncoderAvailableException(Class<?> dataClass) {
+      super("Failed to find source encoder for data class: " + dataClass);
+    }
+  }
+
+  /**
+   * Thrown when some necessary component is missing for a load.
+   */
+  public static class MissingComponentException extends RuntimeException {
+    public MissingComponentException(String message) {
+      super(message);
+    }
   }
 }

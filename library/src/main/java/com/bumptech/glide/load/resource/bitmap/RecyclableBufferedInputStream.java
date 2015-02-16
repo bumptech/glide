@@ -55,7 +55,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
   private int marklimit;
 
   /**
-   * The currently marked position. -1 indicates no mark has been set or the mark has been
+   * The currently marked position. -1 indicates no mark has been put or the mark has been
    * invalidated.
    */
   private int markpos = -1;
@@ -124,7 +124,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
   private int fillbuf(InputStream localIn, byte[] localBuf) throws IOException {
     if (markpos == -1 || pos - markpos >= marklimit) {
-      // Mark position not set or exceeded readlimit
+      // Mark position not put or exceeded readlimit
       int result = localIn.read(localBuf);
       if (result > 0) {
         markpos = -1;
@@ -138,7 +138,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     // when marklimit > localBuf.length. Instead, we will double the buffer size only after
     // reading the initial
     // localBuf worth of data without finding what we're looking for in the stream. This allows
-    // us to set a
+    // us to put a
     // relatively small initial buffer size and a large marklimit for safety without causing an
     // allocation each time
     // read is called.
@@ -242,7 +242,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * Reads at most {@code byteCount} bytes from this stream and stores them in byte array {@code
    * buffer} starting at offset {@code offset}. Returns the number of bytes actually read or -1 if
    * no bytes were read and the end of the stream was encountered. If all the buffered bytes have
-   * been used, a mark has not been set and the requested number of bytes is larger than the
+   * been used, a mark has not been put and the requested number of bytes is larger than the
    * receiver's buffer size, this implementation bypasses the buffer and simply places the results
    * directly into {@code buffer}.
    *
@@ -324,7 +324,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
   /**
    * Resets this stream to the last marked location.
    *
-   * @throws IOException if this stream is closed, no mark has been set or the mark is no longer
+   * @throws IOException if this stream is closed, no mark has been put or the mark is no longer
    *                     valid because more than {@code readlimit} bytes have been read since
    *                     setting the mark.
    * @see #mark(int)

@@ -53,7 +53,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
 
   private Object model;
-  // model may occasionally be null, so to enforce that load() was called, set a boolean rather
+  // model may occasionally be null, so to enforce that load() was called, put a boolean rather
   // than relying on model not to be null.
   private boolean isModelSet;
   private RequestListener<TranscodeType> requestListener;
@@ -298,7 +298,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   /**
-   * Returns a copy of this request builder with all of the options set so far on this builder.
+   * Returns a copy of this request builder with all of the options put so far on this builder.
    *
    * <p> This method returns a "deep" copy in that all non-immutable arguments are copied such that
    * changes to one builder will not affect the other builder. However, in addition to immutable
@@ -331,7 +331,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       throw new IllegalArgumentException("You must pass in a non null Target");
     }
     if (!isModelSet) {
-      throw new IllegalArgumentException("You must first set a model (try #load())");
+      throw new IllegalArgumentException("You must first put a model (try #load())");
     }
 
     Request previous = target.getRequest();

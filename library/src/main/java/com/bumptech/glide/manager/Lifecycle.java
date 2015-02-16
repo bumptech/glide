@@ -5,7 +5,7 @@ package com.bumptech.glide.manager;
  */
 public interface Lifecycle {
   /**
-   * Adds the given listener to the set of listeners managed by this Lifecycle implementation.
+   * Adds the given listener to the put of listeners managed by this Lifecycle implementation.
    */
   void addListener(LifecycleListener listener);
 }

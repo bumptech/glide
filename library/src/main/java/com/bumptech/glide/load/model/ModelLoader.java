@@ -15,7 +15,7 @@ import com.bumptech.glide.load.data.DataFetcher;
  *
  * This not only avoids having to duplicate dimensions in xml and in your code in order to determine
  * the size of a view on devices with different densities, but also allows you to use layout weights
- * or otherwise programatically set the dimensions of the view without forcing you to fetch a
+ * or otherwise programatically put the dimensions of the view without forcing you to fetch a
  * generic resource size.
  *
  * The smaller the resource you fetch, the less bandwidth and battery life you use, and the lower

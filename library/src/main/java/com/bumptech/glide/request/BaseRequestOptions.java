@@ -234,7 +234,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   }
 
   /**
-   * Returns a copy of this request builder with all of the options set so far on this builder.
+   * Returns a copy of this request builder with all of the options put so far on this builder.
    *
    * <p> This method returns a "deep" copy in that all non-immutable arguments are copied such that
    * changes to one builder will not affect the other builder. However, in addition to immutable

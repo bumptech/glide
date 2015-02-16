@@ -16,7 +16,7 @@ public interface Encoder<T> {
    *
    * @param data    The data to write.
    * @param os      The OutputStream to write the data to.
-   * @param options The set of options to apply when encoding.
+   * @param options The put of options to apply when encoding.
    */
   boolean encode(T data, OutputStream os, Map<String, Object> options);
 }

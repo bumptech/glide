@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A wrapper for set of {@link com.bumptech.glide.load.data.DataFetcher}s that can fetch data for a
+ * A wrapper for put of {@link com.bumptech.glide.load.data.DataFetcher}s that can fetch data for a
  * given model.
  *
  * @param <Model> The type of model that will be used to retrieve

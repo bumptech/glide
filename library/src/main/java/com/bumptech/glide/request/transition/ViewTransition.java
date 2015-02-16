@@ -28,7 +28,7 @@ public class ViewTransition<R> implements Transition<R> {
    * {@link android.view.View#clearAnimation()}, then starts the
    * {@link android.view.animation.Animation} given in the constructor using
    * {@link android.view.View#startAnimation(android.view.animation.Animation)} and then returns
-   * {@code false} because the animation does not actually set the current resource on the view.
+   * {@code false} because the animation does not actually put the current resource on the view.
    *
    * @param current {@inheritDoc}
    * @param adapter {@inheritDoc}

@@ -4,13 +4,13 @@ import android.content.ContextWrapper;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
-import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.util.Util;
 
@@ -41,13 +41,13 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
   }
 
   <Data> LoadPath<Data, ?, TranscodeClass> getLoadPath(Class<Data> dataClass) {
-    return glideContext.getLoadPath(dataClass, getResourceClass(), transcodeClass);
+    return glideContext.getRegistry().getLoadPath(dataClass, getResourceClass(), transcodeClass);
   }
 
   void buildDataFetchers(int width, int height) {
     Util.assertMainThread();
     if (fetchers == null) {
-      fetchers = glideContext.getDataFetchers(model, width, height);
+      fetchers = glideContext.getRegistry().getDataFetchers(model, width, height);
     }
   }
 
@@ -70,7 +70,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
   }
 
   List<Class<?>> getRegisteredResourceClasses() {
-    return glideContext
+    return glideContext.getRegistry()
         .getRegisteredResourceClasses(model.getClass(), requestOptions.getResourceClass());
   }
 
@@ -103,30 +103,26 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     return requestOptions.getPriority();
   }
 
-  ResourceTranscoder<?, ? extends TranscodeClass> getTranscoder() {
-    return glideContext.getTranscoder(requestOptions.getResourceClass(), transcodeClass);
-  }
-
   <X> DataRewinder<X> getRewinder(X data) {
-    return glideContext.getRewinder(data);
+    return glideContext.getRegistry().getRewinder(data);
   }
 
   boolean isResourceEncoderAvailable(Resource<?> resource) {
-    return glideContext.isResourceEncoderAvailable(resource);
+    return glideContext.getRegistry().isResourceEncoderAvailable(resource);
   }
 
   <ResourceClass> ResourceEncoder<ResourceClass> getResultEncoder(Resource<ResourceClass> resource)
-      throws GlideContext.NoResultEncoderAvailableException {
-    return glideContext.getResultEncoder(resource);
+      throws Registry.NoResultEncoderAvailableException {
+    return glideContext.getRegistry().getResultEncoder(resource);
   }
 
-  <X> Encoder<X> getSourceEncoder(X data) throws GlideContext.NoSourceEncoderAvailableException {
-    return glideContext.getSourceEncoder(data);
+  <X> Encoder<X> getSourceEncoder(X data) throws Registry.NoSourceEncoderAvailableException {
+    return glideContext.getRegistry().getSourceEncoder(data);
   }
 
   DataFetcherSet<?> getDataFetchers(File file, int width, int height)
-      throws GlideContext.NoModelLoaderAvailableException {
-    return glideContext.getDataFetchers(file, width, height);
+      throws Registry.NoModelLoaderAvailableException {
+    return glideContext.getRegistry().getDataFetchers(file, width, height);
   }
 
   String getTag() {

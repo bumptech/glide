@@ -18,6 +18,12 @@ public class SimpleResource<T> implements Resource<T> {
     this.data = Preconditions.checkNotNull(data);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public Class<T> getResourceClass() {
+    return (Class<T>) data.getClass();
+  }
+
   @Override
   public final T get() {
     return data;

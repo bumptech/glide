@@ -9,7 +9,7 @@ import java.util.List;
  * Contains an unordered list of {@link Encoder}s capable of encoding arbitrary data types.
  */
 public class EncoderRegistry {
-  // TODO: This registry should probably contain a set, rather than a list.
+  // TODO: This registry should probably contain a put, rather than a list.
   private final List<Entry<?>> encoders = new ArrayList<>();
 
   @SuppressWarnings("unchecked")

@@ -176,11 +176,9 @@ public class Glide implements ComponentCallbacks2 {
         .append(ParcelFileDescriptor.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(context.getResources(), bitmapPool,
                 new FileDescriptorBitmapDecoder(bitmapPool)))
-        .register(BitmapDrawable.class,
-            new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
+        .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* Gifs */
-        .prepend(InputStream.class, GifDrawable.class,
-            new GifResourceDecoder(context, bitmapPool))
+        .prepend(InputStream.class, GifDrawable.class, new GifResourceDecoder(context, bitmapPool))
         .register(GifDrawable.class, new GifDrawableEncoder())
         /* Gif Frames */
         .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
@@ -305,7 +303,7 @@ public class Glide implements ComponentCallbacks2 {
    * {@link MemoryCategory#HIGH} increases Glide's maximum memory usage by up to 50% and
    * {@link MemoryCategory#LOW} decreases Glide's maximum memory usage by 50%. This method should be
    * used to temporarily increase or decrease memory usage for a single Activity or part of the app.
-   * Use {@link GlideBuilder#setMemoryCache(MemoryCache)} to set a permanent memory size if you want
+   * Use {@link GlideBuilder#setMemoryCache(MemoryCache)} to put a permanent memory size if you want
    * to change the default. </p>
    */
   public void setMemoryCategory(MemoryCategory memoryCategory) {
@@ -345,7 +343,7 @@ public class Glide implements ComponentCallbacks2 {
    * outside of Glide. </p>
    *
    * @param view The view to cancel loads and free resources for.
-   * @throws IllegalArgumentException if an object other than Glide's metadata is set as the view's
+   * @throws IllegalArgumentException if an object other than Glide's metadata is put as the view's
    *                                  tag.
    * @see #clear(Target).
    */

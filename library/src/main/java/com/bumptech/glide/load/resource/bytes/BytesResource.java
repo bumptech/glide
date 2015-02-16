@@ -14,6 +14,11 @@ public class BytesResource implements Resource<byte[]> {
   }
 
   @Override
+  public Class<byte[]> getResourceClass() {
+    return byte[].class;
+  }
+
+  @Override
   public byte[] get() {
     return bytes;
   }

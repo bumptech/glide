@@ -48,8 +48,8 @@ public interface Transition<R> {
    * @param current The new resource that will be displayed in the view.
    * @param adapter The {@link Transition.ViewAdapter} wrapping a view that can at least return an
    *                {@link android.view.View} from {@link Transition.ViewAdapter#getView()}.
-   * @return True if in the process of running the transition, the new resource was set on the view,
-   * false if the caller needs to manually set the current resource on the view.
+   * @return True if in the process of running the transition, the new resource was put on the view,
+   * false if the caller needs to manually put the current resource on the view.
    */
   boolean transition(R current, ViewAdapter adapter);
 }

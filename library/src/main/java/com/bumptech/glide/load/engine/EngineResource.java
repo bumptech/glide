@@ -12,12 +12,12 @@ import com.bumptech.glide.util.Preconditions;
  * @param <Z> The type of data returned by the wrapped {@link Resource}.
  */
 class EngineResource<Z> implements Resource<Z> {
-  private final Resource<Z> resource;
   private final boolean isCacheable;
   private ResourceListener listener;
   private Key key;
   private int acquired;
   private boolean isRecycled;
+  private final Resource<Z> resource;
 
   interface ResourceListener {
     void onResourceReleased(Key key, EngineResource<?> resource);
@@ -35,6 +35,11 @@ class EngineResource<Z> implements Resource<Z> {
 
   boolean isCacheable() {
     return isCacheable;
+  }
+
+  @Override
+  public Class<Z> getResourceClass() {
+    return resource.getResourceClass();
   }
 
   @Override

@@ -75,7 +75,6 @@ public class SingleRequestTest {
     public RequestHarness() {
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
       when(requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(true);
-      when(glideContext.getDataFetchers(eq(model), anyInt(), anyInt())).thenReturn(dataFetcherSet);
       when(resource.get()).thenReturn(result);
     }
 

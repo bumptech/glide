@@ -55,7 +55,7 @@ public final class SingleRequest<R> implements Request,
      */
     CANCELLED,
     /**
-     * Cleared by the user with a placeholder set, may not be restarted.
+     * Cleared by the user with a placeholder put, may not be restarted.
      */
     CLEARED,
     /**
@@ -351,7 +351,7 @@ public final class SingleRequest<R> implements Request,
 
     if (!canSetResource()) {
       releaseResource(resource);
-      // We can't set the status to complete before asking canSetResource().
+      // We can't put the status to complete before asking canSetResource().
       status = Status.COMPLETE;
       return;
     }
