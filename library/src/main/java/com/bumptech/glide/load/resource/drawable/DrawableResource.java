@@ -18,7 +18,6 @@ import com.bumptech.glide.util.Preconditions;
 public abstract class DrawableResource<T extends Drawable> implements Resource<T> {
   protected final T drawable;
 
-
   public DrawableResource(T drawable) {
     this.drawable = Preconditions.checkNotNull(drawable);
   }

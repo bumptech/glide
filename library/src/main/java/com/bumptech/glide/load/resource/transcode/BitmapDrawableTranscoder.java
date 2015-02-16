@@ -8,7 +8,8 @@ import android.graphics.drawable.BitmapDrawable;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource;
+import com.bumptech.glide.load.resource.bitmap.LazyBitmapDrawableResource;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * An {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} that converts {@link
@@ -23,13 +24,12 @@ public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, Bitm
   }
 
   public BitmapDrawableTranscoder(Resources resources, BitmapPool bitmapPool) {
-    this.resources = resources;
-    this.bitmapPool = bitmapPool;
+    this.resources = Preconditions.checkNotNull(resources);
+    this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
   }
 
   @Override
   public Resource<BitmapDrawable> transcode(Resource<Bitmap> toTranscode) {
-    BitmapDrawable drawable = new BitmapDrawable(resources, toTranscode.get());
-    return new BitmapDrawableResource(drawable, bitmapPool);
+    return LazyBitmapDrawableResource.obtain(resources, bitmapPool, toTranscode.get());
   }
 }

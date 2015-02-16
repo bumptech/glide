@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -163,6 +164,7 @@ public class Glide implements ComponentCallbacks2 {
     this.memoryCache = memoryCache;
     bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
+    Resources resources = context.getResources();
     registry = new Registry(context).register(InputStream.class, new StreamEncoder())
         /* Bitmaps */
         .append(InputStream.class, Bitmap.class, new StreamBitmapDecoder(bitmapPool))
@@ -171,10 +173,9 @@ public class Glide implements ComponentCallbacks2 {
         .register(Bitmap.class, new BitmapEncoder())
         /* GlideBitmapDrawables */
         .append(InputStream.class, BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(context.getResources(), bitmapPool,
-                new StreamBitmapDecoder(bitmapPool)))
+            new BitmapDrawableDecoder<>(resources, bitmapPool, new StreamBitmapDecoder(bitmapPool)))
         .append(ParcelFileDescriptor.class, BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(context.getResources(), bitmapPool,
+            new BitmapDrawableDecoder<>(resources, bitmapPool,
                 new FileDescriptorBitmapDecoder(bitmapPool)))
         .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* Gifs */
@@ -209,7 +210,7 @@ public class Glide implements ComponentCallbacks2 {
             byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
         /* Transcoders */
         .register(Bitmap.class, BitmapDrawable.class,
-            new BitmapDrawableTranscoder(context.getResources(), bitmapPool))
+            new BitmapDrawableTranscoder(resources, bitmapPool))
         .register(Bitmap.class, byte[].class, new BitmapBytesTranscoder())
         .register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
 
