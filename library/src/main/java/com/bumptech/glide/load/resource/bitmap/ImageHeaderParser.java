@@ -84,14 +84,13 @@ public class ImageHeaderParser {
     }
 
     public ImageType getType() throws IOException {
-        int firstByte = streamReader.getUInt8();
+        int firstTwoBytes = streamReader.getUInt16();
 
         // JPEG.
-        if (firstByte == EXIF_MAGIC_NUMBER >> 8) {
+        if (firstTwoBytes == EXIF_MAGIC_NUMBER) {
             return JPEG;
         }
 
-        final int firstTwoBytes = firstByte << 8 & 0xFF00 | streamReader.getUInt8() & 0xFF;
         final int firstFourBytes = firstTwoBytes << 16 & 0xFFFF0000 | streamReader.getUInt16() & 0xFFFF;
         // PNG.
         if (firstFourBytes == PNG_HEADER) {

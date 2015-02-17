@@ -69,6 +69,13 @@ public class ImageHeaderParserTest {
         assertEquals(ImageType.UNKNOWN, parser.getType());
     }
 
+    @Test
+    public void testReturnsUnknownTypeForEmptyData() throws IOException {
+        InputStream is = new ByteArrayInputStream(new byte[0]);
+        ImageHeaderParser parser = new ImageHeaderParser(is);
+        assertEquals(ImageType.UNKNOWN, parser.getType());
+    }
+
     // Test for #286.
     @Test
     public void testHandlesParsingOrientationWithMinimalExifSegment() throws IOException {
