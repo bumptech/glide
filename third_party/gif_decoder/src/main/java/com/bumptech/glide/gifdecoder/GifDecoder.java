@@ -503,7 +503,8 @@ public class GifDecoder {
         }
 
         // Copy pixels into previous image
-        if (savePrevious && currentFrame.dispose == DISPOSAL_UNSPECIFIED || currentFrame.dispose == DISPOSAL_NONE) {
+        if (savePrevious && (currentFrame.dispose == DISPOSAL_UNSPECIFIED
+            || currentFrame.dispose == DISPOSAL_NONE)) {
             if (previousImage == null) {
                 previousImage = getNextBitmap();
             }
