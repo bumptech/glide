@@ -8,11 +8,14 @@ import android.util.Log;
 
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.ByteArrayPool;
 import com.bumptech.glide.util.ExceptionCatchingInputStream;
 import com.bumptech.glide.util.MarkEnforcingInputStream;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 
 import java.io.IOException;
@@ -23,71 +26,40 @@ import java.util.Queue;
 import java.util.Set;
 
 /**
- * A base class with methods for loading and decoding images from InputStreams.
+ * Downsamples, decodes, and rotates images according to their exif orientation.
  */
-public abstract class Downsampler implements BitmapDecoder<InputStream> {
+public final class Downsampler implements ResourceDecoder<InputStream, Bitmap> {
+  /**
+   * A key for an {@link com.bumptech.glide.load.DecodeFormat} option that will be used in
+   * conjunction with the image format to determine the {@link android.graphics.Bitmap.Config} to
+   * provide to {@link android.graphics.BitmapFactory.Options#inPreferredConfig} when decoding
+   * the image.
+   */
   public static final String KEY_DECODE_FORMAT =
       "com.bumptech.glide.load.resource.bitmap.Downsampler.DecodeFormat";
-  private static final String TAG = "Downsampler";
+  /**
+   * A key for an {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
+   * will be used to calculate the sample size to use to downsample an image given the original
+   * and target dimensions of the image.
+   */
+  public static final String KEY_DOWNSAMPLE_STRATEGY =
+      "com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy";
 
   private static final Set<ImageHeaderParser.ImageType> TYPES_THAT_USE_POOL_PRE_KITKAT = EnumSet.of(
       ImageHeaderParser.ImageType.JPEG,
       ImageHeaderParser.ImageType.PNG_A,
       ImageHeaderParser.ImageType.PNG
   );
-
   private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
-
-  /**
-   * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the
-   * dimensions of the image will be greater than or equal to the given width and height.
-   */
-  public static final Downsampler AT_LEAST = new Downsampler() {
-    @Override
-    protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-      return Math.min(inHeight / outHeight, inWidth / outWidth);
-    }
-
-    @Override
-    public String getId() {
-      return "AT_LEAST.com.bumptech.glide.load.data.bitmap";
-    }
-  };
-
-  /**
-   * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the
-   * dimensions of the image will be less than or equal to the given width and height.
-   */
-  public static final Downsampler AT_MOST = new Downsampler() {
-    @Override
-    protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-      return Math.max(inHeight / outHeight, inWidth / outWidth);
-    }
-
-    @Override
-    public String getId() {
-      return "AT_MOST.com.bumptech.glide.load.data.bitmap";
-    }
-  };
-
-  /**
-   * Load the image at its original size.
-   */
-  public static final Downsampler NONE = new Downsampler() {
-    @Override
-    protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-      return 0;
-    }
-
-    @Override
-    public String getId() {
-      return "NONE.com.bumptech.glide.load.data.bitmap";
-    }
-  };
-
   // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer
   // but will resize up to this amount if necessary.
   private static final int MARK_POSITION = 5 * 1024 * 1024;
+
+  private final BitmapPool bitmapPool;
+
+  public Downsampler(BitmapPool bitmapPool) {
+    this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
+  }
 
   @Override
   public boolean handles(InputStream data) {
@@ -104,16 +76,14 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
    * of the image for the given InputStream is provided. </p>
    *
    * @param is        An {@link InputStream} to the data for the image.
-   * @param pool      A pool of recycled bitmaps.
    * @param outWidth  The width the final image should be close to.
    * @param outHeight The height the final image should be close to.
    * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is
    * not null.
    */
   @SuppressWarnings("resource")
-  // see BitmapDecoder.decode
   @Override
-  public Bitmap decode(InputStream is, BitmapPool pool, int outWidth, int outHeight,
+  public Resource<Bitmap> decode(InputStream is, int outWidth, int outHeight,
       Map<String, Object> options) throws IOException {
     ByteArrayPool byteArrayPool = ByteArrayPool.get();
     byte[] bytesForOptions = byteArrayPool.getBytes();
@@ -121,6 +91,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
 
     DecodeFormat decodeFormat = getDecodeFormat(options);
+    DownsampleStrategy downsampleStrategy = getDownsampleStrategy(options);
 
     // Use to fix the mark limit to avoid allocating buffers that fit entire images.
     RecyclableBufferedInputStream bufferedStream =
@@ -139,8 +110,10 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     MarkEnforcingInputStream invalidatingStream = new MarkEnforcingInputStream(exceptionStream);
 
     try {
-      return decodeFromWrappedStreams(exceptionStream, invalidatingStream, bufferedStream,
-          bitmapFactoryOptions, bytesForOptions, decodeFormat, pool, outWidth, outHeight);
+      Bitmap result = decodeFromWrappedStreams(exceptionStream, invalidatingStream, bufferedStream,
+          bitmapFactoryOptions, bytesForOptions, downsampleStrategy, decodeFormat,
+          outWidth, outHeight);
+      return BitmapResource.obtain(result, bitmapPool);
     } finally {
       byteArrayPool.releaseBytes(bytesForOptions);
       byteArrayPool.releaseBytes(bytesForStream);
@@ -149,24 +122,10 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     }
   }
 
-  /**
-   * Determine the amount of downsampling to use for a load given the dimensions of the image to be
-   * downsampled and the dimensions of the view/target the image will be displayed in.
-   *
-   * @param inWidth   The width in pixels of the image to be downsampled.
-   * @param inHeight  The height in piexels of the image to be downsampled.
-   * @param outWidth  The width in pixels of the view/target the image will be displayed in.
-   * @param outHeight The height in pixels of the view/target the imag will be displayed in.
-   * @return An integer to pass in to  {@link BitmapFactory#decodeStream(java.io.InputStream,
-   * android.graphics.Rect, android.graphics.BitmapFactory.Options)}.
-   * @see android.graphics.BitmapFactory.Options#inSampleSize
-   */
-  protected abstract int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight);
-
   private Bitmap decodeFromWrappedStreams(ExceptionCatchingInputStream exceptionStream,
       MarkEnforcingInputStream invalidatingStream, RecyclableBufferedInputStream bufferedStream,
       BitmapFactory.Options bitmapFactoryOptions, byte[] bytesForOptions,
-      DecodeFormat decodeFormat, BitmapPool pool, int outWidth, int outHeight)
+      DownsampleStrategy downsampleStrategy, DecodeFormat decodeFormat, int outWidth, int outHeight)
       throws IOException {
 
     int orientation = getOrientation(exceptionStream);
@@ -179,11 +138,11 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     final int inHeight = inDimens[1];
 
     final int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
-    final int sampleSize =
-        getRoundedSampleSize(degreesToRotate, inWidth, inHeight, outWidth, outHeight);
+    final int sampleSize = getRoundedSampleSize(downsampleStrategy, degreesToRotate, inWidth,
+        inHeight, outWidth, outHeight);
 
     final Bitmap downsampled =
-        downsampleWithSize(invalidatingStream, bufferedStream, bitmapFactoryOptions, pool,
+        downsampleWithSize(invalidatingStream, bufferedStream, bitmapFactoryOptions, bitmapPool,
             inWidth, inHeight, sampleSize, decodeFormat);
 
     // BitmapFactory swallows exceptions during decodes and in some cases when inBitmap is non
@@ -196,7 +155,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         Logs.log(Log.DEBUG, "Exception thrown reading from stream in Downsampler",
             streamException);
       }
-      if (downsampled != null && !pool.put(downsampled)) {
+      if (downsampled != null && !bitmapPool.put(downsampled)) {
         downsampled.recycle();
       }
       return null;
@@ -204,9 +163,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
 
     Bitmap rotated = null;
     if (downsampled != null) {
-      rotated = TransformationUtils.rotateImageExif(downsampled, pool, orientation);
+      rotated = TransformationUtils.rotateImageExif(downsampled, bitmapPool, orientation);
 
-      if (!downsampled.equals(rotated) && !pool.put(downsampled)) {
+      if (!downsampled.equals(rotated) && !bitmapPool.put(downsampled)) {
         downsampled.recycle();
       }
     }
@@ -214,8 +173,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     return rotated;
   }
 
-  private int getRoundedSampleSize(int degreesToRotate, int inWidth, int inHeight, int outWidth,
-      int outHeight) {
+  private int getRoundedSampleSize(DownsampleStrategy downsampleStrategy, int degreesToRotate,
+      int inWidth, int inHeight, int outWidth, int outHeight) {
     int targetHeight = outHeight == Target.SIZE_ORIGINAL ? inHeight : outHeight;
     int targetWidth = outWidth == Target.SIZE_ORIGINAL ? inWidth : outWidth;
 
@@ -224,16 +183,17 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
       // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image
       // width is decreased to near our target's height and the image height is decreased to near
       // our target width.
-      exactSampleSize = getSampleSize(inHeight, inWidth, targetWidth, targetHeight);
+      exactSampleSize =
+          downsampleStrategy.getSampleSize(inHeight, inWidth, targetWidth, targetHeight);
     } else {
-      exactSampleSize = getSampleSize(inWidth, inHeight, targetWidth, targetHeight);
+      exactSampleSize =
+          downsampleStrategy.getSampleSize(inWidth, inHeight, targetWidth, targetHeight);
     }
 
     // BitmapFactory only accepts powers of 2, so it will round down to the nearest power of two
     // that is less than or equal to the sample size we provide. Because we need to estimate the
     // final image width and height to re-use Bitmaps, we mirror BitmapFactory's calculation here.
-    // For bug, see issue #224. For algorithm see
-    // http://stackoverflow.com/a/17379704/800716.
+    // For bug, see issue #224. For algorithm see http://stackoverflow.com/a/17379704/800716.
     final int powerOfTwoSampleSize =
         exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize);
 
@@ -242,9 +202,14 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     return Math.max(1, powerOfTwoSampleSize);
   }
 
+  private static DownsampleStrategy getDownsampleStrategy(Map<String, Object> options) {
+    return options.containsKey(KEY_DOWNSAMPLE_STRATEGY)
+        ? (DownsampleStrategy) options.get(KEY_DOWNSAMPLE_STRATEGY) : DownsampleStrategy.DEFAULT;
+  }
+
   private static DecodeFormat getDecodeFormat(Map<String, Object> options) {
-    return options.containsKey(KEY_DECODE_FORMAT) ? (DecodeFormat) options.get(KEY_DECODE_FORMAT)
-        : DecodeFormat.DEFAULT;
+    return options.containsKey(KEY_DECODE_FORMAT)
+        ? (DecodeFormat) options.get(KEY_DECODE_FORMAT) : DecodeFormat.DEFAULT;
   }
 
   private static int getOrientation(ExceptionCatchingInputStream exceptionStream)
@@ -286,7 +251,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
       return true;
     }
 
-    is.mark(1024);
+    is.mark(MARK_POSITION);
     try {
       final ImageHeaderParser.ImageType type = new ImageHeaderParser(is).getType();
       // We cannot reuse bitmaps when decoding images that are not PNG or JPG prior to KitKat.
@@ -310,14 +275,13 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     }
 
     boolean hasAlpha = false;
-    // We probably only need 25, but this is safer (particularly since the buffer size is > 1024).
-    is.mark(1024);
+    is.mark(MARK_POSITION);
     try {
       hasAlpha = new ImageHeaderParser(is).hasAlpha();
     } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Cannot determine whether the image has alpha or not from header for format "
-                + format, e);
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Cannot determine whether the image has alpha or not from header for"
+            + " format " + format, e);
       }
     } finally {
       is.reset();

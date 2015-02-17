@@ -4,19 +4,23 @@ import android.os.Build;
 
 /**
  * Options for setting the value of {@link android.graphics.Bitmap#getConfig()} for
- * {@link android.graphics.Bitmap}s returned by a
- * {@link com.bumptech.glide.load.resource.bitmap.BitmapDecoder}.
+ * {@link android.graphics.Bitmap}s returned by {@link com.bumptech.glide.load.ResourceDecoder}s.
  *
- * <p> Note - In some cases it may not be possible to obey the requested setting, not all {@link
- * com.bumptech.glide.load.resource.bitmap.BitmapDecoder}s support setting formats and certain
+ * <p> Note - In some cases it may not be possible to obey the requested setting, not all
+ * {@link com.bumptech.glide.load.resource.bitmap.Downsampler}s support setting formats and certain
  * images may not be able to be loaded as certain configurations. Therefore this class represents a
  * preference rather than a requirement. </p>
  */
 public enum DecodeFormat {
   /**
-   * All bitmaps returned by the {@link com.bumptech.glide.load.resource.bitmap.BitmapDecoder}
+   * Bitmaps returned by the {@link com.bumptech.glide.load.ResourceDecoder}.
    * should return {@link android.graphics.Bitmap.Config#ARGB_8888} for
-   * {@link android.graphics.Bitmap#getConfig()}.
+   * {@link android.graphics.Bitmap#getConfig()} when possible.
+   *
+   * <p> GIF images decoded by {@link android.graphics.BitmapFactory} currently use an internal
+   * hidden format that is returned as null from {@link android.graphics.Bitmap#getConfig()}. Since
+   * we cannot force {@link android.graphics.BitmapFactory} to always return our desired config,
+   * this setting is a preference, not a promise.</p>
    */
   PREFER_ARGB_8888,
 
@@ -28,7 +32,6 @@ public enum DecodeFormat {
    * {@link android.graphics.Bitmap#getConfig()}.
    */
   PREFER_RGB_565;
-
 
   /**
    * There is a rendering issue in KitKat and L (or at least L MR1) when reusing mixed format

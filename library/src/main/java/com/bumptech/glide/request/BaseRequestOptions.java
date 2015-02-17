@@ -17,7 +17,6 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
-import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
@@ -296,7 +295,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   }
 
   public CHILD downsample(DownsampleStrategy strategy) {
-    return set(StreamBitmapDecoder.KEY_DOWNSAMPLE_STRATEGY, strategy);
+    return set(Downsampler.KEY_DOWNSAMPLE_STRATEGY, strategy);
   }
 
   /**
