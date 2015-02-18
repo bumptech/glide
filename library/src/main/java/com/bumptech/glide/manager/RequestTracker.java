@@ -19,6 +19,12 @@ public class RequestTracker {
     // can always make repeated requests into targets other than views, or use an activity manager in a fragment pager
     // where holding strong references would steadily leak bitmaps and/or views.
     private final Set<Request> requests = Collections.newSetFromMap(new WeakHashMap<Request, Boolean>());
+    // A set of requests that have not completed and are queued to be run again. We use this list to maintain hard
+    // references to these requests to ensure that they are not garbage collected before they start running or
+    // while they are paused. See #346.
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final List<Request> pendingRequests = new ArrayList<Request>();
+
     private boolean isPaused;
 
     /**
@@ -28,10 +34,12 @@ public class RequestTracker {
         requests.add(request);
         if (!isPaused) {
             request.begin();
+        } else {
+            pendingRequests.add(request);
         }
     }
 
-    // Exposed for testing.
+    // Visible for testing.
     void addRequest(Request request) {
         requests.add(request);
     }
@@ -41,6 +49,7 @@ public class RequestTracker {
      */
     public void removeRequest(Request request) {
         requests.remove(request);
+        pendingRequests.remove(request);
     }
 
     /**
@@ -58,6 +67,7 @@ public class RequestTracker {
         for (Request request : getSnapshot()) {
             if (request.isRunning()) {
                 request.pause();
+                pendingRequests.add(request);
             }
         }
     }
@@ -72,6 +82,7 @@ public class RequestTracker {
                 request.begin();
             }
         }
+        pendingRequests.clear();
     }
 
     /**
@@ -81,6 +92,7 @@ public class RequestTracker {
         for (Request request : getSnapshot()) {
             request.clear();
         }
+        pendingRequests.clear();
     }
 
     /**
@@ -93,6 +105,8 @@ public class RequestTracker {
                 request.pause();
                 if (!isPaused) {
                     request.begin();
+                } else {
+                    pendingRequests.add(request);
                 }
             }
         }
