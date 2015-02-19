@@ -42,7 +42,9 @@ import com.bumptech.glide.load.model.stream.UrlLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
+import com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
+import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
@@ -171,12 +173,19 @@ public class Glide implements ComponentCallbacks2 {
     Resources resources = context.getResources();
     registry = new Registry(context).register(InputStream.class, new StreamEncoder())
         /* Bitmaps */
-        .append(InputStream.class, Bitmap.class, new Downsampler(bitmapPool))
+        .append(ByteBuffer.class, Bitmap.class,
+            new ByteBufferBitmapDecoder(new Downsampler(bitmapPool)))
+        .append(InputStream.class, Bitmap.class,
+            new StreamBitmapDecoder(new Downsampler(bitmapPool)))
         .append(ParcelFileDescriptor.class, Bitmap.class, new VideoBitmapDecoder(bitmapPool))
         .register(Bitmap.class, new BitmapEncoder())
         /* GlideBitmapDrawables */
+        .append(ByteBuffer.class, BitmapDrawable.class,
+            new BitmapDrawableDecoder<>(resources, bitmapPool,
+                new ByteBufferBitmapDecoder(new Downsampler(bitmapPool))))
         .append(InputStream.class, BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(resources, bitmapPool, new Downsampler(bitmapPool)))
+            new BitmapDrawableDecoder<>(resources, bitmapPool,
+                new StreamBitmapDecoder(new Downsampler(bitmapPool))))
         .append(ParcelFileDescriptor.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool, new VideoBitmapDecoder(bitmapPool)))
         .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
