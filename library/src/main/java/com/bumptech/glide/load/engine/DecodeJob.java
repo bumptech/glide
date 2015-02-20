@@ -32,7 +32,7 @@ import java.util.List;
  * @param <R> The type of resource that will be transcoded from the decoded and transformed
  *            resource.
  */
-class DecodeJob<R> {
+class DecodeJob<R> implements DataFetcher.Callback<Object> {
   private static final FileOpener DEFAULT_FILE_OPENER = new FileOpener();
 
   private final RequestContext<R> requestContext;
@@ -196,8 +196,22 @@ class DecodeJob<R> {
 
   private <Data, ResourceType> Resource<R> runLoadPath(DataFetcher<Data> fetcher,
       DataSource dataSource, LoadPath<Data, ResourceType, R> path) {
-    return path.load(fetcher, requestContext, width, height,
-        new DecodeCallback<ResourceType>(dataSource));
+    Resource<R> result = null;
+    try {
+      Data data = fetcher.loadData(requestContext.getPriority());
+      if (data == null) {
+        return null;
+      }
+      result = path.load(data, requestContext, width, height,
+          new DecodeCallback<ResourceType>(dataSource));
+    } catch (IOException e) {
+      if (Logs.isEnabled(Log.VERBOSE)) {
+        Logs.log(Log.VERBOSE, "Fetcher failed: " + fetcher, e);
+      }
+    } finally {
+      fetcher.cleanup();
+    }
+    return result;
   }
 
   public void cancel() {
@@ -208,6 +222,11 @@ class DecodeJob<R> {
   private void logWithTimeAndKey(String message, long startTime) {
     Logs.log(Log.VERBOSE, message + " in " + LogTime.getElapsedMillis(startTime) + ", key: "
         + loadKey);
+  }
+
+  @Override
+  public void onDataReady(Object data) {
+
   }
 
   class SourceWriter<DataType> implements DiskCache.Writer {

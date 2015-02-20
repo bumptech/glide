@@ -1,13 +1,8 @@
 package com.bumptech.glide.load.engine;
 
-import android.util.Log;
-
-import com.bumptech.glide.Logs;
-import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.util.Preconditions;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,36 +28,22 @@ public class LoadPath<Data, ResourceType, Transcode> {
     this.decodePaths = Preconditions.checkNotEmpty(decodePaths);
   }
 
-  public Resource<Transcode> load(DataFetcher<Data> fetcher, RequestContext<Transcode> context,
+  public Resource<Transcode> load(Data data, RequestContext<Transcode> context,
       int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) {
-    Data data = null;
-    try {
-      data = fetcher.loadData(context.getPriority());
-    } catch (IOException e) {
-      if (Logs.isEnabled(Log.VERBOSE)) {
-        Logs.log(Log.VERBOSE, "Fetcher failed: " + fetcher, e);
-      }
-    }
-    Resource<Transcode> result = null;
-    try {
-      if (data == null) {
-        return null;
-      }
+    Preconditions.checkNotNull(data);
 
-      Map<String, Object> options = context.getOptions();
-      DataRewinder<Data> rewinder = context.getRewinder(data);
-      try {
-        for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {
-          result = path.decode(rewinder, width, height, options, decodeCallback);
-          if (result != null) {
-            break;
-          }
+    Resource<Transcode> result = null;
+    Map<String, Object> options = context.getOptions();
+    DataRewinder<Data> rewinder = context.getRewinder(data);
+    try {
+      for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {
+        result = path.decode(rewinder, width, height, options, decodeCallback);
+        if (result != null) {
+          break;
         }
-      } finally {
-        rewinder.cleanup();
       }
     } finally {
-      fetcher.cleanup();
+      rewinder.cleanup();
     }
     return result;
   }
