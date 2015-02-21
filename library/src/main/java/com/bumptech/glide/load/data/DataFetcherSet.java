@@ -50,7 +50,9 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
 
   public void cancel() {
     for (DataFetcher<?> fetcher : fetchers) {
-      fetcher.cancel();
+      if (fetcher != null) {
+        fetcher.cancel();
+      }
     }
   }
 

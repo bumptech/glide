@@ -1,11 +1,15 @@
 package com.bumptech.glide.integration.okhttp;
 
+import android.util.Log;
+
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,11 +28,25 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public InputStream loadData(Priority priority) throws IOException {
+  public void loadData(Priority priority, final DataCallback<? super InputStream> callback)
+      throws IOException {
     Request request = new Request.Builder().url(url.toString()).build();
 
-    stream = client.newCall(request).execute().body().byteStream();
-    return stream;
+    client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
+      @Override
+      public void onFailure(Request request, IOException e) {
+        if (Logs.isEnabled(Log.DEBUG)) {
+          Logs.log(Log.DEBUG, "OkHttp failed to obtain result", e);
+        }
+        callback.onDataReady(null);
+      }
+
+      @Override
+      public void onResponse(Response response) throws IOException {
+        stream = response.body().byteStream();
+        callback.onDataReady(stream);
+      }
+    });
   }
 
   @Override

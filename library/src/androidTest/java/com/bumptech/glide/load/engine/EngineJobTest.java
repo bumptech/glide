@@ -120,7 +120,7 @@ public class EngineJobTest {
   @Test
   public void testListenerNotifiedOfCancelOnCancel() {
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.cancel();
 
     verify(harness.listener).onEngineJobCancelled(eq(job), eq(harness.key));
@@ -129,7 +129,7 @@ public class EngineJobTest {
   @Test
   public void testOnResourceReadyNotDeliveredAfterCancel() {
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.cancel();
 
     job.onResourceReady(harness.resource);
@@ -142,7 +142,7 @@ public class EngineJobTest {
   public void testOnExceptionNotDeliveredAfterCancel() {
     harness = new EngineJobHarness();
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.cancel();
 
     job.onLoadFailed();
@@ -154,7 +154,7 @@ public class EngineJobTest {
   @Test
   public void testRemovingAllCallbacksCancelsRunner() {
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.removeCallback(harness.cb);
 
     assertTrue(job.isCancelled());
@@ -190,7 +190,7 @@ public class EngineJobTest {
   @Test
   public void testDoesNotNotifyCancelledIfAlreadyCancelled() {
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.cancel();
     job.cancel();
 
@@ -200,7 +200,7 @@ public class EngineJobTest {
   @Test
   public void testDoesNotNotifyCancelledIfReceivedException() {
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.onLoadFailed();
     job.cancel();
 
@@ -214,7 +214,7 @@ public class EngineJobTest {
     shadowLooper.pause();
 
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.onResourceReady(harness.resource);
     job.cancel();
     shadowLooper.runOneTask();
@@ -387,10 +387,10 @@ public class EngineJobTest {
   @Test
   public void testCancelsFutureFromDiskCacheServiceIfCancelledAfterStartButBeforeSourceSubmit() {
     Future future = mock(Future.class);
-    when(harness.diskCacheService.submit(eq(harness.engineRunnable))).thenReturn(future);
+    when(harness.diskCacheService.submit(eq(harness.decodeJob))).thenReturn(future);
 
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.cancel();
 
     verify(future).cancel(eq(true));
@@ -399,11 +399,11 @@ public class EngineJobTest {
   @Test
   public void testCancelsFutureFromSourceServiceIfCancelledAfterSourceSubmit() {
     Future future = mock(Future.class);
-    when(harness.sourceService.submit(eq(harness.engineRunnable))).thenReturn(future);
+    when(harness.sourceService.submit(eq(harness.decodeJob))).thenReturn(future);
 
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
-    job.submitForSource(harness.engineRunnable);
+    job.start(harness.decodeJob);
+    job.reschedule(harness.decodeJob);
     job.cancel();
 
     verify(future).cancel(eq(true));
@@ -412,26 +412,26 @@ public class EngineJobTest {
   @Test
   public void testCancelsEngineRunnableOnCancel() {
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
     job.cancel();
 
-    verify(harness.engineRunnable).cancel();
+    verify(harness.decodeJob).cancel();
   }
 
   @Test
   public void testSubmitsRunnableToSourceServiceOnSubmitForSource() {
     EngineJob job = harness.getJob();
-    job.submitForSource(harness.engineRunnable);
+    job.reschedule(harness.decodeJob);
 
-    verify(harness.sourceService).submit(eq(harness.engineRunnable));
+    verify(harness.sourceService).submit(eq(harness.decodeJob));
   }
 
   @Test
   public void testSubimtsRunnableToDiskCacheServiceOnStart() {
     EngineJob job = harness.getJob();
-    job.start(harness.engineRunnable);
+    job.start(harness.decodeJob);
 
-    verify(harness.diskCacheService).submit(eq(harness.engineRunnable));
+    verify(harness.diskCacheService).submit(eq(harness.decodeJob));
   }
 
   @SafeVarargs
@@ -476,7 +476,7 @@ public class EngineJobTest {
     ExecutorService diskCacheService = mock(ExecutorService.class);
     ExecutorService sourceService = mock(ExecutorService.class);
     boolean isCacheable = true;
-    EngineRunnable engineRunnable = mock(EngineRunnable.class);
+    DecodeJob<Object> decodeJob = mock(DecodeJob.class);
 
     public EngineJob getJob() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);

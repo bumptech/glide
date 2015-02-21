@@ -45,14 +45,15 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public InputStream loadData(Priority priority) throws IOException {
+  public void loadData(Priority priority, DataCallback<? super InputStream> callback)
+      throws IOException {
     long startTime = LogTime.getLogTime();
     final InputStream result =
         loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG, "Retrieved result in " + LogTime.getElapsedMillis(startTime) + " ms");
     }
-    return result;
+    callback.onDataReady(result);
   }
 
   private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl)

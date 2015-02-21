@@ -18,7 +18,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * same priority will be executed in FIFO order.
  */
 public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
-  AtomicInteger ordering = new AtomicInteger();
+  private static final String DEFAULT_NAME = "fifo-pool";
+  private final AtomicInteger ordering = new AtomicInteger();
+
+  public FifoPriorityThreadPoolExecutor(int poolSize) {
+    this(DEFAULT_NAME, poolSize);
+  }
 
   /**
    * Constructor to build a fixed thread pool with the given pool size using {@link
@@ -26,8 +31,8 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
    *
    * @param poolSize The number of threads.
    */
-  public FifoPriorityThreadPoolExecutor(int poolSize) {
-    this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory());
+  public FifoPriorityThreadPoolExecutor(String name, int poolSize) {
+    this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory(name));
   }
 
   public FifoPriorityThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAlive,
@@ -46,11 +51,20 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
    * android.os.Process#THREAD_PRIORITY_BACKGROUND}.
    */
   public static class DefaultThreadFactory implements ThreadFactory {
-    int threadNum = 0;
+    private final String name;
+    private int threadNum = 0;
+
+    public DefaultThreadFactory() {
+      this(DEFAULT_NAME);
+    }
+
+    public DefaultThreadFactory(String name) {
+      this.name = name;
+    }
 
     @Override
     public Thread newThread(Runnable runnable) {
-      final Thread result = new Thread(runnable, "fifo-pool-thread-" + threadNum) {
+      final Thread result = new Thread(runnable, name + "-thread-" + threadNum) {
         @Override
         public void run() {
           android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);

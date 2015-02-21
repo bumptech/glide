@@ -1,8 +1,12 @@
 package com.bumptech.glide.integration.volley;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
+import static com.bumptech.glide.testutil.TestUtil.assertStreamOf;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
 
 import android.os.SystemClock;
 
@@ -11,7 +15,6 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.testutil.TestUtil;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 
@@ -19,6 +22,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -30,6 +38,7 @@ import org.robolectric.shadows.ShadowSystemClock;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -42,14 +51,31 @@ import java.util.concurrent.ExecutionException;
 public class VolleyStreamFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
 
+  @Mock VolleyRequestFactory requestFactory;
+  @Mock DataFetcher.DataCallback<InputStream> callback;
+
   private MockWebServer mockWebServer;
   private RequestQueue requestQueue;
+  private ArgumentCaptor<InputStream> streamCaptor;
+  private CountDownLatch waitForResponseLatch;
 
   @Before
   public void setUp() throws IOException {
+    MockitoAnnotations.initMocks(this);
+
+    waitForResponseLatch = new CountDownLatch(1);
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+        waitForResponseLatch.countDown();
+        return null;
+      }
+    }).when(callback).onDataReady(any(InputStream.class));
     requestQueue = Volley.newRequestQueue(RuntimeEnvironment.application);
     mockWebServer = new MockWebServer();
     mockWebServer.play();
+
+    streamCaptor = ArgumentCaptor.forClass(InputStream.class);
   }
 
   @After
@@ -63,8 +89,10 @@ public class VolleyStreamFetcherServerTest {
     String expected = "fakedata";
     mockWebServer.enqueue(new MockResponse().setBody(expected).setResponseCode(200));
     DataFetcher<InputStream> fetcher = getFetcher();
-    InputStream is = fetcher.loadData(Priority.HIGH);
-    assertEquals(expected, TestUtil.isToString(is));
+    fetcher.loadData(Priority.HIGH, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(streamCaptor.capture());
+    assertStreamOf(expected, streamCaptor.getValue());
   }
 
   @Test
@@ -73,8 +101,10 @@ public class VolleyStreamFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301)
         .setHeader("Location", mockWebServer.getUrl("/redirect")));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
-    InputStream is = getFetcher().loadData(Priority.LOW);
-    assertEquals(expected, TestUtil.isToString(is));
+    getFetcher().loadData(Priority.LOW, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(streamCaptor.capture());
+    assertStreamOf(expected, streamCaptor.getValue());
   }
 
   @Test
@@ -83,8 +113,10 @@ public class VolleyStreamFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(302)
         .setHeader("Location", mockWebServer.getUrl("/redirect")));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
-    InputStream is = getFetcher().loadData(Priority.LOW);
-    assertEquals(expected, TestUtil.isToString(is));
+    getFetcher().loadData(Priority.LOW, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(streamCaptor.capture());
+    assertStreamOf(expected, streamCaptor.getValue());
   }
 
   @Test
@@ -98,8 +130,10 @@ public class VolleyStreamFetcherServerTest {
     }
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
 
-    InputStream is = getFetcher().loadData(Priority.NORMAL);
-    assertEquals(expected, TestUtil.isToString(is));
+    getFetcher().loadData(Priority.NORMAL, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(streamCaptor.capture());
+    assertStreamOf(expected, streamCaptor.getValue());
 
     assertThat(mockWebServer.takeRequest().getPath()).contains(DEFAULT_PATH);
     for (int i = 0; i < numRedirects; i++) {
@@ -113,13 +147,17 @@ public class VolleyStreamFetcherServerTest {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301));
     }
 
-    assertThat(getFetcher().loadData(Priority.NORMAL)).isNull();
+    getFetcher().loadData(Priority.NORMAL, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   @Test
   public void testReturnsNullIfStatusCodeIsNegativeOne() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
-    assertThat(getFetcher().loadData(Priority.LOW)).isNull();
+    getFetcher().loadData(Priority.LOW, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   @Test
@@ -128,19 +166,25 @@ public class VolleyStreamFetcherServerTest {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301)
           .setHeader("Location", mockWebServer.getUrl("/redirect" + i)));
     }
-    assertThat(getFetcher().loadData(Priority.NORMAL)).isNull();
+    getFetcher().loadData(Priority.NORMAL, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   @Test
   public void testReturnsNullIfStatusCodeIs500() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500).setBody("error"));
-    assertThat(getFetcher().loadData(Priority.NORMAL)).isNull();
+    getFetcher().loadData(Priority.NORMAL, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   @Test
   public void testReturnsNullIfStatusCodeIs400() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400).setBody("error"));
-    assertThat(getFetcher().loadData(Priority.LOW)).isNull();
+    getFetcher().loadData(Priority.LOW, callback);
+    waitForResponseLatch.await();
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   private DataFetcher<InputStream> getFetcher() {
@@ -158,7 +202,7 @@ public class VolleyStreamFetcherServerTest {
         return super.get();
       }
     };
-    return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString()), requestFuture);
+    return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString()));
   }
 
   /**

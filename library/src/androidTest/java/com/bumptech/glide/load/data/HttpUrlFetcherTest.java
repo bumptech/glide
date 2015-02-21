@@ -1,10 +1,9 @@
 package com.bumptech.glide.load.data;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -28,26 +29,26 @@ import java.net.URL;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class HttpUrlFetcherTest {
+  @Mock HttpURLConnection urlConnection;
+  @Mock HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory;
+  @Mock GlideUrl glideUrl;
+  @Mock InputStream stream;
+  @Mock DataFetcher.DataCallback<InputStream> callback;
+
   private static final int TIMEOUT_MS = 100;
-  private HttpURLConnection urlConnection;
   private HttpUrlFetcher fetcher;
-  private GlideUrl glideUrl;
-  private InputStream stream;
 
   @Before
   public void setUp() throws IOException {
-    urlConnection = mock(HttpURLConnection.class);
+    MockitoAnnotations.initMocks(this);
     URL url = new URL("http://www.google.com");
-    HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory =
-        mock(HttpUrlFetcher.HttpUrlConnectionFactory.class);
-    when(connectionFactory.build(eq(url))).thenReturn(urlConnection);
 
-    glideUrl = mock(GlideUrl.class);
-    when(glideUrl.toURL()).thenReturn(url);
-    fetcher = new HttpUrlFetcher(glideUrl, TIMEOUT_MS, connectionFactory);
-    stream = mock(InputStream.class);
+    when(connectionFactory.build(eq(url))).thenReturn(urlConnection);
     when(urlConnection.getInputStream()).thenReturn(stream);
     when(urlConnection.getResponseCode()).thenReturn(200);
+    when(glideUrl.toURL()).thenReturn(url);
+
+    fetcher = new HttpUrlFetcher(glideUrl, TIMEOUT_MS, connectionFactory);
   }
 
   @Test
@@ -59,13 +60,13 @@ public class HttpUrlFetcherTest {
 
   @Test
   public void testSetsReadTimeout() throws IOException {
-    fetcher.loadData(Priority.HIGH);
+    fetcher.loadData(Priority.HIGH, callback);
     verify(urlConnection).setReadTimeout(eq(TIMEOUT_MS));
   }
 
   @Test
   public void testSetsConnectTimeout() throws IOException {
-    fetcher.loadData(Priority.IMMEDIATE);
+    fetcher.loadData(Priority.IMMEDIATE, callback);
     verify(urlConnection).setConnectTimeout(eq(TIMEOUT_MS));
   }
 
@@ -75,12 +76,13 @@ public class HttpUrlFetcherTest {
     when(urlConnection.getInputStream()).thenReturn(notExpected);
 
     fetcher.cancel();
-    assertNull(fetcher.loadData(Priority.LOW));
+    fetcher.loadData(Priority.LOW, callback);
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   @Test
   public void testDisconnectsUrlOnCleanup() throws IOException {
-    fetcher.loadData(Priority.HIGH);
+    fetcher.loadData(Priority.HIGH, callback);
     fetcher.cleanup();
 
     verify(urlConnection).disconnect();
@@ -99,7 +101,7 @@ public class HttpUrlFetcherTest {
   @Test
   public void testCancelDoesNotDisconnectIfAlreadyConnected()
       throws IOException {
-    fetcher.loadData(Priority.HIGH);
+    fetcher.loadData(Priority.HIGH, callback);
     fetcher.cancel();
 
     verify(urlConnection, never()).disconnect();
@@ -107,7 +109,7 @@ public class HttpUrlFetcherTest {
 
   @Test
   public void testClosesStreamInCleanupIfNotNull() throws IOException {
-    fetcher.loadData(Priority.HIGH);
+    fetcher.loadData(Priority.HIGH, callback);
     fetcher.cleanup();
 
     verify(stream).close();
@@ -115,7 +117,7 @@ public class HttpUrlFetcherTest {
 
   @Test
   public void testClosesStreamBeforeDisconnectingConnection() throws IOException {
-    fetcher.loadData(Priority.NORMAL);
+    fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cleanup();
 
     InOrder order = inOrder(stream, urlConnection);

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
@@ -54,9 +55,11 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     }
 
     @Override
-    public ByteBuffer loadData(Priority priority) throws IOException {
+    public void loadData(Priority priority, DataCallback<? super ByteBuffer> callback)
+        throws IOException {
       channel = new FileInputStream(file).getChannel();
-      return channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+      MappedByteBuffer result = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+      callback.onDataReady(result);
     }
 
     @Override

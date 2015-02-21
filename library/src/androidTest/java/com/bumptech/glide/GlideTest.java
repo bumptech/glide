@@ -9,6 +9,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +49,7 @@ import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.testutil.TestResourceUtil;
 
 import org.junit.After;
@@ -107,7 +109,7 @@ public class GlideTest {
     target = mock(Target.class);
     imageView = new ImageView(RuntimeEnvironment.application);
     imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
-    doAnswer(new CallCallback()).when(target).getSize(any(SizeReadyCallback.class));
+    doAnswer(new CallSizeReady()).when(target).getSize(any(SizeReadyCallback.class));
 
     Handler bgHandler = mock(Handler.class);
     when(bgHandler.post(any(Runnable.class))).thenAnswer(new Answer<Boolean>() {
@@ -611,7 +613,8 @@ public class GlideTest {
   private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource)
       throws Exception {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
-    when(failFetcher.loadData(any(Priority.class))).thenThrow(new IOException("test"));
+    doThrow(new IOException("test")).when(failFetcher)
+        .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
     when(failFetcher.getDataClass()).thenReturn(failResource);
     when(failFetcher.getId()).thenReturn("fakeId");
     ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
@@ -669,7 +672,8 @@ public class GlideTest {
     ModelLoader<T, InputStream> modelLoader = mock(ModelLoader.class);
     DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
     try {
-      when(fetcher.loadData(any(Priority.class))).thenReturn(new ByteArrayInputStream(new byte[0]));
+      doAnswer(new Util.CallDataReady(new ByteArrayInputStream(new byte[0]))).when(fetcher)
+          .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
     } catch (Exception e) {
       // Do nothing.
     }
@@ -686,15 +690,15 @@ public class GlideTest {
     return TestResourceUtil.openResource(getClass(), imageName);
   }
 
-  private static class CallCallback implements Answer<Void> {
+  private static class CallSizeReady implements Answer<Void> {
     private int width;
     private int height;
 
-    public CallCallback() {
+    public CallSizeReady() {
       this(100, 100);
     }
 
-    public CallCallback(int width, int height) {
+    public CallSizeReady(int width, int height) {
       this.width = width;
       this.height = height;
     }
@@ -735,8 +739,9 @@ public class GlideTest {
       when(mockStreamFetcher.getId()).thenReturn("fakeId");
       when(mockStreamFetcher.getDataClass()).thenReturn(InputStream.class);
       try {
-        when(mockStreamFetcher.loadData(any(Priority.class)))
-            .thenReturn(new ByteArrayInputStream(new byte[0]));
+        doAnswer(new Util.CallDataReady<>(new ByteArrayInputStream(new byte[0])))
+            .when(mockStreamFetcher)
+            .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

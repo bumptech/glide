@@ -1,5 +1,7 @@
 package com.bumptech.glide.testutil;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,4 +36,7 @@ public final class TestUtil {
     return new String(isToBytes(is));
   }
 
+  public static void assertStreamOf(String expected, InputStream result) throws IOException {
+    assertThat(expected).isEqualTo(isToString(result));
+  }
 }

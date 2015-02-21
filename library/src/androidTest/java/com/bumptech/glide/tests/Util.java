@@ -5,6 +5,8 @@ import static org.mockito.Mockito.RETURNS_DEFAULTS;
 
 import android.os.Build;
 
+import com.bumptech.glide.load.data.DataFetcher;
+
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.util.ReflectionHelpers;
@@ -75,6 +77,24 @@ public class Util {
       } else {
         return RETURNS_DEFAULTS.answer(invocation);
       }
+    }
+  }
+
+  public static class CallDataReady<T> implements Answer<Void> {
+
+    private T data;
+
+    public CallDataReady(T data) {
+      this.data = data;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+      DataFetcher.DataCallback<T> callback =
+          (DataFetcher.DataCallback<T>) invocationOnMock.getArguments()[1];
+      callback.onDataReady(data);
+      return null;
     }
   }
 }

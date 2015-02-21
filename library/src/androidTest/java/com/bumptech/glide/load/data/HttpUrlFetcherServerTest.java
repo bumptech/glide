@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.data;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verify;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -15,6 +15,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -36,15 +39,21 @@ public class HttpUrlFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
   private static final int TIMEOUT_TIME_MS = 300;
 
+  @Mock DataFetcher.DataCallback<InputStream> callback;
+
   private MockWebServer mockWebServer;
   private boolean defaultFollowRedirects;
+  private ArgumentCaptor<InputStream> streamCaptor;
 
   @Before
   public void setUp() throws IOException {
+    MockitoAnnotations.initMocks(this);
     defaultFollowRedirects = HttpURLConnection.getFollowRedirects();
     HttpURLConnection.setFollowRedirects(false);
     mockWebServer = new MockWebServer();
     mockWebServer.play();
+
+    streamCaptor = ArgumentCaptor.forClass(InputStream.class);
   }
 
   @After
@@ -58,8 +67,9 @@ public class HttpUrlFetcherServerTest {
     String expected = "fakedata";
     mockWebServer.enqueue(new MockResponse().setBody(expected).setResponseCode(200));
     HttpUrlFetcher fetcher = getFetcher();
-    InputStream is = fetcher.loadData(Priority.HIGH);
-    assertEquals(expected, TestUtil.isToString(is));
+    fetcher.loadData(Priority.HIGH, callback);
+    verify(callback).onDataReady(streamCaptor.capture());
+    TestUtil.assertStreamOf(expected, streamCaptor.getValue());
   }
 
   @Test
@@ -68,8 +78,9 @@ public class HttpUrlFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301)
         .setHeader("Location", mockWebServer.getUrl("/redirect")));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
-    InputStream is = getFetcher().loadData(Priority.LOW);
-    assertEquals(expected, TestUtil.isToString(is));
+    getFetcher().loadData(Priority.LOW, callback);
+    verify(callback).onDataReady(streamCaptor.capture());
+    TestUtil.assertStreamOf(expected, streamCaptor.getValue());
   }
 
   @Test
@@ -78,8 +89,9 @@ public class HttpUrlFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(302)
         .setHeader("Location", mockWebServer.getUrl("/redirect")));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
-    InputStream is = getFetcher().loadData(Priority.LOW);
-    assertEquals(expected, TestUtil.isToString(is));
+    getFetcher().loadData(Priority.LOW, callback);
+    verify(callback).onDataReady(streamCaptor.capture());
+    TestUtil.assertStreamOf(expected, streamCaptor.getValue());
   }
 
   @Test
@@ -88,8 +100,9 @@ public class HttpUrlFetcherServerTest {
     mockWebServer
         .enqueue(new MockResponse().setResponseCode(301).setHeader("Location", "/redirect"));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
-    InputStream is = getFetcher().loadData(Priority.NORMAL);
-    assertEquals(expected, TestUtil.isToString(is));
+    getFetcher().loadData(Priority.NORMAL, callback);
+    verify(callback).onDataReady(streamCaptor.capture());
+    TestUtil.assertStreamOf(expected, streamCaptor.getValue());
 
     mockWebServer.takeRequest();
     RecordedRequest second = mockWebServer.takeRequest();
@@ -107,8 +120,9 @@ public class HttpUrlFetcherServerTest {
     }
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
 
-    InputStream is = getFetcher().loadData(Priority.NORMAL);
-    assertEquals(expected, TestUtil.isToString(is));
+    getFetcher().loadData(Priority.NORMAL, callback);
+    verify(callback).onDataReady(streamCaptor.capture());
+    TestUtil.assertStreamOf(expected, streamCaptor.getValue());
 
     assertThat(mockWebServer.takeRequest().getPath()).contains(DEFAULT_PATH);
     for (int i = 0; i < numRedirects; i++) {
@@ -124,7 +138,7 @@ public class HttpUrlFetcherServerTest {
         .setHeader("Location", mockWebServer.getUrl("/redirect")));
 
     try {
-      getFetcher().loadData(Priority.IMMEDIATE);
+      getFetcher().loadData(Priority.IMMEDIATE, callback);
       fail("Didn't get expected IOException");
     } catch (SocketTimeoutException e) {
       fail("Didn't expect SocketTimeoutException");
@@ -138,7 +152,7 @@ public class HttpUrlFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301));
 
     try {
-      getFetcher().loadData(Priority.NORMAL);
+      getFetcher().loadData(Priority.NORMAL, callback);
       fail("Didn't get expected IOException");
     } catch (IOException e) {
       // Expected.
@@ -150,7 +164,7 @@ public class HttpUrlFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301).setHeader("Location", ""));
 
     try {
-      getFetcher().loadData(Priority.NORMAL);
+      getFetcher().loadData(Priority.NORMAL, callback);
       fail("Didn't get expected IOException");
     } catch (IOException e) {
       // Expected.
@@ -160,7 +174,7 @@ public class HttpUrlFetcherServerTest {
   @Test(expected = IOException.class)
   public void testThrowsIfStatusCodeIsNegativeOne() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
-    getFetcher().loadData(Priority.LOW);
+    getFetcher().loadData(Priority.LOW, callback);
   }
 
   @Test(expected = IOException.class)
@@ -169,19 +183,19 @@ public class HttpUrlFetcherServerTest {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301)
           .setHeader("Location", mockWebServer.getUrl("/redirect" + i)));
     }
-    getFetcher().loadData(Priority.NORMAL);
+    getFetcher().loadData(Priority.NORMAL, callback);
   }
 
   @Test(expected = IOException.class)
   public void testThrowsIfStatusCodeIs500() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500));
-    getFetcher().loadData(Priority.NORMAL);
+    getFetcher().loadData(Priority.NORMAL, callback);
   }
 
   @Test(expected = IOException.class)
   public void testThrowsIfStatusCodeIs400() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400));
-    getFetcher().loadData(Priority.LOW);
+    getFetcher().loadData(Priority.LOW, callback);
   }
 
   @Test(expected = SocketTimeoutException.class)
@@ -192,7 +206,7 @@ public class HttpUrlFetcherServerTest {
     tempWebServer.play();
 
     try {
-      getFetcher().loadData(Priority.HIGH);
+      getFetcher().loadData(Priority.HIGH, callback);
     } finally {
       tempWebServer.shutdown();
       // shutdown() called before any enqueue() blocks until it times out.

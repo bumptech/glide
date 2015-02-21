@@ -54,8 +54,10 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
     }
 
     @Override
-    public Data loadData(Priority priority) throws IOException {
-      return converter.convert(model);
+    public void loadData(Priority priority, DataCallback<? super Data> callback)
+        throws IOException {
+      Data result = converter.convert(model);
+      callback.onDataReady(result);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.Priority;
@@ -21,6 +22,7 @@ import java.io.IOException;
 public class ByteArrayLoaderTest {
 
   @Mock ByteArrayLoader.Converter<Object> converter;
+  @Mock DataFetcher.DataCallback<Object> callback;
   private ByteArrayLoader<Object> loader;
 
   @Before
@@ -42,7 +44,8 @@ public class ByteArrayLoaderTest {
     Object expected = new Object();
     when(converter.convert(eq(data))).thenReturn(expected);
 
-    assertEquals(expected, loader.getDataFetcher(data, 10, 10).loadData(Priority.HIGH));
+    loader.getDataFetcher(data, 10, 10).loadData(Priority.HIGH, callback);
+    verify(callback).onDataReady(eq(expected));
   }
 
   @Test

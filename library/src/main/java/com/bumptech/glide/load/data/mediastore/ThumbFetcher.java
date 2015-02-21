@@ -42,9 +42,10 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public InputStream loadData(Priority priority) throws IOException {
+  public void loadData(Priority priority, DataCallback<? super InputStream> callback)
+      throws IOException {
     inputStream = opener.open(context, mediaStoreImageUri);
-    return inputStream;
+    callback.onDataReady(inputStream);
   }
 
   @Override

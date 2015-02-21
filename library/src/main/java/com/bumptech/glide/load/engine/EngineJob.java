@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
  * A class that manages a load by adding and removing callbacks for for the load and notifying
  * callbacks when the load completes.
  */
-class EngineJob implements EngineRunnable.EngineRunnableManager {
+class EngineJob<R> implements DecodeJob.Callback<R> {
   private static final EngineResourceFactory DEFAULT_FACTORY = new EngineResourceFactory();
   private static final Handler MAIN_THREAD_HANDLER =
       new Handler(Looper.getMainLooper(), new MainThreadCallback());
@@ -43,10 +43,10 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   // A put of callbacks that are removed while we're notifying other callbacks of a change in
   // status.
   private List<ResourceCallback> ignoredCallbacks;
-  private EngineRunnable engineRunnable;
   private EngineResource<?> engineResource;
 
   private volatile Future<?> future;
+  private DecodeJob<R> decodeJob;
 
   public EngineJob(Key key, ExecutorService diskCacheService, ExecutorService sourceService,
       boolean isCacheable, EngineJobListener listener) {
@@ -64,14 +64,9 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     this.engineResourceFactory = engineResourceFactory;
   }
 
-  public void start(EngineRunnable engineRunnable) {
-    this.engineRunnable = engineRunnable;
-    future = diskCacheService.submit(engineRunnable);
-  }
-
-  @Override
-  public void submitForSource(EngineRunnable runnable) {
-    future = sourceService.submit(runnable);
+  public void start(DecodeJob<R> decodeJob) {
+    this.decodeJob = decodeJob;
+    future = diskCacheService.submit(decodeJob);
   }
 
   public void addCallback(ResourceCallback cb) {
@@ -120,7 +115,8 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     if (hasLoadFailed || hasResource || isCancelled) {
       return;
     }
-    engineRunnable.cancel();
+
+    decodeJob.cancel();
     Future currentFuture = future;
     if (currentFuture != null) {
       currentFuture.cancel(true);
@@ -132,12 +128,6 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   // Exposed for testing.
   boolean isCancelled() {
     return isCancelled;
-  }
-
-  @Override
-  public void onResourceReady(final Resource<?> resource) {
-    this.resource = resource;
-    MAIN_THREAD_HANDLER.obtainMessage(MSG_COMPLETE, this).sendToTarget();
   }
 
   private void handleResultOnMainThread() {
@@ -166,8 +156,20 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
   }
 
   @Override
+  public void onResourceReady(Resource<R> resource) {
+    this.resource = resource;
+    MAIN_THREAD_HANDLER.obtainMessage(MSG_COMPLETE, this).sendToTarget();
+  }
+
+  @Override
   public void onLoadFailed() {
     MAIN_THREAD_HANDLER.obtainMessage(MSG_EXCEPTION, this).sendToTarget();
+  }
+
+  @Override
+  public void reschedule(DecodeJob<?> job) {
+    // TODO: what if this is fetched from cache?
+    future = sourceService.submit(job);
   }
 
   private void handleExceptionOnMainThread() {

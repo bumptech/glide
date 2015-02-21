@@ -150,13 +150,12 @@ public class Engine implements EngineJobListener,
       return new LoadStatus(cb, current);
     }
 
-    EngineJob engineJob = engineJobFactory.build(key, requestContext.isMemoryCacheable());
-    DecodeJob<R> decodeJob = new DecodeJob<>(requestContext, key, width, height, diskCacheProvider);
-    EngineRunnable runnable =
-        new EngineRunnable(engineJob, decodeJob, requestContext.getPriority());
+    EngineJob<R> engineJob = engineJobFactory.build(key, requestContext.isMemoryCacheable());
+    DecodeJob<R> decodeJob = new DecodeJob<>(requestContext, key, width, height, diskCacheProvider,
+        engineJob);
     jobs.put(key, engineJob);
     engineJob.addCallback(cb);
-    engineJob.start(runnable);
+    engineJob.start(decodeJob);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logWithTimeAndKey("Started new load", startTime, key);

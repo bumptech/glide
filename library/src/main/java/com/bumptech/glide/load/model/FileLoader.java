@@ -58,9 +58,10 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     }
 
     @Override
-    public Data loadData(Priority priority) throws IOException {
+    public void loadData(Priority priority, DataCallback<? super Data> callback)
+        throws IOException {
       data = opener.open(file);
-      return data;
+      callback.onDataReady(data);
     }
 
     @Override

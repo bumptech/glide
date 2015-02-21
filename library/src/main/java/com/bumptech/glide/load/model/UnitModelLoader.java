@@ -35,8 +35,9 @@ public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelT
     }
 
     @Override
-    public ModelType loadData(Priority priority) throws IOException {
-      return resource;
+    public void loadData(Priority priority, DataCallback<? super ModelType> callback)
+        throws IOException {
+      callback.onDataReady(resource);
     }
 
     @Override

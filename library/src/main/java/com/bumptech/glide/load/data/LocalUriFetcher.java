@@ -25,8 +25,7 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   /**
    * Opens an input stream for a uri pointing to a local asset. Only certain uris are supported
    *
-   * @param context A context (this will be weakly referenced and the load will fail if the weak
-   *                reference is cleared before {@link #loadData(Priority)}} is called.
+   * @param context Any {@link android.content.Context}.
    * @param uri     A Uri pointing to a local asset. This load will fail if the uri isn't openable
    *                by {@link ContentResolver#openInputStream(android.net.Uri)}
    * @see ContentResolver#openInputStream(android.net.Uri)
@@ -37,10 +36,11 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public final T loadData(Priority priority) throws IOException {
+  public final void loadData(Priority priority, DataCallback<? super T> callback)
+      throws IOException {
     ContentResolver contentResolver = context.getContentResolver();
     data = loadResource(uri, contentResolver);
-    return data;
+    callback.onDataReady(data);
   }
 
   @Override

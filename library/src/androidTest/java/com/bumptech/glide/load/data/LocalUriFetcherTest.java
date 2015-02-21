@@ -14,6 +14,8 @@ import com.bumptech.glide.Priority;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -26,18 +28,20 @@ import java.io.IOException;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class LocalUriFetcherTest {
   private TestLocalUriFetcher fetcher;
+  @Mock DataFetcher.DataCallback<Closeable> callback;
 
   @Before
   public void setUp() {
+    MockitoAnnotations.initMocks(this);
     fetcher = new TestLocalUriFetcher(RuntimeEnvironment.application, Uri.parse("content://empty"));
   }
 
   @Test
   public void testClosesDataOnCleanup() throws Exception {
-    Closeable closeable = fetcher.loadData(Priority.NORMAL);
+    fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cleanup();
 
-    verify(closeable).close();
+    verify(fetcher.closeable).close();
   }
 
   @Test
@@ -49,11 +53,11 @@ public class LocalUriFetcherTest {
 
   @Test
   public void testHandlesExceptionOnClose() throws Exception {
-    Closeable closeable = fetcher.loadData(Priority.NORMAL);
+    fetcher.loadData(Priority.NORMAL, callback);
 
-    doThrow(new IOException("Test")).when(closeable).close();
+    doThrow(new IOException("Test")).when(fetcher.closeable).close();
     fetcher.cleanup();
-    verify(closeable).close();
+    verify(fetcher.closeable).close();
   }
 
   private static class TestLocalUriFetcher extends LocalUriFetcher<Closeable> {

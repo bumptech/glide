@@ -167,10 +167,10 @@ public class GlideBuilder {
   Glide createGlide() {
     if (sourceService == null) {
       final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
-      sourceService = new FifoPriorityThreadPoolExecutor(cores);
+      sourceService = new FifoPriorityThreadPoolExecutor("source", cores);
     }
     if (diskCacheService == null) {
-      diskCacheService = new FifoPriorityThreadPoolExecutor(1);
+      diskCacheService = new FifoPriorityThreadPoolExecutor("disk-cache", 1);
     }
 
     MemorySizeCalculator calculator = new MemorySizeCalculator(context);

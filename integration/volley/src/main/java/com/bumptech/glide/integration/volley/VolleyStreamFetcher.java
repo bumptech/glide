@@ -6,6 +6,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
@@ -16,7 +17,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ExecutionException;
 
 /**
  * A DataFetcher backed by volley for fetching images via http.
@@ -24,59 +24,36 @@ import java.util.concurrent.ExecutionException;
 public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY = new VolleyRequestFactory() {
     @Override
-    public Request<byte[]> create(String url, VolleyRequestFuture<InputStream> future,
+    public Request<byte[]> create(String url, DataCallback<? super InputStream> callback,
         Request.Priority priority) {
-      return new GlideRequest(url, future, priority);
+      return new GlideRequest(url, callback, priority);
     }
   };
 
   private final RequestQueue requestQueue;
   private final VolleyRequestFactory requestFactory;
   private final GlideUrl url;
-  private VolleyRequestFuture<InputStream> requestFuture;
+  private Request<byte[]> request;
 
   @SuppressWarnings("unused")
   public VolleyStreamFetcher(RequestQueue requestQueue, GlideUrl url) {
-    this(requestQueue, url, null);
+    this(requestQueue, url, DEFAULT_REQUEST_FACTORY);
   }
 
   public VolleyStreamFetcher(RequestQueue requestQueue, GlideUrl url,
-      VolleyRequestFuture<InputStream> requestFuture) {
-    this(requestQueue, url, requestFuture, DEFAULT_REQUEST_FACTORY);
-  }
-
-  public VolleyStreamFetcher(RequestQueue requestQueue, GlideUrl url,
-      VolleyRequestFuture<InputStream> requestFuture, VolleyRequestFactory requestFactory) {
+      VolleyRequestFactory requestFactory) {
     this.requestQueue = requestQueue;
     this.url = url;
     this.requestFactory = requestFactory;
-    this.requestFuture = requestFuture;
-    if (requestFuture == null) {
-      this.requestFuture = VolleyRequestFuture.newFuture();
-    }
   }
 
   @Override
-  public InputStream loadData(Priority priority) throws IOException {
+  public void loadData(Priority priority, DataCallback<? super InputStream> callback)
+      throws IOException {
     // Make sure the string url safely encodes non ascii characters.
     String stringUrl = url.toURL().toString();
-    Request<byte[]> request =
-        requestFactory.create(stringUrl, requestFuture, glideToVolleyPriority(priority));
-
-    requestFuture.setRequest(requestQueue.add(request));
-
-    try {
-      return requestFuture.get();
-    } catch (InterruptedException e) {
-      if (Logs.isEnabled(Log.VERBOSE)) {
-        Logs.log(Log.VERBOSE, "Interrupted waiting for Volley response", e);
-      }
-    } catch (ExecutionException e) {
-      if (Logs.isEnabled(Log.VERBOSE)) {
-        Logs.log(Log.VERBOSE, "ExecutionException waiting for Volley response", e);
-      }
-    }
-    return null;
+    request = requestFactory.create(stringUrl, callback, glideToVolleyPriority(priority));
+    requestQueue.add(request);
   }
 
   @Override
@@ -91,10 +68,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
   @Override
   public void cancel() {
-    VolleyRequestFuture<InputStream> localFuture = requestFuture;
-    if (localFuture != null) {
-      localFuture.cancel(true);
-    }
+    request.cancel();
   }
 
   @Override
@@ -120,13 +94,18 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     }
   }
 
-  private static class GlideRequest extends Request<byte[]> {
-    private final VolleyRequestFuture<InputStream> future;
+  /**
+   * Default {@link com.android.volley.Request} implementation for Glide that recives errors and
+   * results on volley's background thread.
+   */
+  public static class GlideRequest extends Request<byte[]> {
+    private DataCallback<? super InputStream> callback;
     private final Priority priority;
 
-    public GlideRequest(String url, VolleyRequestFuture<InputStream> future, Priority priority) {
-      super(Method.GET, url, future);
-      this.future = future;
+    public GlideRequest(String url, final DataCallback<? super  InputStream> callback,
+        Priority priority) {
+      super(Method.GET, url, null);
+      this.callback = callback;
       this.priority = priority;
     }
 
@@ -136,13 +115,23 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     }
 
     @Override
+    protected VolleyError parseNetworkError(VolleyError volleyError) {
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Volley failed to retrieve response", volleyError);
+      }
+      callback.onDataReady(null);
+      return super.parseNetworkError(volleyError);
+    }
+
+    @Override
     protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
+      callback.onDataReady(new ByteArrayInputStream(response.data));
       return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
     }
 
     @Override
     protected void deliverResponse(byte[] response) {
-      future.onResponse(new ByteArrayInputStream(response));
+      // Do nothing.
     }
   }
 }
