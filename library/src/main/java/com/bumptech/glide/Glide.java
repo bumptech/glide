@@ -383,6 +383,18 @@ public class Glide {
     }
 
     /**
+     * Clears disk cache.
+     *
+     * <p>
+     *     This method should always be called on a background thread, since it is a blocking call.
+     * </p>
+     */
+    public void clearDiskCache() {
+        Util.assertBackgroundThread();
+        getEngine().clearDiskCache();
+    }
+
+    /**
      * Adjusts Glide's current and maximum memory usage based on the given {@link MemoryCategory}.
      *
      * <p>

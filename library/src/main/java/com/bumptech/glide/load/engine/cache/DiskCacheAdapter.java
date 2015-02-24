@@ -23,4 +23,9 @@ public class DiskCacheAdapter implements DiskCache {
     public void delete(Key key) {
         // no op, default for overriders
     }
+
+    @Override
+    public void clear() {
+        // no op, default for overriders
+    }
 }
