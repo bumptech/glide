@@ -183,7 +183,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
             if (isSizeValid(view.getHeight())) {
                 return view.getHeight();
             } else if (layoutParams != null) {
-                return getSizeForParam(layoutParams.height, true /*isHeight*/);
+                return getSizeForParam(view, layoutParams.height, true /*isHeight*/);
             } else {
                 return PENDING_SIZE;
             }
@@ -194,18 +194,36 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
             if (isSizeValid(view.getWidth())) {
                 return view.getWidth();
             } else if (layoutParams != null) {
-                return getSizeForParam(layoutParams.width, false /*isHeight*/);
+                return getSizeForParam(view, layoutParams.width, false /*isHeight*/);
             } else {
                 return PENDING_SIZE;
             }
         }
 
-        private int getSizeForParam(int param, boolean isHeight) {
+        private static int getDimensionByParent(View v, boolean isHeight) {
+            if (v.getParent() instanceof View) {
+                View parent = (View)v.getParent();
+                LayoutParams pParams = parent.getLayoutParams();
+                if (pParams != null) {
+                    int pDimen = isHeight ? parent.getHeight() : parent.getWidth();
+                    int ppDimen = isHeight ? pParams.height : pParams.width;
+                    if (pDimen > 0 || ppDimen > 0) {
+                        return pDimen > 0 ? pDimen : ppDimen;
+                    }
+                    if (pParams.width == LayoutParams.MATCH_PARENT) {
+                        return getDimensionByParent(parent, isHeight);
+                    }
+                }
+            }
+            return PENDING_SIZE;
+        }
+
+        private int getSizeForParam(View v, int param, boolean isHeight) {
             if (param == LayoutParams.WRAP_CONTENT) {
                 Point displayDimens = getDisplayDimens();
                 return isHeight ? displayDimens.y : displayDimens.x;
             } else {
-                return param;
+                return getDimensionByParent(v, isHeight);
             }
         }
 
@@ -227,7 +245,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
         }
 
         private boolean isSizeValid(int size) {
-            return size > 0 || size == LayoutParams.WRAP_CONTENT;
+            return size > 0 || size == LayoutParams.WRAP_CONTENT || size == LayoutParams.MATCH_PARENT;
         }
 
         private static class SizeDeterminerLayoutListener implements ViewTreeObserver.OnPreDrawListener {
