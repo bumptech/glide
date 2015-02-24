@@ -42,10 +42,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private static final BaseRequestOptions DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
-  protected final GlideContext context;
-  protected final Class<TranscodeType> transcodeClass;
-  protected final RequestTracker requestTracker;
-  protected final Lifecycle lifecycle;
+  private final GlideContext context;
+  private final Class<TranscodeType> transcodeClass;
+  private final RequestTracker requestTracker;
+  private final Lifecycle lifecycle;
 
   private BaseRequestOptions<?> requestOptions = DEFAULT_REQUEST_OPTIONS;
   @SuppressWarnings("unchecked")
@@ -62,9 +62,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
 
   RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
     this(other.context, transcodeClass, other.requestTracker, other.lifecycle);
-    this.model = other.model;
-    this.isModelSet = other.isModelSet;
-    this.requestOptions = other.requestOptions;
+    model = other.model;
+    isModelSet = other.isModelSet;
+    requestOptions = other.requestOptions;
   }
 
   RequestBuilder(GlideContext context, Class<TranscodeType> transcodeClass,
@@ -342,6 +342,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       previous.recycle();
     }
 
+    requestOptions.lock();
     Request request = buildRequest(target);
     target.setRequest(request);
     lifecycle.addListener(target);
@@ -484,8 +485,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     return new RequestBuilder<>(File.class, this).apply(DOWNLOAD_ONLY_OPTIONS);
   }
 
-  private Priority getThumbnailPriority() {
-    switch (requestOptions.getPriority()) {
+  private Priority getThumbnailPriority(Priority current) {
+    switch (current) {
       case LOW:
         return Priority.NORMAL;
       case NORMAL:
@@ -499,57 +500,73 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   private Request buildRequest(Target<TranscodeType> target) {
-    return buildRequestRecursive(target, null);
+    return buildRequestRecursive(target, null, transitionOptions, requestOptions.getPriority(),
+        requestOptions.getOverrideWidth(), requestOptions.getOverrideHeight());
   }
 
   private Request buildRequestRecursive(Target<TranscodeType> target,
-      ThumbnailRequestCoordinator parentCoordinator) {
+      ThumbnailRequestCoordinator parentCoordinator,
+      TransitionOptions<?, ? super TranscodeType> transitionOptions,
+      Priority priority, int overrideWidth, int overrideHeight) {
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
-      if (DEFAULT_ANIMATION_OPTIONS.equals(thumbnailBuilder.transitionOptions)) {
-        thumbnailBuilder.transitionOptions = transitionOptions;
+
+      TransitionOptions<?, ? super TranscodeType> thumbTransitionOptions =
+          thumbnailBuilder.transitionOptions;
+      if (DEFAULT_ANIMATION_OPTIONS.equals(thumbTransitionOptions)) {
+        thumbTransitionOptions = transitionOptions;
       }
 
-      if (!thumbnailBuilder.requestOptions.isPrioritySet()) {
-        thumbnailBuilder.requestOptions.priority(getThumbnailPriority());
-      }
+      Priority thumbPriority = thumbnailBuilder.requestOptions.isPrioritySet()
+          ? thumbnailBuilder.requestOptions.getPriority() : getThumbnailPriority(priority);
 
-      if (requestOptions.getOverrideWidth() > 0 && requestOptions.getOverrideHeight() > 0
-          && thumbnailBuilder.requestOptions.getOverrideWidth() < 0
-          && thumbnailBuilder.requestOptions.getOverrideHeight() < 0) {
-        thumbnailBuilder.requestOptions
-            .override(requestOptions.getOverrideWidth(), requestOptions.getOverrideHeight());
+      int thumbOverrideWidth = thumbnailBuilder.requestOptions.getOverrideWidth();
+      int thumbOverrideHeight = thumbnailBuilder.requestOptions.getOverrideHeight();
+      if (Util.isValidDimensions(overrideWidth, overrideHeight)
+          && !thumbnailBuilder.requestOptions.isValidOverride()) {
+        thumbOverrideWidth = requestOptions.getOverrideWidth();
+        thumbOverrideHeight = requestOptions.getOverrideHeight();
       }
 
       ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
-      Request fullRequest = obtainRequest(target, requestOptions, coordinator);
+      Request fullRequest = obtainRequest(target, requestOptions, coordinator,
+          transitionOptions, priority, overrideWidth, overrideHeight);
       // Recursively generate thumbnail requests.
-      Request thumbRequest = thumbnailBuilder.buildRequestRecursive(target, coordinator);
+      Request thumbRequest = thumbnailBuilder.buildRequestRecursive(target, coordinator,
+          thumbTransitionOptions, thumbPriority, thumbOverrideWidth, thumbOverrideHeight);
       coordinator.setRequests(fullRequest, thumbRequest);
       return coordinator;
     } else if (thumbSizeMultiplier != null) {
       // Base case: thumbnail multiplier generates a thumbnail request, but cannot recurse.
       ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
-      Request fullRequest = obtainRequest(target, requestOptions, coordinator);
-      RequestOptions thumbnailOptions =
-          new RequestOptions().apply(requestOptions).sizeMultiplier(thumbSizeMultiplier)
-              .priority(getThumbnailPriority());
-      Request thumbnailRequest = obtainRequest(target, thumbnailOptions, coordinator);
+      Request fullRequest = obtainRequest(target, requestOptions, coordinator, transitionOptions,
+          priority, overrideWidth, overrideHeight);
+      BaseRequestOptions<?> thumbnailOptions = requestOptions.clone()
+          .sizeMultiplier(thumbSizeMultiplier);
+
+      Request thumbnailRequest = obtainRequest(target, thumbnailOptions, coordinator,
+          transitionOptions, getThumbnailPriority(priority), overrideWidth, overrideHeight);
+
       coordinator.setRequests(fullRequest, thumbnailRequest);
       return coordinator;
     } else {
       // Base case: no thumbnail.
-      return obtainRequest(target, requestOptions, parentCoordinator);
+      return obtainRequest(target, requestOptions, parentCoordinator, transitionOptions, priority,
+          overrideWidth, overrideHeight);
     }
   }
 
-  private Request obtainRequest(Target<TranscodeType> target, BaseRequestOptions requestOptions,
-      RequestCoordinator requestCoordinator) {
-    RequestContext<TranscodeType> requestContext =
-        new RequestContext<>(context, model, transcodeClass, requestOptions);
+  private Request obtainRequest(Target<TranscodeType> target,
+      BaseRequestOptions<?> requestOptions, RequestCoordinator requestCoordinator,
+      TransitionOptions<?, ? super TranscodeType> transitionOptions, Priority priority,
+      int overrideWidth, int overrideHeight) {
+    requestOptions.lock();
 
-    return SingleRequest
-        .obtain(requestContext, model, transcodeClass, requestOptions, target, requestListener,
-            requestCoordinator, context.getEngine(), transitionOptions.getTransitionFactory());
+    RequestContext<TranscodeType> requestContext =
+        new RequestContext<>(context, model, transcodeClass, requestOptions, priority,
+            overrideWidth, overrideHeight);
+
+    return SingleRequest.obtain(requestContext, target, requestListener, requestCoordinator,
+        context.getEngine(), transitionOptions.getTransitionFactory());
   }
 }

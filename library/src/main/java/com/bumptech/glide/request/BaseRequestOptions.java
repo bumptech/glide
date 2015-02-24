@@ -22,6 +22,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,10 +31,13 @@ import java.util.Map;
  * Contains and exposes a variety of non type specific options that can be applied to a load in
  * Glide.
  *
- * @param <CHILD> The concrete <em>final</em> subclass.
+ * <p> If {@link #lock()} has been called, this class will throw if any further mutations are
+ * attempted. To unlock, use {@link #clone()}. </p>
+ *
+ * @param <CHILD> The concrete and <em>final</em> subclass.
  */
-public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>> implements
-    Cloneable {
+public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>>
+    implements Cloneable {
   private static final int UNSET = -1;
   private static final int SIZE_MULTIPLIER = 1 << 1;
   private static final int DISK_CACHE_STRATEGY = 1 << 2;
@@ -68,11 +72,12 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private Map<String, Object> options = new HashMap<>();
   private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
   private Class<?> resourceClass = Object.class;
+  private boolean isLocked;
 
   public final CHILD tag(String tag) {
     this.tag = tag;
     fields |= TAG;
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -92,7 +97,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.sizeMultiplier = sizeMultiplier;
     fields |= SIZE_MULTIPLIER;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -113,7 +118,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.diskCacheStrategy = Preconditions.checkNotNull(strategy);
     fields |= DISK_CACHE_STRATEGY;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -126,7 +131,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.priority = Preconditions.checkNotNull(priority);
     fields |= PRIORITY;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -139,7 +144,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.placeholderDrawable = drawable;
     fields |= PLACEHOLDER;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -153,7 +158,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.placeholderId = resourceId;
     fields |= PLACEHOLDER_ID;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -166,7 +171,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.errorPlaceholder = drawable;
     fields |= ERROR_PLACEHOLDER;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -179,7 +184,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.errorId = resourceId;
     fields |= ERROR_ID;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -195,7 +200,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.isCacheable = !skip;
     fields |= IS_CACHEABLE;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -212,7 +217,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     this.overrideHeight = height;
     fields |= OVERRIDE;
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -229,7 +234,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   public final CHILD signature(Key signature) {
     this.signature = Preconditions.checkNotNull(signature);
     fields |= SIGNATURE;
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -239,6 +244,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * changes to one builder will not affect the other builder. However, in addition to immutable
    * arguments, the current model is not copied copied so changes to the model will affect both
    * builders. </p>
+   *
+   * <p> Even if this object was locked, the cloned object returned from this method will not be
+   * locked. </p>
    */
   @SuppressWarnings("unchecked")
   @Override
@@ -249,6 +257,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
       result.options.putAll(options);
       result.transformations = new HashMap<>();
       result.transformations.putAll(transformations);
+      result.isLocked = false;
       return (CHILD) result;
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException(e);
@@ -257,13 +266,13 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   public final CHILD set(String key, Object option) {
     options.put(key, option);
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   public final CHILD decode(Class<?> resourceClass) {
     this.resourceClass = Preconditions.checkNotNull(resourceClass);
     fields |= RESOURCE_CLASS;
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   public final boolean isTransformationSet() {
@@ -362,7 +371,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   public CHILD transform(Context context, Transformation<Bitmap> transformation) {
     optionalTransform(context, transformation);
     isTransformationRequired = true;
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -383,7 +392,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     optionalTransform(BitmapDrawable.class,
         new BitmapDrawableTransformation(context, transformation));
     optionalTransform(GifDrawable.class, new GifDrawableTransformation(context, transformation));
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -407,7 +416,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     Preconditions.checkNotNull(transformation);
     fields |= TRANSFORMATION;
     transformations.put(resourceClass, transformation);
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -421,7 +430,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   public final <T> CHILD transform(Class<T> resourceClass, Transformation<T> transformation) {
     optionalTransform(resourceClass, transformation);
     isTransformationRequired = true;
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -433,7 +442,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     fields &= ~TRANSFORMATION;
     transformations.clear();
     isTransformationRequired = false;
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   @SuppressWarnings("unchecked")
@@ -449,6 +458,18 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
       }
     }
     return result;
+  }
+
+  /**
+   * Throws if any further mutations are attempted.
+   *
+   * <p> Once locked, the only way to unlock is to use {@link #clone()} </p>
+   */
+  @SuppressWarnings("unchecked")
+  public final CHILD lock() {
+    isLocked = true;
+    // This is the only place we should not check locked.
+    return (CHILD) this;
   }
 
   public final Map<String, Object> getOptions() {
@@ -502,7 +523,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     transformations.putAll(other.transformations);
     options.putAll(other.options);
 
-    return self();
+    return selfOrThrowIfLocked();
   }
 
   public final DiskCacheStrategy getDiskCacheStrategy() {
@@ -545,6 +566,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return overrideWidth;
   }
 
+  public final boolean isValidOverride() {
+    return Util.isValidDimensions(overrideWidth, overrideHeight);
+  }
+
   public final int getOverrideHeight() {
     return overrideHeight;
   }
@@ -558,7 +583,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   }
 
   @SuppressWarnings("unchecked")
-  private CHILD self() {
+  private CHILD selfOrThrowIfLocked() {
+    if (isLocked) {
+      throw new IllegalStateException("You cannot modify locked RequestOptions, consider clone()");
+    }
     return (CHILD) this;
   }
 

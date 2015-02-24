@@ -67,24 +67,18 @@ public final class SingleRequest<R> implements Request,
   private final String tag = String.valueOf(hashCode());
 
   private RequestContext<R> requestContext;
-  private Object model;
-  private BaseRequestOptions requestOptions;
   private RequestCoordinator requestCoordinator;
-  private Class<R> transcodeClass;
   private Target<R> target;
   private RequestListener<R> requestListener;
   private Engine engine;
   private TransitionFactory<? super R> animationFactory;
-  private Drawable placeholderDrawable;
-  private Drawable errorDrawable;
   private boolean loadedFromMemoryCache;
   private Resource<R> resource;
   private Engine.LoadStatus loadStatus;
   private long startTime;
   private Status status;
 
-  public static <R> SingleRequest<R> obtain(RequestContext<R> requestContext, Object model,
-      Class<R> transcodeClass, BaseRequestOptions requestOptions, Target<R> target,
+  public static <R> SingleRequest<R> obtain(RequestContext<R> requestContext, Target<R> target,
       RequestListener<R> requestListener, RequestCoordinator requestCoordinator, Engine engine,
       TransitionFactory<? super R> animationFactory) {
     @SuppressWarnings("unchecked") SingleRequest<R> request =
@@ -92,8 +86,8 @@ public final class SingleRequest<R> implements Request,
     if (request == null) {
       request = new SingleRequest<>();
     }
-    request.init(requestContext, model, transcodeClass, requestOptions, target, requestListener,
-        requestCoordinator, engine, animationFactory);
+    request.init(requestContext, target, requestListener, requestCoordinator, engine,
+        animationFactory);
     return request;
   }
 
@@ -101,18 +95,15 @@ public final class SingleRequest<R> implements Request,
     // just create, instances are reused with recycle/init
   }
 
-  private void init(RequestContext<R> requestContext, Object model, Class<R> transcodeClass,
-      BaseRequestOptions requestOptions, Target<R> target, RequestListener<R> requestListener,
+  private void init(RequestContext<R> requestContext,
+      Target<R> target, RequestListener<R> requestListener,
       RequestCoordinator requestCoordinator, Engine engine,
       TransitionFactory<? super R> animationFactory) {
     this.requestContext = requestContext;
-    this.model = model;
-    this.requestOptions = requestOptions;
     this.target = target;
     this.requestListener = requestListener;
     this.requestCoordinator = requestCoordinator;
     this.engine = engine;
-    this.transcodeClass = transcodeClass;
     this.animationFactory = animationFactory;
     status = Status.PENDING;
   }
@@ -120,10 +111,7 @@ public final class SingleRequest<R> implements Request,
   @Override
   public void recycle() {
     requestContext = null;
-    requestOptions = null;
     target = null;
-    placeholderDrawable = null;
-    errorDrawable = null;
     requestListener = null;
     requestCoordinator = null;
     animationFactory = null;
@@ -135,22 +123,22 @@ public final class SingleRequest<R> implements Request,
   @Override
   public void begin() {
     startTime = LogTime.getLogTime();
-    if (model == null) {
+    if (requestContext.getModel() == null) {
       onLoadFailed();
       return;
     }
 
     status = Status.WAITING_FOR_SIZE;
-    int overrideWidth = requestOptions.getOverrideWidth();
-    int overrideHeight = requestOptions.getOverrideHeight();
-    if (overrideWidth > 0 && overrideHeight > 0) {
+    int overrideWidth = requestContext.getOverrideWidth();
+    int overrideHeight = requestContext.getOverrideHeight();
+    if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
       onSizeReady(overrideWidth, overrideHeight);
     } else {
       target.getSize(this);
     }
 
     if (!isComplete() && !isFailed() && canNotifyStatusChanged()) {
-      target.onLoadStarted(getPlaceholderDrawable());
+      target.onLoadStarted(requestContext.getPlaceholderDrawable());
     }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished run method in " + LogTime.getElapsedMillis(startTime));
@@ -193,7 +181,7 @@ public final class SingleRequest<R> implements Request,
       releaseResource(resource);
     }
     if (canNotifyStatusChanged()) {
-      target.onLoadCleared(getPlaceholderDrawable());
+      target.onLoadCleared(requestContext.getPlaceholderDrawable());
     }
     // Must be after cancel().
     status = Status.CLEARED;
@@ -245,32 +233,11 @@ public final class SingleRequest<R> implements Request,
       return;
     }
 
-    Drawable error = getErrorDrawable();
+    Drawable error = requestContext.getErrorDrawable();
     if (error == null) {
-      error = getPlaceholderDrawable();
+      error = requestContext.getPlaceholderDrawable();
     }
     target.onLoadFailed(error);
-  }
-
-  private Drawable getErrorDrawable() {
-    if (errorDrawable == null) {
-      errorDrawable = requestOptions.getErrorPlaceholder();
-      if (errorDrawable == null && requestOptions.getErrorId() > 0) {
-        errorDrawable = requestContext.getResources().getDrawable(requestOptions.getErrorId());
-      }
-    }
-    return errorDrawable;
-  }
-
-  private Drawable getPlaceholderDrawable() {
-    if (placeholderDrawable == null) {
-      placeholderDrawable = requestOptions.getPlaceholderDrawable();
-      if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
-        placeholderDrawable =
-            requestContext.getResources().getDrawable(requestOptions.getPlaceholderId());
-      }
-    }
-    return placeholderDrawable;
   }
 
   /**
@@ -286,7 +253,7 @@ public final class SingleRequest<R> implements Request,
     }
     status = Status.RUNNING;
 
-    float sizeMultiplier = requestOptions.getSizeMultiplier();
+    float sizeMultiplier = requestContext.getSizeMultiplier();
     width = Math.round(sizeMultiplier * width);
     height = Math.round(sizeMultiplier * height);
 
@@ -325,6 +292,7 @@ public final class SingleRequest<R> implements Request,
   @SuppressWarnings("unchecked")
   @Override
   public void onResourceReady(Resource<?> resource) {
+    Class<R> transcodeClass = requestContext.getTranscodeClass();
     if (resource == null) {
       if (Logs.isEnabled(Log.ERROR)) {
         Logs.log(Log.ERROR, "Expected to receive a Resource<R> with an object of " + transcodeClass
@@ -367,8 +335,9 @@ public final class SingleRequest<R> implements Request,
    *                 <code>null</code>
    */
   private void onResourceReady(Resource<R> resource, R result) {
-    if (requestListener == null || !requestListener
-        .onResourceReady(result, model, target, loadedFromMemoryCache, isFirstReadyResource())) {
+    if (requestListener == null
+        || !requestListener.onResourceReady(result, requestContext.getModel(), target,
+        loadedFromMemoryCache, isFirstReadyResource())) {
       Transition<? super R> animation =
           animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
       target.onResourceReady(result, animation);
@@ -395,8 +364,8 @@ public final class SingleRequest<R> implements Request,
 
     status = Status.FAILED;
     //TODO: what if this is a thumbnail request?
-    if (requestListener == null
-        || !requestListener.onLoadFailed(model, target, isFirstReadyResource())) {
+    if (requestListener == null || !requestListener.onLoadFailed(requestContext.getModel(), target,
+        isFirstReadyResource())) {
       setErrorPlaceholder();
     }
   }

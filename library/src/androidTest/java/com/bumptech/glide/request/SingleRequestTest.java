@@ -19,9 +19,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 
-import com.bumptech.glide.GlideContext;
-import com.bumptech.glide.load.data.DataFetcherSet;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
@@ -57,19 +54,13 @@ public class SingleRequestTest {
     Target<List> target = mock(Target.class);
     Resource<List> resource = mock(Resource.class);
     RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
-    int placeholderResourceId = 0;
     Drawable placeholderDrawable = null;
-    int errorResourceId = 0;
     Drawable errorDrawable = null;
     RequestListener<List> requestListener = mock(RequestListener.class);
-    DataFetcherSet dataFetcherSet = mock(DataFetcherSet.class);
     TransitionFactory<List> factory = mock(TransitionFactory.class);
     int overrideWidth = -1;
     int overrideHeight = -1;
     List result = new ArrayList();
-    DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.RESOURCE;
-    GlideContext glideContext = mock(GlideContext.class);
-    RequestOptions requestOptions = new RequestOptions();
     RequestContext<List> requestContext = mock(RequestContext.class);
 
     public RequestHarness() {
@@ -79,12 +70,16 @@ public class SingleRequestTest {
     }
 
     public SingleRequest<List> getRequest() {
-      requestOptions.override(overrideWidth, overrideHeight).placeholder(placeholderResourceId)
-          .placeholder(placeholderDrawable).error(errorResourceId).error(errorDrawable)
-          .diskCacheStrategy(diskCacheStrategy);
+      when(requestContext.getModel()).thenReturn(model);
+      when(requestContext.getTranscodeClass()).thenReturn(List.class);
+      when(requestContext.getErrorDrawable()).thenReturn(errorDrawable);
+      when(requestContext.getPlaceholderDrawable()).thenReturn(placeholderDrawable);
+      when(requestContext.getOverrideWidth()).thenReturn(overrideWidth);
+      when(requestContext.getOverrideHeight()).thenReturn(overrideHeight);
+      when(requestContext.getSizeMultiplier()).thenReturn(1f);
+
       return SingleRequest
-          .obtain(requestContext, model, List.class, requestOptions, target, requestListener,
-              requestCoordinator, engine, factory);
+          .obtain(requestContext, target, requestListener, requestCoordinator, engine, factory);
     }
   }
 
@@ -301,22 +296,6 @@ public class SingleRequestTest {
   }
 
   @Test
-  public void testPlaceholderResourceIsSet() {
-    final int expectedId = 12345;
-    Drawable expected = new ColorDrawable(Color.RED);
-
-    mockContextToReturn(expectedId, expected);
-    MockTarget target = new MockTarget();
-
-    harness.placeholderResourceId = expectedId;
-    harness.target = target;
-    SingleRequest<List> request = harness.getRequest();
-    request.begin();
-
-    assertEquals(expected, target.currentPlaceholder);
-  }
-
-  @Test
   public void testPlaceholderDrawableIsSet() {
     Drawable expected = new ColorDrawable(Color.RED);
 
@@ -326,23 +305,6 @@ public class SingleRequestTest {
     harness.target = target;
     SingleRequest<List> request = harness.getRequest();
     request.begin();
-
-    assertEquals(expected, target.currentPlaceholder);
-  }
-
-  @Test
-  public void testErrorResourceIsSetOnLoadFailed() {
-    final int expectedId = 12345;
-    Drawable expected = new ColorDrawable(Color.RED);
-
-    mockContextToReturn(expectedId, expected);
-    MockTarget target = new MockTarget();
-
-    harness.errorResourceId = expectedId;
-    harness.target = target;
-    SingleRequest<List> request = harness.getRequest();
-
-    request.onLoadFailed();
 
     assertEquals(expected, target.currentPlaceholder);
   }

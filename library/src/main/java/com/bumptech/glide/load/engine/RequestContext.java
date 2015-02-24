@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.content.ContextWrapper;
+import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
@@ -29,15 +30,24 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
   private final Object model;
   private final Class<TranscodeClass> transcodeClass;
   private final BaseRequestOptions<?> requestOptions;
+  private final Priority priority;
+  private final int overrideWidth;
+  private final int overrideHeight;
   private DataFetcherSet<?> fetchers;
+  private Drawable errorDrawable;
+  private Drawable placeholderDrawable;
 
   public RequestContext(GlideContext glideContext, Object model,
-      Class<TranscodeClass> transcodeClass, BaseRequestOptions<?> requestOptions) {
+      Class<TranscodeClass> transcodeClass, BaseRequestOptions<?> requestOptions, Priority priority,
+      int overrideWidth, int overrideHeight) {
     super(glideContext);
     this.glideContext = glideContext;
     this.model = model;
     this.transcodeClass = transcodeClass;
     this.requestOptions = requestOptions;
+    this.priority = priority;
+    this.overrideWidth = overrideWidth;
+    this.overrideHeight = overrideHeight;
   }
 
   <Data> LoadPath<Data, ?, TranscodeClass> getLoadPath(Class<Data> dataClass) {
@@ -78,10 +88,6 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     return requestOptions.getResourceClass();
   }
 
-  Class<TranscodeClass> getTranscodeClass() {
-    return transcodeClass;
-  }
-
   <DecodedResource> Transformation<DecodedResource> getTransformation(
       Class<DecodedResource> decodedResourceClass) {
     return requestOptions.getTransformation(decodedResourceClass);
@@ -100,7 +106,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
   }
 
   Priority getPriority() {
-    return requestOptions.getPriority();
+    return priority;
   }
 
   <X> DataRewinder<X> getRewinder(X data) {
@@ -125,7 +131,43 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     return glideContext.getRegistry().getDataFetchers(file, width, height);
   }
 
-  String getTag() {
-    return requestOptions.getTag();
+  public int getOverrideWidth() {
+    return overrideWidth;
+  }
+
+  public int getOverrideHeight() {
+    return overrideHeight;
+  }
+
+  public Object getModel() {
+    return model;
+  }
+
+  public Class<TranscodeClass> getTranscodeClass() {
+    return transcodeClass;
+  }
+
+  public float getSizeMultiplier() {
+    return requestOptions.getSizeMultiplier();
+  }
+
+  public Drawable getErrorDrawable() {
+    if (errorDrawable == null) {
+      errorDrawable = requestOptions.getErrorPlaceholder();
+      if (errorDrawable == null && requestOptions.getErrorId() > 0) {
+        errorDrawable = getResources().getDrawable(requestOptions.getErrorId());
+      }
+    }
+    return errorDrawable;
+  }
+
+  public Drawable getPlaceholderDrawable() {
+     if (placeholderDrawable == null) {
+      placeholderDrawable = requestOptions.getPlaceholderDrawable();
+      if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
+        placeholderDrawable = getResources().getDrawable(requestOptions.getPlaceholderId());
+      }
+    }
+    return placeholderDrawable;
   }
 }
