@@ -119,7 +119,7 @@ public class Engine implements EngineJobListener,
     Util.assertMainThread();
     long startTime = LogTime.getLogTime();
 
-    requestContext.buildDataFetchers(width, height);
+    requestContext.setDimens(width, height);
 
     EngineKey key = keyFactory.buildKey(requestContext, width, height);
 
@@ -343,8 +343,8 @@ public class Engine implements EngineJobListener,
       this.listener = listener;
     }
 
-    public EngineJob build(Key key, boolean isMemoryCacheable) {
-      return new EngineJob(key, diskCacheService, sourceService, isMemoryCacheable, listener);
+    public <R> EngineJob<R> build(Key key, boolean isMemoryCacheable) {
+      return new EngineJob<>(key, diskCacheService, sourceService, isMemoryCacheable, listener);
     }
   }
 }

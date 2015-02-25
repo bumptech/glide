@@ -18,14 +18,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @RunWith(JUnit4.class)
-public class OriginalKeyTest {
+public class DataCacheKeyTest {
 
   @Test
   public void testDiffersIfIdDiffers()
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
     Key signature = mock(Key.class);
-    OriginalKey first = new OriginalKey("first", signature);
-    OriginalKey second = new OriginalKey("second", signature);
+    DataCacheKey first = new DataCacheKey("first", signature);
+    DataCacheKey second = new DataCacheKey("second", signature);
 
     KeyAssertions.assertDifferent(first, second);
   }
@@ -40,8 +40,8 @@ public class OriginalKeyTest {
     doAnswer(new WriteDigest("secondSignature")).when(secondSignature)
         .updateDiskCacheKey(any(MessageDigest.class));
 
-    OriginalKey first = new OriginalKey("key", firstSignature);
-    OriginalKey second = new OriginalKey("key", secondSignature);
+    DataCacheKey first = new DataCacheKey("key", firstSignature);
+    DataCacheKey second = new DataCacheKey("key", secondSignature);
 
     KeyAssertions.assertDifferent(first, second);
   }
@@ -50,8 +50,8 @@ public class OriginalKeyTest {
   public void testSameIfIdAndSignatureAreTheSame()
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
     Key signature = mock(Key.class);
-    OriginalKey first = new OriginalKey("key", signature);
-    OriginalKey second = new OriginalKey("key", signature);
+    DataCacheKey first = new DataCacheKey("key", signature);
+    DataCacheKey second = new DataCacheKey("key", signature);
 
     KeyAssertions.assertSame(first, second);
   }

@@ -168,7 +168,6 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
 
   @Override
   public void reschedule(DecodeJob<?> job) {
-    // TODO: what if this is fetched from cache?
     future = sourceService.submit(job);
   }
 

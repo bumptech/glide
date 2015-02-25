@@ -6,14 +6,14 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
- * A class for keeping track of the cache key of the original data + any requested signature.
+ * A cache key for original source data + any requested signature.
  */
-class OriginalKey implements Key {
+final class DataCacheKey implements Key {
 
   private final String id;
   private final Key signature;
 
-  public OriginalKey(String id, Key signature) {
+  public DataCacheKey(String id, Key signature) {
     this.id = id;
     this.signature = signature;
   }
@@ -27,7 +27,7 @@ class OriginalKey implements Key {
       return false;
     }
 
-    OriginalKey that = (OriginalKey) o;
+    DataCacheKey that = (DataCacheKey) o;
 
     if (!id.equals(that.id)) {
       return false;

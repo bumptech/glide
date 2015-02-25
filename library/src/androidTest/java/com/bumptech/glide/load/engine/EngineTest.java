@@ -472,7 +472,6 @@ public class EngineTest {
       engine = new Engine(cache, mock(DiskCache.Factory.class), mock(ExecutorService.class),
           mock(ExecutorService.class), jobs, keyFactory, activeResources, engineJobFactory,
           resourceRecycler);
-
     }
 
     public Engine.LoadStatus doLoad() {

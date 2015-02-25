@@ -10,12 +10,13 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.request.BaseRequestOptions;
-import com.bumptech.glide.util.Util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import java.util.Map;
  * @param <TranscodeClass> The type of resources returned using classes from this object.
  */
 public class RequestContext<TranscodeClass> extends ContextWrapper {
+  private static final int UNSET = -1;
   private final GlideContext glideContext;
   private final Object model;
   private final Class<TranscodeClass> transcodeClass;
@@ -36,6 +38,9 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
   private DataFetcherSet<?> fetchers;
   private Drawable errorDrawable;
   private Drawable placeholderDrawable;
+  private int width = UNSET;
+  private int height = UNSET;
+  private List<String> sourceIds;
 
   public RequestContext(GlideContext glideContext, Object model,
       Class<TranscodeClass> transcodeClass, BaseRequestOptions<?> requestOptions, Priority priority,
@@ -54,25 +59,31 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     return glideContext.getRegistry().getLoadPath(dataClass, getResourceClass(), transcodeClass);
   }
 
-  void buildDataFetchers(int width, int height) {
-    Util.assertMainThread();
+  synchronized void setDimens(int width, int height) {
+    this.width = width;
+    this.height = height;
+  }
+
+  synchronized List<String> getSourceIds() {
+     if (sourceIds == null) {
+      sourceIds = new ArrayList<>();
+      for (DataFetcher<?> fetcher : getDataFetchers()) {
+        if (fetcher != null) {
+          sourceIds.add(fetcher.getId());
+        }
+      }
+    }
+    return sourceIds;
+  }
+
+  synchronized DataFetcherSet<?> getDataFetchers() {
+    if (width == UNSET || height == UNSET) {
+      throw new IllegalStateException("Width and/or height are unset.");
+    }
     if (fetchers == null) {
       fetchers = glideContext.getRegistry().getDataFetchers(model, width, height);
     }
-  }
-
-  DataFetcherSet<?> getDataFetchers() {
-    if (fetchers == null) {
-      throw new IllegalStateException("Must call buildDataFetchers first");
-    }
     return fetchers;
-  }
-
-  String getId() {
-    if (fetchers == null) {
-      throw new IllegalStateException("Must call buildDataFetchers first");
-    }
-    return fetchers.getId();
   }
 
   Key getSignature() {
