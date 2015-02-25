@@ -80,7 +80,7 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
      * @param height The height in pixels of the view/target the image will be loaded into.
      * @return The Headers object containing the headers, or null if no headers should be added.
      */
-    protected Headers getHeaders(T model, int width, int height){
+    protected Headers getHeaders(T model, int width, int height) {
         return Headers.NONE;
     }
 }

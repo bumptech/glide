@@ -25,8 +25,9 @@ public class GlideUrl {
 
     private final URL url;
     private final Headers headers;
-    private String stringUrl;
+    private final String stringUrl;
 
+    private String safeStringUrl;
     private URL safeUrl;
 
     public GlideUrl(URL url) {
@@ -41,6 +42,9 @@ public class GlideUrl {
         if (url == null) {
             throw new IllegalArgumentException("URL must not be null!");
         }
+        if (headers == null) {
+            throw new IllegalArgumentException("Headers must not be null");
+        }
         this.url = url;
         stringUrl = null;
         this.headers = headers;
@@ -49,6 +53,9 @@ public class GlideUrl {
     public GlideUrl(String url, Headers headers) {
         if (TextUtils.isEmpty(url)) {
             throw new IllegalArgumentException("String url must not be empty or null: " + url);
+        }
+        if (headers == null) {
+            throw new IllegalArgumentException("Headers must not be null");
         }
         this.stringUrl = url;
         this.url = null;
@@ -63,11 +70,9 @@ public class GlideUrl {
     // using it would require both decoding and encoding each string which is more complicated, slower and generates
     // more objects than the solution below. See also issue #133.
     private URL getSafeUrl() throws MalformedURLException {
-        if (safeUrl != null) {
-            return safeUrl;
+        if (safeUrl == null) {
+            safeUrl = new URL(getSafeStringUrl());
         }
-
-        safeUrl = new URL(getSafeStringUrl());
         return safeUrl;
     }
 
@@ -76,10 +81,14 @@ public class GlideUrl {
     }
 
     private String getSafeStringUrl() {
-        if (TextUtils.isEmpty(stringUrl)) {
-            stringUrl = url.toString();
+        if (TextUtils.isEmpty(safeStringUrl)) {
+            String unsafeStringUrl = stringUrl;
+            if (TextUtils.isEmpty(unsafeStringUrl)) {
+                unsafeStringUrl = url.toString();
+            }
+            safeStringUrl = Uri.encode(unsafeStringUrl, ALLOWED_URI_CHARS);
         }
-        return Uri.encode(stringUrl, ALLOWED_URI_CHARS);
+        return safeStringUrl;
     }
 
     public Map<String, String> getHeaders() {
@@ -91,29 +100,29 @@ public class GlideUrl {
         String urlString = getSafeStringUrl();
         StringBuilder stringBuilder = new StringBuilder(urlString);
         Map<String, String> headerMap = headers.getHeaders();
-        for (String key : headerMap.keySet()) {
-            stringBuilder.append("\n")
-                .append(key)
+        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+            stringBuilder.append('\n')
+                .append(entry.getKey())
                 .append(": ")
-                .append(headerMap.get(key));
+                .append(entry.getValue());
         }
         return stringBuilder.toString();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+        if (o instanceof GlideUrl) {
+          GlideUrl other = (GlideUrl) o;
+          return getSafeStringUrl().equals(other.getSafeStringUrl())
+              && headers.equals(other.headers);
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        return toString().equals(o.toString());
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        int hashCode = getSafeStringUrl().hashCode();
+        hashCode = 31 * hashCode + headers.hashCode();
+        return hashCode;
     }
 }
