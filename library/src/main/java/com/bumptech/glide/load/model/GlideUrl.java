@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * A wrapper for strings representing http/https URLs responsible for ensuring URLs are properly escaped and avoiding
@@ -23,26 +24,36 @@ public class GlideUrl {
     private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
 
     private final URL url;
+    private final Headers headers;
     private String stringUrl;
 
     private URL safeUrl;
 
     public GlideUrl(URL url) {
+        this(url, Headers.NONE);
+    }
+
+    public GlideUrl(String url) {
+        this(url, Headers.NONE);
+    }
+
+    public GlideUrl(URL url, Headers headers) {
         if (url == null) {
             throw new IllegalArgumentException("URL must not be null!");
         }
         this.url = url;
         stringUrl = null;
+        this.headers = headers;
     }
 
-    public GlideUrl(String url) {
+    public GlideUrl(String url, Headers headers) {
         if (TextUtils.isEmpty(url)) {
             throw new IllegalArgumentException("String url must not be empty or null: " + url);
         }
         this.stringUrl = url;
         this.url = null;
+        this.headers = headers;
     }
-
 
     public URL toURL() throws MalformedURLException {
         return getSafeUrl();
@@ -55,19 +66,38 @@ public class GlideUrl {
         if (safeUrl != null) {
             return safeUrl;
         }
-        String unsafe = toString();
-        String safe = Uri.encode(unsafe, ALLOWED_URI_CHARS);
 
-        safeUrl = new URL(safe);
+        safeUrl = new URL(getSafeStringUrl());
         return safeUrl;
+    }
+
+    public String toStringUrl() {
+        return getSafeStringUrl();
+    }
+
+    private String getSafeStringUrl() {
+        if (TextUtils.isEmpty(stringUrl)) {
+            stringUrl = url.toString();
+        }
+        return Uri.encode(stringUrl, ALLOWED_URI_CHARS);
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers.getHeaders();
     }
 
     @Override
     public String toString() {
-        if (TextUtils.isEmpty(stringUrl)) {
-            stringUrl = url.toString();
+        String urlString = getSafeStringUrl();
+        StringBuilder stringBuilder = new StringBuilder(urlString);
+        Map<String, String> headerMap = headers.getHeaders();
+        for (String key : headerMap.keySet()) {
+            stringBuilder.append("\n")
+                .append(key)
+                .append(": ")
+                .append(headerMap.get(key));
         }
-        return stringUrl;
+        return stringBuilder.toString();
     }
 
     @Override

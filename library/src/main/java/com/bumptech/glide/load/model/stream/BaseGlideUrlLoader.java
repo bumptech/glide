@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 
@@ -51,7 +52,7 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
                return null;
             }
 
-            result = new GlideUrl(stringURL);
+            result = new GlideUrl(stringURL, getHeaders(model, width, height));
 
             if (modelCache != null) {
                 modelCache.put(model, width, height, result);
@@ -70,4 +71,16 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
      * @return The String url.
      */
     protected abstract String getUrl(T model, int width, int height);
+
+    /**
+     * Get the headers for the given model and dimensions as a map of strings to sets of strings.
+     *
+     * @param model The model.
+     * @param width The width in pixels of the view/target the image will be loaded into.
+     * @param height The height in pixels of the view/target the image will be loaded into.
+     * @return The Headers object containing the headers, or null if no headers should be added.
+     */
+    protected Headers getHeaders(T model, int width, int height){
+        return Headers.NONE;
+    }
 }
