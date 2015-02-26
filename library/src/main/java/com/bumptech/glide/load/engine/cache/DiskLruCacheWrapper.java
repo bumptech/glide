@@ -60,6 +60,10 @@ public class DiskLruCacheWrapper implements DiskCache {
         return diskLruCache;
     }
 
+    private synchronized void resetDiskCache() {
+        diskLruCache = null;
+    }
+
     @Override
     public File get(Key key) {
         String safeKey = safeKeyGenerator.getSafeKey(key);
@@ -111,6 +115,18 @@ public class DiskLruCacheWrapper implements DiskCache {
         } catch (IOException e) {
             if (Log.isLoggable(TAG, Log.WARN)) {
                 Log.w(TAG, "Unable to delete from disk cache", e);
+            }
+        }
+    }
+
+    @Override
+    public synchronized void clear() {
+        try {
+            getDiskCache().delete();
+            resetDiskCache();
+        }  catch (IOException e) {
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Unable to clear disk cache", e);
             }
         }
     }

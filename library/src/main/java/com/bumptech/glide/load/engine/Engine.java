@@ -293,6 +293,10 @@ public class Engine implements EngineJobListener,
         }
     }
 
+    public void clearDiskCache() {
+        diskCacheProvider.getDiskCache().clear();
+    }
+
     private ReferenceQueue<EngineResource<?>> getReferenceQueue() {
         if (resourceReferenceQueue == null) {
             resourceReferenceQueue = new ReferenceQueue<EngineResource<?>>();
