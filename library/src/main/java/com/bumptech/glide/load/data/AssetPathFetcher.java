@@ -1,7 +1,9 @@
 package com.bumptech.glide.load.data;
 
 import android.content.res.AssetManager;
+import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 
@@ -24,8 +26,14 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super T> callback) throws IOException {
-    data = loadResource(assetManager, assetPath);
+  public void loadData(Priority priority, DataCallback<? super T> callback) {
+    try {
+      data = loadResource(assetManager, assetPath);
+    } catch (IOException e) {
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Failed to load data from asset manager", e);
+      }
+    }
     callback.onDataReady(data);
   }
 

@@ -4,11 +4,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -42,9 +45,14 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback)
-      throws IOException {
-    inputStream = opener.open(context, mediaStoreImageUri);
+  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+    try {
+      inputStream = opener.open(context, mediaStoreImageUri);
+    } catch (FileNotFoundException e) {
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Failed to open media store thumb uri", e);
+      }
+    }
     callback.onDataReady(inputStream);
   }
 

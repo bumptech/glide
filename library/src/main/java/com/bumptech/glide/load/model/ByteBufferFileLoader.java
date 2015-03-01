@@ -1,7 +1,9 @@
 package com.bumptech.glide.load.model;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -10,7 +12,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
@@ -55,10 +56,16 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super ByteBuffer> callback)
-        throws IOException {
-      channel = new FileInputStream(file).getChannel();
-      MappedByteBuffer result = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+    public void loadData(Priority priority, DataCallback<? super ByteBuffer> callback) {
+      ByteBuffer result = null;
+      try {
+        channel = new FileInputStream(file).getChannel();
+        result = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+      } catch (IOException e) {
+        if (Logs.isEnabled(Log.DEBUG)) {
+          Logs.log(Log.DEBUG, "Failed to obtain ByteBuffer for file", e);
+        }
+      }
       callback.onDataReady(result);
     }
 

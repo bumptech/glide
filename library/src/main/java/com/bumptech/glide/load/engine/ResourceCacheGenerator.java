@@ -1,15 +1,11 @@
 package com.bumptech.glide.load.engine;
 
-import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -72,16 +68,8 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
     fetcher = null;
     while (fetcher == null && cacheFetchers.hasNext()) {
       fetcher = cacheFetchers.next();
-      if (fetcher == null) {
-        continue;
-      }
-      try {
+      if (fetcher != null) {
         fetcher.loadData(requestContext.getPriority(), this);
-      } catch (IOException e) {
-        if (Logs.isEnabled(Log.DEBUG)) {
-          Logs.log(Log.DEBUG, "Failed to load data from resource cache fetcher", e);
-        }
-        fetcher = null;
       }
     }
 

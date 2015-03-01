@@ -3,8 +3,6 @@ package com.bumptech.glide.load.data;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 
-import java.io.IOException;
-
 /**
  * Lazily retrieves data that can be used to load a resource.
  *
@@ -22,10 +20,15 @@ import java.io.IOException;
 public interface DataFetcher<T> {
 
   /**
-   * Callback that should be called when data has been loaded and is available.
+   * Callback that should be called when data has been loaded and is available, or when the load
+   * fails.
+   *
    * @param <T> The type of data that will be loaded.
    */
   interface DataCallback<T> {
+    /**
+     * Called with the loaded data if the load succeeded, or with {@code null} if the load failed.
+     */
     void onDataReady(T data);
   }
 
@@ -44,7 +47,7 @@ public interface DataFetcher<T> {
    * @param priority The priority with which the request should be completed.
    * @see #cleanup() where the data retuned will be cleaned up
    */
-  void loadData(Priority priority, DataCallback<? super T> callback) throws IOException;
+  void loadData(Priority priority, DataCallback<? super T> callback);
 
   /**
    * Cleanup or recycle any resources used by this data fetcher. This method will be called in a

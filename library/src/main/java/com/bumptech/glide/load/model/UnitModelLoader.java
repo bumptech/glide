@@ -6,8 +6,6 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 
-import java.io.IOException;
-
 /**
  * A put of helper classes that performs no loading and instead always returns the given model as
  * the data to decode.
@@ -35,8 +33,7 @@ public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelT
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super ModelType> callback)
-        throws IOException {
+    public void loadData(Priority priority, DataCallback<? super ModelType> callback) {
       callback.onDataReady(resource);
     }
 

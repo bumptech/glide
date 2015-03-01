@@ -7,7 +7,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
@@ -54,8 +53,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback)
-        throws IOException {
+    public void loadData(Priority priority, DataCallback<? super Data> callback) {
       Data result = converter.convert(model);
       callback.onDataReady(result);
     }

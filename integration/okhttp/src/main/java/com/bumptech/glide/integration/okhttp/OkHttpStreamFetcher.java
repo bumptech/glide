@@ -28,8 +28,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, final DataCallback<? super InputStream> callback)
-      throws IOException {
+  public void loadData(Priority priority, final DataCallback<? super InputStream> callback) {
     Request request = new Request.Builder().url(url.toString()).build();
 
     client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {

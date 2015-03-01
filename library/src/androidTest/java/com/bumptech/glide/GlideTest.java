@@ -9,7 +9,6 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -613,7 +612,8 @@ public class GlideTest {
   private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource)
       throws Exception {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
-    doThrow(new IOException("test")).when(failFetcher)
+    doAnswer(new Util.CallDataReady(null))
+        .when(failFetcher)
         .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
     when(failFetcher.getDataClass()).thenReturn(failResource);
     when(failFetcher.getId()).thenReturn("fakeId");

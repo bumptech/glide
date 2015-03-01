@@ -3,6 +3,7 @@ package com.bumptech.glide.load.data;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -18,7 +19,6 @@ import java.net.URL;
  * A DataFetcher that retrieves an {@link java.io.InputStream} for a Url.
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
-  private static final String TAG = "HttpUrlFetcher";
   private static final int MAXIMUM_REDIRECTS = 5;
   private static final int DEFAULT_TIMEOUT_MS = 2500;
   // Visible for testing.
@@ -45,13 +45,19 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback)
-      throws IOException {
+  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
     long startTime = LogTime.getLogTime();
-    final InputStream result =
-        loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Retrieved result in " + LogTime.getElapsedMillis(startTime) + " ms");
+    InputStream result = null;
+    try {
+      result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
+    } catch (IOException e) {
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Failed to load data for url", e);
+      }
+    }
+    if (Logs.isEnabled(Log.VERBOSE)) {
+      Logs.log(Log.VERBOSE, "Finished http url fetcher fetch in "
+          + LogTime.getElapsedMillis(startTime) + " ms and loaded "  + result);
     }
     callback.onDataReady(result);
   }

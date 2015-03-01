@@ -3,7 +3,9 @@ package com.bumptech.glide.load.data;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 
@@ -36,10 +38,15 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public final void loadData(Priority priority, DataCallback<? super T> callback)
-      throws IOException {
+  public final void loadData(Priority priority, DataCallback<? super T> callback) {
     ContentResolver contentResolver = context.getContentResolver();
-    data = loadResource(uri, contentResolver);
+    try {
+      data = loadResource(uri, contentResolver);
+    } catch (FileNotFoundException e) {
+      if (Logs.isEnabled(Log.DEBUG)) {
+        Logs.log(Log.DEBUG, "Failed to open Uri", e);
+      }
+    }
     callback.onDataReady(data);
   }
 

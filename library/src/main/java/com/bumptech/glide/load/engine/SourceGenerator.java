@@ -1,14 +1,10 @@
 package com.bumptech.glide.load.engine;
 
-import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -53,16 +49,8 @@ class SourceGenerator implements DataFetcherGenerator,
 
     while (fetcher == null && sourceFetchers.hasNext()) {
       fetcher = sourceFetchers.next();
-      if (fetcher == null) {
-        continue;
-      }
-      try {
+      if (fetcher != null) {
         fetcher.loadData(requestContext.getPriority(), this);
-      } catch (IOException e) {
-        if (Logs.isEnabled(Log.DEBUG)) {
-          Logs.log(Log.DEBUG, "Failed to load data from data cache fetcher", e);
-        }
-        fetcher = null;
       }
     }
     return fetcher != null;

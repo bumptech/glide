@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.data;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.verify;
 
 import com.bumptech.glide.Priority;
@@ -24,7 +24,6 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
@@ -131,74 +130,71 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testThrowsOnRedirectLoops() throws Exception {
+  public void testFailsOnRedirectLoops() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301)
         .setHeader("Location", mockWebServer.getUrl("/redirect")));
     mockWebServer.enqueue(new MockResponse().setResponseCode(301)
         .setHeader("Location", mockWebServer.getUrl("/redirect")));
 
-    try {
-      getFetcher().loadData(Priority.IMMEDIATE, callback);
-      fail("Didn't get expected IOException");
-    } catch (SocketTimeoutException e) {
-      fail("Didn't expect SocketTimeoutException");
-    } catch (IOException e) {
-      // Expected.
-    }
+    getFetcher().loadData(Priority.IMMEDIATE, callback);
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   @Test
-  public void testThrowsIfRedirectLocationIsNotPresent() throws Exception {
+  public void testFailsIfRedirectLocationIsNotPresent() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301));
 
-    try {
-      getFetcher().loadData(Priority.NORMAL, callback);
-      fail("Didn't get expected IOException");
-    } catch (IOException e) {
-      // Expected.
-    }
+    getFetcher().loadData(Priority.NORMAL, callback);
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   @Test
-  public void testThrowsIfRedirectLocationIsPresentAndEmpty() throws Exception {
+  public void testFailsIfRedirectLocationIsPresentAndEmpty() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301).setHeader("Location", ""));
 
-    try {
-      getFetcher().loadData(Priority.NORMAL, callback);
-      fail("Didn't get expected IOException");
-    } catch (IOException e) {
-      // Expected.
-    }
+    getFetcher().loadData(Priority.NORMAL, callback);
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
-  @Test(expected = IOException.class)
-  public void testThrowsIfStatusCodeIsNegativeOne() throws Exception {
+  @Test
+  public void testFailsIfStatusCodeIsNegativeOne() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
     getFetcher().loadData(Priority.LOW, callback);
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
-  @Test(expected = IOException.class)
-  public void testThrowsAfterTooManyRedirects() throws Exception {
+  @Test
+  public void testFailsAfterTooManyRedirects() throws Exception {
     for (int i = 0; i < 10; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301)
           .setHeader("Location", mockWebServer.getUrl("/redirect" + i)));
     }
     getFetcher().loadData(Priority.NORMAL, callback);
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
-  @Test(expected = IOException.class)
-  public void testThrowsIfStatusCodeIs500() throws Exception {
+  @Test
+  public void testFailsIfStatusCodeIs500() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500));
     getFetcher().loadData(Priority.NORMAL, callback);
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
-  @Test(expected = IOException.class)
-  public void testThrowsIfStatusCodeIs400() throws Exception {
+  @Test
+  public void testFailsIfStatusCodeIs400() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400));
     getFetcher().loadData(Priority.LOW, callback);
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
-  @Test(expected = SocketTimeoutException.class)
+  @Test
   public void testSetsReadTimeout() throws Exception {
     MockWebServer tempWebServer = new MockWebServer();
     tempWebServer.enqueue(
@@ -212,6 +208,8 @@ public class HttpUrlFetcherServerTest {
       // shutdown() called before any enqueue() blocks until it times out.
       mockWebServer.enqueue(new MockResponse().setResponseCode(200));
     }
+
+    verify(callback).onDataReady(isNull(InputStream.class));
   }
 
   private HttpUrlFetcher getFetcher() {

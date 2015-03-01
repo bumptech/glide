@@ -2,7 +2,9 @@ package com.bumptech.glide.load.model;
 
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -58,9 +60,14 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback)
-        throws IOException {
-      data = opener.open(file);
+    public void loadData(Priority priority, DataCallback<? super Data> callback) {
+      try {
+        data = opener.open(file);
+      } catch (FileNotFoundException e) {
+        if (Logs.isEnabled(Log.DEBUG)) {
+          Logs.log(Log.DEBUG, "Failed to open file", e);
+        }
+      }
       callback.onDataReady(data);
     }
 

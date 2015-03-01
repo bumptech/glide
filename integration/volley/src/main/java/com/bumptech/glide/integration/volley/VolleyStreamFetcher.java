@@ -15,7 +15,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -48,11 +47,9 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback)
-      throws IOException {
+  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
     // Make sure the string url safely encodes non ascii characters.
-    String stringUrl = url.toURL().toString();
-    request = requestFactory.create(stringUrl, callback, glideToVolleyPriority(priority));
+    request = requestFactory.create(url.toString(), callback, glideToVolleyPriority(priority));
     requestQueue.add(request);
   }
 
