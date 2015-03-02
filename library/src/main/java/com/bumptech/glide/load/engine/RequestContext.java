@@ -10,13 +10,14 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
+import com.bumptech.glide.load.data.LoadDataSet;
+import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.request.BaseRequestOptions;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -24,25 +25,27 @@ import java.util.Map;
  * Context for individual requests and decodes that contains and exposes classes necessary to
  * obtain, decode, and encode resources.
  *
+ * @param <Model> the type of model used to load resources by this object.
  * @param <TranscodeClass> The type of resources returned using classes from this object.
  */
-public class RequestContext<TranscodeClass> extends ContextWrapper {
+public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
   private static final int UNSET = -1;
   private final GlideContext glideContext;
-  private final Object model;
+  private final Model model;
   private final Class<TranscodeClass> transcodeClass;
   private final BaseRequestOptions<?> requestOptions;
   private final Priority priority;
   private final int overrideWidth;
   private final int overrideHeight;
-  private DataFetcherSet<?> fetchers;
+  private LoadDataSet<Model> loadDataSet;
   private Drawable errorDrawable;
   private Drawable placeholderDrawable;
   private int width = UNSET;
   private int height = UNSET;
-  private List<String> sourceIds;
+  private List<Key> cacheKeys;
+  private List<Key> sourceKeys;
 
-  public RequestContext(GlideContext glideContext, Object model,
+  public RequestContext(GlideContext glideContext, Model model,
       Class<TranscodeClass> transcodeClass, BaseRequestOptions<?> requestOptions, Priority priority,
       int overrideWidth, int overrideHeight) {
     super(glideContext);
@@ -64,26 +67,41 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     this.height = height;
   }
 
-  synchronized List<String> getSourceIds() {
-     if (sourceIds == null) {
-      sourceIds = new ArrayList<>();
-      for (DataFetcher<?> fetcher : getDataFetchers()) {
-        if (fetcher != null) {
-          sourceIds.add(fetcher.getId());
-        }
-      }
-    }
-    return sourceIds;
+  synchronized boolean isSourceKey(Key key) {
+    collectKeys();
+    return sourceKeys.contains(key);
   }
 
-  synchronized DataFetcherSet<?> getDataFetchers() {
+  synchronized List<Key> getCacheKeys() {
+    collectKeys();
+    return cacheKeys;
+  }
+
+  private synchronized void collectKeys() {
+    if (cacheKeys == null) {
+      List<Key> cacheKeys = new ArrayList<>();
+      List<Key> sourceKeys = new ArrayList<>();
+
+      for (ModelLoader.LoadData<?> data : getLoadDataSet()) {
+        if (data != null) {
+          cacheKeys.add(data.sourceKey);
+          sourceKeys.add(data.sourceKey);
+          cacheKeys.addAll(data.alternateKeys);
+        }
+      }
+      this.cacheKeys = Collections.unmodifiableList(cacheKeys);
+      this.sourceKeys = Collections.unmodifiableList(sourceKeys);
+    }
+  }
+
+  synchronized LoadDataSet<Model> getLoadDataSet() {
     if (width == UNSET || height == UNSET) {
       throw new IllegalStateException("Width and/or height are unset.");
     }
-    if (fetchers == null) {
-      fetchers = glideContext.getRegistry().getDataFetchers(model, width, height);
+    if (loadDataSet == null) {
+      loadDataSet = glideContext.getRegistry().getLoadDataSet(model, width, height);
     }
-    return fetchers;
+    return loadDataSet;
   }
 
   Key getSignature() {
@@ -137,9 +155,9 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     return glideContext.getRegistry().getSourceEncoder(data);
   }
 
-  DataFetcherSet<?> getDataFetchers(File file, int width, int height)
+  LoadDataSet<File> getDataFetchers(File file, int width, int height)
       throws Registry.NoModelLoaderAvailableException {
-    return glideContext.getRegistry().getDataFetchers(file, width, height);
+    return glideContext.getRegistry().getLoadDataSet(file, width, height);
   }
 
   public int getOverrideWidth() {
@@ -150,7 +168,7 @@ public class RequestContext<TranscodeClass> extends ContextWrapper {
     return overrideHeight;
   }
 
-  public Object getModel() {
+  public Model getModel() {
     return model;
   }
 

@@ -8,6 +8,7 @@ import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -37,8 +38,8 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public final DataFetcher<Data> getDataFetcher(Uri model, int width, int height) {
-    return factory.build(context, model);
+  public final LoadData<Data> buildLoadData(Uri model, int width, int height) {
+    return new LoadData<>(new ObjectKey(model), factory.build(context, model));
   }
 
   @Override

@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -191,7 +192,7 @@ public class GlideTest {
 //        when(dataFetcher.loadData(any(Priority.class))).thenReturn(expected);
 //        when(dataFetcher.getId()).thenReturn("id");
 //        ModelLoader<GlideUrl, File> modelLoader = mock(ModelLoader.class);
-//        when(modelLoader.getDataFetcher(eq(glideUrl), anyInt(), anyInt()))
+//        when(modelLoader.buildLoadData(eq(glideUrl), anyInt(), anyInt()))
 //                .thenReturn(dataFetcher);
 //
 //        Resource<File> expectedResource = mock(Resource.class);
@@ -618,7 +619,8 @@ public class GlideTest {
     when(failFetcher.getDataClass()).thenReturn(failResource);
     when(failFetcher.getId()).thenReturn("fakeId");
     ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
-    when(failLoader.getDataFetcher(any(failModel), anyInt(), anyInt())).thenReturn(failFetcher);
+    when(failLoader.buildLoadData(any(failModel), anyInt(), anyInt()))
+        .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), failFetcher));
     when(failLoader.handles(any(failModel))).thenReturn(true);
     ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
     when(failFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
@@ -679,7 +681,8 @@ public class GlideTest {
     }
     when(fetcher.getId()).thenReturn(UUID.randomUUID().toString());
     when(fetcher.getDataClass()).thenReturn(InputStream.class);
-    when(modelLoader.getDataFetcher(any(modelClass), anyInt(), anyInt())).thenReturn(fetcher);
+    when(modelLoader.buildLoadData(any(modelClass), anyInt(), anyInt()))
+        .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), fetcher));
     when(modelLoader.handles(any(modelClass))).thenReturn(true);
 
     return modelLoader;
@@ -746,8 +749,8 @@ public class GlideTest {
         throw new RuntimeException(e);
       }
       ModelLoader<GlideUrl, InputStream> mockUrlLoader = mock(ModelLoader.class);
-      when(mockUrlLoader.getDataFetcher(any(GlideUrl.class), anyInt(), anyInt()))
-          .thenReturn(mockStreamFetcher);
+      when(mockUrlLoader.buildLoadData(any(GlideUrl.class), anyInt(), anyInt()))
+          .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
       when(mockUrlLoader.handles(any(GlideUrl.class))).thenReturn(true);
       ModelLoaderFactory<GlideUrl, InputStream> mockUrlLoaderFactory =
           mock(ModelLoaderFactory.class);

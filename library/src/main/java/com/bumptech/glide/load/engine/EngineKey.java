@@ -59,9 +59,15 @@ class EngineKey implements Key {
 
   @Override
   public String toString() {
-    return "EngineKey{" + "width=" + width + ", height=" + height
-        + ", resourceClass=" + resourceClass + ", transcodeClass=" + transcodeClass + ", signature="
-        + signature + '}';
+    return "EngineKey{"
+        + "model=" + model
+        + ", width=" + width
+        + ", height=" + height
+        + ", resourceClass=" + resourceClass
+        + ", transcodeClass=" + transcodeClass
+        +  ", signature=" + signature
+        + ", hashCode=" + hashCode
+        + '}';
   }
 
   @Override

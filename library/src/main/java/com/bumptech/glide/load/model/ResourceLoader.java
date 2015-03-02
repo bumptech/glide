@@ -6,8 +6,6 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.load.data.DataFetcher;
-
 import java.io.InputStream;
 
 /**
@@ -16,7 +14,8 @@ import java.io.InputStream;
  *
  * @param <Data> The type of data that will be loaded for the given android resource.
  */
-public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
+public
+class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
 
   private final ModelLoader<Uri, Data> uriLoader;
   private final Resources resources;
@@ -31,17 +30,20 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   }
 
   @Override
-  public DataFetcher<Data> getDataFetcher(Integer model, int width, int height) {
-    Uri uri = Uri.parse(
-        ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + resources.getResourcePackageName(model)
-            + '/' + resources.getResourceTypeName(model) + '/' + resources
-            .getResourceEntryName(model));
+  public LoadData<Data> buildLoadData(Integer model, int width, int height) {
+    Uri uri = getResourceUri(model);
+    return uriLoader.buildLoadData(uri, width, height);
+  }
 
-    return uriLoader.getDataFetcher(uri, width, height);
+  private Uri getResourceUri(Integer model) {
+    return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
+        + resources.getResourcePackageName(model) + '/' + resources.getResourceTypeName(model) + '/'
+        + resources.getResourceEntryName(model));
   }
 
   @Override
   public boolean handles(Integer model) {
+    // TODO: check that this is in fact a resource id.
     return true;
   }
 

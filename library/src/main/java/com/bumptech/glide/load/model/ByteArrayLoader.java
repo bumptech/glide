@@ -5,6 +5,7 @@ import android.content.Context;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.signature.EmptySignature;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -25,8 +26,9 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
   }
 
   @Override
-  public DataFetcher<Data> getDataFetcher(byte[] model, int width, int height) {
-    return new Fetcher<>(model, converter);
+  public LoadData<Data> buildLoadData(byte[] model, int width, int height) {
+    // TODO: compare the actual bytes?
+    return new LoadData<>(EmptySignature.obtain(), new Fetcher<>(model, converter));
   }
 
   @Override

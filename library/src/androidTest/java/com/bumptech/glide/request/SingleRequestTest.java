@@ -61,7 +61,7 @@ public class SingleRequestTest {
     int overrideWidth = -1;
     int overrideHeight = -1;
     List result = new ArrayList();
-    RequestContext<List> requestContext = mock(RequestContext.class);
+    RequestContext<Number, List> requestContext = mock(RequestContext.class);
 
     public RequestHarness() {
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);

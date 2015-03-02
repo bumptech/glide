@@ -14,17 +14,17 @@ import java.util.List;
  * @param <Model> The type of model that will be used to retrieve
  *                {@link com.bumptech.glide.load.data.DataFetcher}s.
  */
-public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
+public class LoadDataSet<Model> implements Iterable<ModelLoader.LoadData<?>> {
 
   private final Model model;
   private final int width;
   private final int height;
   private final List<ModelLoader<Model, ?>> modelLoaders;
   private final List<DataFetcher<?>> fetchers;
-  private volatile String id;
 
-  public DataFetcherSet(Model model, int width, int height,
-      List<ModelLoader<Model, ?>> modelLoaders) {
+  private List<ModelLoader<Model, ?>> filteredLoaders;
+
+  public LoadDataSet(Model model, int width, int height, List<ModelLoader<Model, ?>> modelLoaders) {
     this.model = model;
     this.width = width;
     this.height = height;
@@ -36,18 +36,6 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
     return modelLoaders.isEmpty();
   }
 
-  public String getId() {
-    if (id == null) {
-      for (DataFetcher<?> fetcher : this) {
-        if (fetcher != null) {
-          id = fetcher.getId();
-          break;
-        }
-      }
-    }
-    return id;
-  }
-
   public void cancel() {
     for (DataFetcher<?> fetcher : fetchers) {
       if (fetcher != null) {
@@ -57,8 +45,20 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
   }
 
   @Override
-  public Iterator<DataFetcher<?>> iterator() {
-    return new DataFetcherIterator();
+  public Iterator<ModelLoader.LoadData<?>> iterator() {
+    return new LoadDataIterator();
+  }
+
+  private synchronized List<ModelLoader<Model, ?>> getFilteredLoaders() {
+    if (filteredLoaders == null) {
+      filteredLoaders = new ArrayList<>(modelLoaders.size());
+      for (ModelLoader<Model, ?> loader : modelLoaders) {
+        if (loader.handles(model)) {
+          filteredLoaders.add(loader);
+        }
+      }
+    }
+    return filteredLoaders;
   }
 
   @Override
@@ -68,32 +68,18 @@ public class DataFetcherSet<Model> implements Iterable<DataFetcher<?>> {
         .toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + "}";
   }
 
-  private class DataFetcherIterator implements Iterator<DataFetcher<?>> {
-    int currentIndex;
+  class LoadDataIterator implements Iterator<ModelLoader.LoadData<?>> {
+
+    private int currentIndex;
 
     @Override
     public boolean hasNext() {
-      return currentIndex < modelLoaders.size();
+      return currentIndex < getFilteredLoaders().size();
     }
 
     @Override
-    public DataFetcher<?> next() {
-      final DataFetcher<?> next;
-      if (currentIndex < fetchers.size()) {
-        next = fetchers.get(currentIndex);
-      } else {
-        // We want to cache ModelClass -> [ModelLoader], so we may end up with some ModelLoaders
-        // here that don't want to handle our specific Model. We filter those ModelLoaders out here.
-        ModelLoader<Model, ?> modelLoader = modelLoaders.get(currentIndex);
-        if (modelLoader.handles(model)) {
-          next = modelLoader.getDataFetcher(model, width, height);
-        } else {
-          next = null;
-        }
-        fetchers.add(next);
-      }
-      currentIndex++;
-      return next;
+    public ModelLoader.LoadData<?> next() {
+      return getFilteredLoaders().get(currentIndex++).buildLoadData(model, width, height);
     }
 
     @Override

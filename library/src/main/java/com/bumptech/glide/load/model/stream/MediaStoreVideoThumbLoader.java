@@ -3,12 +3,12 @@ package com.bumptech.glide.load.model.stream;
 import android.content.Context;
 import android.net.Uri;
 
-import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.load.data.mediastore.ThumbFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
 
@@ -24,9 +24,9 @@ public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream>
   }
 
   @Override
-  public DataFetcher<InputStream> getDataFetcher(Uri model, int width, int height) {
+  public LoadData<InputStream> buildLoadData(Uri model, int width, int height) {
     if (MediaStoreUtil.isThumbnailSize(width, height)) {
-      return ThumbFetcher.buildVideoFetcher(context, model);
+      return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildVideoFetcher(context, model));
     } else {
       return null;
     }

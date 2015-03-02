@@ -32,10 +32,8 @@ public class UriLoaderTest {
   // Not a magic number, just arbitrary non zero.
   private static final int IMAGE_SIDE = 120;
 
-  @Mock
-  DataFetcher<Object> localUriFetcher;
-  @Mock
-  UriLoader.LocalUriFetcherFactory<Object> factory;
+  @Mock DataFetcher<Object> localUriFetcher;
+  @Mock UriLoader.LocalUriFetcherFactory<Object> factory;
   private UriLoader loader;
 
   @Before
@@ -51,7 +49,7 @@ public class UriLoaderTest {
     when(factory.build(anyContext(), eq(fileUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(fileUri));
-    assertEquals(localUriFetcher, loader.getDataFetcher(fileUri, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(localUriFetcher, loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
@@ -60,7 +58,8 @@ public class UriLoaderTest {
     when(factory.build(anyContext(), eq(resourceUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(resourceUri));
-    assertEquals(localUriFetcher, loader.getDataFetcher(resourceUri, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(localUriFetcher,
+        loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
@@ -69,7 +68,7 @@ public class UriLoaderTest {
     when(factory.build(anyContext(), eq(contentUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(contentUri));
-    assertEquals(localUriFetcher, loader.getDataFetcher(contentUri, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(localUriFetcher, loader.buildLoadData(contentUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   private static Context anyContext() {

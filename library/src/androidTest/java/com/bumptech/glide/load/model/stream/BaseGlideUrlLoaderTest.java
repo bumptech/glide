@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
@@ -43,13 +44,13 @@ public class BaseGlideUrlLoaderTest {
   @Test
   public void testReturnsNullIfUrlIsNull() {
     urlLoader.resultUrl = null;
-    assertNull(urlLoader.getDataFetcher(new Object(), 100, 100));
+    assertNull(urlLoader.buildLoadData(new Object(), 100, 100));
   }
 
   @Test
   public void testReturnsNullIfUrlIsEmpty() {
     urlLoader.resultUrl = "    ";
-    assertNull(urlLoader.getDataFetcher(new Object(), 100, 100));
+    assertNull(urlLoader.buildLoadData(new Object(), 100, 100));
   }
 
   @Test
@@ -61,10 +62,10 @@ public class BaseGlideUrlLoaderTest {
     when(modelCache.get(eq(model), eq(width), eq(height))).thenReturn(expectedUrl);
     DataFetcher<InputStream> expectedFetcher = mock(DataFetcher.class);
 
-    when(wrapped.getDataFetcher(eq(expectedUrl), eq(width), eq(height)))
-        .thenReturn(expectedFetcher);
+    when(wrapped.buildLoadData(eq(expectedUrl), eq(width), eq(height)))
+        .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), expectedFetcher));
 
-    assertEquals(expectedFetcher, urlLoader.getDataFetcher(model, width, height));
+    assertEquals(expectedFetcher, urlLoader.buildLoadData(model, width, height).fetcher);
   }
 
   @Test
@@ -74,18 +75,19 @@ public class BaseGlideUrlLoaderTest {
 
     urlLoader.resultUrl = "fakeUrl";
     final DataFetcher<InputStream> expected = mock(DataFetcher.class);
-    when(wrapped.getDataFetcher(any(GlideUrl.class), eq(width), eq(height)))
-        .thenAnswer(new Answer<DataFetcher<InputStream>>() {
+    when(wrapped.buildLoadData(any(GlideUrl.class), eq(width), eq(height)))
+        .thenAnswer(new Answer<ModelLoader.LoadData<InputStream>>() {
           @Override
-          public DataFetcher<InputStream> answer(InvocationOnMock invocationOnMock)
+          public ModelLoader.LoadData<InputStream> answer(InvocationOnMock invocationOnMock)
               throws Throwable {
             GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[0];
             assertEquals(urlLoader.resultUrl, glideUrl.toString());
-            return expected;
+            return new ModelLoader.LoadData<>(mock(Key.class), expected);
 
           }
         });
-    assertEquals(expected, urlLoader.getDataFetcher(new Object(), width, height));
+    assertEquals(expected,
+        urlLoader.buildLoadData(new GlideUrl(urlLoader.resultUrl), width, height).fetcher);
   }
 
   @Test
@@ -104,7 +106,7 @@ public class BaseGlideUrlLoaderTest {
       }
     }).when(modelCache).put(eq(model), eq(width), eq(height), any(GlideUrl.class));
 
-    urlLoader.getDataFetcher(model, width, height);
+    urlLoader.buildLoadData(model, width, height);
 
     verify(modelCache).put(eq(model), eq(width), eq(height), any(GlideUrl.class));
   }
@@ -118,9 +120,10 @@ public class BaseGlideUrlLoaderTest {
     int height = 789;
 
     DataFetcher<InputStream> expected = mock(DataFetcher.class);
-    when(wrapped.getDataFetcher(any(GlideUrl.class), eq(width), eq(height))).thenReturn(expected);
+    when(wrapped.buildLoadData(any(GlideUrl.class), eq(width), eq(height)))
+        .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), expected));
 
-    assertEquals(expected, urlLoader.getDataFetcher(new Object(), width, height));
+    assertEquals(expected, urlLoader.buildLoadData(new Object(), width, height).fetcher);
   }
 
   private class TestLoader extends BaseGlideUrlLoader<Object> {

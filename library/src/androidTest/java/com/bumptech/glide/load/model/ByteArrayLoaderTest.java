@@ -34,7 +34,7 @@ public class ByteArrayLoaderTest {
   @Test
   public void testCanHandleByteArray() {
     byte[] data = new byte[10];
-    DataFetcher<Object> fetcher = loader.getDataFetcher(data, -1, -1);
+    DataFetcher<Object> fetcher = loader.buildLoadData(data, -1, -1).fetcher;
     assertNotNull(fetcher);
   }
 
@@ -44,13 +44,13 @@ public class ByteArrayLoaderTest {
     Object expected = new Object();
     when(converter.convert(eq(data))).thenReturn(expected);
 
-    loader.getDataFetcher(data, 10, 10).loadData(Priority.HIGH, callback);
+    loader.buildLoadData(data, 10, 10).fetcher.loadData(Priority.HIGH, callback);
     verify(callback).onDataReady(eq(expected));
   }
 
   @Test
   public void testFetcherRetrunsDataClassFromConverter() {
     when(converter.getDataClass()).thenReturn(Object.class);
-    assertEquals(Object.class, loader.getDataFetcher(new byte[10], 10, 10).getDataClass());
+    assertEquals(Object.class, loader.buildLoadData(new byte[10], 10, 10).fetcher.getDataClass());
   }
 }

@@ -4,6 +4,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.model.ModelLoader;
 
 import java.io.File;
 import java.util.Iterator;
@@ -16,22 +17,23 @@ import java.util.List;
 class ResourceCacheGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
-  private final List<String> sourceIds;
+  private final List<Key> sourceIds;
   private final List<Class<?>> resourceClasses;
   private final int width;
   private final int height;
   private final DiskCache diskCache;
-  private final RequestContext<?> requestContext;
+  private final RequestContext<?, ?> requestContext;
   private final FetcherReadyCallback cb;
 
   private int sourceIdIndex = 0;
   private int resourceClassIndex = -1;
-  private Iterator<DataFetcher<?>> cacheFetchers;
   private DataFetcher<?> fetcher;
+  private Key sourceKey;
+  private Iterator<ModelLoader.LoadData<?>> loadDataIterator;
 
-  public ResourceCacheGenerator(List<String> sourceIds,
+  public ResourceCacheGenerator(List<Key> sourceIds,
       List<Class<?>> resourceClasses, int width, int height, DiskCache diskCache,
-      RequestContext<?> requestContext, FetcherReadyCallback cb) {
+      RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
     this.sourceIds = sourceIds;
     this.resourceClasses = resourceClasses;
     this.width = width;
@@ -43,7 +45,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public boolean startNext() {
-    while (cacheFetchers == null || !cacheFetchers.hasNext()) {
+    while (loadDataIterator == null || !loadDataIterator.hasNext()) {
       resourceClassIndex++;
       if (resourceClassIndex >= resourceClasses.size()) {
         sourceIdIndex++;
@@ -53,7 +55,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
         resourceClassIndex = 0;
       }
 
-      String sourceId = sourceIds.get(sourceIdIndex);
+      Key sourceId = sourceIds.get(sourceIdIndex);
       Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
       Transformation<?> transformation = requestContext.getTransformation(resourceClass);
 
@@ -61,13 +63,14 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
           transformation, resourceClass);
       File cacheFile = diskCache.get(key);
       if (cacheFile != null) {
-        cacheFetchers = requestContext.getDataFetchers(cacheFile, width, height).iterator();
+        this.sourceKey = key;
+        loadDataIterator = requestContext.getDataFetchers(cacheFile, width, height).iterator();
       }
     }
 
     fetcher = null;
-    while (fetcher == null && cacheFetchers.hasNext()) {
-      fetcher = cacheFetchers.next();
+    while (fetcher == null && loadDataIterator.hasNext()) {
+      fetcher = loadDataIterator.next().fetcher;
       if (fetcher != null) {
         fetcher.loadData(requestContext.getPriority(), this);
       }
@@ -78,6 +81,6 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceIds.get(sourceIdIndex), data, fetcher);
+    cb.onDataFetcherReady(sourceKey, data, fetcher);
   }
 }

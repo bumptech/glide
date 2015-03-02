@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import android.net.Uri;
 
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.tests.Util;
 
@@ -33,10 +34,9 @@ public class StringLoaderTest {
   // Not a magic number, just an arbitrary non zero value.
   private static final int IMAGE_SIDE = 100;
 
-  @Mock
-  ModelLoader<Uri, Object> uriLoader;
-  @Mock
-  DataFetcher<Object> fetcher;
+  @Mock ModelLoader<Uri, Object> uriLoader;
+  @Mock DataFetcher<Object> fetcher;
+  @Mock Key key;
 
   private StringLoader<Object> loader;
 
@@ -55,11 +55,12 @@ public class StringLoaderTest {
 
     File f = RuntimeEnvironment.application.getCacheDir();
     Uri expected = Uri.fromFile(f);
-    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
-        .thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(f.getAbsolutePath()));
-    assertEquals(fetcher, loader.getDataFetcher(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher,
+        loader.buildLoadData(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
@@ -70,11 +71,11 @@ public class StringLoaderTest {
         "/storage/emulated/0/DCIM/Camera/IMG_20140520_100001:nopm:.jpg,mimeType=image/jpeg,"
             + "2448x3264,orientation=0,date=Tue";
     Uri expected = Uri.fromFile(new File(testPath));
-    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
-        .thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(new ModelLoader.LoadData<Object>(key, fetcher));
 
     assertTrue(loader.handles(testPath));
-    assertEquals(fetcher, loader.getDataFetcher(testPath, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher, loader.buildLoadData(testPath, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
@@ -82,22 +83,24 @@ public class StringLoaderTest {
     File f = RuntimeEnvironment.application.getCacheDir();
 
     Uri expected = Uri.fromFile(f);
-    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
-        .thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(f.getAbsolutePath()));
-    assertEquals(fetcher, loader.getDataFetcher(expected.toString(), IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher,
+        loader.buildLoadData(expected.toString(), IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
   public void testHandlesResourceUris() throws IOException {
     Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
 
-    when(uriLoader.getDataFetcher(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
-        .thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(resourceUri.toString()));
-    assertEquals(fetcher, loader.getDataFetcher(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher,
+        loader.buildLoadData(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
@@ -105,11 +108,11 @@ public class StringLoaderTest {
     String url = "http://www.google.com";
 
     Uri expected = Uri.parse(url);
-    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
-        .thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(url));
-    assertEquals(fetcher, loader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher, loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
@@ -117,11 +120,11 @@ public class StringLoaderTest {
     String url = "https://www.google.com";
 
     Uri expected = Uri.parse(url);
-    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
-        .thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(url));
-    assertEquals(fetcher, loader.getDataFetcher(url, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher, loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 
   @Test
@@ -129,10 +132,10 @@ public class StringLoaderTest {
     String content = "content://com.bumptech.glide";
 
     Uri expected = Uri.parse(content);
-    when(uriLoader.getDataFetcher(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
-        .thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE)))
+        .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(content));
-    assertEquals(fetcher, loader.getDataFetcher(content, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher, loader.buildLoadData(content, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 }

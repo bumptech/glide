@@ -5,35 +5,36 @@ import android.content.Context;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.signature.ObjectKey;
 
 /**
  * A put of helper classes that performs no loading and instead always returns the given model as
  * the data to decode.
  *
- * @param <ModelType> The type of model that will also be returned as decodable data.
+ * @param <Model> The type of model that will also be returned as decodable data.
  */
-public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelType> {
+public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
 
   @Override
-  public DataFetcher<ModelType> getDataFetcher(ModelType model, int width, int height) {
-    return new UnitFetcher<>(model);
+  public LoadData<Model> buildLoadData(Model model, int width, int height) {
+    return new LoadData<>(new ObjectKey(model), new UnitFetcher<>(model));
   }
 
   @Override
-  public boolean handles(ModelType model) {
+  public boolean handles(Model model) {
     return true;
   }
 
-  private static class UnitFetcher<ModelType> implements DataFetcher<ModelType> {
+  private static class UnitFetcher<Model> implements DataFetcher<Model> {
 
-    private final ModelType resource;
+    private final Model resource;
 
-    public UnitFetcher(ModelType resource) {
+    public UnitFetcher(Model resource) {
       this.resource = resource;
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super ModelType> callback) {
+    public void loadData(Priority priority, DataCallback<? super Model> callback) {
       callback.onDataReady(resource);
     }
 
@@ -54,8 +55,8 @@ public class UnitModelLoader<ModelType> implements ModelLoader<ModelType, ModelT
 
     @SuppressWarnings("unchecked")
     @Override
-    public Class<ModelType> getDataClass() {
-      return (Class<ModelType>) resource.getClass();
+    public Class<Model> getDataClass() {
+      return (Class<Model>) resource.getClass();
     }
 
     @Override

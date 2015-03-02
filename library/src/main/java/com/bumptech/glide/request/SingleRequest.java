@@ -66,7 +66,7 @@ public final class SingleRequest<R> implements Request,
 
   private final String tag = String.valueOf(hashCode());
 
-  private RequestContext<R> requestContext;
+  private RequestContext<?, R> requestContext;
   private RequestCoordinator requestCoordinator;
   private Target<R> target;
   private RequestListener<R> requestListener;
@@ -78,7 +78,7 @@ public final class SingleRequest<R> implements Request,
   private long startTime;
   private Status status;
 
-  public static <R> SingleRequest<R> obtain(RequestContext<R> requestContext, Target<R> target,
+  public static <R> SingleRequest<R> obtain(RequestContext<?, R> requestContext, Target<R> target,
       RequestListener<R> requestListener, RequestCoordinator requestCoordinator, Engine engine,
       TransitionFactory<? super R> animationFactory) {
     @SuppressWarnings("unchecked") SingleRequest<R> request =
@@ -95,7 +95,7 @@ public final class SingleRequest<R> implements Request,
     // just create, instances are reused with recycle/init
   }
 
-  private void init(RequestContext<R> requestContext,
+  private void init(RequestContext<?, R> requestContext,
       Target<R> target, RequestListener<R> requestListener,
       RequestCoordinator requestCoordinator, Engine engine,
       TransitionFactory<? super R> animationFactory) {

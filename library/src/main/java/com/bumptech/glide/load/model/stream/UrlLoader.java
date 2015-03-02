@@ -2,7 +2,6 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 
-import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -25,8 +24,8 @@ public class UrlLoader implements ModelLoader<URL, InputStream> {
   }
 
   @Override
-  public DataFetcher<InputStream> getDataFetcher(URL model, int width, int height) {
-    return glideUrlLoader.getDataFetcher(new GlideUrl(model), width, height);
+  public LoadData<InputStream> buildLoadData(URL model, int width, int height) {
+    return glideUrlLoader.buildLoadData(new GlideUrl(model), width, height);
   }
 
   @Override

@@ -2,12 +2,16 @@ package com.bumptech.glide.load.model.stream;
 
 import android.text.TextUtils;
 
-import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A base class for loading data over http/https. Can be subclassed for use with any model that can
@@ -30,7 +34,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
   }
 
   @Override
-  public DataFetcher<InputStream> getDataFetcher(Model model, int width, int height) {
+  public LoadData<InputStream> buildLoadData(Model model, int width, int height) {
     GlideUrl result = null;
     if (modelCache != null) {
       result = modelCache.get(model, width, height);
@@ -49,7 +53,22 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
       }
     }
 
-    return concreteLoader.getDataFetcher(result, width, height);
+    List<String> alternateUrls = getAlternateUrls(model, width, height);
+    LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height);
+    if (alternateUrls.isEmpty()) {
+      return concreteLoaderData;
+    } else {
+      return new LoadData<>(concreteLoaderData.sourceKey, getAlternateKeys(alternateUrls),
+          concreteLoaderData.fetcher);
+    }
+  }
+
+  private static List<Key> getAlternateKeys(List<String> alternateUrls) {
+    List<Key> result = new ArrayList<>(alternateUrls.size());
+    for (String alternate : alternateUrls) {
+      result.add(new ObjectKey(alternate));
+    }
+    return result;
   }
 
   /**
@@ -61,4 +80,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @return The String url.
    */
   protected abstract String getUrl(Model model, int width, int height);
+
+  protected List<String> getAlternateUrls(Model model, int width, int height) {
+    return Collections.emptyList();
+  }
 }

@@ -25,7 +25,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Runnable,
     Prioritized {
 
-  private final RequestContext<R> requestContext;
+  private final RequestContext<?, R> requestContext;
   private final EngineKey loadKey;
   private final int width;
   private final int height;
@@ -37,13 +37,14 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private DataFetcherGenerator generator;
 
   private Thread currentThread;
-  private String sourceId;
-  private Object data;
-  private DataFetcher<?> fetcher;
+  private Key currentCacheKey;
+  private Object currentData;
+  private DataFetcher<?> currentFetcher;
 
   private volatile boolean isCancelled;
+  private long startFetchTime;
 
-  public DecodeJob(RequestContext<R> requestContext, EngineKey loadKey, int width, int height,
+  public DecodeJob(RequestContext<?, R> requestContext, EngineKey loadKey, int width, int height,
       DiskCacheProvider diskCacheProvider, Callback<R> callback) {
     this.requestContext = requestContext;
     this.loadKey = loadKey;
@@ -83,7 +84,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   public void cancel() {
-    requestContext.getDataFetchers().cancel();
+    requestContext.getLoadDataSet().cancel();
     isCancelled = true;
   }
 
@@ -93,7 +94,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public void run() {
+  public synchronized void run() {
     switch (runReason) {
       case INITIALIZE:
         stage = Stage.RESOURCE_CACHE;
@@ -117,15 +118,15 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
     switch (stage) {
       case RESOURCE_CACHE:
-        return new ResourceCacheGenerator(requestContext.getSourceIds(),
+        return new ResourceCacheGenerator(requestContext.getCacheKeys(),
             requestContext.getRegisteredResourceClasses(), width, height,
             diskCacheProvider.getDiskCache(), requestContext, this);
       case DATA_CACHE:
-        return new DataCacheGenerator(requestContext.getSourceIds(), width, height,
+        return new DataCacheGenerator(requestContext.getCacheKeys(), width, height,
             diskCacheProvider.getDiskCache(), requestContext, this);
       case SOURCE:
-        return new SourceGenerator(width, height, requestContext, diskCacheProvider.getDiskCache(),
-            this);
+        return new SourceGenerator<>(width, height, requestContext,
+            diskCacheProvider.getDiskCache(), this);
       default:
         throw new IllegalStateException("Unrecognized stage: " + stage);
     }
@@ -133,6 +134,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void runGenerators() {
     currentThread = Thread.currentThread();
+    startFetchTime = LogTime.getLogTime();
     while (!isCancelled && generator != null && !generator.startNext()) {
       stage = getNextStage();
       generator = getNextGenerator();
@@ -166,10 +168,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public void onDataFetcherReady(String sourceId, Object data, DataFetcher fetcher) {
-    this.sourceId = sourceId;
-    this.data = data;
-    this.fetcher = fetcher;
+  public synchronized void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher) {
+    this.currentCacheKey = sourceKey;
+    this.currentData = data;
+    this.currentFetcher = fetcher;
     if (Thread.currentThread() != currentThread) {
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
@@ -179,7 +181,13 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void decodeFromRetrievedData() {
-    Resource<R> resource = decodeFromData(sourceId, fetcher, data);
+    if (Logs.isEnabled(Log.VERBOSE)) {
+      Logs.log(Log.VERBOSE, "Retrieved data"
+          + ", data: " + currentData
+          + ", fetcher: " + currentFetcher
+          + ", duration: " + LogTime.getElapsedMillis(startFetchTime));
+    }
+    Resource<R> resource = decodeFromData(currentFetcher, currentData);
     if (resource != null) {
       callback.onResourceReady(resource);
     } else {
@@ -187,7 +195,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
   }
 
-  private <Data> Resource<R> decodeFromData(String dataFetcherId, DataFetcher<?> fetcher,
+  private <Data> Resource<R> decodeFromData(DataFetcher<?> fetcher,
       Data data) {
     try {
       if (data == null) {
@@ -195,7 +203,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
       long startTime = LogTime.getLogTime();
       DataSource dataSource = getDataSource(fetcher);
-      Resource<R> result = decodeFromFetcher(dataFetcherId, data, dataSource);
+      Resource<R> result = decodeFromFetcher(data, dataSource);
       if (Logs.isEnabled(Log.VERBOSE)) {
         logWithTimeAndKey("Decoded result " + result, startTime);
       }
@@ -206,20 +214,19 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @SuppressWarnings("unchecked")
-  private <Data> Resource<R> decodeFromFetcher(String dataFetcherId, Data data,
-      DataSource dataSource) {
+  private <Data> Resource<R> decodeFromFetcher(Data data, DataSource dataSource) {
     LoadPath<Data, ?, R> path = requestContext.getLoadPath((Class<Data>) data.getClass());
     if (path != null) {
-      return runLoadPath(dataFetcherId, data, dataSource, path);
+      return runLoadPath(data, dataSource, path);
     } else {
       return null;
     }
   }
 
-  private <Data, ResourceType> Resource<R> runLoadPath(String sourceId, Data data,
-      DataSource dataSource, LoadPath<Data, ResourceType, R> path) {
+  private <Data, ResourceType> Resource<R> runLoadPath(Data data, DataSource dataSource,
+      LoadPath<Data, ResourceType, R> path) {
     return path.load(data, requestContext, width, height,
-        new DecodeCallback<ResourceType>(sourceId, dataSource));
+        new DecodeCallback<ResourceType>(dataSource));
   }
 
   private DataSource getDataSource(DataFetcher<?> fetcher) {
@@ -240,11 +247,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
-    private final String sourceId;
     private final DataSource dataSource;
 
-    public DecodeCallback(String sourceId, DataSource dataSource) {
-      this.sourceId = sourceId;
+    public DecodeCallback(DataSource dataSource) {
       this.dataSource = dataSource;
     }
 
@@ -273,15 +278,17 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
 
       long startEncodeTime = LogTime.getLogTime();
-      if (requestContext.getDiskCacheStrategy().cacheResult(dataSource, encodeStrategy)) {
+      DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
+      boolean isFromAlternateCacheKey = !requestContext.isSourceKey(currentCacheKey);
+      if (diskCacheStrategy.cacheResult(isFromAlternateCacheKey, dataSource, encodeStrategy)) {
         if (encoder == null) {
           throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
         }
         final Key key;
         if (encodeStrategy == EncodeStrategy.SOURCE) {
-          key = new DataCacheKey(sourceId, requestContext.getSignature());
+          key = new DataCacheKey(currentCacheKey, requestContext.getSignature());
         } else if (encodeStrategy == EncodeStrategy.TRANSFORMED) {
-          key = new ResourceCacheKey(sourceId, requestContext.getSignature(), width, height,
+          key = new ResourceCacheKey(currentCacheKey, requestContext.getSignature(), width, height,
               appliedTransformation, resourceSubClass);
         } else {
           throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);

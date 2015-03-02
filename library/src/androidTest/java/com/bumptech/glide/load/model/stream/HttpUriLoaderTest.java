@@ -39,21 +39,21 @@ public class HttpUriLoaderTest {
   @Test
   public void testHandlesHttpUris() throws MalformedURLException {
     Uri httpUri = Uri.parse("http://www.google.com");
-    loader.getDataFetcher(httpUri, IMAGE_SIDE, IMAGE_SIDE);
+    loader.buildLoadData(httpUri, IMAGE_SIDE, IMAGE_SIDE);
 
     assertTrue(loader.handles(httpUri));
     verify(urlLoader)
-        .getDataFetcher(eq(new GlideUrl(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        .buildLoadData(eq(new GlideUrl(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
   }
 
   @Test
   public void testHandlesHttpsUris() throws MalformedURLException {
     Uri httpsUri = Uri.parse("https://www.google.com");
-    loader.getDataFetcher(httpsUri, IMAGE_SIDE, IMAGE_SIDE);
+    loader.buildLoadData(httpsUri, IMAGE_SIDE, IMAGE_SIDE);
 
     assertTrue(loader.handles(httpsUri));
     verify(urlLoader)
-        .getDataFetcher(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        .buildLoadData(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
   }
 
   // Test for https://github.com/bumptech/glide/issues/71.
@@ -63,9 +63,9 @@ public class HttpUriLoaderTest {
         "http://myserver_url.com:80http://myserver_url.com/webapp/images/no_image.png?size=100");
 
     assertTrue(loader.handles(mostlyInvalidHttpUri));
-    loader.getDataFetcher(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE);
+    loader.buildLoadData(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE);
     verify(urlLoader)
-        .getDataFetcher(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE),
+        .buildLoadData(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE),
             eq(IMAGE_SIDE));
   }
 }

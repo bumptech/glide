@@ -4,8 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
-import com.bumptech.glide.load.data.DataFetcher;
-
 import java.io.File;
 import java.io.InputStream;
 
@@ -23,7 +21,17 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
   }
 
   @Override
-  public DataFetcher<Data> getDataFetcher(String model, int width, int height) {
+  public LoadData<Data> buildLoadData(String model, int width, int height) {
+    Uri uri = parseUri(model);
+    return uriLoader.buildLoadData(uri, width, height);
+  }
+
+  @Override
+  public boolean handles(String model) {
+    return true;
+  }
+
+  private static Uri parseUri(String model) {
     Uri uri;
     if (model.startsWith("/")) {
       uri = toFileUri(model);
@@ -34,13 +42,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
         uri = toFileUri(model);
       }
     }
-
-    return uriLoader.getDataFetcher(uri, width, height);
-  }
-
-  @Override
-  public boolean handles(String model) {
-    return true;
+    return uri;
   }
 
   private static Uri toFileUri(String path) {

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import android.net.Uri;
 
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import org.junit.Before;
@@ -26,10 +27,9 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ResourceLoaderTest {
 
-  @Mock
-  ModelLoader<Uri, Object> uriLoader;
-  @Mock
-  DataFetcher<Object> fetcher;
+  @Mock ModelLoader<Uri, Object> uriLoader;
+  @Mock DataFetcher<Object> fetcher;
+  @Mock Key key;
 
   private ResourceLoader<Object> loader;
 
@@ -44,9 +44,10 @@ public class ResourceLoaderTest {
   public void testCanHandleId() {
     int id = android.R.drawable.star_off;
     Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
-    when(uriLoader.getDataFetcher(eq(contentUri), anyInt(), anyInt())).thenReturn(fetcher);
+    when(uriLoader.buildLoadData(eq(contentUri), anyInt(), anyInt()))
+        .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(id));
-    assertEquals(fetcher, loader.getDataFetcher(id, 100, 100));
+    assertEquals(fetcher, loader.buildLoadData(id, 100, 100).fetcher);
   }
 }

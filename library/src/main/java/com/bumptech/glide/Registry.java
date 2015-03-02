@@ -5,9 +5,9 @@ import android.content.Context;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
-import com.bumptech.glide.load.data.DataFetcherSet;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
+import com.bumptech.glide.load.data.LoadDataSet;
 import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
@@ -204,8 +204,8 @@ public class Registry {
     return dataRewinderRegistry.build(data);
   }
 
-  public DataFetcherSet<?> getDataFetchers(Object model, int width, int height) {
-    DataFetcherSet<?> result = modelLoaderRegistry.getDataFetchers(model, width, height);
+  public <Model> LoadDataSet<Model> getLoadDataSet(Model model, int width, int height) {
+    LoadDataSet<Model> result = modelLoaderRegistry.getDataFetchers(model, width, height);
     if (result.isEmpty()) {
       throw new NoModelLoaderAvailableException(model);
     }

@@ -3,7 +3,6 @@ package com.bumptech.glide.load.model.stream;
 import android.content.Context;
 import android.net.Uri;
 
-import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -29,8 +28,8 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
   }
 
   @Override
-  public DataFetcher<InputStream> getDataFetcher(Uri model, int width, int height) {
-    return urlLoader.getDataFetcher(new GlideUrl(model.toString()), width, height);
+  public LoadData<InputStream> buildLoadData(Uri model, int width, int height) {
+    return urlLoader.buildLoadData(new GlideUrl(model.toString()), width, height);
   }
 
   @Override

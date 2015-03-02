@@ -7,6 +7,7 @@ import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,8 +21,8 @@ import java.nio.channels.FileChannel;
 public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
 
   @Override
-  public DataFetcher<ByteBuffer> getDataFetcher(File file, int width, int height) {
-    return new ByteBufferFetcher(file);
+  public LoadData<ByteBuffer> buildLoadData(File file, int width, int height) {
+    return new LoadData<>(new ObjectKey(file), new ByteBufferFetcher(file));
   }
 
   @Override

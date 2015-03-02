@@ -18,7 +18,8 @@ public enum DiskCacheStrategy {
     }
 
     @Override
-    public boolean isResourceCachable(DataSource dataSource, EncodeStrategy encodeStrategy) {
+    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+        EncodeStrategy encodeStrategy) {
       return dataSource != DataSource.RESOURCE_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
   }, true /*decodeCachedData*/, true /*decodeCachedResource*/),
@@ -32,7 +33,8 @@ public enum DiskCacheStrategy {
     }
 
     @Override
-    public boolean isResourceCachable(DataSource dataSource, EncodeStrategy encodeStrategy) {
+    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+        EncodeStrategy encodeStrategy) {
       return false;
     }
   }, false /*decodeCachedData*/, false /*decodeCachedResource*/),
@@ -46,7 +48,8 @@ public enum DiskCacheStrategy {
     }
 
     @Override
-    public boolean isResourceCachable(DataSource dataSource, EncodeStrategy encodeStrategy) {
+    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+        EncodeStrategy encodeStrategy) {
       return false;
     }
   }, true /*decodeCachedData*/, false /*decodeCachedResource*/),
@@ -60,7 +63,8 @@ public enum DiskCacheStrategy {
     }
 
     @Override
-    public boolean isResourceCachable(DataSource dataSource, EncodeStrategy encodeStrategy) {
+    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+        EncodeStrategy encodeStrategy) {
       return dataSource != DataSource.RESOURCE_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
   }, false /*decodeCachedData*/, true /*decodeCachedResource*/),
@@ -78,8 +82,11 @@ public enum DiskCacheStrategy {
     }
 
     @Override
-    public boolean isResourceCachable(DataSource dataSource, EncodeStrategy encodeStrategy) {
-      return dataSource == DataSource.LOCAL && encodeStrategy == EncodeStrategy.TRANSFORMED;
+    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+        EncodeStrategy encodeStrategy) {
+      return ((isFromAlternateCacheKey && dataSource == DataSource.DATA_DISK_CACHE)
+          || dataSource == DataSource.LOCAL)
+          && encodeStrategy == EncodeStrategy.TRANSFORMED;
     }
   }, true /*decodeCachedData*/, true /*decodeCachedResource*/);
 
@@ -90,7 +97,8 @@ public enum DiskCacheStrategy {
   private interface DiskCacheChooser {
     boolean isSourceCachable(DataSource dataSource);
 
-    boolean isResourceCachable(DataSource dataSource, EncodeStrategy encodeStrategy);
+    boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+        EncodeStrategy encodeStrategy);
   }
 
   DiskCacheStrategy(DiskCacheChooser chooser, boolean decodeCachedData,
@@ -110,8 +118,9 @@ public enum DiskCacheStrategy {
   /**
    * Returns true if this request should cache the final transformed result.
    */
-  public boolean cacheResult(DataSource source, EncodeStrategy encodeStrategy) {
-    return chooser.isResourceCachable(source, encodeStrategy);
+  public boolean cacheResult(boolean isFromAlternateCacheKey, DataSource source,
+      EncodeStrategy encodeStrategy) {
+    return chooser.isResourceCachable(isFromAlternateCacheKey, source, encodeStrategy);
   }
 
   /**

@@ -8,6 +8,7 @@ import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,8 +31,8 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
   }
 
   @Override
-  public DataFetcher<Data> getDataFetcher(File model, int width, int height) {
-    return new FileFetcher<>(model, fileOpener);
+  public LoadData<Data> buildLoadData(File model, int width, int height) {
+    return new LoadData<>(new ObjectKey(model), new FileFetcher<>(model, fileOpener));
   }
 
   @Override

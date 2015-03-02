@@ -114,7 +114,7 @@ public class Engine implements EngineJobListener,
    * @param height The target height in pixels of the desired resource.
    * @param cb     The callback that will be called when the load completes.
    */
-  public <Z, R> LoadStatus load(RequestContext<R> requestContext, int width, int height,
+  public <Z, R> LoadStatus load(RequestContext<?, R> requestContext, int width, int height,
       ResourceCallback cb) {
     Util.assertMainThread();
     long startTime = LogTime.getLogTime();

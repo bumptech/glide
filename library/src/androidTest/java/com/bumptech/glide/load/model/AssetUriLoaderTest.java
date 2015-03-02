@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.res.AssetManager;
@@ -26,8 +25,8 @@ import org.robolectric.annotation.Config;
 public class AssetUriLoaderTest {
   private static final int IMAGE_SIDE = 10;
 
-  @Mock
-  AssetUriLoader.AssetFetcherFactory<Object> factory;
+  @Mock AssetUriLoader.AssetFetcherFactory<Object> factory;
+  @Mock DataFetcher<Object> fetcher;
   private AssetUriLoader<Object> loader;
 
   @Before
@@ -39,9 +38,8 @@ public class AssetUriLoaderTest {
   @Test
   public void testHandlesAssetUris() {
     Uri assetUri = Uri.parse("file:///android_asset/assetName");
-    DataFetcher<Object> expected = mock(DataFetcher.class);
-    when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(expected);
+    when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(fetcher);
     assertTrue(loader.handles(assetUri));
-    assertEquals(expected, loader.getDataFetcher(assetUri, IMAGE_SIDE, IMAGE_SIDE));
+    assertEquals(fetcher, loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
   }
 }

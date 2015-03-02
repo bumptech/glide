@@ -10,45 +10,41 @@ import java.security.MessageDigest;
  */
 final class DataCacheKey implements Key {
 
-  private final String id;
+  private final Key sourceKey;
   private final Key signature;
 
-  public DataCacheKey(String id, Key signature) {
-    this.id = id;
+  public DataCacheKey(Key sourceKey, Key signature) {
+    this.sourceKey = sourceKey;
     this.signature = signature;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    if (o instanceof DataCacheKey) {
+      DataCacheKey other = (DataCacheKey) o;
+      return sourceKey.equals(other.sourceKey) && signature.equals(other.signature);
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    DataCacheKey that = (DataCacheKey) o;
-
-    if (!id.equals(that.id)) {
-      return false;
-    }
-    if (!signature.equals(that.signature)) {
-      return false;
-    }
-
-    return true;
+    return false;
   }
 
   @Override
   public int hashCode() {
-    int result = id.hashCode();
+    int result = sourceKey.hashCode();
     result = 31 * result + signature.hashCode();
     return result;
   }
 
   @Override
+  public String toString() {
+    return "DataCacheKey{"
+        + "sourceKey=" + sourceKey
+        + ", signature=" + signature
+        + '}';
+  }
+
+  @Override
   public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
-    messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
+    sourceKey.updateDiskCacheKey(messageDigest);
     signature.updateDiskCacheKey(messageDigest);
   }
 }

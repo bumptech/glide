@@ -2,7 +2,7 @@ package com.bumptech.glide.load.model;
 
 import android.content.Context;
 
-import com.bumptech.glide.load.data.DataFetcherSet;
+import com.bumptech.glide.load.data.LoadDataSet;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,10 +56,10 @@ public class ModelLoaderRegistry {
     }
   }
 
-  public synchronized <A> DataFetcherSet<?> getDataFetchers(A model, int width, int height) {
+  public synchronized <A> LoadDataSet<A> getDataFetchers(A model, int width, int height) {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoaders(model);
 
-    return new DataFetcherSet<>(model, width, height, modelLoaders);
+    return new LoadDataSet<>(model, width, height, modelLoaders);
   }
 
   public synchronized <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass,

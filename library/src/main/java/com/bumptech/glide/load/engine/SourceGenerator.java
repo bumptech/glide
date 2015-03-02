@@ -1,9 +1,14 @@
 package com.bumptech.glide.load.engine;
 
+import android.util.Log;
+
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.util.LogTime;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -16,68 +21,77 @@ import java.util.Iterator;
  * <p> Depending on the disk cache strategy, source data may first be written to disk and then
  * loaded from the cache file rather than returned directly. </p>
  */
-class SourceGenerator implements DataFetcherGenerator,
+class SourceGenerator<Model> implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
-  private final Iterator<DataFetcher<?>> sourceFetchers;
   private final int width;
   private final int height;
-  private final RequestContext<?> requestContext;
+  private final RequestContext<Model, ?> requestContext;
   private final DiskCache diskCache;
   private final FetcherReadyCallback cb;
+  private final Iterator<ModelLoader.LoadData<?>> dataLoaderIterator;
 
-  private DataFetcher<?> fetcher;
+  private ModelLoader.LoadData<?> loadData;
   private DataCacheGenerator sourceCacheGenerator;
 
-  public SourceGenerator(int width, int height, RequestContext<?> requestContext,
-      DiskCache diskCache, FetcherReadyCallback cb) {
+  public SourceGenerator(int width, int height,
+      RequestContext<Model, ?> requestContext, DiskCache diskCache, FetcherReadyCallback cb) {
     this.width = width;
     this.height = height;
     this.requestContext = requestContext;
     this.diskCache = diskCache;
     this.cb = cb;
-    this.sourceFetchers = requestContext.getDataFetchers().iterator();
+
+    dataLoaderIterator = requestContext.getLoadDataSet().iterator();
   }
 
   @Override
   public boolean startNext() {
-    fetcher = null;
+    loadData = null;
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
     sourceCacheGenerator = null;
 
-    while (fetcher == null && sourceFetchers.hasNext()) {
-      fetcher = sourceFetchers.next();
-      if (fetcher != null) {
-        fetcher.loadData(requestContext.getPriority(), this);
+    while (loadData == null && dataLoaderIterator.hasNext()) {
+      loadData = dataLoaderIterator.next();
+      if (loadData != null) {
+        loadData.fetcher.loadData(requestContext.getPriority(), this);
       }
     }
-    return fetcher != null;
+    return loadData != null;
   }
 
   @Override
   public void onDataReady(Object data) {
     if (data != null
-        && requestContext.getDiskCacheStrategy().cacheSource(fetcher.getDataSource())) {
+        && requestContext.getDiskCacheStrategy().cacheSource(loadData.fetcher.getDataSource())) {
+      long startTime = LogTime.getLogTime();
       try {
         Encoder<Object> encoder = requestContext.getSourceEncoder(data);
         DataCacheWriter<Object> writer =
             new DataCacheWriter<>(encoder, data, requestContext.getOptions());
-        Key originalKey = new DataCacheKey(fetcher.getId(), requestContext.getSignature());
+        Key originalKey = new DataCacheKey(loadData.sourceKey, requestContext.getSignature());
         diskCache.put(originalKey, writer);
+        if (Logs.isEnabled(Log.VERBOSE)) {
+          Logs.log(Log.VERBOSE, "Finished encoding source to cache"
+              + ", key: " + originalKey
+              + ", data: " + data
+              + ", encoder: " + encoder
+              + ", duration: " + LogTime.getElapsedMillis(startTime));
+        }
       } finally {
-        fetcher.cleanup();
+        loadData.fetcher.cleanup();
       }
 
       sourceCacheGenerator =
-          new DataCacheGenerator(Collections.singletonList(fetcher.getId()), width, height,
+          new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), width, height,
               diskCache, requestContext, cb);
       if (!sourceCacheGenerator.startNext()) {
-        cb.onDataFetcherReady(fetcher.getId(), null /*data*/, fetcher);
+        cb.onDataFetcherReady(loadData.sourceKey, null /*data*/, loadData.fetcher);
       }
     } else {
-      cb.onDataFetcherReady(fetcher.getId(), data, fetcher);
+      cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher);
     }
   }
 }

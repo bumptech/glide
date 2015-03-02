@@ -28,7 +28,7 @@ public class LoadPath<Data, ResourceType, Transcode> {
     this.decodePaths = Preconditions.checkNotEmpty(decodePaths);
   }
 
-  public Resource<Transcode> load(Data data, RequestContext<Transcode> context,
+  public Resource<Transcode> load(Data data, RequestContext<?, Transcode> context,
       int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) {
     Preconditions.checkNotNull(data);
 

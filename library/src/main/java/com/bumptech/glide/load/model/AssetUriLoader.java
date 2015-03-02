@@ -9,6 +9,7 @@ import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorAssetPathFetcher;
 import com.bumptech.glide.load.data.StreamAssetPathFetcher;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
 
@@ -32,9 +33,9 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public DataFetcher<Data> getDataFetcher(Uri model, int width, int height) {
+  public LoadData<Data> buildLoadData(Uri model, int width, int height) {
     String assetPath = model.toString().substring(ASSET_PREFIX_LENGTH);
-    return factory.buildFetcher(assetManager, assetPath);
+    return new LoadData<>(new ObjectKey(model), factory.buildFetcher(assetManager, assetPath));
   }
 
   @Override

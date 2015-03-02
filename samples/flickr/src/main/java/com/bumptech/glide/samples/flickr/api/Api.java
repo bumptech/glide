@@ -71,6 +71,24 @@ public class Api {
     return result;
   }
 
+  private static List<String> getLargerSizeKeys(int width, int height) {
+    final int largestEdge = Math.max(width, height);
+
+    boolean isFirstLargest = true;
+    List<String> result = new ArrayList<>();
+    for (int edge : SORTED_SIZE_KEYS) {
+      if (largestEdge <= edge) {
+        if (isFirstLargest) {
+          isFirstLargest = false;
+        } else {
+          result.add(EDGE_TO_SIZE_KEY.get(edge));
+        }
+      }
+    }
+    return result;
+
+  }
+
   public static String getCacheableUrl(Photo photo) {
     return String.format(CACHEABLE_PHOTO_URL, photo.getFarm(), photo.getServer(), photo.getId(),
         photo.getSecret());
@@ -78,6 +96,14 @@ public class Api {
 
   public static String getPhotoURL(Photo photo, int width, int height) {
     return getPhotoUrl(photo, getSizeKey(width, height));
+  }
+
+  public static List<String> getAlternateUrls(Photo photo, int width, int height) {
+    List<String> result = new ArrayList<>();
+    for (String sizeKey : getLargerSizeKeys(width, height)) {
+      result.add(getPhotoUrl(photo, sizeKey));
+    }
+    return result;
   }
 
   private static String getUrlForMethod(String method) {

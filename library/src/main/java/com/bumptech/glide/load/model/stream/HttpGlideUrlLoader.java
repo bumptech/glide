@@ -2,13 +2,13 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 
-import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.HttpUrlFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
 
@@ -47,7 +47,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   }
 
   @Override
-  public DataFetcher<InputStream> getDataFetcher(GlideUrl model, int width, int height) {
+  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height) {
     // GlideUrls memoize parsed URLs so caching them saves a few object instantiations and time
     // spent parsing urls.
     GlideUrl url = model;
@@ -58,7 +58,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         url = model;
       }
     }
-    return new HttpUrlFetcher(url);
+    return new LoadData<>(new ObjectKey(url), new HttpUrlFetcher(url));
   }
 
   @Override

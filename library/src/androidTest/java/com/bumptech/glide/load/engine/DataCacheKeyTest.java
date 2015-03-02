@@ -2,14 +2,16 @@ package com.bumptech.glide.load.engine;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.KeyAssertions;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -20,12 +22,29 @@ import java.security.NoSuchAlgorithmException;
 @RunWith(JUnit4.class)
 public class DataCacheKeyTest {
 
+  @Mock Key firstKey;
+  @Mock Key firstSignature;
+  @Mock Key secondKey;
+  @Mock Key secondSignature;
+
+  @Before
+  public void setUp() throws UnsupportedEncodingException {
+    MockitoAnnotations.initMocks(this);
+    doAnswer(new WriteDigest("firstKey")).when(firstKey)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    doAnswer(new WriteDigest("firstSignature")).when(firstSignature)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    doAnswer(new WriteDigest("secondKey")).when(secondKey)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    doAnswer(new WriteDigest("secondSignature")).when(secondSignature)
+        .updateDiskCacheKey(any(MessageDigest.class));
+  }
+
   @Test
   public void testDiffersIfIdDiffers()
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    Key signature = mock(Key.class);
-    DataCacheKey first = new DataCacheKey("first", signature);
-    DataCacheKey second = new DataCacheKey("second", signature);
+    DataCacheKey first = new DataCacheKey(firstKey, firstSignature);
+    DataCacheKey second = new DataCacheKey(secondKey, firstSignature);
 
     KeyAssertions.assertDifferent(first, second);
   }
@@ -33,15 +52,8 @@ public class DataCacheKeyTest {
   @Test
   public void testDiffersIfSignatureDiffers()
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    Key firstSignature = mock(Key.class);
-    doAnswer(new WriteDigest("firstSignature")).when(firstSignature)
-        .updateDiskCacheKey(any(MessageDigest.class));
-    Key secondSignature = mock(Key.class);
-    doAnswer(new WriteDigest("secondSignature")).when(secondSignature)
-        .updateDiskCacheKey(any(MessageDigest.class));
-
-    DataCacheKey first = new DataCacheKey("key", firstSignature);
-    DataCacheKey second = new DataCacheKey("key", secondSignature);
+    DataCacheKey first = new DataCacheKey(firstKey, firstSignature);
+    DataCacheKey second = new DataCacheKey(firstKey, secondSignature);
 
     KeyAssertions.assertDifferent(first, second);
   }
@@ -49,9 +61,8 @@ public class DataCacheKeyTest {
   @Test
   public void testSameIfIdAndSignatureAreTheSame()
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    Key signature = mock(Key.class);
-    DataCacheKey first = new DataCacheKey("key", signature);
-    DataCacheKey second = new DataCacheKey("key", signature);
+    DataCacheKey first = new DataCacheKey(firstKey, firstSignature);
+    DataCacheKey second = new DataCacheKey(firstKey, firstSignature);
 
     KeyAssertions.assertSame(first, second);
   }

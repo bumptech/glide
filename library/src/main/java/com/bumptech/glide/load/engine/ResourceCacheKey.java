@@ -11,16 +11,16 @@ import java.security.MessageDigest;
  * A cache key for downsampled and transformed resource data + any requested signature.
  */
 final class ResourceCacheKey implements Key {
-  private final String id;
+  private final Key sourceKey;
   private final Key signature;
   private final int width;
   private final int height;
   private final Class<?> decodedResourceClass;
   private final String transformationId;
 
-  public ResourceCacheKey(String id, Key signature, int width, int height,
+  public ResourceCacheKey(Key sourceKey, Key signature, int width, int height,
       Transformation<?> appliedTransformation, Class<?> decodedResourceClass) {
-    this.id = id;
+    this.sourceKey = sourceKey;
     this.signature = signature;
     this.width = width;
     this.height = height;
@@ -35,15 +35,15 @@ final class ResourceCacheKey implements Key {
       return height == other.height && width == other.width
           && (transformationId == null
               ? other.transformationId == null : transformationId.equals(other.transformationId))
-          && decodedResourceClass.equals(other.decodedResourceClass) && id.equals(other.id)
-          && signature.equals(other.signature);
+          && decodedResourceClass.equals(other.decodedResourceClass)
+          && sourceKey.equals(other.sourceKey) && signature.equals(other.signature);
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    int result = id.hashCode();
+    int result = sourceKey.hashCode();
     result = 31 * result + signature.hashCode();
     result = 31 * result + width;
     result = 31 * result + height;
@@ -61,7 +61,7 @@ final class ResourceCacheKey implements Key {
       throws UnsupportedEncodingException {
     byte[] dimensions = ByteBuffer.allocate(8).putInt(width).putInt(height).array();
     signature.updateDiskCacheKey(messageDigest);
-    messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
+    sourceKey.updateDiskCacheKey(messageDigest);
     messageDigest.update(dimensions);
     if (transformationId != null) {
       messageDigest.update(transformationId.getBytes(STRING_CHARSET_NAME));
@@ -70,8 +70,8 @@ final class ResourceCacheKey implements Key {
 
   @Override
   public String toString() {
-    return "ResultKey{" + "id='" + id + '\'' + ", signature=" + signature + ", width=" + width
-        + ", height=" + height + ", appliedTransformation=" + transformationId
+    return "ResultKey{" + "key='" + sourceKey + '\'' + ", signature=" + signature + ", width="
+        + width + ", height=" + height + ", appliedTransformation=" + transformationId
         + ", decodedResourceClass=" + decodedResourceClass + '}';
   }
 }

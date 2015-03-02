@@ -562,7 +562,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       int overrideWidth, int overrideHeight) {
     requestOptions.lock();
 
-    RequestContext<TranscodeType> requestContext =
+    RequestContext<?, TranscodeType> requestContext =
         new RequestContext<>(context, model, transcodeClass, requestOptions, priority,
             overrideWidth, overrideHeight);
 

@@ -452,7 +452,7 @@ public class EngineTest {
     Transformation transformation = mock(Transformation.class);
     Map<Key, WeakReference<EngineResource<?>>> activeResources = new HashMap<>();
     Key signature = mock(Key.class);
-    RequestContext<Object> requestContext = mock(RequestContext.class);
+    RequestContext<Object, Object> requestContext = mock(RequestContext.class);
 
     int width = 100;
     int height = 100;

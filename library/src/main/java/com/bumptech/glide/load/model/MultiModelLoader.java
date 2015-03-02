@@ -1,7 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import com.bumptech.glide.load.data.DataFetcher;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,32 +12,28 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   }
 
   @Override
-  public DataFetcher<Data> getDataFetcher(Model model, int width, int height) {
-    DataFetcher<Data> result = null;
-    for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
-      if (modelLoader.handles(model)) {
-        result = modelLoader.getDataFetcher(model, width, height);
-        if (result != null) {
-          break;
-        }
-      }
-    }
-    return result;
+  public LoadData<Data> buildLoadData(Model model, int width, int height) {
+    ModelLoader<Model, Data> bestLoader = getBestLoader(model);
+    return bestLoader != null ? bestLoader.buildLoadData(model, width, height) : null;
   }
 
   @Override
   public boolean handles(Model model) {
-    for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
-      if (modelLoader.handles(model)) {
-        return true;
-      }
-    }
-    return false;
+    return getBestLoader(model) != null;
   }
 
   @Override
   public String toString() {
     return "MultiModelLoader{" + "modelLoaders=" + Arrays
         .toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + '}';
+  }
+
+  private ModelLoader<Model, Data> getBestLoader(Model model) {
+     for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
+      if (modelLoader.handles(model)) {
+        return modelLoader;
+      }
+    }
+    return null;
   }
 }
