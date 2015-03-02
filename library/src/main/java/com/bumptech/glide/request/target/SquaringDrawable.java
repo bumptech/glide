@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.annotation.TargetApi;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
@@ -17,12 +18,25 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
  * that are not square.
  */
 public class SquaringDrawable extends GlideDrawable {
-    private final GlideDrawable wrapped;
-    private final int side;
+    private GlideDrawable wrapped;
+    private State state;
+    private boolean mutated;
 
     public SquaringDrawable(GlideDrawable wrapped, int side) {
-        this.wrapped = wrapped;
-        this.side = side;
+        this(new State(wrapped.getConstantState(), side), wrapped, null /*res*/);
+    }
+
+    SquaringDrawable(State state, GlideDrawable wrapped, Resources res) {
+        this.state = state;
+        if (wrapped == null) {
+          if (res != null) {
+            this.wrapped = (GlideDrawable) state.wrapped.newDrawable(res);
+          } else {
+            this.wrapped = (GlideDrawable) state.wrapped.newDrawable();
+          }
+        } else {
+          this.wrapped = wrapped;
+        }
     }
 
     @Override
@@ -91,12 +105,12 @@ public class SquaringDrawable extends GlideDrawable {
 
     @Override
     public int getIntrinsicWidth() {
-        return side;
+        return state.side;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return side;
+        return state.side;
     }
 
     @Override
@@ -175,5 +189,49 @@ public class SquaringDrawable extends GlideDrawable {
     @Override
     public boolean isRunning() {
         return wrapped.isRunning();
+    }
+
+    @Override
+    public Drawable mutate() {
+        if (!mutated && super.mutate() == this) {
+            wrapped = (GlideDrawable) wrapped.mutate();
+            state = new State(state);
+            mutated = true;
+        }
+        return this;
+    }
+
+    @Override
+    public ConstantState getConstantState() {
+        return state;
+    }
+
+    static class State extends ConstantState {
+        private final ConstantState wrapped;
+        private final int side;
+
+        State(State other) {
+          this(other.wrapped, other.side);
+        }
+
+        State(ConstantState wrapped, int side) {
+          this.wrapped = wrapped;
+          this.side = side;
+        }
+
+        @Override
+        public Drawable newDrawable() {
+          return newDrawable(null /*res*/);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+          return new SquaringDrawable(this, null /*wrapped*/, res);
+        }
+
+        @Override
+        public int getChangingConfigurations() {
+          return 0;
+        }
     }
 }
