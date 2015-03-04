@@ -26,7 +26,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     @Override
     public InputStream loadData(Priority priority) throws Exception {
         request = new Request.Builder()
-                .url(url.toString())
+                .url(url.toStringUrl())
                 .build();
 
         stream = client.newCall(request)
@@ -50,7 +50,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return url.toString();
+        return url.getCacheKey();
     }
 
     @Override

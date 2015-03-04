@@ -78,7 +78,7 @@ public class BaseGlideUrlLoaderTest {
                     @Override
                     public DataFetcher<InputStream> answer(InvocationOnMock invocationOnMock) throws Throwable {
                         GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[0];
-                        assertEquals(urlLoader.resultUrl, glideUrl.toString());
+                        assertEquals(urlLoader.resultUrl, glideUrl.toStringUrl());
                         return expected;
 
                     }
@@ -97,7 +97,7 @@ public class BaseGlideUrlLoaderTest {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
                 GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[3];
-                assertEquals(urlLoader.resultUrl, glideUrl.toString());
+                assertEquals(urlLoader.resultUrl, glideUrl.toStringUrl());
                 return null;
             }
         }).when(modelCache).put(eq(model), eq(width), eq(height), any(GlideUrl.class));

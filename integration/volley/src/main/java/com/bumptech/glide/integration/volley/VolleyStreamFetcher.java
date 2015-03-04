@@ -56,7 +56,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     @Override
     public InputStream loadData(Priority priority) throws Exception {
         // Make sure the string url safely encodes non ascii characters.
-        String stringUrl = url.toURL().toString();
+        String stringUrl = url.toStringUrl();
         Request<byte[]> request = requestFactory.create(
                 stringUrl, requestFuture, glideToVolleyPriority(priority));
 
@@ -72,7 +72,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return url.toString();
+        return url.getCacheKey();
     }
 
     @Override

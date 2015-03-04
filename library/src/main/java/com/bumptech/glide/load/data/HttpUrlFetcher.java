@@ -100,7 +100,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return glideUrl.toString();
+        return glideUrl.getCacheKey();
     }
 
     @Override

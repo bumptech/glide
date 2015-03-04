@@ -11,14 +11,13 @@ import java.util.Map;
  * A wrapper for strings representing http/https URLs responsible for ensuring URLs are properly escaped and avoiding
  * unnecessary URL instantiations for loaders that require only string urls rather than URL objects.
  *
- * <p>
- *  Users wishing to replace the class for handling URLs must register a factory using GlideUrl.
- * </p>
+ * <p>  Users wishing to replace the class for handling URLs must register a factory using GlideUrl. </p>
  *
- * <p>
- *     To obtain a properly escaped URL, call {@link #toURL()}. To obtain a properly escaped string URL, call
- *     {@link #toURL()} and then {@link java.net.URL#toString()}.
- * </p>
+ * <p> To obtain a properly escaped URL, call {@link #toURL()}. To obtain a properly escaped string URL, call
+ * {@link #toStringUrl()}. To obtain a less safe, but less expensive to calculate cache key, call
+ * {@link #getCacheKey()}. </p>
+ *
+ * <p> This class can also optionally wrap {@link com.bumptech.glide.load.model.Headers} for convenience. </p>
  */
 public class GlideUrl {
     private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
@@ -62,6 +61,13 @@ public class GlideUrl {
         this.headers = headers;
     }
 
+    /**
+     * Returns a properly escaped {@link java.net.URL} that can be used to make http/https requests.
+     *
+     * @see #toStringUrl()
+     * @see #getCacheKey()
+     * @throws MalformedURLException
+     */
     public URL toURL() throws MalformedURLException {
         return getSafeUrl();
     }
@@ -76,6 +82,12 @@ public class GlideUrl {
         return safeUrl;
     }
 
+    /**
+     * Returns a properly escaped {@link String} url that can be used to make http/https requests.
+     *
+     * @see #toURL()
+     * @see #getCacheKey()
+     */
     public String toStringUrl() {
         return getSafeStringUrl();
     }
@@ -91,29 +103,34 @@ public class GlideUrl {
         return safeStringUrl;
     }
 
+    /**
+     * Returns a non-null {@link Map} containing headers.
+     */
     public Map<String, String> getHeaders() {
         return headers.getHeaders();
     }
 
+    /**
+     * Returns an inexpensive to calculate {@link String} suitable for use as a disk cache key.
+     *
+     * <p> This method does not include headers. </p>
+     *
+     * <p> Unlike {@link #toStringUrl()}} and {@link #toURL()}, this method does not escape input. </p>
+     */
+    public String getCacheKey() {
+      return stringUrl != null ? stringUrl : url.toString();
+    }
+
     @Override
     public String toString() {
-        String urlString = getSafeStringUrl();
-        StringBuilder stringBuilder = new StringBuilder(urlString);
-        Map<String, String> headerMap = headers.getHeaders();
-        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-            stringBuilder.append('\n')
-                .append(entry.getKey())
-                .append(": ")
-                .append(entry.getValue());
-        }
-        return stringBuilder.toString();
+        return getCacheKey() + '\n' + headers.toString();
     }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof GlideUrl) {
           GlideUrl other = (GlideUrl) o;
-          return getSafeStringUrl().equals(other.getSafeStringUrl())
+          return getCacheKey().equals(other.getCacheKey())
               && headers.equals(other.headers);
         }
         return false;
@@ -121,7 +138,7 @@ public class GlideUrl {
 
     @Override
     public int hashCode() {
-        int hashCode = getSafeStringUrl().hashCode();
+        int hashCode = getCacheKey().hashCode();
         hashCode = 31 * hashCode + headers.hashCode();
         return hashCode;
     }

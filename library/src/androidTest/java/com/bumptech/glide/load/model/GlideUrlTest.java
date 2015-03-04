@@ -60,7 +60,7 @@ public class GlideUrlTest {
         URL url = new URL(expected);
         GlideUrl glideUrl = new GlideUrl(url);
 
-        assertEquals(expected, glideUrl.toString());
+        assertEquals(expected, glideUrl.toStringUrl());
     }
 
     @Test
