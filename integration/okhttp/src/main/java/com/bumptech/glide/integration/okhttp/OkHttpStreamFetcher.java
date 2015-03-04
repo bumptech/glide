@@ -13,6 +13,7 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Fetches an {@link InputStream} using the okhttp library.
@@ -29,7 +30,12 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
   @Override
   public void loadData(Priority priority, final DataCallback<? super InputStream> callback) {
-    Request request = new Request.Builder().url(url.toString()).build();
+    Request.Builder requestBuilder = new Request.Builder()
+            .url(url.toStringUrl());
+    for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
+      requestBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+    }
+    Request request = requestBuilder.build();
 
     client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
       @Override

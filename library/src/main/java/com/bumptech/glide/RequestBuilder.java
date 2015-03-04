@@ -59,6 +59,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private RequestListener<TranscodeType> requestListener;
   private RequestBuilder<TranscodeType> thumbnailBuilder;
   private Float thumbSizeMultiplier;
+  private boolean isThumbnailBuilt;
 
   RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
     this(other.context, transcodeClass, other.requestTracker, other.lifecycle);
@@ -510,6 +511,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       Priority priority, int overrideWidth, int overrideHeight) {
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
+      if (isThumbnailBuilt) {
+        throw new IllegalStateException("You cannot use a request as both the main request and a "
+            + "thumbnail, consider using clone() on the request(s) passed to thumbnail()");
+      }
 
       TransitionOptions<?, ? super TranscodeType> thumbTransitionOptions =
           thumbnailBuilder.transitionOptions;
@@ -531,9 +536,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
       Request fullRequest = obtainRequest(target, requestOptions, coordinator,
           transitionOptions, priority, overrideWidth, overrideHeight);
+      isThumbnailBuilt = true;
       // Recursively generate thumbnail requests.
       Request thumbRequest = thumbnailBuilder.buildRequestRecursive(target, coordinator,
           thumbTransitionOptions, thumbPriority, thumbOverrideWidth, thumbOverrideHeight);
+      isThumbnailBuilt = false;
       coordinator.setRequests(fullRequest, thumbRequest);
       return coordinator;
     } else if (thumbSizeMultiplier != null) {

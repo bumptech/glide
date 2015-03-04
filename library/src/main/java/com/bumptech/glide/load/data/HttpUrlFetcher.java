@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * A DataFetcher that retrieves an {@link java.io.InputStream} for a Url.
@@ -49,7 +50,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     long startTime = LogTime.getLogTime();
     InputStream result = null;
     try {
-      result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/);
+      result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/,
+          glideUrl.getHeaders());
     } catch (IOException e) {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Failed to load data for url", e);
@@ -62,8 +64,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     callback.onDataReady(result);
   }
 
-  private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl)
-      throws IOException {
+  private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl,
+      Map<String, String> headers) throws IOException {
     if (redirects >= MAXIMUM_REDIRECTS) {
       throw new IOException("Too many (> " + MAXIMUM_REDIRECTS + ") redirects!");
     } else {
@@ -71,13 +73,16 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       // See http://michaelscharf.blogspot.com/2006/11/javaneturlequals-and-hashcode-make.html.
       try {
         if (lastUrl != null && url.toURI().equals(lastUrl.toURI())) {
-          throw new IOException("In re-direct loop");
+            throw new IOException("In re-direct loop");
         }
       } catch (URISyntaxException e) {
         // Do nothing, this is best effort.
       }
     }
     urlConnection = connectionFactory.build(url);
+    for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
+      urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+    }
     urlConnection.setConnectTimeout(timeout);
     urlConnection.setReadTimeout(timeout);
     urlConnection.setUseCaches(false);
@@ -86,9 +91,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     // Connect explicitly to avoid errors in decoders if connection fails.
     urlConnection.connect();
     if (isCancelled) {
-      return null;
+        return null;
     }
-
     final int statusCode = urlConnection.getResponseCode();
     if (statusCode / 100 == 2) {
       stream = urlConnection.getInputStream();
@@ -96,16 +100,16 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     } else if (statusCode / 100 == 3) {
       String redirectUrlString = urlConnection.getHeaderField("Location");
       if (TextUtils.isEmpty(redirectUrlString)) {
-        throw new IOException("Received empty or null redirect url");
+          throw new IOException("Received empty or null redirect url");
       }
       URL redirectUrl = new URL(url, redirectUrlString);
-      return loadDataWithRedirects(redirectUrl, redirects + 1, url);
+      return loadDataWithRedirects(redirectUrl, redirects + 1, url, headers);
     } else {
       if (statusCode == -1) {
-        throw new IOException("Unable to retrieve response code from HttpUrlConnection.");
+          throw new IOException("Unable to retrieve response code from HttpUrlConnection.");
       }
-      throw new IOException(
-          "Request failed " + statusCode + ": " + urlConnection.getResponseMessage());
+      throw new IOException("Request failed " + statusCode + ": "
+          + urlConnection.getResponseMessage());
     }
   }
 
@@ -125,14 +129,13 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
   @Override
   public String getId() {
-    return glideUrl.toString();
+    return glideUrl.getCacheKey();
   }
 
   @Override
   public void cancel() {
     // TODO: we should consider disconnecting the url connection here, but we can't do so
-    // directly because cancel is
-    // often called on the main thread.
+    // directly because cancel is often called on the main thread.
     isCancelled = true;
   }
 

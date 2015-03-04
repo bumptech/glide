@@ -81,7 +81,7 @@ public class BaseGlideUrlLoaderTest {
           public ModelLoader.LoadData<InputStream> answer(InvocationOnMock invocationOnMock)
               throws Throwable {
             GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[0];
-            assertEquals(urlLoader.resultUrl, glideUrl.toString());
+            assertEquals(urlLoader.resultUrl, glideUrl.toStringUrl());
             return new ModelLoader.LoadData<>(mock(Key.class), expected);
 
           }
@@ -101,7 +101,7 @@ public class BaseGlideUrlLoaderTest {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
         GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[3];
-        assertEquals(urlLoader.resultUrl, glideUrl.toString());
+        assertEquals(urlLoader.resultUrl, glideUrl.toStringUrl());
         return null;
       }
     }).when(modelCache).put(eq(model), eq(width), eq(height), any(GlideUrl.class));

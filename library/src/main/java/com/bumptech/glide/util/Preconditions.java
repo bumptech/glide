@@ -1,5 +1,7 @@
 package com.bumptech.glide.util;
 
+import android.text.TextUtils;
+
 import java.util.Collection;
 
 /**
@@ -26,6 +28,13 @@ public final class Preconditions {
       throw new NullPointerException(message);
     }
     return arg;
+  }
+
+  public static String checkNotEmpty(String string) {
+    if (TextUtils.isEmpty(string)) {
+      throw new IllegalArgumentException("Must not be null or empty");
+    }
+    return string;
   }
 
   public static <T extends Collection<Y>, Y> T checkNotEmpty(T collection) {

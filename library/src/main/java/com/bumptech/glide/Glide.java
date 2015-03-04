@@ -90,6 +90,7 @@ public class Glide implements ComponentCallbacks2 {
   private static final String TAG = "Glide";
   private static volatile Glide glide;
 
+  private final Engine engine;
   private final BitmapPool bitmapPool;
   private final MemoryCache memoryCache;
   private final BitmapPreFiller bitmapPreFiller;
@@ -166,6 +167,7 @@ public class Glide implements ComponentCallbacks2 {
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, Context context,
       DecodeFormat decodeFormat) {
+    this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.memoryCache = memoryCache;
     bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
@@ -311,6 +313,18 @@ public class Glide implements ComponentCallbacks2 {
   public void trimMemory(int level) {
     bitmapPool.trimMemory(level);
     memoryCache.trimMemory(level);
+  }
+
+  /**
+   * Clears disk cache.
+   *
+   * <p>
+   *     This method should always be called on a background thread, since it is a blocking call.
+   * </p>
+   */
+  public void clearDiskCache() {
+    Util.assertBackgroundThread();
+    engine.clearDiskCache();
   }
 
   /**

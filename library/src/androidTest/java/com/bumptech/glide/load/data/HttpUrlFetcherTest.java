@@ -54,7 +54,7 @@ public class HttpUrlFetcherTest {
   @Test
   public void testReturnsModelAsString() {
     final String expected = "fakeId";
-    when(glideUrl.toString()).thenReturn(expected);
+    when(glideUrl.getCacheKey()).thenReturn(expected);
     assertEquals(expected, fetcher.getId());
   }
 

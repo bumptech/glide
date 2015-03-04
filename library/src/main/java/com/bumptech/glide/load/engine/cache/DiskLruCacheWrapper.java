@@ -31,8 +31,8 @@ public class DiskLruCacheWrapper implements DiskCache {
   private DiskLruCache diskLruCache;
 
   /**
-   * Get a DiskCache in the given directory and size. If a disk cache has alread been created with a
-   * different directory and/or size, it will be returned instead and the new arguments will be
+   * Get a DiskCache in the given directory and size. If a disk cache has already been created with
+   * a different directory and/or size, it will be returned instead and the new arguments will be
    * ignored.
    *
    * @param directory The directory for the disk cache
@@ -66,11 +66,9 @@ public class DiskLruCacheWrapper implements DiskCache {
     String safeKey = safeKeyGenerator.getSafeKey(key);
     File result = null;
     try {
-      //It is possible that the there will be a put in between these two gets. If so that
-      // shouldn't be a problem
-      //because we will always put the same value at the same key so our input streams will still
-      // represent
-      //the same data
+      // It is possible that the there will be a put in between these two gets. If so that shouldn't
+      // be a problem because we will always put the same value at the same key so our input streams
+      // will still represent the same data.
       final DiskLruCache.Value value = getDiskCache().get(safeKey);
       if (value != null) {
         result = value.getFile(0);
@@ -117,5 +115,21 @@ public class DiskLruCacheWrapper implements DiskCache {
         Log.w(TAG, "Unable to delete from disk cache", e);
       }
     }
+  }
+
+  @Override
+  public synchronized void clear() {
+    try {
+      getDiskCache().delete();
+      resetDiskCache();
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Unable to clear disk cache", e);
+      }
+    }
+  }
+
+  private synchronized void resetDiskCache() {
+    diskLruCache = null;
   }
 }

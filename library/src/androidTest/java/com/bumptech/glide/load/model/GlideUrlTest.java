@@ -14,7 +14,7 @@ import java.net.URL;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class GlideUrlTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenURLIsNull() {
     new GlideUrl((URL) null);
   }
@@ -61,7 +61,7 @@ public class GlideUrlTest {
     URL url = new URL(expected);
     GlideUrl glideUrl = new GlideUrl(url);
 
-    assertEquals(expected, glideUrl.toString());
+    assertEquals(expected, glideUrl.toStringUrl());
   }
 
   @Test

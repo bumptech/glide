@@ -2,6 +2,7 @@ package com.bumptech.glide.integration.volley;
 
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -16,6 +17,8 @@ import com.bumptech.glide.load.model.GlideUrl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A DataFetcher backed by volley for fetching images via http.
@@ -24,8 +27,8 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY = new VolleyRequestFactory() {
     @Override
     public Request<byte[]> create(String url, DataCallback<? super InputStream> callback,
-        Request.Priority priority) {
-      return new GlideRequest(url, callback, priority);
+        Request.Priority priority, Map<String, String> headers) {
+      return new GlideRequest(url, callback, priority, headers);
     }
   };
 
@@ -48,8 +51,8 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
   @Override
   public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
-    // Make sure the string url safely encodes non ascii characters.
-    request = requestFactory.create(url.toString(), callback, glideToVolleyPriority(priority));
+    request = requestFactory.create(url.toStringUrl(), callback, glideToVolleyPriority(priority),
+        url.getHeaders());
     requestQueue.add(request);
   }
 
@@ -96,14 +99,25 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
    * results on volley's background thread.
    */
   public static class GlideRequest extends Request<byte[]> {
-    private DataCallback<? super InputStream> callback;
+    private final DataCallback<? super InputStream> callback;
     private final Priority priority;
+    private final Map<String, String> headers;
 
-    public GlideRequest(String url, final DataCallback<? super  InputStream> callback,
-        Priority priority) {
+    public GlideRequest(String url, DataCallback<? super InputStream> callback, Priority priority) {
+      this(url, callback, priority, Collections.<String, String>emptyMap());
+    }
+
+    public GlideRequest(String url, DataCallback<? super InputStream> callback, Priority priority,
+        Map<String, String> headers) {
       super(Method.GET, url, null);
       this.callback = callback;
       this.priority = priority;
+      this.headers = headers;
+    }
+
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+      return headers;
     }
 
     @Override

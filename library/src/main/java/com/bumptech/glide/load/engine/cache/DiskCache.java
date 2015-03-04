@@ -58,4 +58,9 @@ public interface DiskCache {
    * @param key The key to remove.
    */
   void delete(Key key);
+
+  /**
+   * Clear the cache.
+   */
+  void clear();
 }

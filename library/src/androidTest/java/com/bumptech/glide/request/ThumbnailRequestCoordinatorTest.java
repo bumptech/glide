@@ -294,6 +294,14 @@ public class ThumbnailRequestCoordinatorTest {
   public void testDoesNotClearThumbOnThumbRequestComplete() {
     coordinator.onRequestSuccess(thumb);
     verify(thumb, never()).clear();
+
+  }
+
+  @Test
+  public void testDoesNotClearThumbOnFullComplete_whenThumbIsComplete() {
+      when(thumb.isComplete()).thenReturn(true);
+      coordinator.onRequestSuccess(full);
+      verify(thumb, never()).clear();
   }
 
   @Test

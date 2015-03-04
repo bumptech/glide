@@ -2,10 +2,13 @@ package com.bumptech.glide.load.data;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.testutil.TestUtil;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
@@ -25,12 +28,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Tests {@link com.bumptech.glide.load.data.HttpUrlFetcher} against server responses. Tests for
- * behavior (connection/disconnection/options) should go in {@link com.bumptech.glide.load.data
- * .HttpUrlFetcherTest}, response handling should go here.
+ * behavior (connection/disconnection/options) should go in
+ * {@link com.bumptech.glide.load.data.HttpUrlFetcherTest}, response handling should go here.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -212,9 +217,28 @@ public class HttpUrlFetcherServerTest {
     verify(callback).onDataReady(isNull(InputStream.class));
   }
 
+  @Test
+  public void testAppliesHeadersInGlideUrl() throws Exception {
+    mockWebServer.enqueue(new MockResponse().setResponseCode(200));
+    String headerField = "field";
+    String headerValue = "value";
+    Map<String, String> headersMap = new HashMap<>();
+    headersMap.put(headerField, headerValue);
+    Headers headers = mock(Headers.class);
+    when(headers.getHeaders()).thenReturn(headersMap);
+
+    getFetcher(headers).loadData(Priority.HIGH, callback);
+
+    assertThat(mockWebServer.takeRequest().getHeader(headerField)).isEqualTo(headerValue);
+  }
+
   private HttpUrlFetcher getFetcher() {
+    return getFetcher(Headers.NONE);
+  }
+
+  private HttpUrlFetcher getFetcher(Headers headers) {
     URL url = mockWebServer.getUrl(DEFAULT_PATH);
-    return new HttpUrlFetcher(new GlideUrl(url), TIMEOUT_TIME_MS,
+    return new HttpUrlFetcher(new GlideUrl(url, headers), TIMEOUT_TIME_MS,
         HttpUrlFetcher.DEFAULT_CONNECTION_FACTORY);
   }
 }

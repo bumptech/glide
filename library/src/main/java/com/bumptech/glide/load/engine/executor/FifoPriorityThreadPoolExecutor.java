@@ -96,12 +96,14 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
     @Override
     protected void done() {
       super.done();
-      try {
-        get();
-      } catch (ExecutionException e) {
-        throw new RuntimeException(e.getCause());
-      } catch (CancellationException | InterruptedException e) {
-        // Ignore.
+      if (!isCancelled()) {
+        try {
+          get();
+        } catch (ExecutionException e) {
+          throw new RuntimeException(e.getCause());
+        } catch (CancellationException | InterruptedException e) {
+          // Ignore.
+        }
       }
     }
 

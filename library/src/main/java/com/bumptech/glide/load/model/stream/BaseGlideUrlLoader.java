@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.signature.ObjectKey;
@@ -46,13 +47,15 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
         return null;
       }
 
-      result = new GlideUrl(stringURL);
+      result = new GlideUrl(stringURL, getHeaders(model, width, height));
 
       if (modelCache != null) {
         modelCache.put(model, width, height, result);
       }
     }
 
+    // TODO: this is expensive and slow to calculate every time, we should either cache these, or
+    // try to come up with a way to avoid finding them when not necessary.
     List<String> alternateUrls = getAlternateUrls(model, width, height);
     LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height);
     if (alternateUrls.isEmpty()) {
@@ -72,16 +75,38 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
   }
 
   /**
-   * Get a valid url http:// or https:// for the given model and dimensions as a string.
+   * Returns a valid url http:// or https:// for the given model and dimensions as a string.
    *
    * @param model  The model.
    * @param width  The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
-   * @return The String url.
    */
   protected abstract String getUrl(Model model, int width, int height);
 
+  /**
+   * Returns a list of alternate urls for the given model, width, and height from which equivalent
+   * data can be obtained (usually the same image with the same aspect ratio, but in a larger size)
+   * as the primary url.
+   *
+   * <p> Implementing this method allows Glide to fulfill requests for bucketed images in smaller
+   * bucket sizes using already cached data for larger bucket sizes. </p>
+   *
+   * @param width  The width in pixels of the view/target the image will be loaded into.
+   * @param height The height in pixels of the view/target the image will be loaded into.
+   */
   protected List<String> getAlternateUrls(Model model, int width, int height) {
     return Collections.emptyList();
+  }
+
+  /**
+   * Returns the headers for the given model and dimensions as a map of strings to sets of strings,
+   * or null if no headers should be added.
+   *
+   * @param model The model.
+   * @param width The width in pixels of the view/target the image will be loaded into.
+   * @param height The height in pixels of the view/target the image will be loaded into.
+   */
+  protected Headers getHeaders(Model model, int width, int height) {
+    return Headers.NONE;
   }
 }

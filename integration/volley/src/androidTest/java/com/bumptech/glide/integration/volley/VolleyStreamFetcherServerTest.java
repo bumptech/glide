@@ -2,11 +2,12 @@ package com.bumptech.glide.integration.volley;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.bumptech.glide.testutil.TestUtil.assertStreamOf;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
 
@@ -15,6 +16,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 
@@ -32,22 +34,22 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowSystemClock;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Tests {@link com.bumptech.glide.integration.volley.VolleyStreamFetcher} against server
  * responses.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows =
-    VolleyStreamFetcherServerTest.FakeSystemClock.class)
+@Config(manifest = Config.NONE, emulateSdk = 18,
+    shadows = VolleyStreamFetcherServerTest.FakeSystemClock.class)
 public class VolleyStreamFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
 
@@ -187,22 +189,29 @@ public class VolleyStreamFetcherServerTest {
     verify(callback).onDataReady(isNull(InputStream.class));
   }
 
+  @Test
+  public void testAppliesHeadersInGlideUrl() throws Exception {
+    mockWebServer.enqueue(new MockResponse().setResponseCode(200));
+    String headerField = "field";
+    String headerValue = "value";
+    Map<String, String> headersMap = new HashMap<String, String>();
+    headersMap.put(headerField, headerValue);
+    Headers headers = mock(Headers.class);
+    when(headers.getHeaders()).thenReturn(headersMap);
+
+    getFetcher(headers).loadData(Priority.HIGH, callback);
+    waitForResponseLatch.await();
+
+    assertThat(mockWebServer.takeRequest().getHeader(headerField)).isEqualTo(headerValue);
+  }
+
   private DataFetcher<InputStream> getFetcher() {
+    return getFetcher(Headers.NONE);
+  }
+
+  private DataFetcher<InputStream> getFetcher(Headers headers) {
     URL url = mockWebServer.getUrl(DEFAULT_PATH);
-    VolleyRequestFuture<InputStream> requestFuture = new VolleyRequestFuture<InputStream>() {
-      @Override
-      public InputStream get() throws InterruptedException, ExecutionException {
-        for (int i = 0; i < 251 && !isDone(); i++) {
-          Thread.sleep(10);
-          ShadowLooper.runUiThreadTasks();
-        }
-        if (!isDone()) {
-          fail("Failed to get response from Volley in time");
-        }
-        return super.get();
-      }
-    };
-    return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString()));
+    return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString(), headers));
   }
 
   /**
