@@ -1,8 +1,8 @@
 package com.bumptech.glide.tests;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+
+import com.google.common.testing.EqualsTester;
 
 import com.bumptech.glide.load.Key;
 
@@ -20,8 +20,9 @@ public class KeyAssertions {
 
   private static void assertSameOrdered(Key first, Key second)
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    assertEquals(first, second);
-    assertEquals(first.hashCode(), second.hashCode());
+    new EqualsTester()
+        .addEqualityGroup(first, second)
+        .testEquals();
 
     assertThat(getDigest(first)).isEqualTo(getDigest(second));
   }
@@ -34,8 +35,10 @@ public class KeyAssertions {
 
   public static void assertDifferent(Key first, Key second, boolean checkDiskCacheKey)
       throws NoSuchAlgorithmException, UnsupportedEncodingException {
-    assertNotEquals(first, second);
-    assertNotEquals(first.hashCode(), second.hashCode());
+    new EqualsTester()
+        .addEqualityGroup(first)
+        .addEqualityGroup(second)
+        .testEquals();
 
     if (checkDiskCacheKey) {
       MessageDigest firstDigest = MessageDigest.getInstance("SHA-1");
@@ -43,7 +46,7 @@ public class KeyAssertions {
       MessageDigest secondDigest = MessageDigest.getInstance("SHA-1");
       second.updateDiskCacheKey(secondDigest);
 
-      assertNotEquals(getDigest(first), getDigest(second));
+      assertThat(getDigest(first)).isNotEqualTo(getDigest(second));
     }
   }
 

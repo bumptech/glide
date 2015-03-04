@@ -54,7 +54,6 @@ final class ResourceCacheKey implements Key {
     return result;
   }
 
-  // TODO: Include decoded resource class.
   // TODO: Include relevant options?
   @Override
   public void updateDiskCacheKey(MessageDigest messageDigest)
@@ -66,12 +65,18 @@ final class ResourceCacheKey implements Key {
     if (transformationId != null) {
       messageDigest.update(transformationId.getBytes(STRING_CHARSET_NAME));
     }
+    messageDigest.update(decodedResourceClass.getName().getBytes(STRING_CHARSET_NAME));
   }
 
   @Override
   public String toString() {
-    return "ResultKey{" + "key='" + sourceKey + '\'' + ", signature=" + signature + ", width="
-        + width + ", height=" + height + ", appliedTransformation=" + transformationId
-        + ", decodedResourceClass=" + decodedResourceClass + '}';
+    return "ResourceCacheKey{"
+        + "sourceKey=" + sourceKey
+        + ", signature=" + signature
+        + ", width=" + width
+        + ", height=" + height
+        + ", decodedResourceClass=" + decodedResourceClass
+        + ", transformationId='" + transformationId + '\''
+        + '}';
   }
 }

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.tests.KeyAssertions;
 
@@ -41,7 +40,6 @@ public class EngineKeyTest {
     int height = 2;
     Class resourceClass = Object.class;
     Class transcodeClass = Integer.class;
-    ResourceDecoder decoder = mock(ResourceDecoder.class);
     ResourceEncoder encoder = mock(ResourceEncoder.class);
     Key signature = mock(Key.class);
 
