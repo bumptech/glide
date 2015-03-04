@@ -178,44 +178,6 @@ public class GlideTest {
     verify(memoryCache).trimMemory(eq(level));
   }
 
-  // TODO: fixme.
-//    @SuppressWarnings("unchecked")
-//    @Test
-//    public void testGenericLoader() throws Exception {
-//        File expected = new File("test");
-//
-//        Target<File> target = mock(Target.class);
-//        doAnswer(new CallCallback()).when(target).getSize(any(SizeReadyCallback.class));
-//
-//        GlideUrl glideUrl =  mock(GlideUrl.class);
-//        DataFetcher<File> dataFetcher = mock(DataFetcher.class);
-//        when(dataFetcher.loadData(any(Priority.class))).thenReturn(expected);
-//        when(dataFetcher.getId()).thenReturn("id");
-//        ModelLoader<GlideUrl, File> modelLoader = mock(ModelLoader.class);
-//        when(modelLoader.buildLoadData(eq(glideUrl), anyInt(), anyInt()))
-//                .thenReturn(dataFetcher);
-//
-//        Resource<File> expectedResource = mock(Resource.class);
-//        when(expectedResource.get()).thenReturn(expected);
-//        ResourceDecoder<File, File> sourceDecoder = mock(ResourceDecoder.class);
-//        when(sourceDecoder.decode(eq(expected), anyInt(), anyInt())).thenReturn(expectedResource);
-//        ResourceDecoder<File, File> cacheDecoder = mock(ResourceDecoder.class);
-//        ResourceEncoder<File> encoder = mock(ResourceEncoder.class);
-//        Encoder<File> sourceEncoder = mock(Encoder.class);
-//
-//        requestManager
-//                .using(modelLoader, File.class)
-//                .load(glideUrl)
-//                .as(File.class)
-//                .decoder(sourceDecoder)
-//                .cacheDecoder(cacheDecoder)
-//                .encoder(encoder)
-//                .sourceEncoder(sourceEncoder)
-//                .into(target);
-//
-//        verify(target).onResourceReady(eq(expected), any(GlideAnimation.class));
-//    }
-
   @Test
   public void testFileDefaultLoaderWithInputStream() throws Exception {
     registerFailFactory(File.class, ParcelFileDescriptor.class);
@@ -365,7 +327,7 @@ public class GlideTest {
       @Override
       public boolean onLoadFailed(Object model, Target target,
           boolean isFirstResource) {
-        return false;
+        throw new RuntimeException("Load failed");
       }
 
       @Override
@@ -429,18 +391,6 @@ public class GlideTest {
   public void testUnregisteredModelThrowsException() {
     Float unregistered = 0.5f;
     requestManager.asDrawable().load(unregistered).into(target);
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testUnregisteredModelWithGivenLoaderDoesNotThrow() {
-    Float unregistered = 0.5f;
-    ModelLoader<Float, InputStream> mockLoader = mockStreamModelLoader(Float.class);
-    // TODO: fixme.
-//        requestManager
-//                .using(mockLoader)
-//                .load(unregistered)
-//                .into(target);
   }
 
   @Test
@@ -549,21 +499,6 @@ public class GlideTest {
     verify(target).onLoadFailed(eq(error));
   }
 
-  // TODO: fixme.
-//    @Test
-//    public void testNullModelWithModelLoaderDoesNotThrow() {
-//        String nullString = null;
-//        Drawable drawable = new ColorDrawable(Color.RED);
-//        StreamModelLoader<String> modelLoader = mock(StreamModelLoader.class);
-//        requestManager
-//                .using(modelLoader)
-//                .load(nullString)
-//                .placeholder(drawable)
-//                .into(target);
-//
-//        verify(target).onLoadFailed(any(Exception.class), eq(drawable));
-//    }
-
   @Test
   public void testByteData() {
     byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
@@ -572,41 +507,22 @@ public class GlideTest {
 
   @Test
   public void testClone() throws IOException {
-    GifDrawable firstResult = mock(GifDrawable.class);
-    Resource<GifDrawable> firstResource = mock(Resource.class);
-    when(firstResource.get()).thenReturn(firstResult);
-    // TODO: fixme.
-//        ResourceTranscoder<GifBitmapWrapper, GlideDrawable> firstTranscoder = mock
-// (ResourceTranscoder.class);
-//        when(firstTranscoder.transcode(any(Resource.class))).thenReturn(firstResource);
-//        when(firstTranscoder.getId()).thenReturn("transcoder1");
-
-    GifDrawable secondResult = mock(GifDrawable.class);
-    Resource<GifDrawable> secondResource = mock(Resource.class);
-    when(secondResource.get()).thenReturn(secondResult);
-    // TODO: fixme.
-//        ResourceTranscoder<GifBitmapWrapper, GlideDrawable> secondTranscoder = mock
-// (ResourceTranscoder.class);
-//        when(secondTranscoder.transcode(any(Resource.class))).thenReturn(secondResource);
-//        when(secondTranscoder.getId()).thenReturn("transcoder2");
-
-//        RequestBuilder<Drawable, Drawable> firstRequest = requestManager.from(String.class)
-// .transcoder
-//                (firstTranscoder)
-//                .override(100, 100);
-//        RequestBuilder<Drawable, Drawable> secondRequest = firstRequest.clone().transcoder
-// (secondTranscoder);
-
     Target firstTarget = mock(Target.class);
+    doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(any(SizeReadyCallback.class));
     Target secondTarget = mock(Target.class);
+    doAnswer(new CallSizeReady(100, 100)).when(secondTarget).getSize(any(SizeReadyCallback.class));
+    RequestBuilder<Drawable> firstRequest = Glide.with(getContext())
+        .asDrawable()
+        .load(mockUri("content://first"));
 
-    String fakeUri = mockUri("content://fakeUri");
-//
-//        firstRequest.load(fakeUri).into(firstTarget);
-//        verify(firstTarget).onResourceReady(eq(firstResult), any(GlideAnimation.class));
-//
-//        secondRequest.load(fakeUri).into(secondTarget);
-//        verify(secondTarget).onResourceReady(eq(secondResult), any(GlideAnimation.class));
+    firstRequest.into(firstTarget);
+
+    firstRequest.clone()
+        .apply(placeholderOf(new ColorDrawable(Color.RED)))
+        .into(secondTarget);
+
+    verify(firstTarget).onResourceReady(any(Resource.class), any(Transition.class));
+    verify(secondTarget).onResourceReady(anyObject(), any(Transition.class));
   }
 
   @SuppressWarnings("unchecked")
@@ -688,7 +604,6 @@ public class GlideTest {
     return modelLoader;
   }
 
-
   private InputStream openResource(String imageName) throws IOException {
     return TestResourceUtil.openResource(getClass(), imageName);
   }
@@ -762,12 +677,9 @@ public class GlideTest {
   }
 
   // TODO: Extending ShadowContentResolver results in exceptions because of some state issues
-  // where we seem to get
-  // one content resolver shadow in one part of the test and a different one in a different part
-  // of the test. Each
-  // one ends up with different registered uris, which causes tests to fail. We shouldn't need to
-  // do this, but
-  // using static maps seems to fix the issue.
+  // where we seem to get one content resolver shadow in one part of the test and a different one in
+  // a different part of the test. Each one ends up with different registered uris, which causes
+  // tests to fail. We shouldn't need to do this, but using static maps seems to fix the issue.
   @Implements(value = ContentResolver.class)
   public static class ShadowFileDescriptorContentResolver {
     private static final Map<Uri, AssetFileDescriptor> URI_TO_FILE_DESCRIPTOR = new HashMap<>();

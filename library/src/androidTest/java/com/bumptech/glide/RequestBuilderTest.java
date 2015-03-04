@@ -29,12 +29,9 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class RequestBuilderTest {
-  @Mock
-  GlideContext glideContext;
-  @Mock
-  RequestTracker requestTracker;
-  @Mock
-  Lifecycle lifecycle;
+  @Mock GlideContext glideContext;
+  @Mock RequestTracker requestTracker;
+  @Mock Lifecycle lifecycle;
 
   @Before
   public void setUp() {
@@ -50,35 +47,6 @@ public class RequestBuilderTest {
   public void testThrowsWhenGlideAnimationFactoryIsNull() {
     getNullModelRequest().transition(null);
   }
-
-  @Test
-  public void testDoesNotThrowWhenModelAndLoaderNull() {
-    // TODO: fixme.
-//        new RequestBuilder(Robolectric.application, null, null, Object.class, mock(Glide.class)
-// , requestTracker,
-//                mock(Lifecycle.class));
-  }
-  // TODO: fixme.
-//
-//    @Test
-//    public void testDoesNotThrowWithNullModelWhenDecoderSet() {
-//        getNullModelRequest().decoder(mock(ResourceDecoder.class));
-//    }
-//
-//    @Test
-//    public void testDoesNotThrowWithNullModelWhenCacheDecoderSet() {
-//        getNullModelRequest().cacheDecoder(mock(ResourceDecoder.class));
-//    }
-//
-//    @Test
-//    public void testDoesNotThrowWithNullModelWhenEncoderSet() {
-//        getNullModelRequest().encoder(mock(ResourceEncoder.class));
-//    }
-//
-//    @Test
-//    public void testDoesNotThrowWithNullModelWhenDiskCacheStrategySet() {
-//        getNullModelRequest().diskCacheStrategy(DiskCacheStrategy.ALL);
-//    }
 
   @Test
   public void testDoesNotThrowWithNullModelWhenRequestIsBuilt() {
