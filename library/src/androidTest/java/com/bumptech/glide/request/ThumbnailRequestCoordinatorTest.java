@@ -296,6 +296,13 @@ public class ThumbnailRequestCoordinatorTest {
     }
 
     @Test
+    public void testDoesNotClearThumbOnFullComplete_whenThumbIsComplete() {
+        when(thumb.isComplete()).thenReturn(true);
+        coordinator.onRequestSuccess(full);
+        verify(thumb, never()).clear();
+    }
+
+    @Test
     public void testDoesNotNotifyParentOnThumbRequestComplete() {
         coordinator = new ThumbnailRequestCoordinator(parent);
         coordinator.setRequests(full, thumb);
