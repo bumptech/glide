@@ -3,6 +3,8 @@ package com.bumptech.glide.integration.volley;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
 
@@ -14,6 +16,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.testutil.TestUtil;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
@@ -33,6 +36,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -182,7 +187,26 @@ public class VolleyStreamFetcherServerTest {
         }
     }
 
+    @Test
+    public void testAppliesHeadersInGlideUrl() throws Exception {
+      mockWebServer.enqueue(new MockResponse().setResponseCode(200));
+      String headerField = "field";
+      String headerValue = "value";
+      Map<String, String> headersMap = new HashMap<String, String>();
+      headersMap.put(headerField, headerValue);
+      Headers headers = mock(Headers.class);
+      when(headers.getHeaders()).thenReturn(headersMap);
+
+      getFetcher(headers).loadData(Priority.HIGH);
+
+      assertThat(mockWebServer.takeRequest().getHeader(headerField)).isEqualTo(headerValue);
+    }
+
     private DataFetcher<InputStream> getFetcher() {
+      return getFetcher(Headers.NONE);
+    }
+
+    private DataFetcher<InputStream> getFetcher(Headers headers) {
         URL url = mockWebServer.getUrl(DEFAULT_PATH);
         VolleyRequestFuture<InputStream> requestFuture = new VolleyRequestFuture<InputStream>() {
             @Override
@@ -197,7 +221,7 @@ public class VolleyStreamFetcherServerTest {
                 return super.get();
             }
         };
-        return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString()), requestFuture);
+        return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString(), headers), requestFuture);
     }
 
     /** A shadow clock that doesn't rely on running on an Android thread with a Looper. */
