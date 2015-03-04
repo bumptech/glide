@@ -84,11 +84,6 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     }
 
     @Override
-    public String getId() {
-      return file.getPath();
-    }
-
-    @Override
     public void cancel() {
       // Do nothing.
     }

@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.data;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -51,11 +50,6 @@ public class StreamAssetPathFetcherTest {
     fetcher.cleanup();
 
     verify(expected).close();
-  }
-
-  @Test
-  public void testReturnsAssetPathAsId() {
-    assertEquals(assetPath, fetcher.getId());
   }
 
   @Test

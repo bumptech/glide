@@ -44,11 +44,6 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
     }
 
     @Override
-    public String getId() {
-      return resource.toString();
-    }
-
-    @Override
     public void cancel() {
       // Do nothing.
     }

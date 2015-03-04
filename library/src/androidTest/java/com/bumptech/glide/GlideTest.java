@@ -77,7 +77,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -533,7 +532,6 @@ public class GlideTest {
         .when(failFetcher)
         .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
     when(failFetcher.getDataClass()).thenReturn(failResource);
-    when(failFetcher.getId()).thenReturn("fakeId");
     ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
     when(failLoader.buildLoadData(any(failModel), anyInt(), anyInt()))
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), failFetcher));
@@ -595,7 +593,6 @@ public class GlideTest {
     } catch (Exception e) {
       // Do nothing.
     }
-    when(fetcher.getId()).thenReturn(UUID.randomUUID().toString());
     when(fetcher.getDataClass()).thenReturn(InputStream.class);
     when(modelLoader.buildLoadData(any(modelClass), anyInt(), anyInt()))
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), fetcher));
@@ -654,7 +651,6 @@ public class GlideTest {
     @Override
     public void registerComponents(Context context, Registry registry) {
       DataFetcher<InputStream> mockStreamFetcher = mock(DataFetcher.class);
-      when(mockStreamFetcher.getId()).thenReturn("fakeId");
       when(mockStreamFetcher.getDataClass()).thenReturn(InputStream.class);
       try {
         doAnswer(new Util.CallDataReady<>(new ByteArrayInputStream(new byte[0])))

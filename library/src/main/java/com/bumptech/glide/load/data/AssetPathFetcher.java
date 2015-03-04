@@ -50,11 +50,6 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public String getId() {
-    return assetPath;
-  }
-
-  @Override
   public void cancel() {
     // Do nothing.
   }

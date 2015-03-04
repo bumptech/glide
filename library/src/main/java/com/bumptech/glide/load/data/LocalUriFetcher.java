@@ -67,11 +67,6 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public String getId() {
-    return uri.toString();
-  }
-
-  @Override
   public DataSource getDataSource() {
     return DataSource.LOCAL;
   }

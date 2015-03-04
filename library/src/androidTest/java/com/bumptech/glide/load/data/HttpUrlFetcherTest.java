@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.data;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.inOrder;
@@ -49,13 +48,6 @@ public class HttpUrlFetcherTest {
     when(glideUrl.toURL()).thenReturn(url);
 
     fetcher = new HttpUrlFetcher(glideUrl, TIMEOUT_MS, connectionFactory);
-  }
-
-  @Test
-  public void testReturnsModelAsString() {
-    final String expected = "fakeId";
-    when(glideUrl.getCacheKey()).thenReturn(expected);
-    assertEquals(expected, fetcher.getId());
   }
 
   @Test

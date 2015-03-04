@@ -68,11 +68,6 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public String getId() {
-    return mediaStoreImageUri.toString();
-  }
-
-  @Override
   public void cancel() {
     // Do nothing.
   }

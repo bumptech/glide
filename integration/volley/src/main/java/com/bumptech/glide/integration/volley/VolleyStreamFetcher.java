@@ -62,11 +62,6 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public String getId() {
-    return url.toString();
-  }
-
-  @Override
   public void cancel() {
     request.cancel();
   }

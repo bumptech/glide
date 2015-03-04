@@ -60,18 +60,6 @@ public interface DataFetcher<T> {
   void cleanup();
 
   /**
-   * Returns a string uniquely identifying the data that this fetcher will fetch including the
-   * specific size.
-   *
-   * <p> A hash of the bytes of the data that will be fetched is the ideal id but since that is in
-   * many cases impractical, urls, file paths, and uris are normally sufficient. </p>
-   *
-   * <p> Note - this method will be run on the main thread so it should not perform blocking
-   * operations and should finish quickly. </p>
-   */
-  String getId();
-
-  /**
    * A method that will be called when a load is no longer relevant and has been cancelled. This
    * method does not need to guarantee that any in process loads do not finish. It also may be
    * called before a load starts or after it finishes.
@@ -85,6 +73,9 @@ public interface DataFetcher<T> {
    */
   void cancel();
 
+  /**
+   * Returns the class of the data this fetcher will attempt to obtain.
+   */
   Class<T> getDataClass();
 
   /**

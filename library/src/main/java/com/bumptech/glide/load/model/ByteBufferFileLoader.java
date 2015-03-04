@@ -84,11 +84,6 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     }
 
     @Override
-    public String getId() {
-      return file.getPath();
-    }
-
-    @Override
     public void cancel() {
       // Do nothing.
     }

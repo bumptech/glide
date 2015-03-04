@@ -66,11 +66,6 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
     }
 
     @Override
-    public String getId() {
-      return "";
-    }
-
-    @Override
     public void cancel() {
       // Do nothing.
     }
