@@ -66,7 +66,9 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     if (coordinator != null) {
       coordinator.onRequestSuccess(this);
     }
-    thumb.clear();
+    if (!thumb.isComplete()) {
+      thumb.clear();
+    }
   }
 
   private boolean parentIsAnyResourceSet() {
