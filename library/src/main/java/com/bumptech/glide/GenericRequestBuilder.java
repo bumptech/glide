@@ -742,7 +742,6 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         if (priority == null) {
             priority = Priority.NORMAL;
         }
-        isThumbnailBuilt = false;
         return buildRequestRecursive(target, null);
     }
 
@@ -769,9 +768,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
             ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
             Request fullRequest = obtainRequest(target, sizeMultiplier, priority, coordinator);
+            // Guard against infinite recursion.
             isThumbnailBuilt = true;
             // Recursively generate thumbnail requests.
             Request thumbRequest = thumbnailRequestBuilder.buildRequestRecursive(target, coordinator);
+            isThumbnailBuilt = false;
             coordinator.setRequests(fullRequest, thumbRequest);
             return coordinator;
         } else if (thumbSizeMultiplier != null) {
