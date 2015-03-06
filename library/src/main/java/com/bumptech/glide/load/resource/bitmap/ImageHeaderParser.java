@@ -8,6 +8,8 @@ import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageTyp
 
 import android.util.Log;
 
+import com.bumptech.glide.util.Preconditions;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -85,10 +87,12 @@ public class ImageHeaderParser {
   }
 
   public ImageHeaderParser(InputStream is) {
+    Preconditions.checkNotNull(is);
     reader = new StreamReader(is);
   }
 
   public ImageHeaderParser(ByteBuffer byteBuffer) {
+    Preconditions.checkNotNull(byteBuffer);
     reader = new ByteBufferReader(byteBuffer);
   }
 

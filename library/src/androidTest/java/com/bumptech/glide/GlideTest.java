@@ -75,6 +75,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -650,25 +651,36 @@ public class GlideTest {
 
     @Override
     public void registerComponents(Context context, Registry registry) {
-      DataFetcher<InputStream> mockStreamFetcher = mock(DataFetcher.class);
-      when(mockStreamFetcher.getDataClass()).thenReturn(InputStream.class);
+      registerMockModelLoader(GlideUrl.class, InputStream.class,
+          new ByteArrayInputStream(new byte[0]), registry);
+      registerMockModelLoader(File.class, InputStream.class,
+          new ByteArrayInputStream(new byte[0]), registry);
+      registerMockModelLoader(File.class, ParcelFileDescriptor.class,
+          mock(ParcelFileDescriptor.class), registry);
+      registerMockModelLoader(File.class, ByteBuffer.class,
+          ByteBuffer.allocate(10), registry);
+    }
+
+    private static <X, Y> void registerMockModelLoader(Class<X> modelClass, Class<Y> dataClass,
+          Y loadedData, Registry registry) {
+      DataFetcher<Y> mockStreamFetcher = mock(DataFetcher.class);
+      when(mockStreamFetcher.getDataClass()).thenReturn(dataClass);
       try {
-        doAnswer(new Util.CallDataReady<>(new ByteArrayInputStream(new byte[0])))
+        doAnswer(new Util.CallDataReady<>(loadedData))
             .when(mockStreamFetcher)
             .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
-      ModelLoader<GlideUrl, InputStream> mockUrlLoader = mock(ModelLoader.class);
-      when(mockUrlLoader.buildLoadData(any(GlideUrl.class), anyInt(), anyInt()))
+      ModelLoader<X, Y> mockUrlLoader = mock(ModelLoader.class);
+      when(mockUrlLoader.buildLoadData(any(modelClass), anyInt(), anyInt()))
           .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
-      when(mockUrlLoader.handles(any(GlideUrl.class))).thenReturn(true);
-      ModelLoaderFactory<GlideUrl, InputStream> mockUrlLoaderFactory =
-          mock(ModelLoaderFactory.class);
+      when(mockUrlLoader.handles(any(modelClass))).thenReturn(true);
+      ModelLoaderFactory<X, Y> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
       when(mockUrlLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
           .thenReturn(mockUrlLoader);
 
-      registry.prepend(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
+      registry.replace(modelClass, dataClass, mockUrlLoaderFactory);
     }
   }
 
