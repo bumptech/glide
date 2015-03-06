@@ -66,8 +66,8 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    if (data != null
-        && requestContext.getDiskCacheStrategy().cacheSource(loadData.fetcher.getDataSource())) {
+    DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
+    if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       long startTime = LogTime.getLogTime();
       try {
         Encoder<Object> encoder = requestContext.getSourceEncoder(data);

@@ -11,63 +11,63 @@ public enum DiskCacheStrategy {
   /**
    * Caches with both {@link #DATA} and {@link #RESOURCE}.
    */
-  ALL(new DiskCacheChooser() {
+  ALL(true /*decodeCachedData*/, true /*decodeCachedResource*/) {
     @Override
-    public boolean isSourceCachable(DataSource dataSource) {
+    public boolean isDataCacheable(DataSource dataSource) {
       return true;
     }
 
     @Override
-    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+    public boolean isResourceCacheable(boolean isFromAlternateCacheKey, DataSource dataSource,
         EncodeStrategy encodeStrategy) {
       return dataSource != DataSource.RESOURCE_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
-  }, true /*decodeCachedData*/, true /*decodeCachedResource*/),
+  },
   /**
    * Saves no data to cache.
    */
-  NONE(new DiskCacheChooser() {
+  NONE(false /*decodeCachedData*/, false /*decodeCachedResource*/) {
     @Override
-    public boolean isSourceCachable(DataSource dataSource) {
+    public boolean isDataCacheable(DataSource dataSource) {
       return false;
     }
 
     @Override
-    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+    public boolean isResourceCacheable(boolean isFromAlternateCacheKey, DataSource dataSource,
         EncodeStrategy encodeStrategy) {
       return false;
     }
-  }, false /*decodeCachedData*/, false /*decodeCachedResource*/),
+  },
   /**
    * Writes retrieved data directly to the disk cache before it's decoded.
    */
-  DATA(new DiskCacheChooser() {
+  DATA(true /*decodeCachedData*/, false /*decodeCachedResource*/) {
     @Override
-    public boolean isSourceCachable(DataSource dataSource) {
+    public boolean isDataCacheable(DataSource dataSource) {
       return true;
     }
 
     @Override
-    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+    public boolean isResourceCacheable(boolean isFromAlternateCacheKey, DataSource dataSource,
         EncodeStrategy encodeStrategy) {
       return false;
     }
-  }, true /*decodeCachedData*/, false /*decodeCachedResource*/),
+  },
   /**
    * Writes resources to disk after they've been decoded.
    */
-  RESOURCE(new DiskCacheChooser() {
+  RESOURCE(false /*decodeCachedData*/, true /*decodeCachedResource*/) {
     @Override
-    public boolean isSourceCachable(DataSource dataSource) {
+    public boolean isDataCacheable(DataSource dataSource) {
       return false;
     }
 
     @Override
-    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+    public boolean isResourceCacheable(boolean isFromAlternateCacheKey, DataSource dataSource,
         EncodeStrategy encodeStrategy) {
       return dataSource != DataSource.RESOURCE_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
-  }, false /*decodeCachedData*/, true /*decodeCachedResource*/),
+  },
   /**
    * Tries to intelligently choose a strategy based on the data source of the
    * {@link com.bumptech.glide.load.data.DataFetcher} and the
@@ -75,35 +75,26 @@ public enum DiskCacheStrategy {
    * {@link com.bumptech.glide.load.ResourceEncoder} (if an
    * {@link com.bumptech.glide.load.ResourceEncoder} is available).
    */
-  AUTOMATIC(new DiskCacheChooser() {
+  AUTOMATIC(true /*decodeCachedData*/, true /*decodeCachedResource*/) {
     @Override
-    public boolean isSourceCachable(DataSource dataSource) {
+    public boolean isDataCacheable(DataSource dataSource) {
       return dataSource == DataSource.REMOTE;
     }
 
     @Override
-    public boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
+    public boolean isResourceCacheable(boolean isFromAlternateCacheKey, DataSource dataSource,
         EncodeStrategy encodeStrategy) {
       return ((isFromAlternateCacheKey && dataSource == DataSource.DATA_DISK_CACHE)
           || dataSource == DataSource.LOCAL)
           && encodeStrategy == EncodeStrategy.TRANSFORMED;
     }
-  }, true /*decodeCachedData*/, true /*decodeCachedResource*/);
+  };
 
-  private final DiskCacheChooser chooser;
   private final boolean decodeCachedData;
   private final boolean decodeCachedResource;
 
-  private interface DiskCacheChooser {
-    boolean isSourceCachable(DataSource dataSource);
-
-    boolean isResourceCachable(boolean isFromAlternateCacheKey, DataSource dataSource,
-        EncodeStrategy encodeStrategy);
-  }
-
-  DiskCacheStrategy(DiskCacheChooser chooser, boolean decodeCachedData,
+  DiskCacheStrategy(boolean decodeCachedData,
       boolean decodeCachedResource) {
-    this.chooser = chooser;
     this.decodeCachedData = decodeCachedData;
     this.decodeCachedResource = decodeCachedResource;
   }
@@ -111,17 +102,13 @@ public enum DiskCacheStrategy {
   /**
    * Returns true if this request should cache the original unmodified data.
    */
-  public boolean cacheSource(DataSource source) {
-    return chooser.isSourceCachable(source);
-  }
+  public abstract boolean isDataCacheable(DataSource dataSource);
 
   /**
-   * Returns true if this request should cache the final transformed result.
+   * Returns true if this request should cache the final transformed resource.
    */
-  public boolean cacheResult(boolean isFromAlternateCacheKey, DataSource source,
-      EncodeStrategy encodeStrategy) {
-    return chooser.isResourceCachable(isFromAlternateCacheKey, source, encodeStrategy);
-  }
+  public abstract boolean isResourceCacheable(boolean isFromAlternateCacheKey,
+      DataSource dataSource, EncodeStrategy encodeStrategy);
 
   /**
    * Returns true if this request should attempt to decode cached resource data.

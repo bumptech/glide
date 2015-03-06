@@ -277,7 +277,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       long startEncodeTime = LogTime.getLogTime();
       DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
       boolean isFromAlternateCacheKey = !requestContext.isSourceKey(currentSourceKey);
-      if (diskCacheStrategy.cacheResult(isFromAlternateCacheKey, dataSource, encodeStrategy)) {
+      if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
+          encodeStrategy)) {
         if (encoder == null) {
           throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
         }
