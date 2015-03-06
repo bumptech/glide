@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -31,10 +32,13 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
 public class ByteBufferGifDecoderTest {
+  private static final byte[] GIF_HEADER = new byte[] { 0x47, 0x49, 0x46 };
+
   private ByteBufferGifDecoder decoder;
   private GifHeaderParser parser;
   private ByteBufferGifDecoder.GifHeaderParserPool parserPool;
@@ -60,6 +64,32 @@ public class ByteBufferGifDecoderTest {
     options = new HashMap<>();
     decoder = new ByteBufferGifDecoder(RuntimeEnvironment.application, bitmapPool, parserPool,
         decoderPool);
+  }
+
+  @Test
+  public void testDoesNotHandleStreamIfEnabledButNotAGif() throws IOException {
+    Map<String, Object> options = new HashMap<>();
+    assertThat(decoder.handles(ByteBuffer.allocate(0), options)).isFalse();
+  }
+
+  @Test
+  public void testHandlesStreamIfContainsGifHeaderAndDisabledIsNotSet() throws IOException {
+    Map<String, Object> options = new HashMap<>();
+    assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isTrue();
+  }
+
+  @Test
+  public void testHandlesStreamIfContainsGifHeaderAndDisabledIsFalse() throws IOException {
+    Map<String, Object> options = new HashMap<>();
+    options.put(ByteBufferGifDecoder.KEY_DISABLE_ANIMATION, false);
+    assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isTrue();
+  }
+
+  @Test
+  public void testDoesNotHandleStreamIfDisabled() throws IOException {
+    Map<String, Object> options = new HashMap<>();
+    options.put(ByteBufferGifDecoder.KEY_DISABLE_ANIMATION, true);
+    assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isFalse();
   }
 
   @Test

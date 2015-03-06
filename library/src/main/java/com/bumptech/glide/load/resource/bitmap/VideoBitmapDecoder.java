@@ -55,7 +55,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   }
 
   @Override
-  public boolean handles(ParcelFileDescriptor data) {
+  public boolean handles(ParcelFileDescriptor data, Map<String, Object> options) {
     MediaMetadataRetriever retriever = factory.build();
     try {
       retriever.setDataSource(data.getFileDescriptor());

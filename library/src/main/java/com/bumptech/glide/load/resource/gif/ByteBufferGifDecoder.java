@@ -27,6 +27,15 @@ import java.util.Queue;
  * com.bumptech.glide.load.resource.gif.GifDrawable} from {@link java.io.InputStream} data.
  */
 public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDrawable> {
+
+  /**
+   * A Key for an {@link boolean} option that if set to {@code true}, disables this decoder
+   * ({@link #handles(java.nio.ByteBuffer, java.util.Map)} will return {@code false}). Defaults to
+   * {@code false}.
+   */
+  public static final String KEY_DISABLE_ANIMATION =
+      "com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder.DisableAnimation";
+
   private static final GifHeaderParserPool PARSER_POOL = new GifHeaderParserPool();
   private static final GifDecoderPool DECODER_POOL = new GifDecoderPool();
 
@@ -55,8 +64,11 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   }
 
   @Override
-  public boolean handles(ByteBuffer source) throws IOException {
-    return new ImageHeaderParser(source).getType() == ImageHeaderParser.ImageType.GIF;
+  public boolean handles(ByteBuffer source, Map<String, Object> options) throws IOException {
+    boolean isDisabled =
+        options.containsKey(KEY_DISABLE_ANIMATION) && (boolean) options.get(KEY_DISABLE_ANIMATION);
+    return !isDisabled
+        && new ImageHeaderParser(source).getType() == ImageHeaderParser.ImageType.GIF;
   }
 
   @Override

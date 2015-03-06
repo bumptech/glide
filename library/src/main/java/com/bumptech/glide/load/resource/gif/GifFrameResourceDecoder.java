@@ -22,7 +22,7 @@ public final class GifFrameResourceDecoder implements ResourceDecoder<GifDecoder
   }
 
   @Override
-  public boolean handles(GifDecoder source) {
+  public boolean handles(GifDecoder source, Map<String, Object> options) {
     return true;
   }
 

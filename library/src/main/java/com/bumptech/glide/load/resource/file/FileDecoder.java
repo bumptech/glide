@@ -13,7 +13,7 @@ import java.util.Map;
 public class FileDecoder implements ResourceDecoder<File, File> {
 
   @Override
-  public boolean handles(File source) {
+  public boolean handles(File source, Map<String, Object> options) {
     return true;
   }
 

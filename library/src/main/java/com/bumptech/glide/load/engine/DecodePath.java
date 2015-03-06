@@ -48,7 +48,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
     for (ResourceDecoder<DataType, ResourceType> decoder : decoders) {
       try {
         DataType data = rewinder.rewindAndGet();
-        if (decoder.handles(data)) {
+        if (decoder.handles(data, options)) {
           data = rewinder.rewindAndGet();
           result = decoder.decode(data, width, height, options);
         }

@@ -16,7 +16,7 @@ import java.util.Map;
 public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
 
   @Override
-  public boolean handles(InputStream source) throws IOException {
+  public boolean handles(InputStream source, Map<String, Object> options) throws IOException {
     // TODO: Can we tell?
     return true;
   }

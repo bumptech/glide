@@ -25,7 +25,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
   }
 
   @Override
-  public boolean handles(InputStream source) throws IOException {
+  public boolean handles(InputStream source, Map<String, Object> options) throws IOException {
     return downsampler.handles(source);
   }
 

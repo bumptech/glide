@@ -13,7 +13,22 @@ import java.util.Map;
  */
 public interface ResourceDecoder<T, Z> {
 
-  boolean handles(T source) throws IOException;
+  /**
+   * Returns {@code true} if this decoder is capable of decoding the given source with the given
+   * options, and {@code false} otherwise.
+   *
+   * <p> Decoders should make a best effort attempt to quickly determine if they are likely to be
+   * able to decode data, but should not attempt to completely read the given data. A typical
+   * implementation would check the file headers verify they match content the decoder expects to
+   * handle (ie a GIF decoder should verify that the image contains the GIF header block. </p>
+   *
+   * <p> Decoders that return {@code true} from {@link #handles(Object, java.util.Map)} may still
+   * return {@code null} from {@link #decode(Object, int, int, java.util.Map)} if the data is
+   * partial or formatted incorrectly. </p>
+   *
+   * @throws IOException
+   */
+  boolean handles(T source, Map<String, Object> options) throws IOException;
 
   /**
    * Returns a decoded resource from the given data or null if no resource could be decoded.

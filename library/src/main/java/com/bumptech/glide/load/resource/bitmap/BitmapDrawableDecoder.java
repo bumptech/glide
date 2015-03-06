@@ -37,8 +37,8 @@ public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType
   }
 
   @Override
-  public boolean handles(DataType source) throws IOException {
-    return decoder.handles(source);
+  public boolean handles(DataType source, Map<String, Object> options) throws IOException {
+    return decoder.handles(source, options);
   }
 
   @Override
