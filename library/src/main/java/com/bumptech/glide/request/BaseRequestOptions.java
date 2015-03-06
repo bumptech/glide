@@ -18,8 +18,10 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
+import com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
+import com.bumptech.glide.load.resource.gif.StreamGifDecoder;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
@@ -442,6 +444,19 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     fields &= ~TRANSFORMATION;
     transformations.clear();
     isTransformationRequired = false;
+    return selfOrThrowIfLocked();
+  }
+
+  /**
+   * Disables resource decoders that return animated resources so any resource returned will be
+   * static.
+   *
+   * <p> To disable transitions (fades etc) use
+   * {@link com.bumptech.glide.TransitionOptions#dontTransition()}</p>
+   */
+  public final CHILD dontAnimate() {
+    set(ByteBufferGifDecoder.KEY_DISABLE_ANIMATION, true);
+    set(StreamGifDecoder.KEY_DISABLE_ANIMATION, true);
     return selfOrThrowIfLocked();
   }
 
