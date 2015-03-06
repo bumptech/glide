@@ -75,7 +75,7 @@ public class VolleyStreamFetcherServerTest {
     }).when(callback).onDataReady(any(InputStream.class));
     requestQueue = Volley.newRequestQueue(RuntimeEnvironment.application);
     mockWebServer = new MockWebServer();
-    mockWebServer.play();
+    mockWebServer.start();
 
     streamCaptor = ArgumentCaptor.forClass(InputStream.class);
   }
@@ -194,7 +194,7 @@ public class VolleyStreamFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(200));
     String headerField = "field";
     String headerValue = "value";
-    Map<String, String> headersMap = new HashMap<String, String>();
+    Map<String, String> headersMap = new HashMap<>();
     headersMap.put(headerField, headerValue);
     Headers headers = mock(Headers.class);
     when(headers.getHeaders()).thenReturn(headersMap);
@@ -220,6 +220,8 @@ public class VolleyStreamFetcherServerTest {
   @Implements(SystemClock.class)
   public static class FakeSystemClock extends ShadowSystemClock {
 
+    // Used by Shadow.
+    @SuppressWarnings("unused")
     @Implementation
     public static long elapsedRealtime() {
       // The default is to return something using the main looper, which doesn't exist on

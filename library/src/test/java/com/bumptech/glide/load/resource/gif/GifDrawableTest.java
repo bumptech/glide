@@ -26,6 +26,7 @@ import android.os.Build;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.gif.GifDrawableTest.BitmapTrackingShadowCanvas;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.Util;
 
@@ -38,9 +39,17 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadows.ShadowCanvas;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, emulateSdk = 18,
+    shadows = { GlideShadowLooper.class, BitmapTrackingShadowCanvas.class })
 public class GifDrawableTest {
   private GifDrawable drawable;
   private int frameHeight;
@@ -53,6 +62,14 @@ public class GifDrawableTest {
   @Mock private GifFrameLoader frameLoader;
   @Mock private Paint paint;
   @Mock private Transformation<Bitmap> transformation;
+
+  private static Paint isAPaint() {
+    return isA(Paint.class);
+  }
+
+  private static Rect isARect() {
+    return isA(Rect.class);
+  }
 
   @Before
   public void setUp() {
@@ -75,18 +92,12 @@ public class GifDrawableTest {
 
   @Test
   public void testShouldDrawFirstFrameBeforeAnyFrameRead() {
-    Canvas canvas = mock(Canvas.class);
+    Canvas canvas = new Canvas();
     drawable.draw(canvas);
 
-    verify(canvas).drawBitmap(eq(firstFrame), (Rect) isNull(), isARect(), isAPaint());
-  }
-
-  @Test
-  public void testDoesNotDrawNullFirstFrame() {
-    drawable = new GifDrawable(RuntimeEnvironment.application, frameLoader, bitmapPool, paint);
-    Canvas canvas = mock(Canvas.class);
-
-    verify(canvas, never()).drawBitmap(isA(Bitmap.class), isARect(), isARect(), isAPaint());
+    BitmapTrackingShadowCanvas shadowCanvas =
+        (BitmapTrackingShadowCanvas) ShadowExtractor.extract(canvas);
+    assertThat(shadowCanvas.getDrawnBitmaps()).containsExactly(firstFrame);
   }
 
   @Test
@@ -508,7 +519,6 @@ public class GifDrawableTest {
     verify(paint).setColorFilter(eq(colorFilter));
   }
 
-
   @Test
   public void testReturnsCurrentTransformationInGetFrameTransformation() {
     Transformation<Bitmap> newTransformation = mock(Transformation.class);
@@ -528,19 +538,25 @@ public class GifDrawableTest {
     verify(cb, times(1 + loopCount * frameCount)).invalidateDrawable(eq(drawable));
   }
 
-  private static Paint isAPaint() {
-    return isA(Paint.class);
-  }
-
-  private static Rect isARect() {
-    return isA(Rect.class);
-  }
-
   private void runLoops(int loopCount, int frameCount) {
     for (int loop = 0; loop < loopCount; loop++) {
       for (int frame = 0; frame < frameCount; frame++) {
         drawable.onFrameReady(frame);
       }
+    }
+  }
+
+  @Implements(Canvas.class)
+  public static class BitmapTrackingShadowCanvas extends ShadowCanvas {
+    private final Set<Bitmap> drawnBitmaps = new HashSet<>();
+
+    @Implementation
+    public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
+      drawnBitmaps.add(bitmap);
+    }
+
+    public Iterable<Bitmap> getDrawnBitmaps() {
+      return drawnBitmaps;
     }
   }
 }

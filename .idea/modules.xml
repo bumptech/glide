@@ -4,8 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/third_party/disklrucache/disklrucache.iml" filepath="$PROJECT_DIR$/third_party/disklrucache/disklrucache.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/flickr/flickr.iml" filepath="$PROJECT_DIR$/samples/flickr/flickr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/gallery/gallery.iml" filepath="$PROJECT_DIR$/samples/gallery/gallery.iml" />
       <module fileurl="file://$PROJECT_DIR$/third_party/gif_decoder/gif_decoder.iml" filepath="$PROJECT_DIR$/third_party/gif_decoder/gif_decoder.iml" />
-      <module fileurl="file://$PROJECT_DIR$/third_party/gif_encoder/gif_encoder.iml" filepath="$PROJECT_DIR$/third_party/gif_encoder/gif_encoder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/integration/gifencoder/gifencoder.iml" filepath="$PROJECT_DIR$/integration/gifencoder/gifencoder.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/giphy/giphy.iml" filepath="$PROJECT_DIR$/samples/giphy/giphy.iml" />
       <module fileurl="file://$PROJECT_DIR$/glide/glide.iml" filepath="$PROJECT_DIR$/glide/glide.iml" />
       <module fileurl="file://$PROJECT_DIR$/glide-parent.iml" filepath="$PROJECT_DIR$/glide-parent.iml" />

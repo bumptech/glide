@@ -7,9 +7,9 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.robolectric:robolectric-gradle-plugin:${ROBOLECTRIC_GRADLE_VERSION}"
         classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
         classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${COVERALLS_GRADLE_VERSION}"
+        classpath "org.robolectric:robolectric-gradle-plugin:${ROBOLECTRIC_GRADLE_VERSION}"
     }
 }
 
@@ -69,5 +69,5 @@ subprojects { project ->
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2'
+    gradleVersion = '2.2.1'
 }

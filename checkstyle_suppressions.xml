@@ -5,7 +5,7 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <suppress files=".*[/\\]library[/\\]src[/\\]androidTest[/\\].*" checks="Javadoc.*"/>
+    <suppress files=".*[/\\]library[/\\]src[/\\]test[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]gif_encoder[/\\].*" checks=".*"/>
     <suppress files=".*RequestBuilder.java|ChildLoadProvider.java|TransitionOptions.java|BaseDecodeOptions.java|RequestOptions.java" checks="NoClone" />
 </suppressions>

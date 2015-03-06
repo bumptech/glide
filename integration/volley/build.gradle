@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'robolectric'
+apply plugin: 'org.robolectric'
 
 repositories {
     mavenCentral()
@@ -9,12 +9,12 @@ dependencies {
     compile project(':glide')
     compile "com.mcxiaoke.volley:library:${VOLLEY_VERSION}"
 
-    androidTestCompile project(":testutil")
-    androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"
-    androidTestCompile "junit:junit:${JUNIT_VERSION}"
-    androidTestCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
-    androidTestCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    androidTestCompile "com.squareup.okhttp:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testCompile project(":testutil")
+    testCompile "com.google.truth:truth:${TRUTH_VERSION}"
+    testCompile "junit:junit:${JUNIT_VERSION}"
+    testCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
+    testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testCompile "com.squareup.okhttp:mockwebserver:${MOCKWEBSERVER_VERSION}"
 }
 
 android {

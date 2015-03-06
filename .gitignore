@@ -16,6 +16,8 @@ library/install_dependencies/maven-android-sdk-deployer
 .idea/dictionaries
 .idea/dataSources.ids
 .idea/datasources.xml
+_site/*
+_pages/*
 library/.idea
 samples/**/.idea
 *.DS_Store

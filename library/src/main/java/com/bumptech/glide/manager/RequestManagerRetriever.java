@@ -25,8 +25,9 @@ import java.util.Map;
  * retrieving existing ones from activities and fragment.
  */
 public class RequestManagerRetriever implements Handler.Callback {
-  private static final String TAG = "RMRetriever";
+  // Visible for testing.
   static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
+  private static final String TAG = "RMRetriever";
 
   /**
    * The singleton instance of RequestManagerRetriever.
