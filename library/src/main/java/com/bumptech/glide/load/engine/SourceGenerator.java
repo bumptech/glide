@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import android.util.Log;
 
 import com.bumptech.glide.Logs;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -22,7 +23,8 @@ import java.util.Iterator;
  * loaded from the cache file rather than returned directly. </p>
  */
 class SourceGenerator<Model> implements DataFetcherGenerator,
-    DataFetcher.DataCallback<Object> {
+    DataFetcher.DataCallback<Object>,
+    DataFetcherGenerator.FetcherReadyCallback {
 
   private final int width;
   private final int height;
@@ -86,12 +88,23 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
       sourceCacheGenerator =
           new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), width, height,
-              diskCache, requestContext, cb);
+              diskCache, requestContext, this);
       if (!sourceCacheGenerator.startNext()) {
-        cb.onDataFetcherReady(loadData.sourceKey, null /*data*/, loadData.fetcher);
+        cb.onDataFetcherReady(loadData.sourceKey, null /*data*/, loadData.fetcher,
+            loadData.fetcher.getDataSource());
       }
     } else {
-      cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher);
+      cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,
+          loadData.fetcher.getDataSource());
     }
+  }
+
+  // Called from source cache generator.
+  @Override
+  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher,
+      DataSource dataSource) {
+    // This data fetcher will be loading from a File and provide the wrong data source, so override
+    // with the data source of the original fetcher
+    cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource());
   }
 }

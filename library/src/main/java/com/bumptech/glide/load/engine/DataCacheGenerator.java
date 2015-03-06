@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -50,7 +51,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
       Key originalKey = new DataCacheKey(sourceId, requestContext.getSignature());
       File cacheFile = diskCache.get(originalKey);
       if (cacheFile != null) {
-        this.sourceKey = originalKey;
+        this.sourceKey = sourceId;
         loadDataIterator = requestContext.getDataFetchers(cacheFile, width, height).iterator();
       }
     }
@@ -67,6 +68,6 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceKey, data, fetcher);
+    cb.onDataFetcherReady(sourceKey, data, fetcher, DataSource.DATA_DISK_CACHE);
   }
 }

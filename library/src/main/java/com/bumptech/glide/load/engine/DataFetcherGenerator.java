@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 
@@ -21,7 +22,7 @@ interface DataFetcherGenerator {
      * @param data The loaded data, or null if the load failed.
      * @param fetcher The data fetcher we attempted to load from.
      */
-    void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher);
+    void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher, DataSource dataSource);
   }
 
   /**
