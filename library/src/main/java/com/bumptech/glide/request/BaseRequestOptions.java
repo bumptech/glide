@@ -445,6 +445,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return selfOrThrowIfLocked();
   }
 
+  public final Map<Class<?>, Transformation<?>> getTransformations() {
+    return transformations;
+  }
+
   @SuppressWarnings("unchecked")
   public final <T> Transformation<T> getTransformation(Class<T> resourceClass) {
     Transformation<T> result = (Transformation<T>) transformations.get(resourceClass);

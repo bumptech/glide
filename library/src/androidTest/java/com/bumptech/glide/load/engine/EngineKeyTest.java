@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +20,7 @@ import org.mockito.stubbing.Answer;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
+import java.util.Collections;
 
 /**
  * Tests if {@link EngineKey} {@link Object#hashCode() hashCode} and {@link Object#equals(Object)
@@ -42,10 +43,17 @@ public class EngineKeyTest {
     Class resourceClass = Object.class;
     Class transcodeClass = Integer.class;
     Key signature = mock(Key.class);
-    List<Transformation> transformations;
+    Transformation<Object> transformation = mock(Transformation.class);
+
+    public Harness() {
+      doAnswer(new Util.WriteDigest("transformation")).when(transformation)
+          .updateDiskCacheKey(any(MessageDigest.class));
+    }
 
     public EngineKey build() {
-      return new EngineKey(id, signature, width, height, resourceClass, transcodeClass);
+      return new EngineKey(id, signature, width, height,
+          Collections.<Class<?>, Transformation<?>>singletonMap(Object.class, transformation),
+          resourceClass, transcodeClass);
     }
   }
 
@@ -119,8 +127,14 @@ public class EngineKeyTest {
   }
 
   @Test
-  public void testDifferesIfTransformationsDiffer() {
-    Transformation<Object> transformation = mock(Transformation.class);
+  public void testDiffersIfTransformationsDiffer() throws NoSuchAlgorithmException {
+    EngineKey first = harness.build();
 
+    Transformation<Object> other = mock(Transformation.class);
+    doAnswer(new Util.WriteDigest("other")).when(other)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    harness.transformation = other;
+    EngineKey second = harness.build();
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
   }
 }

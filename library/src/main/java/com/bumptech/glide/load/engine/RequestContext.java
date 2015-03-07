@@ -122,6 +122,10 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
     return requestOptions.getTransformation(decodedResourceClass);
   }
 
+  Map<Class<?>, Transformation<?>> getTransformations() {
+    return requestOptions.getTransformations();
+  }
+
   Map<String, Object> getOptions() {
     return requestOptions.getOptions();
   }

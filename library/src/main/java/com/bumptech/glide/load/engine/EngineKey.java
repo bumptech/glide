@@ -1,9 +1,11 @@
 package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.util.Preconditions;
 
 import java.security.MessageDigest;
+import java.util.Map;
 
 /**
  * An in memory only cache key used to multiplex loads.
@@ -15,14 +17,17 @@ class EngineKey implements Key {
   private final Class<?> resourceClass;
   private final Class<?> transcodeClass;
   private final Key signature;
+  private final Map<Class<?>, Transformation<?>> transformations;
   private int hashCode;
 
-  public EngineKey(Object model, Key signature, int width, int height, Class<?> resourceClass,
+  public EngineKey(Object model, Key signature, int width, int height,
+      Map<Class<?>, Transformation<?>> transformations, Class<?> resourceClass,
       Class<?> transcodeClass) {
     this.model = Preconditions.checkNotNull(model);
     this.signature = Preconditions.checkNotNull(signature, "Signature must not be null");
     this.width = width;
     this.height = height;
+    this.transformations = Preconditions.checkNotNull(transformations);
     this.resourceClass =
         Preconditions.checkNotNull(resourceClass, "Resource class must not be null");
     this.transcodeClass =
@@ -37,6 +42,7 @@ class EngineKey implements Key {
           && signature.equals(other.signature)
           && height == other.height
           && width == other.width
+          && transformations.equals(other.transformations)
           && resourceClass.equals(other.resourceClass)
           && transcodeClass.equals(other.transcodeClass);
     }
@@ -50,6 +56,7 @@ class EngineKey implements Key {
       hashCode = 31 * hashCode + signature.hashCode();
       hashCode = 31 * hashCode + width;
       hashCode = 31 * hashCode + height;
+      hashCode = 31 * hashCode + transformations.hashCode();
       hashCode = 31 * hashCode + resourceClass.hashCode();
       hashCode = 31 * hashCode + transcodeClass.hashCode();
     }
@@ -64,8 +71,9 @@ class EngineKey implements Key {
         + ", height=" + height
         + ", resourceClass=" + resourceClass
         + ", transcodeClass=" + transcodeClass
-        +  ", signature=" + signature
+        + ", signature=" + signature
         + ", hashCode=" + hashCode
+        + ", transformations=" + transformations
         + '}';
   }
 
