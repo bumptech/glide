@@ -65,7 +65,7 @@ public class RequestManagerRetrieverTest {
             harness.doGet();
 
             Robolectric.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
-            assertTrue(harness.hasFragmentWithTag(RequestManagerRetriever.TAG));
+            assertTrue(harness.hasFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG));
         }
     }
 
@@ -81,7 +81,7 @@ public class RequestManagerRetrieverTest {
         for (RetrieverHarness harness : harnesses) {
             RequestManager requestManager = mock(RequestManager.class);
 
-            harness.addFragmentWithTag(RequestManagerRetriever.TAG, requestManager);
+            harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, requestManager);
 
             assertEquals(requestManager, harness.doGet());
         }
@@ -90,7 +90,7 @@ public class RequestManagerRetrieverTest {
     @Test
     public void testReturnsNewRequestManagerIfFragmentExistsButHasNoRequestManager() {
         for (RetrieverHarness harness : harnesses) {
-            harness.addFragmentWithTag(RequestManagerRetriever.TAG, null);
+            harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, null);
 
             assertNotNull(harness.doGet());
         }
@@ -99,7 +99,7 @@ public class RequestManagerRetrieverTest {
     @Test
     public void testSavesNewRequestManagerToFragmentIfCreatesRequestManagerForExistingFragment() {
         for (RetrieverHarness harness : harnesses) {
-            harness.addFragmentWithTag(RequestManagerRetriever.TAG, null);
+            harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, null);
             RequestManager first = harness.doGet();
             RequestManager second = harness.doGet();
 
@@ -109,7 +109,7 @@ public class RequestManagerRetrieverTest {
 
     @Test
     public void testHasValidTag() {
-        assertEquals(RequestManagerRetriever.class.getPackage().getName(), RequestManagerRetriever.TAG);
+        assertEquals(RequestManagerRetriever.class.getPackage().getName(), RequestManagerRetriever.FRAGMENT_TAG);
     }
 
     @Test
@@ -396,7 +396,9 @@ public class RequestManagerRetrieverTest {
 
         @Override
         public boolean hasFragmentWithTag(String tag) {
-            return controller.get().getFragmentManager().findFragmentByTag(RequestManagerRetriever.TAG) != null;
+            return null != controller.get()
+                .getFragmentManager()
+                .findFragmentByTag(RequestManagerRetriever.FRAGMENT_TAG);
         }
 
         @Override
@@ -405,7 +407,7 @@ public class RequestManagerRetrieverTest {
             fragment.setRequestManager(requestManager);
             controller.get().getFragmentManager()
                     .beginTransaction()
-                    .add(fragment, RequestManagerRetriever.TAG)
+                    .add(fragment, RequestManagerRetriever.FRAGMENT_TAG)
                     .commitAllowingStateLoss();
             controller.get().getFragmentManager().executePendingTransactions();
         }
@@ -440,7 +442,7 @@ public class RequestManagerRetrieverTest {
 
         @Override
         public boolean hasFragmentWithTag(String tag) {
-            return controller.get().getSupportFragmentManager().findFragmentByTag(RequestManagerRetriever.TAG)
+            return controller.get().getSupportFragmentManager().findFragmentByTag(RequestManagerRetriever.FRAGMENT_TAG)
                     != null;
         }
 
@@ -450,7 +452,7 @@ public class RequestManagerRetrieverTest {
             fragment.setRequestManager(manager);
             controller.get().getSupportFragmentManager()
                     .beginTransaction()
-                    .add(fragment, RequestManagerRetriever.TAG)
+                    .add(fragment, RequestManagerRetriever.FRAGMENT_TAG)
                     .commitAllowingStateLoss();
             controller.get().getSupportFragmentManager().executePendingTransactions();
         }
