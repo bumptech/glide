@@ -17,7 +17,6 @@ import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
-import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.signature.ApplicationVersionSignature;
 import com.bumptech.glide.signature.MediaStoreSignature;
@@ -43,21 +42,19 @@ import java.util.UUID;
 public class RequestManager implements LifecycleListener {
     private final Context context;
     private final Lifecycle lifecycle;
-    private final RequestManagerTreeNode treeNode;
     private final RequestTracker requestTracker;
     private final Glide glide;
     private final OptionsApplier optionsApplier;
     private DefaultOptions options;
 
-    public RequestManager(Context context, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
-        this(context, lifecycle, treeNode, new RequestTracker(), new ConnectivityMonitorFactory());
+    public RequestManager(Context context, Lifecycle lifecycle) {
+        this(context, lifecycle, new RequestTracker(), new ConnectivityMonitorFactory());
     }
 
-    RequestManager(Context context, final Lifecycle lifecycle, RequestManagerTreeNode treeNode,
-            RequestTracker requestTracker, ConnectivityMonitorFactory factory) {
+    RequestManager(Context context, final Lifecycle lifecycle, RequestTracker requestTracker,
+            ConnectivityMonitorFactory factory) {
         this.context = context.getApplicationContext();
         this.lifecycle = lifecycle;
-        this.treeNode = treeNode;
         this.requestTracker = requestTracker;
         this.glide = Glide.get(context);
         this.optionsApplier = new OptionsApplier();
@@ -149,27 +146,6 @@ public class RequestManager implements LifecycleListener {
     }
 
     /**
-     * Performs {@link #pauseRequests()} recursively for all managers that are contextually descendant
-     * to this manager based on the Activity/Fragment hierarchy:
-     *
-     * <ul>
-     * <li>When pausing on an Activity all attached fragments will also get paused.
-     * <li>When pausing on an attached Fragment all descendant fragments will also get paused.
-     * <li>When pausing on a detached Fragment or the application context only the current RequestManager is paused.
-     * </ul>
-     *
-     * <p>Note, on pre-Jelly Bean MR1 calling pause on a Fragment will not cause child fragments to pause, in this
-     * case either call pause on the Activity or use a support Fragment.
-     */
-    public void pauseRequestsRecursive() {
-        Util.assertMainThread();
-        pauseRequests();
-        for (RequestManager requestManager : treeNode.getDescendants()) {
-            requestManager.pauseRequests();
-        }
-    }
-
-    /**
      * Restarts any loads that have not yet completed.
      *
      * @see #isPaused()
@@ -178,19 +154,6 @@ public class RequestManager implements LifecycleListener {
     public void resumeRequests() {
         Util.assertMainThread();
         requestTracker.resumeRequests();
-    }
-
-    /**
-     * Performs {@link #resumeRequests()} recursively for all managers that are contextually descendant
-     * to this manager based on the Activity/Fragment hierarchy. The hierarchical semantics are identical as for
-     * {@link #pauseRequestsRecursive()}.
-     */
-    public void resumeRequestsRecursive() {
-        Util.assertMainThread();
-        resumeRequests();
-        for (RequestManager requestManager : treeNode.getDescendants()) {
-            requestManager.resumeRequests();
-        }
     }
 
     /**

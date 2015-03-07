@@ -48,7 +48,6 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
@@ -138,8 +137,7 @@ public class GlideTest {
 
         Glide.get(getContext()).register(GlideUrl.class, InputStream.class, mockUrlLoaderFactory);
         Lifecycle lifecycle = mock(Lifecycle.class);
-        RequestManagerTreeNode treeNode = mock(RequestManagerTreeNode.class);
-        requestManager = new RequestManager(getContext(), lifecycle, treeNode);
+        requestManager = new RequestManager(getContext(), lifecycle);
         requestManager.resumeRequests();
     }
 
