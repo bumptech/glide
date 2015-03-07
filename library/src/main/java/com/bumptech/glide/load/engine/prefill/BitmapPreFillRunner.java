@@ -12,7 +12,6 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.util.Util;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.HashSet;
 import java.util.Set;
@@ -153,9 +152,8 @@ final class BitmapPreFillRunner implements Runnable {
   private static class UniqueKey implements Key {
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest)
-        throws UnsupportedEncodingException {
-      // Do nothing.
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+      throw new UnsupportedOperationException();
     }
   }
 

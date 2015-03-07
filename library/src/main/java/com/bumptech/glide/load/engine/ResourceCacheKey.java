@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
@@ -16,7 +15,7 @@ final class ResourceCacheKey implements Key {
   private final int width;
   private final int height;
   private final Class<?> decodedResourceClass;
-  private final String transformationId;
+  private final Transformation<?> transformation;
 
   public ResourceCacheKey(Key sourceKey, Key signature, int width, int height,
       Transformation<?> appliedTransformation, Class<?> decodedResourceClass) {
@@ -24,7 +23,7 @@ final class ResourceCacheKey implements Key {
     this.signature = signature;
     this.width = width;
     this.height = height;
-    transformationId = appliedTransformation != null ? appliedTransformation.getId() : null;
+    this.transformation = appliedTransformation;
     this.decodedResourceClass = decodedResourceClass;
   }
 
@@ -33,8 +32,8 @@ final class ResourceCacheKey implements Key {
     if (o instanceof ResourceCacheKey) {
       ResourceCacheKey other = (ResourceCacheKey) o;
       return height == other.height && width == other.width
-          && (transformationId == null
-              ? other.transformationId == null : transformationId.equals(other.transformationId))
+          && (transformation == null
+              ? other.transformation == null : transformation.equals(other.transformation))
           && decodedResourceClass.equals(other.decodedResourceClass)
           && sourceKey.equals(other.sourceKey) && signature.equals(other.signature);
     }
@@ -47,8 +46,8 @@ final class ResourceCacheKey implements Key {
     result = 31 * result + signature.hashCode();
     result = 31 * result + width;
     result = 31 * result + height;
-    if (transformationId != null) {
-      result = 31 * result + transformationId.hashCode();
+    if (transformation != null) {
+      result = 31 * result + transformation.hashCode();
     }
     result = 31 * result + decodedResourceClass.hashCode();
     return result;
@@ -56,16 +55,15 @@ final class ResourceCacheKey implements Key {
 
   // TODO: Include relevant options?
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest)
-      throws UnsupportedEncodingException {
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
     byte[] dimensions = ByteBuffer.allocate(8).putInt(width).putInt(height).array();
     signature.updateDiskCacheKey(messageDigest);
     sourceKey.updateDiskCacheKey(messageDigest);
     messageDigest.update(dimensions);
-    if (transformationId != null) {
-      messageDigest.update(transformationId.getBytes(STRING_CHARSET_NAME));
+    if (transformation != null) {
+      transformation.updateDiskCacheKey(messageDigest);
     }
-    messageDigest.update(decodedResourceClass.getName().getBytes(STRING_CHARSET_NAME));
+    messageDigest.update(decodedResourceClass.getName().getBytes(CHARSET));
   }
 
   @Override
@@ -76,7 +74,7 @@ final class ResourceCacheKey implements Key {
         + ", width=" + width
         + ", height=" + height
         + ", decodedResourceClass=" + decodedResourceClass
-        + ", transformationId='" + transformationId + '\''
+        + ", transformation='" + transformation + '\''
         + '}';
   }
 }

@@ -2,7 +2,6 @@ package com.bumptech.glide.signature;
 
 import com.bumptech.glide.load.Key;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
@@ -20,7 +19,7 @@ public final class EmptySignature implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
     // Do nothing.
   }
 }

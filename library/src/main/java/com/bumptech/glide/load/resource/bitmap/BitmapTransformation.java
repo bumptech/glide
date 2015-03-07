@@ -19,6 +19,9 @@ import com.bumptech.glide.util.Util;
  * <pre>
  * <code>
  * public class FillSpace extends BaseBitmapTransformation {
+ *     private static final String ID = "com.bumptech.glide.transformations.FillSpace";
+ *     private static final String ID_BYTES = ID.getBytes(STRING_CHARSET_NAME);
+ *
  *     {@literal @Override}
  *     public Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
  *         if (toTransform.getWidth() == outWidth && toTransform.getHeight() == outHeight) {
@@ -27,13 +30,29 @@ import com.bumptech.glide.util.Util;
  *
  *         return Bitmap.createScaledBitmap(toTransform, outWidth, outHeight, true);
  *     }
+ *
+ *     {@literal @Override}
+ *     public void equals(Object o) {
+ *       return o instanceof FillSpace;
+ *     }
+ *
+ *     {@literal @Override}
+ *     public int hashCode() {
+ *       return ID.hashCode();
+ *     }
+ *
+ *     {@literal @Override}
+ *     public void updateDiskCacheKey(MessageDigest messageDigest)
+ *         throws UnsupportedEncodingException {
+ *       messageDigest.update(ID_BYTES);
+ *     }
  * }
  * </code>
  * </pre>
  */
 public abstract class BitmapTransformation implements Transformation<Bitmap> {
 
-  private BitmapPool bitmapPool;
+  private final BitmapPool bitmapPool;
 
   public BitmapTransformation(Context context) {
     this(Glide.get(context).getBitmapPool());

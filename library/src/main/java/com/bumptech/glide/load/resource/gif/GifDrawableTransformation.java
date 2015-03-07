@@ -8,6 +8,9 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.util.Preconditions;
+
+import java.security.MessageDigest;
 
 /**
  * An {@link com.bumptech.glide.load.Transformation} that wraps a transformation for a
@@ -23,8 +26,8 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
   }
 
   public GifDrawableTransformation(Transformation<Bitmap> wrapped, BitmapPool bitmapPool) {
-    this.wrapped = wrapped;
-    this.bitmapPool = bitmapPool;
+    this.wrapped = Preconditions.checkNotNull(wrapped);
+    this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
   }
 
   @Override
@@ -50,7 +53,21 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
   }
 
   @Override
-  public String getId() {
-    return wrapped.getId();
+  public boolean equals(Object o) {
+    if (o instanceof GifDrawableTransformation) {
+      GifDrawableTransformation other = (GifDrawableTransformation) o;
+      return wrapped.equals(other.wrapped);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return wrapped.hashCode();
+  }
+
+  @Override
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    wrapped.updateDiskCacheKey(messageDigest);
   }
 }

@@ -20,6 +20,8 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.security.MessageDigest;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class BitmapTransformationTest {
@@ -36,13 +38,11 @@ public class BitmapTransformationTest {
   public void testReturnsGivenResourceWhenBitmapNotTransformed() {
     BitmapTransformation transformation = new BitmapTransformation(bitmapPool) {
       @Override
-      protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-        return toTransform;
-      }
+      public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      public String getId() {
-        return null;
+      protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+        return toTransform;
       }
     };
 
@@ -55,13 +55,11 @@ public class BitmapTransformationTest {
     final Bitmap transformed = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     BitmapTransformation transformation = new BitmapTransformation(bitmapPool) {
       @Override
-      protected Bitmap transform(BitmapPool pool, Bitmap bitmap, int outWidth, int outHeight) {
-        return transformed;
-      }
+      public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      public String getId() {
-        return null;
+      protected Bitmap transform(BitmapPool pool, Bitmap bitmap, int outWidth, int outHeight) {
+        return transformed;
       }
     };
 
@@ -76,17 +74,15 @@ public class BitmapTransformationTest {
     final Resource<Bitmap> resource = mockResource(223, 4123);
     BitmapTransformation transformation = new BitmapTransformation(bitmapPool) {
       @Override
+      public void updateDiskCacheKey(MessageDigest messageDigest) { }
+
+      @Override
       protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
         assertEquals(bitmapPool, pool);
         assertEquals(resource.get(), toTransform);
         assertEquals(expectedWidth, outWidth);
         assertEquals(expectedHeight, outHeight);
         return resource.get();
-      }
-
-      @Override
-      public String getId() {
-        return null;
       }
     };
 
@@ -98,16 +94,13 @@ public class BitmapTransformationTest {
     BitmapTransformation transformation = new BitmapTransformation(bitmapPool) {
 
       @Override
+      public void updateDiskCacheKey(MessageDigest messageDigest) { }
+
+      @Override
       protected Bitmap transform(BitmapPool bitmapPool, Bitmap toTransform, int outWidth,
           int outHeight) {
         return null;
       }
-
-      @Override
-      public String getId() {
-        return null;
-      }
-
     };
     transformation.transform(mock(Resource.class), -1, 100);
   }
@@ -117,13 +110,11 @@ public class BitmapTransformationTest {
     BitmapTransformation transformation = new BitmapTransformation(bitmapPool) {
 
       @Override
-      protected Bitmap transform(BitmapPool bitmapPool, Bitmap toTransform, int outWidth,
-          int outHeight) {
-        return null;
-      }
+      public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      public String getId() {
+      protected Bitmap transform(BitmapPool bitmapPool, Bitmap toTransform, int outWidth,
+          int outHeight) {
         return null;
       }
 
@@ -136,9 +127,7 @@ public class BitmapTransformationTest {
     BitmapTransformation transform = new BitmapTransformation(bitmapPool) {
 
       @Override
-      public String getId() {
-        return null;
-      }
+      public void updateDiskCacheKey(MessageDigest messageDigest) {  }
 
       @Override
       protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
@@ -196,8 +185,6 @@ public class BitmapTransformationTest {
     }
 
     @Override
-    public String getId() {
-      return null;
-    }
+    public void updateDiskCacheKey(MessageDigest messageDigest) { }
   }
 }

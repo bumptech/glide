@@ -6,20 +6,17 @@ import com.google.common.testing.EqualsTester;
 
 import com.bumptech.glide.load.Key;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class KeyAssertions {
 
-  public static void assertSame(Key first, Key second)
-      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+  public static void assertSame(Key first, Key second) throws NoSuchAlgorithmException {
     assertSameOrdered(first, second);
     assertSameOrdered(second, first);
   }
 
-  private static void assertSameOrdered(Key first, Key second)
-      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+  private static void assertSameOrdered(Key first, Key second) throws NoSuchAlgorithmException {
     new EqualsTester()
         .addEqualityGroup(first, second)
         .testEquals();
@@ -27,14 +24,13 @@ public class KeyAssertions {
     assertThat(getDigest(first)).isEqualTo(getDigest(second));
   }
 
-  public static void assertDifferent(Key first, Key second)
-      throws NoSuchAlgorithmException, UnsupportedEncodingException {
+  public static void assertDifferent(Key first, Key second) throws NoSuchAlgorithmException {
     assertDifferent(first, second, true);
     assertDifferent(second, first, true);
   }
 
   public static void assertDifferent(Key first, Key second, boolean checkDiskCacheKey)
-      throws NoSuchAlgorithmException, UnsupportedEncodingException {
+      throws NoSuchAlgorithmException {
     new EqualsTester()
         .addEqualityGroup(first)
         .addEqualityGroup(second)
@@ -50,8 +46,7 @@ public class KeyAssertions {
     }
   }
 
-  private static byte[] getDigest(Key key)
-      throws NoSuchAlgorithmException, UnsupportedEncodingException {
+  private static byte[] getDigest(Key key) throws NoSuchAlgorithmException {
     MessageDigest md = MessageDigest.getInstance("SHA-1");
     key.updateDiskCacheKey(md);
     return md.digest();

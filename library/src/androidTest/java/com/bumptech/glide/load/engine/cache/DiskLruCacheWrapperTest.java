@@ -16,7 +16,6 @@ import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 @RunWith(RobolectricTestRunner.class)
@@ -120,8 +119,7 @@ public class DiskLruCacheWrapperTest {
     }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest)
-        throws UnsupportedEncodingException {
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
       messageDigest.update(key.getBytes());
     }
   }

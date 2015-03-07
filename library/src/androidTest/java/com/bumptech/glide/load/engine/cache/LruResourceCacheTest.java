@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 @RunWith(JUnit4.class)
@@ -113,9 +112,8 @@ public class LruResourceCacheTest {
 
   private static class MockKey implements Key {
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest)
-        throws UnsupportedEncodingException {
-      messageDigest.update(toString().getBytes("UTF-8"));
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+      messageDigest.update(toString().getBytes(CHARSET));
     }
   }
 }

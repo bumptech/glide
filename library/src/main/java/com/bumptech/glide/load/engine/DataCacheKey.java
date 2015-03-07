@@ -2,7 +2,6 @@ package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.Key;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
@@ -47,7 +46,7 @@ final class DataCacheKey implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
     sourceKey.updateDiskCacheKey(messageDigest);
     signature.updateDiskCacheKey(messageDigest);
   }

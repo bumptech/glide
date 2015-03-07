@@ -3,7 +3,6 @@ package com.bumptech.glide.signature;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
@@ -23,8 +22,8 @@ public final class ObjectKey implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
-    messageDigest.update(object.toString().getBytes(STRING_CHARSET_NAME));
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    messageDigest.update(object.toString().getBytes(CHARSET));
   }
 
   @Override

@@ -6,7 +6,6 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.LruCache;
 import com.bumptech.glide.util.Util;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -28,7 +27,7 @@ class SafeKeyGenerator {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         key.updateDiskCacheKey(messageDigest);
         safeKey = Util.sha256BytesToHex(messageDigest.digest());
-      } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+      } catch (NoSuchAlgorithmException e) {
         if (Log.isLoggable(TAG, Log.ERROR)) {
           Log.e(TAG, "Failed to create cache key", e);
         }

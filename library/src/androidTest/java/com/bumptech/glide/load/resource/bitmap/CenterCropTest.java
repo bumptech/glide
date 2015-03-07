@@ -5,6 +5,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -12,77 +13,96 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class CenterCropTest {
-  private CenterCropHarness harness;
+  @Mock Resource<Bitmap> resource;
+  @Mock BitmapPool pool;
+
+  private CenterCrop centerCrop;
+  private int bitmapWidth;
+  private int bitmapHeight;
+  private Bitmap bitmap;
 
   @Before
   public void setUp() {
-    harness = new CenterCropHarness();
+    MockitoAnnotations.initMocks(this);
+    bitmapWidth = 100;
+    bitmapHeight = 100;
+    bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+    when(resource.get()).thenReturn(bitmap);
+
+    centerCrop = new CenterCrop(pool);
   }
 
   @Test
   public void testDoesNotPutNullBitmapAcquiredFromPool() {
-    when(harness.pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
+    when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
 
-    harness.centerCrop.transform(harness.resource, 100, 100);
+    centerCrop.transform(resource, 100, 100);
 
-    verify(harness.pool, never()).put(any(Bitmap.class));
+    verify(pool, never()).put(any(Bitmap.class));
   }
 
   @Test
   public void testReturnsGivenResourceIfMatchesSizeExactly() {
     Resource<Bitmap> result =
-        harness.centerCrop.transform(harness.resource, harness.bitmapWidth, harness.bitmapHeight);
+        centerCrop.transform(resource, bitmapWidth, bitmapHeight);
 
-    assertEquals(harness.resource, result);
+    assertEquals(resource, result);
   }
 
   @Test
   public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
-    harness.centerCrop.transform(harness.resource, harness.bitmapWidth, harness.bitmapHeight);
+    centerCrop.transform(resource, bitmapWidth, bitmapHeight);
 
-    verify(harness.resource, never()).recycle();
+    verify(resource, never()).recycle();
   }
 
   @Test
   public void testDoesPutNonNullBitmapAcquiredFromPoolWhenUnused() {
     Bitmap fromPool =
-        Bitmap.createBitmap(harness.bitmapWidth, harness.bitmapHeight, Bitmap.Config.ARGB_8888);
-    when(harness.pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(fromPool);
+        Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+    when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(fromPool);
 
-    harness.centerCrop.transform(harness.resource, harness.bitmapWidth, harness.bitmapHeight);
+    centerCrop.transform(resource, bitmapWidth, bitmapHeight);
 
-    verify(harness.pool).put(eq(fromPool));
+    verify(pool).put(eq(fromPool));
   }
 
   @Test
   public void testDoesNotRecycleGivenResource() {
-    harness.centerCrop.transform(harness.resource, 50, 50);
+    centerCrop.transform(resource, 50, 50);
 
-    verify(harness.resource, never()).recycle();
+    verify(resource, never()).recycle();
   }
 
   @Test
   public void testAsksBitmapPoolForArgb8888IfInConfigIsNull() {
-    Shadows.shadowOf(harness.bitmap).setConfig(null);
+    Shadows.shadowOf(bitmap).setConfig(null);
 
-    harness.centerCrop.transform(harness.resource, 10, 10);
+    centerCrop.transform(resource, 10, 10);
 
-    verify(harness.pool).get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888));
-    verify(harness.pool, never()).get(anyInt(), anyInt(), (Bitmap.Config) isNull());
+    verify(pool).get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888));
+    verify(pool, never()).get(anyInt(), anyInt(), (Bitmap.Config) isNull());
   }
 
   @Test
@@ -97,7 +117,7 @@ public class CenterCropTest {
       when(resource.get()).thenReturn(toTransform);
 
       Resource<Bitmap> result =
-          harness.centerCrop.transform(resource, expectedWidth, expectedHeight);
+          centerCrop.transform(resource, expectedWidth, expectedHeight);
       Bitmap transformed = result.get();
       assertEquals(expectedWidth, transformed.getWidth());
       assertEquals(expectedHeight, transformed.getHeight());
@@ -116,7 +136,7 @@ public class CenterCropTest {
       when(resource.get()).thenReturn(toTransform);
 
       Resource<Bitmap> result =
-          harness.centerCrop.transform(resource, expectedWidth, expectedHeight);
+          centerCrop.transform(resource, expectedWidth, expectedHeight);
       Bitmap transformed = result.get();
       assertEquals(expectedWidth, transformed.getWidth());
       assertEquals(expectedHeight, transformed.getHeight());
@@ -124,21 +144,12 @@ public class CenterCropTest {
   }
 
   @Test
-  public void testHasValidId() {
-    Util.assertClassHasValidId(CenterCrop.class, harness.centerCrop.getId());
-  }
+  public void testEquals() throws NoSuchAlgorithmException {
+    KeyAssertions.assertSame(centerCrop, new CenterCrop(pool));
 
-  private static class CenterCropHarness {
-    int bitmapWidth = 100;
-    int bitmapHeight = 100;
-    Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-    BitmapResource resource = mock(BitmapResource.class);
-    BitmapPool pool = mock(BitmapPool.class);
-
-    CenterCrop centerCrop = new CenterCrop(pool);
-
-    public CenterCropHarness() {
-      when(resource.get()).thenReturn(bitmap);
-    }
+    Transformation<Bitmap> other = mock(Transformation.class);
+    doAnswer(new Util.WriteDigest("other")).when(other)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    KeyAssertions.assertDifferent(centerCrop, other);
   }
 }

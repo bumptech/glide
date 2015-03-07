@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,9 +50,8 @@ public class KeyGeneratorTest {
     }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest)
-        throws UnsupportedEncodingException {
-      messageDigest.update(id.getBytes(STRING_CHARSET_NAME));
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+      messageDigest.update(id.getBytes(CHARSET));
     }
   }
 }

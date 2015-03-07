@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.MessageDigest;
 
 public class Util {
 
@@ -65,6 +66,21 @@ public class Util {
 
   public static void setSdkVersionInt(int version) {
     ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", version);
+  }
+
+  public static class WriteDigest implements Answer<Void> {
+    private String toWrite;
+
+    public WriteDigest(String toWrite) {
+      this.toWrite = toWrite;
+    }
+
+    @Override
+    public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+      MessageDigest md = (MessageDigest) invocationOnMock.getArguments()[0];
+      md.update(toWrite.getBytes());
+      return null;
+    }
   }
 
   public static class ReturnsSelfAnswer implements Answer<Object> {

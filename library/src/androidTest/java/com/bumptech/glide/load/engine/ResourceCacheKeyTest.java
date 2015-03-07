@@ -1,12 +1,14 @@
 package com.bumptech.glide.load.engine;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.signature.StringSignature;
 import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @RunWith(JUnit4.class)
@@ -79,7 +82,8 @@ public class ResourceCacheKeyTest {
       @Override
       public void mutate(Factory factory) {
         factory.transformation = mock(Transformation.class);
-        when(factory.transformation.getId()).thenReturn("otherTransformation");
+        doAnswer(new Util.WriteDigest("otherTransformation")).when(factory.transformation)
+            .updateDiskCacheKey(any(MessageDigest.class));
       }
     });
   }
@@ -105,7 +109,7 @@ public class ResourceCacheKeyTest {
 
     try {
       KeyAssertions.assertDifferent(original, mutated);
-    } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+    } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
   }
@@ -119,7 +123,8 @@ public class ResourceCacheKeyTest {
     Class<?> resourceClass = Object.class;
 
     Factory() {
-      when(transformation.getId()).thenReturn("transformation");
+      doAnswer(new Util.WriteDigest("transformation")).when(transformation)
+          .updateDiskCacheKey(any(MessageDigest.class));
     }
 
     ResourceCacheKey build() {

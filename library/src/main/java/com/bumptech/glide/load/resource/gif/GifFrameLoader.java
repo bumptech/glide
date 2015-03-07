@@ -21,7 +21,6 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.UUID;
 
@@ -205,8 +204,7 @@ class GifFrameLoader {
     }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest)
-        throws UnsupportedEncodingException {
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
       throw new UnsupportedOperationException("Not implemented");
     }
   }

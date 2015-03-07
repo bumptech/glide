@@ -8,6 +8,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Preconditions;
+
+import java.security.MessageDigest;
 
 /**
  * Transforms {@link android.graphics.drawable.BitmapDrawable}s.
@@ -19,9 +22,15 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   private final Transformation<Bitmap> wrapped;
 
   public BitmapDrawableTransformation(Context context, Transformation<Bitmap> wrapped) {
+    this(context, Glide.get(context).getBitmapPool(), wrapped);
+  }
+
+  // Visible for testing.
+  BitmapDrawableTransformation(Context context, BitmapPool bitmapPool,
+      Transformation<Bitmap> wrapped) {
     this.context = context.getApplicationContext();
-    this.bitmapPool = Glide.get(context).getBitmapPool();
-    this.wrapped = wrapped;
+    this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
+    this.wrapped = Preconditions.checkNotNull(wrapped);
   }
 
   @Override
@@ -39,7 +48,21 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   }
 
   @Override
-  public String getId() {
-    return wrapped.getId();
+  public boolean equals(Object o) {
+    if (o instanceof BitmapDrawableTransformation) {
+      BitmapDrawableTransformation other = (BitmapDrawableTransformation) o;
+      return wrapped.equals(other.wrapped);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return wrapped.hashCode();
+  }
+
+  @Override
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    wrapped.updateDiskCacheKey(messageDigest);
   }
 }

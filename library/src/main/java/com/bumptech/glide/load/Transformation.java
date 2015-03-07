@@ -3,11 +3,18 @@ package com.bumptech.glide.load;
 import com.bumptech.glide.load.engine.Resource;
 
 /**
- * A class for performing an arbitrary transformation on a resource.
+ * A class for performing an arbitrary transformation on a resource that implements
+ * {@link #equals(Object)} and {@link #hashCode()}} to identify the transformation in the memory
+ * cache and {@link #updateDiskCacheKey(java.security.MessageDigest)}} to identify the
+ * transformation in disk caches.
+ *
+ * <p> Using the fully qualified class name (not {@link Class#getName()} to avoid proguard
+ * obfuscation) is an easy way to implement
+ * {@link #updateDiskCacheKey(java.security.MessageDigest)}} correctly. </p>
  *
  * @param <T> The type of the resource being transformed.
  */
-public interface Transformation<T> {
+public interface Transformation<T> extends Key {
 
   /**
    * Transforms the given resource and returns the transformed resource.
@@ -29,16 +36,4 @@ public interface Transformation<T> {
    * @return The transformed resource.
    */
   Resource<T> transform(Resource<T> resource, int outWidth, int outHeight);
-
-  /**
-   * A method to get a unique identifier for this particular transformation that can be used as part
-   * of a cache key. The fully qualified class name for this class is appropriate if written out,
-   * but getClass().getName() is not because the name may be changed by proguard.
-   *
-   * <p> If this transformation does not affect the data that will be stored in cache, returning an
-   * empty string here is acceptable. </p>
-   *
-   * @return A string that uniquely identifies this transformation.
-   */
-  String getId();
 }

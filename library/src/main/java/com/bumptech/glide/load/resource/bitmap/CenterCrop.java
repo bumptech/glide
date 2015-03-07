@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
+import java.security.MessageDigest;
+
 /**
  * Scale the image so that either the width of the image matches the given width and the height of
  * the image is greater than the given height or vice versa, and then crop the larger dimension to
@@ -13,6 +15,8 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
  * Does not maintain the image's aspect ratio
  */
 public class CenterCrop extends BitmapTransformation {
+  private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterCrop";
+  private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
   public CenterCrop(Context context) {
     super(context);
@@ -36,7 +40,17 @@ public class CenterCrop extends BitmapTransformation {
   }
 
   @Override
-  public String getId() {
-    return "CenterCrop.com.bumptech.glide.load.resource.bitmap";
+  public boolean equals(Object o) {
+    return o instanceof CenterCrop;
+  }
+
+  @Override
+  public int hashCode() {
+    return ID.hashCode();
+  }
+
+  @Override
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    messageDigest.update(ID_BYTES);
   }
 }

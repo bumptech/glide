@@ -1,6 +1,6 @@
 package com.bumptech.glide.load;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 /**
@@ -13,6 +13,7 @@ import java.security.MessageDigest;
  */
 public interface Key {
   String STRING_CHARSET_NAME = "UTF-8";
+  Charset CHARSET = Charset.forName(STRING_CHARSET_NAME);
 
   /**
    * Adds all uniquely identifying information to the given digest.
@@ -20,7 +21,7 @@ public interface Key {
    * <p> Note - Using {@link java.security.MessageDigest#reset()} inside of this method will result
    * in undefined behavior. </p>
    */
-  void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException;
+  void updateDiskCacheKey(MessageDigest messageDigest);
 
   @Override
   boolean equals(Object o);

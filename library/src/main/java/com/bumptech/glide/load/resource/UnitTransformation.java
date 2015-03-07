@@ -3,12 +3,14 @@ package com.bumptech.glide.load.resource;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 
+import java.security.MessageDigest;
+
 /**
  * A noop Transformation that simply returns the given resource.
  *
  * @param <T> The type of the resource that will always be returned unmodified.
  */
-public class UnitTransformation<T> implements Transformation<T> {
+public final class UnitTransformation<T> implements Transformation<T> {
   private static final Transformation<?> TRANSFORMATION = new UnitTransformation<Object>();
 
   /**
@@ -21,13 +23,19 @@ public class UnitTransformation<T> implements Transformation<T> {
     return (UnitTransformation<T>) TRANSFORMATION;
   }
 
+  private UnitTransformation() {
+    // Only accessible as a singleton.
+  }
+
   @Override
   public Resource<T> transform(Resource<T> resource, int outWidth, int outHeight) {
     return resource;
   }
 
   @Override
-  public String getId() {
-    return "";
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    // Do nothing.
   }
+
+  /* Use default implementations of equals and hashcode. */
 }

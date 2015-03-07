@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doAnswer;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.Util.WriteDigest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +13,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -65,20 +64,5 @@ public class DataCacheKeyTest {
     DataCacheKey second = new DataCacheKey(firstKey, firstSignature);
 
     KeyAssertions.assertSame(first, second);
-  }
-
-  private static class WriteDigest implements Answer<Void> {
-    private String toWrite;
-
-    public WriteDigest(String toWrite) {
-      this.toWrite = toWrite;
-    }
-
-    @Override
-    public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-      MessageDigest md = (MessageDigest) invocationOnMock.getArguments()[0];
-      md.update(toWrite.getBytes());
-      return null;
-    }
   }
 }

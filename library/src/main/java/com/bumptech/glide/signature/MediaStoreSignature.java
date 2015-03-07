@@ -2,7 +2,6 @@ package com.bumptech.glide.signature;
 
 import com.bumptech.glide.load.Key;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
@@ -66,9 +65,9 @@ public class MediaStoreSignature implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
     byte[] data = ByteBuffer.allocate(12).putLong(dateModified).putInt(orientation).array();
     messageDigest.update(data);
-    messageDigest.update(mimeType.getBytes(STRING_CHARSET_NAME));
+    messageDigest.update(mimeType.getBytes(CHARSET));
   }
 }

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.tests.KeyAssertions;
 
 import org.junit.Before;
@@ -19,6 +19,7 @@ import org.mockito.stubbing.Answer;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * Tests if {@link EngineKey} {@link Object#hashCode() hashCode} and {@link Object#equals(Object)
@@ -40,8 +41,8 @@ public class EngineKeyTest {
     int height = 2;
     Class resourceClass = Object.class;
     Class transcodeClass = Integer.class;
-    ResourceEncoder encoder = mock(ResourceEncoder.class);
     Key signature = mock(Key.class);
+    List<Transformation> transformations;
 
     public EngineKey build() {
       return new EngineKey(id, signature, width, height, resourceClass, transcodeClass);
@@ -115,5 +116,11 @@ public class EngineKeyTest {
     harness.transcodeClass = Long.class;
     EngineKey second = harness.build();
     KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
+
+  @Test
+  public void testDifferesIfTransformationsDiffer() {
+    Transformation<Object> transformation = mock(Transformation.class);
+
   }
 }

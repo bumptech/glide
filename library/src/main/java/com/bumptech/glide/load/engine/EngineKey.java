@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
@@ -71,7 +70,7 @@ class EngineKey implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
     throw new UnsupportedOperationException();
   }
 }
