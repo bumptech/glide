@@ -12,11 +12,12 @@ import java.util.Map;
  */
 public interface VolleyRequestFactory {
 
-    /**
-     * Returns a Volley request for the given image url. The given future should be put as a
-     * listener or called when the request completes.
-     */
-    Request<byte[]> create(String url, DataCallback<? super InputStream> future, Priority priority,
-        Map<String, String> headers);
+  /**
+   * Returns a Volley request for the given image url. The given future should be put as a
+   * listener or called when the request completes.
+   */
+
+  Request<byte[]> create(String url, DataCallback<? super InputStream> callback,
+      Priority priority, Map<String, String> headers);
 
 }

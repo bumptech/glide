@@ -16,6 +16,7 @@ import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitor.ConnectivityListener;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
+import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -23,6 +24,8 @@ import com.bumptech.glide.tests.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
@@ -32,14 +35,17 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerTest {
+  @Mock Lifecycle lifecycle = mock(Lifecycle.class);
+  @Mock RequestManagerTreeNode treeNode = mock(RequestManagerTreeNode.class);
+
   private RequestManager manager;
   private ConnectivityMonitor connectivityMonitor;
   private RequestTracker requestTracker;
   private ConnectivityListener connectivityListener;
-  private Lifecycle lifecycle = mock(Lifecycle.class);
 
   @Before
   public void setUp() {
+    MockitoAnnotations.initMocks(this);
     connectivityMonitor = mock(ConnectivityMonitor.class);
     ConnectivityMonitorFactory factory = mock(ConnectivityMonitorFactory.class);
     when(factory.build(any(Context.class), any(ConnectivityMonitor.ConnectivityListener.class)))
@@ -51,8 +57,8 @@ public class RequestManagerTest {
           }
         });
     requestTracker = mock(RequestTracker.class);
-    manager =
-        new RequestManager(RuntimeEnvironment.application, lifecycle, requestTracker, factory);
+    manager = new RequestManager(RuntimeEnvironment.application, lifecycle, treeNode,
+        requestTracker, factory);
   }
 
   @Test
