@@ -24,6 +24,7 @@ import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitor.ConnectivityListener;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
+import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -50,6 +51,7 @@ public class RequestManagerTest {
     private ConnectivityListener connectivityListener;
     private RequestManager.DefaultOptions options;
     private Lifecycle lifecycle = mock(Lifecycle.class);
+    private RequestManagerTreeNode treeNode = mock(RequestManagerTreeNode.class);
 
     @Before
     public void setUp() {
@@ -64,7 +66,8 @@ public class RequestManagerTest {
                     }
                 });
         requestTracker = mock(RequestTracker.class);
-        manager = new RequestManager(Robolectric.application, lifecycle, requestTracker, factory);
+        manager =
+            new RequestManager(RuntimeEnvironment.application, lifecycle, treeNode, requestTracker, factory);
         options = mock(RequestManager.DefaultOptions.class);
         manager.setDefaultOptions(options);
     }

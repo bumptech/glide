@@ -17,8 +17,11 @@ import android.util.Log;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Util;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A collection of static methods for creating new {@link com.bumptech.glide.RequestManager}s or retrieving existing
@@ -70,7 +73,7 @@ public class RequestManagerRetriever implements Handler.Callback {
                     // However, in this case since the manager attached to the application will not receive lifecycle
                     // events, we must force the manager to start resumed using ApplicationLifecycle.
                     applicationManager = new RequestManager(context.getApplicationContext(),
-                            new ApplicationLifecycle());
+                            new ApplicationLifecycle(), new EmptyRequestManagerTreeNode());
                 }
             }
         }
@@ -147,8 +150,7 @@ public class RequestManagerRetriever implements Handler.Callback {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    RequestManager fragmentGet(Context context, final android.app.FragmentManager fm) {
+    RequestManagerFragment getRequestManagerFragment(final android.app.FragmentManager fm) {
         RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {
             current = pendingRequestManagerFragments.get(fm);
@@ -159,16 +161,21 @@ public class RequestManagerRetriever implements Handler.Callback {
                 handler.obtainMessage(ID_REMOVE_FRAGMENT_MANAGER, fm).sendToTarget();
             }
         }
+        return current;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    RequestManager fragmentGet(Context context, android.app.FragmentManager fm) {
+        RequestManagerFragment current = getRequestManagerFragment(fm);
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new RequestManager(context, current.getLifecycle());
+            requestManager = new RequestManager(context, current.getLifecycle(), current.getRequestManagerTreeNode());
             current.setRequestManager(requestManager);
         }
         return requestManager;
-
     }
 
-    RequestManager supportFragmentGet(Context context, final FragmentManager fm) {
+    SupportRequestManagerFragment getSupportRequestManagerFragment(final FragmentManager fm) {
         SupportRequestManagerFragment current = (SupportRequestManagerFragment) fm.findFragmentByTag(TAG);
         if (current == null) {
             current = pendingSupportRequestManagerFragments.get(fm);
@@ -179,9 +186,14 @@ public class RequestManagerRetriever implements Handler.Callback {
                 handler.obtainMessage(ID_REMOVE_SUPPORT_FRAGMENT_MANAGER, fm).sendToTarget();
             }
         }
+        return current;
+    }
+
+    RequestManager supportFragmentGet(Context context, FragmentManager fm) {
+        SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm);
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
-            requestManager = new RequestManager(context, current.getLifecycle());
+            requestManager = new RequestManager(context, current.getLifecycle(), current.getRequestManagerTreeNode());
             current.setRequestManager(requestManager);
         }
         return requestManager;
