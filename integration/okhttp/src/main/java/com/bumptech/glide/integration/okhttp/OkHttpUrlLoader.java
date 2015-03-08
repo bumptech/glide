@@ -6,7 +6,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.signature.ObjectKey;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.io.InputStream;
@@ -31,7 +30,7 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   @Override
   public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height,
       Map<String, Object> options) {
-    return new LoadData<>(new ObjectKey(model), new OkHttpStreamFetcher(client, model));
+    return new LoadData<>(model, new OkHttpStreamFetcher(client, model));
   }
 
   /**

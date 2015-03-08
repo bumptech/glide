@@ -7,7 +7,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
   private static List<Key> getAlternateKeys(List<String> alternateUrls) {
     List<Key> result = new ArrayList<>(alternateUrls.size());
     for (String alternate : alternateUrls) {
-      result.add(new ObjectKey(alternate));
+      result.add(new GlideUrl(alternate));
     }
     return result;
   }

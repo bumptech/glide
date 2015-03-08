@@ -3,10 +3,12 @@ package com.bumptech.glide.load.model;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.Map;
 
 /**
@@ -24,7 +26,7 @@ import java.util.Map;
  * <p> This class can also optionally wrap {@link com.bumptech.glide.load.model.Headers} for
  * convenience. </p>
  */
-public class GlideUrl {
+public class GlideUrl implements Key {
   private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
 
   private final URL url;
@@ -112,6 +114,11 @@ public class GlideUrl {
   @Override
   public String toString() {
     return getCacheKey();
+  }
+
+  @Override
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    messageDigest.update(getCacheKey().getBytes(CHARSET));
   }
 
   @Override

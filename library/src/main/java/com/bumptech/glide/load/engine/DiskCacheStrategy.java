@@ -14,7 +14,7 @@ public enum DiskCacheStrategy {
   ALL(true /*decodeCachedData*/, true /*decodeCachedResource*/) {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
-      return true;
+      return dataSource != DataSource.DATA_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
 
     @Override
@@ -44,7 +44,7 @@ public enum DiskCacheStrategy {
   DATA(true /*decodeCachedData*/, false /*decodeCachedResource*/) {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
-      return true;
+      return dataSource != DataSource.DATA_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
 
     @Override

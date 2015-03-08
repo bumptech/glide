@@ -22,13 +22,10 @@ public final class ObjectKey implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
-    messageDigest.update(object.toString().getBytes(CHARSET));
-  }
-
-  @Override
   public String toString() {
-    return object.toString();
+    return "ObjectKey{"
+        + "object=" + object
+        + '}';
   }
 
   @Override
@@ -43,6 +40,11 @@ public final class ObjectKey implements Key {
   @Override
   public int hashCode() {
     return object.hashCode();
+  }
+
+  @Override
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    messageDigest.update(object.toString().getBytes(CHARSET));
   }
 }
 

@@ -60,7 +60,7 @@ public final class BasicHeaders implements Headers {
     public static final class Builder {
         private final Map<String, Set<String>> headers = new HashMap<String, Set<String>>();
 
-        public void addHeader(String key, String value) {
+        public Builder addHeader(String key, String value) {
             if (headers.containsKey(key)) {
                 headers.get(key).add(value);
             } else {
@@ -68,6 +68,7 @@ public final class BasicHeaders implements Headers {
                 values.add(value);
                 headers.put(key, values);
             }
+            return this;
         }
 
         public BasicHeaders build() {

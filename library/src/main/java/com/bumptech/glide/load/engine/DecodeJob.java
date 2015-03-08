@@ -95,7 +95,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public synchronized void run() {
+  public void run() {
     switch (runReason) {
       case INITIALIZE:
         stage = Stage.RESOURCE_CACHE;
@@ -169,7 +169,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public synchronized void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher,
+  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher,
       DataSource dataSource) {
     this.currentSourceKey = sourceKey;
     this.currentData = data;

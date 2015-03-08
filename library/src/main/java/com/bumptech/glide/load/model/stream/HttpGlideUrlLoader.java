@@ -8,7 +8,6 @@ import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         url = model;
       }
     }
-    return new LoadData<>(new ObjectKey(url), new HttpUrlFetcher(url));
+    return new LoadData<>(url, new HttpUrlFetcher(url));
   }
 
   @Override

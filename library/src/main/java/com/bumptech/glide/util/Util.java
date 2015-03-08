@@ -28,14 +28,18 @@ public final class Util {
    * Returns the hex string of the given byte array representing a SHA256 hash.
    */
   public static String sha256BytesToHex(byte[] bytes) {
-    return bytesToHex(bytes, SHA_256_CHARS);
+    synchronized (SHA_256_CHARS) {
+      return bytesToHex(bytes, SHA_256_CHARS);
+    }
   }
 
   /**
    * Returns the hex string of the given byte array representing a SHA1 hash.
    */
   public static String sha1BytesToHex(byte[] bytes) {
-    return bytesToHex(bytes, SHA_1_CHARS);
+    synchronized (SHA_1_CHARS) {
+      return bytesToHex(bytes, SHA_1_CHARS);
+    }
   }
 
   // Taken from:

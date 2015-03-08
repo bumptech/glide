@@ -8,7 +8,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -38,8 +37,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   @Override
   public LoadData<InputStream> buildLoadData(GlideUrl url, int width, int height,
       Map<String, Object> options) {
-    return new LoadData<>(new ObjectKey(url),
-        new VolleyStreamFetcher(requestQueue, url, requestFactory));
+    return new LoadData<>(url, new VolleyStreamFetcher(requestQueue, url, requestFactory));
   }
 
   /**

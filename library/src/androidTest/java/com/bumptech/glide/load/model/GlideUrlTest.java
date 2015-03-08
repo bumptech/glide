@@ -1,6 +1,9 @@
 package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
+import com.google.common.testing.EqualsTester;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,5 +87,32 @@ public class GlideUrlTest {
 
     GlideUrl glideUrlFromEscapedUrl = new GlideUrl(new URL(escaped));
     assertEquals(escaped, glideUrlFromEscapedUrl.toURL().toString());
+  }
+
+  @Test
+  public void testEquals() throws MalformedURLException {
+    Headers headers = mock(Headers.class);
+    Headers otherHeaders = mock(Headers.class);
+    String url = "http://www.google.com";
+    String otherUrl = "http://mail.google.com";
+    new EqualsTester()
+        .addEqualityGroup(
+            new GlideUrl(url),
+            new GlideUrl(url),
+            new GlideUrl(new URL(url)),
+            new GlideUrl(new URL(url))
+        )
+        .addEqualityGroup(
+            new GlideUrl(otherUrl),
+            new GlideUrl(new URL(otherUrl))
+        )
+        .addEqualityGroup(
+            new GlideUrl(url, headers),
+            new GlideUrl(new URL(url), headers)
+        )
+        .addEqualityGroup(
+            new GlideUrl(url, otherHeaders),
+            new GlideUrl(new URL(url), otherHeaders)
+        ).testEquals();
   }
 }
