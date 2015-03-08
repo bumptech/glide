@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A base class for loading data over http/https. Can be subclassed for use with any model that can
@@ -35,7 +36,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(Model model, int width, int height) {
+  public LoadData<InputStream> buildLoadData(Model model, int width, int height,
+      Map<String, Object> options) {
     GlideUrl result = null;
     if (modelCache != null) {
       result = modelCache.get(model, width, height);
@@ -57,7 +59,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     // TODO: this is expensive and slow to calculate every time, we should either cache these, or
     // try to come up with a way to avoid finding them when not necessary.
     List<String> alternateUrls = getAlternateUrls(model, width, height);
-    LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height);
+    LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height,
+        options);
     if (alternateUrls.isEmpty()) {
       return concreteLoaderData;
     } else {

@@ -20,6 +20,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.HashMap;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class AssetUriLoaderTest {
@@ -40,6 +42,7 @@ public class AssetUriLoaderTest {
     Uri assetUri = Uri.parse("file:///android_asset/assetName");
     when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(fetcher);
     assertTrue(loader.handles(assetUri));
-    assertEquals(fetcher, loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
+    assertEquals(fetcher, loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE,
+        new HashMap<String, Object>()).fetcher);
   }
 }

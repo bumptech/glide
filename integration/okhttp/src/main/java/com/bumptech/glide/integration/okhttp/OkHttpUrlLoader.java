@@ -10,6 +10,7 @@ import com.bumptech.glide.signature.ObjectKey;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * A simple model loader for fetching media over http/https using OkHttp.
@@ -28,7 +29,8 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height) {
+  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height,
+      Map<String, Object> options) {
     return new LoadData<>(new ObjectKey(model), new OkHttpStreamFetcher(client, model));
   }
 

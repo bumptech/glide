@@ -19,14 +19,16 @@ import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class HttpUriLoaderTest {
   private static final int IMAGE_SIDE = 100;
+  private static final Map<String, Object> OPTIONS = new HashMap<>();
 
-  @Mock
-  ModelLoader<GlideUrl, InputStream> urlLoader;
+  @Mock ModelLoader<GlideUrl, InputStream> urlLoader;
   private HttpUriLoader loader;
 
   @Before
@@ -39,21 +41,23 @@ public class HttpUriLoaderTest {
   @Test
   public void testHandlesHttpUris() throws MalformedURLException {
     Uri httpUri = Uri.parse("http://www.google.com");
-    loader.buildLoadData(httpUri, IMAGE_SIDE, IMAGE_SIDE);
+    loader.buildLoadData(httpUri, IMAGE_SIDE, IMAGE_SIDE, OPTIONS);
 
     assertTrue(loader.handles(httpUri));
     verify(urlLoader)
-        .buildLoadData(eq(new GlideUrl(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        .buildLoadData(eq(new GlideUrl(httpUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE),
+            eq(OPTIONS));
   }
 
   @Test
   public void testHandlesHttpsUris() throws MalformedURLException {
     Uri httpsUri = Uri.parse("https://www.google.com");
-    loader.buildLoadData(httpsUri, IMAGE_SIDE, IMAGE_SIDE);
+    loader.buildLoadData(httpsUri, IMAGE_SIDE, IMAGE_SIDE, OPTIONS);
 
     assertTrue(loader.handles(httpsUri));
     verify(urlLoader)
-        .buildLoadData(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+        .buildLoadData(eq(new GlideUrl(httpsUri.toString())), eq(IMAGE_SIDE), eq(IMAGE_SIDE),
+            eq(OPTIONS));
   }
 
   // Test for https://github.com/bumptech/glide/issues/71.
@@ -63,9 +67,9 @@ public class HttpUriLoaderTest {
         "http://myserver_url.com:80http://myserver_url.com/webapp/images/no_image.png?size=100");
 
     assertTrue(loader.handles(mostlyInvalidHttpUri));
-    loader.buildLoadData(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE);
+    loader.buildLoadData(mostlyInvalidHttpUri, IMAGE_SIDE, IMAGE_SIDE, OPTIONS);
     verify(urlLoader)
         .buildLoadData(eq(new GlideUrl(mostlyInvalidHttpUri.toString())), eq(IMAGE_SIDE),
-            eq(IMAGE_SIDE));
+            eq(IMAGE_SIDE), eq(OPTIONS));
   }
 }

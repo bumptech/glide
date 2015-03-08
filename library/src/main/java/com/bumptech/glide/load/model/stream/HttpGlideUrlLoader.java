@@ -11,6 +11,7 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * An {@link com.bumptech.glide.load.model.ModelLoader} for translating {@link
@@ -47,7 +48,8 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height) {
+  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height,
+      Map<String, Object> options) {
     // GlideUrls memoize parsed URLs so caching them saves a few object instantiations and time
     // spent parsing urls.
     GlideUrl url = model;

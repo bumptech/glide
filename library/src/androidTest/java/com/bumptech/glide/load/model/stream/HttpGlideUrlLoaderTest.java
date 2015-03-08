@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.InputStream;
+import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class HttpGlideUrlLoaderTest {
@@ -28,7 +29,8 @@ public class HttpGlideUrlLoaderTest {
 
   @Test
   public void testReturnsValidFetcher() {
-    DataFetcher<InputStream> result = loader.buildLoadData(model, 100, 100).fetcher;
+    DataFetcher<InputStream> result = loader.buildLoadData(model, 100, 100,
+        new HashMap<String, Object>()).fetcher;
     assertThat(result).isInstanceOf(HttpUrlFetcher.class);
   }
 }

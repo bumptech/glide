@@ -7,6 +7,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
 
+import java.util.Map;
+
 /**
  * A put of helper classes that performs no loading and instead always returns the given model as
  * the data to decode.
@@ -16,7 +18,8 @@ import com.bumptech.glide.signature.ObjectKey;
 public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
 
   @Override
-  public LoadData<Model> buildLoadData(Model model, int width, int height) {
+  public LoadData<Model> buildLoadData(Model model, int width, int height,
+      Map<String, Object> options) {
     return new LoadData<>(new ObjectKey(model), new UnitFetcher<>(model));
   }
 

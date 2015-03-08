@@ -11,6 +11,7 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * A simple model loader for fetching media over http/https using Volley.
@@ -35,7 +36,8 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(GlideUrl url, int width, int height) {
+  public LoadData<InputStream> buildLoadData(GlideUrl url, int width, int height,
+      Map<String, Object> options) {
     return new LoadData<>(new ObjectKey(url),
         new VolleyStreamFetcher(requestQueue, url, requestFactory));
   }

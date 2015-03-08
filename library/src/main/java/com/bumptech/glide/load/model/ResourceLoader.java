@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * A model loader for handling Android resource files. Model must be an Android resource id in the
@@ -30,9 +31,10 @@ class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Integer model, int width, int height) {
+  public LoadData<Data> buildLoadData(Integer model, int width, int height,
+      Map<String, Object> options) {
     Uri uri = getResourceUri(model);
-    return uriLoader.buildLoadData(uri, width, height);
+    return uriLoader.buildLoadData(uri, width, height, options);
   }
 
   private Uri getResourceUri(Integer model) {

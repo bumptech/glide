@@ -99,7 +99,8 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
       throw new IllegalStateException("Width and/or height are unset.");
     }
     if (loadDataSet == null) {
-      loadDataSet = glideContext.getRegistry().getLoadDataSet(model, width, height);
+      loadDataSet = glideContext.getRegistry().getLoadDataSet(model, width, height,
+          glideContext.getOptions().getOptions());
     }
     return loadDataSet;
   }
@@ -161,7 +162,8 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
 
   LoadDataSet<File> getDataFetchers(File file, int width, int height)
       throws Registry.NoModelLoaderAvailableException {
-    return glideContext.getRegistry().getLoadDataSet(file, width, height);
+    return glideContext.getRegistry().getLoadDataSet(file, width, height,
+        glideContext.getOptions().getOptions());
   }
 
   public int getOverrideWidth() {

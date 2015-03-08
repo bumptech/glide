@@ -6,6 +6,7 @@ import com.bumptech.glide.util.Preconditions;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A factory interface for translating an arbitrarily complex data model into a concrete data type
@@ -76,7 +77,7 @@ public interface ModelLoader<Model, Data> {
    *               {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate that
    *               the resource should be loaded at its original height.
    */
-  LoadData<Data> buildLoadData(Model model, int width, int height);
+  LoadData<Data> buildLoadData(Model model, int width, int height, Map<String, Object> options);
 
   /**
    * Returns true if the given model is a of a recognized type that this loader can probably load.
@@ -86,7 +87,7 @@ public interface ModelLoader<Model, Data> {
    *
    * <p> This method is generally expected to do no I/O and complete quickly, so best effort
    * results are acceptable. {@link ModelLoader ModelLoaders} that return true from this method may
-   * return {@code null} from {@link #buildLoadData(Object, int, int)} </p>
+   * return {@code null} from {@link #buildLoadData(Object, int, int, Map)} </p>
    */
   boolean handles(Model model);
 }

@@ -6,6 +6,7 @@ package com.bumptech.glide.load.engine.cache;
 
 import android.util.Log;
 
+import com.bumptech.glide.Logs;
 import com.bumptech.glide.disklrucache.DiskLruCache;
 import com.bumptech.glide.load.Key;
 
@@ -64,6 +65,9 @@ public class DiskLruCacheWrapper implements DiskCache {
   @Override
   public File get(Key key) {
     String safeKey = safeKeyGenerator.getSafeKey(key);
+    if (Logs.isEnabled(Log.VERBOSE)) {
+      Logs.log(Log.VERBOSE, "Get: Obtained: " + safeKey + " for for Key: " + key);
+    }
     File result = null;
     try {
       // It is possible that the there will be a put in between these two gets. If so that shouldn't
@@ -84,6 +88,9 @@ public class DiskLruCacheWrapper implements DiskCache {
   @Override
   public void put(Key key, Writer writer) {
     String safeKey = safeKeyGenerator.getSafeKey(key);
+    if (Logs.isEnabled(Log.VERBOSE)) {
+      Logs.log(Log.VERBOSE, "Put: Obtained: " + safeKey + " for for Key: " + key);
+    }
     try {
       DiskLruCache.Editor editor = getDiskCache().edit(safeKey);
       // Editor will be null if there are two concurrent puts. In the worst case we will just

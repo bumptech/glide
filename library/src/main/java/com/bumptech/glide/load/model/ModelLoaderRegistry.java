@@ -56,10 +56,11 @@ public class ModelLoaderRegistry {
     }
   }
 
-  public synchronized <A> LoadDataSet<A> getDataFetchers(A model, int width, int height) {
+  public synchronized <A> LoadDataSet<A> getDataFetchers(A model, int width, int height,
+      Map<String, Object> options) {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoaders(model);
 
-    return new LoadDataSet<>(model, width, height, modelLoaders);
+    return new LoadDataSet<>(model, width, height, modelLoaders, options);
   }
 
   public synchronized <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass,

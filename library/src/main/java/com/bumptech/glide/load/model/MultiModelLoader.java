@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
@@ -12,9 +13,10 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Model model, int width, int height) {
+  public LoadData<Data> buildLoadData(Model model, int width, int height,
+      Map<String, Object> options) {
     ModelLoader<Model, Data> bestLoader = getBestLoader(model);
-    return bestLoader != null ? bestLoader.buildLoadData(model, width, height) : null;
+    return bestLoader != null ? bestLoader.buildLoadData(model, width, height, options) : null;
   }
 
   @Override

@@ -24,6 +24,7 @@ import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manages component registration.
@@ -204,8 +205,9 @@ public class Registry {
     return dataRewinderRegistry.build(data);
   }
 
-  public <Model> LoadDataSet<Model> getLoadDataSet(Model model, int width, int height) {
-    LoadDataSet<Model> result = modelLoaderRegistry.getDataFetchers(model, width, height);
+  public <Model> LoadDataSet<Model> getLoadDataSet(Model model, int width, int height,
+      Map<String, Object> options) {
+    LoadDataSet<Model> result = modelLoaderRegistry.getDataFetchers(model, width, height, options);
     if (result.isEmpty()) {
       throw new NoModelLoaderAvailableException(model);
     }

@@ -9,6 +9,7 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * A wrapper class that translates {@link java.net.URL} objects into {@link
@@ -24,8 +25,9 @@ public class UrlLoader implements ModelLoader<URL, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(URL model, int width, int height) {
-    return glideUrlLoader.buildLoadData(new GlideUrl(model), width, height);
+  public LoadData<InputStream> buildLoadData(URL model, int width, int height,
+      Map<String, Object> options) {
+    return glideUrlLoader.buildLoadData(new GlideUrl(model), width, height, options);
   }
 
   @Override

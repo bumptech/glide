@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A wrapper for put of {@link com.bumptech.glide.load.data.DataFetcher}s that can fetch data for a
@@ -20,15 +21,18 @@ public class LoadDataSet<Model> implements Iterable<ModelLoader.LoadData<?>> {
   private final int width;
   private final int height;
   private final List<ModelLoader<Model, ?>> modelLoaders;
+  private final Map<String, Object> options;
   private final List<DataFetcher<?>> fetchers;
 
   private List<ModelLoader<Model, ?>> filteredLoaders;
 
-  public LoadDataSet(Model model, int width, int height, List<ModelLoader<Model, ?>> modelLoaders) {
+  public LoadDataSet(Model model, int width, int height, List<ModelLoader<Model, ?>> modelLoaders,
+      Map<String, Object> options) {
     this.model = model;
     this.width = width;
     this.height = height;
     this.modelLoaders = modelLoaders;
+    this.options = options;
     fetchers = new ArrayList<>(modelLoaders.size());
   }
 
@@ -79,7 +83,7 @@ public class LoadDataSet<Model> implements Iterable<ModelLoader.LoadData<?>> {
 
     @Override
     public ModelLoader.LoadData<?> next() {
-      return getFilteredLoaders().get(currentIndex++).buildLoadData(model, width, height);
+      return getFilteredLoaders().get(currentIndex++).buildLoadData(model, width, height, options);
     }
 
     @Override

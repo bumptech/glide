@@ -22,6 +22,8 @@ import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Tests for the {@link UriLoader} class.
@@ -34,12 +36,14 @@ public class UriLoaderTest {
 
   @Mock DataFetcher<Object> localUriFetcher;
   @Mock UriLoader.LocalUriFetcherFactory<Object> factory;
-  private UriLoader loader;
+  private UriLoader<Object> loader;
+  private Map<String, Object> options;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
+    options = new HashMap<>();
     loader = new UriLoader<>(RuntimeEnvironment.application, factory);
   }
 
@@ -49,7 +53,8 @@ public class UriLoaderTest {
     when(factory.build(anyContext(), eq(fileUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(fileUri));
-    assertEquals(localUriFetcher, loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
+    assertEquals(localUriFetcher,
+        loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
   }
 
   @Test
@@ -59,7 +64,7 @@ public class UriLoaderTest {
 
     assertTrue(loader.handles(resourceUri));
     assertEquals(localUriFetcher,
-        loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
+        loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
   }
 
   @Test
@@ -68,7 +73,8 @@ public class UriLoaderTest {
     when(factory.build(anyContext(), eq(contentUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(contentUri));
-    assertEquals(localUriFetcher, loader.buildLoadData(contentUri, IMAGE_SIDE, IMAGE_SIDE).fetcher);
+    assertEquals(localUriFetcher, loader.buildLoadData(contentUri, IMAGE_SIDE, IMAGE_SIDE,
+        options).fetcher);
   }
 
   private static Context anyContext() {

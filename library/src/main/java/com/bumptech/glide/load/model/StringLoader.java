@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * A model loader for handling certain string models. Handles paths, urls, and any uri string with a
@@ -21,9 +22,10 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(String model, int width, int height) {
+  public LoadData<Data> buildLoadData(String model, int width, int height,
+      Map<String, Object> options) {
     Uri uri = parseUri(model);
-    return uriLoader.buildLoadData(uri, width, height);
+    return uriLoader.buildLoadData(uri, width, height, options);
   }
 
   @Override

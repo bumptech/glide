@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,8 +29,9 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(Uri model, int width, int height) {
-    return urlLoader.buildLoadData(new GlideUrl(model.toString()), width, height);
+  public LoadData<InputStream> buildLoadData(Uri model, int width, int height,
+      Map<String, Object> options) {
+    return urlLoader.buildLoadData(new GlideUrl(model.toString()), width, height, options);
   }
 
   @Override

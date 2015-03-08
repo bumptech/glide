@@ -5,6 +5,7 @@ import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
@@ -536,7 +537,8 @@ public class GlideTest {
         .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
     when(failFetcher.getDataClass()).thenReturn(failResource);
     ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
-    when(failLoader.buildLoadData(any(failModel), anyInt(), anyInt()))
+    when(failLoader.buildLoadData(any(failModel), anyInt(), anyInt(),
+        anyMapOf(String.class, Object.class)))
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), failFetcher));
     when(failLoader.handles(any(failModel))).thenReturn(true);
     ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
@@ -597,7 +599,8 @@ public class GlideTest {
       // Do nothing.
     }
     when(fetcher.getDataClass()).thenReturn(InputStream.class);
-    when(modelLoader.buildLoadData(any(modelClass), anyInt(), anyInt()))
+    when(modelLoader.buildLoadData(any(modelClass), anyInt(), anyInt(),
+        anyMapOf(String.class, Object.class)))
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), fetcher));
     when(modelLoader.handles(any(modelClass))).thenReturn(true);
 
@@ -675,7 +678,8 @@ public class GlideTest {
         throw new RuntimeException(e);
       }
       ModelLoader<X, Y> mockUrlLoader = mock(ModelLoader.class);
-      when(mockUrlLoader.buildLoadData(any(modelClass), anyInt(), anyInt()))
+      when(mockUrlLoader.buildLoadData(any(modelClass), anyInt(), anyInt(),
+          anyMapOf(String.class, Object.class)))
           .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
       when(mockUrlLoader.handles(any(modelClass))).thenReturn(true);
       ModelLoaderFactory<X, Y> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
