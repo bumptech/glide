@@ -49,12 +49,12 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
   @Override
   public boolean startNext() {
-    loadData = null;
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
     sourceCacheGenerator = null;
 
+    loadData = null;
     while (loadData == null && dataLoaderIterator.hasNext()) {
       loadData = dataLoaderIterator.next();
       if (loadData != null) {

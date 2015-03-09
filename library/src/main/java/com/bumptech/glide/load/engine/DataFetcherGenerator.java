@@ -18,7 +18,7 @@ interface DataFetcherGenerator {
     /**
      * Notifies the callback that the load is complete.
      *
-     * @param sourceId The id of the loaded data.
+     * @param sourceKey The id of the loaded data.
      * @param data The loaded data, or null if the load failed.
      * @param fetcher The data fetcher we attempted to load from.
      */

@@ -271,10 +271,9 @@ public class FlickrSearchActivity extends ActionBarActivity {
         backgroundThumbnailFetcher.cancel();
       }
 
-      // TODO: re-enable background thumbnail fetching.
-//      backgroundThumbnailFetcher =
-//          new BackgroundThumbnailFetcher(FlickrSearchActivity.this, photos);
-//      backgroundHandler.post(backgroundThumbnailFetcher);
+      backgroundThumbnailFetcher =
+          new BackgroundThumbnailFetcher(FlickrSearchActivity.this, photos);
+      backgroundHandler.post(backgroundThumbnailFetcher);
 
       currentPhotos = photos;
     }
