@@ -157,8 +157,8 @@ public final class Downsampler {
     int orientation = getOrientation(is);
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
 
-    int sampleSize = getRoundedSampleSize(downsampleStrategy, degreesToRotate, inWidth,
-        inHeight, outWidth, outHeight);
+    int sampleSize = getRoundedSampleSize(downsampleStrategy, degreesToRotate, inWidth, inHeight,
+        outWidth, outHeight);
 
     Bitmap downsampled = downsampleWithSize(is, bitmapFactoryOptions, bitmapPool, inWidth, inHeight,
         sampleSize, decodeFormat, callbacks);
@@ -216,8 +216,7 @@ public final class Downsampler {
         ? (DecodeFormat) options.get(KEY_DECODE_FORMAT) : DecodeFormat.DEFAULT;
   }
 
-  private static int getOrientation(InputStream is)
-      throws IOException {
+  private static int getOrientation(InputStream is) throws IOException {
     is.mark(MARK_POSITION);
     int orientation = 0;
     try {
@@ -324,17 +323,46 @@ public final class Downsampler {
       // Once we've read the image header, we no longer need to allow the buffer to expand in
       // size. To avoid unnecessary allocations reading image data, we fix the mark limit so that it
       // is no larger than our current buffer size here. See issue #225.
-//      bufferedStream.fixMarkLimit();
       callbacks.onObtainBounds();
     }
 
-    final Bitmap result = BitmapFactory.decodeStream(is, null, options);
+    // out* is reset by most calls to decodeStream, successful or otherwise.
+    int outWidth = options.outWidth;
+    int outHeight = options.outHeight;
+    String outMimeType = options.outMimeType;
+    final Bitmap result;
+    try {
+      result = BitmapFactory.decodeStream(is, null, options);
+    } catch (IllegalArgumentException e) {
+      throw newIoExceptionForInBitmapAssertion(e, outWidth, outHeight, outMimeType, options);
+    }
 
     if (options.inJustDecodeBounds) {
       is.reset();
     }
 
     return result;
+  }
+
+  // BitmapFactory throws an IllegalArgumentException if any error occurs attempting to decode a
+  // file when inBitmap is non-null, including those caused by partial or corrupt data. We still log
+  // the error because the IllegalArgumentException is supposed to catch errors reusing Bitmaps, so
+  // want some useful log output. In most cases this can be safely treated as a normal IOException.
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+  private static IOException newIoExceptionForInBitmapAssertion(IllegalArgumentException e,
+      int outWidth, int outHeight, String outMimeType, BitmapFactory.Options options) {
+    final String inBitmapString;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && options.inBitmap != null) {
+      inBitmapString =  "[" + options.inBitmap.getWidth() + "x" + options.inBitmap.getHeight()
+          + "] " + options.inBitmap.getConfig();
+    } else {
+      inBitmapString = null;
+    }
+    return new IOException("Exception decoding bitmap"
+          + ", outWidth: " + outWidth
+          + ", outHeight: " + outHeight
+          + ", outMimeType: " + outMimeType
+          + ", inBitmap: " + inBitmapString, e);
   }
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
