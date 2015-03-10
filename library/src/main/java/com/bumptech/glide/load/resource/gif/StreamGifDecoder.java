@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawable> {
   /**
-   * A Key for an {@link boolean} option that if set to {@code true}, disables this decoder
+   * A Key for an {@link Boolean} option that if set to {@code true}, disables this decoder
    * ({@link #handles(java.io.InputStream, java.util.Map)} will return {@code false}). Defaults to
    * {@code false}.
    */

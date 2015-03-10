@@ -21,7 +21,7 @@ import java.util.HashSet;
 public final class Api {
   private static volatile Api api = null;
   private static final String BETA_KEY = "dc6zaTOxFJmzC";
-  private static final String BASE_URL = "http://api.giphy.com";
+  private static final String BASE_URL = "https://api.giphy.com/";
   private static final String SEARCH_PATH = "/v1/gifs/search";
   private static final String TRENDING_PATH = "/v1/gifs/trending";
   private final Handler bgHandler;
@@ -50,7 +50,7 @@ public final class Api {
      *
      * @param result The results returned from Giphy's search api.
      */
-    public void onSearchComplete(SearchResult result);
+    void onSearchComplete(SearchResult result);
   }
 
   public static Api get() {

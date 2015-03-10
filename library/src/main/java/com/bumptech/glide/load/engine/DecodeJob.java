@@ -76,6 +76,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
    * Where we're trying to decode data from.
    */
   private enum Stage {
+    /** The initial stage. */
+    INITIALIZE,
     /** Decode from a cached resource. */
     RESOURCE_CACHE,
     /** Decode from cached source data. */
@@ -98,7 +100,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   public void run() {
     switch (runReason) {
       case INITIALIZE:
-        stage = Stage.RESOURCE_CACHE;
+        stage = getNextStage(Stage.INITIALIZE);
         generator = getNextGenerator();
         runGenerators();
         break;
@@ -137,7 +139,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     currentThread = Thread.currentThread();
     startFetchTime = LogTime.getLogTime();
     while (!isCancelled && generator != null && !generator.startNext()) {
-      stage = getNextStage();
+      stage = getNextStage(stage);
       generator = getNextGenerator();
 
       if (stage == Stage.SOURCE) {
@@ -154,13 +156,18 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     // onDataFetcherReady.
   }
 
-  private Stage getNextStage() {
-    if (stage == null) {
+  private Stage getNextStage(Stage current) {
+    if (current == null) {
       return null;
     }
-    switch (stage) {
+    DiskCacheStrategy strategy = requestContext.getDiskCacheStrategy();
+    switch (current) {
+      case INITIALIZE:
+        return strategy.decodeCachedResource()
+            ? Stage.RESOURCE_CACHE : getNextStage(Stage.RESOURCE_CACHE);
       case RESOURCE_CACHE:
-        return Stage.DATA_CACHE;
+        return strategy.decodeCachedData()
+            ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);
       case DATA_CACHE:
         return Stage.SOURCE;
       default:

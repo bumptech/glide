@@ -29,7 +29,7 @@ import java.util.Queue;
 public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDrawable> {
 
   /**
-   * A Key for an {@link boolean} option that if set to {@code true}, disables this decoder
+   * A Key for an {@link Boolean} option that if set to {@code true}, disables this decoder
    * ({@link #handles(java.nio.ByteBuffer, java.util.Map)} will return {@code false}). Defaults to
    * {@code false}.
    */

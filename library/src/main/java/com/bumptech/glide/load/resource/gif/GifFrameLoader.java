@@ -106,7 +106,7 @@ class GifFrameLoader {
     gifDecoder.advance();
     long targetTime = SystemClock.uptimeMillis() + gifDecoder.getNextDelay();
     next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
-    requestBuilder.apply(signatureOf(new FrameSignature())).load(gifDecoder).into(next);
+    requestBuilder.clone().apply(signatureOf(new FrameSignature())).load(gifDecoder).into(next);
   }
 
   // Visible for testing.
