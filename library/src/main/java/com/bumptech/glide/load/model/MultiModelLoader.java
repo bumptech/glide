@@ -15,27 +15,31 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   @Override
   public LoadData<Data> buildLoadData(Model model, int width, int height,
       Map<String, Object> options) {
-    ModelLoader<Model, Data> bestLoader = getBestLoader(model);
-    return bestLoader != null ? bestLoader.buildLoadData(model, width, height, options) : null;
+    LoadData<Data> result = null;
+    for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
+      if (modelLoader.handles(model)) {
+        result = modelLoader.buildLoadData(model, width, height, options);
+        if (result != null) {
+          break;
+        }
+      }
+    }
+    return result;
   }
 
   @Override
   public boolean handles(Model model) {
-    return getBestLoader(model) != null;
+    for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
+      if (modelLoader.handles(model)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
   public String toString() {
     return "MultiModelLoader{" + "modelLoaders=" + Arrays
         .toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + '}';
-  }
-
-  private ModelLoader<Model, Data> getBestLoader(Model model) {
-     for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
-      if (modelLoader.handles(model)) {
-        return modelLoader;
-      }
-    }
-    return null;
   }
 }
