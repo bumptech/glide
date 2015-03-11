@@ -147,29 +147,40 @@ public final class Downsampler {
   }
 
   private Bitmap decodeFromWrappedStreams(InputStream is,
-      BitmapFactory.Options bitmapFactoryOptions, DownsampleStrategy downsampleStrategy,
+      BitmapFactory.Options options, DownsampleStrategy downsampleStrategy,
       DecodeFormat decodeFormat, int requestedWidth, int requestedHeight,
       DecodeCallbacks callbacks) throws IOException {
 
-    int[] sourceDimensions = getDimensions(is, bitmapFactoryOptions, callbacks);
+    int[] sourceDimensions = getDimensions(is, options, callbacks);
     int sourceWidth = sourceDimensions[0];
     int sourceHeight = sourceDimensions[1];
+    String sourceMimeType = options.outMimeType;
 
     int orientation = getOrientation(is);
-    int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
+    int degreesToRotate = TransformationUtils.getExifOrientationDegrees(getOrientation(is));
 
-    int sampleSize = getRoundedSampleSize(downsampleStrategy, degreesToRotate, sourceWidth,
-        sourceHeight, requestedWidth, requestedHeight);
-
-    Bitmap downsampled = downsampleWithSize(is, bitmapFactoryOptions, bitmapPool, sourceWidth,
-        sourceHeight, sampleSize, decodeFormat, requestedWidth, requestedHeight, callbacks);
-
+    options.inPreferredConfig = getConfig(is, decodeFormat);
+    options.inSampleSize = getRoundedSampleSize(downsampleStrategy, degreesToRotate,
+        sourceWidth, sourceHeight, requestedWidth, requestedHeight);
+    options.inDensity = downsampleStrategy.getDensity(sourceWidth, sourceHeight,
+        requestedWidth, requestedHeight);
+    options.inTargetDensity = downsampleStrategy.getTargetDensity(sourceWidth,
+        sourceHeight, requestedWidth, requestedHeight, options.inSampleSize);
+    if (isScaling(options)) {
+      options.inScaled = true;
+    }
+    Bitmap downsampled = downsampleWithSize(is, options, bitmapPool, sourceWidth,
+        sourceHeight, callbacks);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
+
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      logDecode(sourceWidth, sourceHeight, sourceMimeType, options, downsampled,
+          requestedWidth, requestedHeight);
+    }
 
     Bitmap rotated = null;
     if (downsampled != null) {
       rotated = TransformationUtils.rotateImageExif(downsampled, bitmapPool, orientation);
-
       if (!downsampled.equals(rotated) && !bitmapPool.put(downsampled)) {
         downsampled.recycle();
       }
@@ -233,20 +244,31 @@ public final class Downsampler {
   }
 
   private static Bitmap downsampleWithSize(InputStream is, BitmapFactory.Options options,
-      BitmapPool pool, int sourceWidth, int sourceHeight, int sampleSize, DecodeFormat decodeFormat,
-      int requestedWidth, int requestedHeight, DecodeCallbacks callbacks) throws IOException {
-    Bitmap.Config config = getConfig(is, decodeFormat);
-    options.inSampleSize = sampleSize;
-    options.inPreferredConfig = config;
+      BitmapPool pool, int sourceWidth, int sourceHeight, DecodeCallbacks callbacks)
+      throws IOException {
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
     if ((options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT)
         && shouldUsePool(is)) {
-      int targetWidth = (int) Math.ceil(sourceWidth / (double) sampleSize);
-      int targetHeight = (int) Math.ceil(sourceHeight / (double) sampleSize);
+      // If we have valid densities, scale, but make sure we don't upscale.
+      float densityMultiplier = isScaling(options)
+          ? Math.min((float) options.inTargetDensity / options.inDensity, 1f) : 1f;
+
+      int sampleSize = options.inSampleSize;
+      int downsampledWidth = sourceWidth / sampleSize;
+      int downsampledHeight = sourceHeight / sampleSize;
+      int expectedWidth = (int) Math.ceil(downsampledWidth * densityMultiplier);
+      int expectedHeight = (int) Math.ceil(downsampledHeight * densityMultiplier);
+
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Calculated target [" + expectedWidth + "x" + expectedHeight + "] for source"
+            + "[" + sourceWidth + "x" + sourceHeight + "]"
+            + ", sampleSize: " + sampleSize
+            + ", density multiplier: " + densityMultiplier);
+      }
       // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
-      setInBitmap(options, pool.getDirty(targetWidth, targetHeight, config));
+      setInBitmap(options, pool.getDirty(expectedWidth, expectedHeight, options.inPreferredConfig));
     }
-    return decodeStream(is, options, requestedWidth, requestedHeight, callbacks);
+    return decodeStream(is, options, callbacks);
   }
 
   private static boolean shouldUsePool(InputStream is) throws IOException {
@@ -306,27 +328,26 @@ public final class Downsampler {
   private static int[] getDimensions(InputStream is, BitmapFactory.Options options,
       DecodeCallbacks decodeCallbacks) throws IOException {
     options.inJustDecodeBounds = true;
-    decodeStream(is, options, -1, -1, decodeCallbacks);
+    decodeStream(is, options, decodeCallbacks);
     options.inJustDecodeBounds = false;
     return new int[] { options.outWidth, options.outHeight };
   }
 
   private static Bitmap decodeStream(InputStream is, BitmapFactory.Options options,
-      int requestedWidth, int requestedHeight, DecodeCallbacks callbacks) throws IOException {
+      DecodeCallbacks callbacks) throws IOException {
     if (options.inJustDecodeBounds) {
       is.mark(MARK_POSITION);
     }
-
     // BitmapFactory.Options out* variables are reset by most calls to decodeStream, successful or
     // otherwise, so capture here in case we log below.
-    int outWidth = options.outWidth;
-    int outHeight = options.outHeight;
+    int sourceWidth = options.outWidth;
+    int sourceHeight = options.outHeight;
     String outMimeType = options.outMimeType;
     final Bitmap result;
     try {
       result = BitmapFactory.decodeStream(is, null, options);
     } catch (IllegalArgumentException e) {
-      throw newIoExceptionForInBitmapAssertion(e, outWidth, outHeight, outMimeType, options);
+      throw newIoExceptionForInBitmapAssertion(e, sourceWidth, sourceHeight, outMimeType, options);
     }
 
     if (options.inJustDecodeBounds) {
@@ -335,24 +356,26 @@ public final class Downsampler {
       // size. To avoid unnecessary allocations reading image data, we fix the mark limit so that it
       // is no larger than our current buffer size here. See issue #225.
       callbacks.onObtainBounds();
-    } else {
-      maybeLogDecode(outWidth, outHeight, outMimeType, options, result, requestedWidth,
-          requestedHeight);
     }
 
     return result;
   }
 
-  private static void maybeLogDecode(int outWidth, int outHeight, String outMimeType,
-      BitmapFactory.Options options, Bitmap result, int targetWidth, int targetHeight) {
-    if (!Log.isLoggable(TAG, Log.VERBOSE)) {
-      return;
-    }
+  private static boolean isScaling(BitmapFactory.Options options) {
+    return options.inTargetDensity > 0 && options.inDensity > 0
+        && options.inTargetDensity != options.inDensity;
+  }
+
+  private static void logDecode(int sourceWidth, int sourceHeight, String outMimeType,
+      BitmapFactory.Options options, Bitmap result, int requestedWidth, int requestedHeight) {
     Log.v(TAG, "Decoded " + getBitmapString(result)
-        + " from [" + outWidth + "x" + outHeight + "] " + outMimeType
+        + " from [" + sourceWidth + "x" + sourceHeight + "] " + outMimeType
         + " with inBitmap " + getInBitmapString(options)
-        + " for [" + targetWidth + "x" + targetHeight + "] and sample size: "
-        + options.inSampleSize);
+        + " for [" + requestedWidth + "x" + requestedHeight + "]"
+        + ", sample size: " + options.inSampleSize
+        + ", density: " + options.inDensity
+        + ", target density: " + options.inTargetDensity
+        + ", thread: " + Thread.currentThread().getName());
   }
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -425,6 +448,8 @@ public final class Downsampler {
     decodeBitmapOptions.inSampleSize = 1;
     decodeBitmapOptions.inPreferredConfig = null;
     decodeBitmapOptions.inJustDecodeBounds = false;
+    decodeBitmapOptions.inDensity = 0;
+    decodeBitmapOptions.inTargetDensity = 0;
     decodeBitmapOptions.outWidth = 0;
     decodeBitmapOptions.outHeight = 0;
     decodeBitmapOptions.outMimeType = null;

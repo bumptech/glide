@@ -342,6 +342,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #fitCenter(android.content.Context)
    */
   public CHILD optionalFitCenter(Context context) {
+    downsample(DownsampleStrategy.FIT_CENTER);
     return optionalTransform(context, new FitCenter(context));
   }
 
@@ -354,6 +355,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalFitCenter(android.content.Context)
    */
   public CHILD fitCenter(Context context) {
+    downsample(DownsampleStrategy.FIT_CENTER);
     return transform(context, new FitCenter(context));
   }
 
