@@ -32,12 +32,17 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
   @Override
   public Resource<Bitmap> decode(InputStream source, int width, int height,
       Map<String, Object> options) throws IOException {
-    ByteArrayPool byteArrayPool = ByteArrayPool.get();
-    byte[] bytesForStream = byteArrayPool.getBytes();
+    byte[] bytesForStream = null;
 
     // Use to fix the mark limit to avoid allocating buffers that fit entire images.
-    RecyclableBufferedInputStream bufferedStream =
-        new RecyclableBufferedInputStream(source, bytesForStream);
+    final RecyclableBufferedInputStream bufferedStream;
+    if (source instanceof RecyclableBufferedInputStream) {
+      bufferedStream = (RecyclableBufferedInputStream) source;
+    } else {
+      bytesForStream = ByteArrayPool.get().getBytes();
+      bufferedStream = new RecyclableBufferedInputStream(source, bytesForStream);
+    }
+
     // Use to retrieve exceptions thrown while reading.
     // TODO(#126): when the framework no longer returns partially decoded Bitmaps or provides a
     // way to determine if a Bitmap is partially decoded, consider removing.
@@ -54,7 +59,9 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
       return downsampler.decode(invalidatingStream, width, height, options, callbacks);
     } finally {
       exceptionStream.release();
-      byteArrayPool.releaseBytes(bytesForStream);
+      if (bytesForStream != null) {
+        ByteArrayPool.get().releaseBytes(bytesForStream);
+      }
     }
   }
 
