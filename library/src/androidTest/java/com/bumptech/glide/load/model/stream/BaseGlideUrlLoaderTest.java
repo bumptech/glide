@@ -139,7 +139,7 @@ public class BaseGlideUrlLoaderTest {
     }
 
     @Override
-    protected String getUrl(Object model, int width, int height) {
+    protected String getUrl(Object model, int width, int height, Map<String, Object> options) {
       return resultUrl;
     }
 

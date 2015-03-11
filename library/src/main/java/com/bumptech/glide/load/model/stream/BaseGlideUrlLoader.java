@@ -43,12 +43,12 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     }
 
     if (result == null) {
-      String stringURL = getUrl(model, width, height);
+      String stringURL = getUrl(model, width, height, options);
       if (TextUtils.isEmpty(stringURL)) {
         return null;
       }
 
-      result = new GlideUrl(stringURL, getHeaders(model, width, height));
+      result = new GlideUrl(stringURL, getHeaders(model, width, height, options));
 
       if (modelCache != null) {
         modelCache.put(model, width, height, result);
@@ -57,7 +57,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
 
     // TODO: this is expensive and slow to calculate every time, we should either cache these, or
     // try to come up with a way to avoid finding them when not necessary.
-    List<String> alternateUrls = getAlternateUrls(model, width, height);
+    List<String> alternateUrls = getAlternateUrls(model, width, height, options);
     LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height,
         options);
     if (alternateUrls.isEmpty()) {
@@ -83,7 +83,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width  The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
-  protected abstract String getUrl(Model model, int width, int height);
+  protected abstract String getUrl(Model model, int width, int height, Map<String, Object> options);
 
   /**
    * Returns a list of alternate urls for the given model, width, and height from which equivalent
@@ -96,7 +96,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width  The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
-  protected List<String> getAlternateUrls(Model model, int width, int height) {
+  protected List<String> getAlternateUrls(Model model, int width, int height,
+      Map<String, Object> options) {
     return Collections.emptyList();
   }
 
@@ -108,7 +109,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
-  protected Headers getHeaders(Model model, int width, int height) {
+  protected Headers getHeaders(Model model, int width, int height, Map<String, Object> options) {
     return Headers.NONE;
   }
 }
