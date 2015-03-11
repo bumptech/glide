@@ -2,6 +2,7 @@ package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -13,7 +14,6 @@ import com.bumptech.glide.samples.flickr.api.Photo;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An implementation of ModelStreamLoader that leverages the StreamOpener class and the
@@ -51,13 +51,12 @@ public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
   }
 
   @Override
-  protected String getUrl(Photo model, int width, int height, Map<String, Object> options) {
+  protected String getUrl(Photo model, int width, int height, Options options) {
     return Api.getPhotoURL(model, width, height);
   }
 
   @Override
-  protected List<String> getAlternateUrls(Photo photo, int width, int height,
-      Map<String, Object> options) {
+  protected List<String> getAlternateUrls(Photo photo, int width, int height, Options options) {
     return Api.getAlternateUrls(photo, width, height);
   }
 }

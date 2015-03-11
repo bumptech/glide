@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.net.Uri;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import org.junit.Before;
@@ -22,8 +23,6 @@ import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Tests for the {@link UriLoader} class.
@@ -37,13 +36,13 @@ public class UriLoaderTest {
   @Mock DataFetcher<Object> localUriFetcher;
   @Mock UriLoader.LocalUriFetcherFactory<Object> factory;
   private UriLoader<Object> loader;
-  private Map<String, Object> options;
+  private Options options;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    options = new HashMap<>();
+    options = new Options();
     loader = new UriLoader<>(RuntimeEnvironment.application, factory);
   }
 

@@ -8,6 +8,8 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.UnitTransformation;
@@ -71,7 +73,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private String tag;
   private boolean isTransformationRequired;
 
-  private Map<String, Object> options = new HashMap<>();
+  private Options options = new Options();
   private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
   private Class<?> resourceClass = Object.class;
   private boolean isLocked;
@@ -255,7 +257,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   public final CHILD clone() {
     try {
       BaseRequestOptions<CHILD> result = (BaseRequestOptions<CHILD>) super.clone();
-      result.options = new HashMap<>();
+      result.options = new Options();
       result.options.putAll(options);
       result.transformations = new HashMap<>();
       result.transformations.putAll(transformations);
@@ -266,8 +268,8 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     }
   }
 
-  public final CHILD set(String key, Object option) {
-    options.put(key, option);
+  public final <T> CHILD set(Option<T> option, T value) {
+    options.set(option, value);
     return selfOrThrowIfLocked();
   }
 
@@ -283,30 +285,30 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   /**
    * Sets the value for key
-   * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#KEY_COMPRESSION_FORMAT}.
+   * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#COMPRESSION_FORMAT}.
    */
   public CHILD encodeFormat(Bitmap.CompressFormat format) {
-    return set(BitmapEncoder.KEY_COMPRESSION_FORMAT, format);
+    return set(BitmapEncoder.COMPRESSION_FORMAT, format);
   }
 
   /**
    * Sets the value for key
-   * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#KEY_COMPRESSION_QUALITY}.
+   * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#COMPRESSION_QUALITY}.
    */
   public CHILD encodeQuality(Integer quality) {
-    return set(BitmapEncoder.KEY_COMPRESSION_QUALITY, quality);
+    return set(BitmapEncoder.COMPRESSION_QUALITY, quality);
   }
 
   public CHILD format(DecodeFormat format) {
-    return set(Downsampler.KEY_DECODE_FORMAT, Preconditions.checkNotNull(format));
+    return set(Downsampler.DECODE_FORMAT, Preconditions.checkNotNull(format));
   }
 
-  public CHILD frame(int frame) {
-    return set(VideoBitmapDecoder.KEY_TARGET_FRAME, frame);
+  public CHILD frame(long frame) {
+    return set(VideoBitmapDecoder.TARGET_FRAME, frame);
   }
 
   public CHILD downsample(DownsampleStrategy strategy) {
-    return set(Downsampler.KEY_DOWNSAMPLE_STRATEGY, strategy);
+    return set(Downsampler.DOWNSAMPLE_STRATEGY, strategy);
   }
 
   /**
@@ -457,8 +459,8 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * {@link com.bumptech.glide.TransitionOptions#dontTransition()}</p>
    */
   public final CHILD dontAnimate() {
-    set(ByteBufferGifDecoder.KEY_DISABLE_ANIMATION, true);
-    set(StreamGifDecoder.KEY_DISABLE_ANIMATION, true);
+    set(ByteBufferGifDecoder.DISABLE_ANIMATION, true);
+    set(StreamGifDecoder.DISABLE_ANIMATION, true);
     return selfOrThrowIfLocked();
   }
 
@@ -493,7 +495,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return (CHILD) this;
   }
 
-  public final Map<String, Object> getOptions() {
+  public final Options getOptions() {
     return options;
   }
 

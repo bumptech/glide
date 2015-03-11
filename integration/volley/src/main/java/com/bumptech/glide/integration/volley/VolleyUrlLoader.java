@@ -4,13 +4,13 @@ import android.content.Context;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * A simple model loader for fetching media over http/https using Volley.
@@ -36,7 +36,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   @Override
   public LoadData<InputStream> buildLoadData(GlideUrl url, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     return new LoadData<>(url, new VolleyStreamFetcher(requestQueue, url, requestFactory));
   }
 

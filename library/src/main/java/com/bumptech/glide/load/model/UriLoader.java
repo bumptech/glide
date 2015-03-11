@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
@@ -14,7 +15,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,7 +40,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
 
   @Override
   public final LoadData<Data> buildLoadData(Uri model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     return new LoadData<>(new ObjectKey(model), factory.build(context, model));
   }
 

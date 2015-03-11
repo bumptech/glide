@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model;
 
 import android.content.Context;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.LoadDataSet;
 
 import java.util.Collections;
@@ -57,7 +58,7 @@ public class ModelLoaderRegistry {
   }
 
   public synchronized <A> LoadDataSet<A> getDataFetchers(A model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoaders(model);
 
     return new LoadDataSet<>(model, width, height, modelLoaders, options);

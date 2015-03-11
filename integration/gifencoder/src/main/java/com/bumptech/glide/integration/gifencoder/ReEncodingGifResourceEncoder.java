@@ -9,6 +9,9 @@ import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.gifencoder.AnimatedGifEncoder;
 import com.bumptech.glide.load.EncodeStrategy;
+import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
@@ -23,15 +26,18 @@ import com.bumptech.glide.util.LogTime;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Map;
+import java.security.MessageDigest;
 
 /**
  * An {@link com.bumptech.glide.load.ResourceEncoder} that can write
  * {@link com.bumptech.glide.load.resource.gif.GifDrawable} to cache.
  */
 public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable> {
-  /**
-   * A key for a boolean option that, if set to <code>true</code>, causes the fully transformed
+
+  private static final String KEY_ENCODE_TRANSFORMATION =
+      "com.bumptech.glide.load.resource.gif.GifResourceEncoder.EncodeTransformation";
+   /**
+   * A boolean option that, if set to <code>true</code>, causes the fully transformed
    * GIF to be written to cache.
    *
    * <p> Warning - encoding GIFs is slow and often produces larger and less efficient GIFs than
@@ -39,8 +45,15 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
    *
    * <p> Defaults to <code>false</code>. </p>
    */
-  public static final String KEY_ENCODE_TRANSFORMATION =
-      "com.bumptech.glide.load.resource.gif.GifResourceEncoder.EncodeTransformation";
+  public static final Option<Boolean> ENCODE_TRANSFORMATION =
+      Option.disk(KEY_ENCODE_TRANSFORMATION, false, new Option.CacheKeyUpdater<Boolean>() {
+        @Override
+        public void update(Boolean value, MessageDigest messageDigest) {
+          if (value) {
+            messageDigest.update(KEY_ENCODE_TRANSFORMATION.getBytes(Key.CHARSET));
+          }
+        }
+      });
 
   private static final Factory FACTORY = new Factory();
   private static final String TAG = "GifEncoder";
@@ -60,15 +73,14 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   }
 
   @Override
-  public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
-    return encodeTransformation(options) ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
+  public EncodeStrategy getEncodeStrategy(Options options) {
+    return options.get(ENCODE_TRANSFORMATION) ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
   }
 
   @Override
-  public boolean encode(Resource<GifDrawable> resource, OutputStream os,
-      Map<String, Object> options) {
+  public boolean encode(Resource<GifDrawable> resource, OutputStream os, Options options) {
     GifDrawable drawable = resource.get();
-    if (encodeTransformation(options)) {
+    if (options.get(ENCODE_TRANSFORMATION)) {
       return encodeTransformed(drawable, os);
     } else {
       return writeDataDirect(drawable.getBuffer(), os);
@@ -153,11 +165,6 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
       bitmapResource.recycle();
     }
     return transformedResource;
-  }
-
-  private boolean encodeTransformation(Map<String, Object> options) {
-    Boolean encodeTransformed = (Boolean) options.get(KEY_ENCODE_TRANSFORMATION);
-    return encodeTransformed != null && encodeTransformed;
   }
 
   // Visible for testing.

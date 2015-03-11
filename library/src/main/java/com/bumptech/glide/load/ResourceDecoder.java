@@ -3,7 +3,6 @@ package com.bumptech.glide.load;
 import com.bumptech.glide.load.engine.Resource;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * An interface for decoding resources.
@@ -22,13 +21,13 @@ public interface ResourceDecoder<T, Z> {
    * implementation would check the file headers verify they match content the decoder expects to
    * handle (ie a GIF decoder should verify that the image contains the GIF header block. </p>
    *
-   * <p> Decoders that return {@code true} from {@link #handles(Object, java.util.Map)} may still
-   * return {@code null} from {@link #decode(Object, int, int, java.util.Map)} if the data is
+   * <p> Decoders that return {@code true} from {@link #handles(Object, Options)} may still
+   * return {@code null} from {@link #decode(Object, int, int, Options)} if the data is
    * partial or formatted incorrectly. </p>
    *
    * @throws IOException
    */
-  boolean handles(T source, Map<String, Object> options) throws IOException;
+  boolean handles(T source, Options options) throws IOException;
 
   /**
    * Returns a decoded resource from the given data or null if no resource could be decoded.
@@ -55,6 +54,5 @@ public interface ResourceDecoder<T, Z> {
    *                expected type.
    * @throws IOException
    */
-  Resource<Z> decode(T source, int width, int height, Map<String, Object> options)
-      throws IOException;
+  Resource<Z> decode(T source, int width, int height, Options options) throws IOException;
 }

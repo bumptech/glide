@@ -3,6 +3,7 @@ package com.bumptech.glide.samples.giphy;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -10,7 +11,6 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * A model loader that translates a POJO mirroring a JSON object representing a single image from
@@ -47,7 +47,7 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
   }
 
   @Override
-  protected String getUrl(Api.GifResult model, int width, int height, Map<String, Object> options) {
+  protected String getUrl(Api.GifResult model, int width, int height, Options options) {
     Api.GifImage fixedHeight = model.images.fixed_height_downsampled;
     int fixedHeightDifference = getDifference(fixedHeight, width, height);
     Api.GifImage fixedWidth = model.images.fixed_width_downsampled;

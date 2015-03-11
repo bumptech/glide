@@ -1,11 +1,11 @@
 package com.bumptech.glide.load.engine;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * For a given {@link com.bumptech.glide.load.data.DataFetcher} for a given data class, attempts to
@@ -33,7 +33,7 @@ public class LoadPath<Data, ResourceType, Transcode> {
     Preconditions.checkNotNull(data);
 
     Resource<Transcode> result = null;
-    Map<String, Object> options = context.getOptions();
+    Options options = context.getOptions();
     DataRewinder<Data> rewinder = context.getRewinder(data);
     try {
       for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {

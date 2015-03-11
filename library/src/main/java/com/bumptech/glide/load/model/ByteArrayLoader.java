@@ -4,13 +4,13 @@ import android.content.Context;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.EmptySignature;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 /**
  * A base class to convert byte arrays to input streams so they can be decoded. This class is
@@ -28,7 +28,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
 
   @Override
   public LoadData<Data> buildLoadData(byte[] model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     // TODO: compare the actual bytes?
     return new LoadData<>(EmptySignature.obtain(), new Fetcher<>(model, converter));
   }

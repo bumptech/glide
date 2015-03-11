@@ -7,6 +7,7 @@ import android.util.Log;
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
 
@@ -15,7 +16,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * A simple model loader for loading data from {@link File}s.
@@ -33,7 +33,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
 
   @Override
   public LoadData<Data> buildLoadData(File model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     return new LoadData<>(new ObjectKey(model), new FileFetcher<>(model, fileOpener));
   }
 

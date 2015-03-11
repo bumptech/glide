@@ -8,6 +8,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataRewinder;
@@ -127,7 +128,7 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
     return requestOptions.getTransformations();
   }
 
-  Map<String, Object> getOptions() {
+  Options getOptions() {
     return requestOptions.getOptions();
   }
 

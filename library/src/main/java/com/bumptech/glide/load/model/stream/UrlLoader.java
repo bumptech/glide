@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -9,7 +10,6 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Map;
 
 /**
  * A wrapper class that translates {@link java.net.URL} objects into {@link
@@ -25,8 +25,7 @@ public class UrlLoader implements ModelLoader<URL, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(URL model, int width, int height,
-      Map<String, Object> options) {
+  public LoadData<InputStream> buildLoadData(URL model, int width, int height, Options options) {
     return glideUrlLoader.buildLoadData(new GlideUrl(model), width, height, options);
   }
 

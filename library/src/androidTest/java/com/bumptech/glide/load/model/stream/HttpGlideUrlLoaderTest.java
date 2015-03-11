@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model.stream;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.HttpUrlFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -13,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.InputStream;
-import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class HttpGlideUrlLoaderTest {
@@ -29,8 +29,7 @@ public class HttpGlideUrlLoaderTest {
 
   @Test
   public void testReturnsValidFetcher() {
-    DataFetcher<InputStream> result = loader.buildLoadData(model, 100, 100,
-        new HashMap<String, Object>()).fetcher;
+    DataFetcher<InputStream> result = loader.buildLoadData(model, 100, 100, new Options()).fetcher;
     assertThat(result).isInstanceOf(HttpUrlFetcher.class);
   }
 }

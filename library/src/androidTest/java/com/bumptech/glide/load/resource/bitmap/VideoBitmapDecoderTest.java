@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
@@ -24,8 +25,6 @@ import org.robolectric.annotation.Config;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -35,14 +34,14 @@ public class VideoBitmapDecoderTest {
   @Mock private MediaMetadataRetriever retriever;
   @Mock private BitmapPool bitmapPool;
   private VideoBitmapDecoder decoder;
-  private Map<String, Object> options;
+  private Options options;
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
     when(factory.build()).thenReturn(retriever);
     decoder = new VideoBitmapDecoder(bitmapPool, factory);
-    options = new HashMap<>();
+    options = new Options();
   }
 
   @Test
@@ -74,14 +73,14 @@ public class VideoBitmapDecoderTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testThrowsExceptionIfCalledWithInvalidFrame() throws IOException {
-    options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, -5);
+    options.set(VideoBitmapDecoder.TARGET_FRAME, -5L);
     new VideoBitmapDecoder(bitmapPool, factory).decode(resource, 100, 100, options);
   }
 
   @Test
   public void testSpecifiesThumbnailFrameIfICalledWithFrameNumber() throws IOException {
-    int frame = 5;
-    options.put(VideoBitmapDecoder.KEY_TARGET_FRAME, frame);
+    long frame = 5;
+    options.set(VideoBitmapDecoder.TARGET_FRAME, frame);
     decoder = new VideoBitmapDecoder(bitmapPool, factory);
 
     decoder.decode(resource, 100, 100, options);

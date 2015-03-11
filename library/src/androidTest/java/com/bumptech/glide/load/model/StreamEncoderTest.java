@@ -2,6 +2,8 @@ package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertEquals;
 
+import com.bumptech.glide.load.Options;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +12,6 @@ import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Collections;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -27,7 +28,7 @@ public class StreamEncoderTest {
     String fakeData = "SomeRandomFakeData";
     ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    encoder.encode(is, os, Collections.<String, Object>emptyMap());
+    encoder.encode(is, os, new Options());
 
     assertEquals(fakeData, new String(os.toByteArray()));
   }

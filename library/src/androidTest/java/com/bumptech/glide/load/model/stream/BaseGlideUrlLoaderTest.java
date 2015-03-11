@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
@@ -26,8 +27,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -37,14 +36,14 @@ public class BaseGlideUrlLoaderTest {
   @Mock ModelLoader<GlideUrl, InputStream> wrapped;
   @Mock DataFetcher<InputStream> fetcher;
   private TestLoader urlLoader;
-  private Map<String, Object> options;
+  private Options options;
 
   @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    options = new HashMap<>();
+    options = new Options();
     urlLoader = new TestLoader(wrapped, modelCache);
   }
 
@@ -139,7 +138,7 @@ public class BaseGlideUrlLoaderTest {
     }
 
     @Override
-    protected String getUrl(Object model, int width, int height, Map<String, Object> options) {
+    protected String getUrl(Object model, int width, int height, Options options) {
       return resultUrl;
     }
 

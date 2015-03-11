@@ -6,8 +6,9 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
+import com.bumptech.glide.load.Options;
+
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * A model loader for handling Android resource files. Model must be an Android resource id in the
@@ -15,8 +16,7 @@ import java.util.Map;
  *
  * @param <Data> The type of data that will be loaded for the given android resource.
  */
-public
-class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
+public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
 
   private final ModelLoader<Uri, Data> uriLoader;
   private final Resources resources;
@@ -31,8 +31,7 @@ class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Integer model, int width, int height,
-      Map<String, Object> options) {
+  public LoadData<Data> buildLoadData(Integer model, int width, int height, Options options) {
     Uri uri = getResourceUri(model);
     return uriLoader.buildLoadData(uri, width, height, options);
   }

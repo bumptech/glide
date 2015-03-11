@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
@@ -21,19 +22,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class DownsamplerTest {
   @Mock private BitmapPool bitmapPool;
   private Downsampler downsampler;
-  private HashMap<String, Object> options;
+  private Options options;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    options = new HashMap<>();
+    options = new Options();
     downsampler = new Downsampler(bitmapPool);
   }
 
@@ -42,7 +42,7 @@ public class DownsamplerTest {
     Bitmap rgb565 = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     InputStream stream = compressBitmap(rgb565, Bitmap.CompressFormat.JPEG);
 
-    options.put(Downsampler.KEY_DECODE_FORMAT, DecodeFormat.PREFER_ARGB_8888);
+    options.set(Downsampler.DECODE_FORMAT, DecodeFormat.PREFER_ARGB_8888);
     Resource<Bitmap> result = downsampler.decode(stream, 100, 100, options);
     assertEquals(Bitmap.Config.ARGB_8888, result.get().getConfig());
   }
@@ -52,7 +52,7 @@ public class DownsamplerTest {
     Bitmap rgb565 = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     InputStream stream = compressBitmap(rgb565, Bitmap.CompressFormat.JPEG);
 
-    options.put(Downsampler.KEY_DECODE_FORMAT, DecodeFormat.PREFER_RGB_565);
+    options.set(Downsampler.DECODE_FORMAT, DecodeFormat.PREFER_RGB_565);
     Resource<Bitmap> result = downsampler.decode(stream, 100, 100, options);
     assertEquals(Bitmap.Config.RGB_565, result.get().getConfig());
   }

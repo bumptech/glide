@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.content.Context;
 
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataRewinder;
@@ -24,7 +25,6 @@ import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Manages component registration.
@@ -206,7 +206,7 @@ public class Registry {
   }
 
   public <Model> LoadDataSet<Model> getLoadDataSet(Model model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     LoadDataSet<Model> result = modelLoaderRegistry.getDataFetchers(model, width, height, options);
     if (result.isEmpty()) {
       throw new NoModelLoaderAvailableException(model);

@@ -6,13 +6,13 @@ import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorAssetPathFetcher;
 import com.bumptech.glide.load.data.StreamAssetPathFetcher;
 import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * Loads a specific data type from an Asset Manager Uri.
@@ -35,7 +35,7 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
 
   @Override
   public LoadData<Data> buildLoadData(Uri model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     String assetPath = model.toString().substring(ASSET_PREFIX_LENGTH);
     return new LoadData<>(new ObjectKey(model), factory.buildFetcher(assetManager, assetPath));
   }

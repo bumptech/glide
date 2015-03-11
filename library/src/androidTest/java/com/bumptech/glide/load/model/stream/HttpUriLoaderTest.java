@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 
 import android.net.Uri;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 
@@ -19,14 +20,12 @@ import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class HttpUriLoaderTest {
   private static final int IMAGE_SIDE = 100;
-  private static final Map<String, Object> OPTIONS = new HashMap<>();
+  private static final Options OPTIONS = new Options();
 
   @Mock ModelLoader<GlideUrl, InputStream> urlLoader;
   private HttpUriLoader loader;

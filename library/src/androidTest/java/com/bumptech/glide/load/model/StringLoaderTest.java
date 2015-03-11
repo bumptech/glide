@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import android.net.Uri;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.tests.Util;
 
@@ -24,8 +25,6 @@ import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Tests for the {@link com.bumptech.glide.load.model.StringLoader} class.
@@ -41,13 +40,13 @@ public class StringLoaderTest {
   @Mock Key key;
 
   private StringLoader<Object> loader;
-  private Map<String, Object> options;
+  private Options options;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    options = new HashMap<>();
+    options = new Options();
     when(uriLoader.handles(any(Uri.class))).thenReturn(true);
     loader = new StringLoader<>(uriLoader);
   }

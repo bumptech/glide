@@ -2,14 +2,15 @@ package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.net.Uri;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import org.junit.Before;
@@ -20,8 +21,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.util.HashMap;
 
 /**
  * Tests for the {@link com.bumptech.glide.load.model.ResourceLoader} class.
@@ -47,12 +46,10 @@ public class ResourceLoaderTest {
   public void testCanHandleId() {
     int id = android.R.drawable.star_off;
     Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
-    when(uriLoader.buildLoadData(eq(contentUri), anyInt(), anyInt(),
-        anyMapOf(String.class, Object.class)))
+    when(uriLoader.buildLoadData(eq(contentUri), anyInt(), anyInt(), any(Options.class)))
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(id));
-    assertEquals(fetcher,
-        loader.buildLoadData(id, 100, 100, new HashMap<String, Object>()).fetcher);
+    assertEquals(fetcher, loader.buildLoadData(id, 100, 100, new Options()).fetcher);
   }
 }

@@ -2,6 +2,7 @@ package com.bumptech.glide.integration.okhttp;
 
 import android.content.Context;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -9,7 +10,6 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * A simple model loader for fetching media over http/https using OkHttp.
@@ -29,7 +29,7 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   @Override
   public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     return new LoadData<>(model, new OkHttpStreamFetcher(client, model));
   }
 

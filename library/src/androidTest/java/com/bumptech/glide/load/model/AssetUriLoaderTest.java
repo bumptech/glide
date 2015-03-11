@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.AssetManager;
 import android.net.Uri;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import org.junit.Before;
@@ -19,8 +20,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.util.HashMap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -43,6 +42,6 @@ public class AssetUriLoaderTest {
     when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(fetcher);
     assertTrue(loader.handles(assetUri));
     assertEquals(fetcher, loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE,
-        new HashMap<String, Object>()).fetcher);
+        new Options()).fetcher);
   }
 }

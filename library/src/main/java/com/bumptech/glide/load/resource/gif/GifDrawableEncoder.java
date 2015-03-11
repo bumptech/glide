@@ -3,13 +3,13 @@ package com.bumptech.glide.load.resource.gif;
 import android.util.Log;
 
 import com.bumptech.glide.load.EncodeStrategy;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.ByteBufferUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 
 /**
  * Writes the original bytes of a {@link com.bumptech.glide.load.resource.gif.GifDrawable} to an
@@ -19,12 +19,12 @@ public class GifDrawableEncoder implements ResourceEncoder<GifDrawable> {
   private static final String TAG = "GifEncoder";
 
   @Override
-  public EncodeStrategy getEncodeStrategy(Map<String, Object> options) {
+  public EncodeStrategy getEncodeStrategy(Options options) {
     return EncodeStrategy.SOURCE;
   }
 
   @Override
-  public boolean encode(Resource<GifDrawable> data, OutputStream os, Map<String, Object> options) {
+  public boolean encode(Resource<GifDrawable> data, OutputStream os, Options options) {
     GifDrawable drawable = data.get();
     try {
       ByteBufferUtil.encode(drawable.getBuffer(), os);

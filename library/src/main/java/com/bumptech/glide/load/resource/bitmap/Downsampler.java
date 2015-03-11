@@ -8,6 +8,8 @@ import android.util.Log;
 
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.target.Target;
@@ -20,7 +22,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -30,20 +31,20 @@ import java.util.Set;
 public final class Downsampler {
   private static final String TAG = "Downsampler";
   /**
-   * A key for an {@link com.bumptech.glide.load.DecodeFormat} option that will be used in
-   * conjunction with the image format to determine the {@link android.graphics.Bitmap.Config} to
-   * provide to {@link android.graphics.BitmapFactory.Options#inPreferredConfig} when decoding
-   * the image.
+   * Indicates the {@link com.bumptech.glide.load.DecodeFormat} that will be used in conjunction
+   * with the image format to determine the {@link android.graphics.Bitmap.Config} to provide to
+   * {@link android.graphics.BitmapFactory.Options#inPreferredConfig} when decoding the image.
    */
-  public static final String KEY_DECODE_FORMAT =
-      "com.bumptech.glide.load.resource.bitmap.Downsampler.DecodeFormat";
+  public static final Option<DecodeFormat> DECODE_FORMAT = Option.memory(
+      "com.bumptech.glide.load.resource.bitmap.Downsampler.DecodeFormat", DecodeFormat.DEFAULT);
   /**
-   * A key for an {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
+   * Indicates the {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
    * will be used to calculate the sample size to use to downsample an image given the original
    * and target dimensions of the image.
    */
-  public static final String KEY_DOWNSAMPLE_STRATEGY =
-      "com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy";
+  public static final Option<DownsampleStrategy> DOWNSAMPLE_STRATEGY =
+      Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy",
+          DownsampleStrategy.AT_LEAST);
 
   private static final DecodeCallbacks EMPTY_CALLBACKS = new DecodeCallbacks() {
     @Override
@@ -90,11 +91,10 @@ public final class Downsampler {
    * data present in the stream and that is downsampled according to the given dimensions and any
    * provided  {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option.
    *
-   * @see #decode(java.io.InputStream, int, int, java.util.Map,
-   * com.bumptech.glide.load.resource.bitmap.Downsampler.DecodeCallbacks)
+   * @see #decode(InputStream, int, int, Options, DecodeCallbacks)
    */
   public Resource<Bitmap> decode(InputStream is, int outWidth, int outHeight,
-      Map<String, Object> options) throws IOException {
+      Options options) throws IOException {
     return decode(is, outWidth, outHeight, options, EMPTY_CALLBACKS);
   }
 
@@ -124,7 +124,7 @@ public final class Downsampler {
    */
   @SuppressWarnings("resource")
   public Resource<Bitmap> decode(InputStream is, int requestedWidth, int requestedHeight,
-      Map<String, Object> options, DecodeCallbacks callbacks) throws IOException {
+      Options options, DecodeCallbacks callbacks) throws IOException {
     Preconditions.checkArgument(is.markSupported(), "You must provide an InputStream that supports"
         + " mark()");
 
@@ -133,8 +133,8 @@ public final class Downsampler {
     BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
     bitmapFactoryOptions.inTempStorage = bytesForOptions;
 
-    DecodeFormat decodeFormat = getDecodeFormat(options);
-    DownsampleStrategy downsampleStrategy = getDownsampleStrategy(options);
+    DecodeFormat decodeFormat = options.get(DECODE_FORMAT);
+    DownsampleStrategy downsampleStrategy = options.get(DOWNSAMPLE_STRATEGY);
 
     try {
       Bitmap result = decodeFromWrappedStreams(is, bitmapFactoryOptions,
@@ -216,16 +216,6 @@ public final class Downsampler {
     // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code
     // than 0.
     return Math.max(1, powerOfTwoSampleSize);
-  }
-
-  private static DownsampleStrategy getDownsampleStrategy(Map<String, Object> options) {
-    return options.containsKey(KEY_DOWNSAMPLE_STRATEGY)
-        ? (DownsampleStrategy) options.get(KEY_DOWNSAMPLE_STRATEGY) : DownsampleStrategy.DEFAULT;
-  }
-
-  private static DecodeFormat getDecodeFormat(Map<String, Object> options) {
-    return options.containsKey(KEY_DECODE_FORMAT)
-        ? (DecodeFormat) options.get(KEY_DECODE_FORMAT) : DecodeFormat.DEFAULT;
   }
 
   private static int getOrientation(InputStream is) throws IOException {

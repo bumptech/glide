@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model.stream;
 import android.text.TextUtils;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.load.model.ModelCache;
@@ -12,7 +13,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A base class for loading data over http/https. Can be subclassed for use with any model that can
@@ -35,8 +35,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(Model model, int width, int height,
-      Map<String, Object> options) {
+  public LoadData<InputStream> buildLoadData(Model model, int width, int height, Options options) {
     GlideUrl result = null;
     if (modelCache != null) {
       result = modelCache.get(model, width, height);
@@ -83,7 +82,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width  The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
-  protected abstract String getUrl(Model model, int width, int height, Map<String, Object> options);
+  protected abstract String getUrl(Model model, int width, int height, Options options);
 
   /**
    * Returns a list of alternate urls for the given model, width, and height from which equivalent
@@ -97,7 +96,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
   protected List<String> getAlternateUrls(Model model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     return Collections.emptyList();
   }
 
@@ -109,7 +108,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
-  protected Headers getHeaders(Model model, int width, int height, Map<String, Object> options) {
+  protected Headers getHeaders(Model model, int width, int height, Options options) {
     return Headers.NONE;
   }
 }

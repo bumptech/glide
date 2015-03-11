@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -11,7 +12,6 @@ import com.bumptech.glide.util.MarkEnforcingInputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * Decodes {@link android.graphics.Bitmap Bitmaps} from {@link java.io.InputStream InputStreams}.
@@ -25,13 +25,13 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
   }
 
   @Override
-  public boolean handles(InputStream source, Map<String, Object> options) throws IOException {
+  public boolean handles(InputStream source, Options options) throws IOException {
     return downsampler.handles(source);
   }
 
   @Override
-  public Resource<Bitmap> decode(InputStream source, int width, int height,
-      Map<String, Object> options) throws IOException {
+  public Resource<Bitmap> decode(InputStream source, int width, int height, Options options)
+      throws IOException {
     byte[] bytesForStream = null;
 
     // Use to fix the mark limit to avoid allocating buffers that fit entire images.

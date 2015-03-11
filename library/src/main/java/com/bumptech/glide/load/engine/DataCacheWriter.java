@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 
 import java.io.BufferedOutputStream;
@@ -12,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 
 /**
  * Writes original source data or downsampled/transformed resource data to cache using the
@@ -29,14 +29,14 @@ class DataCacheWriter<DataType> implements DiskCache.Writer {
   private final Encoder<DataType> encoder;
   private final DataType data;
   private final FileOpener fileOpener;
-  private final Map<String, Object> options;
+  private final Options options;
 
-  DataCacheWriter(Encoder<DataType> encoder, DataType data, Map<String, Object> options) {
+  DataCacheWriter(Encoder<DataType> encoder, DataType data, Options options) {
     this(encoder, data, options, DEFAULT_FILE_OPENER);
   }
 
   // Visible for testing.
-  DataCacheWriter(Encoder<DataType> encoder, DataType data, Map<String, Object> options,
+  DataCacheWriter(Encoder<DataType> encoder, DataType data, Options options,
       FileOpener fileOpener) {
     this.encoder = encoder;
     this.data = data;

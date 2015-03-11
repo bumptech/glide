@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
@@ -31,8 +32,6 @@ import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
@@ -45,7 +44,7 @@ public class ByteBufferGifDecoderTest {
   private ByteBufferGifDecoder.GifDecoderPool decoderPool;
   private GifDecoder gifDecoder;
   private GifHeader gifHeader;
-  private HashMap<String, Object> options;
+  private Options options;
 
   @Before
   public void setUp() {
@@ -61,34 +60,30 @@ public class ByteBufferGifDecoderTest {
     decoderPool = mock(ByteBufferGifDecoder.GifDecoderPool.class);
     when(decoderPool.obtain(any(GifDecoder.BitmapProvider.class))).thenReturn(gifDecoder);
 
-    options = new HashMap<>();
+    options = new Options();
     decoder = new ByteBufferGifDecoder(RuntimeEnvironment.application, bitmapPool, parserPool,
         decoderPool);
   }
 
   @Test
   public void testDoesNotHandleStreamIfEnabledButNotAGif() throws IOException {
-    Map<String, Object> options = new HashMap<>();
     assertThat(decoder.handles(ByteBuffer.allocate(0), options)).isFalse();
   }
 
   @Test
   public void testHandlesStreamIfContainsGifHeaderAndDisabledIsNotSet() throws IOException {
-    Map<String, Object> options = new HashMap<>();
     assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isTrue();
   }
 
   @Test
   public void testHandlesStreamIfContainsGifHeaderAndDisabledIsFalse() throws IOException {
-    Map<String, Object> options = new HashMap<>();
-    options.put(ByteBufferGifDecoder.KEY_DISABLE_ANIMATION, false);
+    options.set(ByteBufferGifDecoder.DISABLE_ANIMATION, false);
     assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isTrue();
   }
 
   @Test
   public void testDoesNotHandleStreamIfDisabled() throws IOException {
-    Map<String, Object> options = new HashMap<>();
-    options.put(ByteBufferGifDecoder.KEY_DISABLE_ANIMATION, true);
+    options.set(ByteBufferGifDecoder.DISABLE_ANIMATION, true);
     assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isFalse();
   }
 

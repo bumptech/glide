@@ -6,6 +6,7 @@ import android.util.Log;
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
 
@@ -14,7 +15,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Map;
 
 /**
  * Loads {@link java.nio.ByteBuffer}s using NIO for {@link java.io.File}.
@@ -23,7 +23,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
 
   @Override
   public LoadData<ByteBuffer> buildLoadData(File file, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     return new LoadData<>(new ObjectKey(file), new ByteBufferFetcher(file));
   }
 

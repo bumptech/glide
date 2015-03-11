@@ -4,10 +4,9 @@ import android.content.Context;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
-
-import java.util.Map;
 
 /**
  * A put of helper classes that performs no loading and instead always returns the given model as
@@ -19,7 +18,7 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
 
   @Override
   public LoadData<Model> buildLoadData(Model model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     return new LoadData<>(new ObjectKey(model), new UnitFetcher<>(model));
   }
 

@@ -3,13 +3,13 @@ package com.bumptech.glide.load.engine;
 import android.util.Log;
 
 import com.bumptech.glide.Logs;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Attempts to decode and transcode  resource type from a given data type.
@@ -33,7 +33,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   }
 
   public Resource<Transcode> decode(DataRewinder<DataType> rewinder, int width, int height,
-      Map<String, Object> options, DecodeCallback<ResourceType> callback) {
+      Options options, DecodeCallback<ResourceType> callback) {
     Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
     if (decoded == null) {
       return null;
@@ -43,7 +43,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   }
 
   private Resource<ResourceType> decodeResource(DataRewinder<DataType> rewinder, int width,
-      int height, Map<String, Object> options) {
+      int height, Options options) {
     Resource<ResourceType> result = null;
     for (ResourceDecoder<DataType, ResourceType> decoder : decoders) {
       try {

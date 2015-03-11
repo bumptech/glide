@@ -1,8 +1,9 @@
 package com.bumptech.glide.load.model;
 
+import com.bumptech.glide.load.Options;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
@@ -14,7 +15,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
   @Override
   public LoadData<Data> buildLoadData(Model model, int width, int height,
-      Map<String, Object> options) {
+      Options options) {
     LoadData<Data> result = null;
     for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
       if (modelLoader.handles(model)) {

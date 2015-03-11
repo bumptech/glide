@@ -9,6 +9,8 @@ import com.bumptech.glide.Logs;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -19,7 +21,6 @@ import com.bumptech.glide.util.Util;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -29,12 +30,12 @@ import java.util.Queue;
 public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDrawable> {
 
   /**
-   * A Key for an {@link Boolean} option that if set to {@code true}, disables this decoder
-   * ({@link #handles(java.nio.ByteBuffer, java.util.Map)} will return {@code false}). Defaults to
+   *  If set to {@code true}, disables this decoder
+   *  ({@link #handles(ByteBuffer, Options)} will return {@code false}). Defaults to
    * {@code false}.
    */
-  public static final String KEY_DISABLE_ANIMATION =
-      "com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder.DisableAnimation";
+  public static final Option<Boolean> DISABLE_ANIMATION = Option.memory(
+      "com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder.DisableAnimation", false);
 
   private static final GifHeaderParserPool PARSER_POOL = new GifHeaderParserPool();
   private static final GifDecoderPool DECODER_POOL = new GifDecoderPool();
@@ -64,16 +65,13 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   }
 
   @Override
-  public boolean handles(ByteBuffer source, Map<String, Object> options) throws IOException {
-    boolean isDisabled =
-        options.containsKey(KEY_DISABLE_ANIMATION) && (boolean) options.get(KEY_DISABLE_ANIMATION);
-    return !isDisabled
+  public boolean handles(ByteBuffer source, Options options) throws IOException {
+    return !options.get(DISABLE_ANIMATION)
         && new ImageHeaderParser(source).getType() == ImageHeaderParser.ImageType.GIF;
   }
 
   @Override
-  public GifDrawableResource decode(ByteBuffer source, int width, int height,
-      Map<String, Object> options) {
+  public GifDrawableResource decode(ByteBuffer source, int width, int height, Options options) {
     final GifHeaderParser parser = parserPool.obtain(source);
     final GifDecoder decoder = decoderPool.obtain(provider);
     try {

@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
@@ -81,8 +82,8 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().dontTransform();
   }
 
-  public static RequestOptions option(String key, Object option) {
-    return new RequestOptions().set(key, option);
+  public static <T> RequestOptions option(Option<T> option, T value) {
+    return new RequestOptions().set(option, value);
   }
 
   public static RequestOptions decodeTypeOf(Class<?> resourceClass) {

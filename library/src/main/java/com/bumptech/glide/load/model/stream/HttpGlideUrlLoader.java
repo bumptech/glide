@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.HttpUrlFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
@@ -10,7 +11,6 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * An {@link com.bumptech.glide.load.model.ModelLoader} for translating {@link
@@ -19,6 +19,35 @@ import java.util.Map;
 public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   private final ModelCache<GlideUrl, GlideUrl> modelCache;
+
+  public HttpGlideUrlLoader() {
+    this(null);
+  }
+
+  public HttpGlideUrlLoader(ModelCache<GlideUrl, GlideUrl> modelCache) {
+    this.modelCache = modelCache;
+  }
+
+  @Override
+  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height,
+      Options options) {
+    // GlideUrls memoize parsed URLs so caching them saves a few object instantiations and time
+    // spent parsing urls.
+    GlideUrl url = model;
+    if (modelCache != null) {
+      url = modelCache.get(model, 0, 0);
+      if (url == null) {
+        modelCache.put(model, 0, 0, model);
+        url = model;
+      }
+    }
+    return new LoadData<>(url, new HttpUrlFetcher(url));
+  }
+
+  @Override
+  public boolean handles(GlideUrl model) {
+    return true;
+  }
 
   /**
    * The default factory for {@link HttpGlideUrlLoader}s.
@@ -36,34 +65,5 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     public void teardown() {
       // Do nothing.
     }
-  }
-
-  public HttpGlideUrlLoader() {
-    this(null);
-  }
-
-  public HttpGlideUrlLoader(ModelCache<GlideUrl, GlideUrl> modelCache) {
-    this.modelCache = modelCache;
-  }
-
-  @Override
-  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height,
-      Map<String, Object> options) {
-    // GlideUrls memoize parsed URLs so caching them saves a few object instantiations and time
-    // spent parsing urls.
-    GlideUrl url = model;
-    if (modelCache != null) {
-      url = modelCache.get(model, 0, 0);
-      if (url == null) {
-        modelCache.put(model, 0, 0, model);
-        url = model;
-      }
-    }
-    return new LoadData<>(url, new HttpUrlFetcher(url));
-  }
-
-  @Override
-  public boolean handles(GlideUrl model) {
-    return true;
   }
 }

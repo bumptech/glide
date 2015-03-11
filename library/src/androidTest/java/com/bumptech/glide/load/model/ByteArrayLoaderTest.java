@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import org.junit.Before;
@@ -17,8 +18,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class ByteArrayLoaderTest {
@@ -26,13 +25,13 @@ public class ByteArrayLoaderTest {
   @Mock ByteArrayLoader.Converter<Object> converter;
   @Mock DataFetcher.DataCallback<Object> callback;
   private ByteArrayLoader<Object> loader;
-  Map<String, Object> options;
+  private Options options;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     loader = new ByteArrayLoader<>(converter);
-    options = new HashMap<>();
+    options = new Options();
   }
 
   @Test

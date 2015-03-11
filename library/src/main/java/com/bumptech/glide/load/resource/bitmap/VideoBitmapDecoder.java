@@ -6,12 +6,15 @@ import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.io.IOException;
-import java.util.Map;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 
 /**
  * An {@link com.bumptech.glide.load.ResourceDecoder} that can decode a thumbnail frame
@@ -22,17 +25,27 @@ import java.util.Map;
  */
 public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor, Bitmap> {
   /**
-   * A key for a long indicating the target frame we should provide to
-   * {@link android.media.MediaMetadataRetriever#getFrameAtTime(long)} when extracting a video
-   * frame.
-   */
-  public static final String KEY_TARGET_FRAME =
-      "com.bumtpech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame";
-  /**
    * A constant indicating we should use whatever frame we consider best, frequently not the first
    * frame.
    */
-  public static final int DEFAULT_FRAME = -1;
+  public static final long DEFAULT_FRAME = -1;
+
+  /**
+   * A long indicating the target frame we should provide to
+   * {@link android.media.MediaMetadataRetriever#getFrameAtTime(long)} when extracting a video
+   * frame.
+   */
+  public static final Option<Long> TARGET_FRAME = Option.disk(
+      "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame", DEFAULT_FRAME,
+      new Option.CacheKeyUpdater<Long>() {
+        private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
+        @Override
+        public void update(Long value, MessageDigest messageDigest) {
+          synchronized (buffer) {
+            messageDigest.update(buffer.putLong(value).array());
+          }
+        }
+      });
 
   private static final MediaMetadataRetrieverFactory DEFAULT_FACTORY =
       new MediaMetadataRetrieverFactory();
@@ -55,7 +68,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   }
 
   @Override
-  public boolean handles(ParcelFileDescriptor data, Map<String, Object> options) {
+  public boolean handles(ParcelFileDescriptor data, Options options) {
     MediaMetadataRetriever retriever = factory.build();
     try {
       retriever.setDataSource(data.getFileDescriptor());
@@ -70,9 +83,8 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
 
   @Override
   public Resource<Bitmap> decode(ParcelFileDescriptor resource, int outWidth, int outHeight,
-      Map<String, Object> options) throws IOException {
-    int frame = options.containsKey(KEY_TARGET_FRAME)
-        ? (Integer) options.get(KEY_TARGET_FRAME) : DEFAULT_FRAME;
+      Options options) throws IOException {
+    long frame = options.get(TARGET_FRAME);
     if (frame < 0 && frame != DEFAULT_FRAME) {
       throw new IllegalArgumentException(
           "Requested frame must be non-negative, or DEFAULT_FRAME, given: " + frame);
