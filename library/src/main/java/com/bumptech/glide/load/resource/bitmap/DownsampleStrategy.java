@@ -12,8 +12,9 @@ public interface DownsampleStrategy {
   DownsampleStrategy AT_LEAST = new DownsampleStrategy() {
 
     @Override
-    public int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-      return Math.min(inHeight / outHeight, inWidth / outWidth);
+    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight) {
+      return Math.min(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
     }
   };
 
@@ -23,8 +24,9 @@ public interface DownsampleStrategy {
    */
   DownsampleStrategy AT_MOST = new DownsampleStrategy() {
     @Override
-    public int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-      return Math.max(inHeight / outHeight, inWidth / outWidth);
+    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight) {
+      return Math.max(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
     }
   };
 
@@ -33,7 +35,8 @@ public interface DownsampleStrategy {
    */
   DownsampleStrategy NONE = new DownsampleStrategy() {
     @Override
-    public int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
+    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight) {
       return 1;
     }
   };
@@ -48,13 +51,13 @@ public interface DownsampleStrategy {
    * to be
    * downsampled and the dimensions of the view/target the image will be displayed in.
    *
-   * @param inWidth   The width in pixels of the image to be downsampled.
-   * @param inHeight  The height in piexels of the image to be downsampled.
-   * @param outWidth  The width in pixels of the view/target the image will be displayed in.
-   * @param outHeight The height in pixels of the view/target the imag will be displayed in.
+   * @param sourceWidth   The width in pixels of the image to be downsampled.
+   * @param sourceHeight  The height in piexels of the image to be downsampled.
+   * @param requestedWidth  The width in pixels of the view/target the image will be displayed in.
+   * @param requestedHeight The height in pixels of the view/target the imag will be displayed in.
    * @return An integer to pass in to {@link android.graphics.BitmapFactory#decodeStream(
    * java.io.InputStream, android.graphics.Rect, android.graphics.BitmapFactory.Options)}.
    * @see android.graphics.BitmapFactory.Options#inSampleSize
    */
-  int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight);
+  int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight);
 }
