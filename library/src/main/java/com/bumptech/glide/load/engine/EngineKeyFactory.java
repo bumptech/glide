@@ -6,6 +6,6 @@ class EngineKeyFactory {
   public EngineKey buildKey(RequestContext<?, ?> requestContext, int width, int height) {
     return new EngineKey(requestContext.getModel(), requestContext.getSignature(), width, height,
         requestContext.getTransformations(), requestContext.getResourceClass(),
-        requestContext.getTranscodeClass());
+        requestContext.getTranscodeClass(), requestContext.getOptions());
   }
 }

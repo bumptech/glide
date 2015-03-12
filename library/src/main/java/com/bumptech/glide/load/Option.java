@@ -2,10 +2,13 @@ package com.bumptech.glide.load;
 
 import com.bumptech.glide.util.Preconditions;
 
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 /**
- * A base class with reasonable defaults for applying arbitrary component related options.
+ * Defines available component (decoders, encoders, model loaders etc.) options with optional
+ * default values and the ability to affect the resource disk cache key used by {@link
+ * com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE}.
  *
  * <p>
  *   Implementations must either be unique (usually declared as static final variables), or
@@ -18,13 +21,14 @@ import java.security.MessageDigest;
  * </p>
  *
  * @param <T> The type of the option ({@link Integer}, {@link
- * android.graphics.Bitmap.CompressFormat} etc.).
+ * android.graphics.Bitmap.CompressFormat} etc.), must implement {@link #equals(Object)} and
+ * {@link #hashCode()}.
  */
 public final class Option<T> implements Comparable<Option<?>> {
 
   private static final CacheKeyUpdater<Object> EMPTY_UPDATER = new CacheKeyUpdater<Object>() {
     @Override
-    public void update(Object value, MessageDigest messageDigest) {
+    public void update(String key, Object value, MessageDigest messageDigest) {
       // Do nothing.
     }
   };
@@ -79,13 +83,25 @@ public final class Option<T> implements Comparable<Option<?>> {
   }
 
   Option(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
-    this.key = Preconditions.checkNotNull(key);
+    this.key = Preconditions.checkNotEmpty(key);
     this.defaultValue = defaultValue;
     this.cacheKeyUpdater = Preconditions.checkNotNull(cacheKeyUpdater);
   }
 
+  /**
+   * Returns a reasonable default to use if no other value is set, or {@code null}.
+   */
   public T getDefaultValue() {
     return defaultValue;
+  }
+
+  /**
+   * Updates the given {@link MessageDigest} used to construct a cache key with the given
+   * value using the {@link com.bumptech.glide.load.Option.CacheKeyUpdater} optionally provided in
+   * the constructor.
+   */
+  public void update(T value, MessageDigest messageDigest) {
+    cacheKeyUpdater.update(key, value, messageDigest);
   }
 
   @Override
@@ -107,13 +123,16 @@ public final class Option<T> implements Comparable<Option<?>> {
     return key.compareTo(another.key);
   }
 
-  public void update(T value, MessageDigest messageDigest) {
-    cacheKeyUpdater.update(value, messageDigest);
-  }
-
   @SuppressWarnings("unchecked")
   private static <T> CacheKeyUpdater<T> emptyUpdater() {
     return (CacheKeyUpdater<T>) EMPTY_UPDATER;
+  }
+
+  @Override
+  public String toString() {
+    return "Option{"
+        + "key='" + key + '\''
+        + '}';
   }
 
   /**
@@ -121,6 +140,11 @@ public final class Option<T> implements Comparable<Option<?>> {
    * generate a disk cache key.
    */
   public interface CacheKeyUpdater<T> {
-    void update(T value, MessageDigest messageDigest);
+    Charset CHARSET = Key.CHARSET;
+    /**
+     * Updates the given {@link MessageDigest} with the bytes of the given key (to avoid incidental
+     * value collisions when values are not particularly unique) and value.
+     */
+    void update(String key, T value, MessageDigest messageDigest);
   }
 }

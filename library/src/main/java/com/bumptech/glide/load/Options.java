@@ -15,8 +15,9 @@ public final class Options implements Key {
     values.putAll(other.values);
   }
 
-  public <T> void set(Option<T> option, T value) {
+  public <T> Options set(Option<T> option, T value) {
     values.put(option, value);
+    return this;
   }
 
   @SuppressWarnings("unchecked")
@@ -45,8 +46,15 @@ public final class Options implements Key {
     }
   }
 
+  @Override
+  public String toString() {
+    return "Options{"
+        + "values=" + values
+        + '}';
+  }
+
   @SuppressWarnings("unchecked")
-  private <T> void updateDiskCacheKey(Option<T> option, Object value, MessageDigest md) {
+  private static <T> void updateDiskCacheKey(Option<T> option, Object value, MessageDigest md) {
     option.update((T) value, md);
   }
 }

@@ -294,7 +294,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
           key = new DataCacheKey(currentSourceKey, requestContext.getSignature());
         } else if (encodeStrategy == EncodeStrategy.TRANSFORMED) {
           key = new ResourceCacheKey(currentSourceKey, requestContext.getSignature(), width, height,
-              appliedTransformation, resourceSubClass);
+              appliedTransformation, resourceSubClass, requestContext.getOptions());
         } else {
           throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
         }

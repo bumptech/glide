@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
@@ -13,9 +15,10 @@ import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -27,7 +30,8 @@ import java.util.Collections;
  * equals} and SHA-1 disk cache key are different on any difference in ID or existence of a certain
  * workflow part. Also checking whether the equals method is symmetric.
  */
-@RunWith(JUnit4.class)
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class EngineKeyTest {
   private Harness harness;
 
@@ -44,6 +48,7 @@ public class EngineKeyTest {
     Class transcodeClass = Integer.class;
     Key signature = mock(Key.class);
     Transformation<Object> transformation = mock(Transformation.class);
+    Options options = new Options();
 
     public Harness() {
       doAnswer(new Util.WriteDigest("transformation")).when(transformation)
@@ -53,7 +58,7 @@ public class EngineKeyTest {
     public EngineKey build() {
       return new EngineKey(id, signature, width, height,
           Collections.<Class<?>, Transformation<?>>singletonMap(Object.class, transformation),
-          resourceClass, transcodeClass);
+          resourceClass, transcodeClass, options);
     }
   }
 
@@ -134,6 +139,15 @@ public class EngineKeyTest {
     doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(any(MessageDigest.class));
     harness.transformation = other;
+    EngineKey second = harness.build();
+    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+  }
+
+  @Test
+  public void testDiffersIfOptionsDiffer() throws NoSuchAlgorithmException {
+    EngineKey first = harness.build();
+    harness.options = new Options();
+    harness.options.set(Option.memory("fakeKey"), "someValue");
     EngineKey second = harness.build();
     KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
   }

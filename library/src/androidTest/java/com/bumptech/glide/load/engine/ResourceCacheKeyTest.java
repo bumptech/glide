@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.signature.StringSignature;
 import com.bumptech.glide.tests.KeyAssertions;
@@ -121,6 +122,7 @@ public class ResourceCacheKeyTest {
     int height = 100;
     Transformation<?> transformation = mock(Transformation.class);
     Class<?> resourceClass = Object.class;
+    Options options = new Options();
 
     Factory() {
       doAnswer(new Util.WriteDigest("transformation")).when(transformation)
@@ -129,7 +131,7 @@ public class ResourceCacheKeyTest {
 
     ResourceCacheKey build() {
       return new ResourceCacheKey(sourceKey, signature, width, height, transformation,
-          resourceClass);
+          resourceClass, options);
     }
   }
 }

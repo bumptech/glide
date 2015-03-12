@@ -38,10 +38,12 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   public static final Option<Long> TARGET_FRAME = Option.disk(
       "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame", DEFAULT_FRAME,
       new Option.CacheKeyUpdater<Long>() {
-        private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
+        private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
         @Override
-        public void update(Long value, MessageDigest messageDigest) {
+        public void update(String key, Long value, MessageDigest messageDigest) {
+          messageDigest.update(key.getBytes(CHARSET));
           synchronized (buffer) {
+            buffer.rewind();
             messageDigest.update(buffer.putLong(value).array());
           }
         }

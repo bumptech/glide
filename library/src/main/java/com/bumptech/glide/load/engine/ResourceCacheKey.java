@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 
 import java.nio.ByteBuffer;
@@ -15,16 +16,18 @@ final class ResourceCacheKey implements Key {
   private final int width;
   private final int height;
   private final Class<?> decodedResourceClass;
+  private final Options options;
   private final Transformation<?> transformation;
 
   public ResourceCacheKey(Key sourceKey, Key signature, int width, int height,
-      Transformation<?> appliedTransformation, Class<?> decodedResourceClass) {
+      Transformation<?> appliedTransformation, Class<?> decodedResourceClass, Options options) {
     this.sourceKey = sourceKey;
     this.signature = signature;
     this.width = width;
     this.height = height;
     this.transformation = appliedTransformation;
     this.decodedResourceClass = decodedResourceClass;
+    this.options = options;
   }
 
   @Override
@@ -35,7 +38,8 @@ final class ResourceCacheKey implements Key {
           && (transformation == null
               ? other.transformation == null : transformation.equals(other.transformation))
           && decodedResourceClass.equals(other.decodedResourceClass)
-          && sourceKey.equals(other.sourceKey) && signature.equals(other.signature);
+          && sourceKey.equals(other.sourceKey) && signature.equals(other.signature)
+          && options.equals(other.options);
     }
     return false;
   }
@@ -50,6 +54,7 @@ final class ResourceCacheKey implements Key {
       result = 31 * result + transformation.hashCode();
     }
     result = 31 * result + decodedResourceClass.hashCode();
+    result = 31 * result + options.hashCode();
     return result;
   }
 
@@ -63,6 +68,7 @@ final class ResourceCacheKey implements Key {
     if (transformation != null) {
       transformation.updateDiskCacheKey(messageDigest);
     }
+    options.updateDiskCacheKey(messageDigest);
     messageDigest.update(decodedResourceClass.getName().getBytes(CHARSET));
   }
 
@@ -75,6 +81,7 @@ final class ResourceCacheKey implements Key {
         + ", height=" + height
         + ", decodedResourceClass=" + decodedResourceClass
         + ", transformation='" + transformation + '\''
+        + ", options=" + options
         + '}';
   }
 }

@@ -6,7 +6,6 @@ package com.bumptech.glide.load.engine.cache;
 
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.disklrucache.DiskLruCache;
 import com.bumptech.glide.load.Key;
 
@@ -65,8 +64,8 @@ public class DiskLruCacheWrapper implements DiskCache {
   @Override
   public File get(Key key) {
     String safeKey = safeKeyGenerator.getSafeKey(key);
-    if (Logs.isEnabled(Log.VERBOSE)) {
-      Logs.log(Log.VERBOSE, "Get: Obtained: " + safeKey + " for for Key: " + key);
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Get: Obtained: " + safeKey + " for for Key: " + key);
     }
     File result = null;
     try {
@@ -88,8 +87,8 @@ public class DiskLruCacheWrapper implements DiskCache {
   @Override
   public void put(Key key, Writer writer) {
     String safeKey = safeKeyGenerator.getSafeKey(key);
-    if (Logs.isEnabled(Log.VERBOSE)) {
-      Logs.log(Log.VERBOSE, "Put: Obtained: " + safeKey + " for for Key: " + key);
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Put: Obtained: " + safeKey + " for for Key: " + key);
     }
     try {
       DiskLruCache.Editor editor = getDiskCache().edit(safeKey);

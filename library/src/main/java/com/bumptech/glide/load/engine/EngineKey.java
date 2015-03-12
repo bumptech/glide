@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.util.Preconditions;
 
@@ -18,11 +19,12 @@ class EngineKey implements Key {
   private final Class<?> transcodeClass;
   private final Key signature;
   private final Map<Class<?>, Transformation<?>> transformations;
+  private final Options options;
   private int hashCode;
 
   public EngineKey(Object model, Key signature, int width, int height,
       Map<Class<?>, Transformation<?>> transformations, Class<?> resourceClass,
-      Class<?> transcodeClass) {
+      Class<?> transcodeClass, Options options) {
     this.model = Preconditions.checkNotNull(model);
     this.signature = Preconditions.checkNotNull(signature, "Signature must not be null");
     this.width = width;
@@ -32,6 +34,7 @@ class EngineKey implements Key {
         Preconditions.checkNotNull(resourceClass, "Resource class must not be null");
     this.transcodeClass =
         Preconditions.checkNotNull(transcodeClass, "Transcode class must not be null");
+    this.options = Preconditions.checkNotNull(options);
   }
 
   @Override
@@ -44,7 +47,8 @@ class EngineKey implements Key {
           && width == other.width
           && transformations.equals(other.transformations)
           && resourceClass.equals(other.resourceClass)
-          && transcodeClass.equals(other.transcodeClass);
+          && transcodeClass.equals(other.transcodeClass)
+          && options.equals(other.options);
     }
     return false;
   }
@@ -59,6 +63,7 @@ class EngineKey implements Key {
       hashCode = 31 * hashCode + transformations.hashCode();
       hashCode = 31 * hashCode + resourceClass.hashCode();
       hashCode = 31 * hashCode + transcodeClass.hashCode();
+      hashCode = 31 * hashCode + options.hashCode();
     }
     return hashCode;
   }
@@ -74,6 +79,7 @@ class EngineKey implements Key {
         + ", signature=" + signature
         + ", hashCode=" + hashCode
         + ", transformations=" + transformations
+        + ", options=" + options
         + '}';
   }
 
