@@ -327,6 +327,13 @@ public final class Downsampler {
       DecodeCallbacks callbacks) throws IOException {
     if (options.inJustDecodeBounds) {
       is.mark(MARK_POSITION);
+    } else {
+      // Once we've read the image header, we no longer need to allow the buffer to expand in
+      // size. To avoid unnecessary allocations reading image data, we fix the mark limit so that it
+      // is no larger than our current buffer size here. We need to do so immediately before
+      // decoding the full image to avoid having our mark limit overridden by other calls to
+      // markand reset. See issue #225.
+      callbacks.onObtainBounds();
     }
     // BitmapFactory.Options out* variables are reset by most calls to decodeStream, successful or
     // otherwise, so capture here in case we log below.
@@ -342,10 +349,7 @@ public final class Downsampler {
 
     if (options.inJustDecodeBounds) {
       is.reset();
-      // Once we've read the image header, we no longer need to allow the buffer to expand in
-      // size. To avoid unnecessary allocations reading image data, we fix the mark limit so that it
-      // is no larger than our current buffer size here. See issue #225.
-      callbacks.onObtainBounds();
+
     }
 
     return result;
