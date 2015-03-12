@@ -9,12 +9,13 @@ import com.bumptech.glide.load.EncodeStrategy;
 public enum DiskCacheStrategy {
 
   /**
-   * Caches with both {@link #DATA} and {@link #RESOURCE}.
+   * Caches remote data with both {@link #DATA} and {@link #RESOURCE}, and local data with
+   * {@link #RESOURCE} only.
    */
   ALL(true /*decodeCachedData*/, true /*decodeCachedResource*/) {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
-      return dataSource != DataSource.DATA_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
+      return dataSource == DataSource.REMOTE;
     }
 
     @Override
