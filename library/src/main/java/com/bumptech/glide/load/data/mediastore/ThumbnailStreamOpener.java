@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 
 import java.io.File;
@@ -17,15 +18,18 @@ class ThumbnailStreamOpener {
   private static final String TAG = "ThumbStreamOpener";
   private static final FileService DEFAULT_SERVICE = new FileService();
   private final FileService service;
-  private ThumbnailQuery query;
+  private final ThumbnailQuery query;
+  private final ByteArrayPool byteArrayPool;
 
-  public ThumbnailStreamOpener(ThumbnailQuery query) {
-    this(DEFAULT_SERVICE, query);
+  public ThumbnailStreamOpener(ThumbnailQuery query, ByteArrayPool byteArrayPool) {
+    this(DEFAULT_SERVICE, query, byteArrayPool);
   }
 
-  public ThumbnailStreamOpener(FileService service, ThumbnailQuery query) {
+  public ThumbnailStreamOpener(FileService service, ThumbnailQuery query,
+      ByteArrayPool byteArrayPool) {
     this.service = service;
     this.query = query;
+    this.byteArrayPool = byteArrayPool;
   }
 
   public int getOrientation(Context context, Uri uri) {
@@ -33,7 +37,7 @@ class ThumbnailStreamOpener {
     InputStream is = null;
     try {
       is = context.getContentResolver().openInputStream(uri);
-      orientation = new ImageHeaderParser(is).getOrientation();
+      orientation = new ImageHeaderParser(is, byteArrayPool).getOrientation();
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Failed to open uri: " + uri, e);

@@ -8,13 +8,14 @@ import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageTyp
 
 import android.util.Log;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.util.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 
 /**
  * A class for parsing the exif orientation and other data from an image header.
@@ -56,7 +57,8 @@ public class ImageHeaderParser {
   // "II".
   private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;
   private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
-  private static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES;
+  private static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
+      JPEG_EXIF_SEGMENT_PREAMBLE.getBytes(Charset.forName("UTF-8"));
   private static final int SEGMENT_SOS = 0xDA;
   private static final int MARKER_EOI = 0xD9;
   private static final int SEGMENT_START_ID = 0xFF;
@@ -64,25 +66,18 @@ public class ImageHeaderParser {
   private static final int ORIENTATION_TAG_TYPE = 0x0112;
   private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
 
+  private final ByteArrayPool byteArrayPool;
   private final Reader reader;
 
-  static {
-    byte[] bytes = new byte[0];
-    try {
-      bytes = JPEG_EXIF_SEGMENT_PREAMBLE.getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      // Ignore.
-    }
-    JPEG_EXIF_SEGMENT_PREAMBLE_BYTES = bytes;
-  }
-
-  public ImageHeaderParser(InputStream is) {
+  public ImageHeaderParser(InputStream is, ByteArrayPool byteArrayPool) {
     Preconditions.checkNotNull(is);
+    this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
     reader = new StreamReader(is);
   }
 
-  public ImageHeaderParser(ByteBuffer byteBuffer) {
+  public ImageHeaderParser(ByteBuffer byteBuffer, ByteArrayPool byteArrayPool) {
     Preconditions.checkNotNull(byteBuffer);
+    this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
     reader = new ByteBufferReader(byteBuffer);
   }
 
@@ -193,18 +188,22 @@ public class ImageHeaderParser {
             return null;
         }
       } else {
-        byte[] segmentData = new byte[segmentLength];
-        int read = reader.read(segmentData);
-        if (read != segmentLength) {
+        byte[] segmentData = byteArrayPool.get(segmentLength);
+        try {
+          int read = reader.read(segmentData);
+          if (read != segmentLength) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unable to read segment data"
-                    + ", type: " + segmentType
-                    + ", length: " + segmentLength
-                    + ", actually read: " + read);
+              Log.d(TAG, "Unable to read segment data"
+                  + ", type: " + segmentType
+                  + ", length: " + segmentLength
+                  + ", actually read: " + read);
             }
             return null;
-        } else {
+          } else {
             return segmentData;
+          }
+        } finally {
+          byteArrayPool.put(segmentData);
         }
       }
     }

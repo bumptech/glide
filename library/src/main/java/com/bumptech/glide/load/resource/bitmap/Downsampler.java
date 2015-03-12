@@ -13,9 +13,9 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.SampleSizeRounding;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.util.ByteArrayPool;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 
@@ -74,10 +74,13 @@ public final class Downsampler {
 
   private final BitmapPool bitmapPool;
   private final DisplayMetrics displayMetrics;
+  private final ByteArrayPool byteArrayPool;
 
-  public Downsampler(DisplayMetrics displayMetrics, BitmapPool bitmapPool) {
-    this.displayMetrics = displayMetrics;
+  public Downsampler(DisplayMetrics displayMetrics, BitmapPool bitmapPool,
+      ByteArrayPool byteArrayPool) {
+    this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
+    this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
   }
 
   public boolean handles(InputStream is) {
@@ -132,8 +135,7 @@ public final class Downsampler {
     Preconditions.checkArgument(is.markSupported(), "You must provide an InputStream that supports"
         + " mark()");
 
-    ByteArrayPool byteArrayPool = ByteArrayPool.get();
-    byte[] bytesForOptions = byteArrayPool.getBytes();
+    byte[] bytesForOptions = byteArrayPool.get(ByteArrayPool.DEFAULT_BUFFER);
     BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
     bitmapFactoryOptions.inTempStorage = bytesForOptions;
 
@@ -146,7 +148,7 @@ public final class Downsampler {
       return BitmapResource.obtain(result, bitmapPool);
     } finally {
       releaseOptions(bitmapFactoryOptions);
-      byteArrayPool.releaseBytes(bytesForOptions);
+      byteArrayPool.put(bytesForOptions);
     }
   }
 
@@ -266,11 +268,11 @@ public final class Downsampler {
     }
   }
 
-  private static int getOrientation(InputStream is) throws IOException {
+  private int getOrientation(InputStream is) throws IOException {
     is.mark(MARK_POSITION);
     int orientation = 0;
     try {
-      orientation = new ImageHeaderParser(is).getOrientation();
+      orientation = new ImageHeaderParser(is, byteArrayPool).getOrientation();
     } catch (IOException e) {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Cannot determine the image orientation from header", e);
@@ -281,7 +283,7 @@ public final class Downsampler {
     return orientation;
   }
 
-  private static Bitmap downsampleWithSize(InputStream is, BitmapFactory.Options options,
+  private Bitmap downsampleWithSize(InputStream is, BitmapFactory.Options options,
       BitmapPool pool, int sourceWidth, int sourceHeight, DecodeCallbacks callbacks)
       throws IOException {
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
@@ -311,7 +313,7 @@ public final class Downsampler {
     return decodeStream(is, options, callbacks);
   }
 
-  private static boolean shouldUsePool(InputStream is) throws IOException {
+  private boolean shouldUsePool(InputStream is) throws IOException {
     // On KitKat+, any bitmap (of a given config) can be used to decode any other bitmap
     // (with the same config).
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -320,7 +322,7 @@ public final class Downsampler {
 
     is.mark(MARK_POSITION);
     try {
-      final ImageHeaderParser.ImageType type = new ImageHeaderParser(is).getType();
+      final ImageHeaderParser.ImageType type = new ImageHeaderParser(is, byteArrayPool).getType();
       // We cannot reuse bitmaps when decoding images that are not PNG or JPG prior to KitKat.
       // See: https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
       return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(type);
@@ -334,7 +336,7 @@ public final class Downsampler {
     return false;
   }
 
-  private static Bitmap.Config getConfig(InputStream is, DecodeFormat format) throws IOException {
+  private Bitmap.Config getConfig(InputStream is, DecodeFormat format) throws IOException {
     // Changing configs can cause skewing on 4.1, see issue #128.
     if (format == DecodeFormat.PREFER_ARGB_8888
         || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
@@ -344,7 +346,7 @@ public final class Downsampler {
     boolean hasAlpha = false;
     is.mark(MARK_POSITION);
     try {
-      hasAlpha = new ImageHeaderParser(is).hasAlpha();
+      hasAlpha = new ImageHeaderParser(is, byteArrayPool).hasAlpha();
     } catch (IOException e) {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Cannot determine whether the image has alpha or not from header for"

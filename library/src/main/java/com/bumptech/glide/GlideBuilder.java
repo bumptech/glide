@@ -9,7 +9,9 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
@@ -29,6 +31,7 @@ public class GlideBuilder {
 
   private Engine engine;
   private BitmapPool bitmapPool;
+  private ByteArrayPool byteArrayPool;
   private MemoryCache memoryCache;
   private ExecutorService sourceService;
   private ExecutorService diskCacheService;
@@ -48,6 +51,11 @@ public class GlideBuilder {
    */
   public GlideBuilder setBitmapPool(BitmapPool bitmapPool) {
     this.bitmapPool = bitmapPool;
+    return this;
+  }
+
+  public GlideBuilder setByteArrayPool(ByteArrayPool byteArrayPool) {
+    this.byteArrayPool = byteArrayPool;
     return this;
   }
 
@@ -187,6 +195,10 @@ public class GlideBuilder {
       }
     }
 
+    if (byteArrayPool == null) {
+      byteArrayPool = new LruByteArrayPool();
+    }
+
     if (memoryCache == null) {
       memoryCache = new LruResourceCache(calculator.getMemoryCacheSize());
     }
@@ -203,6 +215,6 @@ public class GlideBuilder {
       decodeFormat = DecodeFormat.DEFAULT;
     }
 
-    return new Glide(engine, memoryCache, bitmapPool, context, decodeFormat);
+    return new Glide(engine, memoryCache, bitmapPool, byteArrayPool, context, decodeFormat);
   }
 }

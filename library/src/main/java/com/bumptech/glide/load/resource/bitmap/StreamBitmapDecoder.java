@@ -6,7 +6,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.util.ByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.util.ExceptionCatchingInputStream;
 import com.bumptech.glide.util.MarkEnforcingInputStream;
 
@@ -19,9 +19,11 @@ import java.io.InputStream;
 public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap> {
 
   private final Downsampler downsampler;
+  private final ByteArrayPool byteArrayPool;
 
-  public StreamBitmapDecoder(Downsampler downsampler) {
+  public StreamBitmapDecoder(Downsampler downsampler, ByteArrayPool byteArrayPool) {
     this.downsampler = downsampler;
+    this.byteArrayPool = byteArrayPool;
   }
 
   @Override
@@ -32,15 +34,13 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
   @Override
   public Resource<Bitmap> decode(InputStream source, int width, int height, Options options)
       throws IOException {
-    byte[] bytesForStream = null;
 
     // Use to fix the mark limit to avoid allocating buffers that fit entire images.
     final RecyclableBufferedInputStream bufferedStream;
     if (source instanceof RecyclableBufferedInputStream) {
       bufferedStream = (RecyclableBufferedInputStream) source;
     } else {
-      bytesForStream = ByteArrayPool.get().getBytes();
-      bufferedStream = new RecyclableBufferedInputStream(source, bytesForStream);
+      bufferedStream = new RecyclableBufferedInputStream(source, byteArrayPool);
     }
 
     // Use to retrieve exceptions thrown while reading.
@@ -59,9 +59,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
       return downsampler.decode(invalidatingStream, width, height, options, callbacks);
     } finally {
       exceptionStream.release();
-      if (bytesForStream != null) {
-        ByteArrayPool.get().releaseBytes(bytesForStream);
-      }
+      bufferedStream.release();
     }
   }
 

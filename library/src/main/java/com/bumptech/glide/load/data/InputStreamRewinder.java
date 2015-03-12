@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.data;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
-import com.bumptech.glide.util.ByteArrayPool;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,12 +15,9 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
   private static final int MARK_LIMIT = 5 * 1024 * 1024;
 
   private final RecyclableBufferedInputStream bufferedStream;
-  private final byte[] buffer;
 
-  InputStreamRewinder(InputStream is) {
-    ByteArrayPool byteArrayPool = ByteArrayPool.get();
-    buffer = byteArrayPool.getBytes();
-    bufferedStream = new RecyclableBufferedInputStream(is, buffer);
+  InputStreamRewinder(InputStream is, ByteArrayPool byteArrayPool) {
+    bufferedStream = new RecyclableBufferedInputStream(is, byteArrayPool);
     bufferedStream.mark(MARK_LIMIT);
   }
 
@@ -32,18 +29,23 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
 
   @Override
   public void cleanup() {
-    ByteArrayPool.get().releaseBytes(buffer);
+    bufferedStream.release();
   }
 
   /**
    * Factory for producing {@link com.bumptech.glide.load.data.InputStreamRewinder}s from {@link
    * java.io.InputStream}s.
    */
-  public static class Factory implements DataRewinder.Factory<InputStream> {
+  public static final class Factory implements DataRewinder.Factory<InputStream> {
+    private final ByteArrayPool byteArrayPool;
+
+    public Factory(ByteArrayPool byteArrayPool) {
+      this.byteArrayPool = byteArrayPool;
+    }
 
     @Override
     public DataRewinder<InputStream> build(InputStream data) {
-      return new InputStreamRewinder(data);
+      return new InputStreamRewinder(data, byteArrayPool);
     }
 
     @Override

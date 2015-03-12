@@ -17,7 +17,7 @@ package com.bumptech.glide.load.resource.bitmap;
  *  limitations under the License.
  */
 
-import android.util.Log;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -37,8 +37,6 @@ import java.io.InputStream;
  * </pre>
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
-  private static final String TAG = "BufferedIs";
-
   /**
    * The buffer containing the current bytes read from the target InputStream.
    */
@@ -64,13 +62,12 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * The current position within the byte array {@code buf}.
    */
   private int pos;
+  private final ByteArrayPool byteArrayPool;
 
-  public RecyclableBufferedInputStream(InputStream in, byte[] buffer) {
+  public RecyclableBufferedInputStream(InputStream in, ByteArrayPool byteArrayPool) {
     super(in);
-    if (buffer == null || buffer.length == 0) {
-      throw new IllegalArgumentException("buffer is null or empty");
-    }
-    buf = buffer;
+    this.byteArrayPool = byteArrayPool;
+    buf = byteArrayPool.get(ByteArrayPool.DEFAULT_BUFFER);
   }
 
   /**
@@ -106,6 +103,13 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     marklimit = buf.length;
   }
 
+  public synchronized void release() {
+    if (buf != null) {
+      byteArrayPool.put(buf);
+      buf = null;
+    }
+  }
+
   /**
    * Closes this stream. The source stream is closed and any resources associated with it are
    * released.
@@ -114,7 +118,10 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    */
   @Override
   public void close() throws IOException {
-    buf = null;
+    if (buf != null) {
+      byteArrayPool.put(buf);
+      buf = null;
+    }
     InputStream localIn = in;
     in = null;
     if (localIn != null) {
@@ -148,14 +155,13 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
       if (newLength > marklimit) {
         newLength = marklimit;
       }
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "allocate buffer of length: " + newLength);
-      }
-      byte[] newbuf = new byte[newLength];
+      byte[] newbuf = byteArrayPool.get(newLength);
       System.arraycopy(localBuf, 0, newbuf, 0, localBuf.length);
+      byte[] oldbuf = localBuf;
       // Reassign buf, which will invalidate any local references
       // FIXME: what if buf was null?
       localBuf = buf = newbuf;
+      byteArrayPool.put(oldbuf);
     } else if (markpos > 0) {
       System.arraycopy(localBuf, markpos, localBuf, 0, localBuf.length - markpos);
     }

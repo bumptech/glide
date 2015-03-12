@@ -6,11 +6,13 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.ExifOrientationStream;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,7 +37,8 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   }
 
   private static ThumbFetcher build(Context context, Uri uri, ThumbnailQuery query) {
-    return new ThumbFetcher(context, uri, new ThumbnailStreamOpener(query));
+    ByteArrayPool byteArrayPool = Glide.get(context).getByteArrayPool();
+    return new ThumbFetcher(context, uri, new ThumbnailStreamOpener(query, byteArrayPool));
   }
 
   // Visible for testing.

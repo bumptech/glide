@@ -19,6 +19,7 @@ import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.tests.GlideShadowLooper;
 
 import org.junit.Before;
@@ -61,8 +62,8 @@ public class ByteBufferGifDecoderTest {
     when(decoderPool.obtain(any(GifDecoder.BitmapProvider.class))).thenReturn(gifDecoder);
 
     options = new Options();
-    decoder = new ByteBufferGifDecoder(RuntimeEnvironment.application, bitmapPool, parserPool,
-        decoderPool);
+    decoder = new ByteBufferGifDecoder(RuntimeEnvironment.application, bitmapPool,
+        new LruByteArrayPool(), parserPool, decoderPool);
   }
 
   @Test

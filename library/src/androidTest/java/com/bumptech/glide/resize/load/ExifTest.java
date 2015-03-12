@@ -2,11 +2,12 @@ package com.bumptech.glide.resize.load;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.testutil.TestResourceUtil;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -19,6 +20,8 @@ import java.io.InputStream;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ExifTest {
 
+  private LruByteArrayPool byteArrayPool;
+
   private InputStream open(String imageName) throws IOException {
     return TestResourceUtil.openResource(getClass(), "exif-orientation-examples/" + imageName);
   }
@@ -27,10 +30,10 @@ public class ExifTest {
     InputStream is = null;
     try {
       is = open(filePrefix + "_" + expectedOrientation + ".jpg");
-      assertEquals(new ImageHeaderParser(is).getOrientation(), expectedOrientation);
+      assertEquals(new ImageHeaderParser(is, new LruByteArrayPool()).getOrientation(),
+          expectedOrientation);
     } catch (IOException e) {
-      e.printStackTrace();
-      assertNull(e);
+      throw new RuntimeException(e);
     } finally {
       if (is != null) {
         try {
@@ -42,10 +45,15 @@ public class ExifTest {
     }
   }
 
+  @Before
+  public void setUp() {
+    byteArrayPool = new LruByteArrayPool();
+  }
+
   @Test
   public void testIssue387() throws IOException {
       InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
-      assertThat(new ImageHeaderParser(is).getOrientation()).isEqualTo(6);
+      assertThat(new ImageHeaderParser(is, byteArrayPool).getOrientation()).isEqualTo(6);
   }
 
   @Test

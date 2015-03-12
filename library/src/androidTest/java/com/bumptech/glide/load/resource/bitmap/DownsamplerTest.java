@@ -3,14 +3,18 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.collect.Range.closed;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.DisplayMetrics;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +35,7 @@ import java.io.InputStream;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class DownsamplerTest {
   @Mock private BitmapPool bitmapPool;
+  @Mock private ByteArrayPool byteArrayPool;
   private Downsampler downsampler;
   private Options options;
 
@@ -38,8 +43,10 @@ public class DownsamplerTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
     options = new Options();
-    downsampler = new Downsampler(RuntimeEnvironment.application.getResources().getDisplayMetrics(),
-        bitmapPool);
+    DisplayMetrics displayMetrics =
+        RuntimeEnvironment.application.getResources().getDisplayMetrics();
+    when(byteArrayPool.get(anyInt())).thenReturn(new byte[ByteArrayPool.DEFAULT_BUFFER]);
+    downsampler = new Downsampler(displayMetrics, bitmapPool, byteArrayPool);
   }
 
   @Test

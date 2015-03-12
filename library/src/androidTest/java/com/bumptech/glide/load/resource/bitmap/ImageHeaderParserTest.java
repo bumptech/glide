@@ -3,9 +3,11 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 import com.bumptech.glide.testutil.TestResourceUtil;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -25,6 +27,13 @@ public class ImageHeaderParserTest {
   private static final byte[] PNG_HEADER_WITH_IHDR_CHUNK =
       new byte[] { (byte) 0x89, 0x50, 0x4e, 0x47, 0xd, 0xa, 0x1a, 0xa, 0x0, 0x0, 0x0, 0xd, 0x49,
           0x48, 0x44, 0x52, 0x0, 0x0, 0x1, (byte) 0x90, 0x0, 0x0, 0x1, 0x2c, 0x8, 0x6 };
+
+  private LruByteArrayPool byteArrayPool;
+
+  @Before
+  public void setUp() {
+    byteArrayPool = new LruByteArrayPool();
+  }
 
   @Test
   public void testCanParsePngType() throws IOException {
@@ -124,7 +133,7 @@ public class ImageHeaderParserTest {
   @Test
   public void testHandlesPartialReads() throws IOException {
     InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
-    ImageHeaderParser parser = new ImageHeaderParser(new PartialReadInputStream(is));
+    ImageHeaderParser parser = new ImageHeaderParser(new PartialReadInputStream(is), byteArrayPool);
     assertThat(parser.getOrientation()).isEqualTo(6);
   }
 
@@ -132,7 +141,7 @@ public class ImageHeaderParserTest {
   @Test
   public void testHandlesPartialSkips() throws IOException {
     InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
-    ImageHeaderParser parser = new ImageHeaderParser(new PartialSkipInputStream(is));
+    ImageHeaderParser parser = new ImageHeaderParser(new PartialSkipInputStream(is), byteArrayPool);
     assertThat(parser.getOrientation()).isEqualTo(6);
   }
 
@@ -140,7 +149,8 @@ public class ImageHeaderParserTest {
   public void testHandlesSometimesZeroSkips() throws IOException {
     InputStream is = new ByteArrayInputStream(
         new byte[] { (byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a });
-    ImageHeaderParser parser = new ImageHeaderParser(new SometimesZeroSkipInputStream(is));
+    ImageHeaderParser parser =
+        new ImageHeaderParser(new SometimesZeroSkipInputStream(is), byteArrayPool);
     assertEquals(ImageType.PNG, parser.getType());
   }
 
@@ -150,11 +160,11 @@ public class ImageHeaderParserTest {
 
   private static void runTest(byte[] data, ParserTestCase test) throws IOException {
     InputStream is = new ByteArrayInputStream(data);
-    ImageHeaderParser parser = new ImageHeaderParser(is);
+    ImageHeaderParser parser = new ImageHeaderParser(is, new LruByteArrayPool());
     test.run(parser);
 
     ByteBuffer buffer = ByteBuffer.wrap(data);
-    parser = new ImageHeaderParser(buffer);
+    parser = new ImageHeaderParser(buffer, new LruByteArrayPool());
     test.run(parser);
   }
 

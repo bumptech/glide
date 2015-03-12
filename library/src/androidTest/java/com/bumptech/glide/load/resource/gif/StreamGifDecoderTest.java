@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,7 @@ public class StreamGifDecoderTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    decoder = new StreamGifDecoder(byteBufferDecoder);
+    decoder = new StreamGifDecoder(byteBufferDecoder, new LruByteArrayPool());
     options = new Options();
   }
 

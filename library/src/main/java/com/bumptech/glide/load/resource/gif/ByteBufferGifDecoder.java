@@ -14,8 +14,10 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
+import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
@@ -43,22 +45,24 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   private final Context context;
   private final GifHeaderParserPool parserPool;
   private final BitmapPool bitmapPool;
+  private final ByteArrayPool byteArrayPool;
   private final GifDecoderPool decoderPool;
   private final GifBitmapProvider provider;
 
   public ByteBufferGifDecoder(Context context) {
-    this(context, Glide.get(context).getBitmapPool());
+    this(context, Glide.get(context).getBitmapPool(), Glide.get(context).getByteArrayPool());
   }
 
-  public ByteBufferGifDecoder(Context context, BitmapPool bitmapPool) {
-    this(context, bitmapPool, PARSER_POOL, DECODER_POOL);
+  public ByteBufferGifDecoder(Context context, BitmapPool bitmapPool, ByteArrayPool byteArrayPool) {
+    this(context, bitmapPool, byteArrayPool, PARSER_POOL, DECODER_POOL);
   }
 
   // Visible for testing.
-  ByteBufferGifDecoder(Context context, BitmapPool bitmapPool, GifHeaderParserPool parserPool,
-      GifDecoderPool decoderPool) {
+  ByteBufferGifDecoder(Context context, BitmapPool bitmapPool, ByteArrayPool byteArrayPool,
+      GifHeaderParserPool parserPool, GifDecoderPool decoderPool) {
     this.context = context;
     this.bitmapPool = bitmapPool;
+    this.byteArrayPool = byteArrayPool;
     this.decoderPool = decoderPool;
     this.provider = new GifBitmapProvider(bitmapPool);
     this.parserPool = parserPool;
@@ -67,7 +71,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   @Override
   public boolean handles(ByteBuffer source, Options options) throws IOException {
     return !options.get(DISABLE_ANIMATION)
-        && new ImageHeaderParser(source).getType() == ImageHeaderParser.ImageType.GIF;
+        && new ImageHeaderParser(source, byteArrayPool).getType() == ImageType.GIF;
   }
 
   @Override

@@ -12,6 +12,9 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,6 +115,7 @@ public class ThumbnailStreamOpenerTest {
     Uri uri = Uri.fromFile(file);
     ThumbnailQuery query = mock(ThumbnailQuery.class);
     FileService service = mock(FileService.class);
+    ByteArrayPool byteArrayPool = new LruByteArrayPool();
 
     public Harness() {
       cursor.addRow(new String[] { file.getAbsolutePath() });
@@ -122,7 +126,7 @@ public class ThumbnailStreamOpenerTest {
     }
 
     public ThumbnailStreamOpener get() {
-      return new ThumbnailStreamOpener(service, query);
+      return new ThumbnailStreamOpener(service, query, byteArrayPool);
     }
   }
 }
