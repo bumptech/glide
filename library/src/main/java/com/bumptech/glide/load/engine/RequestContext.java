@@ -101,7 +101,7 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
     }
     if (loadDataSet == null) {
       loadDataSet = glideContext.getRegistry().getLoadDataSet(model, width, height,
-          glideContext.getOptions().getOptions());
+          requestOptions.getOptions());
     }
     return loadDataSet;
   }
@@ -164,7 +164,7 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
   LoadDataSet<File> getDataFetchers(File file, int width, int height)
       throws Registry.NoModelLoaderAvailableException {
     return glideContext.getRegistry().getLoadDataSet(file, width, height,
-        glideContext.getOptions().getOptions());
+        requestOptions.getOptions());
   }
 
   public int getOverrideWidth() {
