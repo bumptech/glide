@@ -1,8 +1,10 @@
 package com.bumptech.glide.samples.gallery;
 
+import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -28,17 +30,17 @@ class RecyclerAdapter extends RecyclerView.Adapter
     implements ListPreloader.PreloadSizeProvider<MediaStoreData>,
     ListPreloader.PreloadModelProvider<MediaStoreData> {
 
-  private final Context context;
   private final List<MediaStoreData> data;
-  private final RequestManager requestManager;
   private final int screenWidth;
+  private final RequestBuilder<Drawable> requestBuilder;
 
   private int[] actualDimensions;
 
   RecyclerAdapter(Context context, List<MediaStoreData> data, RequestManager requestManager) {
-    this.context = context;
     this.data = data;
-    this.requestManager = requestManager;
+    requestBuilder = requestManager
+        .asDrawable()
+        .apply(fitCenterTransform(context));
 
     setHasStableIds(true);
 
@@ -77,11 +79,11 @@ class RecyclerAdapter extends RecyclerView.Adapter
 
     Key signature =
         new MediaStoreSignature(current.mimeType, current.dateModified, current.orientation);
-    requestManager
-        .asDrawable()
+
+    requestBuilder
+        .clone()
+        .apply(signatureOf(signature))
         .load(current.uri)
-        .apply(signatureOf(signature)
-            .fitCenter(vh.image.getContext()))
         .into(vh.image);
   }
 
@@ -109,10 +111,9 @@ class RecyclerAdapter extends RecyclerView.Adapter
   public RequestBuilder getPreloadRequestBuilder(MediaStoreData item) {
     MediaStoreSignature signature =
         new MediaStoreSignature(item.mimeType, item.dateModified, item.orientation);
-    return requestManager
-        .asDrawable()
-        .apply(signatureOf(signature)
-            .fitCenter(context))
+    return requestBuilder
+        .clone()
+        .apply(signatureOf(signature))
         .load(item.uri);
   }
 

@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.gallery;
 
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -59,13 +58,6 @@ public class RecyclerViewFragment extends Fragment
     RecyclerViewPreloaderListener recyclerViewPreloaderListener =
         new RecyclerViewPreloaderListener(preloader);
     recyclerView.setOnScrollListener(recyclerViewPreloaderListener);
-    recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
-      @Override
-      public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
-          RecyclerView.State state) {
-        outRect.set(10, 0, 10, 0);
-      }
-    });
     recyclerView.setAdapter(adapter);
   }
 
