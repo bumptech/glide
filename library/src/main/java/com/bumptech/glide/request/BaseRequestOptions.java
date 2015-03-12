@@ -543,6 +543,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     }
 
     isTransformationRequired |= other.isTransformationRequired;
+    fields |= other.fields;
     transformations.putAll(other.transformations);
     options.putAll(other.options);
 
