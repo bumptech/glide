@@ -59,28 +59,27 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   @Override
   public Bitmap get(int width, int height, Bitmap.Config config) {
     int size = Util.getBitmapByteSize(width, height, config);
-    Key targetKey = keyPool.get(size, config);
-    Key bestKey = findBestKey(targetKey, size, config);
+    Key bestKey = findBestKey(size, config);
 
     Bitmap result = groupedMap.get(bestKey);
     if (result != null) {
       // Decrement must be called before reconfigure.
-      decrementBitmapOfSize(Util.getBitmapByteSize(result), result.getConfig());
+      decrementBitmapOfSize(bestKey.size, result);
       result.reconfigure(width, height,
           result.getConfig() != null ? result.getConfig() : Bitmap.Config.ARGB_8888);
     }
     return result;
   }
 
-  private Key findBestKey(Key key, int size, Bitmap.Config config) {
-    Key result = key;
+  private Key findBestKey(int size, Bitmap.Config config) {
+    Key result = keyPool.get(size, config);
     for (Bitmap.Config possibleConfig : getInConfigs(config)) {
       NavigableMap<Integer, Integer> sizesForPossibleConfig = getSizesForConfig(possibleConfig);
       Integer possibleSize = sizesForPossibleConfig.ceilingKey(size);
       if (possibleSize != null && possibleSize <= size * MAX_SIZE_MULTIPLE) {
         if (possibleSize != size
             || (possibleConfig == null ? config != null : !possibleConfig.equals(config))) {
-          keyPool.offer(key);
+          keyPool.offer(result);
           result = keyPool.get(possibleSize, possibleConfig);
         }
         break;
@@ -94,14 +93,22 @@ public class SizeConfigStrategy implements LruPoolStrategy {
     Bitmap removed = groupedMap.removeLast();
     if (removed != null) {
       int removedSize = Util.getBitmapByteSize(removed);
-      decrementBitmapOfSize(removedSize, removed.getConfig());
+      decrementBitmapOfSize(removedSize, removed);
     }
     return removed;
   }
 
-  private void decrementBitmapOfSize(Integer size, Bitmap.Config config) {
+  private void decrementBitmapOfSize(Integer size, Bitmap removed) {
+    Bitmap.Config config = removed.getConfig();
     NavigableMap<Integer, Integer> sizes = getSizesForConfig(config);
     Integer current = sizes.get(size);
+    if (current == null) {
+      throw new NullPointerException("Tried to decrement empty size"
+          + ", size: " + size
+          + ", removed: " + logBitmap(removed)
+          + ", this: " + this);
+    }
+
     if (current == 1) {
       sizes.remove(size);
     } else {
