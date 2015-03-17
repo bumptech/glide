@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A base ModelLoader for {@link android.net.Uri}s that handles local {@link android.net.Uri}s
+ * A ModelLoader for {@link android.net.Uri}s that handles local {@link android.net.Uri}s
  * directly and routes remote {@link android.net.Uri}s to a wrapped
  * {@link com.bumptech.glide.load.model.ModelLoader} that handles
  * {@link com.bumptech.glide.load.model.GlideUrl}s.
@@ -26,9 +26,15 @@ import java.util.Set;
  * @param <Data> The type of data that will be retrieved for {@link android.net.Uri}s.
  */
 public class UriLoader<Data> implements ModelLoader<Uri, Data> {
-  private static final Set<String> SCHEMES = Collections.unmodifiableSet(new HashSet<>(Arrays
-      .asList(ContentResolver.SCHEME_FILE, ContentResolver.SCHEME_ANDROID_RESOURCE,
-          ContentResolver.SCHEME_CONTENT)));
+  private static final Set<String> SCHEMES = Collections.unmodifiableSet(
+      new HashSet<>(
+          Arrays.asList(
+              ContentResolver.SCHEME_FILE,
+              ContentResolver.SCHEME_ANDROID_RESOURCE,
+              ContentResolver.SCHEME_CONTENT
+          )
+      )
+  );
 
   private final Context context;
   private final LocalUriFetcherFactory<Data> factory;
@@ -39,7 +45,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public final LoadData<Data> buildLoadData(Uri model, int width, int height,
+  public LoadData<Data> buildLoadData(Uri model, int width, int height,
       Options options) {
     return new LoadData<>(new ObjectKey(model), factory.build(context, model));
   }
