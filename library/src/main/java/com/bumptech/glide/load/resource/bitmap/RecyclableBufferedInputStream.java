@@ -335,7 +335,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
       throw new IOException("Stream is closed");
     }
     if (-1 == markpos) {
-      throw new InvalidMarkException("Mark has been invalidated");
+      throw new InvalidMarkException("Mark has been invalidated, pos: " + pos + " markLimit: " + marklimit);
     }
     pos = markpos;
   }
@@ -391,7 +391,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * An exception thrown when a mark can no longer be obeyed because the underlying buffer size is
    * smaller than the amount of data read after the mark position.
    */
-  public static class InvalidMarkException extends RuntimeException {
+  public static class InvalidMarkException extends IOException {
     private static final long serialVersionUID = -4338378848813561757L;
 
     public InvalidMarkException(String detailMessage) {
