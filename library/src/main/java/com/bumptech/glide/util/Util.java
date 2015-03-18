@@ -72,6 +72,13 @@ public final class Util {
    */
   @TargetApi(Build.VERSION_CODES.KITKAT)
   public static int getBitmapByteSize(Bitmap bitmap) {
+    // The return value of getAllocationByteCount silently changes for recycled bitmaps from the
+    // internal buffer size to row bytes * height. To avoid random inconsistencies in caches, we
+    // instead assert here.
+    if (bitmap.isRecycled()) {
+      throw new IllegalStateException("Cannot obtain size for recycled Bitmap: " + bitmap
+          + "[" + bitmap.getWidth() + "x" + bitmap.getHeight() + "] " + bitmap.getConfig());
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
       try {

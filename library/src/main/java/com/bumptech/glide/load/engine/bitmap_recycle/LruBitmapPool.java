@@ -80,6 +80,9 @@ public class LruBitmapPool implements BitmapPool {
     if (bitmap == null) {
       throw new NullPointerException("Bitmap must not be null");
     }
+    if (bitmap.isRecycled()) {
+      throw new IllegalStateException("Cannot pool recycled bitmap");
+    }
     if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize
         || !allowedConfigs.contains(bitmap.getConfig())) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -183,12 +186,12 @@ public class LruBitmapPool implements BitmapPool {
       }
       tracker.remove(removed);
       currentSize -= strategy.getSize(removed);
-      removed.recycle();
       evictions++;
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Evicting bitmap=" + strategy.logBitmap(removed));
       }
       dump();
+      removed.recycle();
     }
   }
 
