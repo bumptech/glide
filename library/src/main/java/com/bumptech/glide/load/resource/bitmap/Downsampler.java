@@ -239,9 +239,9 @@ public final class Downsampler {
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
     if ((options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT)
         && shouldUsePool(is)) {
-      // If we have valid densities, scale, but make sure we don't upscale.
+
       float densityMultiplier = isScaling(options)
-          ? Math.min((float) options.inTargetDensity / options.inDensity, 1f) : 1f;
+          ? (float) options.inTargetDensity / options.inDensity : 1f;
 
       int sampleSize = options.inSampleSize;
       int downsampledWidth = sourceWidth / sampleSize;
@@ -251,8 +251,10 @@ public final class Downsampler {
 
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Calculated target [" + expectedWidth + "x" + expectedHeight + "] for source"
-            + "[" + sourceWidth + "x" + sourceHeight + "]"
+            + " [" + sourceWidth + "x" + sourceHeight + "]"
             + ", sampleSize: " + sampleSize
+            + ", targetDensity: " + options.inTargetDensity
+            + ", density: " + options.inDensity
             + ", density multiplier: " + densityMultiplier);
       }
       // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
