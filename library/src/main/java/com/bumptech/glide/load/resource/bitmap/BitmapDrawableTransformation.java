@@ -34,16 +34,19 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   }
 
   @Override
-  public Resource<BitmapDrawable> transform(Resource<BitmapDrawable> resource, int outWidth,
-      int outHeight) {
-    BitmapDrawable other = resource.get();
-    Bitmap bitmap = other.getBitmap();
-    BitmapResource toTransform = BitmapResource.obtain(bitmap, bitmapPool);
-    Resource<Bitmap> result = wrapped.transform(toTransform, outWidth, outHeight);
-    if (result.equals(toTransform)) {
-      return resource;
+  public Resource<BitmapDrawable> transform(Resource<BitmapDrawable> drawableResourceToTransform,
+      int outWidth, int outHeight) {
+    BitmapDrawable drawableToTransform = drawableResourceToTransform.get();
+    Bitmap bitmapToTransform = drawableToTransform.getBitmap();
+
+    BitmapResource bitmapResourceToTransform = BitmapResource.obtain(bitmapToTransform, bitmapPool);
+    Resource<Bitmap> transformedBitmapResource =
+        wrapped.transform(bitmapResourceToTransform, outWidth, outHeight);
+
+    if (transformedBitmapResource.equals(bitmapResourceToTransform)) {
+      return drawableResourceToTransform;
     } else {
-      return LazyBitmapDrawableResource.obtain(context, bitmap);
+      return LazyBitmapDrawableResource.obtain(context, transformedBitmapResource.get());
     }
   }
 

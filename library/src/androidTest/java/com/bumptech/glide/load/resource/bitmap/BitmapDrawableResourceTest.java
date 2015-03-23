@@ -33,7 +33,6 @@ public class BitmapDrawableResourceTest {
     assertEquals(harness.bitmap, harness.create().get().getBitmap());
   }
 
-
   @Test
   public void testReturnsDifferentDrawableEachTime() {
     BitmapDrawableResource resource = harness.create();
