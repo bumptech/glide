@@ -1,6 +1,7 @@
 package com.bumptech.glide.manager;
 
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +65,7 @@ public class RequestTracker {
      */
     public void pauseRequests() {
         isPaused = true;
-        for (Request request : getSnapshot()) {
+        for (Request request : Util.getSnapshot(requests)) {
             if (request.isRunning()) {
                 request.pause();
                 pendingRequests.add(request);
@@ -77,7 +78,7 @@ public class RequestTracker {
      */
     public void resumeRequests() {
         isPaused = false;
-        for (Request request : getSnapshot()) {
+        for (Request request : Util.getSnapshot(requests)) {
             if (!request.isComplete() && !request.isCancelled() && !request.isRunning()) {
                 request.begin();
             }
@@ -89,7 +90,7 @@ public class RequestTracker {
      * Cancels all requests and clears their resources.
      */
     public void clearRequests() {
-        for (Request request : getSnapshot()) {
+        for (Request request : Util.getSnapshot(requests)) {
             request.clear();
         }
         pendingRequests.clear();
@@ -99,7 +100,7 @@ public class RequestTracker {
      * Restarts failed requests and cancels and restarts in progress requests.
      */
     public void restartRequests() {
-        for (Request request : getSnapshot()) {
+        for (Request request : Util.getSnapshot(requests)) {
             if (!request.isComplete() && !request.isCancelled()) {
                 // Ensure the request will be restarted in onResume.
                 request.pause();
@@ -110,18 +111,5 @@ public class RequestTracker {
                 }
             }
         }
-    }
-
-    // Avoids a ConcurrentModificationException when requests are started by another request completing. See #303.
-    private List<Request> getSnapshot() {
-        // toArray creates a new ArrayList internally and this way we can guarantee entries will not be
-        // null. See #322.
-        List<Request> result = new ArrayList<Request>(requests.size());
-        // We could also just call new ArrayList<Request>(requests) but that actually creates two new ArrayLists because
-        // that constructor in ArrayList calls toArray().
-        for (Request request : requests) {
-            result.add(request);
-        }
-        return result;
     }
 }
