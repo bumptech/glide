@@ -208,6 +208,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         Bitmap.Config config = getConfig(is, decodeFormat);
         options.inSampleSize = sampleSize;
         options.inPreferredConfig = config;
+        if (options.inPreferredConfig != Bitmap.Config.ARGB_8888) {
+            options.inDither = true;
+        }
         if ((options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) && shouldUsePool(is)) {
             int targetWidth = (int) Math.ceil(inWidth / (double) sampleSize);
             int targetHeight = (int) Math.ceil(inHeight / (double) sampleSize);
