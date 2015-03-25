@@ -17,8 +17,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
  */
 public final class TransformationUtils {
   private static final String TAG = "TransformationUtils";
-  public static final int PAINT_FLAGS =
-      Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
+  public static final int PAINT_FLAGS = Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
 
   private TransformationUtils() {
     // Utility class.

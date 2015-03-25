@@ -160,6 +160,9 @@ public final class Downsampler {
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(getOrientation(is));
 
     options.inPreferredConfig = getConfig(is, decodeFormat);
+    if (options.inPreferredConfig != Bitmap.Config.ARGB_8888) {
+      options.inDither = true;
+    }
     options.inSampleSize = getRoundedSampleSize(downsampleStrategy, degreesToRotate,
         sourceWidth, sourceHeight, requestedWidth, requestedHeight);
     options.inDensity = downsampleStrategy.getDensity(sourceWidth, sourceHeight,
