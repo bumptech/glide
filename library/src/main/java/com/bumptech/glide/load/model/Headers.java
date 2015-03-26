@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -9,7 +10,12 @@ import java.util.Map;
 public interface Headers {
 
     /** An empty Headers object that can be used if users don't want to provide headers. */
-    Headers NONE = new BasicHeaders.Builder().build();
+    Headers NONE = new Headers() {
+        @Override
+        public Map<String, String> getHeaders() {
+            return Collections.emptyMap();
+        }
+    };
 
     Map<String, String> getHeaders();
 

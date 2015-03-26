@@ -1,28 +1,26 @@
 package com.bumptech.glide.load.model;
 
-import android.text.TextUtils;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A wrapper class for a set of headers to be included in a Glide request, allowing headers to be
  * constructed lazily.
  *
- * <p> Should be used instead of BasicHeaders when constructing headers requires I/O. </p>
+ * <p> Ideally headers are constructed once and then re-used for multiple loads, rather then being
+ * constructed individually for each load. </p>
+ *
+ * <p> This class is thread safe. </p>
  */
 public final class LazyHeaders implements Headers {
-    private final Map<String, Set<String>> eagerHeaders;
-    private final Map<String, Set<LazyHeaderFactory>> lazyHeaders;
+    private final Map<String, List<LazyHeaderFactory>> headers;
     private volatile Map<String, String> combinedHeaders;
 
-    LazyHeaders(Map<String, Set<String>> eagerHeaders,
-        Map<String, Set<LazyHeaderFactory>> lazyHeaders) {
-        this.eagerHeaders = Collections.unmodifiableMap(eagerHeaders);
-        this.lazyHeaders = Collections.unmodifiableMap(lazyHeaders);
+    LazyHeaders(Map<String, List<LazyHeaderFactory>> headers) {
+        this.headers = Collections.unmodifiableMap(headers);
     }
 
     @Override
@@ -40,20 +38,18 @@ public final class LazyHeaders implements Headers {
 
     private Map<String, String> generateHeaders() {
         Map<String, String> combinedHeaders = new HashMap<String, String>();
-        Set<String> combinedKeys = new HashSet<String>(eagerHeaders.keySet());
-        combinedKeys.addAll(lazyHeaders.keySet());
 
-        for (String key : combinedKeys) {
-            Set<String> values = new HashSet<String>();
-            if (eagerHeaders.containsKey(key)) {
-                values.addAll(eagerHeaders.get(key));
-            }
-            if (lazyHeaders.containsKey(key)) {
-                for (LazyHeaderFactory factory : lazyHeaders.get(key)) {
-                    values.add(factory.buildHeader());
+        for (Map.Entry<String, List<LazyHeaderFactory>> entry : headers.entrySet()) {
+            StringBuilder sb = new StringBuilder();
+            List<LazyHeaderFactory> factories = entry.getValue();
+            for (int i = 0; i < factories.size(); i++) {
+                LazyHeaderFactory factory = factories.get(i);
+                sb.append(factory.buildHeader());
+                if (i != factories.size() - 1) {
+                    sb.append(',');
                 }
             }
-            combinedHeaders.put(key, TextUtils.join(",", values));
+            combinedHeaders.put(entry.getKey(), sb.toString());
         }
 
         return combinedHeaders;
@@ -61,74 +57,123 @@ public final class LazyHeaders implements Headers {
 
     @Override
     public String toString() {
-        Set<String> combinedKeys = new HashSet<String>(eagerHeaders.keySet());
-        combinedKeys.addAll(lazyHeaders.keySet());
-
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String key : combinedKeys) {
-            stringBuilder.append(key)
-                .append(": ");
-            if (eagerHeaders.containsKey(key)) {
-                stringBuilder.append(TextUtils.join(",", eagerHeaders.get(key)));
-            }
-            if (lazyHeaders.containsKey(key)) {
-                for (LazyHeaderFactory factory : lazyHeaders.get(key)) {
-                    stringBuilder.append(factory.toString());
-                    stringBuilder.append(',');
-                }
-            }
-            stringBuilder.append('\n');
-        }
-        return stringBuilder.toString();
+        return "LazyHeaders{"
+            + "headers=" + headers
+            + '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+        if (o instanceof LazyHeaders) {
+            LazyHeaders other = (LazyHeaders) o;
+            return headers.equals(other.headers);
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        LazyHeaders otherHeaders = (LazyHeaders) o;
-        return eagerHeaders.equals(otherHeaders.eagerHeaders)
-            && lazyHeaders.equals(otherHeaders.lazyHeaders);
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return eagerHeaders.hashCode() + 31 * lazyHeaders.hashCode();
+        return headers.hashCode();
     }
 
     /**
-     * Builder class for {@link BasicHeaders}.
+     * Builder class for {@link LazyHeaders}.
+     *
+     * <p> This class is not thread safe. </p>
      */
     public static final class Builder {
-        private final Map<String, Set<String>> eagerHeaders = new HashMap<String, Set<String>>();
-        private final Map<String, Set<LazyHeaderFactory>> lazyHeaders =
-            new HashMap<String, Set<LazyHeaderFactory>>();
+        private boolean copyOnModify;
+        private Map<String, List<LazyHeaderFactory>> headers =
+            new HashMap<String, List<LazyHeaderFactory>>();
 
-        public void addHeader(String key, String value) {
-            Set<String> values = eagerHeaders.get(key);
-            if (values == null) {
-                values = new HashSet<String>();
-                eagerHeaders.put(key, values);
-            }
-            values.add(value);
+        /**
+         * Adds a value for the given header and returns this builder.
+         *
+         * <p> Use {@link #addHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
+         * (ie an oauth token). </p>
+         *
+         * @see #addHeader(String, LazyHeaderFactory)
+
+         */
+        public Builder addHeader(String key, String value) {
+            return addHeader(key, new StringHeaderFactory(value));
         }
 
-        public void addHeader(String key, LazyHeaderFactory factory) {
-            Set<LazyHeaderFactory> factories = lazyHeaders.get(key);
+        /**
+         * Adds an {@link LazyHeaderFactory} that will be used to construct a value for the given
+         * key lazily on a background thread.
+         *
+         * <p> Headers may have multiple values whose order is defined by the order in which
+         * this method is called. </p>
+         *
+         * <p> This class does not prevent you from adding the same value to a given key multiple
+         * times </p>
+         */
+        public Builder addHeader(String key, LazyHeaderFactory factory) {
+            if (copyOnModify) {
+                copyOnModify = false;
+                headers = copyHeaders();
+            }
+
+            List<LazyHeaderFactory> factories = headers.get(key);
             if (factories == null) {
-                factories = new HashSet<LazyHeaderFactory>();
-                lazyHeaders.put(key, factories);
+                factories = new ArrayList<LazyHeaderFactory>();
+                headers.put(key, factories);
             }
             factories.add(factory);
+            return this;
         }
 
+        /**
+         * Returns a new immutable {@link LazyHeaders} object.
+         */
         public LazyHeaders build() {
-          return new LazyHeaders(eagerHeaders, lazyHeaders);
+          copyOnModify = true;
+          return new LazyHeaders(headers);
+        }
+
+        private Map<String, List<LazyHeaderFactory>> copyHeaders() {
+            Map<String, List<LazyHeaderFactory>> result =
+                  new HashMap<String, List<LazyHeaderFactory>>(headers.size());
+            for (Map.Entry<String, List<LazyHeaderFactory>> entry : headers.entrySet()) {
+                result.put(entry.getKey(), new ArrayList<LazyHeaderFactory>(entry.getValue()));
+            }
+            return result;
+        }
+    }
+
+    static final class StringHeaderFactory implements LazyHeaderFactory {
+
+        private final String value;
+
+        StringHeaderFactory(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String buildHeader() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return "StringHeaderFactory{"
+                + "value='" + value + '\''
+                + '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof StringHeaderFactory) {
+                StringHeaderFactory other = (StringHeaderFactory) o;
+                return value.equals(other.value);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
         }
     }
 }
