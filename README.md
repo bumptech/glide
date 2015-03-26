@@ -63,7 +63,7 @@ public void onCreate(Bundle savedInstanceState) {
 
     ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
 
-    Glide.with(this).load("http://goo.gl/h8qOq7").into(imageView);
+    Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
 }
 
 // For a list:
