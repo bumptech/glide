@@ -26,8 +26,8 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   private int sourceIdIndex = -1;
   private Key sourceKey;
-  private DataFetcher<?> fetcher;
   private Iterator<ModelLoader.LoadData<?>> loadDataIterator;
+  private volatile DataFetcher<?> fetcher;
 
   public DataCacheGenerator(List<Key> sourceIds, int width, int height, DiskCache diskCache,
       RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
@@ -64,6 +64,14 @@ class DataCacheGenerator implements DataFetcherGenerator,
       }
     }
     return fetcher != null;
+  }
+
+  @Override
+  public void cancel() {
+    DataFetcher<?> local = fetcher;
+    if (local != null) {
+      local.cancel();
+    }
   }
 
   @Override

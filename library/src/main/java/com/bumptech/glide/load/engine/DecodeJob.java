@@ -34,7 +34,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private Stage stage;
   private RunReason runReason = RunReason.INITIALIZE;
-  private DataFetcherGenerator generator;
+  private volatile DataFetcherGenerator generator;
 
   private Thread currentThread;
   private Key currentSourceKey;
@@ -87,8 +87,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   public void cancel() {
-    requestContext.getLoadDataSet().cancel();
     isCancelled = true;
+    DataFetcherGenerator local = generator;
+    if (local != null) {
+      local.cancel();
+    }
   }
 
   @Override
@@ -176,7 +179,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher,
+  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
       DataSource dataSource) {
     this.currentSourceKey = sourceKey;
     this.currentData = data;

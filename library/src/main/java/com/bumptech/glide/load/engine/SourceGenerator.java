@@ -9,6 +9,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.util.LogTime;
 
 import java.util.Collections;
@@ -33,8 +34,8 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
   private final FetcherReadyCallback cb;
   private final Iterator<ModelLoader.LoadData<?>> dataLoaderIterator;
 
-  private ModelLoader.LoadData<?> loadData;
   private DataCacheGenerator sourceCacheGenerator;
+  private volatile ModelLoader.LoadData<?> loadData;
 
   public SourceGenerator(int width, int height,
       RequestContext<Model, ?> requestContext, DiskCache diskCache, FetcherReadyCallback cb) {
@@ -62,6 +63,14 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
       }
     }
     return loadData != null;
+  }
+
+  @Override
+  public void cancel() {
+    LoadData<?> local = loadData;
+    if (local != null) {
+      local.fetcher.cancel();
+    }
   }
 
   @Override
@@ -101,7 +110,7 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
   // Called from source cache generator.
   @Override
-  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher,
+  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
       DataSource dataSource) {
     // This data fetcher will be loading from a File and provide the wrong data source, so override
     // with the data source of the original fetcher

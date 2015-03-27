@@ -22,7 +22,6 @@ public class LoadDataSet<Model> implements Iterable<ModelLoader.LoadData<?>> {
   private final int height;
   private final List<ModelLoader<Model, ?>> modelLoaders;
   private final Options options;
-  private final List<DataFetcher<?>> fetchers;
 
   private List<ModelLoader<Model, ?>> filteredLoaders;
 
@@ -33,19 +32,10 @@ public class LoadDataSet<Model> implements Iterable<ModelLoader.LoadData<?>> {
     this.height = height;
     this.modelLoaders = modelLoaders;
     this.options = options;
-    fetchers = new ArrayList<>(modelLoaders.size());
   }
 
   public boolean isEmpty() {
     return modelLoaders.isEmpty();
-  }
-
-  public void cancel() {
-    for (DataFetcher<?> fetcher : fetchers) {
-      if (fetcher != null) {
-        fetcher.cancel();
-      }
-    }
   }
 
   @Override
@@ -67,9 +57,8 @@ public class LoadDataSet<Model> implements Iterable<ModelLoader.LoadData<?>> {
 
   @Override
   public String toString() {
-    return "DataFetcherSet{" + "fetchers=" + Arrays
-        .toString(fetchers.toArray(new DataFetcher[fetchers.size()])) + ", modelLoaders=" + Arrays
-        .toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + "}";
+    return "DataFetcherSet{modelLoaders=" +
+        Arrays.toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + "}";
   }
 
   class LoadDataIterator implements Iterator<ModelLoader.LoadData<?>> {

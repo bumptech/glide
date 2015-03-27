@@ -22,7 +22,8 @@ interface DataFetcherGenerator {
      * @param data The loaded data, or null if the load failed.
      * @param fetcher The data fetcher we attempted to load from.
      */
-    void onDataFetcherReady(Key sourceKey, Object data, DataFetcher fetcher, DataSource dataSource);
+    void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
+        DataSource dataSource);
   }
 
   /**
@@ -30,4 +31,11 @@ interface DataFetcherGenerator {
    * a {@link com.bumptech.glide.load.data.DataFetcher} was started, and false otherwise.
    */
   boolean startNext();
+
+  /**
+   * Attempts to cancel the currently running fetcher.
+   *
+   * <p> This will be called on the main thread and should complete quickly. </p>
+   */
+  void cancel();
 }
