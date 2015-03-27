@@ -35,7 +35,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   private final RequestQueue requestQueue;
   private final VolleyRequestFactory requestFactory;
   private final GlideUrl url;
-  private Request<byte[]> request;
+  private volatile Request<byte[]> request;
 
   @SuppressWarnings("unused")
   public VolleyStreamFetcher(RequestQueue requestQueue, GlideUrl url) {
@@ -63,7 +63,10 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
   @Override
   public void cancel() {
-    request.cancel();
+    Request<byte[]> local = request;
+    if (local != null) {
+      local.cancel();
+    }
   }
 
   @Override
