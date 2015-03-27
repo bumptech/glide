@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
@@ -294,6 +295,9 @@ public class Engine implements EngineJobListener,
         synchronized (this) {
           if (diskCache == null) {
             diskCache = factory.build();
+          }
+          if (diskCache == null) {
+            diskCache = new DiskCacheAdapter();
           }
         }
       }
