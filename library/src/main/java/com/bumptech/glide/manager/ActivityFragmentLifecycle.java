@@ -12,7 +12,7 @@ import java.util.WeakHashMap;
  */
 class ActivityFragmentLifecycle implements Lifecycle {
     private final Set<LifecycleListener> lifecycleListeners =
-            Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<LifecycleListener, Boolean>()));
+            Collections.newSetFromMap(new WeakHashMap<LifecycleListener, Boolean>());
     private boolean isStarted;
     private boolean isDestroyed;
 
