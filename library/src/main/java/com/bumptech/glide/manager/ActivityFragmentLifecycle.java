@@ -11,8 +11,8 @@ import java.util.WeakHashMap;
  * listeners of {@link android.app.Fragment} and {@link android.app.Activity} lifecycle events.
  */
 class ActivityFragmentLifecycle implements Lifecycle {
-  private final Set<LifecycleListener> lifecycleListeners = Collections
-      .synchronizedSet(Collections.newSetFromMap(new WeakHashMap<LifecycleListener, Boolean>()));
+  private final Set<LifecycleListener> lifecycleListeners =
+      Collections.newSetFromMap(new WeakHashMap<LifecycleListener, Boolean>());
   private boolean isStarted;
   private boolean isDestroyed;
 
