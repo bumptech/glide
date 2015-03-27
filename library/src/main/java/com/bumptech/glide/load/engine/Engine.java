@@ -9,6 +9,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.DataLoadProvider;
@@ -321,6 +322,9 @@ public class Engine implements EngineJobListener,
                 synchronized (this) {
                     if (diskCache == null) {
                         diskCache = factory.build();
+                    }
+                    if (diskCache == null) {
+                        diskCache = new DiskCacheAdapter();
                     }
                 }
             }
