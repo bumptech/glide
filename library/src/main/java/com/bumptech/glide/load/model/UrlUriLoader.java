@@ -14,6 +14,8 @@ import java.util.Set;
 /**
  * Handles http/https Uris by delegating to the {@link ModelLoader} for {@link
  * com.bumptech.glide.load.model.GlideUrl GlideUrls}.
+ *
+ * @param <Data> The type of data this Loader will obtain for a {@link Uri}.
  */
 public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
   private static final Set<String> SCHEMES = Collections.unmodifiableSet(

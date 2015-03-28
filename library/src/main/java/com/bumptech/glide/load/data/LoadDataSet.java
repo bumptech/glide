@@ -57,8 +57,8 @@ public class LoadDataSet<Model> implements Iterable<ModelLoader.LoadData<?>> {
 
   @Override
   public String toString() {
-    return "DataFetcherSet{modelLoaders=" +
-        Arrays.toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + "}";
+    return "DataFetcherSet{modelLoaders="
+        + Arrays.toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + "}";
   }
 
   class LoadDataIterator implements Iterator<ModelLoader.LoadData<?>> {
