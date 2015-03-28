@@ -154,7 +154,7 @@ public class LruCache<T, Y> {
    *
    * @param size The size the cache should be less than.
    */
-  protected void trimToSize(int size) {
+  protected synchronized void trimToSize(int size) {
     Map.Entry<T, Y> last;
     while (currentSize > size) {
       last = cache.entrySet().iterator().next();

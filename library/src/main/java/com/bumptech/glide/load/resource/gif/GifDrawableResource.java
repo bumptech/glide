@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
+import android.graphics.Bitmap;
+
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
 import com.bumptech.glide.util.Util;
 
@@ -18,7 +20,9 @@ public class GifDrawableResource extends DrawableResource<GifDrawable> {
 
   @Override
   public int getSize() {
-   return drawable.getBuffer().limit() + Util.getBitmapByteSize(drawable.getFirstFrame());
+    Bitmap firstFrame = drawable.getFirstFrame();
+   return drawable.getBuffer().limit() + Util.getBitmapByteSize(firstFrame.getWidth(),
+       firstFrame.getHeight(), firstFrame.getConfig());
   }
 
   @Override
