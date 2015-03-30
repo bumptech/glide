@@ -47,7 +47,8 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
    */
   @Override
   public void onLoadStarted(Drawable placeholder) {
-    view.setImageDrawable(placeholder);
+    setResource(null);
+    setDrawable(placeholder);
   }
 
   /**
@@ -58,7 +59,8 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
    */
   @Override
   public void onLoadFailed(Drawable errorDrawable) {
-    view.setImageDrawable(errorDrawable);
+    setResource(null);
+    setDrawable(errorDrawable);
   }
 
   /**
@@ -69,7 +71,8 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
    */
   @Override
   public void onLoadCleared(Drawable placeholder) {
-    view.setImageDrawable(placeholder);
+    setResource(null);
+    setDrawable(placeholder);
   }
 
   @Override

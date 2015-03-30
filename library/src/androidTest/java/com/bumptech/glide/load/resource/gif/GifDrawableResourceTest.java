@@ -5,18 +5,13 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.graphics.Bitmap;
-
-import com.bumptech.glide.util.Util;
+import org.robolectric.RobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.nio.ByteBuffer;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -31,13 +26,11 @@ public class GifDrawableResourceTest {
   }
 
   @Test
-  public void testReturnsDrawableSizePlusFirstFrameSize() {
+  public void testReturnsSizeFromDrawable() {
     final int size = 2134;
-    Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    when(drawable.getFirstFrame()).thenReturn(firstFrame);
-    when(drawable.getBuffer()).thenReturn(ByteBuffer.allocate(size));
+    when(drawable.getSize()).thenReturn(size);
 
-    assertEquals(size + Util.getBitmapByteSize(firstFrame), resource.getSize());
+    assertEquals(size, resource.getSize());
   }
 
   @Test

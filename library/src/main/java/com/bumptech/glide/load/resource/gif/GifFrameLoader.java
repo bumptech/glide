@@ -13,6 +13,8 @@ import android.os.SystemClock;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.gifdecoder.GifDecoder;
+import com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider;
+import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -20,16 +22,20 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Util;
 
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 class GifFrameLoader {
 
-  private final FrameCallback callback;
   private final GifDecoder gifDecoder;
   private final Handler handler;
   private final Context context;
+  private final List<FrameCallback> callbacks = new ArrayList<>();
 
   private boolean isRunning = false;
   private boolean isLoadPending = false;
@@ -37,35 +43,101 @@ class GifFrameLoader {
   private DelayTarget current;
   private boolean isCleared;
   private DelayTarget next;
+  private Bitmap firstFrame;
+  private Transformation<Bitmap> transformation;
 
   public interface FrameCallback {
     void onFrameReady(int index);
   }
 
-  public GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, int width,
-      int height) {
-    this(context, callback, gifDecoder, null, getRequestBuilder(context, width, height));
+  public GifFrameLoader(Context context, BitmapProvider bitmapProvider, GifHeader gifHeader,
+      ByteBuffer byteBuffer, int width, int height,  Transformation<Bitmap> transformation,
+      Bitmap firstFrame) {
+    this(context, new GifDecoder(bitmapProvider, gifHeader, byteBuffer), null,
+        getRequestBuilder(context, width, height), transformation,
+        firstFrame);
   }
 
-  GifFrameLoader(Context context, FrameCallback callback, GifDecoder gifDecoder, Handler handler,
-      RequestBuilder<Bitmap> requestBuilder) {
+  GifFrameLoader(Context context, GifDecoder gifDecoder, Handler handler,
+      RequestBuilder<Bitmap> requestBuilder, Transformation<Bitmap> transformation,
+      Bitmap firstFrame) {
     if (handler == null) {
       handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
     }
     this.context = context.getApplicationContext();
-    this.callback = callback;
-    this.gifDecoder = gifDecoder;
     this.handler = handler;
     this.requestBuilder = requestBuilder;
+
+    this.gifDecoder = gifDecoder;
+
+    setFrameTransformation(transformation, firstFrame);
   }
 
-  @SuppressWarnings("unchecked")
-  public void setFrameTransformation(Transformation<Bitmap> transformation) {
-    Preconditions.checkNotNull(transformation);
+  void setFrameTransformation(Transformation<Bitmap> transformation, Bitmap firstFrame) {
+    this.transformation = Preconditions.checkNotNull(transformation);
+    this.firstFrame = Preconditions.checkNotNull(firstFrame);
     requestBuilder = requestBuilder.apply(new RequestOptions().transform(context, transformation));
   }
 
-  public void start() {
+  Transformation<Bitmap> getFrameTransformation() {
+    return transformation;
+  }
+
+  Bitmap getFirstFrame() {
+    return firstFrame;
+  }
+
+  void subscribe(FrameCallback frameCallback) {
+    if (isCleared) {
+      throw new IllegalStateException("Cannot subscribe to a cleared frame loader");
+    }
+    boolean start = callbacks.isEmpty();
+    if (callbacks.contains(frameCallback)) {
+      throw new IllegalStateException("Cannot subscribe twice in a row");
+    }
+    callbacks.add(frameCallback);
+    if (start) {
+      start();
+    }
+  }
+
+  void unsubscribe(FrameCallback frameCallback) {
+    callbacks.remove(frameCallback);
+    if (callbacks.isEmpty()) {
+      stop();
+    }
+  }
+
+  int getWidth() {
+    return getCurrentFrame().getWidth();
+  }
+
+  int getHeight() {
+    return getCurrentFrame().getHeight();
+  }
+
+  int getSize() {
+    return getBuffer().limit() + getFrameSize();
+  }
+
+  private int getFrameSize() {
+    return Util.getBitmapByteSize(getCurrentFrame().getWidth(), getCurrentFrame().getHeight(),
+        getCurrentFrame().getConfig());
+  }
+
+  ByteBuffer getBuffer() {
+    return gifDecoder.getData().asReadOnlyBuffer();
+  }
+
+  int getFrameCount() {
+    return gifDecoder.getFrameCount();
+  }
+
+  int getLoopCount() {
+    return gifDecoder.getLoopCount();
+  }
+
+  private void start() {
     if (isRunning) {
       return;
     }
@@ -75,11 +147,14 @@ class GifFrameLoader {
     loadNextFrame();
   }
 
-  public void stop() {
+  private void stop() {
     isRunning = false;
   }
 
-  public void clear() {
+  void clear() {
+    callbacks.clear();
+    recycleFirstFrame();
+    gifDecoder.clear();
     stop();
     if (current != null) {
       Glide.clear(current);
@@ -90,11 +165,10 @@ class GifFrameLoader {
       next = null;
     }
     isCleared = true;
-    // test.
   }
 
-  public Bitmap getCurrentFrame() {
-    return current != null ? current.getResource() : null;
+  Bitmap getCurrentFrame() {
+    return current != null ? current.getResource() : firstFrame;
   }
 
   private void loadNextFrame() {
@@ -109,6 +183,15 @@ class GifFrameLoader {
     requestBuilder.clone().apply(signatureOf(new FrameSignature())).load(gifDecoder).into(next);
   }
 
+  private void recycleFirstFrame() {
+    if (firstFrame != null) {
+      if (!Glide.get(context).getBitmapPool().put(firstFrame)) {
+        firstFrame.recycle();
+      }
+      firstFrame = null;
+    }
+  }
+
   // Visible for testing.
   void onFrameReady(DelayTarget delayTarget) {
     if (isCleared) {
@@ -116,12 +199,19 @@ class GifFrameLoader {
       return;
     }
 
-    DelayTarget previous = current;
-    current = delayTarget;
-    callback.onFrameReady(delayTarget.index);
-
-    if (previous != null) {
-      handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, previous).sendToTarget();
+    if (delayTarget.getResource() != null) {
+      recycleFirstFrame();
+      DelayTarget previous = current;
+      current = delayTarget;
+      // The callbacks may unregister when onFrameReady is called, so iterate in reverse to avoid
+      // concurrent modifications.
+      for (int i = callbacks.size() - 1; i >= 0; i--) {
+        FrameCallback cb = callbacks.get(i);
+        cb.onFrameReady(delayTarget.index);
+      }
+      if (previous != null) {
+        handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, previous).sendToTarget();
+      }
     }
 
     isLoadPending = false;
@@ -153,13 +243,13 @@ class GifFrameLoader {
     private final long targetTime;
     private Bitmap resource;
 
-    public DelayTarget(Handler handler, int index, long targetTime) {
+    DelayTarget(Handler handler, int index, long targetTime) {
       this.handler = handler;
       this.index = index;
       this.targetTime = targetTime;
     }
 
-    public Bitmap getResource() {
+    Bitmap getResource() {
       return resource;
     }
 

@@ -13,8 +13,8 @@ import java.util.Map;
  */
 public class LruCache<T, Y> {
   private final LinkedHashMap<T, Y> cache = new LinkedHashMap<>(100, 0.75f, true);
-  private int maxSize;
   private final int initialMaxSize;
+  private int maxSize;
   private int currentSize = 0;
 
   /**
@@ -144,7 +144,7 @@ public class LruCache<T, Y> {
   /**
    * Clears all items in the cache.
    */
-  public synchronized void clearMemory() {
+  public void clearMemory() {
     trimToSize(0);
   }
 

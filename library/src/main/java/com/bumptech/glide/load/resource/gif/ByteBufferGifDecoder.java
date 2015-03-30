@@ -99,8 +99,8 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
     Transformation<Bitmap> unitTransformation = UnitTransformation.get();
 
     GifDrawable gifDrawable =
-        new GifDrawable(context, provider, bitmapPool, unitTransformation, width, height, header,
-            byteBuffer, firstFrame);
+        new GifDrawable(context, provider, bitmapPool, byteBuffer, unitTransformation, width,
+            height, header, firstFrame);
 
     if (Logs.isEnabled(Log.VERBOSE)) {
       Logs.log(Log.VERBOSE, "Decoded gif from stream in " + LogTime.getElapsedMillis(startTime));

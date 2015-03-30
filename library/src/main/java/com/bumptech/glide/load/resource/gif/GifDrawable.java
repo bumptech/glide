@@ -37,12 +37,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    * present.
    */
   public static final int LOOP_INTRINSIC = 0;
-  private final Paint paint;
-  private final Rect destRect = new Rect();
-  private final GifState state;
-  private final GifDecoder decoder;
-  private final GifFrameLoader frameLoader;
 
+  private final GifState state;
   /**
    * True if the drawable is currently animating.
    */
@@ -72,6 +68,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   private int maxLoopCount = LOOP_FOREVER;
 
   private boolean applyGravity;
+  private Paint paint;
+  private Rect destRect;
+
 
   /**
    * Constructor for GifDrawable.
@@ -94,66 +93,50 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    *                            {@link com.bumptech.glide.request.target.Target}
    *                            this drawable is being loaded into).
    * @param gifHeader           The header data for this gif.
-   * @param buffer              A {@link java.nio.ByteBuffer} containing the compressed bytes of the
-   *                            gif.
    * @param firstFrame          The decoded and transformed first frame of this gif.
    * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
    */
   public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider,
-      BitmapPool bitmapPool, Transformation<Bitmap> frameTransformation, int targetFrameWidth,
-      int targetFrameHeight, GifHeader gifHeader, ByteBuffer buffer,
-      Bitmap firstFrame) {
-    this(new GifState(gifHeader, buffer, context, frameTransformation, targetFrameWidth,
-        targetFrameHeight, bitmapProvider, bitmapPool, firstFrame));
+      BitmapPool bitmapPool, ByteBuffer byteBuffer, Transformation<Bitmap> frameTransformation,
+      int targetFrameWidth, int targetFrameHeight, GifHeader gifHeader, Bitmap firstFrame) {
+    this(new GifState(context, bitmapPool,
+        new GifFrameLoader(context, bitmapProvider, gifHeader, byteBuffer, targetFrameWidth,
+            targetFrameHeight, frameTransformation, firstFrame)));
   }
 
   GifDrawable(GifState state) {
     this.state = Preconditions.checkNotNull(state);
-    this.decoder = new GifDecoder(state.bitmapProvider);
-    this.paint = new Paint();
-    decoder.setData(state.gifHeader, state.buffer);
-    frameLoader =
-        new GifFrameLoader(state.context, this, decoder, state.targetWidth, state.targetHeight);
   }
 
   // Visible for testing.
-  GifDrawable(GifDecoder decoder, GifFrameLoader frameLoader, Bitmap firstFrame,
-      BitmapPool bitmapPool, Paint paint) {
-    this.decoder = decoder;
-    this.frameLoader = frameLoader;
-    this.state = new GifState(null);
+  GifDrawable(Context context, GifFrameLoader frameLoader, BitmapPool bitmapPool, Paint paint) {
+    this(new GifState(context, bitmapPool, frameLoader));
     this.paint = paint;
-    state.bitmapPool = bitmapPool;
-    state.firstFrame = firstFrame;
+  }
+
+  public int getSize() {
+    return state.frameLoader.getSize();
   }
 
   public Bitmap getFirstFrame() {
-    return state.firstFrame;
+    return state.frameLoader.getFirstFrame();
   }
 
   public void setFrameTransformation(Transformation<Bitmap> frameTransformation,
       Bitmap firstFrame) {
-    state.firstFrame =
-        Preconditions.checkNotNull(firstFrame, "The first frame of the GIF must not be null");
-    state.frameTransformation = Preconditions
-        .checkNotNull(frameTransformation, "The frame transformation must not be null");
-    frameLoader.setFrameTransformation(frameTransformation);
-  }
-
-  public GifDecoder getDecoder() {
-    return decoder;
+    state.frameLoader.setFrameTransformation(frameTransformation, firstFrame);
   }
 
   public Transformation<Bitmap> getFrameTransformation() {
-    return state.frameTransformation;
+    return state.frameLoader.getFrameTransformation();
   }
 
   public ByteBuffer getBuffer() {
-    return state.buffer;
+    return state.frameLoader.getBuffer();
   }
 
   public int getFrameCount() {
-    return decoder.getFrameCount();
+    return state.frameLoader.getFrameCount();
   }
 
   private void resetLoopCount() {
@@ -173,38 +156,22 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   public void stop() {
     isStarted = false;
     stopRunning();
-
-    // On APIs > honeycomb we know our drawable is not being displayed anymore when it's callback
-    // is cleared and so we can use the absence of a callback as an indication that it's ok to clear
-    // our temporary data. Prior to honeycomb we can't tell if our callback is null and instead
-    // eagerly reset to avoid holding on to resources we no longer need.
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-      reset();
-    }
-  }
-
-  /**
-   * Clears temporary data and resets the drawable back to the first frame.
-   */
-  private void reset() {
-    frameLoader.clear();
-    invalidateSelf();
   }
 
   private void startRunning() {
     // If we have only a single frame, we don't want to decode it endlessly.
-    if (decoder.getFrameCount() == 1) {
+    if (state.frameLoader.getFrameCount() == 1) {
       invalidateSelf();
     } else if (!isRunning) {
       isRunning = true;
-      frameLoader.start();
+      state.frameLoader.subscribe(this);
       invalidateSelf();
     }
   }
 
   private void stopRunning() {
     isRunning = false;
-    frameLoader.stop();
+    state.frameLoader.unsubscribe(this);
   }
 
   @Override
@@ -220,12 +187,12 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   @Override
   public int getIntrinsicWidth() {
-    return state.firstFrame.getWidth();
+    return state.frameLoader.getWidth();
   }
 
   @Override
   public int getIntrinsicHeight() {
-    return state.firstFrame.getHeight();
+    return state.frameLoader.getHeight();
   }
 
   @Override
@@ -252,23 +219,36 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
     if (applyGravity) {
       Gravity.apply(GifState.GRAVITY, getIntrinsicWidth(), getIntrinsicHeight(), getBounds(),
-          destRect);
+          getDestRect());
       applyGravity = false;
     }
 
-    Bitmap currentFrame = frameLoader.getCurrentFrame();
-    Bitmap toDraw = currentFrame != null ? currentFrame : state.firstFrame;
-    canvas.drawBitmap(toDraw, null, destRect, paint);
+    Bitmap currentFrame = state.frameLoader.getCurrentFrame();
+    canvas.drawBitmap(currentFrame, null, getDestRect(), getPaint());
   }
 
   @Override
   public void setAlpha(int i) {
-    paint.setAlpha(i);
+    getPaint().setAlpha(i);
   }
 
   @Override
   public void setColorFilter(ColorFilter colorFilter) {
-    paint.setColorFilter(colorFilter);
+    getPaint().setColorFilter(colorFilter);
+  }
+
+  private Rect getDestRect() {
+    if (destRect == null) {
+      destRect = new Rect();
+    }
+    return destRect;
+  }
+
+  private Paint getPaint() {
+    if (paint == null) {
+      paint = new Paint();
+    }
+    return paint;
   }
 
   @Override
@@ -282,13 +262,13 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   public void onFrameReady(int frameIndex) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getCallback() == null) {
       stop();
-      reset();
+      invalidateSelf();
       return;
     }
 
     invalidateSelf();
 
-    if (frameIndex == decoder.getFrameCount() - 1) {
+    if (frameIndex == state.frameLoader.getFrameCount() - 1) {
       loopCount++;
     }
 
@@ -307,18 +287,12 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    */
   public void recycle() {
     isRecycled = true;
-    decoder.clear();
-    state.bitmapPool.put(state.firstFrame);
-    frameLoader.clear();
+    state.frameLoader.clear();
   }
 
   // For testing.
   boolean isRecycled() {
     return isRecycled;
-  }
-
-  public boolean isAnimated() {
-    return true;
   }
 
   public void setLoopCount(int loopCount) {
@@ -328,51 +302,22 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     }
 
     if (loopCount == LOOP_INTRINSIC) {
-      maxLoopCount = decoder.getLoopCount();
+      maxLoopCount = state.frameLoader.getLoopCount();
     } else {
       maxLoopCount = loopCount;
     }
   }
 
   static class GifState extends ConstantState {
-    private static final int GRAVITY = Gravity.FILL;
-    ByteBuffer buffer;
-    GifHeader gifHeader;
-    Context context;
-    Transformation<Bitmap> frameTransformation;
-    int targetWidth;
-    int targetHeight;
-    GifDecoder.BitmapProvider bitmapProvider;
-    BitmapPool bitmapPool;
-    Bitmap firstFrame;
+    static final int GRAVITY = Gravity.FILL;
+    final Context context;
+    final BitmapPool bitmapPool;
+    final GifFrameLoader frameLoader;
 
-    public GifState(GifHeader header, ByteBuffer buffer, Context context,
-        Transformation<Bitmap> frameTransformation, int targetWidth, int targetHeight,
-        GifDecoder.BitmapProvider provider, BitmapPool bitmapPool, Bitmap firstFrame) {
-      this.firstFrame =
-          Preconditions.checkNotNull(firstFrame, "The first frame of the GIF must not be null");
-      this.gifHeader = header;
-      this.buffer = buffer;
+    public GifState(Context context, BitmapPool bitmapPool, GifFrameLoader frameLoader) {
       this.bitmapPool = bitmapPool;
       this.context = context.getApplicationContext();
-      this.frameTransformation = frameTransformation;
-      this.targetWidth = targetWidth;
-      this.targetHeight = targetHeight;
-      this.bitmapProvider = provider;
-    }
-
-    public GifState(GifState original) {
-      if (original != null) {
-        gifHeader = original.gifHeader;
-        buffer = original.buffer;
-        context = original.context;
-        frameTransformation = original.frameTransformation;
-        targetWidth = original.targetWidth;
-        targetHeight = original.targetHeight;
-        bitmapProvider = original.bitmapProvider;
-        bitmapPool = original.bitmapPool;
-        firstFrame = original.firstFrame;
-      }
+      this.frameLoader = frameLoader;
     }
 
     @Override

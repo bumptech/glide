@@ -102,4 +102,16 @@ class EngineResource<Z> implements Resource<Z> {
       listener.onResourceReleased(key, this);
     }
   }
+
+  @Override
+  public String toString() {
+    return "EngineResource{"
+        + "isCacheable=" + isCacheable
+        + ", listener=" + listener
+        + ", key=" + key
+        + ", acquired=" + acquired
+        + ", isRecycled=" + isRecycled
+        + ", resource=" + resource
+        + '}';
+  }
 }

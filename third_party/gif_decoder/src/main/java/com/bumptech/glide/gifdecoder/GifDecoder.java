@@ -121,7 +121,6 @@ public class GifDecoder {
   private int[] mainScratch;
 
   private int framePointer;
-  private byte[] data;
   private GifHeader header;
   private BitmapProvider bitmapProvider;
   private Bitmap previousImage;
@@ -142,12 +141,17 @@ public class GifDecoder {
      * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link
      *               android.graphics.Bitmap}.
      */
-    public Bitmap obtain(int width, int height, Bitmap.Config config);
+    Bitmap obtain(int width, int height, Bitmap.Config config);
 
     /**
      * Releases the given Bitmap back to the pool.
      */
-    public void release(Bitmap bitmap);
+    void release(Bitmap bitmap);
+  }
+
+  public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
+    this(provider);
+    setData(gifHeader, rawData);
   }
 
   public GifDecoder(BitmapProvider provider) {
@@ -163,8 +167,8 @@ public class GifDecoder {
     return header.height;
   }
 
-  public byte[] getData() {
-    return data;
+  public ByteBuffer getData() {
+    return rawData;
   }
 
   /**
@@ -344,17 +348,16 @@ public class GifDecoder {
 
   public void clear() {
     header = null;
-    data = null;
     mainPixels = null;
     mainScratch = null;
     if (previousImage != null) {
       bitmapProvider.release(previousImage);
     }
     previousImage = null;
+    rawData = null;
   }
 
   public synchronized void setData(GifHeader header, byte[] data) {
-    this.data = data;
     setData(header, ByteBuffer.wrap(data));
   }
 
@@ -395,7 +398,6 @@ public class GifDecoder {
    * @return read status code (0 = no errors).
    */
   public synchronized int read(byte[] data) {
-    this.data = data;
     this.header = getHeaderParser().setData(data).parseHeader();
     if (data != null) {
       // Initialize the raw data buffer.
