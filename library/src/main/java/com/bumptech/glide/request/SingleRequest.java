@@ -335,6 +335,9 @@ public final class SingleRequest<R> implements Request,
    *                 <code>null</code>
    */
   private void onResourceReady(Resource<R> resource, R result) {
+    status = Status.COMPLETE;
+    this.resource = resource;
+
     if (requestListener == null
         || !requestListener.onResourceReady(result, requestContext.getModel(), target,
         loadedFromMemoryCache, isFirstReadyResource())) {
@@ -343,8 +346,6 @@ public final class SingleRequest<R> implements Request,
       target.onResourceReady(result, animation);
     }
 
-    status = Status.COMPLETE;
-    this.resource = resource;
     notifyLoadSuccess();
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
