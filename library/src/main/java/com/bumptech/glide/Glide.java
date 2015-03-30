@@ -355,7 +355,6 @@ public class Glide implements ComponentCallbacks2 {
     Request request = target.getRequest();
     if (request != null) {
       request.clear();
-      target.setRequest(null);
     }
   }
 
@@ -367,7 +366,6 @@ public class Glide implements ComponentCallbacks2 {
    */
   public static void clear(FutureTarget<?> target) {
     target.clear();
-    target.setRequest(null);
   }
 
   /**

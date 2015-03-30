@@ -203,18 +203,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Resource<R> resource = decodeFromData(currentFetcher, currentData, currentDataSource);
     if (resource != null) {
       callback.onResourceReady(resource);
-      cleanup();
     } else {
       runGenerators();
     }
-  }
-
-  private void cleanup() {
-    currentData = null;
-    currentDataSource = null;
-    currentFetcher = null;
-    currentSourceKey = null;
-    currentThread = null;
   }
 
   private <Data> Resource<R> decodeFromData(DataFetcher<?> fetcher, Data data,
