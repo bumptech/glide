@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 class GifFrameLoader {
+  private static final String TAG = "GifFrameLoader";
 
   private final GifDecoder gifDecoder;
   private final Handler handler;
@@ -55,9 +57,12 @@ class GifFrameLoader {
   public GifFrameLoader(Context context, BitmapProvider bitmapProvider, GifHeader gifHeader,
       ByteBuffer byteBuffer, int width, int height,  Transformation<Bitmap> transformation,
       Bitmap firstFrame) {
-    this(context, Glide.with(context), new GifDecoder(bitmapProvider, gifHeader, byteBuffer), null,
-        getRequestBuilder(context, width, height), transformation,
-        firstFrame);
+    this(context,
+        Glide.with(context),
+        new GifDecoder(bitmapProvider, gifHeader, byteBuffer,
+            getSampleSize(gifHeader, width, height)),
+        null /*handler*/,
+        getRequestBuilder(context, width, height), transformation, firstFrame);
   }
 
   GifFrameLoader(Context context, RequestManager requestManager, GifDecoder gifDecoder,
@@ -262,6 +267,21 @@ class GifFrameLoader {
       Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
       handler.sendMessageAtTime(msg, targetTime);
     }
+  }
+  private static int getSampleSize(GifHeader gifHeader, int targetWidth, int targetHeight) {
+    int exactSampleSize = Math.min(gifHeader.getHeight() / targetHeight,
+        gifHeader.getWidth() / targetWidth);
+    int powerOfTwoSampleSize = exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize);
+    // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code
+    // than 0.
+    int sampleSize = Math.max(1, powerOfTwoSampleSize);
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Downsampling gif"
+          + ", sampleSize: " + sampleSize
+          + ", target dimens: [" + targetWidth + "x" + targetHeight
+          + ", actual dimens: [" + gifHeader.getWidth() + "x" + gifHeader.getHeight());
+    }
+    return sampleSize;
   }
 
   private static RequestBuilder<Bitmap> getRequestBuilder(Context context, int width, int height) {

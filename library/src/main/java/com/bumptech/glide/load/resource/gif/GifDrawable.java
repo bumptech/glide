@@ -71,7 +71,6 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   private Paint paint;
   private Rect destRect;
 
-
   /**
    * Constructor for GifDrawable.
    *
@@ -246,7 +245,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   private Paint getPaint() {
     if (paint == null) {
-      paint = new Paint();
+      paint = new Paint(Paint.FILTER_BITMAP_FLAG);
     }
     return paint;
   }

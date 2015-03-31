@@ -126,6 +126,9 @@ public class GifDecoder {
   private Bitmap previousImage;
   private boolean savePrevious;
   private int status;
+  private int sampleSize;
+  private int downsampledHeight;
+  private int downsampledWidth;
 
   /**
    * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs
@@ -150,8 +153,16 @@ public class GifDecoder {
   }
 
   public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
+    this(provider, gifHeader, rawData, 1 /*sampleSize*/);
+  }
+
+  public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
+      int sampleSize) {
     this(provider);
-    setData(gifHeader, rawData);
+    if (sampleSize <= 0) {
+      throw new IllegalArgumentException("Sample size must be >=0, not: " + sampleSize);
+    }
+    setData(gifHeader, rawData, sampleSize);
   }
 
   public GifDecoder(BitmapProvider provider) {
@@ -362,6 +373,10 @@ public class GifDecoder {
   }
 
   public synchronized void setData(GifHeader header, ByteBuffer buffer) {
+    setData(header, buffer, 1);
+  }
+
+  public synchronized void setData(GifHeader header, ByteBuffer buffer, int sampleSize) {
     this.status = STATUS_OK;
     this.header = header;
     framePointer = INITIAL_FRAME_POINTER;
@@ -379,9 +394,14 @@ public class GifDecoder {
       }
     }
 
+    this.sampleSize = sampleSize;
     // Now that we know the size, init scratch arrays.
+    // TODO: Find a way to avoid this entirely or at least downsample it
+    // (either should be possible).
     mainPixels = new byte[header.width * header.height];
-    mainScratch = new int[header.width * header.height];
+    mainScratch = new int[(header.width / sampleSize) * (header.height / sampleSize)];
+    downsampledWidth = header.width / sampleSize;
+    downsampledHeight = header.height / sampleSize;
   }
 
   private GifHeaderParser getHeaderParser() {
@@ -400,23 +420,7 @@ public class GifDecoder {
   public synchronized int read(byte[] data) {
     this.header = getHeaderParser().setData(data).parseHeader();
     if (data != null) {
-      // Initialize the raw data buffer.
-      rawData = ByteBuffer.wrap(data);
-      rawData.rewind();
-      rawData.order(ByteOrder.LITTLE_ENDIAN);
-
-      // Now that we know the size, init scratch arrays.
-      mainPixels = new byte[header.width * header.height];
-      mainScratch = new int[header.width * header.height];
-
-      // No point in specially saving an old frame if we're never going to use it.
-      savePrevious = false;
-      for (GifFrame frame : header.frames) {
-        if (frame.dispose == DISPOSAL_PREVIOUS) {
-          savePrevious = true;
-          break;
-        }
-      }
+      setData(header, data);
     }
 
     return status;
@@ -427,18 +431,13 @@ public class GifDecoder {
    * disposition codes).
    */
   private Bitmap setPixels(GifFrame currentFrame, GifFrame previousFrame) {
-
-    int width = header.width;
-    int height = header.height;
-
     // Final location of blended pixels.
     final int[] dest = mainScratch;
 
     // fill in starting image contents based on last image's dispose code
     if (previousFrame != null && previousFrame.dispose > DISPOSAL_UNSPECIFIED) {
       // We don't need to do anything for DISPOSAL_NONE, if it has the correct pixels so will our
-      // mainScratch
-      // and therefore so will our dest array.
+      // mainScratch and therefore so will our dest array.
       if (previousFrame.dispose == DISPOSAL_BACKGROUND) {
         // Start with a canvas filled with the background color
         int c = 0;
@@ -448,21 +447,26 @@ public class GifDecoder {
         Arrays.fill(dest, c);
       } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {
         // Start with the previous frame
-        previousImage.getPixels(dest, 0, width, 0, 0, width, height);
+        previousImage.getPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth,
+            downsampledHeight);
       }
     }
 
     // Decode pixels for this frame  into the global pixels[] scratch.
     decodeBitmapData(currentFrame);
 
+    int downsampledIH = currentFrame.ih / sampleSize;
+    int downsampledIY = currentFrame.iy / sampleSize;
+    int downsampledIW = currentFrame.iw / sampleSize;
+    int downsampledIX = currentFrame.ix / sampleSize;
     // Copy each source line to the appropriate place in the destination.
     int pass = 1;
     int inc = 8;
     int iline = 0;
-    for (int i = 0; i < currentFrame.ih; i++) {
+    for (int i = 0; i < downsampledIH; i++) {
       int line = i;
       if (currentFrame.interlace) {
-        if (iline >= currentFrame.ih) {
+        if (iline >= downsampledIH) {
           pass++;
           switch (pass) {
             case 2:
@@ -483,26 +487,27 @@ public class GifDecoder {
         line = iline;
         iline += inc;
       }
-      line += currentFrame.iy;
-      if (line < header.height) {
-        int k = line * header.width;
+      line += downsampledIY;
+      if (line < downsampledHeight) {
+        int k = line * downsampledWidth;
         // Start of line in dest.
-        int dx = k + currentFrame.ix;
+        int dx = k + downsampledIX;
         // End of dest line.
-        int dlim = dx + currentFrame.iw;
-        if ((k + header.width) < dlim) {
+        int dlim = dx + downsampledIW;
+        if (k + downsampledWidth < dlim) {
           // Past dest edge.
-          dlim = k + header.width;
+          dlim = k + downsampledWidth;
         }
         // Start of line in source.
-        int sx = i * currentFrame.iw;
+        int sx = i * sampleSize * currentFrame.iw;
+        int maxPositionInSource = sx + ((dlim - dx) * sampleSize);
         while (dx < dlim) {
           // Map color and insert in destination.
-          int index = ((int) mainPixels[sx++]) & 0xff;
-          int c = act[index];
-          if (c != 0) {
-            dest[dx] = c;
+          int averageColor = averageColorsNear(sx, maxPositionInSource, currentFrame.iw);
+          if (averageColor != 0) {
+            dest[dx] = averageColor;
           }
+          sx += sampleSize;
           dx++;
         }
       }
@@ -514,13 +519,60 @@ public class GifDecoder {
       if (previousImage == null) {
         previousImage = getNextBitmap();
       }
-      previousImage.setPixels(dest, 0, width, 0, 0, width, height);
+      previousImage.setPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth,
+          downsampledHeight);
     }
 
     // Set pixels for current image.
     Bitmap result = getNextBitmap();
-    result.setPixels(dest, 0, width, 0, 0, width, height);
+    result.setPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth, downsampledHeight);
     return result;
+  }
+
+  private int averageColorsNear(int positionInMainPixels, int maxPositionInMainPixels,
+      int currentFrameIw) {
+    int alphaSum = 0;
+    int redSum = 0;
+    int greenSum = 0;
+    int blueSum = 0;
+
+    int totalAdded = 0;
+    // Find the pixels in the current row.
+    for (int i = positionInMainPixels;
+        i < positionInMainPixels + sampleSize && i < mainPixels.length
+        && i < maxPositionInMainPixels; i++) {
+      int currentColorIndex = ((int) mainPixels[i]) & 0xff;
+      int currentColor = act[currentColorIndex];
+      if (currentColor != 0) {
+        alphaSum += currentColor >> 24 & 0x000000ff;
+        redSum += currentColor >> 16 & 0x000000ff;
+        greenSum += currentColor >> 8 & 0x000000ff;
+        blueSum += currentColor & 0x000000ff;
+        totalAdded++;
+      }
+    }
+    // Find the pixels in the next row.
+    for (int i = positionInMainPixels + currentFrameIw;
+        i < positionInMainPixels + currentFrameIw + sampleSize && i < mainPixels.length
+        && i < maxPositionInMainPixels; i++) {
+      int currentColorIndex = ((int) mainPixels[i]) & 0xff;
+      int currentColor = act[currentColorIndex];
+      if (currentColor != 0) {
+        alphaSum += currentColor >> 24 & 0x000000ff;
+        redSum += currentColor >> 16 & 0x000000ff;
+        greenSum += currentColor >> 8 & 0x000000ff;
+        blueSum += currentColor & 0x000000ff;
+        totalAdded++;
+      }
+    }
+    if (totalAdded == 0) {
+      return 0;
+    } else {
+      return ((alphaSum / totalAdded) << 24)
+          | ((redSum / totalAdded) << 16)
+          | ((greenSum / totalAdded) << 8)
+          | (blueSum / totalAdded);
+     }
   }
 
   /**
@@ -641,8 +693,7 @@ public class GifDecoder {
 
         while (top > 0) {
           // Pop a pixel off the pixel stack.
-          top--;
-          mainPixels[pi++] = pixelStack[top];
+          mainPixels[pi++] = pixelStack[--top];
           i++;
         }
       }
@@ -693,9 +744,9 @@ public class GifDecoder {
   }
 
   private Bitmap getNextBitmap() {
-    Bitmap result = bitmapProvider.obtain(header.width, header.height, BITMAP_CONFIG);
+    Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, BITMAP_CONFIG);
     if (result == null) {
-      result = Bitmap.createBitmap(header.width, header.height, BITMAP_CONFIG);
+      result = Bitmap.createBitmap(downsampledWidth, downsampledHeight, BITMAP_CONFIG);
     }
     setAlpha(result);
     return result;
