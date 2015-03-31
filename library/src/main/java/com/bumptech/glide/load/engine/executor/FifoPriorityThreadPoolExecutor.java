@@ -92,21 +92,6 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
       this.order = order;
     }
 
-    @SuppressWarnings("PMD.PreserveStackTrace")
-    @Override
-    protected void done() {
-      super.done();
-      if (!isCancelled()) {
-        try {
-          get();
-        } catch (ExecutionException e) {
-          throw new RuntimeException(e.getCause());
-        } catch (CancellationException | InterruptedException e) {
-          // Ignore.
-        }
-      }
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object o) {
