@@ -493,14 +493,15 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
      * @param result object returned by {@link Resource#get()}, checked for type and never <code>null</code>
      */
     private void onResourceReady(Resource<?> resource, R result) {
+        status = Status.COMPLETE;
+        this.resource = resource;
+
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstReadyResource())) {
             GlideAnimation<R> animation = animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
             target.onResourceReady(result, animation);
         }
 
-        status = Status.COMPLETE;
-        this.resource = resource;
         notifyLoadSuccess();
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
