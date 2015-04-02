@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.testing.EqualsTester;
-import org.robolectric.RobolectricTestRunner;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -39,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -51,7 +51,8 @@ public class GifFrameLoaderTest {
 
   @Mock GifFrameLoader.FrameCallback callback;
   @Mock GifDecoder gifDecoder;
-  @Mock Handler handler;
+  @Mock
+  Handler handler;
   @Mock Transformation<Bitmap> transformation;
   private GifFrameLoader loader;
   private RequestBuilder<Bitmap> requestBuilder;
