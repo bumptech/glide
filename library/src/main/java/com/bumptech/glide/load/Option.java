@@ -2,7 +2,6 @@ package com.bumptech.glide.load;
 
 import com.bumptech.glide.util.Preconditions;
 
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 /**
@@ -28,14 +27,11 @@ public final class Option<T> implements Comparable<Option<?>> {
 
   private static final CacheKeyUpdater<Object> EMPTY_UPDATER = new CacheKeyUpdater<Object>() {
     @Override
-    public void update(String key, Object value, MessageDigest messageDigest) {
+    public void update(byte[] keyBytes, Object value, MessageDigest messageDigest) {
       // Do nothing.
     }
   };
 
-  private final T defaultValue;
-  private final CacheKeyUpdater<T> cacheKeyUpdater;
-  private final String key;
 
   /**
    * Returns a new {@link Option} that does not affect disk cache keys with a {@code null} default
@@ -82,6 +78,11 @@ public final class Option<T> implements Comparable<Option<?>> {
     return new Option<>(key, defaultValue, cacheKeyUpdater);
   }
 
+  private final T defaultValue;
+  private final CacheKeyUpdater<T> cacheKeyUpdater;
+  private final String key;
+  private volatile byte[] keyBytes;
+
   Option(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
     this.key = Preconditions.checkNotEmpty(key);
     this.defaultValue = defaultValue;
@@ -101,7 +102,14 @@ public final class Option<T> implements Comparable<Option<?>> {
    * the constructor.
    */
   public void update(T value, MessageDigest messageDigest) {
-    cacheKeyUpdater.update(key, value, messageDigest);
+    cacheKeyUpdater.update(getKeyBytes(), value, messageDigest);
+  }
+
+  private byte[] getKeyBytes() {
+    if (keyBytes == null) {
+      keyBytes = key.getBytes(Key.CHARSET);
+    }
+    return keyBytes;
   }
 
   @Override
@@ -140,11 +148,10 @@ public final class Option<T> implements Comparable<Option<?>> {
    * generate a disk cache key.
    */
   public interface CacheKeyUpdater<T> {
-    Charset CHARSET = Key.CHARSET;
     /**
      * Updates the given {@link MessageDigest} with the bytes of the given key (to avoid incidental
      * value collisions when values are not particularly unique) and value.
      */
-    void update(String key, T value, MessageDigest messageDigest);
+    void update(byte[] keyBytes, T value, MessageDigest messageDigest);
   }
 }

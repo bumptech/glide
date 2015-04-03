@@ -40,8 +40,8 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
       new Option.CacheKeyUpdater<Long>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
         @Override
-        public void update(String key, Long value, MessageDigest messageDigest) {
-          messageDigest.update(key.getBytes(CHARSET));
+        public void update(byte[] keyBytes, Long value, MessageDigest messageDigest) {
+          messageDigest.update(keyBytes);
           synchronized (buffer) {
             buffer.rewind();
             messageDigest.update(buffer.putLong(value).array());
