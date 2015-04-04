@@ -23,7 +23,7 @@ public class ImageHeaderParser {
     /**
      * The format of the image data including whether or not the image may include transparent pixels.
      */
-    public static enum ImageType {
+    public enum ImageType {
         /** GIF type. */
         GIF(true),
         /** JPG type. */
@@ -171,18 +171,25 @@ public class ImageHeaderParser {
             segmentLength = streamReader.getUInt16() - 2;
 
             if (segmentType != EXIF_SEGMENT_TYPE) {
-                if (segmentLength != streamReader.skip(segmentLength)) {
+                long skipped = streamReader.skip(segmentLength);
+                if (skipped != segmentLength) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, "Unable to skip enough data for type=" + segmentType);
+                        Log.d(TAG, "Unable to skip enough data"
+                            + ", type: " + segmentType
+                            + ", wanted to skip: " + segmentLength
+                            + ", but actually skipped: " + skipped);
                     }
                     return null;
                 }
             } else {
                 byte[] segmentData = new byte[segmentLength];
-
-                if (segmentLength != streamReader.read(segmentData)) {
+                int read = streamReader.read(segmentData);
+                if (read != segmentLength) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, "Unable to read segment data for type=" + segmentType + " length=" + segmentLength);
+                        Log.d(TAG, "Unable to read segment data"
+                            + ", type: " + segmentType
+                            + ", length: " + segmentLength
+                            + ", actually read: " + read);
                     }
                     return null;
                 } else {
@@ -229,7 +236,7 @@ public class ImageHeaderParser {
             // 12 is max format code.
             if (formatCode < 1 || formatCode > 12) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Got invalid format code = " + formatCode);
+                    Log.d(TAG, "Got invalid format code=" + formatCode);
                 }
                 continue;
             }
@@ -244,7 +251,7 @@ public class ImageHeaderParser {
             }
 
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Got tagIndex=" + i + " tagType=" + tagType + " formatCode =" + formatCode
+                Log.d(TAG, "Got tagIndex=" + i + " tagType=" + tagType + " formatCode=" + formatCode
                         + " componentCount=" + componentCount);
             }
 
@@ -332,11 +339,39 @@ public class ImageHeaderParser {
         }
 
         public long skip(long total) throws IOException {
-            return is.skip(total);
+            if (total < 0) {
+                return 0;
+            }
+
+            long skipped;
+            long toSkip = total;
+            while (toSkip > 0) {
+                skipped = is.skip(toSkip);
+                if (skipped > 0) {
+                    toSkip -= skipped;
+                } else {
+                    // Skip has no specific contract as to what happens when you reach the end of
+                    // the stream. To differentiate between temporarily not having more data and
+                    // having finished the stream, we read a single byte when we fail to skip any
+                    // amount of data.
+                    int testEofByte = is.read();
+                    if (testEofByte == -1) {
+                        break;
+                    } else {
+                        toSkip--;
+                    }
+                }
+            }
+            return total - toSkip;
         }
 
         public int read(byte[] buffer) throws IOException {
-            return is.read(buffer);
+            int toRead = buffer.length;
+            int read;
+            while (toRead > 0 && ((read = is.read(buffer, buffer.length - toRead, toRead)) != -1)) {
+                toRead -= read;
+            }
+            return buffer.length - toRead;
         }
 
         public int getByte() throws IOException {
