@@ -1,5 +1,6 @@
 package com.bumptech.glide.resize.load;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -39,6 +40,12 @@ public class ExifTest {
         }
       }
     }
+  }
+
+  @Test
+  public void testIssue387() throws IOException {
+      InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
+      assertThat(new ImageHeaderParser(is).getOrientation()).isEqualTo(6);
   }
 
   @Test

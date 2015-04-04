@@ -26,22 +26,12 @@ public class ImageHeaderParser {
    * The format of the image data including whether or not the image may include transparent
    * pixels.
    */
-  public static enum ImageType {
-    /**
-     * GIF type.
-     */
+  public enum ImageType {
     GIF(true),
-    /**
-     * JPG type.
-     */
     JPEG(false),
-    /**
-     * PNG type with alpha.
-     */
+    /** PNG type with alpha. */
     PNG_A(true),
-    /**
-     * PNG type without alpha.
-     */
+    /** PNG type without alpha. */
     PNG(false),
     /**
      * Unrecognized type.
@@ -192,23 +182,29 @@ public class ImageHeaderParser {
       segmentLength = reader.getUInt16() - 2;
 
       if (segmentType != EXIF_SEGMENT_TYPE) {
-        if (segmentLength != reader.skip(segmentLength)) {
-          if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Unable to skip enough data for type=" + segmentType);
-          }
-          return null;
+        long skipped = reader.skip(segmentLength);
+        if (skipped != segmentLength) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unable to skip enough data"
+                    + ", type: " + segmentType
+                    + ", wanted to skip: " + segmentLength
+                    + ", but actually skipped: " + skipped);
+            }
+            return null;
         }
       } else {
         byte[] segmentData = new byte[segmentLength];
-
-        if (segmentLength != reader.read(segmentData)) {
-          if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG,
-                "Unable to read segment data for type=" + segmentType + " length=" + segmentLength);
-          }
-          return null;
+        int read = reader.read(segmentData);
+        if (read != segmentLength) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unable to read segment data"
+                    + ", type: " + segmentType
+                    + ", length: " + segmentLength
+                    + ", actually read: " + read);
+            }
+            return null;
         } else {
-          return segmentData;
+            return segmentData;
         }
       }
     }
@@ -390,7 +386,6 @@ public class ImageHeaderParser {
   private static class StreamReader implements Reader {
     private final InputStream is;
     // Motorola / big endian byte order.
-
     public StreamReader(InputStream is) {
       this.is = is;
     }
@@ -407,12 +402,40 @@ public class ImageHeaderParser {
 
     @Override
     public long skip(long total) throws IOException {
-      return is.skip(total);
+      if (total < 0) {
+          return 0;
+      }
+
+      long skipped;
+      long toSkip = total;
+      while (toSkip > 0) {
+          skipped = is.skip(toSkip);
+          if (skipped > 0) {
+              toSkip -= skipped;
+          } else {
+              // Skip has no specific contract as to what happens when you reach the end of
+              // the stream. To differentiate between temporarily not having more data and
+              // having finished the stream, we read a single byte when we fail to skip any
+              // amount of data.
+              int testEofByte = is.read();
+              if (testEofByte == -1) {
+                  break;
+              } else {
+                  toSkip--;
+              }
+          }
+      }
+      return total - toSkip;
     }
 
     @Override
     public int read(byte[] buffer) throws IOException {
-      return is.read(buffer);
+      int toRead = buffer.length;
+      int read;
+      while (toRead > 0 && ((read = is.read(buffer, buffer.length - toRead, toRead)) != -1)) {
+          toRead -= read;
+      }
+      return buffer.length - toRead;
     }
 
     @Override

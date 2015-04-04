@@ -1,21 +1,25 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
+import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 import com.bumptech.glide.testutil.TestResourceUtil;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.robolectric.util.Util;
 
 import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-@RunWith(JUnit4.class)
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class ImageHeaderParserTest {
 
   private static final byte[] PNG_HEADER_WITH_IHDR_CHUNK =
@@ -116,6 +120,30 @@ public class ImageHeaderParserTest {
     });
   }
 
+  // Test for #387.
+  @Test
+  public void testHandlesPartialReads() throws IOException {
+    InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
+    ImageHeaderParser parser = new ImageHeaderParser(new PartialReadInputStream(is));
+    assertThat(parser.getOrientation()).isEqualTo(6);
+  }
+
+  // Test for #387.
+  @Test
+  public void testHandlesPartialSkips() throws IOException {
+    InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
+    ImageHeaderParser parser = new ImageHeaderParser(new PartialSkipInputStream(is));
+    assertThat(parser.getOrientation()).isEqualTo(6);
+  }
+
+  @Test
+  public void testHandlesSometimesZeroSkips() throws IOException {
+    InputStream is = new ByteArrayInputStream(
+        new byte[] { (byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a });
+    ImageHeaderParser parser = new ImageHeaderParser(new SometimesZeroSkipInputStream(is));
+    assertEquals(ImageType.PNG, parser.getType());
+  }
+
   private interface ParserTestCase {
     void run(ImageHeaderParser parser) throws IOException;
   }
@@ -135,5 +163,57 @@ public class ImageHeaderParserTest {
     System.arraycopy(PNG_HEADER_WITH_IHDR_CHUNK, 0, result, 0, PNG_HEADER_WITH_IHDR_CHUNK.length);
     result[result.length - 1] = (byte) bitDepth;
     return result;
+  }
+
+  private static class SometimesZeroSkipInputStream extends FilterInputStream {
+    boolean returnZeroFlag = true;
+
+    protected SometimesZeroSkipInputStream(InputStream in) {
+        super(in);
+    }
+
+    @Override
+    public long skip(long byteCount) throws IOException {
+      final long result;
+      if (returnZeroFlag) {
+        result = 0;
+      } else {
+        result = super.skip(byteCount);
+      }
+      returnZeroFlag = !returnZeroFlag;
+      return result;
+    }
+  }
+
+  private static class PartialSkipInputStream extends FilterInputStream {
+
+    protected PartialSkipInputStream(InputStream in) {
+        super(in);
+    }
+
+    @Override
+    public long skip(long byteCount) throws IOException {
+        long toActuallySkip = byteCount / 2;
+        if (byteCount == 1) {
+            toActuallySkip = 1;
+        }
+        return super.skip(toActuallySkip);
+    }
+  }
+
+  private static class PartialReadInputStream extends FilterInputStream {
+
+    protected PartialReadInputStream(InputStream in) {
+        super(in);
+    }
+
+    @Override
+    public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+        int toActuallyRead = byteCount / 2;
+        if (byteCount == 1) {
+            toActuallyRead = 1;
+        }
+        return super.read(buffer, byteOffset, toActuallyRead);
+    }
   }
 }
