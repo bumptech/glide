@@ -343,10 +343,9 @@ public class ImageHeaderParser {
                 return 0;
             }
 
-            long skipped;
             long toSkip = total;
             while (toSkip > 0) {
-                skipped = is.skip(toSkip);
+                long skipped = is.skip(toSkip);
                 if (skipped > 0) {
                     toSkip -= skipped;
                 } else {
