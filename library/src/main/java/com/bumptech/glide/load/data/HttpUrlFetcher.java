@@ -7,6 +7,7 @@ import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.util.ContentLengthInputStream;
 import com.bumptech.glide.util.LogTime;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Map;
  * A DataFetcher that retrieves an {@link java.io.InputStream} for a Url.
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
+  private static final String CONTENT_LENGTH_HEADER = "Content-Length";
   private static final int MAXIMUM_REDIRECTS = 5;
   private static final int DEFAULT_TIMEOUT_MS = 2500;
   // Visible for testing.
@@ -95,7 +97,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     }
     final int statusCode = urlConnection.getResponseCode();
     if (statusCode / 100 == 2) {
-      stream = urlConnection.getInputStream();
+      String contentLength = urlConnection.getHeaderField(CONTENT_LENGTH_HEADER);
+      stream = ContentLengthInputStream.obtain(urlConnection.getInputStream(), contentLength);
       return stream;
     } else if (statusCode / 100 == 3) {
       String redirectUrlString = urlConnection.getHeaderField("Location");

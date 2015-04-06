@@ -7,6 +7,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.util.ContentLengthInputStream;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -20,6 +21,7 @@ import java.util.Map;
  * Fetches an {@link InputStream} using the okhttp library.
  */
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
+  private static final String CONTENT_LENGTH_HEADER = "Content-Length";
   private final OkHttpClient client;
   private final GlideUrl url;
   private InputStream stream;
@@ -50,8 +52,9 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
       @Override
       public void onResponse(Response response) throws IOException {
         if (response.isSuccessful()) {
+          String contentLength = response.header(CONTENT_LENGTH_HEADER);
           responseBody = response.body();
-          stream = responseBody.byteStream();
+          stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
         } else if (Logs.isEnabled(Log.DEBUG)) {
           Logs.log(Log.DEBUG, "OkHttp got error response: " + response.code() + ", "
               + response.message());
