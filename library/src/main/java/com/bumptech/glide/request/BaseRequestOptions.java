@@ -320,6 +320,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #centerCrop(android.content.Context)
    */
   public CHILD optionalCenterCrop(Context context) {
+    downsample(DownsampleStrategy.CENTER_OUTSIDE);
     return optionalTransform(context, new CenterCrop(context));
   }
 
@@ -332,6 +333,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalCenterCrop(android.content.Context)
    */
   public CHILD centerCrop(Context context) {
+    downsample(DownsampleStrategy.CENTER_OUTSIDE);
     return transform(context, new CenterCrop(context));
   }
 
@@ -344,7 +346,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #fitCenter(android.content.Context)
    */
   public CHILD optionalFitCenter(Context context) {
-    downsample(DownsampleStrategy.FIT_CENTER);
+    downsample(DownsampleStrategy.CENTER_INSIDE);
     return optionalTransform(context, new FitCenter(context));
   }
 
@@ -357,7 +359,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalFitCenter(android.content.Context)
    */
   public CHILD fitCenter(Context context) {
-    downsample(DownsampleStrategy.FIT_CENTER);
+    downsample(DownsampleStrategy.CENTER_INSIDE);
     return transform(context, new FitCenter(context));
   }
 

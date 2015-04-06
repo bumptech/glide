@@ -23,7 +23,7 @@ public abstract class DownsampleStrategy {
    * exactly equal to the requested size and the other dimension is less than or equal to the
    * requested size.
    */
-  public static final DownsampleStrategy FIT_CENTER = new DownsampleStrategy() {
+  public static final DownsampleStrategy CENTER_INSIDE = new DownsampleStrategy() {
     @Override
     public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
@@ -44,6 +44,42 @@ public abstract class DownsampleStrategy {
       float widthPercentage = requestedWidth / (float) sourceWidth;
       float heightPercentage = requestedHeight / (float) sourceHeight;
       int targetDimen = widthPercentage < heightPercentage ? requestedWidth : requestedHeight;
+      return targetDimen * sampleSize;
+    }
+  };
+
+  /**
+   * Downsamples, maintaining the original aspect ratio , so that one of the image's dimensions is
+   * exactly equal to the requested size and the other dimension is greater than or equal to
+   * the requested size.
+   */
+  public static final DownsampleStrategy CENTER_OUTSIDE = new DownsampleStrategy() {
+    @Override
+    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight) {
+      return AT_LEAST.getSampleSize(sourceWidth, sourceHeight, requestedWidth, requestedHeight);
+    }
+
+    @Override
+    public int getDensity(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight) {
+      if (sourceWidth * requestedHeight > sourceHeight * requestedHeight) {
+        return sourceHeight;
+      } else {
+        return sourceWidth;
+      }
+    }
+
+    @Override
+    public int getTargetDensity(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight, int sampleSize) {
+
+      final int targetDimen;
+      if (sourceWidth * requestedHeight > sourceHeight * requestedHeight) {
+        targetDimen = requestedHeight;
+      } else {
+        targetDimen = requestedWidth;
+      }
       return targetDimen * sampleSize;
     }
   };
