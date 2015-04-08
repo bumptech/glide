@@ -370,6 +370,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     }
 
     if (!requestOptions.isTransformationSet() && view.getScaleType() != null) {
+      if (requestOptions.isLocked()) {
+        requestOptions = requestOptions.clone();
+      }
       switch (view.getScaleType()) {
         case CENTER_CROP:
           requestOptions.optionalCenterCrop(context);

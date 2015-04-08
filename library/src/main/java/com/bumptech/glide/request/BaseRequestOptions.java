@@ -283,6 +283,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return isSet(TRANSFORMATION);
   }
 
+  public final boolean isLocked() {
+    return isLocked;
+  }
+
   /**
    * Sets the value for key
    * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#COMPRESSION_FORMAT}.
