@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.os.Build;
@@ -275,6 +278,51 @@ public final class TransformationUtils {
     final Canvas canvas = new Canvas(result);
     final Paint paint = new Paint(PAINT_FLAGS);
     canvas.drawBitmap(toOrient, matrix, paint);
+
+    return result;
+  }
+
+  /**
+   * Crop the image to a circle and resize to the specified width/height.  The circle crop will
+   * have the same width and height equal to the min-edge of the result image.
+   *
+   * @param recycled A mutable Bitmap with dimensions width and height that we can load the cropped
+   *                 portion of toCrop into.
+   * @param toCrop   The Bitmap to resize.
+   * @param width    The width in pixels of the final Bitmap.
+   * @param height   The height in pixels of the final Bitmap.
+   * @return The resized Bitmap (will be recycled if recycled is not null).
+   */
+  public static Bitmap circleCrop(Bitmap recycled, Bitmap toCrop, int destWidth, int destHeight) {
+    if (toCrop == null) {
+      return null;
+    }
+
+    Bitmap result = (recycled != null) ? recycled
+        : Bitmap.createBitmap(destWidth, destHeight, getSafeConfig(toCrop));
+    result.setHasAlpha(true);
+
+    int destMinEdge = Math.min(destWidth, destHeight);
+    float radius = destMinEdge / 2f;
+    Rect destRect = new Rect((destWidth - destMinEdge) / 2, (destHeight - destMinEdge) / 2,
+        destMinEdge, destMinEdge);
+
+    int srcWidth = toCrop.getWidth();
+    int srcHeight = toCrop.getHeight();
+    int srcMinEdge = Math.min(srcWidth, srcHeight);
+    Rect srcRect = new Rect((srcWidth - srcMinEdge) / 2, (srcHeight - srcMinEdge) / 2,
+        srcMinEdge, srcMinEdge);
+
+    Canvas canvas = new Canvas(result);
+    Paint paint = new Paint(PAINT_FLAGS);
+    paint.setAntiAlias(true);
+
+    // Draw a circle
+    canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius, paint);
+
+    // Draw the bitmap in the circle
+    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+    canvas.drawBitmap(toCrop, srcRect, destRect, paint);
 
     return result;
   }
