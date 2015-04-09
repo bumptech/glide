@@ -16,6 +16,11 @@ interface DataFetcherGenerator {
   interface FetcherReadyCallback {
 
     /**
+     * Requests that we call startNext() again on a Glide owned thread.
+     */
+    void reschedule();
+
+    /**
      * Notifies the callback that the load is complete.
      *
      * @param sourceKey The id of the loaded data.

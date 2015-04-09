@@ -179,6 +179,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
+  public void reschedule() {
+    runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
+    callback.reschedule(this);
+  }
+
+  @Override
   public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
       DataSource dataSource) {
     this.currentSourceKey = sourceKey;

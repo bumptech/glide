@@ -35,6 +35,7 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
   private final Iterator<ModelLoader.LoadData<?>> dataLoaderIterator;
 
   private DataCacheGenerator sourceCacheGenerator;
+  private Object dataToCache;
   private volatile ModelLoader.LoadData<?> loadData;
 
   public SourceGenerator(int width, int height,
@@ -50,6 +51,10 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
   @Override
   public boolean startNext() {
+    if (dataToCache != null) {
+      cacheData();
+      dataToCache = null;
+    }
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
@@ -65,6 +70,30 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
     return loadData != null;
   }
 
+  private void cacheData() {
+    long startTime = LogTime.getLogTime();
+    try {
+      Encoder<Object> encoder = requestContext.getSourceEncoder(dataToCache);
+      DataCacheWriter<Object> writer =
+          new DataCacheWriter<>(encoder, dataToCache, requestContext.getOptions());
+      Key originalKey = new DataCacheKey(loadData.sourceKey, requestContext.getSignature());
+      diskCache.put(originalKey, writer);
+      if (Logs.isEnabled(Log.VERBOSE)) {
+        Logs.log(Log.VERBOSE, "Finished encoding source to cache"
+            + ", key: " + originalKey
+            + ", data: " + dataToCache
+            + ", encoder: " + encoder
+            + ", duration: " + LogTime.getElapsedMillis(startTime));
+      }
+    } finally {
+      loadData.fetcher.cleanup();
+    }
+
+    sourceCacheGenerator =
+        new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), width, height,
+            diskCache, requestContext, this);
+  }
+
   @Override
   public void cancel() {
     LoadData<?> local = loadData;
@@ -77,35 +106,21 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
   public void onDataReady(Object data) {
     DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
-      long startTime = LogTime.getLogTime();
-      try {
-        Encoder<Object> encoder = requestContext.getSourceEncoder(data);
-        DataCacheWriter<Object> writer =
-            new DataCacheWriter<>(encoder, data, requestContext.getOptions());
-        Key originalKey = new DataCacheKey(loadData.sourceKey, requestContext.getSignature());
-        diskCache.put(originalKey, writer);
-        if (Logs.isEnabled(Log.VERBOSE)) {
-          Logs.log(Log.VERBOSE, "Finished encoding source to cache"
-              + ", key: " + originalKey
-              + ", data: " + data
-              + ", encoder: " + encoder
-              + ", duration: " + LogTime.getElapsedMillis(startTime));
-        }
-      } finally {
-        loadData.fetcher.cleanup();
-      }
-
-      sourceCacheGenerator =
-          new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), width, height,
-              diskCache, requestContext, this);
-      if (!sourceCacheGenerator.startNext()) {
-        cb.onDataFetcherReady(loadData.sourceKey, null /*data*/, loadData.fetcher,
-            loadData.fetcher.getDataSource());
-      }
+      dataToCache = data;
+      // We might be being called back on someone else's thread. Before doing anything, we should
+      // reschedule to get back onto Glide's thread.
+      cb.reschedule();
     } else {
       cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,
           loadData.fetcher.getDataSource());
     }
+  }
+
+  @Override
+  public void reschedule() {
+    // We don't expect this to happen, although if we ever need it to we can delegate to our
+    // callback.
+    throw new UnsupportedOperationException();
   }
 
   // Called from source cache generator.
