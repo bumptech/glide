@@ -33,7 +33,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url.toStringUrl());
         for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
-          requestBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+            requestBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
         }
         Request request = requestBuilder.build();
 
@@ -50,12 +50,12 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void cleanup() {
-        try {
-            if (stream != null) {
+        if (stream != null) {
+            try {
                 stream.close();
+            } catch (IOException e) {
+                // Ignored
             }
-        } catch (IOException e) {
-            // Ignored
         }
         if (responseBody != null) {
             try {
