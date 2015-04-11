@@ -23,6 +23,9 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.LogTime;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -74,28 +77,57 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
   @Override
   public EncodeStrategy getEncodeStrategy(Options options) {
-    return options.get(ENCODE_TRANSFORMATION) ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
+    Boolean encodeTransformation = options.get(ENCODE_TRANSFORMATION);
+    return encodeTransformation != null && encodeTransformation
+        ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
   }
 
   @Override
-  public boolean encode(Resource<GifDrawable> resource, OutputStream os, Options options) {
+  public boolean encode(Resource<GifDrawable> resource, File file, Options options) {
     GifDrawable drawable = resource.get();
-    if (options.get(ENCODE_TRANSFORMATION)) {
-      return encodeTransformed(drawable, os);
+    Transformation<Bitmap> transformation = drawable.getFrameTransformation();
+    boolean isTransformed = !(transformation instanceof UnitTransformation);
+    if (isTransformed && options.get(ENCODE_TRANSFORMATION)) {
+      return encodeTransformedToFile(drawable, file);
     } else {
-      return writeDataDirect(drawable.getBuffer(), os);
+      return writeDataDirect(drawable.getBuffer(), file);
     }
   }
 
-  private boolean encodeTransformed(GifDrawable drawable, OutputStream os) {
+  private boolean encodeTransformedToFile(GifDrawable drawable, File file) {
     long startTime = LogTime.getLogTime();
-    Transformation<Bitmap> transformation = drawable.getFrameTransformation();
-    if (transformation instanceof UnitTransformation) {
-      return writeDataDirect(drawable.getBuffer(), os);
+    OutputStream os = null;
+    boolean success = false;
+    try {
+      os = new BufferedOutputStream(new FileOutputStream(file));
+      success = encodeTransformedToStream(drawable, os);
+      os.close();
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to encode GIF", e);
+      }
+    } finally {
+      if (os != null) {
+        try {
+          os.close();
+        } catch (IOException e) {
+          // Ignored.
+        }
+      }
+
+    }
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Re-encoded gif with " + drawable.getFrameCount() + " frames and "
+          + drawable.getBuffer().limit() + " bytes in " + LogTime.getElapsedMillis(startTime)
+          + " ms");
     }
 
-    GifDecoder decoder = decodeHeaders(drawable.getBuffer());
+    return success;
+  }
 
+  private boolean encodeTransformedToStream(GifDrawable drawable, OutputStream os) {
+    Transformation<Bitmap> transformation = drawable.getFrameTransformation();
+    GifDecoder decoder = decodeHeaders(drawable.getBuffer());
     AnimatedGifEncoder encoder = factory.buildEncoder();
     if (!encoder.start(os)) {
       return false;
@@ -119,21 +151,12 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
       }
     }
 
-    boolean result = encoder.finish();
-
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG,
-          "Encoded gif with " + decoder.getFrameCount() + " frames and "
-              + drawable.getBuffer().limit() + " bytes in " + LogTime.getElapsedMillis(startTime)
-              + " ms");
-    }
-
-    return result;
+    return encoder.finish();
   }
 
-  private boolean writeDataDirect(ByteBuffer data, OutputStream os) {
+  private boolean writeDataDirect(ByteBuffer data, File file) {
     try {
-      ByteBufferUtil.encode(data, os);
+      ByteBufferUtil.toFile(data, file);
     } catch (IOException e) {
       if (Logs.isEnabled(Log.WARN)) {
         Logs.log(Log.WARN, "Failed to write gif data", e);

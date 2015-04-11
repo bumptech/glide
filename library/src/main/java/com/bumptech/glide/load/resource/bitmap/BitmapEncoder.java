@@ -11,6 +11,9 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -48,20 +51,39 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   private static final String TAG = "BitmapEncoder";
 
   @Override
-  public boolean encode(Resource<Bitmap> resource, OutputStream os, Options options) {
+  public boolean encode(Resource<Bitmap> resource, File file, Options options) {
     final Bitmap bitmap = resource.get();
 
     long start = LogTime.getLogTime();
     Bitmap.CompressFormat format = getFormat(bitmap, options);
     int quality = options.get(COMPRESSION_QUALITY);
-    bitmap.compress(format, quality, os);
+
+    boolean success = false;
+    OutputStream os = null;
+    try {
+      os = new FileOutputStream(file);
+      bitmap.compress(format, quality, os);
+      os.close();
+      success = true;
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to encode Bitmap", e);
+      }
+    } finally {
+      if (os != null) {
+        try {
+          os.close();
+        } catch (IOException e) {
+          // Do nothing.
+        }
+      }
+    }
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG,
-          "Compressed with type: " + format + " of size " + Util.getBitmapByteSize(bitmap) + " in "
-              + LogTime.getElapsedMillis(start));
+      Log.v(TAG, "Compressed with type: " + format + " of size " + Util.getBitmapByteSize(bitmap)
+          + " in " + LogTime.getElapsedMillis(start));
     }
-    return true;
+    return success;
   }
 
   private Bitmap.CompressFormat getFormat(Bitmap bitmap, Options options) {

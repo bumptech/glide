@@ -11,18 +11,22 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.util.ByteBufferUtil;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = {
@@ -35,15 +39,20 @@ public class BitmapEncoderTest {
     harness = new EncoderHarness();
   }
 
+  @After
+  public void tearDown() {
+    harness.tearDown();
+  }
+
   @Test
-  public void testBitmapIsEncoded() {
+  public void testBitmapIsEncoded() throws IOException {
     String fakeBytes = harness.encode();
 
     assertContains(fakeBytes, Shadows.shadowOf(harness.bitmap).getDescription());
   }
 
   @Test
-  public void testBitmapIsEncodedWithGivenQuality() {
+  public void testBitmapIsEncodedWithGivenQuality() throws IOException {
     int quality = 7;
     harness.setQuality(quality);
 
@@ -53,7 +62,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testEncoderObeysNonNullCompressFormat() {
+  public void testEncoderObeysNonNullCompressFormat() throws IOException {
     Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
     harness.setFormat(format);
 
@@ -63,7 +72,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() {
+  public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(false);
 
@@ -73,7 +82,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() {
+  public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(true);
 
@@ -85,7 +94,7 @@ public class BitmapEncoderTest {
   @Test
   public void testReturnsTrueFromWrite() {
     BitmapEncoder encoder = new BitmapEncoder();
-    assertTrue(encoder.encode(harness.resource, harness.os, harness.options));
+    assertTrue(encoder.encode(harness.resource, harness.file, harness.options));
   }
 
   @Test
@@ -102,8 +111,8 @@ public class BitmapEncoderTest {
   private static class EncoderHarness {
     Resource<Bitmap> resource = mock(Resource.class);
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
     Options options = new Options();
+    File file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
 
     public EncoderHarness() {
       when(resource.get()).thenReturn(bitmap);
@@ -117,10 +126,15 @@ public class BitmapEncoderTest {
       options.set(BitmapEncoder.COMPRESSION_FORMAT, format);
     }
 
-    public String encode() {
+    public String encode() throws IOException {
       BitmapEncoder encoder = new BitmapEncoder();
-      encoder.encode(resource, os, options);
-      return new String(os.toByteArray());
+      encoder.encode(resource, file, options);
+      byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
+      return new String(data);
+    }
+
+    public void tearDown() {
+      file.delete();
     }
   }
 

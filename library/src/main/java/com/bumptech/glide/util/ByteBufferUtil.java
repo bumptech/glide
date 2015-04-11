@@ -1,9 +1,12 @@
 package com.bumptech.glide.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -18,7 +21,60 @@ public final class ByteBufferUtil {
     // Utility class.
   }
 
-  public static void encode(ByteBuffer byteBuffer, OutputStream os) throws IOException {
+  public static ByteBuffer fromFile(File file) throws IOException {
+    RandomAccessFile raf = null;
+    FileChannel channel = null;
+    try {
+      raf = new RandomAccessFile(file, "r");
+      channel = raf.getChannel();
+      return channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length()).load();
+    } finally {
+      if (channel != null) {
+        try {
+          channel.close();
+        } catch (IOException e) {
+          // Ignored.
+        }
+      }
+      if (raf != null) {
+        try {
+          raf.close();
+        } catch (IOException e) {
+          // Ignored.
+        }
+      }
+    }
+  }
+
+  public static void toFile(ByteBuffer buffer, File file) throws IOException {
+    RandomAccessFile raf = null;
+    FileChannel channel = null;
+    try {
+      raf = new RandomAccessFile(file, "rw");
+      channel = raf.getChannel();
+      channel.write(buffer);
+      channel.force(false /*metadata*/);
+      channel.close();
+      raf.close();
+    } finally {
+      if (channel != null) {
+        try {
+          channel.close();
+        } catch (IOException e) {
+          // Ignored.
+        }
+      }
+      if (raf != null) {
+        try {
+          raf.close();
+        } catch (IOException e) {
+          // Ignored.
+        }
+      }
+    }
+  }
+
+  public static void toStream(ByteBuffer byteBuffer, OutputStream os) throws IOException {
     SafeArray safeArray = getSafeArray(byteBuffer);
     if (safeArray != null) {
       os.write(safeArray.data, safeArray.offset, safeArray.offset + safeArray.limit);

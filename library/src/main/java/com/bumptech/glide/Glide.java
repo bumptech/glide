@@ -26,6 +26,7 @@ import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
 import com.bumptech.glide.load.model.AssetUriLoader;
 import com.bumptech.glide.load.model.ByteArrayLoader;
+import com.bumptech.glide.load.model.ByteBufferEncoder;
 import com.bumptech.glide.load.model.ByteBufferFileLoader;
 import com.bumptech.glide.load.model.FileLoader;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -174,7 +175,9 @@ public class Glide implements ComponentCallbacks2 {
     bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
     Resources resources = context.getResources();
-    registry = new Registry(context).register(InputStream.class, new StreamEncoder())
+    registry = new Registry(context)
+        .register(ByteBuffer.class, new ByteBufferEncoder())
+        .register(InputStream.class, new StreamEncoder())
         /* Bitmaps */
         .append(ByteBuffer.class, Bitmap.class,
             new ByteBufferBitmapDecoder(new Downsampler(bitmapPool)))

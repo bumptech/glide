@@ -8,8 +8,8 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.ByteBufferUtil;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Writes the original bytes of a {@link com.bumptech.glide.load.resource.gif.GifDrawable} to an
@@ -24,16 +24,17 @@ public class GifDrawableEncoder implements ResourceEncoder<GifDrawable> {
   }
 
   @Override
-  public boolean encode(Resource<GifDrawable> data, OutputStream os, Options options) {
+  public boolean encode(Resource<GifDrawable> data, File file, Options options) {
     GifDrawable drawable = data.get();
+    boolean success = false;
     try {
-      ByteBufferUtil.encode(drawable.getBuffer(), os);
+      ByteBufferUtil.toFile(drawable.getBuffer(), file);
+      success = true;
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Failed to encode gif drawable data", e);
       }
-      return false;
     }
-    return true;
+    return success;
   }
 }

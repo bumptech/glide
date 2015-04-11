@@ -9,12 +9,11 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
+import com.bumptech.glide.util.ByteBufferUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 
 /**
  * Loads {@link java.nio.ByteBuffer}s using NIO for {@link java.io.File}.
@@ -52,7 +51,6 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
   private static class ByteBufferFetcher implements DataFetcher<ByteBuffer> {
 
     private final File file;
-    private FileChannel channel;
 
     public ByteBufferFetcher(File file) {
       this.file = file;
@@ -62,8 +60,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     public void loadData(Priority priority, DataCallback<? super ByteBuffer> callback) {
       ByteBuffer result = null;
       try {
-        channel = new FileInputStream(file).getChannel();
-        result = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+        result = ByteBufferUtil.fromFile(file);
       } catch (IOException e) {
         if (Logs.isEnabled(Log.DEBUG)) {
           Logs.log(Log.DEBUG, "Failed to obtain ByteBuffer for file", e);
@@ -74,15 +71,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
 
     @Override
     public void cleanup() {
-      try {
-        // The memory mapped ByteBuffer remains in memory until it's garbage collected, so it is
-        // safe to close the channel even if the caller hasn't finished with the ByteBuffer.
-        if (channel != null) {
-          channel.close();
-        }
-      } catch (IOException e) {
-        // Ignored.
-      }
+      // Do nothing.
     }
 
     @Override
