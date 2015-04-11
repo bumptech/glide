@@ -201,7 +201,9 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    */
   @Override
   public void run() {
-    request.clear();
+    if (request != null) {
+      request.clear();
+    }
   }
 
   /**
