@@ -23,14 +23,15 @@ public class DrawableCrossFadeFactory<T extends Drawable> implements GlideAnimat
     private static final int DEFAULT_DURATION_MS = 300;
     private final ViewAnimationFactory<T> animationFactory;
     private final int duration;
-    private DrawableCrossFadeViewAnimation<T> animation;
+    private DrawableCrossFadeViewAnimation<T> firstResourceAnimation;
+    private DrawableCrossFadeViewAnimation<T> secondResourceAnimation;
 
     public DrawableCrossFadeFactory() {
         this(DEFAULT_DURATION_MS);
     }
 
     public DrawableCrossFadeFactory(int duration) {
-        this(new ViewAnimationFactory<T>(new DefaultAnimationFactory()), duration);
+        this(new ViewAnimationFactory<T>(new DefaultAnimationFactory(duration)), duration);
     }
 
     public DrawableCrossFadeFactory(Context context, int defaultAnimationId, int duration) {
@@ -50,22 +51,43 @@ public class DrawableCrossFadeFactory<T extends Drawable> implements GlideAnimat
     public GlideAnimation<T> build(boolean isFromMemoryCache, boolean isFirstResource) {
         if (isFromMemoryCache) {
             return NoAnimation.get();
+        } else if (isFirstResource) {
+            return getFirstResourceAnimation();
+        } else {
+            return getSecondResourceAnimation();
         }
+    }
 
-        if (animation == null) {
-            GlideAnimation<T> defaultAnimation = animationFactory.build(false, isFirstResource);
-            animation = new DrawableCrossFadeViewAnimation<T>(defaultAnimation, duration);
+    private GlideAnimation<T> getFirstResourceAnimation() {
+        if (firstResourceAnimation == null) {
+            GlideAnimation<T> defaultAnimation = animationFactory.build(false /*isFromMemoryCache*/,
+                true /*isFirstResource*/);
+            firstResourceAnimation = new DrawableCrossFadeViewAnimation<T>(defaultAnimation, duration);
         }
+        return firstResourceAnimation;
+    }
 
-        return animation;
+    private GlideAnimation<T> getSecondResourceAnimation() {
+        if (secondResourceAnimation == null) {
+            GlideAnimation<T> defaultAnimation = animationFactory.build(false /*isFromMemoryCache*/,
+                false /*isFirstResource*/);
+            secondResourceAnimation = new DrawableCrossFadeViewAnimation<T>(defaultAnimation, duration);
+        }
+        return secondResourceAnimation;
     }
 
     private static class DefaultAnimationFactory implements ViewAnimation.AnimationFactory {
 
+        private final int duration;
+
+        DefaultAnimationFactory(int duration) {
+            this.duration = duration;
+        }
+
         @Override
         public Animation build() {
             AlphaAnimation animation = new AlphaAnimation(0f, 1f);
-            animation.setDuration(DEFAULT_DURATION_MS / 2);
+            animation.setDuration(duration);
             return animation;
         }
     }
