@@ -38,14 +38,14 @@ public class ThumbnailStreamOpenerTest {
 
     @Test
     public void testReturnsNullIfCursorIsNull() throws FileNotFoundException {
-        when(harness.query.query(eq(Robolectric.application), eq(harness.uri))).thenReturn(null);
+        when(harness.query.queryPath(eq(Robolectric.application), eq(harness.uri))).thenReturn(null);
         assertNull(harness.get()
                 .open(Robolectric.application, harness.uri));
     }
 
     @Test
     public void testReturnsNullIfCursorIsEmpty() throws FileNotFoundException {
-        when(harness.query.query(eq(Robolectric.application), eq(harness.uri))).thenReturn(
+        when(harness.query.queryPath(eq(Robolectric.application), eq(harness.uri))).thenReturn(
                 new MatrixCursor(new String[1]));
         assertNull(harness.get()
                 .open(Robolectric.application, harness.uri));
@@ -55,7 +55,7 @@ public class ThumbnailStreamOpenerTest {
     public void testReturnsNullIfCursorHasEmptyPath() throws FileNotFoundException {
         MatrixCursor cursor = new MatrixCursor(new String[1]);
         cursor.addRow(new Object[]{ "" });
-        when(harness.query.query(eq(Robolectric.application), eq(harness.uri))).thenReturn(cursor);
+        when(harness.query.queryPath(eq(Robolectric.application), eq(harness.uri))).thenReturn(cursor);
         assertNull(harness.get()
                 .open(Robolectric.application, harness.uri));
     }
@@ -93,7 +93,7 @@ public class ThumbnailStreamOpenerTest {
         MediaStoreThumbFetcher.VideoThumbnailQuery query = new MediaStoreThumbFetcher.VideoThumbnailQuery();
         TestCursor testCursor = new SimpleTestCursor();
         Robolectric.shadowOf(Robolectric.application.getContentResolver()).setCursor(queryUri, testCursor);
-        assertEquals(testCursor, query.query(Robolectric.application, harness.uri));
+        assertEquals(testCursor, query.queryPath(Robolectric.application, harness.uri));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ThumbnailStreamOpenerTest {
         MediaStoreThumbFetcher.ImageThumbnailQuery query = new MediaStoreThumbFetcher.ImageThumbnailQuery();
         TestCursor testCursor = new SimpleTestCursor();
         Robolectric.shadowOf(Robolectric.application.getContentResolver()).setCursor(queryUri, testCursor);
-        assertEquals(testCursor, query.query(Robolectric.application, harness.uri));
+        assertEquals(testCursor, query.queryPath(Robolectric.application, harness.uri));
     }
 
     private static class Harness {
@@ -114,7 +114,7 @@ public class ThumbnailStreamOpenerTest {
 
         public Harness() {
             cursor.addRow(new String[] { file.getAbsolutePath() });
-            when(query.query(eq(Robolectric.application), eq(uri))).thenReturn(cursor);
+            when(query.queryPath(eq(Robolectric.application), eq(uri))).thenReturn(cursor);
             when(service.get(eq(file.getAbsolutePath()))).thenReturn(file);
             when(service.exists(eq(file))).thenReturn(true);
             when(service.length(eq(file))).thenReturn(1L);

@@ -6,8 +6,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,6 +24,7 @@ import java.io.InputStream;
  * {@link android.provider.MediaStore.Video.Thumbnails}.
  */
 public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
+    private static final String TAG = "MediaStoreThumbFetcher";
     private static final int MINI_WIDTH = 512;
     private static final int MINI_HEIGHT = 384;
     private static final ThumbnailStreamOpenerFactory DEFAULT_FACTORY = new ThumbnailStreamOpenerFactory();
@@ -54,14 +57,35 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
         ThumbnailStreamOpener fetcher = factory.build(mediaStoreUri, width, height);
 
         if (fetcher != null) {
-            inputStream = fetcher.open(context, mediaStoreUri);
+            inputStream = openThumbInputStream(fetcher);
         }
 
-        if (inputStream != null) {
-            return inputStream;
-        } else {
-            return defaultFetcher.loadData(priority);
+        if (inputStream == null) {
+            inputStream = defaultFetcher.loadData(priority);
         }
+
+        return inputStream;
+    }
+
+    private InputStream openThumbInputStream(ThumbnailStreamOpener fetcher) {
+        InputStream result = null;
+        try {
+            result = fetcher.open(context, mediaStoreUri);
+        } catch (FileNotFoundException e) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Failed to find thumbnail file", e);
+            }
+        }
+
+        int orientation = -1;
+        if (result != null) {
+            orientation = fetcher.getOrientation(context, mediaStoreUri);
+        }
+
+        if (orientation != -1) {
+            result = new ExifOrientationStream(result, orientation);
+        }
+        return result;
     }
 
     @Override
@@ -111,7 +135,7 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
     }
 
     interface ThumbnailQuery {
-        Cursor query(Context context, Uri uri);
+        Cursor queryPath(Context context, Uri uri);
     }
 
     static class ThumbnailStreamOpener {
@@ -128,20 +152,36 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
             this.query = query;
         }
 
+        public int getOrientation(Context context, Uri uri) {
+            int orientation = -1;
+            InputStream is = null;
+            try {
+                is = context.getContentResolver().openInputStream(uri);
+                orientation = new ImageHeaderParser(is).getOrientation();
+            } catch (IOException e) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Failed to open uri: " + uri, e);
+                }
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        // Ignored.
+                    }
+                }
+            }
+            return orientation;
+        }
+
         public InputStream open(Context context, Uri uri) throws FileNotFoundException {
             Uri thumbnailUri = null;
             InputStream inputStream = null;
 
-            final Cursor cursor = query.query(context, uri);
+            final Cursor cursor = query.queryPath(context, uri);
             try {
                 if (cursor != null && cursor.moveToFirst()) {
-                    String path = cursor.getString(0);
-                    if (!TextUtils.isEmpty(path)) {
-                        File file = service.get(path);
-                        if (service.exists(file) && service.length(file) > 0) {
-                            thumbnailUri = Uri.fromFile(file);
-                        }
-                    }
+                    thumbnailUri = parseThumbUri(cursor);
                 }
             } finally {
                 if (cursor != null) {
@@ -153,29 +193,57 @@ public class MediaStoreThumbFetcher implements DataFetcher<InputStream> {
             }
             return inputStream;
         }
+
+        private Uri parseThumbUri(Cursor cursor) {
+            Uri result = null;
+            String path = cursor.getString(0);
+            if (!TextUtils.isEmpty(path)) {
+                File file = service.get(path);
+                if (service.exists(file) && service.length(file) > 0) {
+                    result = Uri.fromFile(file);
+                }
+            }
+            return result;
+        }
     }
 
     static class ImageThumbnailQuery implements ThumbnailQuery {
+        private static final String[] PATH_PROJECTION = {
+            MediaStore.Images.Thumbnails.DATA,
+        };
+        private static final String PATH_SELECTION =
+            MediaStore.Images.Thumbnails.KIND + " = " + MediaStore.Images.Thumbnails.MINI_KIND
+            + " AND " + MediaStore.Images.Thumbnails.IMAGE_ID + " = ?";
 
         @Override
-        public Cursor query(Context context, Uri uri) {
-            String id = uri.getLastPathSegment();
-            return context.getContentResolver().query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, new String[] {
-                            MediaStore.Images.Thumbnails.DATA
-                    }, MediaStore.Images.Thumbnails.IMAGE_ID + " = ? AND " + MediaStore.Images.Thumbnails.KIND + " = ?",
-                    new String[] { id, String.valueOf(MediaStore.Images.Thumbnails.MINI_KIND) }, null);
+        public Cursor queryPath(Context context, Uri uri) {
+            String imageId = uri.getLastPathSegment();
+            return context.getContentResolver().query(
+                MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
+                PATH_PROJECTION,
+                PATH_SELECTION,
+                new String[] { imageId },
+                null /*sortOrder*/);
         }
     }
 
     static class VideoThumbnailQuery implements ThumbnailQuery {
+        private static final String[] PATH_PROJECTION = {
+            MediaStore.Video.Thumbnails.DATA
+        };
+        private static final String PATH_SELECTION =
+            MediaStore.Video.Thumbnails.KIND + " = " + MediaStore.Video.Thumbnails.MINI_KIND
+            + " AND " + MediaStore.Video.Thumbnails.VIDEO_ID + " = ?";
 
         @Override
-        public Cursor query(Context context, Uri uri) {
-            String id = uri.getLastPathSegment();
-            return context.getContentResolver().query(MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI, new String[] {
-                    MediaStore.Video.Thumbnails.DATA
-            }, MediaStore.Video.Thumbnails.VIDEO_ID + " = ? AND " + MediaStore.Video.Thumbnails.KIND + " = ?",
-                    new String[] { id, String.valueOf(MediaStore.Video.Thumbnails.MINI_KIND) }, null);
+        public Cursor queryPath(Context context, Uri uri) {
+            String videoId = uri.getLastPathSegment();
+            return context.getContentResolver().query(
+                MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
+                PATH_PROJECTION,
+                PATH_SELECTION,
+                new String[] { videoId },
+                null /*sortOrder*/);
         }
     }
 
