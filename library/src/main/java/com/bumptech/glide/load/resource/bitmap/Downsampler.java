@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.bumptech.glide.Logs;
@@ -64,15 +65,17 @@ public final class Downsampler {
               ImageHeaderParser.ImageType.PNG_A,
               ImageHeaderParser.ImageType.PNG
           )
-  );
+      );
   private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
   // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer
   // but will resize up to this amount if necessary.
   private static final int MARK_POSITION = 5 * 1024 * 1024;
 
   private final BitmapPool bitmapPool;
+  private final DisplayMetrics displayMetrics;
 
-  public Downsampler(BitmapPool bitmapPool) {
+  public Downsampler(DisplayMetrics displayMetrics, BitmapPool bitmapPool) {
+    this.displayMetrics = displayMetrics;
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
   }
 
@@ -169,11 +172,18 @@ public final class Downsampler {
         requestedWidth, requestedHeight);
     options.inTargetDensity = downsampleStrategy.getTargetDensity(sourceWidth,
         sourceHeight, requestedWidth, requestedHeight, options.inSampleSize);
+
     if (isScaling(options)) {
       options.inScaled = true;
+    } else {
+      options.inDensity = options.inTargetDensity = 0;
     }
     Bitmap downsampled = downsampleWithSize(is, options, bitmapPool, sourceWidth,
         sourceHeight, callbacks);
+    // If we scaled, the Bitmap density will be our inTargetDensity. Here we correct it back to
+    // the expected density dpi.
+    downsampled.setDensity(displayMetrics.densityDpi);
+
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {

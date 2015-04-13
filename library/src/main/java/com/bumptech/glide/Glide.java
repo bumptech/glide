@@ -175,23 +175,25 @@ public class Glide implements ComponentCallbacks2 {
     bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
     Resources resources = context.getResources();
+
+    Downsampler downsampler = new Downsampler(resources.getDisplayMetrics(), bitmapPool);
     registry = new Registry(context)
         .register(ByteBuffer.class, new ByteBufferEncoder())
         .register(InputStream.class, new StreamEncoder())
         /* Bitmaps */
         .append(ByteBuffer.class, Bitmap.class,
-            new ByteBufferBitmapDecoder(new Downsampler(bitmapPool)))
+            new ByteBufferBitmapDecoder(downsampler))
         .append(InputStream.class, Bitmap.class,
-            new StreamBitmapDecoder(new Downsampler(bitmapPool)))
+            new StreamBitmapDecoder(downsampler))
         .append(ParcelFileDescriptor.class, Bitmap.class, new VideoBitmapDecoder(bitmapPool))
         .register(Bitmap.class, new BitmapEncoder())
         /* GlideBitmapDrawables */
         .append(ByteBuffer.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool,
-                new ByteBufferBitmapDecoder(new Downsampler(bitmapPool))))
+                new ByteBufferBitmapDecoder(downsampler)))
         .append(InputStream.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool,
-                new StreamBitmapDecoder(new Downsampler(bitmapPool))))
+                new StreamBitmapDecoder(downsampler)))
         .append(ParcelFileDescriptor.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool, new VideoBitmapDecoder(bitmapPool)))
         .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))

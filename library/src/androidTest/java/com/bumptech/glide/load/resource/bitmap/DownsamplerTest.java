@@ -2,6 +2,8 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.DecodeFormat;
@@ -14,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
@@ -34,7 +36,8 @@ public class DownsamplerTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
     options = new Options();
-    downsampler = new Downsampler(bitmapPool);
+    downsampler = new Downsampler(RuntimeEnvironment.application.getResources().getDisplayMetrics(),
+        bitmapPool);
   }
 
   @Test
