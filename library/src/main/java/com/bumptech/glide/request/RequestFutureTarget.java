@@ -220,7 +220,9 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
      */
     @Override
     public void run() {
-        request.clear();
+        if (request != null) {
+            request.clear();
+        }
     }
 
     /**
