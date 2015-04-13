@@ -67,11 +67,12 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     fullRequest = Glide.with(this)
         .asDrawable()
-        .apply(centerCropTransform(getActivity()))
-        .transition(withCrossFade(R.anim.fade_in, 150));
+        .transition(withCrossFade(R.anim.fade_in, 150))
+        .apply(centerCropTransform(getActivity()));
 
     thumbnailRequest = Glide.with(this)
         .asDrawable()
+        .transition(withCrossFade(R.anim.fade_in, 150))
         .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
             .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
 

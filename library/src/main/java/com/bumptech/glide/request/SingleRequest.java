@@ -335,14 +335,16 @@ public final class SingleRequest<R> implements Request,
    *                 <code>null</code>
    */
   private void onResourceReady(Resource<R> resource, R result) {
+    // We must call isFirstReadyResource before setting status.
+    boolean isFirstResource = isFirstReadyResource();
     status = Status.COMPLETE;
     this.resource = resource;
 
     if (requestListener == null
         || !requestListener.onResourceReady(result, requestContext.getModel(), target,
-        loadedFromMemoryCache, isFirstReadyResource())) {
+        loadedFromMemoryCache, isFirstResource)) {
       Transition<? super R> animation =
-          animationFactory.build(loadedFromMemoryCache, isFirstReadyResource());
+          animationFactory.build(loadedFromMemoryCache, isFirstResource);
       target.onResourceReady(result, animation);
     }
 

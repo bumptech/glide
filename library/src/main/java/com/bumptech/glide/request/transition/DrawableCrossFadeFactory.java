@@ -19,14 +19,16 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
   private static final int DEFAULT_DURATION_MS = 300;
   private final ViewAnimationFactory<Drawable> viewAnimationFactory;
   private final int duration;
-  private DrawableCrossFadeTransition transition;
+  private DrawableCrossFadeTransition firstResourceTransition;
+  private DrawableCrossFadeTransition secondResourceTransition;
 
   public DrawableCrossFadeFactory() {
     this(DEFAULT_DURATION_MS);
   }
 
   public DrawableCrossFadeFactory(int duration) {
-    this(new ViewAnimationFactory<Drawable>(new DefaultViewTransitionAnimationFactory()), duration);
+    this(new ViewAnimationFactory<Drawable>(
+        new DefaultViewTransitionAnimationFactory(duration)), duration);
   }
 
   public DrawableCrossFadeFactory(int defaultAnimationId, int duration) {
@@ -46,23 +48,45 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
   public Transition<Drawable> build(boolean isFromMemoryCache, boolean isFirstResource) {
     if (isFromMemoryCache) {
       return NoTransition.get();
+    } else if (isFirstResource) {
+      return getFirstResourceTransition();
+    } else {
+      return getSecondResourceTransition();
     }
+  }
 
-    if (transition == null) {
-      Transition<Drawable> defaultTransition = viewAnimationFactory.build(false, isFirstResource);
-      transition = new DrawableCrossFadeTransition(defaultTransition, duration);
-    }
 
-    return transition;
+  private Transition<Drawable> getFirstResourceTransition() {
+      if (firstResourceTransition == null) {
+          Transition<Drawable> defaultAnimation =
+              viewAnimationFactory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/);
+          firstResourceTransition = new DrawableCrossFadeTransition(defaultAnimation, duration);
+      }
+      return firstResourceTransition;
+  }
+
+  private Transition<Drawable> getSecondResourceTransition() {
+      if (secondResourceTransition == null) {
+          Transition<Drawable> defaultAnimation =
+              viewAnimationFactory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/);
+          secondResourceTransition = new DrawableCrossFadeTransition(defaultAnimation, duration);
+      }
+      return secondResourceTransition;
   }
 
   private static class DefaultViewTransitionAnimationFactory implements ViewTransition
       .ViewTransitionAnimationFactory {
 
+    private final int duration;
+
+    DefaultViewTransitionAnimationFactory(int duration) {
+      this.duration = duration;
+    }
+
     @Override
     public Animation build(Context context) {
       AlphaAnimation animation = new AlphaAnimation(0f, 1f);
-      animation.setDuration(DEFAULT_DURATION_MS / 2);
+      animation.setDuration(duration);
       return animation;
     }
   }
