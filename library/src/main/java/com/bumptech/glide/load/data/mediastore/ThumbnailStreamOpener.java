@@ -4,12 +4,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
+
+import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 class ThumbnailStreamOpener {
+  private static final String TAG = "ThumbStreamOpener";
   private static final FileService DEFAULT_SERVICE = new FileService();
   private final FileService service;
   private ThumbnailQuery query;
@@ -21,6 +26,28 @@ class ThumbnailStreamOpener {
   public ThumbnailStreamOpener(FileService service, ThumbnailQuery query) {
     this.service = service;
     this.query = query;
+  }
+
+  public int getOrientation(Context context, Uri uri) {
+    int orientation = -1;
+    InputStream is = null;
+    try {
+      is = context.getContentResolver().openInputStream(uri);
+      orientation = new ImageHeaderParser(is).getOrientation();
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to open uri: " + uri, e);
+      }
+    } finally {
+      if (is != null) {
+          try {
+              is.close();
+          } catch (IOException e) {
+              // Ignored.
+          }
+      }
+    }
+      return orientation;
   }
 
   public InputStream open(Context context, Uri uri) throws FileNotFoundException {

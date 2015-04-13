@@ -10,6 +10,7 @@ import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.ExifOrientationStream;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -46,14 +47,29 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
 
   @Override
   public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+    inputStream = openThumbInputStream();
+    callback.onDataReady(inputStream);
+  }
+
+  private InputStream openThumbInputStream() {
+    InputStream result = null;
     try {
-      inputStream = opener.open(context, mediaStoreImageUri);
+      result = opener.open(context, mediaStoreImageUri);
     } catch (FileNotFoundException e) {
       if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Failed to open media store thumb uri", e);
+        Logs.log(Log.DEBUG, "Failed to find thumbnail file", e);
       }
     }
-    callback.onDataReady(inputStream);
+
+    int orientation = -1;
+    if (result != null) {
+      orientation = opener.getOrientation(context, mediaStoreImageUri);
+    }
+
+    if (orientation != -1) {
+      result = new ExifOrientationStream(result, orientation);
+    }
+    return result;
   }
 
   @Override
@@ -82,31 +98,44 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     return DataSource.LOCAL;
   }
 
-  // Visible for testing.
   static class VideoThumbnailQuery implements ThumbnailQuery {
+    private static final String[] PATH_PROJECTION = {
+      MediaStore.Video.Thumbnails.DATA
+    };
+    private static final String PATH_SELECTION =
+        MediaStore.Video.Thumbnails.KIND + " = " + MediaStore.Video.Thumbnails.MINI_KIND
+        + " AND " + MediaStore.Video.Thumbnails.VIDEO_ID + " = ?";
 
     @Override
     public Cursor query(Context context, Uri uri) {
-      String id = uri.getLastPathSegment();
-      return context.getContentResolver().query(MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
-          new String[] { MediaStore.Video.Thumbnails.DATA },
-          MediaStore.Video.Thumbnails.VIDEO_ID + " = ? AND " + MediaStore.Video.Thumbnails.KIND
-              + " = ?", new String[] { id, String.valueOf(MediaStore.Video.Thumbnails.MINI_KIND) },
-          null);
+      String videoId = uri.getLastPathSegment();
+      return context.getContentResolver().query(
+          MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
+          PATH_PROJECTION,
+          PATH_SELECTION,
+          new String[] { videoId },
+          null /*sortOrder*/);
     }
   }
 
-  // Visible for testing.
+
   static class ImageThumbnailQuery implements ThumbnailQuery {
+    private static final String[] PATH_PROJECTION = {
+      MediaStore.Images.Thumbnails.DATA,
+    };
+    private static final String PATH_SELECTION =
+        MediaStore.Images.Thumbnails.KIND + " = " + MediaStore.Images.Thumbnails.MINI_KIND
+        + " AND " + MediaStore.Images.Thumbnails.IMAGE_ID + " = ?";
 
     @Override
     public Cursor query(Context context, Uri uri) {
-      String id = uri.getLastPathSegment();
-      return context.getContentResolver().query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
-          new String[] { MediaStore.Images.Thumbnails.DATA },
-          MediaStore.Images.Thumbnails.IMAGE_ID + " = ? AND " + MediaStore.Images.Thumbnails.KIND
-              + " = ?", new String[] { id, String.valueOf(MediaStore.Images.Thumbnails.MINI_KIND) },
-          null);
+      String imageId = uri.getLastPathSegment();
+      return context.getContentResolver().query(
+          MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
+          PATH_PROJECTION,
+          PATH_SELECTION,
+          new String[] { imageId },
+          null /*sortOrder*/);
     }
   }
 }

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data.mediastore;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +46,7 @@ public class ThumbFetcherTest {
     when(opener.open(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(expected);
 
     fetcher.loadData(Priority.LOW, callback);
-    verify(callback).onDataReady(eq(expected));
+    verify(callback).onDataReady(isNotNull(InputStream.class));
   }
 
   @Test
