@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,14 +26,12 @@ import org.robolectric.annotation.Config;
 public class CircleCropTest {
   @Mock private BitmapPool bitmapPool;
 
-  private Context context;
   private CircleCrop circleCrop;
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    context = RuntimeEnvironment.application;
-    circleCrop = new CircleCrop(context);
+    circleCrop = new CircleCrop(RuntimeEnvironment.application);
   }
 
   @Test
@@ -112,5 +109,4 @@ public class CircleCropTest {
     canvas.drawRect(rect, paint);
     return result;
   }
-
 }

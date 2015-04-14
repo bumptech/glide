@@ -12,10 +12,10 @@ import java.security.MessageDigest;
  * A Glide {@link BitmapTransformation} to circle crop an image.  Behaves similar to a
  * {@link FitCenter} transform, but the resulting image is masked to a circle.
  *
- * <p> Uses a PorterDuff blend mode, , seehttp://ssp.impulsetrain.com/porterduff.html. </p>
+ * <p> Uses a PorterDuff blend mode, see http://ssp.impulsetrain.com/porterduff.html. </p>
  */
 public class CircleCrop extends BitmapTransformation {
-  private static final String ID = "com.google.android.apps.photos.accountswitcher.CircleCrop";
+  private static final String ID = "com.bumptech.glide.load.resource.bitmap.CircleCrop";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
   public CircleCrop(Context context) {
