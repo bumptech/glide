@@ -3,8 +3,6 @@ package com.bumptech.glide.load.resource.bitmap;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-import org.robolectric.RobolectricTestRunner;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -16,11 +14,11 @@ import android.graphics.Rect;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 

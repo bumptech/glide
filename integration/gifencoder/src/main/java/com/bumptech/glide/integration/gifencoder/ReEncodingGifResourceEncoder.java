@@ -9,7 +9,6 @@ import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
 import com.bumptech.glide.gifencoder.AnimatedGifEncoder;
 import com.bumptech.glide.load.EncodeStrategy;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -51,9 +50,9 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   public static final Option<Boolean> ENCODE_TRANSFORMATION =
       Option.disk(KEY_ENCODE_TRANSFORMATION, false, new Option.CacheKeyUpdater<Boolean>() {
         @Override
-        public void update(String key, Boolean value, MessageDigest messageDigest) {
+        public void update(byte[] keyBytes, Boolean value, MessageDigest messageDigest) {
           if (value) {
-            messageDigest.update(KEY_ENCODE_TRANSFORMATION.getBytes(Key.CHARSET));
+            messageDigest.update(keyBytes);
           }
         }
       });

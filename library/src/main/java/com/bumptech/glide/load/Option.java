@@ -24,7 +24,6 @@ import java.security.MessageDigest;
  * {@link #hashCode()}.
  */
 public final class Option<T> implements Comparable<Option<?>> {
-
   private static final CacheKeyUpdater<Object> EMPTY_UPDATER = new CacheKeyUpdater<Object>() {
     @Override
     public void update(byte[] keyBytes, Object value, MessageDigest messageDigest) {
@@ -32,6 +31,10 @@ public final class Option<T> implements Comparable<Option<?>> {
     }
   };
 
+  private final T defaultValue;
+  private final CacheKeyUpdater<T> cacheKeyUpdater;
+  private final String key;
+  private volatile byte[] keyBytes;
 
   /**
    * Returns a new {@link Option} that does not affect disk cache keys with a {@code null} default
@@ -77,11 +80,6 @@ public final class Option<T> implements Comparable<Option<?>> {
   public static <T> Option<T> disk(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
     return new Option<>(key, defaultValue, cacheKeyUpdater);
   }
-
-  private final T defaultValue;
-  private final CacheKeyUpdater<T> cacheKeyUpdater;
-  private final String key;
-  private volatile byte[] keyBytes;
 
   Option(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
     this.key = Preconditions.checkNotEmpty(key);

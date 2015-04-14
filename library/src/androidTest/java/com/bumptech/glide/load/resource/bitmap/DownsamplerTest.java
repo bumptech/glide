@@ -2,8 +2,6 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
 
-import org.robolectric.RobolectricTestRunner;
-
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.DecodeFormat;
@@ -16,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 

@@ -11,7 +11,7 @@ import java.io.InputStream;
  * <p>This class assumes that the wrapped stream contains an image format that can contain
  * exif information and performs no verification. </p>
  */
-public class ExifOrientationStream extends FilterInputStream {
+public final class ExifOrientationStream extends FilterInputStream {
   /** Allow two bytes for the file format. */
   private static final int SEGMENT_START_POSITION = 2;
   private static final byte[] EXIF_SEGMENT = new byte[] {
@@ -29,7 +29,7 @@ public class ExifOrientationStream extends FilterInputStream {
       0x66,
       0x00,
       0x00,
-      /** mototorola byte order (big endian). */
+      /** motorola byte order (big endian). */
       (byte) 0x4D,
       (byte) 0x4D,
       /** filler? */

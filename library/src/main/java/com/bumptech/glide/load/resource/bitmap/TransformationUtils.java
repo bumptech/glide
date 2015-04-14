@@ -142,10 +142,14 @@ public final class TransformationUtils {
    * @param outBitmap   The {@link android.graphics.Bitmap} that will be returned from the
    *                    transformation.
    */
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   public static void setAlpha(Bitmap toTransform, Bitmap outBitmap) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1 && outBitmap != null) {
-      outBitmap.setHasAlpha(toTransform.hasAlpha());
+    setAlphaIfAvailable(outBitmap, toTransform.hasAlpha());
+  }
+
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+  private static void setAlphaIfAvailable(Bitmap bitmap, boolean hasAlpha) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1 && bitmap != null) {
+      bitmap.setHasAlpha(hasAlpha);
     }
   }
 
@@ -289,8 +293,8 @@ public final class TransformationUtils {
    * @param recycled A mutable Bitmap with dimensions width and height that we can load the cropped
    *                 portion of toCrop into.
    * @param toCrop   The Bitmap to resize.
-   * @param width    The width in pixels of the final Bitmap.
-   * @param height   The height in pixels of the final Bitmap.
+   * @param destWidth    The width in pixels of the final Bitmap.
+   * @param destHeight   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
   public static Bitmap circleCrop(Bitmap recycled, Bitmap toCrop, int destWidth, int destHeight) {
@@ -300,7 +304,7 @@ public final class TransformationUtils {
 
     Bitmap result = (recycled != null) ? recycled
         : Bitmap.createBitmap(destWidth, destHeight, getSafeConfig(toCrop));
-    result.setHasAlpha(true);
+    setAlphaIfAvailable(result, true /*hasAlpha*/);
 
     int destMinEdge = Math.min(destWidth, destHeight);
     float radius = destMinEdge / 2f;

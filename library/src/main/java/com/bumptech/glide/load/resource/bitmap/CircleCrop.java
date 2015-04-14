@@ -11,8 +11,8 @@ import java.security.MessageDigest;
 /**
  * A Glide {@link BitmapTransformation} to circle crop an image.  Behaves similar to a
  * {@link FitCenter} transform, but the resulting image is masked to a circle.
- * <p>
- * Uses a PorterDuff blend mode, {@see http://ssp.impulsetrain.com/porterduff.html}.
+ *
+ * <p> Uses a PorterDuff blend mode, , seehttp://ssp.impulsetrain.com/porterduff.html. </p>
  */
 public class CircleCrop extends BitmapTransformation {
   private static final String ID = "com.google.android.apps.photos.accountswitcher.CircleCrop";
@@ -26,6 +26,8 @@ public class CircleCrop extends BitmapTransformation {
     super(bitmapPool);
   }
 
+  // Bitmap doesn't implement equals, so == and .equals are equivalent here.
+  @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
   protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
     final Bitmap toReuse = pool.get(outWidth, outHeight,

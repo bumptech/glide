@@ -180,10 +180,6 @@ public final class Downsampler {
     }
     Bitmap downsampled = downsampleWithSize(is, options, bitmapPool, sourceWidth,
         sourceHeight, callbacks);
-    // If we scaled, the Bitmap density will be our inTargetDensity. Here we correct it back to
-    // the expected density dpi.
-    downsampled.setDensity(displayMetrics.densityDpi);
-
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -193,6 +189,10 @@ public final class Downsampler {
 
     Bitmap rotated = null;
     if (downsampled != null) {
+      // If we scaled, the Bitmap density will be our inTargetDensity. Here we correct it back to
+      // the expected density dpi.
+      downsampled.setDensity(displayMetrics.densityDpi);
+
       rotated = TransformationUtils.rotateImageExif(downsampled, bitmapPool, orientation);
       if (!downsampled.equals(rotated) && !bitmapPool.put(downsampled)) {
         downsampled.recycle();
