@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.model.stream;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.net.Uri;
@@ -13,6 +13,8 @@ import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -31,12 +33,11 @@ public class StringLoaderTest {
     private static final int IMAGE_SIDE = 100;
 
     private StreamStringLoader stringLoader;
-    private ModelLoader<Uri, InputStream> uriLoader;
+    @Mock ModelLoader<Uri, InputStream> uriLoader;
 
-    @SuppressWarnings("unchecked")
     @Before
-    public void setUp() throws Exception {
-        uriLoader = mock(ModelLoader.class);
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
         stringLoader = new StreamStringLoader(uriLoader);
     }
 
@@ -100,5 +101,12 @@ public class StringLoaderTest {
         stringLoader.getResourceFetcher(content, IMAGE_SIDE, IMAGE_SIDE);
 
         verify(uriLoader).getResourceFetcher(eq(Uri.parse(content)), eq(IMAGE_SIDE), eq(IMAGE_SIDE));
+    }
+
+    @Test
+    public void testGetResourceFetcher_withEmptyString_returnsNull() {
+        assertThat(stringLoader.getResourceFetcher("", IMAGE_SIDE, IMAGE_SIDE)).isNull();
+        assertThat(stringLoader.getResourceFetcher("    ", IMAGE_SIDE, IMAGE_SIDE)).isNull();
+        assertThat(stringLoader.getResourceFetcher("  \n", IMAGE_SIDE, IMAGE_SIDE)).isNull();
     }
 }

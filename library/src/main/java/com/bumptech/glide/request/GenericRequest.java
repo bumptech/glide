@@ -417,7 +417,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
 
         if (dataFetcher == null) {
-            onException(new Exception("Failed to load model: " + model));
+            onException(new Exception("Failed to load model: \'" + model + "\'"));
             return;
         }
         ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();

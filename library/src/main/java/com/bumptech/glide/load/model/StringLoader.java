@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.bumptech.glide.load.data.DataFetcher;
 
@@ -22,7 +23,9 @@ public class StringLoader<T> implements ModelLoader<String, T> {
     @Override
     public DataFetcher<T> getResourceFetcher(String model, int width, int height) {
         Uri uri;
-        if (model.startsWith("/")) {
+        if (TextUtils.isEmpty(model)) {
+            return null;
+        } else if (model.startsWith("/")) {
             uri = toFileUri(model);
         } else {
             uri = Uri.parse(model);
