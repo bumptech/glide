@@ -67,11 +67,8 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
         this.waiter = waiter;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public synchronized boolean cancel(boolean b) {
+    public synchronized boolean cancel(boolean mayInterruptIfRunning) {
         if (isCancelled) {
             return true;
         }
@@ -79,31 +76,24 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
         final boolean result = !isDone();
         if (result) {
             isCancelled = true;
-            clear();
+            if (mayInterruptIfRunning) {
+                clear();
+            }
             waiter.notifyAll(this);
         }
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized boolean isCancelled() {
         return isCancelled;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized boolean isDone() {
         return isCancelled || resultReceived;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public R get() throws InterruptedException, ExecutionException {
         try {
@@ -113,9 +103,6 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public R get(long time, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException {
         return doGet(timeUnit.toMillis(time));
@@ -129,17 +116,11 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
         cb.onSizeReady(width, height);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setRequest(Request request) {
         this.request = request;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Request getRequest() {
         return request;
@@ -222,6 +203,7 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
     public void run() {
         if (request != null) {
             request.clear();
+            cancel(false /*mayInterruptIfRunning*/);
         }
     }
 
@@ -234,25 +216,16 @@ public class RequestFutureTarget<T, R> implements FutureTarget<R>, Runnable {
         mainHandler.post(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onStart() {
         // Do nothing.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onStop() {
         // Do nothing.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onDestroy() {
         // Do nothing.
