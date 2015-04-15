@@ -7,6 +7,7 @@ package com.bumptech.glide.load.engine.cache;
 import android.util.Log;
 
 import com.bumptech.glide.disklrucache.DiskLruCache;
+import com.bumptech.glide.disklrucache.DiskLruCache.Value;
 import com.bumptech.glide.load.Key;
 
 import java.io.File;
@@ -28,6 +29,7 @@ public class DiskLruCacheWrapper implements DiskCache {
   private final SafeKeyGenerator safeKeyGenerator;
   private final File directory;
   private final int maxSize;
+  private final DiskCacheWriteLocker writeLocker = new DiskCacheWriteLocker();
   private DiskLruCache diskLruCache;
 
   /**
@@ -86,15 +88,27 @@ public class DiskLruCacheWrapper implements DiskCache {
 
   @Override
   public void put(Key key, Writer writer) {
-    String safeKey = safeKeyGenerator.getSafeKey(key);
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Put: Obtained: " + safeKey + " for for Key: " + key);
-    }
+    // We want to make sure that puts block so that data is available when put completes. We may
+    // actually not write any data if we find that data is written by the time we acquire the lock.
+    writeLocker.acquire(key);
     try {
-      DiskLruCache.Editor editor = getDiskCache().edit(safeKey);
-      // Editor will be null if there are two concurrent puts. In the worst case we will just
-      // silently fail.
-      if (editor != null) {
+      String safeKey = safeKeyGenerator.getSafeKey(key);
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Put: Obtained: " + safeKey + " for for Key: " + key);
+      }
+      try {
+        // We assume we only need to put once, so if data was written while we were trying to get
+        // the lock, we can simply abort.
+        DiskLruCache diskCache = getDiskCache();
+        Value current = diskCache.get(safeKey);
+        if (current != null) {
+          return;
+        }
+
+        DiskLruCache.Editor editor = diskCache.edit(safeKey);
+        if (editor == null) {
+          throw new IllegalStateException("Had two simultaneous puts for: " + safeKey);
+        }
         try {
           File file = editor.getFile(0);
           if (writer.write(file)) {
@@ -103,11 +117,13 @@ public class DiskLruCacheWrapper implements DiskCache {
         } finally {
           editor.abortUnlessCommitted();
         }
+      } catch (IOException e) {
+        if (Log.isLoggable(TAG, Log.WARN)) {
+          Log.w(TAG, "Unable to put to disk cache", e);
+        }
       }
-    } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Unable to put to disk cache", e);
-      }
+    } finally {
+      writeLocker.release(key);
     }
   }
 
