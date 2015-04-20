@@ -48,6 +48,17 @@ Or Maven:
 </dependency>
 ```
 
+Proguard
+--------
+Depending on your proguard config and usage, you may need to include the following lines in your proguard.cfg:
+```
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+    **[] $VALUES;
+    public *;
+}
+```
+
 How do I use Glide?
 -------------------
 Checkout the [GitHub wiki][2] for pages on a variety of topics, and see the [javadocs][3].
