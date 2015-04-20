@@ -24,6 +24,7 @@ import com.bumptech.glide.util.LogTime;
 class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Runnable,
     Prioritized {
+  private static final String TAG = "DecodeJob";
 
   private final RequestContext<?, R> requestContext;
   private final EngineKey loadKey;
@@ -101,7 +102,22 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   @Override
   public void run() {
-    switch (runReason) {
+    // This should be much more fine grained, but since Java's thread pool implementation silently
+    // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
+    // that something is failing.
+    try {
+      runWrapped();
+    } catch (RuntimeException e) {
+      if (Log.isLoggable(TAG, Log.ERROR)) {
+        Log.e(TAG, "DecodeJob threw unexpectedly", e);
+      }
+      callback.onLoadFailed();
+      throw e;
+    }
+  }
+
+  private void runWrapped() {
+     switch (runReason) {
       case INITIALIZE:
         stage = getNextStage(Stage.INITIALIZE);
         generator = getNextGenerator();
