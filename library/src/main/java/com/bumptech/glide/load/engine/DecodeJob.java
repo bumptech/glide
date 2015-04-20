@@ -130,8 +130,8 @@ class DecodeJob<A, T, Z> {
     }
 
     public void cancel() {
-        fetcher.cancel();
         isCancelled = true;
+        fetcher.cancel();
     }
 
     private Resource<Z> transformEncodeAndTranscode(Resource<T> decoded) {
