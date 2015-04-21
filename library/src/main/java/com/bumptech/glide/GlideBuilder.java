@@ -189,7 +189,7 @@ public class GlideBuilder {
         }
 
         if (diskCacheFactory == null) {
-            diskCacheFactory = new InternalCacheDiskCacheFactory(context, Glide.DEFAULT_DISK_CACHE_SIZE);
+            diskCacheFactory = new InternalCacheDiskCacheFactory(context);
         }
 
         if (engine == null) {
