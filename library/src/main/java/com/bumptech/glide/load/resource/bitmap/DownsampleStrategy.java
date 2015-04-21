@@ -12,9 +12,10 @@ public abstract class DownsampleStrategy {
   public static final DownsampleStrategy AT_LEAST = new DownsampleStrategy() {
 
     @Override
-    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+    public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
-      return Math.min(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
+      return Integer.highestOneBit(
+          Math.min(sourceHeight / requestedHeight, sourceWidth / requestedWidth));
     }
   };
 
@@ -25,26 +26,11 @@ public abstract class DownsampleStrategy {
    */
   public static final DownsampleStrategy CENTER_INSIDE = new DownsampleStrategy() {
     @Override
-    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight) {
-      return AT_LEAST.getSampleSize(sourceWidth, sourceHeight, requestedWidth, requestedHeight);
-    }
-
-    @Override
-    public int getDensity(int sourceWidth, int sourceHeight, int requestedWidth,
+    public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
       float widthPercentage = requestedWidth / (float) sourceWidth;
       float heightPercentage = requestedHeight / (float) sourceHeight;
-      return widthPercentage < heightPercentage ? sourceWidth : sourceHeight;
-    }
-
-    @Override
-    public int getTargetDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight, int sampleSize) {
-      float widthPercentage = requestedWidth / (float) sourceWidth;
-      float heightPercentage = requestedHeight / (float) sourceHeight;
-      int targetDimen = widthPercentage < heightPercentage ? requestedWidth : requestedHeight;
-      return targetDimen * sampleSize;
+      return Math.min(widthPercentage, heightPercentage);
     }
   };
 
@@ -55,32 +41,11 @@ public abstract class DownsampleStrategy {
    */
   public static final DownsampleStrategy CENTER_OUTSIDE = new DownsampleStrategy() {
     @Override
-    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+    public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
-      return AT_LEAST.getSampleSize(sourceWidth, sourceHeight, requestedWidth, requestedHeight);
-    }
-
-    @Override
-    public int getDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight) {
-      if (sourceWidth * requestedHeight > sourceHeight * requestedHeight) {
-        return sourceHeight;
-      } else {
-        return sourceWidth;
-      }
-    }
-
-    @Override
-    public int getTargetDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight, int sampleSize) {
-
-      final int targetDimen;
-      if (sourceWidth * requestedHeight > sourceHeight * requestedHeight) {
-        targetDimen = requestedHeight;
-      } else {
-        targetDimen = requestedWidth;
-      }
-      return targetDimen * sampleSize;
+      float widthPercentage = requestedWidth / (float) sourceWidth;
+      float heightPercentage = requestedHeight / (float) sourceHeight;
+      return Math.max(widthPercentage, heightPercentage);
     }
   };
 
@@ -90,21 +55,10 @@ public abstract class DownsampleStrategy {
    */
   public static final DownsampleStrategy AT_MOST = new DownsampleStrategy() {
     @Override
-    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+    public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
-      return Math.max(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
-    }
-
-    @Override
-    public int getDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight) {
-      return 0;
-    }
-
-    @Override
-    public int getTargetDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight, int sampleSize) {
-      return 0;
+      return Integer.highestOneBit(
+          Math.max(sourceHeight / requestedHeight, sourceWidth / requestedWidth));
     }
   };
 
@@ -113,21 +67,9 @@ public abstract class DownsampleStrategy {
    */
   public static final DownsampleStrategy NONE = new DownsampleStrategy() {
     @Override
-    public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+    public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
-      return 1;
-    }
-
-    @Override
-    public int getDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight) {
-      return 0;
-    }
-
-    @Override
-    public int getTargetDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-        int requestedHeight, int sampleSize) {
-      return 0;
+      return 1f;
     }
   };
 
@@ -137,56 +79,20 @@ public abstract class DownsampleStrategy {
   public static final DownsampleStrategy DEFAULT = AT_LEAST;
 
   /**
-   * Determine the amount of downsampling to use for a load given the dimensions of the image
-   * to be downsampled and the dimensions of the view/target the image will be displayed in.
+   * Returns a float between 0 and +infinity indicating a scale factor to apply to the source
+   * width and height when displayed in the requested width and height.
+   *
+   * <p>The returned scale factor will be split into a power of two sample size applied via
+   * {@link android.graphics.BitmapFactory.Options#inSampleSize} and a float scale factor applied
+   * after downsampling via {@link android.graphics.BitmapFactory.Options#inTargetDensity} and
+   * {@link android.graphics.BitmapFactory.Options#inDensity}. Because of rounding errors the scale
+   * factor may not be applied precisely.
    *
    * @param sourceWidth   The width in pixels of the image to be downsampled.
    * @param sourceHeight  The height in pixels of the image to be downsampled.
    * @param requestedWidth  The width in pixels of the view/target the image will be displayed in.
    * @param requestedHeight The height in pixels of the view/target the image will be displayed in.
-   * @return An integer to pass in to {@link android.graphics.BitmapFactory#decodeStream(
-   * java.io.InputStream, android.graphics.Rect, android.graphics.BitmapFactory.Options)}.
-   * @see android.graphics.BitmapFactory.Options#inSampleSize
    */
-  public abstract int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
+  public abstract float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
       int requestedHeight);
-
-  /**
-   * Returns an integer value for {@link android.graphics.BitmapFactory.Options#inDensity} that can
-   * be used, along with {@link #getTargetDensity(int, int, int, int, int)} to scale the image
-   * natively, or {@code 0} to additional avoid scaling.
-   *
-   * @param sourceWidth   The width in pixels of the image to be downsampled.
-   * @param sourceHeight  The height in pixels of the image to be downsampled.
-   * @param requestedWidth  The width in pixels of the view/target the image will be displayed in.
-   * @param requestedHeight The height in pixels of the view/target the image will be displayed in.
-   */
-  public int getDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-      int requestedHeight) {
-    return 0;
-  }
-
-  /**
-   * Returns an integer value for {@link android.graphics.BitmapFactory.Options#inTargetDensity}
-   * that can be used, along with {@link #getDensity(int, int, int, int)}} to scale the image
-   * natively, or {@code 0} to additional avoid scaling.
-   *
-   * <p> The additional scaling will be applied by multiplying the result of
-   * inTargetDensity/inDensity to to downsampled image (sourceWidth/Height divided by sampleSize)
-   * </p>
-   *
-   * <p> Images can only be downscaled, scale factors from densities greater than 1 will be ignored.
-   * </p>
-   *
-   * @param sourceWidth   The width in pixels of the image to be downsampled.
-   * @param sourceHeight  The height in pixels of the image to be downsampled.
-   * @param requestedWidth  The width in pixels of the view/target the image will be displayed in.
-   * @param requestedHeight The height in pixels of the view/target the image will be displayed in.
-   * @param sampleSize The sample size that will be used to downsample the image before any
-   *                   additional density related scaling is applied.
-   */
-  public int getTargetDensity(int sourceWidth, int sourceHeight, int requestedWidth,
-      int requestedHeight, int sampleSize) {
-    return 0;
-  }
 }
