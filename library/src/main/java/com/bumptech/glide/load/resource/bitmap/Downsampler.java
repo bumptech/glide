@@ -166,9 +166,18 @@ public final class Downsampler {
     if (options.inPreferredConfig != Bitmap.Config.ARGB_8888) {
       options.inDither = true;
     }
-    calculateScaling(downsampleStrategy, degreesToRotate, sourceWidth, sourceHeight, requestedWidth,
-        requestedHeight, options);
+    options.inSampleSize = getRoundedSampleSize(downsampleStrategy, degreesToRotate,
+        sourceWidth, sourceHeight, requestedWidth, requestedHeight);
+    options.inDensity = downsampleStrategy.getDensity(sourceWidth, sourceHeight,
+        requestedWidth, requestedHeight);
+    options.inTargetDensity = downsampleStrategy.getTargetDensity(sourceWidth,
+        sourceHeight, requestedWidth, requestedHeight, options.inSampleSize);
 
+    if (isScaling(options)) {
+      options.inScaled = true;
+    } else {
+      options.inDensity = options.inTargetDensity = 0;
+    }
     Bitmap downsampled = downsampleWithSize(is, options, bitmapPool, sourceWidth,
         sourceHeight, callbacks);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
@@ -193,53 +202,33 @@ public final class Downsampler {
     return rotated;
   }
 
-  private static void calculateScaling(DownsampleStrategy downsampleStrategy, int degreesToRotate,
-      int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight,
-      BitmapFactory.Options options) {
+  private int getRoundedSampleSize(DownsampleStrategy downsampleStrategy, int degreesToRotate,
+      int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
     int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
     int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
 
-    final float exactScaleFactor;
+    final int exactSampleSize;
     if (degreesToRotate == 90 || degreesToRotate == 270) {
       // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image
       // width is decreased to near our target's height and the image height is decreased to near
       // our target width.
-      exactScaleFactor = downsampleStrategy.getScaleFactor(sourceHeight, sourceWidth,
-          targetWidth, targetHeight);
+      exactSampleSize =
+          downsampleStrategy.getSampleSize(sourceHeight, sourceWidth, targetWidth, targetHeight);
     } else {
-      exactScaleFactor =
-          downsampleStrategy.getScaleFactor(sourceWidth, sourceHeight, targetWidth, targetHeight);
+      exactSampleSize =
+          downsampleStrategy.getSampleSize(sourceWidth, sourceHeight, targetWidth, targetHeight);
     }
 
-    int outWidth = (int) (exactScaleFactor * sourceWidth + 0.5f);
-    int outHeight = (int) (exactScaleFactor * sourceHeight + 0.5f);
+    // BitmapFactory only accepts powers of 2, so it will round down to the nearest power of two
+    // that is less than or equal to the sample size we provide. Because we need to estimate the
+    // final image width and height to re-use Bitmaps, we mirror BitmapFactory's calculation here.
+    // For bug, see issue #224. For algorithm see http://stackoverflow.com/a/17379704/800716.
+    final int powerOfTwoSampleSize =
+        exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize);
 
-    int widthScaleFactor = sourceWidth / outWidth;
-    int heightScaleFactor = sourceHeight / outHeight;
-    int scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
-
-    int powerOfTwoSampleSize = Math.max(1, Integer.highestOneBit(scaleFactor));
-    float adjustedScaleFactor = powerOfTwoSampleSize * exactScaleFactor;
-
-    options.inSampleSize = powerOfTwoSampleSize;
-    options.inTargetDensity = (int) (1000 * adjustedScaleFactor + 0.5f);
-    options.inDensity = 1000;
-    if (isScaling(options)) {
-      options.inScaled = true;
-    } else {
-      options.inDensity = options.inTargetDensity = 0;
-    }
-
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Calculate scaling"
-          + ", source: [" + sourceWidth + "x" + sourceHeight + "]"
-          + ", target: [" + targetWidth + "x" + targetHeight + "]"
-          + ", exact scale factor: " + exactScaleFactor
-          + ", power of 2 sample size: " + powerOfTwoSampleSize
-          + ", adjusted scale factor: " + adjustedScaleFactor
-          + ", target density: " + options.inTargetDensity
-          + ", density: " + options.inDensity);
-    }
+    // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code
+    // than 0.
+    return Math.max(1, powerOfTwoSampleSize);
   }
 
   private static int getOrientation(InputStream is) throws IOException {
@@ -268,8 +257,8 @@ public final class Downsampler {
           ? (float) options.inTargetDensity / options.inDensity : 1f;
 
       int sampleSize = options.inSampleSize;
-      int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
-      int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
+      int downsampledWidth = sourceWidth / sampleSize;
+      int downsampledHeight = sourceHeight / sampleSize;
       int expectedWidth = (int) Math.ceil(downsampledWidth * densityMultiplier);
       int expectedHeight = (int) Math.ceil(downsampledHeight * densityMultiplier);
 
