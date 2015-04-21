@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
  * A class that generates and caches safe and unique string file names from {@link
  * com.bumptech.glide.load.Key}s.
  */
-class SafeKeyGenerator {
+public class SafeKeyGenerator {
   private final LruCache<Key, String> loadIdToSafeHash = new LruCache<>(1000);
 
   private static String calculateHexStringDigest(Key key) {
