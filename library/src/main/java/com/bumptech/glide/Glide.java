@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.cache.DiskLruCacheFactory;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
@@ -79,10 +80,7 @@ import java.util.List;
  * {@link MemoryCache}.
  */
 public class Glide {
-    /** 250 MB of cache. */
-    static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
 
-    private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
     private static final String TAG = "Glide";
     private static volatile Glide glide;
 
@@ -110,7 +108,7 @@ public class Glide {
      * @param context A context.
      */
     public static File getPhotoCacheDir(Context context) {
-        return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
+        return getPhotoCacheDir(context, DiskLruCacheFactory.DEFAULT_DISK_CACHE_DIR);
     }
 
     /**

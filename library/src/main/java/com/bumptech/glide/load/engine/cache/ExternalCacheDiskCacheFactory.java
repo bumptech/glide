@@ -5,24 +5,26 @@ import android.content.Context;
 import java.io.File;
 
 /**
- * Creates an {@link com.bumptech.glide.disklrucache.DiskLruCache} based disk cache in the internal disk cache
+ * Creates an {@link com.bumptech.glide.disklrucache.DiskLruCache} based disk cache in the external disk cache
  * directory.
+ * <p/>
+ * <b>Images can be read by everyone when using external disk cache.</b>
  */
-public final class InternalCacheDiskCacheFactory extends DiskLruCacheFactory {
+public final class ExternalCacheDiskCacheFactory extends DiskLruCacheFactory {
 
-    public InternalCacheDiskCacheFactory(Context context) {
+    public ExternalCacheDiskCacheFactory(Context context) {
         this(context, DiskCache.Factory.DEFAULT_DISK_CACHE_DIR, DiskCache.Factory.DEFAULT_DISK_CACHE_SIZE);
     }
 
-    public InternalCacheDiskCacheFactory(Context context, int diskCacheSize) {
+    public ExternalCacheDiskCacheFactory(Context context, int diskCacheSize) {
         this(context, DiskCache.Factory.DEFAULT_DISK_CACHE_DIR, diskCacheSize);
     }
 
-    public InternalCacheDiskCacheFactory(final Context context, final String diskCacheName, int diskCacheSize) {
+    public ExternalCacheDiskCacheFactory(final Context context, final String diskCacheName, int diskCacheSize) {
         super(new CacheDirectoryGetter() {
             @Override
             public File getCacheDirectory() {
-                File cacheDirectory = context.getCacheDir();
+                File cacheDirectory = context.getExternalCacheDir();
                 if (cacheDirectory == null) {
                     return null;
                 }
