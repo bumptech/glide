@@ -92,7 +92,17 @@ public abstract class DownsampleStrategy {
     @Override
     public int getSampleSize(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
-      return Math.max(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
+      if (sourceWidth == requestedWidth && sourceHeight == requestedHeight) {
+        return 1;
+      } else {
+        int maxMultiplier = (int) Math.ceil(Math.max(sourceHeight / (float) requestedHeight,
+            sourceWidth / (float) requestedWidth));
+        if (maxMultiplier % 2 == 0) {
+          return maxMultiplier;
+        } else {
+          return Integer.highestOneBit(maxMultiplier) << 1;
+        }
+      }
     }
 
     @Override
