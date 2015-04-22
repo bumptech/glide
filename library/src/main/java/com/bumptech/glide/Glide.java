@@ -360,6 +360,7 @@ public class Glide implements ComponentCallbacks2 {
     Request request = target.getRequest();
     if (request != null) {
       request.clear();
+      request.recycle();
       target.setRequest(null);
     }
   }

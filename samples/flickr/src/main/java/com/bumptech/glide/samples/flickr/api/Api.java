@@ -12,6 +12,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.util.LruCache;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +35,9 @@ public class Api {
       "https://api.flickr.com/services/rest/?method=%s&format=json&api_key=" + API_KEY;
   // Incomplete size independent url for photos that can be cached per photo
   private static final String CACHEABLE_PHOTO_URL = "http://farm%s.staticflickr.com/%s/%s_%s_";
+  private static final int MAX_URLS_TO_CACHE = 2000;
+  private static final LruCache<UrlCacheKey, String> CACHED_URLS =
+      new LruCache<>(MAX_URLS_TO_CACHE);
 
   private static final SparseArray<String> EDGE_TO_SIZE_KEY = new SparseArray<String>() {
     {
@@ -115,7 +119,13 @@ public class Api {
   }
 
   private static String getPhotoUrl(Photo photo, String sizeKey) {
-    return photo.getPartialUrl() + sizeKey + ".jpg";
+    UrlCacheKey entry = new UrlCacheKey(photo, sizeKey);
+    String result = CACHED_URLS.get(entry);
+    if (result == null) {
+      result = photo.getPartialUrl() + sizeKey + ".jpg";
+      CACHED_URLS.put(entry, result);
+    }
+    return result;
   }
 
   /**
@@ -217,6 +227,32 @@ public class Api {
 
       this.searchString = searchString;
       this.results = results;
+    }
+  }
+
+  private static final class UrlCacheKey {
+    private final Photo photo;
+    private final String sizeKey;
+
+    private UrlCacheKey(Photo photo, String sizeKey) {
+      this.photo = photo;
+      this.sizeKey = sizeKey;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (o instanceof UrlCacheKey) {
+        UrlCacheKey other = (UrlCacheKey) o;
+        return photo.equals(other.photo) && sizeKey.equals(other.sizeKey);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = photo.hashCode();
+      result = 31 * result + sizeKey.hashCode();
+      return result;
     }
   }
 }

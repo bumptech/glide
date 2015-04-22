@@ -35,6 +35,7 @@ public class GlideUrl implements Key {
 
   private String safeStringUrl;
   private URL safeUrl;
+  private volatile byte[] cacheKeyBytes;
 
   public GlideUrl(URL url) {
     this(url, Headers.NONE);
@@ -118,7 +119,14 @@ public class GlideUrl implements Key {
 
   @Override
   public void updateDiskCacheKey(MessageDigest messageDigest) {
-    messageDigest.update(getCacheKey().getBytes(CHARSET));
+    messageDigest.update(getCacheKeyBytes());
+  }
+
+  private byte[] getCacheKeyBytes() {
+    if (cacheKeyBytes == null) {
+      cacheKeyBytes = getCacheKey().getBytes(CHARSET);
+    }
+    return cacheKeyBytes;
   }
 
   @Override
