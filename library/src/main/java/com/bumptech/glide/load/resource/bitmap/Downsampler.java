@@ -32,8 +32,8 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
 
     /**
-     * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image
-     * will be greater than or equal to the given width and height.
+     * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the smallest edge of the
+     * image will be between 1x and 2x the requested size. The larger edge has no maximum size.
      */
     public static final Downsampler AT_LEAST = new Downsampler() {
         @Override
@@ -48,14 +48,16 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
     };
 
     /**
-     * Load and scale the image uniformly (maintaining the image's aspect ratio) so that the dimensions of the image
-     * will be less than or equal to the given width and height.
-     *
+     * Load and scale the image uniformly (maintaining the image's aspect ratio) so that largest edge of the image
+     * will be between 1/2x and 1x of the requested size. The smaller edge has no minimum size.
      */
     public static final Downsampler AT_MOST = new Downsampler() {
         @Override
         protected int getSampleSize(int inWidth, int inHeight, int outWidth, int outHeight) {
-            return Math.max(inHeight / outHeight, inWidth / outWidth);
+            int maxIntegerFactor = (int) Math.ceil(Math.max(inHeight / (float) outHeight,
+                inWidth / (float) outWidth));
+            int lesserOrEqualSampleSize = Math.max(1, Integer.highestOneBit(maxIntegerFactor));
+            return lesserOrEqualSampleSize << (lesserOrEqualSampleSize < maxIntegerFactor ? 1 : 0);
         }
 
         @Override
