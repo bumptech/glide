@@ -41,4 +41,11 @@ public class StringSignature implements Key {
     public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
         messageDigest.update(signature.getBytes(STRING_CHARSET_NAME));
     }
+
+    @Override
+    public String toString() {
+        return "StringSignature{"
+            + "signature='" + signature + '\''
+            + '}';
+    }
 }
