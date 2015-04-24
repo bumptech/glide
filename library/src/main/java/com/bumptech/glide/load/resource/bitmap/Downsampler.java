@@ -239,7 +239,7 @@ public final class Downsampler {
         : Math.min(widthScaleFactor, heightScaleFactor);
 
     int powerOfTwoSampleSize = Math.max(1, Integer.highestOneBit(scaleFactor));
-    if (rounding == SampleSizeRounding.MEMORY && powerOfTwoSampleSize < exactScaleFactor) {
+    if (rounding == SampleSizeRounding.MEMORY && powerOfTwoSampleSize < (1.f / exactScaleFactor)) {
       powerOfTwoSampleSize = powerOfTwoSampleSize << 1;
     }
 
