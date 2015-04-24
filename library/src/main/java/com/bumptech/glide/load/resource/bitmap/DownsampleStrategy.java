@@ -65,6 +65,18 @@ public abstract class DownsampleStrategy {
   public abstract float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
       int requestedHeight);
 
+  /**
+   * Returns a non-null {@link SampleSizeRounding} to use to resolve rounding errors and conflicts
+   * between scaling for the width and the height of the image.
+   *
+   * @param sourceWidth   The width in pixels of the image to be downsampled.
+   * @param sourceHeight  The height in pixels of the image to be downsampled.
+   * @param requestedWidth  The width in pixels of the view/target the image will be displayed in.
+   * @param requestedHeight The height in pixels of the view/target the image will be displayed in.
+   */
+  public abstract SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+      int requestedWidth, int requestedHeight);
+
   private static class CenterInside extends DownsampleStrategy {
 
     @Override
@@ -73,6 +85,12 @@ public abstract class DownsampleStrategy {
       float widthPercentage = requestedWidth / (float) sourceWidth;
       float heightPercentage = requestedHeight / (float) sourceHeight;
       return Math.min(widthPercentage, heightPercentage);
+    }
+
+    @Override
+    public SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+        int requestedWidth, int requestedHeight) {
+      return SampleSizeRounding.QUALITY;
     }
   }
 
@@ -84,6 +102,12 @@ public abstract class DownsampleStrategy {
       float heightPercentage = requestedHeight / (float) sourceHeight;
       return Math.max(widthPercentage, heightPercentage);
     }
+
+    @Override
+    public SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+        int requestedWidth, int requestedHeight) {
+      return SampleSizeRounding.QUALITY;
+    }
   }
 
   private static class AtLeast extends DownsampleStrategy {
@@ -92,7 +116,13 @@ public abstract class DownsampleStrategy {
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
       int minIntegerFactor = Math.min(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
-      return minIntegerFactor == 0 ? 1 : Integer.highestOneBit(minIntegerFactor);
+      return minIntegerFactor == 0 ? 1f : 1f / Integer.highestOneBit(minIntegerFactor);
+    }
+
+    @Override
+    public SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+        int requestedWidth, int requestedHeight) {
+      return SampleSizeRounding.QUALITY;
     }
   }
 
@@ -100,14 +130,18 @@ public abstract class DownsampleStrategy {
     @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
-      int maxMultiplier = (int) Math.ceil(Math.max(sourceHeight / (float) requestedHeight,
-          sourceWidth / (float) requestedWidth));
-      if (maxMultiplier <= 1) {
-        return 1;
-      } else {
-        int highestOneBit = Integer.highestOneBit(maxMultiplier);
-        return highestOneBit << (maxMultiplier == highestOneBit ? 0 : 1);
-      }
+      int maxIntegerFactor = (int) Math.ceil(Math.max(sourceHeight / (float) requestedHeight,
+              sourceWidth / (float) requestedWidth));
+      int lesserOrEqualSampleSize = Math.max(1, Integer.highestOneBit(maxIntegerFactor));
+      int greaterOrEqualSampleSize =
+          lesserOrEqualSampleSize << (lesserOrEqualSampleSize < maxIntegerFactor ? 1 : 0);
+      return 1f / greaterOrEqualSampleSize;
+    }
+
+    @Override
+    public SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+        int requestedWidth, int requestedHeight) {
+      return SampleSizeRounding.MEMORY;
     }
   }
 
@@ -117,5 +151,28 @@ public abstract class DownsampleStrategy {
         int requestedHeight) {
       return 1f;
     }
+
+    @Override
+    public SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+        int requestedWidth, int requestedHeight) {
+      return SampleSizeRounding.QUALITY;
+    }
+  }
+
+  /**
+   * Indicates whether to prefer to prefer downsampling or scaling to prefer lower memory usage
+   * or higher quality.
+   */
+  public enum SampleSizeRounding {
+    /**
+     * Prefer to round the sample size up so that the image is downsampled to smaller than the
+     * requested size to use less memory.
+     */
+    MEMORY,
+    /**
+     * Prefer to round the sample size down so that the image is downsampled to larger than the
+     * requested size to maintain quality at the expense of extra memory usage.
+     */
+    QUALITY,
   }
 }

@@ -1,8 +1,13 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.google.common.collect.Range.closed;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
@@ -14,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -57,6 +61,107 @@ public class DownsamplerTest {
     options.set(Downsampler.DECODE_FORMAT, DecodeFormat.PREFER_RGB_565);
     Resource<Bitmap> result = downsampler.decode(stream, 100, 100, options);
     assertEquals(Bitmap.Config.RGB_565, result.get().getConfig());
+  }
+
+  @Test
+  public void testCalculateScaling_withInvalidSourceSizes_doesNotCrash() {
+    runScaleTest(0, 0, 100, 100, DownsampleStrategy.AT_MOST, 0, 0);
+    runScaleTest(-1, -1, 100, 100, DownsampleStrategy.AT_MOST, -1, -1);
+    runScaleTest(0, 0, 100, 100, DownsampleStrategy.AT_LEAST, 0, 0);
+    runScaleTest(-1, -1, 100, 100, DownsampleStrategy.CENTER_OUTSIDE, -1, -1);
+  }
+
+  @Test
+  public void testCalculateScaling_withAtMost() {
+    DownsampleStrategy strategy = DownsampleStrategy.AT_MOST;
+    runScaleTest(100, 100, 100, 100, strategy, 100, 100);
+    runScaleTest(200, 200, 100, 100, strategy, 100, 100);
+    runScaleTest(400, 400, 100, 100, strategy, 100, 100);
+    runScaleTest(300, 300, 100, 100, strategy, 75, 75);
+    runScaleTest(799, 100, 100, 100, strategy, 100, 13);
+    runScaleTest(800, 100, 100, 100, strategy, 100, 13);
+    runScaleTest(801, 100, 100, 100, strategy, 50, 6);
+    runScaleTest(100, 800, 100, 100, strategy, 13, 100);
+    runScaleTest(87, 78, 100, 100, strategy, 87, 78);
+  }
+
+  @Test
+  public void testCalculateScaling_withAtLeast() {
+    DownsampleStrategy strategy = DownsampleStrategy.AT_LEAST;
+    runScaleTest(100, 100, 100, 100, strategy, 100, 100);
+    runScaleTest(200, 200, 100, 100, strategy, 100, 100);
+    runScaleTest(400, 400, 100, 100, strategy, 100, 100);
+    runScaleTest(300, 300, 100, 100, strategy, 150, 150);
+    runScaleTest(799, 100, 100, 100, strategy, 799, 100);
+    runScaleTest(800, 100, 100, 100, strategy, 800, 100);
+    runScaleTest(801, 100, 100, 100, strategy, 801, 100);
+    runScaleTest(100, 800, 100, 100, strategy, 100, 800);
+    runScaleTest(87, 78, 100, 100, strategy, 87, 78);
+  }
+
+  @Test
+  public void testCalculateScaling_withCenterInside() {
+    DownsampleStrategy strategy = DownsampleStrategy.CENTER_INSIDE;
+    runScaleTest(100, 100, 100, 100, strategy, 100, 100);
+    runScaleTest(200, 200, 100, 100, strategy, 100, 100);
+    runScaleTest(400, 400, 100, 100, strategy, 100, 100);
+    runScaleTest(300, 300, 100, 100, strategy, 100, 100);
+    runScaleTest(799, 100, 100, 100, strategy, 100, 13);
+    runScaleTest(800, 100, 100, 100, strategy, 100, 13);
+    runScaleTest(801, 100, 100, 100, strategy, 100, 13);
+    runScaleTest(100, 800, 100, 100, strategy, 13, 100);
+    runScaleTest(87, 78, 100, 100, strategy, 100, 90);
+  }
+
+  @Test
+  public void testCalculateScaling_withCenterOutside() {
+    DownsampleStrategy strategy = DownsampleStrategy.CENTER_OUTSIDE;
+    runScaleTest(100, 100, 100, 100, strategy, 100, 100);
+    runScaleTest(200, 200, 100, 100, strategy, 100, 100);
+    runScaleTest(400, 400, 100, 100, strategy, 100, 100);
+    runScaleTest(300, 300, 100, 100, strategy, 100, 100);
+    runScaleTest(799, 100, 100, 100, strategy, 799, 100);
+    runScaleTest(800, 100, 100, 100, strategy, 800, 100);
+    runScaleTest(801, 100, 100, 100, strategy, 801, 100);
+    runScaleTest(100, 800, 100, 100, strategy, 100, 800);
+    runScaleTest(87, 78, 100, 100, strategy, 112, 100);
+  }
+
+  @Test
+  public void testCalculateScaling_withNone() {
+    DownsampleStrategy strategy = DownsampleStrategy.NONE;
+    runScaleTest(100, 100, 100, 100, strategy, 100, 100);
+    runScaleTest(200, 200, 100, 100, strategy, 200, 200);
+    runScaleTest(400, 400, 100, 100, strategy, 400, 400);
+    runScaleTest(300, 300, 100, 100, strategy, 300, 300);
+    runScaleTest(799, 100, 100, 100, strategy, 799, 100);
+    runScaleTest(800, 100, 100, 100, strategy, 800, 100);
+    runScaleTest(801, 100, 100, 100, strategy, 801, 100);
+    runScaleTest(100, 800, 100, 100, strategy, 100, 800);
+    runScaleTest(87, 78, 100, 100, strategy, 87, 78);
+  }
+
+  private static void runScaleTest(int sourceWidth, int sourceHeight, int targetWidth,
+      int targetHeight, DownsampleStrategy strategy, int expectedWidth, int expectedHeight) {
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    Downsampler.calculateScaling(strategy, 0, sourceWidth, sourceHeight, targetWidth, targetHeight,
+        options);
+    assertSize(sourceWidth, sourceHeight, expectedWidth, expectedHeight, options);
+  }
+
+  private static void assertSize(int sourceWidth, int sourceHeight, int expectedWidth,
+      int expectedHeight, BitmapFactory.Options options) {
+    float sampleSize = Math.max(1, options.inSampleSize);
+    int downsampledWidth = (int) ((sourceWidth / sampleSize) + 0.5f);
+    int downsampledHeight = (int) ((sourceHeight / sampleSize) + 0.5f);
+
+    float scaleFactor = options.inScaled && options.inTargetDensity > 0 && options.inDensity > 0
+        ? options.inTargetDensity / (float) options.inDensity : 1f;
+    int scaledWidth = (int) Math.ceil(downsampledWidth * scaleFactor);
+    int scaledHeight = (int) Math.ceil(downsampledHeight * scaleFactor);
+
+    assertThat(scaledWidth).isIn(closed(expectedWidth, expectedWidth + 1));
+    assertThat(scaledHeight).isIn(closed(expectedHeight, expectedHeight + 1));
   }
 
   private InputStream compressBitmap(Bitmap bitmap, Bitmap.CompressFormat compressFormat)

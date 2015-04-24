@@ -13,6 +13,7 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.SampleSizeRounding;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.ByteArrayPool;
 import com.bumptech.glide.util.Preconditions;
@@ -193,7 +194,8 @@ public final class Downsampler {
     return rotated;
   }
 
-  private static void calculateScaling(DownsampleStrategy downsampleStrategy, int degreesToRotate,
+  // Visible for testing.
+  static void calculateScaling(DownsampleStrategy downsampleStrategy, int degreesToRotate,
       int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight,
       BitmapFactory.Options options) {
     // We can't downsample source content if we can't determine its dimensions.
@@ -220,15 +222,27 @@ public final class Downsampler {
       throw new IllegalArgumentException("Cannot scale with factor: " + exactScaleFactor
           + " from: " + downsampleStrategy);
     }
+    SampleSizeRounding rounding = downsampleStrategy.getSampleSizeRounding(sourceWidth,
+        sourceHeight, targetWidth, targetHeight);
+    if (rounding == null) {
+      throw new IllegalArgumentException("Cannot round with null rounding");
+    }
 
     int outWidth = (int) (exactScaleFactor * sourceWidth + 0.5f);
     int outHeight = (int) (exactScaleFactor * sourceHeight + 0.5f);
 
     int widthScaleFactor = sourceWidth / outWidth;
     int heightScaleFactor = sourceHeight / outHeight;
-    int scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
+
+    int scaleFactor = rounding == SampleSizeRounding.MEMORY
+        ? Math.max(widthScaleFactor, heightScaleFactor)
+        : Math.min(widthScaleFactor, heightScaleFactor);
 
     int powerOfTwoSampleSize = Math.max(1, Integer.highestOneBit(scaleFactor));
+    if (rounding == SampleSizeRounding.MEMORY && powerOfTwoSampleSize < exactScaleFactor) {
+      powerOfTwoSampleSize = powerOfTwoSampleSize << 1;
+    }
+
     float adjustedScaleFactor = powerOfTwoSampleSize * exactScaleFactor;
 
     options.inSampleSize = powerOfTwoSampleSize;

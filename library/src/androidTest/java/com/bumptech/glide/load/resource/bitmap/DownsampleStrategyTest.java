@@ -16,9 +16,9 @@ public class DownsampleStrategyTest {
   public void testAtMost_withSourceSmallerInOneDimensions_returnsScaleFactorForLargestDimension() {
     assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(100, 200, 200, 200)).isEqualTo(1f);
     assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(200, 100, 200, 200)).isEqualTo(1f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(270, 480, 724, 440)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(400, 200, 200, 200)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(800, 200, 200, 200)).isEqualTo(4f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(270, 480, 724, 440)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(400, 200, 200, 200)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(800, 200, 200, 200)).isEqualTo(1 / 4f);
   }
 
   @Test
@@ -30,26 +30,26 @@ public class DownsampleStrategyTest {
 
   @Test
   public void testAtMost_withSourceLessThanTwiceRequestedSize_returnsScaleFactorOfTwo() {
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(150, 150, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(101, 101, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(199, 199, 100, 100)).isEqualTo(2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(150, 150, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(101, 101, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(199, 199, 100, 100)).isEqualTo(1 / 2f);
   }
 
   @Test
   public void testAtMost_withSourceGreaterThanRequestedSize_returnsPowerOfTwoScaleFactor() {
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(200, 200, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(300, 300, 100, 100)).isEqualTo(4f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(400, 400, 100, 100)).isEqualTo(4f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(1000, 200, 100, 100)).isEqualTo(16f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(1000, 1000, 100, 100)).isEqualTo(16f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(200, 200, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(300, 300, 100, 100)).isEqualTo(1 / 4f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(400, 400, 100, 100)).isEqualTo(1 / 4f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(1000, 200, 100, 100)).isEqualTo(1 / 16f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(1000, 1000, 100, 100)).isEqualTo(1 / 16f);
   }
 
   @Test
   public void testAtMost_withSourceGreaterInOneDimension_returnsScaleFactorOfLargestDimension() {
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(101, 200, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(199, 200, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(400, 200, 100, 100)).isEqualTo(4f);
-    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(1000, 400, 100, 100)).isEqualTo(16f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(101, 200, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(199, 200, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(400, 200, 100, 100)).isEqualTo(1 / 4f);
+    assertThat(DownsampleStrategy.AT_MOST.getScaleFactor(1000, 400, 100, 100)).isEqualTo(1 / 16f);
   }
 
   @Test
@@ -75,19 +75,19 @@ public class DownsampleStrategyTest {
 
   @Test
   public void testAtLeast_withSourceGreaterThanRequestedSize_returnsPowerOfTwoScaleFactor() {
-    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(200, 200, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(300, 300, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(400, 400, 100, 100)).isEqualTo(4f);
-    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(1000, 200, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(1000, 1000, 100, 100)).isEqualTo(8f);
+    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(200, 200, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(300, 300, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(400, 400, 100, 100)).isEqualTo(1 / 4f);
+    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(1000, 200, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(1000, 1000, 100, 100)).isEqualTo(1 / 8f);
   }
 
   @Test
   public void testAtLeast_withSourceGreaterInOneDimension_returnsScaleFactorOfSmallestDimension() {
     assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(101, 200, 100, 100)).isEqualTo(1f);
     assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(199, 200, 100, 100)).isEqualTo(1f);
-    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(400, 200, 100, 100)).isEqualTo(2f);
-    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(1000, 400, 100, 100)).isEqualTo(4f);
+    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(400, 200, 100, 100)).isEqualTo(1 / 2f);
+    assertThat(DownsampleStrategy.AT_LEAST.getScaleFactor(1000, 400, 100, 100)).isEqualTo(1 / 4f);
   }
 
   @Test
