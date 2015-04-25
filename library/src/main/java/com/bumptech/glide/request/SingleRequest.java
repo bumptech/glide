@@ -137,7 +137,8 @@ public final class SingleRequest<R> implements Request,
       target.getSize(this);
     }
 
-    if (!isComplete() && !isFailed() && canNotifyStatusChanged()) {
+    if ((status == Status.RUNNING || status == Status.WAITING_FOR_SIZE)
+        && canNotifyStatusChanged()) {
       target.onLoadStarted(requestContext.getPlaceholderDrawable());
     }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
