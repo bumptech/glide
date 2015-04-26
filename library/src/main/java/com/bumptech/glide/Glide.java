@@ -448,6 +448,7 @@ public class Glide {
     public static void clear(View view) {
         Target<?> viewTarget = new ClearTarget(view);
         clear(viewTarget);
+        view.setTag(null);
     }
 
     /**
