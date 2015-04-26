@@ -25,6 +25,7 @@ public class DiskLruCacheWrapper implements DiskCache {
     private static final int VALUE_COUNT = 1;
     private static DiskLruCacheWrapper wrapper = null;
 
+    private final DiskCacheWriteLocker writeLocker = new DiskCacheWriteLocker();
     private final SafeKeyGenerator safeKeyGenerator;
     private final File directory;
     private final int maxSize;
@@ -87,6 +88,7 @@ public class DiskLruCacheWrapper implements DiskCache {
     @Override
     public void put(Key key, Writer writer) {
         String safeKey = safeKeyGenerator.getSafeKey(key);
+        writeLocker.acquire(key);
         try {
             DiskLruCache.Editor editor = getDiskCache().edit(safeKey);
             // Editor will be null if there are two concurrent puts. In the worst case we will just silently fail.
@@ -104,6 +106,8 @@ public class DiskLruCacheWrapper implements DiskCache {
             if (Log.isLoggable(TAG, Log.WARN)) {
                 Log.w(TAG, "Unable to put to disk cache", e);
             }
+        } finally {
+            writeLocker.release(key);
         }
     }
 
