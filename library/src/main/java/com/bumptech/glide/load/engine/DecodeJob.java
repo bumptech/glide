@@ -248,7 +248,7 @@ class DecodeJob<A, T, Z> {
     }
 
     private void logWithTimeAndKey(String message, long startTime) {
-        Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + resultKey);
+        Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + ", key: " + resultKey);
     }
 
     class SourceWriter<DataType> implements DiskCache.Writer {
