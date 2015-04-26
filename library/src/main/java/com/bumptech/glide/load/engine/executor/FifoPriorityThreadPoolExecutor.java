@@ -1,5 +1,9 @@
 package com.bumptech.glide.load.engine.executor;
 
+import android.util.Log;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RunnableFuture;
@@ -15,7 +19,38 @@ import java.util.concurrent.atomic.AtomicInteger;
  * same time. Runnables with the same priority will be executed in FIFO order.
  */
 public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
-    AtomicInteger ordering = new AtomicInteger();
+    private static final String TAG = "PriorityExecutor";
+    private final AtomicInteger ordering = new AtomicInteger();
+    private final UncaughtThrowableStrategy uncaughtThrowableStrategy;
+
+    /**
+     * A strategy for handling unexpected and uncaught throwables thrown by futures run on the pool.
+     */
+    public enum UncaughtThrowableStrategy {
+        /** Silently catches and ignores the uncaught throwables. */
+        IGNORE,
+        /** Logs the uncaught throwables using {@link #TAG} and {@link Log}. */
+        LOG {
+            @Override
+            protected void handle(Throwable t) {
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, "Request threw uncaught throwable", t);
+                }
+            }
+        },
+        /** Rethrows the uncaught throwables to crash the app. */
+        THROW {
+            @Override
+            protected void handle(Throwable t) {
+                super.handle(t);
+                throw new RuntimeException(t);
+            }
+        };
+
+        protected void handle(Throwable t) {
+            // Ignore.
+        }
+    }
 
     /**
      * Constructor to build a fixed thread pool with the given pool size using
@@ -24,17 +59,48 @@ public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
      * @param poolSize The number of threads.
      */
     public FifoPriorityThreadPoolExecutor(int poolSize) {
-        this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory());
+        this(poolSize, UncaughtThrowableStrategy.LOG);
+    }
+
+    /**
+     * Constructor to build a fixed thread pool with the given pool size using
+     * {@link com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor.DefaultThreadFactory}.
+     *
+     * @param poolSize The number of threads.
+     * @param uncaughtThrowableStrategy Dictates how the pool should handle uncaught and unexpected throwables
+     *                                  thrown by Futures run by the pool.
+     */
+    public FifoPriorityThreadPoolExecutor(int poolSize, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+        this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory(),
+            uncaughtThrowableStrategy);
     }
 
     public FifoPriorityThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAlive, TimeUnit timeUnit,
-            ThreadFactory threadFactory) {
+            ThreadFactory threadFactory, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
         super(corePoolSize, maximumPoolSize, keepAlive, timeUnit, new PriorityBlockingQueue<Runnable>(), threadFactory);
+        this.uncaughtThrowableStrategy = uncaughtThrowableStrategy;
     }
 
     @Override
     protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
         return new LoadTask<T>(runnable, value, ordering.getAndIncrement());
+    }
+
+    @Override
+    protected void afterExecute(Runnable r, Throwable t) {
+        super.afterExecute(r, t);
+        if (t == null && r instanceof Future<?>) {
+            Future<?> future = (Future<?>) r;
+            if (future.isDone() && !future.isCancelled()) {
+                try {
+                    future.get();
+                } catch (InterruptedException e) {
+                    uncaughtThrowableStrategy.handle(e);
+                } catch (ExecutionException e) {
+                    uncaughtThrowableStrategy.handle(e);
+                }
+            }
+        }
     }
 
     /**
