@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -17,7 +18,9 @@ import java.util.Map;
  * A DataFetcher that retrieves an {@link java.io.InputStream} for a Url.
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
-    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String TAG = "HttpUrlFetcher";
+    private static final String ENCODING_HEADER = "Accept-Encoding";
+    private static final String DEFAULT_ENCODING = "identity";
     private static final int MAXIMUM_REDIRECTS = 5;
     private static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY = new DefaultHttpUrlConnectionFactory();
 
@@ -62,6 +65,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
           urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
         }
+        // Do our best to avoid gzip since it's both inefficient for images and also makes it more
+        // difficult for us to detect and prevent partial content rendering. See #440.
+        if (TextUtils.isEmpty(urlConnection.getRequestProperty(ENCODING_HEADER))) {
+            urlConnection.setRequestProperty(ENCODING_HEADER, DEFAULT_ENCODING);
+        }
         urlConnection.setConnectTimeout(2500);
         urlConnection.setReadTimeout(2500);
         urlConnection.setUseCaches(false);
@@ -74,9 +82,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         }
         final int statusCode = urlConnection.getResponseCode();
         if (statusCode / 100 == 2) {
-            String contentLength = urlConnection.getHeaderField(CONTENT_LENGTH);
-            stream = ContentLengthInputStream.obtain(urlConnection.getInputStream(), contentLength);
-            return stream;
+            return getStreamForSuccessfulRequest(urlConnection);
         } else if (statusCode / 100 == 3) {
             String redirectUrlString = urlConnection.getHeaderField("Location");
             if (TextUtils.isEmpty(redirectUrlString)) {
@@ -90,6 +96,20 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
             }
             throw new IOException("Request failed " + statusCode + ": " + urlConnection.getResponseMessage());
         }
+    }
+
+    private InputStream getStreamForSuccessfulRequest(HttpURLConnection urlConnection)
+            throws IOException {
+        if (TextUtils.isEmpty(urlConnection.getContentEncoding())) {
+            int contentLength = urlConnection.getContentLength();
+            stream = ContentLengthInputStream.obtain(urlConnection.getInputStream(), contentLength);
+        } else {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Got non empty content encoding: " + urlConnection.getContentEncoding());
+            }
+            stream = urlConnection.getInputStream();
+        }
+        return stream;
     }
 
     @Override

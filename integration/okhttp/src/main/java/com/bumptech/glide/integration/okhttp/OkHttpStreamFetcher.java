@@ -17,7 +17,6 @@ import java.util.Map;
  * Fetches an {@link InputStream} using the okhttp library.
  */
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private final OkHttpClient client;
     private final GlideUrl url;
     private InputStream stream;
@@ -43,7 +42,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
             throw new IOException("Request failed with code: " + response.code());
         }
 
-        String contentLength = response.header(CONTENT_LENGTH_HEADER);
+        long contentLength = responseBody.contentLength();
         stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
         return stream;
     }
