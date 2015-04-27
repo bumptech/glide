@@ -170,7 +170,11 @@ public class Registry {
       for (Class<?> dataClass : dataClasses) {
         List<? extends Class<?>> registeredResourceClasses =
             decoderRegistry.getResourceClasses(dataClass, resourceClass);
-        result.addAll(registeredResourceClasses);
+        for (Class<?> registeredResourceClass : registeredResourceClasses) {
+          if (!result.contains(registeredResourceClass)) {
+            result.add(registeredResourceClass);
+          }
+        }
       }
       modelToResourceClassCache.put(modelClass, resourceClass,
           Collections.unmodifiableList(result));

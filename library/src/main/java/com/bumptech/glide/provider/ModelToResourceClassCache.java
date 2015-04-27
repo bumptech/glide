@@ -20,6 +20,8 @@ public class ModelToResourceClassCache {
     MultiClassKey key = resourceClassKeyRef.getAndSet(null);
     if (key == null) {
       key = new MultiClassKey(modelClass, resourceClass);
+    } else {
+      key.set(modelClass, resourceClass);
     }
     final List<Class<?>> result;
     synchronized (registeredResourceClassCache) {
