@@ -1,5 +1,7 @@
 package com.bumptech.glide;
 
+import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -15,6 +17,7 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.Util;
 
 /**
@@ -30,6 +33,8 @@ import com.bumptech.glide.util.Util;
  * @see Glide#with(Context)
  */
 public class RequestManager implements LifecycleListener {
+  private static final RequestOptions DECODE_TYPE_BITMAP = decodeTypeOf(Bitmap.class).lock();
+  private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
   private final GlideContext context;
   private final Lifecycle lifecycle;
   private final RequestTracker requestTracker;
@@ -185,7 +190,7 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading a {@link android.graphics.Bitmap}
    */
   public RequestBuilder<Bitmap> asBitmap() {
-    return as(Bitmap.class).transition(new BitmapTransitionOptions());
+    return as(Bitmap.class).transition(new BitmapTransitionOptions()).apply(DECODE_TYPE_BITMAP);
   }
 
   /**
@@ -202,7 +207,7 @@ public class RequestManager implements LifecycleListener {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    */
   public RequestBuilder<GifDrawable> asGif() {
-    return as(GifDrawable.class).transition(new DrawableTransitionOptions());
+    return as(GifDrawable.class).transition(new DrawableTransitionOptions()).apply(DECODE_TYPE_GIF);
   }
 
   /**
