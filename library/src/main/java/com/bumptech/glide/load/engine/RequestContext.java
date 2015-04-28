@@ -91,10 +91,8 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
       int size = loadData.size();
       for (int i = 0; i < size; i++) {
         ModelLoader.LoadData<?> data = loadData.get(i);
-        if (data != null) {
-          cacheKeys.add(data.sourceKey);
-          cacheKeys.addAll(data.alternateKeys);
-        }
+        cacheKeys.add(data.sourceKey);
+        cacheKeys.addAll(data.alternateKeys);
       }
       this.cacheKeys = cacheKeys;
     }
@@ -110,8 +108,11 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
       int size = modelLoaders.size();
       for (int i = 0; i < size; i++) {
         ModelLoader<Model, ?> modelLoader = modelLoaders.get(i);
-        loadData.add(modelLoader.buildLoadData(model, width, height,
-            requestOptions.getOptions()));
+        LoadData<?> current =
+            modelLoader.buildLoadData(model, width, height, requestOptions.getOptions());
+        if (current != null) {
+          loadData.add(current);
+        }
       }
     }
     return loadData;
