@@ -74,6 +74,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         .asDrawable()
         .transition(withCrossFade(R.anim.fade_in, 150))
         .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
+            .centerCrop(getActivity())
             .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
 
     preloadRequest =
