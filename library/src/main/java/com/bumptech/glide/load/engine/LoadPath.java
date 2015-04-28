@@ -36,7 +36,9 @@ public class LoadPath<Data, ResourceType, Transcode> {
     Options options = context.getOptions();
     DataRewinder<Data> rewinder = context.getRewinder(data);
     try {
-      for (DecodePath<Data, ResourceType, Transcode> path : decodePaths) {
+      int size = decodePaths.size();
+      for (int i = 0; i < size; i++) {
+        DecodePath<Data, ResourceType, Transcode> path = decodePaths.get(i);
         result = path.decode(rewinder, width, height, options, decodeCallback);
         if (result != null) {
           break;

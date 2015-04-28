@@ -7,7 +7,6 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -26,8 +25,10 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   private int sourceIdIndex = -1;
   private Key sourceKey;
-  private Iterator<ModelLoader.LoadData<?>> loadDataIterator;
+  private List<ModelLoader<File, ?>> modelLoaders;
+  private int modelLoaderIndex;
   private volatile DataFetcher<?> fetcher;
+  private File cacheFile;
 
   public DataCacheGenerator(List<Key> sourceIds, int width, int height, DiskCache diskCache,
       RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
@@ -41,7 +42,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public boolean startNext() {
-    while (loadDataIterator == null || !loadDataIterator.hasNext()) {
+    while (modelLoaders == null || !hasNextModelLoader()) {
       sourceIdIndex++;
       if (sourceIdIndex >= sourceIds.size()) {
         return false;
@@ -49,21 +50,28 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
       Key sourceId = sourceIds.get(sourceIdIndex);
       Key originalKey = new DataCacheKey(sourceId, requestContext.getSignature());
-      File cacheFile = diskCache.get(originalKey);
+      cacheFile = diskCache.get(originalKey);
       if (cacheFile != null) {
         this.sourceKey = sourceId;
-        loadDataIterator = requestContext.getDataFetchers(cacheFile, width, height).iterator();
+        modelLoaders = requestContext.getModelLoaders(cacheFile);
+        modelLoaderIndex = 0;
       }
     }
 
     fetcher = null;
-    while (fetcher == null && loadDataIterator.hasNext()) {
-      fetcher = loadDataIterator.next().fetcher;
+    while (fetcher == null && hasNextModelLoader()) {
+      ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
+      fetcher =
+          modelLoader.buildLoadData(cacheFile, width, height, requestContext.getOptions()).fetcher;
       if (fetcher != null) {
         fetcher.loadData(requestContext.getPriority(), this);
       }
     }
     return fetcher != null;
+  }
+
+  private boolean hasNextModelLoader() {
+    return modelLoaderIndex < modelLoaders.size();
   }
 
   @Override

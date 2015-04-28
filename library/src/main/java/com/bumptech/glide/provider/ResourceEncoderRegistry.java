@@ -19,7 +19,9 @@ public class ResourceEncoderRegistry {
 
   @SuppressWarnings("unchecked")
   public synchronized <Z> ResourceEncoder<Z> get(Class<Z> resourceClass) {
-    for (Entry<?> entry : encoders) {
+    int size = encoders.size();
+    for (int i = 0; i < size; i++) {
+      Entry<?> entry = encoders.get(i);
       if (entry.handles(resourceClass)) {
         return (ResourceEncoder<Z>) entry.encoder;
       }

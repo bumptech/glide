@@ -7,15 +7,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.content.Context;
 
+import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -26,12 +31,13 @@ import java.util.List;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class MultiModelLoaderFactoryTest {
 
-  @Mock
-  ModelLoaderFactory<String, String> singleFactory;
-  @Mock
-  ModelLoader<String, String> modelLoader;
-  @Mock
-  MultiModelLoaderFactory.Factory multiModelLoaderFactory;
+  @Mock ModelLoaderFactory<String, String> firstFactory;
+  @Mock ModelLoader<String, String> firstModelLoader;
+  @Mock MultiModelLoaderFactory.Factory multiModelLoaderFactory;
+  @Mock ModelLoaderFactory<String, String> secondFactory;
+  @Mock ModelLoader<String, String> secondModelLoader;
+
+  public @Rule ExpectedException exception = ExpectedException.none();
 
   private MultiModelLoaderFactory multiFactory;
 
@@ -41,55 +47,56 @@ public class MultiModelLoaderFactoryTest {
 
     multiFactory =
         new MultiModelLoaderFactory(RuntimeEnvironment.application, multiModelLoaderFactory);
-    when(singleFactory.build(anyContext(), eq(multiFactory))).thenReturn(modelLoader);
+    when(firstFactory.build(anyContext(), eq(multiFactory))).thenReturn(firstModelLoader);
+    when(secondFactory.build(anyContext(), eq(multiFactory))).thenReturn(secondModelLoader);
   }
 
   @Test
   public void testAppend_addsModelLoaderForModelClass() {
-    multiFactory.append(String.class, String.class, singleFactory);
+    multiFactory.append(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
-    assertThat(modelLoaders).containsExactly(modelLoader);
+    assertThat(modelLoaders).containsExactly(firstModelLoader);
   }
 
   @Test
   public void testAppend_addsModelLoaderForModelAndDataClass() {
-    multiFactory.append(String.class, String.class, singleFactory);
+    multiFactory.append(String.class, String.class, firstFactory);
 
-    List<ModelLoader<String, String>> modelLoaders = buildModelLoaders(String.class, String.class);
-    assertThat(modelLoaders).containsExactly(modelLoader);
+    ModelLoader<String, String> modelLoader = multiFactory.build(String.class, String.class);
+    assertThat(modelLoader).isEqualTo(firstModelLoader);
   }
 
   @Test
   public void testPrepend_addsModelLoaderForModelClass() {
-    multiFactory.prepend(String.class, String.class, singleFactory);
+    multiFactory.prepend(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
-    assertThat(modelLoaders).containsExactly(modelLoader);
+    assertThat(modelLoaders).containsExactly(firstModelLoader);
   }
 
   @Test
   public void testPrepend_addsModelLoaderForModelAndDataClass() {
-    multiFactory.prepend(String.class, String.class, singleFactory);
+    multiFactory.prepend(String.class, String.class, firstFactory);
 
-    List<ModelLoader<String, String>> modelLoaders = buildModelLoaders(String.class, String.class);
-    assertThat(modelLoaders).containsExactly(modelLoader);
+    ModelLoader<String, String> modelLoader = multiFactory.build(String.class, String.class);
+    assertThat(modelLoader).isEqualTo(firstModelLoader);
   }
 
   @Test
   public void testReplace_addsModelLoaderForModelClass() {
-    multiFactory.replace(String.class, String.class, singleFactory);
+    multiFactory.replace(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
-    assertThat(modelLoaders).containsExactly(modelLoader);
+    assertThat(modelLoaders).containsExactly(firstModelLoader);
   }
 
   @Test
   public void testReplace_addsModelLoaderForModelAndDataClasses() {
-    multiFactory.replace(String.class, String.class, singleFactory);
+    multiFactory.replace(String.class, String.class, firstFactory);
 
-    List<ModelLoader<String, String>> modelLoaders = buildModelLoaders(String.class, String.class);
-    assertThat(modelLoaders).containsExactly(modelLoader);
+    ModelLoader<String, String> modelLoader = multiFactory.build(String.class, String.class);
+    assertThat(modelLoader).isEqualTo(firstModelLoader);
   }
 
   @SuppressWarnings("unchecked")
@@ -101,7 +108,7 @@ public class MultiModelLoaderFactoryTest {
     multiFactory.append(String.class, String.class, secondOtherFactory);
 
     List<ModelLoaderFactory<String, String>> removed =
-        multiFactory.replace(String.class, String.class, singleFactory);
+        multiFactory.replace(String.class, String.class, firstFactory);
     assertThat(removed).containsExactly(firstOtherFactory, secondOtherFactory);
   }
 
@@ -110,10 +117,10 @@ public class MultiModelLoaderFactoryTest {
     appendFactoryFor(String.class, String.class);
     appendFactoryFor(String.class, String.class);
 
-    multiFactory.replace(String.class, String.class, singleFactory);
+    multiFactory.replace(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
-    assertThat(modelLoaders).containsExactly(modelLoader);
+    assertThat(modelLoaders).containsExactly(firstModelLoader);
   }
 
   @SuppressWarnings("unchecked")
@@ -121,11 +128,11 @@ public class MultiModelLoaderFactoryTest {
   public void testRemove_returnsPreviouslyRegisteredFactories_withModelAndDataClasses() {
     ModelLoaderFactory<String, String> other = mock(ModelLoaderFactory.class);
     multiFactory.append(String.class, String.class, other);
-    multiFactory.append(String.class, String.class, singleFactory);
+    multiFactory.append(String.class, String.class, firstFactory);
 
     List<ModelLoaderFactory<String, String>> removed =
         multiFactory.remove(String.class, String.class);
-    assertThat(removed).containsExactly(singleFactory, other);
+    assertThat(removed).containsExactly(firstFactory, other);
   }
 
   @Test
@@ -142,53 +149,53 @@ public class MultiModelLoaderFactoryTest {
   @Test
   public void testBuild_withModelClass_returnsMultipleModelLoaders_ofGivenModelAndDataClasses() {
     ModelLoader<String, String> otherLoader = appendFactoryFor(String.class, String.class);
-    multiFactory.append(String.class, String.class, singleFactory);
+    multiFactory.append(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
-    assertThat(modelLoaders).containsExactly(otherLoader, modelLoader);
+    assertThat(modelLoaders).containsExactly(otherLoader, firstModelLoader);
   }
 
   @Test
   public void
   testBuild_withModelClass_returnsMultipleModelLoaders_ofGivenModelClassWithDifferentDataClasses() {
     ModelLoader<String, Integer> otherLoader = appendFactoryFor(String.class, Integer.class);
-    multiFactory.append(String.class, String.class, singleFactory);
+    multiFactory.append(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
-    assertThat(modelLoaders).containsExactly(otherLoader, modelLoader);
+    assertThat(modelLoaders).containsExactly(otherLoader, firstModelLoader);
   }
 
   @Test
   public void testBuild_withModelClass_excludesModelLoadersForOtherModelClasses() {
-    multiFactory.append(String.class, String.class, singleFactory);
+    multiFactory.append(String.class, String.class, firstFactory);
     List<ModelLoader<Integer, ?>> modelLoaders = multiFactory.build(Integer.class);
-    assertThat(modelLoaders).doesNotContain(modelLoader);
+    assertThat(modelLoaders).doesNotContain(firstModelLoader);
   }
 
   @Test
   public void
   testBuild_withModelAndDataClasses_returnsMultipleModelLoaders_ofGivenModelAndDataClasses() {
     ModelLoader<String, String> otherLoader = appendFactoryFor(String.class, String.class);
-    multiFactory.append(String.class, String.class, singleFactory);
+    multiFactory.append(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, String>> modelLoaders = buildModelLoaders(String.class, String.class);
-    assertThat(modelLoaders).containsExactly(otherLoader, modelLoader);
+    assertThat(modelLoaders).containsExactly(otherLoader, firstModelLoader);
   }
 
   @Test
   public void testBuild_withModelAndDataClasses_excludesModelLoadersForOtherDataClasses() {
-    multiFactory.append(String.class, String.class, singleFactory);
-    List<ModelLoader<String, Integer>> modelLoaders =
-        buildModelLoaders(String.class, Integer.class);
-    assertThat(modelLoaders).doesNotContain(modelLoader);
+    multiFactory.append(String.class, String.class, firstFactory);
+
+    exception.expect(NoModelLoaderAvailableException.class);
+    multiFactory.build(String.class, Integer.class);
   }
 
   @Test
   public void testBuild_withModelAndDataClasses_excludesModelLoadersForOtherModelClasses() {
-    multiFactory.append(String.class, String.class, singleFactory);
-    List<ModelLoader<Integer, String>> modelLoaders =
-        buildModelLoaders(Integer.class, String.class);
-    assertThat(modelLoaders).doesNotContain(modelLoader);
+    multiFactory.append(String.class, String.class, firstFactory);
+
+    exception.expect(NoModelLoaderAvailableException.class);
+    multiFactory.build(Integer.class, String.class);
   }
 
   @Test
@@ -207,37 +214,40 @@ public class MultiModelLoaderFactoryTest {
 
   @Test
   public void testBuild_withModelAndDataClass_doesNotMatchSubclassesOfModelClass() {
-    ModelLoader<String, Object> subclass = appendFactoryFor(String.class, Object.class);
-    List<ModelLoader<Object, Object>> modelLoaders = buildModelLoaders(Object.class, Object.class);
-    assertThat(modelLoaders).doesNotContain(subclass);
+    appendFactoryFor(String.class, Object.class);
+    exception.expect(NoModelLoaderAvailableException.class);
+    multiFactory.build(Object.class, Object.class);
   }
 
   @Test
   public void testBuild_withModelAndDataClass_doesNotMatchSubclassesOfDataClass() {
-    ModelLoader<Object, String> subclass = appendFactoryFor(Object.class, String.class);
-    List<ModelLoader<Object, Object>> modelLoaders = buildModelLoaders(Object.class, Object.class);
-    assertThat(modelLoaders).doesNotContain(subclass);
+    appendFactoryFor(Object.class, String.class);
+    exception.expect(NoModelLoaderAvailableException.class);
+    multiFactory.build(Object.class, Object.class);
   }
 
   @Test
   public void testBuild_withModelAndDataClass_doesMatchSuperclassesOfModelClass() {
-    ModelLoader<Object, Object> superclass = appendFactoryFor(Object.class, Object.class);
+    ModelLoader<Object, Object> firstSuperClass = appendFactoryFor(Object.class, Object.class);
+    ModelLoader<Object, Object> secondSuperClass = appendFactoryFor(Object.class, Object.class);
     List<ModelLoader<String, Object>> modelLoaders = buildModelLoaders(String.class, Object.class);
-    assertThat(modelLoaders).contains(superclass);
+    assertThat(modelLoaders).containsExactly(firstSuperClass, secondSuperClass);
   }
 
   @Test
   public void testBuild_withModelAndDataClass_matchesSuperclassesOfDataClass() {
-    ModelLoader<Object, Object> superclass = appendFactoryFor(Object.class, Object.class);
+    ModelLoader<Object, Object> firstSuperClass = appendFactoryFor(Object.class, Object.class);
+    ModelLoader<Object, Object> secondSuperClass = appendFactoryFor(Object.class, Object.class);
     List<ModelLoader<Object, String>> modelLoaders = buildModelLoaders(Object.class, String.class);
-    assertThat(modelLoaders).containsExactly(superclass);
+    assertThat(modelLoaders).containsExactly(firstSuperClass, secondSuperClass);
   }
 
   @Test
   public void testBuild_withModelAndDataClass_matchesSuperclassOfModelAndDataClass() {
-    ModelLoader<Object, Object> superclass = appendFactoryFor(Object.class, Object.class);
+    ModelLoader<Object, Object> firstSuperclass = appendFactoryFor(Object.class, Object.class);
+    ModelLoader<Object, Object> secondSuperclass = appendFactoryFor(Object.class, Object.class);
     List<ModelLoader<String, String>> modelLoaders = buildModelLoaders(String.class, String.class);
-    assertThat(modelLoaders).contains(superclass);
+    assertThat(modelLoaders).containsExactly(firstSuperclass, secondSuperclass);
   }
 
   @Test

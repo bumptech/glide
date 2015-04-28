@@ -13,7 +13,7 @@ import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.util.LogTime;
 
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
 
 /**
  * Generates {@link com.bumptech.glide.load.data.DataFetcher DataFetchers} from original source data
@@ -32,21 +32,22 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
   private final RequestContext<Model, ?> requestContext;
   private final DiskCache diskCache;
   private final FetcherReadyCallback cb;
-  private final Iterator<ModelLoader.LoadData<?>> dataLoaderIterator;
 
+  private List<LoadData<?>> loadDataList;
+  private int loadDataListIndex;
   private DataCacheGenerator sourceCacheGenerator;
   private Object dataToCache;
   private volatile ModelLoader.LoadData<?> loadData;
 
-  public SourceGenerator(int width, int height,
-      RequestContext<Model, ?> requestContext, DiskCache diskCache, FetcherReadyCallback cb) {
+  public SourceGenerator(int width, int height, RequestContext<Model, ?> requestContext,
+      DiskCache diskCache, FetcherReadyCallback cb) {
     this.width = width;
     this.height = height;
     this.requestContext = requestContext;
     this.diskCache = diskCache;
     this.cb = cb;
 
-    dataLoaderIterator = requestContext.getLoadDataSet().iterator();
+    loadDataList = requestContext.getLoadData();
   }
 
   @Override
@@ -61,13 +62,17 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
     sourceCacheGenerator = null;
 
     loadData = null;
-    while (loadData == null && dataLoaderIterator.hasNext()) {
-      loadData = dataLoaderIterator.next();
+    while (loadData == null && hasNextModelLoader()) {
+      loadData = loadDataList.get(loadDataListIndex++);
       if (loadData != null) {
         loadData.fetcher.loadData(requestContext.getPriority(), this);
       }
     }
     return loadData != null;
+  }
+
+  private boolean hasNextModelLoader() {
+    return loadDataListIndex < loadDataList.size();
   }
 
   private void cacheData() {

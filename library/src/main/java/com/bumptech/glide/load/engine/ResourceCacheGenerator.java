@@ -8,7 +8,6 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -18,8 +17,6 @@ import java.util.List;
 class ResourceCacheGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
-  private final List<Key> sourceIds;
-  private final List<Class<?>> resourceClasses;
   private final int width;
   private final int height;
   private final DiskCache diskCache;
@@ -29,14 +26,13 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   private int sourceIdIndex = 0;
   private int resourceClassIndex = -1;
   private Key sourceKey;
-  private Iterator<ModelLoader.LoadData<?>> loadDataIterator;
+  private List<ModelLoader<File, ?>> modelLoaders;
+  private int modelLoaderIndex;
   private volatile DataFetcher<?> fetcher;
+  private File cacheFile;
 
-  public ResourceCacheGenerator(List<Key> sourceIds,
-      List<Class<?>> resourceClasses, int width, int height, DiskCache diskCache,
+  public ResourceCacheGenerator(int width, int height, DiskCache diskCache,
       RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
-    this.sourceIds = sourceIds;
-    this.resourceClasses = resourceClasses;
     this.width = width;
     this.height = height;
     this.diskCache = diskCache;
@@ -46,7 +42,9 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public boolean startNext() {
-    while (loadDataIterator == null || !loadDataIterator.hasNext()) {
+    List<Key> sourceIds = requestContext.getCacheKeys();
+    List<Class<?>> resourceClasses = requestContext.getRegisteredResourceClasses();
+    while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
       if (resourceClassIndex >= resourceClasses.size()) {
         sourceIdIndex++;
@@ -62,22 +60,29 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
       Key key = new ResourceCacheKey(sourceId, requestContext.getSignature(), width, height,
           transformation, resourceClass, requestContext.getOptions());
-      File cacheFile = diskCache.get(key);
+      cacheFile = diskCache.get(key);
       if (cacheFile != null) {
         this.sourceKey = sourceId;
-        loadDataIterator = requestContext.getDataFetchers(cacheFile, width, height).iterator();
+        modelLoaders = requestContext.getModelLoaders(cacheFile);
+        modelLoaderIndex = 0;
       }
     }
 
     fetcher = null;
-    while (fetcher == null && loadDataIterator.hasNext()) {
-      fetcher = loadDataIterator.next().fetcher;
+    while (fetcher == null && hasNextModelLoader()) {
+      ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
+      fetcher =
+          modelLoader.buildLoadData(cacheFile, width, height, requestContext.getOptions()).fetcher;
       if (fetcher != null) {
         fetcher.loadData(requestContext.getPriority(), this);
       }
     }
 
     return fetcher != null;
+  }
+
+  private boolean hasNextModelLoader() {
+    return modelLoaderIndex < modelLoaders.size();
   }
 
   @Override

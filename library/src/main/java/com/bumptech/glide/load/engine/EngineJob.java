@@ -25,7 +25,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   private static final int MSG_COMPLETE = 1;
   private static final int MSG_EXCEPTION = 2;
 
-  private final List<ResourceCallback> cbs = new ArrayList<>();
+  private final List<ResourceCallback> cbs = new ArrayList<>(2);
   private final EngineResourceFactory engineResourceFactory;
   private final EngineJobListener listener;
   private final Key key;

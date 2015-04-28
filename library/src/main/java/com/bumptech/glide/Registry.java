@@ -3,15 +3,14 @@ package com.bumptech.glide;
 import android.content.Context;
 
 import com.bumptech.glide.load.Encoder;
-import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
-import com.bumptech.glide.load.data.LoadDataSet;
 import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
@@ -209,9 +208,8 @@ public class Registry {
     return dataRewinderRegistry.build(data);
   }
 
-  public <Model> LoadDataSet<Model> getLoadDataSet(Model model, int width, int height,
-      Options options) {
-    LoadDataSet<Model> result = modelLoaderRegistry.getDataFetchers(model, width, height, options);
+  public <Model> List<ModelLoader<Model, ?>> getModelLoaders(Model model) {
+    List<ModelLoader<Model, ?>> result = modelLoaderRegistry.getModelLoaders(model);
     if (result.isEmpty()) {
       throw new NoModelLoaderAvailableException(model);
     }
@@ -225,6 +223,10 @@ public class Registry {
   public static class NoModelLoaderAvailableException extends MissingComponentException {
     public NoModelLoaderAvailableException(Object model) {
       super("Failed to find any ModelLoaders for model: " + model);
+    }
+
+    public NoModelLoaderAvailableException(Class modelClass, Class dataClass) {
+      super("Failed to find any ModelLoaders for model: " + modelClass + " and data: " + dataClass);
     }
   }
 

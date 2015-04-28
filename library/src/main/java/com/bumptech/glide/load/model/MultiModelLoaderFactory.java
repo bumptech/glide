@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model;
 
 import android.content.Context;
 
+import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.util.Preconditions;
 
 import java.util.ArrayList;
@@ -91,7 +92,13 @@ public class MultiModelLoaderFactory {
         loaders.add(this.<Model, Data>build(entry));
       }
     }
-    return factory.build(loaders);
+    if (loaders.size() > 1) {
+      return factory.build(loaders);
+    } else if (loaders.size() == 1) {
+      return loaders.get(0);
+    } else {
+      throw new NoModelLoaderAvailableException(modelClass, dataClass);
+    }
   }
 
   @SuppressWarnings("unchecked")

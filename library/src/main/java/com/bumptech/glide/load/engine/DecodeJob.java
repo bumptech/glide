@@ -140,9 +140,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
     switch (stage) {
       case RESOURCE_CACHE:
-        return new ResourceCacheGenerator(requestContext.getCacheKeys(),
-            requestContext.getRegisteredResourceClasses(), width, height,
-            diskCacheProvider.getDiskCache(), requestContext, this);
+        return new ResourceCacheGenerator(width, height, diskCacheProvider.getDiskCache(),
+            requestContext, this);
       case DATA_CACHE:
         return new DataCacheGenerator(requestContext.getCacheKeys(), width, height,
             diskCacheProvider.getDiskCache(), requestContext, this);

@@ -2,9 +2,7 @@ package com.bumptech.glide.load.model;
 
 import android.content.Context;
 
-import com.bumptech.glide.load.Options;
-import com.bumptech.glide.load.data.LoadDataSet;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -57,11 +55,17 @@ public class ModelLoaderRegistry {
     }
   }
 
-  public synchronized <A> LoadDataSet<A> getDataFetchers(A model, int width, int height,
-      Options options) {
-    List<ModelLoader<A, ?>> modelLoaders = getModelLoaders(model);
-
-    return new LoadDataSet<>(model, width, height, modelLoaders, options);
+  public synchronized <A> List<ModelLoader<A, ?>> getModelLoaders(A model) {
+    List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));
+    int size = modelLoaders.size();
+    List<ModelLoader<A, ?>> filteredLoaders = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
+      ModelLoader<A, ?> loader = modelLoaders.get(i);
+      if (loader.handles(model)) {
+        filteredLoaders.add(loader);
+      }
+    }
+    return filteredLoaders;
   }
 
   public synchronized <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass,
@@ -73,8 +77,7 @@ public class ModelLoaderRegistry {
     return multiModelLoaderFactory.getDataClasses(modelClass);
   }
 
-  private <A> List<ModelLoader<A, ?>> getModelLoaders(A model) {
-    Class<A> modelClass = getClass(model);
+  private <A> List<ModelLoader<A, ?>> getModelLoadersForClass(Class<A> modelClass) {
     List<ModelLoader<A, ?>> loaders = cache.get(modelClass);
     if (loaders == null) {
       loaders = Collections.unmodifiableList(multiModelLoaderFactory.build(modelClass));

@@ -12,13 +12,12 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataRewinder;
-import com.bumptech.glide.load.data.LoadDataSet;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.request.BaseRequestOptions;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -38,13 +37,12 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
   private final Priority priority;
   private final int overrideWidth;
   private final int overrideHeight;
-  private LoadDataSet<Model> loadDataSet;
   private Drawable errorDrawable;
   private Drawable placeholderDrawable;
   private int width = UNSET;
   private int height = UNSET;
   private List<Key> cacheKeys;
-  private List<Key> sourceKeys;
+  private List<LoadData<?>> loadData;
 
   public RequestContext(GlideContext glideContext, Model model,
       Class<TranscodeClass> transcodeClass, BaseRequestOptions<?> requestOptions, Priority priority,
@@ -68,42 +66,55 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
     this.height = height;
   }
 
-  synchronized boolean isSourceKey(Key key) {
-    collectKeys();
-    return sourceKeys.contains(key);
-  }
-
   synchronized List<Key> getCacheKeys() {
     collectKeys();
     return cacheKeys;
   }
 
+  synchronized boolean isSourceKey(Key key) {
+    List<LoadData<?>> loadData = getLoadData();
+    int size = loadData.size();
+    for (int i = 0; i < size; i++) {
+      LoadData<?> current = loadData.get(i);
+      if (current.sourceKey.equals(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private synchronized void collectKeys() {
     if (cacheKeys == null) {
-      List<Key> cacheKeys = new ArrayList<>();
-      List<Key> sourceKeys = new ArrayList<>();
+      List<LoadData<?>> loadData = getLoadData();
+      List<Key> cacheKeys = new ArrayList<>(loadData.size());
 
-      for (ModelLoader.LoadData<?> data : getLoadDataSet()) {
+      int size = loadData.size();
+      for (int i = 0; i < size; i++) {
+        ModelLoader.LoadData<?> data = loadData.get(i);
         if (data != null) {
           cacheKeys.add(data.sourceKey);
-          sourceKeys.add(data.sourceKey);
           cacheKeys.addAll(data.alternateKeys);
         }
       }
-      this.cacheKeys = Collections.unmodifiableList(cacheKeys);
-      this.sourceKeys = Collections.unmodifiableList(sourceKeys);
+      this.cacheKeys = cacheKeys;
     }
   }
 
-  synchronized LoadDataSet<Model> getLoadDataSet() {
+  synchronized List<LoadData<?>> getLoadData() {
     if (width == UNSET || height == UNSET) {
       throw new IllegalStateException("Width and/or height are unset.");
     }
-    if (loadDataSet == null) {
-      loadDataSet = glideContext.getRegistry().getLoadDataSet(model, width, height,
-          requestOptions.getOptions());
+    if (loadData == null) {
+      List<ModelLoader<Model, ?>> modelLoaders = glideContext.getRegistry().getModelLoaders(model);
+      loadData = new ArrayList<>(modelLoaders.size());
+      int size = modelLoaders.size();
+      for (int i = 0; i < size; i++) {
+        ModelLoader<Model, ?> modelLoader = modelLoaders.get(i);
+        loadData.add(modelLoader.buildLoadData(model, width, height,
+            requestOptions.getOptions()));
+      }
     }
-    return loadDataSet;
+    return loadData;
   }
 
   Key getSignature() {
@@ -161,10 +172,9 @@ public class RequestContext<Model, TranscodeClass> extends ContextWrapper {
     return glideContext.getRegistry().getSourceEncoder(data);
   }
 
-  LoadDataSet<File> getDataFetchers(File file, int width, int height)
+  List<ModelLoader<File, ?>> getModelLoaders(File file)
       throws Registry.NoModelLoaderAvailableException {
-    return glideContext.getRegistry().getLoadDataSet(file, width, height,
-        requestOptions.getOptions());
+    return glideContext.getRegistry().getModelLoaders(file);
   }
 
   public int getOverrideWidth() {

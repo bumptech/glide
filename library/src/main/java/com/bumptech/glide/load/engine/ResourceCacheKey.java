@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.util.LruCache;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -11,6 +12,7 @@ import java.security.MessageDigest;
  * A cache key for downsampled and transformed resource data + any requested signature.
  */
 final class ResourceCacheKey implements Key {
+  private static final LruCache<Class<?>, byte[]> RESOURCE_CLASS_BYTES = new LruCache<>(50);
   private final Key sourceKey;
   private final Key signature;
   private final int width;
@@ -69,7 +71,16 @@ final class ResourceCacheKey implements Key {
       transformation.updateDiskCacheKey(messageDigest);
     }
     options.updateDiskCacheKey(messageDigest);
-    messageDigest.update(decodedResourceClass.getName().getBytes(CHARSET));
+    messageDigest.update(getResourceClassBytes());
+  }
+
+  private byte[] getResourceClassBytes() {
+    byte[] result = RESOURCE_CLASS_BYTES.get(decodedResourceClass);
+    if (result == null) {
+      result = decodedResourceClass.getName().getBytes(CHARSET);
+      RESOURCE_CLASS_BYTES.put(decodedResourceClass, result);
+    }
+    return result;
   }
 
   @Override
