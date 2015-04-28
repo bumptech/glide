@@ -12,6 +12,7 @@ import android.os.SystemClock;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider;
 import com.bumptech.glide.gifdecoder.GifHeader;
@@ -36,6 +37,7 @@ class GifFrameLoader {
   private final Handler handler;
   private final Context context;
   private final List<FrameCallback> callbacks = new ArrayList<>();
+  private final RequestManager requestManager;
 
   private boolean isRunning = false;
   private boolean isLoadPending = false;
@@ -53,18 +55,19 @@ class GifFrameLoader {
   public GifFrameLoader(Context context, BitmapProvider bitmapProvider, GifHeader gifHeader,
       ByteBuffer byteBuffer, int width, int height,  Transformation<Bitmap> transformation,
       Bitmap firstFrame) {
-    this(context, new GifDecoder(bitmapProvider, gifHeader, byteBuffer), null,
+    this(context, Glide.with(context), new GifDecoder(bitmapProvider, gifHeader, byteBuffer), null,
         getRequestBuilder(context, width, height), transformation,
         firstFrame);
   }
 
-  GifFrameLoader(Context context, GifDecoder gifDecoder, Handler handler,
-      RequestBuilder<Bitmap> requestBuilder, Transformation<Bitmap> transformation,
+  GifFrameLoader(Context context, RequestManager requestManager, GifDecoder gifDecoder,
+      Handler handler, RequestBuilder<Bitmap> requestBuilder, Transformation<Bitmap> transformation,
       Bitmap firstFrame) {
+    this.requestManager = requestManager;
     if (handler == null) {
       handler = new Handler(Looper.getMainLooper(), new FrameLoaderCallback());
     }
-    this.context = context.getApplicationContext();
+    this.context = context;
     this.handler = handler;
     this.requestBuilder = requestBuilder;
 
@@ -157,11 +160,11 @@ class GifFrameLoader {
     gifDecoder.clear();
     stop();
     if (current != null) {
-      Glide.clear(current);
+      requestManager.clear(current);
       current = null;
     }
     if (next != null) {
-      Glide.clear(next);
+      requestManager.clear(next);
       next = null;
     }
     isCleared = true;
@@ -230,7 +233,7 @@ class GifFrameLoader {
         return true;
       } else if (msg.what == MSG_CLEAR) {
         GifFrameLoader.DelayTarget target = (DelayTarget) msg.obj;
-        Glide.clear(target);
+        requestManager.clear(target);
       }
       return false;
     }

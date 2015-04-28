@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -17,7 +18,11 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
 
 /**
@@ -69,6 +74,8 @@ public class RequestManager implements LifecycleListener {
       lifecycle.addListener(this);
     }
     lifecycle.addListener(connectivityMonitor);
+
+    Glide.get(context).registerRequestManager(this);
   }
 
   /**
@@ -160,8 +167,6 @@ public class RequestManager implements LifecycleListener {
    */
   @Override
   public void onStart() {
-    // onStart might not be called because this object may be created after the
-    // fragment/activity's onStart method.
     resumeRequests();
   }
 
@@ -180,6 +185,7 @@ public class RequestManager implements LifecycleListener {
    */
   @Override
   public void onDestroy() {
+    Glide.get(context).unregisterRequestManager(this);
     requestTracker.clearRequests();
   }
 
@@ -233,7 +239,62 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading the given resource class.
    */
   public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
-    return new RequestBuilder<>(context, resourceClass, requestTracker, lifecycle);
+    return new RequestBuilder<>(context, this, resourceClass);
+  }
+
+  /**
+   * Cancel any pending loads Glide may have for the view and free any resources that may have been
+   * loaded for the view.
+   *
+   * <p> Note that this will only work if {@link View#setTag(Object)} is not called on this view
+   * outside of Glide. </p>
+   *
+   * @param view The view to cancel loads and free resources for.
+   * @throws IllegalArgumentException if an object other than Glide's metadata is put as the view's
+   *                                  tag.
+   * @see #clear(Target).
+   */
+  public void clear(View view) {
+    clear(new ClearTarget(view));
+  }
+
+  /**
+   * Cancel any pending loads Glide may have for the target and free any resources (such as
+   * {@link Bitmap}s) that may have been loaded for the target so they may be reused.
+   *
+   * @param target The Target to cancel loads for.
+   */
+  public void clear(Target<?> target) {
+    Util.assertMainThread();
+    if (target == null) {
+      return;
+    }
+
+    Request request = target.getRequest();
+    untrackOrDelegate(target, request);
+    if (request != null) {
+      request.clear();
+      request.recycle();
+      target.setRequest(null);
+    }
+  }
+
+  private void untrackOrDelegate(Target<?> target, Request request) {
+    boolean isOwnedByUs = untrack(target, request);
+    if (!isOwnedByUs) {
+      Glide.get(context).removeFromManagers(target, request);
+    }
+  }
+
+  boolean untrack(Target<?> target, Request request) {
+    // Optimization only.
+    lifecycle.removeListener(target);
+    return requestTracker.removeRequest(request);
+  }
+
+  void track(Target<?> target, Request request) {
+    lifecycle.addListener(target);
+    requestTracker.runRequest(request);
   }
 
   private static class RequestManagerConnectivityListener implements ConnectivityMonitor
@@ -249,6 +310,18 @@ public class RequestManager implements LifecycleListener {
       if (isConnected) {
         requestTracker.restartRequests();
       }
+    }
+  }
+
+  private static class ClearTarget extends ViewTarget<View, Object> {
+
+    public ClearTarget(View view) {
+      super(view);
+    }
+
+    @Override
+    public void onResourceReady(Object resource, Transition<? super Object> transition) {
+      // Do nothing.
     }
   }
 }

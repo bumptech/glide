@@ -14,7 +14,6 @@ import android.os.ParcelFileDescriptor;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.View;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
@@ -62,19 +61,17 @@ import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
-import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.target.ViewTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -100,6 +97,7 @@ public class Glide implements ComponentCallbacks2 {
   private final GlideContext glideContext;
   private final Registry registry;
   private final ByteArrayPool byteArrayPool;
+  private final List<RequestManager> managers = new ArrayList<>();
 
   /**
    * Returns a directory with a default name in the private cache directory of the application to
@@ -362,50 +360,6 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   /**
-   * Cancel any pending loads Glide may have for the target and free any resources (such as
-   * {@link Bitmap}s) that may have been loaded for the target so they may be reused.
-   *
-   * @param target The Target to cancel loads for.
-   */
-  public static void clear(Target<?> target) {
-    Util.assertMainThread();
-    Request request = target.getRequest();
-    if (request != null) {
-      request.clear();
-      request.recycle();
-      target.setRequest(null);
-    }
-  }
-
-  /**
-   * Cancel any pending loads Glide may have for the target and free any resources that may have
-   * been loaded into the target so they may be reused.
-   *
-   * @param target The target to cancel loads for.
-   */
-  public static void clear(FutureTarget<?> target) {
-    target.clear();
-    target.setRequest(null);
-  }
-
-  /**
-   * Cancel any pending loads Glide may have for the view and free any resources that may have been
-   * loaded for the view.
-   *
-   * <p> Note that this will only work if {@link View#setTag(Object)} is not called on this view
-   * outside of Glide. </p>
-   *
-   * @param view The view to cancel loads and free resources for.
-   * @throws IllegalArgumentException if an object other than Glide's metadata is put as the view's
-   *                                  tag.
-   * @see #clear(Target).
-   */
-  public static void clear(View view) {
-    Target<?> viewTarget = new ClearTarget(view);
-    clear(viewTarget);
-  }
-
-  /**
    * Begin a load with Glide by passing in a context.
    *
    * <p> Any requests started using a context will only have the application level options applied
@@ -487,6 +441,35 @@ public class Glide implements ComponentCallbacks2 {
     return registry;
   }
 
+  void removeFromManagers(Target<?> target, Request request) {
+    for (RequestManager requestManager : managers) {
+      if (requestManager.untrack(target, request)) {
+        return;
+      }
+    }
+    if (target != null && request != null) {
+      throw new IllegalStateException("Failed to remove request from managers");
+    }
+  }
+
+  void registerRequestManager(RequestManager requestManager) {
+    synchronized (managers) {
+      if (managers.contains(requestManager)) {
+        throw new IllegalStateException("Cannot register already registered manager");
+      }
+      managers.add(requestManager);
+    }
+  }
+
+  void unregisterRequestManager(RequestManager requestManager) {
+    synchronized (managers) {
+      if (!managers.contains(requestManager)) {
+        throw new IllegalStateException("Cannot register not yet registered manager");
+      }
+      managers.remove(requestManager);
+    }
+  }
+
   @Override
   public void onTrimMemory(int level) {
     trimMemory(level);
@@ -500,16 +483,5 @@ public class Glide implements ComponentCallbacks2 {
   @Override
   public void onLowMemory() {
     clearMemory();
-  }
-
-  private static class ClearTarget extends ViewTarget<View, Object> {
-    public ClearTarget(View view) {
-      super(view);
-    }
-
-    @Override
-    public void onResourceReady(Object resource, Transition<? super Object> transition) {
-      // Do nothing.
-    }
   }
 }

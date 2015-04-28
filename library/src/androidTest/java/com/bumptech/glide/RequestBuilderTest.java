@@ -7,10 +7,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.widget.ImageView;
 
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -30,8 +29,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class RequestBuilderTest {
   @Mock GlideContext glideContext;
-  @Mock RequestTracker requestTracker;
-  @Mock Lifecycle lifecycle;
+  @Mock RequestManager requestManager;
 
   @Before
   public void setUp() {
@@ -40,7 +38,7 @@ public class RequestBuilderTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfContextIsNull() {
-    new RequestBuilder(null, Object.class, requestTracker, lifecycle);
+    new RequestBuilder(null /*context*/, requestManager, Object.class);
   }
 
   @Test(expected = NullPointerException.class)
@@ -55,8 +53,10 @@ public class RequestBuilderTest {
 
   @Test
   public void testAddsNewRequestToRequestTracker() {
-    getNullModelRequest().into(mock(Target.class));
-    verify(requestTracker).runRequest(any(Request.class));
+    Target target = mock(Target.class);
+    getNullModelRequest().into(target);
+
+    verify(requestManager).track(eq(target), any(Request.class));
   }
 
   @Test
@@ -67,7 +67,7 @@ public class RequestBuilderTest {
 
     getNullModelRequest().into(target);
 
-    verify(requestTracker).removeRequest(eq(previous));
+    verify(requestManager).clear(eq(target));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -107,7 +107,7 @@ public class RequestBuilderTest {
     when(glideContext.buildImageViewTarget(any(ImageView.class), any(Class.class)))
         .thenReturn(mock(Target.class));
     when(glideContext.getOptions()).thenReturn(new RequestOptions());
-    return new RequestBuilder(glideContext, Object.class, requestTracker, lifecycle)
+    return new RequestBuilder(glideContext, requestManager, Object.class)
         .load((Object) null);
   }
 }

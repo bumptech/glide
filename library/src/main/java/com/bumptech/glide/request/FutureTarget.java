@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
  *                                       .into(250, 250);
  * Bitmap myBitmap = futureTarget.get();
  * ... // do things with bitmap and then release when finished:
- * Glide.clear(futureTarget);
+ * futureTarget.cancel(false);
  * }
  * </pre>
  *
@@ -24,11 +24,5 @@ import java.util.concurrent.Future;
  *
  * @param <R> The type of resource this FutureTarget will retrieve.
  */
-public interface FutureTarget<R> extends Future<R>,
-    Target<R> {
-
-  /**
-   * Safely clears the target from a background thread to release its resources.
-   */
-  void clear();
+public interface FutureTarget<R> extends Future<R>, Target<R> {
 }

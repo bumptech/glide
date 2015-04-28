@@ -48,11 +48,11 @@ public class RequestTracker {
   }
 
   /**
-   * Stops tracking the given request.
+   * Stops tracking the given request and returns {@code true} if the request was removed or
+   * {@code false} if the request was not found.
    */
-  public void removeRequest(Request request) {
-    requests.remove(request);
-    pendingRequests.remove(request);
+  public boolean removeRequest(Request request) {
+    return requests.remove(request) || pendingRequests.remove(request);
   }
 
   /**

@@ -1,6 +1,6 @@
 package com.bumptech.glide.request.target;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.transition.Transition;
 
 /**
@@ -11,6 +11,8 @@ import com.bumptech.glide.request.transition.Transition;
  */
 public final class PreloadTarget<Z> extends SimpleTarget<Z> {
 
+  private final RequestManager requestManager;
+
   /**
    * Returns a PreloadTarget.
    *
@@ -18,16 +20,17 @@ public final class PreloadTarget<Z> extends SimpleTarget<Z> {
    * @param height The height in pixels of the desired resource.
    * @param <Z>    The type of the desired resource.
    */
-  public static <Z> PreloadTarget<Z> obtain(int width, int height) {
-    return new PreloadTarget<>(width, height);
+  public static <Z> PreloadTarget<Z> obtain(RequestManager requestManager, int width, int height) {
+    return new PreloadTarget<>(requestManager, width, height);
   }
 
-  private PreloadTarget(int width, int height) {
+  private PreloadTarget(RequestManager requestManager, int width, int height) {
     super(width, height);
+    this.requestManager = requestManager;
   }
 
   @Override
   public void onResourceReady(Z resource, Transition<? super Z> transition) {
-    Glide.clear(this);
+    requestManager.clear(this);
   }
 }

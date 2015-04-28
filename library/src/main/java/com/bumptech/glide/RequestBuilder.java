@@ -7,8 +7,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.RequestContext;
-import com.bumptech.glide.manager.Lifecycle;
-import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
@@ -42,10 +40,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private static final BaseRequestOptions DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
+
   private final GlideContext context;
+  private final RequestManager requestManager;
   private final Class<TranscodeType> transcodeClass;
-  private final RequestTracker requestTracker;
-  private final Lifecycle lifecycle;
 
   private BaseRequestOptions<?> requestOptions = DEFAULT_REQUEST_OPTIONS;
   @SuppressWarnings("unchecked")
@@ -62,18 +60,17 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private boolean isThumbnailBuilt;
 
   RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
-    this(other.context, transcodeClass, other.requestTracker, other.lifecycle);
+    this(other.context, other.requestManager, transcodeClass);
     model = other.model;
     isModelSet = other.isModelSet;
     requestOptions = other.requestOptions;
   }
 
-  RequestBuilder(GlideContext context, Class<TranscodeType> transcodeClass,
-      RequestTracker requestTracker, Lifecycle lifecycle) {
+  RequestBuilder(GlideContext context, RequestManager requestManager,
+      Class<TranscodeType> transcodeClass) {
+    this.requestManager = requestManager;
     this.context = Preconditions.checkNotNull(context);
     this.transcodeClass = transcodeClass;
-    this.requestTracker = requestTracker;
-    this.lifecycle = lifecycle;
     requestOptions = context.getOptions().clone();
   }
 
@@ -324,7 +321,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @param target The target to load the resource into.
    * @return The given target.
-   * @see Glide#clear(com.bumptech.glide.request.target.Target)
+   * @see {@link #requestManager
    */
   public <Y extends Target<TranscodeType>> Y into(Y target) {
     Util.assertMainThread();
@@ -338,16 +335,13 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     Request previous = target.getRequest();
 
     if (previous != null) {
-      previous.clear();
-      requestTracker.removeRequest(previous);
-      previous.recycle();
+      requestManager.clear(target);
     }
 
     requestOptions.lock();
     Request request = buildRequest(target);
     target.setRequest(request);
-    lifecycle.addListener(target);
-    requestTracker.runRequest(request);
+    requestManager.track(target, request);
 
     return target;
   }
@@ -357,7 +351,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * the view, and frees any resources Glide may have previously loaded into the view so they may be
    * reused.
    *
-   * @see Glide#clear(android.view.View)
+   * @see RequestManager#clear(Target)
    *
    * @param view The view to cancel previous loads for and load the new resource into.
    * @return The
@@ -404,7 +398,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *               previously called).
    * @return An {@link com.bumptech.glide.request.FutureTarget} that can be used to obtain the
    * resource in a blocking manner.
-   * @see Glide#clear(com.bumptech.glide.request.FutureTarget)
+   * @see RequestManager#clear(Target)
    */
   public FutureTarget<TranscodeType> into(int width, int height) {
     final RequestFutureTarget<TranscodeType> target =
@@ -438,11 +432,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)}} if
    *               previously called).
    * @return A {@link Target} that can be used to cancel the load via
-   * {@link Glide#clear(com.bumptech.glide.request.target.Target)}.
+   * {@link RequestManager#clear(Target)}.
    * @see com.bumptech.glide.ListPreloader
    */
   public Target<TranscodeType> preload(int width, int height) {
-    final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(width, height);
+    final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(requestManager, width, height);
     return into(target);
   }
 
@@ -452,7 +446,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * the width and height.
    *
    * @return A {@link Target} that can be used to cancel the load via
-   * {@link Glide#clear(com.bumptech.glide.request.target.Target)}.
+   * {@link RequestManager#clear(Target)}
    * @see #preload(int, int)
    */
   public Target<TranscodeType> preload() {

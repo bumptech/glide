@@ -25,11 +25,11 @@ import java.util.concurrent.TimeoutException;
  *      RequestFutureTarget target = Glide.load("")...
  *     Object resource = target.get();
  *     // Do something with resource, and when finished:
- *     Glide.clear(target);
+ *     target.cancel(false);
  *     }
  *     </pre>
- * The {@link com.bumptech.glide.Glide#clear(FutureTarget)} call will make sure any resources used
- * are recycled. </p>
+ * The {@link #cancel(boolean)} call will make sure any resources used are recycled.
+ * </p>
  *
  * @param <R> The type of the resource that will be loaded.
  */
@@ -75,9 +75,9 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     final boolean result = !isDone();
     if (result) {
       isCancelled = true;
-      clear();
       waiter.notifyAll(this);
     }
+    clearOnMainThread();
     return result;
   }
 
@@ -203,15 +203,11 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   public void run() {
     if (request != null) {
       request.clear();
+      request = null;
     }
   }
 
-  /**
-   * Can be safely called from either the main thread or a background thread to cleanup the
-   * resources used by this target.
-   */
-  @Override
-  public void clear() {
+  private void clearOnMainThread() {
     mainHandler.post(this);
   }
 

@@ -12,4 +12,9 @@ class ApplicationLifecycle implements Lifecycle {
   public void addListener(LifecycleListener listener) {
     listener.onStart();
   }
+
+  @Override
+  public void removeListener(LifecycleListener listener) {
+    // Do nothing.
+  }
 }

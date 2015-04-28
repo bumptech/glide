@@ -40,6 +40,11 @@ class ActivityFragmentLifecycle implements Lifecycle {
     }
   }
 
+  @Override
+  public void removeListener(LifecycleListener listener) {
+    lifecycleListeners.remove(listener);
+  }
+
   void onStart() {
     isStarted = true;
     for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
