@@ -1,18 +1,19 @@
 package com.bumptech.glide.load;
 
+import android.support.v4.util.ArrayMap;
+import android.support.v4.util.SimpleArrayMap;
+
 import java.security.MessageDigest;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * A set of {@link Option Options} to apply to in memory and disk cache keys.
  */
 public final class Options implements Key {
-  private final SortedMap<Option<?>, Object> values = new TreeMap<>();
+  private final ArrayMap<Option<?>, Object> values = new ArrayMap<>();
 
   public void putAll(Options other) {
-    values.putAll(other.values);
+    values.putAll((SimpleArrayMap<Option<?>, Object>) other.values);
   }
 
   public <T> Options set(Option<T> option, T value) {

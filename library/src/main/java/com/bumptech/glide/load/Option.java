@@ -23,7 +23,7 @@ import java.security.MessageDigest;
  * android.graphics.Bitmap.CompressFormat} etc.), must implement {@link #equals(Object)} and
  * {@link #hashCode()}.
  */
-public final class Option<T> implements Comparable<Option<?>> {
+public final class Option<T> {
   private static final CacheKeyUpdater<Object> EMPTY_UPDATER = new CacheKeyUpdater<Object>() {
     @Override
     public void update(byte[] keyBytes, Object value, MessageDigest messageDigest) {
@@ -122,11 +122,6 @@ public final class Option<T> implements Comparable<Option<?>> {
   @Override
   public int hashCode() {
     return key.hashCode();
-  }
-
-  @Override
-  public int compareTo(Option<?> another) {
-    return key.compareTo(another.key);
   }
 
   @SuppressWarnings("unchecked")
