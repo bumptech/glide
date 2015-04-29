@@ -387,7 +387,7 @@ public class FlickrSearchActivity extends ActionBarActivity {
             Log.d(TAG, "Got ExecutionException waiting for background downloadOnly", e);
           }
         }
-        Glide.clear(futureTarget);
+        futureTarget.cancel(true /*mayInterruptIfRunning*/);
       }
     }
   }

@@ -29,7 +29,6 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   private List<ModelLoader<File, ?>> modelLoaders;
   private int modelLoaderIndex;
   private volatile DataFetcher<?> fetcher;
-  private File cacheFile;
 
   public ResourceCacheGenerator(int width, int height, DiskCache diskCache,
       RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
@@ -44,6 +43,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   public boolean startNext() {
     List<Key> sourceIds = requestContext.getCacheKeys();
     List<Class<?>> resourceClasses = requestContext.getRegisteredResourceClasses();
+    File cacheFile = null;
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
       if (resourceClassIndex >= resourceClasses.size()) {

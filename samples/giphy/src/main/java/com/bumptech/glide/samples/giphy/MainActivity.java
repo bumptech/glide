@@ -52,7 +52,7 @@ public class MainActivity extends Activity implements Api.Monitor {
     adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);
     gifList.setAdapter(adapter);
     ListPreloader<Api.GifResult> preloader =
-        new ListPreloader<Api.GifResult>(adapter, preloadSizeProvider, 2);
+        new ListPreloader<Api.GifResult>(Glide.with(this), adapter, preloadSizeProvider, 2);
     gifList.setOnScrollListener(preloader);
   }
 

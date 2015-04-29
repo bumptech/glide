@@ -52,8 +52,8 @@ public class MainActivity extends Activity {
 
   public void clearCache(View v) {
     Log.w(TAG, "clearing cache");
-    Glide.clear(imageViewRes);
-    Glide.clear(imageViewNet);
+    Glide.with(this).clear(imageViewRes);
+    Glide.with(this).clear(imageViewNet);
     Glide.get(this).clearMemory();
     File cacheDir = Glide.getPhotoCacheDir(this);
     if (cacheDir.isDirectory()) {

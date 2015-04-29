@@ -32,8 +32,8 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
   private final RequestContext<Model, ?> requestContext;
   private final DiskCache diskCache;
   private final FetcherReadyCallback cb;
+  private final List<LoadData<?>> loadDataList;
 
-  private List<LoadData<?>> loadDataList;
   private int loadDataListIndex;
   private DataCacheGenerator sourceCacheGenerator;
   private Object dataToCache;

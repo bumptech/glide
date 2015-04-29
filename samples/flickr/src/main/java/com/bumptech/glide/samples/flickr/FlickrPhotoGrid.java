@@ -89,8 +89,8 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     final FixedPreloadSizeProvider<Photo> preloadSizeProvider =
         new FixedPreloadSizeProvider<Photo>(photoSize, photoSize);
-    final ListPreloader<Photo> preloader =
-        new ListPreloader<Photo>(adapter, preloadSizeProvider, args.getInt(PRELOAD_KEY));
+    final ListPreloader<Photo> preloader = new ListPreloader<Photo>(Glide.with(this), adapter,
+        preloadSizeProvider, args.getInt(PRELOAD_KEY));
     grid.setOnScrollListener(preloader);
 
     if (currentPhotos != null) {

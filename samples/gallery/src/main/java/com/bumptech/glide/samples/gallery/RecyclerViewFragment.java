@@ -14,6 +14,7 @@ import android.widget.AbsListView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestManager;
 
 import java.util.List;
 
@@ -52,9 +53,11 @@ public class RecyclerViewFragment extends Fragment
   @Override
   public void onLoadFinished(Loader<List<MediaStoreData>> loader,
       List<MediaStoreData> mediaStoreData) {
+    RequestManager requestManager = Glide.with(this);
     RecyclerAdapter adapter =
-        new RecyclerAdapter(getActivity(), mediaStoreData, Glide.with(this));
-    ListPreloader<MediaStoreData> preloader = new ListPreloader<>(adapter, adapter, 3);
+        new RecyclerAdapter(getActivity(), mediaStoreData, requestManager);
+    ListPreloader<MediaStoreData> preloader =
+        new ListPreloader<>(requestManager, adapter, adapter, 3);
     RecyclerViewPreloaderListener recyclerViewPreloaderListener =
         new RecyclerViewPreloaderListener(preloader);
     recyclerView.setOnScrollListener(recyclerViewPreloaderListener);

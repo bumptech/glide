@@ -64,8 +64,8 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     list.setAdapter(adapter);
 
     preloadSizeProvider = new ViewPreloadSizeProvider<Photo>();
-    ListPreloader<Photo> preloader =
-        new ListPreloader<Photo>(adapter, preloadSizeProvider, PRELOAD_AHEAD_ITEMS);
+    ListPreloader<Photo> preloader = new ListPreloader<Photo>(Glide.with(this), adapter,
+        preloadSizeProvider, PRELOAD_AHEAD_ITEMS);
     list.setOnScrollListener(preloader);
 
     if (currentPhotos != null) {

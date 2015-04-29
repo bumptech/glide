@@ -28,7 +28,6 @@ class DataCacheGenerator implements DataFetcherGenerator,
   private List<ModelLoader<File, ?>> modelLoaders;
   private int modelLoaderIndex;
   private volatile DataFetcher<?> fetcher;
-  private File cacheFile;
 
   public DataCacheGenerator(List<Key> sourceIds, int width, int height, DiskCache diskCache,
       RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
@@ -42,6 +41,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public boolean startNext() {
+    File cacheFile = null;
     while (modelLoaders == null || !hasNextModelLoader()) {
       sourceIdIndex++;
       if (sourceIdIndex >= sourceIds.size()) {
