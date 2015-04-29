@@ -135,7 +135,7 @@ public final class Downsampler {
     Preconditions.checkArgument(is.markSupported(), "You must provide an InputStream that supports"
         + " mark()");
 
-    byte[] bytesForOptions = byteArrayPool.get(ByteArrayPool.DEFAULT_BUFFER);
+    byte[] bytesForOptions = byteArrayPool.get(ByteArrayPool.STANDARD_BUFFER_SIZE_BYTES);
     BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
     bitmapFactoryOptions.inTempStorage = bytesForOptions;
 

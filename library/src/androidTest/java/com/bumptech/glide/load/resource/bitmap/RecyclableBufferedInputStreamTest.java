@@ -10,18 +10,18 @@ import static org.mockito.Mockito.verify;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-@Ignore
-@RunWith(JUnit4.class)
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, emulateSdk = 18)
 public class RecyclableBufferedInputStreamTest {
 
   private static final int DATA_SIZE = 30;
@@ -40,7 +40,7 @@ public class RecyclableBufferedInputStreamTest {
 
     byteArrayPool = new LruByteArrayPool();
     InputStream wrapped = new ByteArrayInputStream(data);
-    stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
+    stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool, BUFFER_SIZE);
   }
 
   @Test

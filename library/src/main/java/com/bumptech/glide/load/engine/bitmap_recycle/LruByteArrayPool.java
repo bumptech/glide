@@ -6,11 +6,12 @@ import java.util.Arrays;
 import java.util.TreeMap;
 
 /**
- * A fixed size LruByteArrayPool.
+ * A fixed size LruByteArrayPool that evicts arrays using an LRU strategy to keep the pool under
+ * the maximum byte size.
  */
 public final class LruByteArrayPool implements ByteArrayPool {
   private static final String TAG = "LruBytesPool";
-  // 4mb.
+  // 4MB.
   private static final int DEFAULT_SIZE = 4 * 1024 * 1024;
   private static final int MAX_SIZE_MULTIPLE = 8;
   private final GroupedLinkedMap<Key, byte[]> groupedMap = new GroupedLinkedMap<>();
@@ -20,10 +21,18 @@ public final class LruByteArrayPool implements ByteArrayPool {
 
   private int currentSizeBytes;
 
+  /**
+   * Constructor for a new pool with a standard size.
+   */
   public LruByteArrayPool() {
     this(DEFAULT_SIZE);
   }
 
+  /**
+   * Constructor for a new pool.
+   *
+   * @param maxSizeBytes The maximum size in bytes of the pool.
+   */
   public LruByteArrayPool(int maxSizeBytes) {
     this.maxSizeBytes = maxSizeBytes;
   }
@@ -109,7 +118,7 @@ public final class LruByteArrayPool implements ByteArrayPool {
     }
   }
 
-  static final class KeyPool extends BaseKeyPool<Key> {
+  private static final class KeyPool extends BaseKeyPool<Key> {
 
     Key get(int size) {
       Key result = get();
@@ -123,7 +132,7 @@ public final class LruByteArrayPool implements ByteArrayPool {
     }
   }
 
-  static final class Key implements Poolable {
+  private static final class Key implements Poolable {
     private final KeyPool pool;
     private int size;
 

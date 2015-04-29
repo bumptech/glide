@@ -29,6 +29,10 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   private List<ModelLoader<File, ?>> modelLoaders;
   private int modelLoaderIndex;
   private volatile DataFetcher<?> fetcher;
+  // PMD is wrong here, this File must be an instance variable because it may be used across
+  // multiple calls to startNext.
+  @SuppressWarnings("PMD.SingularField")
+  private File cacheFile;
 
   public ResourceCacheGenerator(int width, int height, DiskCache diskCache,
       RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
@@ -43,7 +47,6 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   public boolean startNext() {
     List<Key> sourceIds = requestContext.getCacheKeys();
     List<Class<?>> resourceClasses = requestContext.getRegisteredResourceClasses();
-    File cacheFile = null;
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
       if (resourceClassIndex >= resourceClasses.size()) {

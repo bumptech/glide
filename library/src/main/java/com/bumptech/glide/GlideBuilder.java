@@ -54,6 +54,13 @@ public class GlideBuilder {
     return this;
   }
 
+  /**
+   * Sets the {@link ByteArrayPool} implementation to allow variable sized byte arrays to be stored
+   * and retrieved as needed.
+   *
+   * @param byteArrayPool The pool to use.
+   * @return This builder.
+   */
   public GlideBuilder setByteArrayPool(ByteArrayPool byteArrayPool) {
     this.byteArrayPool = byteArrayPool;
     return this;

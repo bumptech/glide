@@ -45,7 +45,8 @@ public class DownsamplerTest {
     options = new Options();
     DisplayMetrics displayMetrics =
         RuntimeEnvironment.application.getResources().getDisplayMetrics();
-    when(byteArrayPool.get(anyInt())).thenReturn(new byte[ByteArrayPool.DEFAULT_BUFFER]);
+    when(byteArrayPool.get(anyInt()))
+        .thenReturn(new byte[ByteArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
     downsampler = new Downsampler(displayMetrics, bitmapPool, byteArrayPool);
   }
 
