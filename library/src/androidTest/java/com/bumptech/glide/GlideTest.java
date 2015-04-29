@@ -37,6 +37,7 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -80,8 +81,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * Tests for the {@link Glide} interface and singleton.
@@ -635,21 +634,21 @@ public class GlideTest {
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
       // Run all tasks on the main thread so they complete synchronously.
-      ExecutorService service = mock(ExecutorService.class);
-      when(service.submit(any(Runnable.class))).thenAnswer(new Answer<Future<?>>() {
+      GlideExecutor executor = mock(GlideExecutor.class);
+      doAnswer(new Answer<Void>() {
         @Override
-        public Future<?> answer(InvocationOnMock invocation) throws Throwable {
+        public Void answer(InvocationOnMock invocation) throws Throwable {
           Runnable runnable = (Runnable) invocation.getArguments()[0];
           runnable.run();
-          return mock(Future.class);
+          return null;
         }
-      });
+      }).when(executor).execute(any(Runnable.class));
 
       DiskCache.Factory diskCacheFactory = mock(DiskCache.Factory.class);
       when(diskCacheFactory.build()).thenReturn(mock(DiskCache.class));
 
       builder.setMemoryCache(mock(MemoryCache.class)).setDiskCache(diskCacheFactory)
-          .setResizeService(service).setDiskCacheService(service);
+          .setResizeExecutor(executor).setDiskCacheExecutor(executor);
     }
 
     @Override

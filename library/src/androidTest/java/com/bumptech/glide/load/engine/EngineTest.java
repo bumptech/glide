@@ -21,6 +21,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -36,7 +37,6 @@ import org.robolectric.annotation.Config;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = { GlideShadowLooper.class })
@@ -469,8 +469,8 @@ public class EngineTest {
 
       job = mock(EngineJob.class);
 
-      engine = new Engine(cache, mock(DiskCache.Factory.class), mock(ExecutorService.class),
-          mock(ExecutorService.class), jobs, keyFactory, activeResources, engineJobFactory,
+      engine = new Engine(cache, mock(DiskCache.Factory.class), mock(GlideExecutor.class),
+          mock(GlideExecutor.class), jobs, keyFactory, activeResources, engineJobFactory,
           resourceRecycler);
     }
 

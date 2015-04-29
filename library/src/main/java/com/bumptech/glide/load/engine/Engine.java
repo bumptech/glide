@@ -2,12 +2,14 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.support.v4.util.Pools;
 import android.util.Log;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
@@ -16,7 +18,6 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Responsible for starting loads and managing active and cached resources.
@@ -32,6 +33,7 @@ public class Engine implements EngineJobListener,
   private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
   private final ResourceRecycler resourceRecycler;
   private final LazyDiskCacheProvider diskCacheProvider;
+  private int requestOrder;
 
   // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See
   // #295.
@@ -55,14 +57,14 @@ public class Engine implements EngineJobListener,
   }
 
   public Engine(MemoryCache memoryCache, DiskCache.Factory diskCacheFactory,
-      ExecutorService diskCacheService, ExecutorService sourceService) {
-    this(memoryCache, diskCacheFactory, diskCacheService, sourceService, null, null, null, null,
+      GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor) {
+    this(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor, null, null, null, null,
         null);
   }
 
   // Visible for testing.
-  Engine(MemoryCache cache, DiskCache.Factory diskCacheFactory, ExecutorService diskCacheService,
-      ExecutorService sourceService, Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
+  Engine(MemoryCache cache, DiskCache.Factory diskCacheFactory, GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor, Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
       Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory,
       ResourceRecycler resourceRecycler) {
     this.cache = cache;
@@ -84,7 +86,7 @@ public class Engine implements EngineJobListener,
     this.jobs = jobs;
 
     if (engineJobFactory == null) {
-      engineJobFactory = new EngineJobFactory(diskCacheService, sourceService, this);
+      engineJobFactory = new EngineJobFactory(diskCacheExecutor, sourceExecutor, this);
     }
     this.engineJobFactory = engineJobFactory;
 
@@ -153,7 +155,7 @@ public class Engine implements EngineJobListener,
 
     EngineJob<R> engineJob = engineJobFactory.build(key, requestContext.isMemoryCacheable());
     DecodeJob<R> decodeJob = new DecodeJob<>(requestContext, key, width, height, diskCacheProvider,
-        engineJob);
+        engineJob, requestOrder++);
     jobs.put(key, engineJob);
     engineJob.addCallback(cb);
     engineJob.start(decodeJob);
@@ -340,19 +342,29 @@ public class Engine implements EngineJobListener,
 
   // Visible for testing.
   static class EngineJobFactory {
-    private final ExecutorService diskCacheService;
-    private final ExecutorService sourceService;
+    private static final String TAG = "EngineJobFactory";
+    private final GlideExecutor diskCacheExecutor;
+    private final GlideExecutor sourceExecutor;
     private final EngineJobListener listener;
+    private final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(150);
 
-    public EngineJobFactory(ExecutorService diskCacheService, ExecutorService sourceService,
+    public EngineJobFactory(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
         EngineJobListener listener) {
-      this.diskCacheService = diskCacheService;
-      this.sourceService = sourceService;
+      this.diskCacheExecutor = diskCacheExecutor;
+      this.sourceExecutor = sourceExecutor;
       this.listener = listener;
     }
 
+    @SuppressWarnings("unchecked")
     public <R> EngineJob<R> build(Key key, boolean isMemoryCacheable) {
-      return new EngineJob<>(key, diskCacheService, sourceService, isMemoryCacheable, listener);
+       EngineJob<R> result = (EngineJob<R>) pool.acquire();
+      if (result == null) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(TAG, "Create new job");
+        }
+        result = new EngineJob<>(diskCacheExecutor, sourceExecutor, listener, pool);
+      }
+      return result.init(key, isMemoryCacheable);
     }
   }
 }

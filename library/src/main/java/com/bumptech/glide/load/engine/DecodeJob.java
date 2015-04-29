@@ -11,19 +11,21 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.engine.executor.Prioritized;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source
  * and applying transformations and transcodes.
+ *
+ * <p>Note: this class has a natural ordering that is inconsistent with equals.
  *
  * @param <R> The type of resource that will be transcoded from the decoded and transformed
  *            resource.
  */
 class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Runnable,
-    Prioritized {
+    Comparable<DecodeJob<?>> {
   private static final String TAG = "DecodeJob";
 
   private final RequestContext<?, R> requestContext;
@@ -32,6 +34,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private final int height;
   private final DiskCacheProvider diskCacheProvider;
   private final Callback<R> callback;
+  private final int order;
 
   private Stage stage;
   private RunReason runReason = RunReason.INITIALIZE;
@@ -45,15 +48,30 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private long startFetchTime;
 
   private volatile boolean isCancelled;
+  private volatile boolean isCallbackNotified;
 
   public DecodeJob(RequestContext<?, R> requestContext, EngineKey loadKey, int width, int height,
-      DiskCacheProvider diskCacheProvider, Callback<R> callback) {
+      DiskCacheProvider diskCacheProvider, Callback<R> callback, int order) {
     this.requestContext = requestContext;
     this.loadKey = loadKey;
     this.width = width;
     this.height = height;
     this.diskCacheProvider = diskCacheProvider;
     this.callback = callback;
+    this.order = order;
+  }
+
+  @Override
+  public int compareTo(DecodeJob<?> other) {
+    int result = getPriority() - other.getPriority();
+    if (result == 0) {
+      result = order - other.order;
+    }
+    return result;
+  }
+
+  private int getPriority() {
+    return requestContext.getPriority().ordinal();
   }
 
   /**
@@ -96,22 +114,21 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public int getPriority() {
-    return requestContext.getPriority().ordinal();
-  }
-
-  @Override
   public void run() {
     // This should be much more fine grained, but since Java's thread pool implementation silently
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
     // that something is failing.
     try {
+      if (isCancelled) {
+        notifyFailed();
+        return;
+      }
       runWrapped();
     } catch (RuntimeException e) {
       if (!isCancelled && Log.isLoggable(TAG, Log.ERROR)) {
         Log.e(TAG, "DecodeJob threw unexpectedly", e);
       }
-      callback.onLoadFailed();
+      notifyFailed();
       throw e;
     }
   }
@@ -156,7 +173,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private void runGenerators() {
     currentThread = Thread.currentThread();
     startFetchTime = LogTime.getLogTime();
-    while (!isCancelled && generator != null && !generator.startNext()) {
+    boolean isStarted = false;
+    while (!isCancelled && generator != null && !(isStarted = generator.startNext())) {
       stage = getNextStage(stage);
       generator = getNextGenerator();
 
@@ -167,11 +185,27 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
     }
     // We've run out of stages and generators, give up.
-    if (stage == null) {
-      callback.onLoadFailed();
+    if ((stage == null || isCancelled) && !isStarted) {
+      notifyFailed();
     }
+
     // Otherwise a generator started a new load and we expect to be called back in
     // onDataFetcherReady.
+  }
+
+  private void notifyFailed() {
+    setNotifiedOrThrow();
+    callback.onLoadFailed();
+  }
+
+  private void notifyComplete(Resource<R> resource) {
+    setNotifiedOrThrow();
+    callback.onResourceReady(resource);
+  }
+
+  private void setNotifiedOrThrow() {
+    Preconditions.checkArgument(!isCallbackNotified, "Already notified callback");
+    isCallbackNotified = true;
   }
 
   private Stage getNextStage(Stage current) {
@@ -223,7 +257,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
     Resource<R> resource = decodeFromData(currentFetcher, currentData, currentDataSource);
     if (resource != null) {
-      callback.onResourceReady(resource);
+      notifyComplete(resource);
       cleanup();
     } else {
       runGenerators();

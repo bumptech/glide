@@ -295,6 +295,7 @@ public final class SingleRequest<R> implements Request,
   @SuppressWarnings("unchecked")
   @Override
   public void onResourceReady(Resource<?> resource) {
+    loadStatus = null;
     Class<R> transcodeClass = requestContext.getTranscodeClass();
     if (resource == null) {
       if (Logs.isEnabled(Log.ERROR)) {
@@ -368,6 +369,7 @@ public final class SingleRequest<R> implements Request,
       Log.d(TAG, "Load failed");
     }
 
+    loadStatus = null;
     status = Status.FAILED;
     //TODO: what if this is a thumbnail request?
     if (requestListener == null || !requestListener.onLoadFailed(requestContext.getModel(), target,

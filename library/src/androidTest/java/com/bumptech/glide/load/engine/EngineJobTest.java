@@ -14,8 +14,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
+import android.support.v4.util.Pools;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 
 import org.junit.Before;
@@ -32,8 +34,6 @@ import org.robolectric.shadows.ShadowLooper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -179,10 +179,10 @@ public class EngineJobTest {
   }
 
   @Test
-  public void testDoesNotNotifyCancelledIfCompletesBeforeCancel() {
+  public void testDoesNotNotifyCancelledIfCompletes() {
     EngineJob job = harness.getJob();
+    job.start(harness.decodeJob);
     job.onResourceReady(harness.resource);
-    job.cancel();
 
     verify(harness.listener, never()).onEngineJobCancelled(eq(job), eq(harness.key));
   }
@@ -202,7 +202,6 @@ public class EngineJobTest {
     EngineJob job = harness.getJob();
     job.start(harness.decodeJob);
     job.onLoadFailed();
-    job.cancel();
 
     verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
     verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
@@ -376,41 +375,7 @@ public class EngineJobTest {
   }
 
   @Test
-  public void testRemovingCallbackAfterLoadFailsWithNullExceptionDoesNotCancelJob() {
-    EngineJob job = harness.getJob();
-
-    job.onLoadFailed();
-    job.removeCallback(harness.cb);
-    verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
-  }
-
-  @Test
-  public void testCancelsFutureFromDiskCacheServiceIfCancelledAfterStartButBeforeSourceSubmit() {
-    Future future = mock(Future.class);
-    when(harness.diskCacheService.submit(eq(harness.decodeJob))).thenReturn(future);
-
-    EngineJob job = harness.getJob();
-    job.start(harness.decodeJob);
-    job.cancel();
-
-    verify(future).cancel(eq(true));
-  }
-
-  @Test
-  public void testCancelsFutureFromSourceServiceIfCancelledAfterSourceSubmit() {
-    Future future = mock(Future.class);
-    when(harness.sourceService.submit(eq(harness.decodeJob))).thenReturn(future);
-
-    EngineJob job = harness.getJob();
-    job.start(harness.decodeJob);
-    job.reschedule(harness.decodeJob);
-    job.cancel();
-
-    verify(future).cancel(eq(true));
-  }
-
-  @Test
-  public void testCancelsEngineRunnableOnCancel() {
+  public void testCancelsDecodeJobOnCancel() {
     EngineJob job = harness.getJob();
     job.start(harness.decodeJob);
     job.cancel();
@@ -419,19 +384,19 @@ public class EngineJobTest {
   }
 
   @Test
-  public void testSubmitsRunnableToSourceServiceOnSubmitForSource() {
+  public void testSubmitsDecodeJobToSourceServiceOnSubmitForSource() {
     EngineJob job = harness.getJob();
     job.reschedule(harness.decodeJob);
 
-    verify(harness.sourceService).submit(eq(harness.decodeJob));
+    verify(harness.sourceService).execute(eq(harness.decodeJob));
   }
 
   @Test
-  public void testSubimtsRunnableToDiskCacheServiceOnStart() {
+  public void testSubmitsDecodeJobToDiskCacheServiceOnStart() {
     EngineJob job = harness.getJob();
     job.start(harness.decodeJob);
 
-    verify(harness.diskCacheService).submit(eq(harness.decodeJob));
+    verify(harness.diskCacheService).execute(eq(harness.decodeJob));
   }
 
   @SafeVarargs
@@ -449,12 +414,14 @@ public class EngineJobTest {
     List<ResourceCallback> cbs = new ArrayList<>();
     EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
     EngineJob job;
-    ExecutorService diskCacheService = mock(ExecutorService.class);
-    ExecutorService sourceService = mock(ExecutorService.class);
+    GlideExecutor diskCacheService = mock(GlideExecutor.class);
+    GlideExecutor sourceService = mock(GlideExecutor.class);
+    Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
 
     public MultiCbHarness() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
-      job = new EngineJob(key, diskCacheService, sourceService, isCacheable, listener, factory);
+      job = new EngineJob(diskCacheService, sourceService, listener, pool, factory)
+          .init(key, isCacheable);
       for (int i = 0; i < numCbs; i++) {
         cbs.add(mock(ResourceCallback.class));
       }
@@ -473,15 +440,16 @@ public class EngineJobTest {
     Resource<Object> resource = mock(Resource.class);
     EngineResource<Object> engineResource = mock(EngineResource.class);
     EngineJobListener listener = mock(EngineJobListener.class);
-    ExecutorService diskCacheService = mock(ExecutorService.class);
-    ExecutorService sourceService = mock(ExecutorService.class);
+    GlideExecutor diskCacheService = mock(GlideExecutor.class);
+    GlideExecutor sourceService = mock(GlideExecutor.class);
     boolean isCacheable = true;
     DecodeJob<Object> decodeJob = mock(DecodeJob.class);
+    Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
 
     public EngineJob getJob() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
-      EngineJob result =
-          new EngineJob(key, diskCacheService, sourceService, isCacheable, listener, factory);
+      EngineJob result = new EngineJob(diskCacheService, sourceService, listener, pool, factory)
+          .init(key, isCacheable);
       result.addCallback(cb);
       return result;
     }

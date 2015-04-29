@@ -3,15 +3,16 @@ package com.bumptech.glide.load.engine;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.util.Pools;
+import android.util.Log;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * A class that manages a load by adding and removing callbacks for for the load and notifying
@@ -26,17 +27,18 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   private static final int MSG_EXCEPTION = 2;
 
   private final List<ResourceCallback> cbs = new ArrayList<>(2);
+  private final Pools.Pool<EngineJob<?>> pool;
   private final EngineResourceFactory engineResourceFactory;
   private final EngineJobListener listener;
-  private final Key key;
-  private final ExecutorService diskCacheService;
-  private final ExecutorService sourceService;
-  private final boolean isCacheable;
+  private final GlideExecutor diskCacheExecutor;
+  private final GlideExecutor sourceExecutor;
+  private Key key;
+  private boolean isCacheable;
 
   private boolean isCancelled;
   // Either resource or exception (particularly exception) may be returned to us null, so use
-  // booleans to track if
-  // we've received them instead of relying on them to be non-null. See issue #180.
+  // booleans to track if we've received them instead of relying on them to be non-null. See issue
+  // #180.
   private Resource<?> resource;
   private boolean hasResource;
   private boolean hasLoadFailed;
@@ -45,31 +47,42 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   private List<ResourceCallback> ignoredCallbacks;
   private EngineResource<?> engineResource;
 
-  private volatile Future<?> future;
   private DecodeJob<R> decodeJob;
+  private Exception isReleased;
 
-  public EngineJob(Key key, ExecutorService diskCacheService, ExecutorService sourceService,
-      boolean isCacheable, EngineJobListener listener) {
-    this(key, diskCacheService, sourceService, isCacheable, listener, DEFAULT_FACTORY);
+  EngineJob(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
+      EngineJobListener listener, Pools.Pool<EngineJob<?>> pool) {
+    this(diskCacheExecutor, sourceExecutor, listener, pool, DEFAULT_FACTORY);
   }
 
-  public EngineJob(Key key, ExecutorService diskCacheService, ExecutorService sourceService,
-      boolean isCacheable, EngineJobListener listener,
+  // Visible for testing.
+  EngineJob(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
+      EngineJobListener listener, Pools.Pool<EngineJob<?>> pool,
       EngineResourceFactory engineResourceFactory) {
-    this.key = key;
-    this.diskCacheService = diskCacheService;
-    this.sourceService = sourceService;
-    this.isCacheable = isCacheable;
+    this.diskCacheExecutor = diskCacheExecutor;
+    this.sourceExecutor = sourceExecutor;
     this.listener = listener;
+    this.pool = pool;
     this.engineResourceFactory = engineResourceFactory;
+  }
+
+  // Visible for testing.
+  EngineJob<R> init(Key key, boolean isCacheable) {
+    this.key = key;
+    this.isCacheable = isCacheable;
+    isReleased = null;
+    return this;
   }
 
   public void start(DecodeJob<R> decodeJob) {
     this.decodeJob = decodeJob;
-    future = diskCacheService.submit(decodeJob);
+    diskCacheExecutor.execute(decodeJob);
   }
 
   public void addCallback(ResourceCallback cb) {
+    if (isReleased != null) {
+      throw new RuntimeException("Already released", isReleased);
+    }
     Util.assertMainThread();
     if (hasResource) {
       cb.onResourceReady(engineResource);
@@ -81,6 +94,9 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   public void removeCallback(ResourceCallback cb) {
+    if (isReleased != null) {
+      throw new RuntimeException("Already released", isReleased);
+    }
     Util.assertMainThread();
     if (hasResource || hasLoadFailed) {
       addIgnoredCallback(cb);
@@ -116,13 +132,18 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
       return;
     }
 
+    boolean isPendingJobRemoved =
+        diskCacheExecutor.remove(decodeJob) || sourceExecutor.remove(decodeJob);
     decodeJob.cancel();
-    Future currentFuture = future;
-    if (currentFuture != null) {
-      currentFuture.cancel(true);
-    }
     isCancelled = true;
     listener.onEngineJobCancelled(this, key);
+
+    if (isPendingJobRemoved) {
+//      Log.d("TEST", "removed pending job");
+      release();
+    } else {
+//      Log.d("TEST", "Failed to remove pending job");
+    }
   }
 
   // Exposed for testing.
@@ -131,8 +152,12 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   private void handleResultOnMainThread() {
+    if (isReleased != null) {
+      throw new RuntimeException("Already released", isReleased);
+    }
     if (isCancelled) {
       resource.recycle();
+      release();
       return;
     } else if (cbs.isEmpty()) {
       throw new IllegalStateException("Received a resource without any callbacks to notify");
@@ -153,6 +178,26 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
     }
     // Our request is complete, so we can release the resource.
     engineResource.release();
+
+    release();
+  }
+
+  private void release() {
+    isReleased = new RuntimeException("release");
+    cbs.clear();
+    key = null;
+    engineResource = null;
+    resource = null;
+    if (ignoredCallbacks != null) {
+      ignoredCallbacks.clear();
+    }
+    hasLoadFailed = false;
+    isCancelled = false;
+    hasResource = false;
+    decodeJob = null;
+    if (!pool.release(this)) {
+      Log.d("TEST", "failed to release");
+    }
   }
 
   @Override
@@ -168,11 +213,19 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
 
   @Override
   public void reschedule(DecodeJob<?> job) {
-    future = sourceService.submit(job);
+//    if (isCancelled) {
+//      release();
+//    } else {
+      sourceExecutor.execute(job);
+//    }
   }
 
   private void handleExceptionOnMainThread() {
+    if (isReleased != null) {
+      throw new RuntimeException("Already released", isReleased);
+    }
     if (isCancelled) {
+      release();
       return;
     } else if (cbs.isEmpty()) {
       throw new IllegalStateException("Received an exception without any callbacks to notify");
@@ -186,6 +239,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
         cb.onLoadFailed();
       }
     }
+
+    release();
   }
 
   // Visible for testing.

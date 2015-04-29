@@ -15,9 +15,7 @@ import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
-import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor;
-
-import java.util.concurrent.ExecutorService;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 
 /**
  * A builder class for setting default structural classes for Glide to use.
@@ -29,8 +27,8 @@ public class GlideBuilder {
   private BitmapPool bitmapPool;
   private ByteArrayPool byteArrayPool;
   private MemoryCache memoryCache;
-  private ExecutorService sourceService;
-  private ExecutorService diskCacheService;
+  private GlideExecutor sourceExecutor;
+  private GlideExecutor diskCacheExecutor;
   private DecodeFormat decodeFormat;
   private DiskCache.Factory diskCacheFactory;
   private MemorySizeCalculator memorySizeCalculator;
@@ -117,11 +115,11 @@ public class GlideBuilder {
    *
    * @param service The ExecutorService to use.
    * @return This builder.
-   * @see #setDiskCacheService(java.util.concurrent.ExecutorService)
-   * @see com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor
+   * @see #setDiskCacheExecutor(GlideExecutor)
+   * @see GlideExecutor
    */
-  public GlideBuilder setResizeService(ExecutorService service) {
-    this.sourceService = service;
+  public GlideBuilder setResizeExecutor(GlideExecutor service) {
+    this.sourceExecutor = service;
     return this;
   }
 
@@ -134,11 +132,11 @@ public class GlideBuilder {
    *
    * @param service The ExecutorService to use.
    * @return This builder.
-   * @see #setResizeService(java.util.concurrent.ExecutorService)
-   * @see com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor
+   * @see #setResizeExecutor(GlideExecutor)
+   * @see GlideExecutor
    */
-  public GlideBuilder setDiskCacheService(ExecutorService service) {
-    this.diskCacheService = service;
+  public GlideBuilder setDiskCacheExecutor(GlideExecutor service) {
+    this.diskCacheExecutor = service;
     return this;
   }
 
@@ -198,12 +196,12 @@ public class GlideBuilder {
   }
 
   Glide createGlide() {
-    if (sourceService == null) {
+    if (sourceExecutor == null) {
       final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
-      sourceService = new FifoPriorityThreadPoolExecutor("source", cores);
+      sourceExecutor = new GlideExecutor("source", cores);
     }
-    if (diskCacheService == null) {
-      diskCacheService = new FifoPriorityThreadPoolExecutor("disk-cache", 1);
+    if (diskCacheExecutor == null) {
+      diskCacheExecutor = new GlideExecutor("disk-cache", 1);
     }
 
     if (memorySizeCalculator == null) {
@@ -232,7 +230,7 @@ public class GlideBuilder {
     }
 
     if (engine == null) {
-      engine = new Engine(memoryCache, diskCacheFactory, diskCacheService, sourceService);
+      engine = new Engine(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor);
     }
 
     if (decodeFormat == null) {
