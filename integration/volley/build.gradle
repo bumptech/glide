@@ -14,20 +14,19 @@ dependencies {
     androidTestCompile "junit:junit:${JUNIT_VERSION}"
     androidTestCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
     androidTestCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    // TODO: increase this to 2.0.+ when we compile against Java 7.
     androidTestCompile "com.squareup.okhttp:mockwebserver:${MOCKWEBSERVER_VERSION}"
 }
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode = VERSION_CODE
-        versionName = VERSION_NAME
+        versionCode VERSION_CODE as int
+        versionName VERSION_NAME as String
     }
 }
 

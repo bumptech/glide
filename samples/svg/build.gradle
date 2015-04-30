@@ -6,7 +6,7 @@ repositories {
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
         applicationId 'com.bumptech.svgsample.app'
