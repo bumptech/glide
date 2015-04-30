@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -15,6 +16,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.InOrder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 @RunWith(JUnit4.class)
 public class ThumbnailRequestCoordinatorTest {
@@ -80,6 +83,21 @@ public class ThumbnailRequestCoordinatorTest {
     coordinator.begin();
 
     verify(thumb, never()).begin();
+  }
+
+  @Test
+  public void testDoesNotStartFullIfClearedByThumb() {
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        coordinator.clear();
+        return null;
+      }
+    }).when(thumb).begin();
+
+    coordinator.begin();
+
+    verify(full, never()).begin();
   }
 
   @Test

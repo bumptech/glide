@@ -9,6 +9,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   private Request full;
   private Request thumb;
   private RequestCoordinator coordinator;
+  private boolean isRunning;
 
   public ThumbnailRequestCoordinator() {
     this(null);
@@ -83,16 +84,18 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
    */
   @Override
   public void begin() {
+    isRunning = true;
     if (!thumb.isRunning()) {
       thumb.begin();
     }
-    if (!full.isRunning()) {
+    if (isRunning && !full.isRunning()) {
       full.begin();
     }
   }
 
   @Override
   public void pause() {
+    isRunning = false;
     full.pause();
     thumb.pause();
   }
@@ -102,6 +105,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
    */
   @Override
   public void clear() {
+    isRunning = false;
     thumb.clear();
     full.clear();
   }
