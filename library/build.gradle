@@ -60,7 +60,7 @@ afterEvaluate {
 
         classes = fileTree('build/intermediates/classes/debug/')
         source = fileTree('src/main/java')
-        classpath = files(project.configurations.compile.asPath)
+        classpath = project.configurations.compile
 
         effort = 'max'
 
