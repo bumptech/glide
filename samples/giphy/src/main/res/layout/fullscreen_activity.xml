@@ -3,4 +3,6 @@
    xmlns:android="http://schemas.android.com/apk/res/android"
    android:id="@+id/fullscreen_gif"
    android:layout_width="match_parent"
-   android:layout_height="match_parent"/>
+   android:layout_height="match_parent"
+   android:contentDescription="@string/fullscreen_description"
+   />
