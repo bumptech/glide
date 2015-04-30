@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,9 +42,19 @@ public class MemorySizeCalculatorTest {
   public void testDefaultMemoryCacheSizeIsTwiceScreenSize() {
     Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
-    int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
+    float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
-    assertEquals(harness.getScreenSize() * harness.memoryCacheScreens, memoryCacheSize);
+    assertThat(memoryCacheSize).isEqualTo(harness.getScreenSize() * harness.memoryCacheScreens);
+  }
+
+  @Test
+  public void testCanSetCustomMemoryCacheSize() {
+    harness.memoryCacheScreens = 9.5f;
+    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+
+    float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
+
+    assertThat(memoryCacheSize).isEqualTo(harness.getScreenSize() * harness.memoryCacheScreens);
   }
 
   @Test
@@ -55,7 +64,7 @@ public class MemorySizeCalculatorTest {
 
     Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
-    int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
+    float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
     assertThat((float) memoryCacheSize)
         .isIn(Range.atMost(memoryClassBytes * harness.sizeMultiplier));
@@ -65,10 +74,19 @@ public class MemorySizeCalculatorTest {
   public void testDefaultBitmapPoolSize() {
     Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
-    int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
+    float bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-//        assertThat(bitmapPoolSize).isIn(Range.open());
-    assertEquals(harness.getScreenSize() * harness.bitmapPoolScreens, bitmapPoolSize);
+    assertThat(bitmapPoolSize).isEqualTo(harness.getScreenSize() * harness.bitmapPoolScreens);
+  }
+
+  @Test
+  public void testCanSetCustomBitmapPoolSize() {
+    harness.bitmapPoolScreens = 2f;
+    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+
+    float bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
+
+    assertThat(bitmapPoolSize).isEqualTo(harness.getScreenSize() * harness.bitmapPoolScreens);
   }
 
   @Test
@@ -125,9 +143,9 @@ public class MemorySizeCalculatorTest {
   private static class MemorySizeHarness {
     int pixelSize = 500;
     int bytesPerPixel = MemorySizeCalculator.BYTES_PER_ARGB_8888_PIXEL;
-    int memoryCacheScreens = MemorySizeCalculator.MEMORY_CACHE_TARGET_SCREENS;
-    int bitmapPoolScreens = MemorySizeCalculator.BITMAP_POOL_TARGET_SCREENS;
-    float sizeMultiplier = MemorySizeCalculator.MAX_SIZE_MULTIPLIER;
+    float memoryCacheScreens = MemorySizeCalculator.Builder.MEMORY_CACHE_TARGET_SCREENS;
+    float bitmapPoolScreens = MemorySizeCalculator.Builder.BITMAP_POOL_TARGET_SCREENS;
+    float sizeMultiplier = MemorySizeCalculator.Builder.MAX_SIZE_MULTIPLIER;
     ActivityManager activityManager =
         (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
     MemorySizeCalculator.ScreenDimensions screenDimensions =
@@ -136,8 +154,13 @@ public class MemorySizeCalculatorTest {
     public MemorySizeCalculator getCalculator() {
       when(screenDimensions.getWidthPixels()).thenReturn(pixelSize);
       when(screenDimensions.getHeightPixels()).thenReturn(pixelSize);
-      return new MemorySizeCalculator(RuntimeEnvironment.application, activityManager,
-          screenDimensions);
+      return new MemorySizeCalculator.Builder(RuntimeEnvironment.application)
+          .setMemoryCacheScreens(memoryCacheScreens)
+          .setBitmapPoolScreens(bitmapPoolScreens)
+          .setMaxSizeMultiplier(sizeMultiplier)
+          .setActivityManager(activityManager)
+          .setScreenDimensions(screenDimensions)
+          .build();
     }
 
     public int getScreenSize() {

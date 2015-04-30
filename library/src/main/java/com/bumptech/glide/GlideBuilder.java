@@ -37,6 +37,7 @@ public class GlideBuilder {
   private ExecutorService diskCacheService;
   private DecodeFormat decodeFormat;
   private DiskCache.Factory diskCacheFactory;
+  private MemorySizeCalculator memorySizeCalculator;
 
   public GlideBuilder(Context context) {
     this.context = context.getApplicationContext();
@@ -173,6 +174,34 @@ public class GlideBuilder {
     return this;
   }
 
+  /**
+   * Sets the {@link MemorySizeCalculator} to use to calculate maximum sizes for default
+   * {@link MemoryCache MemoryCaches} and/or default {@link BitmapPool BitmapPools}.
+   *
+   * @see #setMemorySizeCalculator(MemorySizeCalculator)
+   *
+   * @param builder The builder to use (will not be modified).
+   * @return This builder.
+   */
+  public GlideBuilder setMemorySizeCalculator(MemorySizeCalculator.Builder builder) {
+    return setMemorySizeCalculator(builder.build());
+  }
+
+  /**
+   * Sets the {@link MemorySizeCalculator} to use to calculate maximum sizes for default
+   * {@link MemoryCache MemoryCaches} and/or default {@link BitmapPool BitmapPools}.
+   *
+   * <p>The given {@link MemorySizeCalculator} will not affect custom pools or caches provided
+   * via {@link #setBitmapPool(BitmapPool)} or {@link #setMemoryCache(MemoryCache)}.
+   *
+   * @param calculator The calculator to use.
+   * @return This builder.
+   */
+  public GlideBuilder setMemorySizeCalculator(MemorySizeCalculator calculator) {
+    this.memorySizeCalculator = calculator;
+    return this;
+  }
+
   // For testing.
   GlideBuilder setEngine(Engine engine) {
     this.engine = engine;
@@ -188,10 +217,13 @@ public class GlideBuilder {
       diskCacheService = new FifoPriorityThreadPoolExecutor("disk-cache", 1);
     }
 
-    MemorySizeCalculator calculator = new MemorySizeCalculator(context);
+    if (memorySizeCalculator == null) {
+      memorySizeCalculator = new MemorySizeCalculator.Builder(context).build();
+    }
+
     if (bitmapPool == null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-        int size = calculator.getBitmapPoolSize();
+        int size = memorySizeCalculator.getBitmapPoolSize();
         if (DecodeFormat.REQUIRE_ARGB_8888) {
           bitmapPool = new LruBitmapPool(size, Collections.singleton(Bitmap.Config.ARGB_8888));
         } else {
@@ -207,7 +239,7 @@ public class GlideBuilder {
     }
 
     if (memoryCache == null) {
-      memoryCache = new LruResourceCache(calculator.getMemoryCacheSize());
+      memoryCache = new LruResourceCache(memorySizeCalculator.getMemoryCacheSize());
     }
 
     if (diskCacheFactory == null) {
