@@ -151,7 +151,7 @@ public class LruBitmapPool implements BitmapPool {
 
     @Override
     public void clearMemory() {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "clearMemory");
         }
         trimToSize(0);
@@ -160,7 +160,7 @@ public class LruBitmapPool implements BitmapPool {
     @SuppressLint("InlinedApi")
     @Override
     public void trimMemory(int level) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "trimMemory, level=" + level);
         }
         if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE) {

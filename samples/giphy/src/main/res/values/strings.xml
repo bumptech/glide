@@ -3,4 +3,5 @@
   <string name="app_name">GiphySample</string>
   <string name="image_description">An image from the list of results for a search query</string>
   <string name="giphy_logo_description">An animated version of the Giphy company logo</string>
+  <string name="fullscreen_description">Full screen view of an image</string>
 </resources>

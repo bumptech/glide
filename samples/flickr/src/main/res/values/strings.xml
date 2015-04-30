@@ -8,4 +8,5 @@
   <string name="medium">Medium</string>
   <string name="list">List</string>
   <string name="image_description">An image from the list of results for a search query</string>
+  <string name="fullscreen_description">Full screen view of an image</string>
 </resources>

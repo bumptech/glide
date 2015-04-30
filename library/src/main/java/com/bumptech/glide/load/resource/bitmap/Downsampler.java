@@ -188,6 +188,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         if (degreesToRotate == 90 || degreesToRotate == 270) {
             // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image width is
             // decreased to near our target's height and the image height is decreased to near our target width.
+            //noinspection SuspiciousNameCombination
             exactSampleSize = getSampleSize(inHeight, inWidth, targetWidth, targetHeight);
         } else {
             exactSampleSize = getSampleSize(inWidth, inHeight, targetWidth, targetHeight);
@@ -247,6 +248,7 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
         return false;
     }
 
+    @SuppressWarnings("deprecation")
     private static Bitmap.Config getConfig(InputStream is, DecodeFormat format) {
         // Changing configs can cause skewing on 4.1, see issue #128.
         if (format == DecodeFormat.ALWAYS_ARGB_8888 || format == DecodeFormat.PREFER_ARGB_8888
