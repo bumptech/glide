@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'robolectric'
+apply plugin: 'org.robolectric'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
 apply plugin: 'pmd'
@@ -72,11 +72,7 @@ afterEvaluate {
         }
     }
 
-    findbugsTestDebug {
-        enabled = false
-    }
-
-    check.dependsOn('findbugs')
+    tasks.check.dependsOn(tasks.findbugs)
 
     task pmd(type: Pmd) {
 
@@ -95,11 +91,7 @@ afterEvaluate {
         }
     }
 
-    pmdTestDebug {
-        enabled = false
-    }
-
-    check.dependsOn('pmd')
+    tasks.check.dependsOn(tasks.pmd)
 
     task jacocoTestReport(type:JacocoReport, dependsOn: testDebug) {
         def coverageSourceDirs = ['src/main/java']

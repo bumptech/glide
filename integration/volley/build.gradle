@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'robolectric'
+apply plugin: 'org.robolectric'
 
 repositories {
   mavenCentral()
