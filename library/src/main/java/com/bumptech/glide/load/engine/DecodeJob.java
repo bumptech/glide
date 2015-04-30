@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.v4.util.Pools;
 import android.util.Log;
 
 import com.bumptech.glide.Logs;
@@ -27,19 +28,19 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Runnable,
     Comparable<DecodeJob<?>> {
   private static final String TAG = "DecodeJob";
+  private static final RunReason INITIAL_RUN_REASON = RunReason.INITIALIZE;
 
-  private final RequestContext<?, R> requestContext;
-  private final EngineKey loadKey;
-  private final int width;
-  private final int height;
   private final DiskCacheProvider diskCacheProvider;
-  private final Callback<R> callback;
-  private final int order;
-
+  private final Pools.Pool<DecodeJob<?>> pool;
+  private RequestContext<?, R> requestContext;
+  private EngineKey loadKey;
+  private int width;
+  private int height;
+  private Callback<R> callback;
+  private int order;
   private Stage stage;
-  private RunReason runReason = RunReason.INITIALIZE;
+  private RunReason runReason = INITIAL_RUN_REASON;
   private volatile DataFetcherGenerator generator;
-
   private Thread currentThread;
   private Key currentSourceKey;
   private Object currentData;
@@ -50,15 +51,38 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private volatile boolean isCancelled;
   private volatile boolean isCallbackNotified;
 
-  public DecodeJob(RequestContext<?, R> requestContext, EngineKey loadKey, int width, int height,
-      DiskCacheProvider diskCacheProvider, Callback<R> callback, int order) {
+  DecodeJob(DiskCacheProvider diskCacheProvider, Pools.Pool<DecodeJob<?>> pool) {
+    this.diskCacheProvider = diskCacheProvider;
+    this.pool = pool;
+  }
+
+  DecodeJob<R> init(RequestContext<?, R> requestContext, EngineKey loadKey, int width, int height,
+      Callback<R> callback, int order) {
     this.requestContext = requestContext;
     this.loadKey = loadKey;
     this.width = width;
     this.height = height;
-    this.diskCacheProvider = diskCacheProvider;
     this.callback = callback;
     this.order = order;
+    return this;
+  }
+
+  void release() {
+    requestContext = null;
+    loadKey = null;
+    callback = null;
+    stage = null;
+    runReason = INITIAL_RUN_REASON;
+    generator = null;
+    currentThread = null;
+    currentSourceKey = null;
+    currentData = null;
+    currentDataSource = null;
+    currentFetcher = null;
+    startFetchTime = 0L;
+    isCancelled = false;
+    isCallbackNotified = false;
+    pool.release(this);
   }
 
   @Override

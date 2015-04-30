@@ -16,9 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
@@ -445,13 +443,10 @@ public class EngineTest {
   private static class EngineTestHarness {
     EngineKey cacheKey = mock(EngineKey.class);
     EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
-    Priority priority = Priority.NORMAL;
     ResourceCallback cb = mock(ResourceCallback.class);
     EngineResource resource = mock(EngineResource.class);
     Map<Key, EngineJob> jobs = new HashMap<>();
-    Transformation transformation = mock(Transformation.class);
     Map<Key, WeakReference<EngineResource<?>>> activeResources = new HashMap<>();
-    Key signature = mock(Key.class);
     RequestContext<Object, Object> requestContext = mock(RequestContext.class);
 
     int width = 100;
@@ -461,6 +456,7 @@ public class EngineTest {
     EngineJob job;
     Engine engine;
     Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
+    Engine.DecodeJobFactory decodeJobFactory = mock(Engine.DecodeJobFactory.class);
     ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
 
     public EngineTestHarness() {
@@ -471,7 +467,7 @@ public class EngineTest {
 
       engine = new Engine(cache, mock(DiskCache.Factory.class), mock(GlideExecutor.class),
           mock(GlideExecutor.class), jobs, keyFactory, activeResources, engineJobFactory,
-          resourceRecycler);
+          decodeJobFactory, resourceRecycler);
     }
 
     public Engine.LoadStatus doLoad() {

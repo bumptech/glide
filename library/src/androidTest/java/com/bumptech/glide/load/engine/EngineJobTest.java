@@ -32,7 +32,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
@@ -47,7 +46,9 @@ public class EngineJobTest {
 
   @Test
   public void testOnResourceReadyPassedToCallbacks() throws Exception {
-    harness.getJob().onResourceReady(harness.resource);
+    EngineJob<Object> job = harness.getJob();
+    job.start(harness.decodeJob);
+    job.onResourceReady(harness.resource);
 
     ShadowLooper.runUiThreadTasks();
     verify(harness.cb).onResourceReady(eq(harness.engineResource));
@@ -55,7 +56,9 @@ public class EngineJobTest {
 
   @Test
   public void testListenerNotifiedJobCompleteOnOnResourceReady() {
-    harness.getJob().onResourceReady(harness.resource);
+    EngineJob<Object> job = harness.getJob();
+    job.start(harness.decodeJob);
+    job.onResourceReady(harness.resource);
 
     ShadowLooper.runUiThreadTasks();
 
@@ -65,6 +68,7 @@ public class EngineJobTest {
   @Test
   public void testNotifiesAllCallbacksOnReady() {
     MultiCbHarness harness = new MultiCbHarness();
+    harness.job.start(harness.decodeJob);
     harness.job.onResourceReady(harness.resource);
     for (ResourceCallback cb : harness.cbs) {
       verify(cb).onResourceReady(eq(harness.engineResource));
@@ -74,6 +78,7 @@ public class EngineJobTest {
   @Test
   public void testNotifiesAllCallbacksOnException() {
     MultiCbHarness harness = new MultiCbHarness();
+    harness.job.start(harness.decodeJob);
     harness.job.onLoadFailed();
     for (ResourceCallback cb : harness.cbs) {
       verify(cb).onLoadFailed();
@@ -83,6 +88,7 @@ public class EngineJobTest {
   @Test
   public void testAcquiresResourceOncePerCallback() {
     MultiCbHarness harness = new MultiCbHarness();
+    harness.job.start(harness.decodeJob);
     harness.job.onResourceReady(harness.resource);
 
     // Acquired once and then released while notifying.
@@ -94,7 +100,9 @@ public class EngineJobTest {
   @Test
   public void testListenerNotifiedJobCompleteOnException() {
     harness = new EngineJobHarness();
-    harness.getJob().onLoadFailed();
+    EngineJob<Object> job = harness.getJob();
+    job.start(harness.decodeJob);
+    job.onLoadFailed();
     ShadowLooper.runUiThreadTasks();
     verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
   }
@@ -102,7 +110,9 @@ public class EngineJobTest {
   @Test
   public void testResourceIsCacheableWhenIsCacheableOnReady() {
     harness.isCacheable = true;
-    harness.getJob().onResourceReady(harness.resource);
+    EngineJob<Object> job = harness.getJob();
+    job.start(harness.decodeJob);
+    job.onResourceReady(harness.resource);
 
     ShadowLooper.runUiThreadTasks();
     verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
@@ -111,7 +121,9 @@ public class EngineJobTest {
   @Test
   public void testResourceIsCacheableWhenNotIsCacheableOnReady() {
     harness.isCacheable = false;
-    harness.getJob().onResourceReady(harness.resource);
+    EngineJob<Object> job = harness.getJob();
+    job.start(harness.decodeJob);
+    job.onResourceReady(harness.resource);
 
     ShadowLooper.runUiThreadTasks();
     verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
@@ -119,7 +131,7 @@ public class EngineJobTest {
 
   @Test
   public void testListenerNotifiedOfCancelOnCancel() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.cancel();
 
@@ -128,7 +140,7 @@ public class EngineJobTest {
 
   @Test
   public void testOnResourceReadyNotDeliveredAfterCancel() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.cancel();
 
@@ -141,7 +153,7 @@ public class EngineJobTest {
   @Test
   public void testOnExceptionNotDeliveredAfterCancel() {
     harness = new EngineJobHarness();
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.cancel();
 
@@ -153,7 +165,7 @@ public class EngineJobTest {
 
   @Test
   public void testRemovingAllCallbacksCancelsRunner() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.removeCallback(harness.cb);
 
@@ -172,7 +184,9 @@ public class EngineJobTest {
 
   @Test
   public void testResourceIsAcquiredOncePerConsumerAndOnceForCache() {
-    harness.getJob().onResourceReady(harness.resource);
+    EngineJob<Object> job = harness.getJob();
+    job.start(harness.decodeJob);
+    job.onResourceReady(harness.resource);
 
     // Once while notifying and once for single callback.
     verify(harness.engineResource, times(2)).acquire();
@@ -180,7 +194,7 @@ public class EngineJobTest {
 
   @Test
   public void testDoesNotNotifyCancelledIfCompletes() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource);
 
@@ -189,7 +203,7 @@ public class EngineJobTest {
 
   @Test
   public void testDoesNotNotifyCancelledIfAlreadyCancelled() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.cancel();
     job.cancel();
@@ -199,7 +213,7 @@ public class EngineJobTest {
 
   @Test
   public void testDoesNotNotifyCancelledIfReceivedException() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.onLoadFailed();
 
@@ -212,7 +226,7 @@ public class EngineJobTest {
     ShadowLooper shadowLooper = Shadows.shadowOf(harness.mainHandler.getLooper());
     shadowLooper.pause();
 
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource);
     job.cancel();
@@ -224,14 +238,16 @@ public class EngineJobTest {
   @Test
   public void testDoesNotAcquireOnceForMemoryCacheIfNotCacheable() {
     harness.isCacheable = false;
-    harness.getJob().onResourceReady(harness.resource);
+    EngineJob<Object> job = harness.getJob();
+    job.start(harness.decodeJob);
+    job.onResourceReady(harness.resource);
 
     verify(harness.engineResource, times(2)).acquire();
   }
 
   @Test
   public void testNotifiesNewCallbackOfResourceIfCallbackIsAddedDuringOnResourceReady() {
-    final EngineJob job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     final ResourceCallback existingCallback = mock(ResourceCallback.class);
     final ResourceCallback newCallback = mock(ResourceCallback.class);
 
@@ -244,6 +260,7 @@ public class EngineJobTest {
     }).when(existingCallback).onResourceReady(any(Resource.class));
 
     job.addCallback(existingCallback);
+    job.start(harness.decodeJob);
     job.onResourceReady(harness.resource);
 
     verify(newCallback).onResourceReady(eq(harness.engineResource));
@@ -265,6 +282,7 @@ public class EngineJobTest {
     }).when(existingCallback).onLoadFailed();
 
     job.addCallback(existingCallback);
+    job.start(harness.decodeJob);
     job.onLoadFailed();
 
     verify(newCallback).onLoadFailed();
@@ -272,7 +290,7 @@ public class EngineJobTest {
 
   @Test
   public void testRemovingCallbackDuringOnResourceReadyIsIgnoredIfCallbackHasAlreadyBeenCalled() {
-    final EngineJob job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     final ResourceCallback cb = mock(ResourceCallback.class);
 
     doAnswer(new Answer() {
@@ -284,6 +302,7 @@ public class EngineJobTest {
     }).when(cb).onResourceReady(any(Resource.class));
 
     job.addCallback(cb);
+    job.start(harness.decodeJob);
     job.onResourceReady(harness.resource);
 
     verify(cb, times(1)).onResourceReady(any(Resource.class));
@@ -292,7 +311,7 @@ public class EngineJobTest {
   @Test
   public void testRemovingCallbackDuringOnExceptionIsIgnoredIfCallbackHasAlreadyBeenCalled() {
     harness = new EngineJobHarness();
-    final EngineJob job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     final ResourceCallback cb = mock(ResourceCallback.class);
 
     doAnswer(new Answer() {
@@ -304,6 +323,7 @@ public class EngineJobTest {
     }).when(cb).onLoadFailed();
 
     job.addCallback(cb);
+    job.start(harness.decodeJob);
     job.onLoadFailed();
 
     verify(cb, times(1)).onLoadFailed();
@@ -312,7 +332,7 @@ public class EngineJobTest {
   @Test
   public void
   testRemovingCallbackDuringOnResourceReadyPreventsCallbackFromBeingCalledIfNotYetCalled() {
-    final EngineJob job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
     doAnswer(new Answer() {
@@ -324,7 +344,7 @@ public class EngineJobTest {
     }).when(harness.cb).onResourceReady(any(Resource.class));
 
     job.addCallback(notYetCalled);
-
+    job.start(harness.decodeJob);
     job.onResourceReady(harness.resource);
 
     verify(notYetCalled, never()).onResourceReady(any(Resource.class));
@@ -333,7 +353,7 @@ public class EngineJobTest {
   @Test
   public void
   testRemovingCallbackDuringOnResourceReadyPreventsResourceFromBeingAcquiredForCallback() {
-    final EngineJob job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
     doAnswer(new Answer() {
@@ -345,6 +365,7 @@ public class EngineJobTest {
     }).when(harness.cb).onResourceReady(any(Resource.class));
 
     job.addCallback(notYetCalled);
+    job.start(harness.decodeJob);
 
     job.onResourceReady(harness.resource);
 
@@ -355,7 +376,7 @@ public class EngineJobTest {
   @Test
   public void testRemovingCallbackDuringOnExceptionPreventsCallbackFromBeingCalledIfNotYetCalled() {
     harness = new EngineJobHarness();
-    final EngineJob job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     final ResourceCallback called = mock(ResourceCallback.class);
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
@@ -369,6 +390,7 @@ public class EngineJobTest {
 
     job.addCallback(called);
     job.addCallback(notYetCalled);
+    job.start(harness.decodeJob);
     job.onLoadFailed();
 
     verify(notYetCalled, never()).onResourceReady(any(Resource.class));
@@ -376,7 +398,7 @@ public class EngineJobTest {
 
   @Test
   public void testCancelsDecodeJobOnCancel() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.cancel();
 
@@ -385,7 +407,7 @@ public class EngineJobTest {
 
   @Test
   public void testSubmitsDecodeJobToSourceServiceOnSubmitForSource() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.reschedule(harness.decodeJob);
 
     verify(harness.sourceService).execute(eq(harness.decodeJob));
@@ -393,17 +415,13 @@ public class EngineJobTest {
 
   @Test
   public void testSubmitsDecodeJobToDiskCacheServiceOnStart() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
 
     verify(harness.diskCacheService).execute(eq(harness.decodeJob));
   }
 
-  @SafeVarargs
-  private static <T> List<T> list(T... items) {
-    return Arrays.asList(items);
-  }
-
+  @SuppressWarnings("unchecked")
   private static class MultiCbHarness {
     Key key = mock(Key.class);
     Resource<Object> resource = mock(Resource.class);
@@ -413,14 +431,15 @@ public class EngineJobTest {
     int numCbs = 10;
     List<ResourceCallback> cbs = new ArrayList<>();
     EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
-    EngineJob job;
+    EngineJob<Object> job;
     GlideExecutor diskCacheService = mock(GlideExecutor.class);
     GlideExecutor sourceService = mock(GlideExecutor.class);
     Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
+    DecodeJob<Object> decodeJob = mock(DecodeJob.class);
 
     public MultiCbHarness() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
-      job = new EngineJob(diskCacheService, sourceService, listener, pool, factory)
+      job = new EngineJob<>(diskCacheService, sourceService, listener, pool, factory)
           .init(key, isCacheable);
       for (int i = 0; i < numCbs; i++) {
         cbs.add(mock(ResourceCallback.class));
@@ -446,7 +465,7 @@ public class EngineJobTest {
     DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
 
-    public EngineJob getJob() {
+    public EngineJob<Object> getJob() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
       EngineJob result = new EngineJob(diskCacheService, sourceService, listener, pool, factory)
           .init(key, isCacheable);

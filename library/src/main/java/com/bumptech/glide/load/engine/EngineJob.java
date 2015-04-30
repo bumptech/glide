@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.util.Pools;
-import android.util.Log;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
@@ -194,10 +193,9 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
     hasLoadFailed = false;
     isCancelled = false;
     hasResource = false;
+    decodeJob.release();
     decodeJob = null;
-    if (!pool.release(this)) {
-      Log.d("TEST", "failed to release");
-    }
+    pool.release(this);
   }
 
   @Override
@@ -213,11 +211,11 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
 
   @Override
   public void reschedule(DecodeJob<?> job) {
-//    if (isCancelled) {
-//      release();
-//    } else {
+    if (isCancelled) {
+      release();
+    } else {
       sourceExecutor.execute(job);
-//    }
+    }
   }
 
   private void handleExceptionOnMainThread() {
