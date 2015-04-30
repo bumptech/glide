@@ -321,7 +321,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @param target The target to load the resource into.
    * @return The given target.
-   * @see {@link #requestManager
+   * @see RequestManager#clear(Target)
    */
   public <Y extends Target<TranscodeType>> Y into(Y target) {
     Util.assertMainThread();

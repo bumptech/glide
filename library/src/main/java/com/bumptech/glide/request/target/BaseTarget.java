@@ -10,7 +10,7 @@ import com.bumptech.glide.request.Request;
  *
  * <p> For maximum efficiency, clear this target when you have finished using or displaying the
  * {@link com.bumptech.glide.load.engine.Resource} loaded into it using
- * {@link com.bumptech.glide.Glide#clear(Target)}.</p>
+ * {@link com.bumptech.glide.RequestManager#clear(Target)}.</p>
  *
  * <p> For loading {@link com.bumptech.glide.load.engine.Resource}s into {@link android.view.View}s,
  * {@link com.bumptech.glide.request.target.ViewTarget} or
