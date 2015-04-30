@@ -1,10 +1,12 @@
 package com.bumptech.glide.manager;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,17 +36,54 @@ public class RequestTrackerTest {
     tracker.clearRequests();
 
     verify(request).clear();
+    verify(request).recycle();
+  }
+
+  @Test
+  public void testClearRemoveAndRecycle_withNullRequest_doesNothingAndReturnsFalse() {
+    assertThat(tracker.clearRemoveAndRecycle(null)).isFalse();
+  }
+
+  @Test
+  public void testClearRemoveAndRecycle_withUnTrackedRequest_doesNothingAndReturnsFalse() {
+    Request request = mock(Request.class);
+
+    assertThat(tracker.clearRemoveAndRecycle(request)).isFalse();
+
+    verify(request, never()).clear();
+    verify(request, never()).recycle();
+  }
+
+  @Test
+  public void testClearRemoveAndRecycle_withTrackedRequest_clearsRecyclesAndReturnsTrue() {
+    Request request = mock(Request.class);
+    tracker.addRequest(request);
+
+    assertThat(tracker.clearRemoveAndRecycle(request)).isTrue();
+    verify(request).clear();
+    verify(request).recycle();
+  }
+
+  @Test
+  public void testClearRemoveAndRecyle_withAlreadyRemovedRequest_doesNothingAndReturnsFalse() {
+    Request request = mock(Request.class);
+    tracker.addRequest(request);
+    tracker.clearRemoveAndRecycle(request);
+    assertThat(tracker.clearRemoveAndRecycle(request)).isFalse();
+
+    verify(request, times(1)).clear();
+    verify(request, times(1)).recycle();
   }
 
   @Test
   public void testCanAddAndRemoveRequest() {
     Request request = mock(Request.class);
     tracker.addRequest(request);
-    tracker.removeRequest(request);
+    tracker.clearRemoveAndRecycle(request);
 
     tracker.clearRequests();
 
-    verify(request, never()).clear();
+    verify(request, times(1)).clear();
   }
 
   @Test
@@ -168,7 +207,7 @@ public class RequestTrackerTest {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
-    doAnswer(new RemoveRequest(second)).when(first).begin();
+    doAnswer(new ClearAndRemoveRequest(second)).when(first).begin();
 
     tracker.addRequest(mock(Request.class));
     tracker.addRequest(first);
@@ -183,7 +222,7 @@ public class RequestTrackerTest {
     Request second = mock(Request.class);
 
     when(first.isRunning()).thenReturn(true);
-    doAnswer(new RemoveRequest(second)).when(first).pause();
+    doAnswer(new ClearAndRemoveRequest(second)).when(first).pause();
 
     tracker.addRequest(mock(Request.class));
     tracker.addRequest(first);
@@ -197,7 +236,7 @@ public class RequestTrackerTest {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
-    doAnswer(new RemoveRequest(second)).when(first).clear();
+    doAnswer(new ClearAndRemoveRequest(second)).when(first).clear();
 
     tracker.addRequest(mock(Request.class));
     tracker.addRequest(first);
@@ -211,7 +250,7 @@ public class RequestTrackerTest {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
-    doAnswer(new RemoveRequest(second)).when(first).pause();
+    doAnswer(new ClearAndRemoveRequest(second)).when(first).pause();
 
     tracker.addRequest(mock(Request.class));
     tracker.addRequest(first);
@@ -302,17 +341,17 @@ public class RequestTrackerTest {
     assertFalse(tracker.isPaused());
   }
 
-  private class RemoveRequest implements Answer<Void> {
+  private class ClearAndRemoveRequest implements Answer<Void> {
 
     private Request toRemove;
 
-    public RemoveRequest(Request toRemove) {
+    public ClearAndRemoveRequest(Request toRemove) {
       this.toRemove = toRemove;
     }
 
     @Override
     public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-      tracker.removeRequest(toRemove);
+      tracker.clearRemoveAndRecycle(toRemove);
       return null;
     }
   }

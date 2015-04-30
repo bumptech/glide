@@ -271,12 +271,8 @@ public class RequestManager implements LifecycleListener {
     }
 
     Request request = target.getRequest();
+    target.setRequest(null);
     untrackOrDelegate(target, request);
-    if (request != null) {
-      request.clear();
-      request.recycle();
-      target.setRequest(null);
-    }
   }
 
   private void untrackOrDelegate(Target<?> target, Request request) {
@@ -289,7 +285,7 @@ public class RequestManager implements LifecycleListener {
   boolean untrack(Target<?> target, Request request) {
     // Optimization only.
     lifecycle.removeListener(target);
-    return requestTracker.removeRequest(request);
+    return requestTracker.clearRemoveAndRecycle(request);
   }
 
   void track(Target<?> target, Request request) {

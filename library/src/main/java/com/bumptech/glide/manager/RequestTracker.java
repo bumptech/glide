@@ -11,6 +11,8 @@ import java.util.WeakHashMap;
 
 /**
  * A class for tracking, canceling, and restarting in progress, completed, and failed requests.
+ *
+ * <p>This class is not thread safe and must be accessed on the main thread.
  */
 public class RequestTracker {
   // Most requests will be for views and will therefore be held strongly (and safely) by the view
@@ -48,11 +50,17 @@ public class RequestTracker {
   }
 
   /**
-   * Stops tracking the given request and returns {@code true} if the request was removed or
-   * {@code false} if the request was not found.
+   * Stops tracking the given request, clears, and recycles it, and returns {@code true} if the
+   * request was removed or {@code false} if the request was not found.
    */
-  public boolean removeRequest(Request request) {
-    return requests.remove(request) || pendingRequests.remove(request);
+  public boolean clearRemoveAndRecycle(Request request) {
+    boolean isOwnedByUs =
+        request != null && (requests.remove(request) || pendingRequests.remove(request));
+    if (isOwnedByUs) {
+      request.clear();
+      request.recycle();
+    }
+    return isOwnedByUs;
   }
 
   /**
@@ -90,10 +98,12 @@ public class RequestTracker {
 
   /**
    * Cancels all requests and clears their resources.
+   *
+   * <p>After this call requests cannot be restarted.
    */
   public void clearRequests() {
     for (Request request : Util.getSnapshot(requests)) {
-      request.clear();
+      clearRemoveAndRecycle(request);
     }
     pendingRequests.clear();
   }

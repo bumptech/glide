@@ -1,6 +1,8 @@
 package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
+import android.support.v4.util.Pools;
+import android.support.v4.util.Pools.SimplePool;
 import android.util.Log;
 
 import com.bumptech.glide.Logs;
@@ -14,8 +16,6 @@ import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 
-import java.util.Queue;
-
 /**
  * A {@link Request} that loads a {@link com.bumptech.glide.load.engine.Resource} into a given
  * {@link Target}.
@@ -26,7 +26,7 @@ public final class SingleRequest<R> implements Request,
     SizeReadyCallback,
     ResourceCallback {
   private static final String TAG = "Request";
-  private static final Queue<SingleRequest<?>> REQUEST_POOL = Util.createQueue(0);
+  private static final Pools.Pool<SingleRequest<?>> REQUEST_POOL = new SimplePool<>(150);
   private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
   private enum Status {
@@ -82,7 +82,7 @@ public final class SingleRequest<R> implements Request,
       RequestListener<R> requestListener, RequestCoordinator requestCoordinator, Engine engine,
       TransitionFactory<? super R> animationFactory) {
     @SuppressWarnings("unchecked") SingleRequest<R> request =
-        (SingleRequest<R>) REQUEST_POOL.poll();
+        (SingleRequest<R>) REQUEST_POOL.acquire();
     if (request == null) {
       request = new SingleRequest<>();
     }
@@ -117,7 +117,7 @@ public final class SingleRequest<R> implements Request,
     animationFactory = null;
     loadedFromMemoryCache = false;
     loadStatus = null;
-    REQUEST_POOL.offer(this);
+    REQUEST_POOL.release(this);
   }
 
   @Override

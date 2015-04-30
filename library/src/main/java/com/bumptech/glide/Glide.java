@@ -447,7 +447,7 @@ public class Glide implements ComponentCallbacks2 {
         return;
       }
     }
-    if (target != null && request != null) {
+    if (request != null) {
       throw new IllegalStateException("Failed to remove request from managers");
     }
   }
