@@ -59,6 +59,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private final String tag = String.valueOf(hashCode());
 
     private Key signature;
+    private Drawable fallbackDrawable;
+    private int fallbackResourceId;
     private int placeholderResourceId;
     private int errorResourceId;
     private Context context;
@@ -99,6 +101,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             int placeholderResourceId,
             Drawable errorDrawable,
             int errorResourceId,
+            Drawable fallbackDrawable,
+            int fallbackResourceId,
             RequestListener<? super A, R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
@@ -125,6 +129,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
                 placeholderResourceId,
                 errorDrawable,
                 errorResourceId,
+                fallbackDrawable,
+                fallbackResourceId,
                 requestListener,
                 requestCoordinator,
                 engine,
@@ -150,6 +156,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         target = null;
         placeholderDrawable = null;
         errorDrawable = null;
+        fallbackDrawable = null;
         requestListener = null;
         requestCoordinator = null;
         transformation = null;
@@ -171,6 +178,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             int placeholderResourceId,
             Drawable errorDrawable,
             int errorResourceId,
+            Drawable fallbackDrawable,
+            int fallbackResourceId,
             RequestListener<? super A, R> requestListener,
             RequestCoordinator requestCoordinator,
             Engine engine,
@@ -184,6 +193,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         this.loadProvider = loadProvider;
         this.model = model;
         this.signature = signature;
+        this.fallbackDrawable = fallbackDrawable;
+        this.fallbackResourceId = fallbackResourceId;
         this.context = context.getApplicationContext();
         this.priority = priority;
         this.target = target;
@@ -371,12 +382,22 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         return status == Status.FAILED;
     }
 
+    private Drawable getFallbackDrawable() {
+      if (fallbackDrawable == null && fallbackResourceId > 0) {
+        fallbackDrawable = context.getResources().getDrawable(fallbackResourceId);
+      }
+      return fallbackDrawable;
+    }
+
     private void setErrorPlaceholder(Exception e) {
         if (!canNotifyStatusChanged()) {
             return;
         }
 
-        Drawable error = getErrorDrawable();
+        Drawable error = model == null ? getFallbackDrawable() : null;
+        if (error == null) {
+          error = getErrorDrawable();
+        }
         if (error == null) {
             error = getPlaceholderDrawable();
         }

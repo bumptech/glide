@@ -77,6 +77,8 @@ public class GenericRequestTest {
         int placeholderResourceId = 0;
         Drawable placeholderDrawable = null;
         int errorResourceId = 0;
+        Drawable fallbackDrawable = null;
+        int fallbackResourceId = 0;
         Transformation transformation = mock(Transformation.class);
         Drawable errorDrawable = null;
         LoadProvider<Number, Object, Object, List> loadProvider = mock(LoadProvider.class);
@@ -122,6 +124,8 @@ public class GenericRequestTest {
                     placeholderResourceId,
                     errorDrawable,
                     errorResourceId,
+                    fallbackDrawable,
+                    fallbackResourceId,
                     requestListener,
                     requestCoordinator,
                     engine,
@@ -331,7 +335,8 @@ public class GenericRequestTest {
 
         assertTrue(request.isFailed());
         verify(harness.requestListener)
-                .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean());
+                .onException(any(Exception.class), any(Number.class), eq(harness.target),
+                    anyBoolean());
     }
 
     @Test
@@ -357,7 +362,8 @@ public class GenericRequestTest {
         assertTrue(request.isFailed());
         verify(harness.engine).release(eq(harness.resource));
         verify(harness.requestListener)
-                .onException(any(Exception.class), any(Number.class), eq(harness.target), anyBoolean());
+                .onException(any(Exception.class), any(Number.class), eq(harness.target),
+                    anyBoolean());
     }
 
     @Test
@@ -483,9 +489,10 @@ public class GenericRequestTest {
         request.onSizeReady(100, 100);
         request.onSizeReady(100, 100);
 
-        verify(harness.engine, times(1)).load(eq(harness.signature), eq(100), eq(100), any(DataFetcher.class),
-                any(DataLoadProvider.class), any(Transformation.class), any(ResourceTranscoder.class),
-                any(Priority.class), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class));
+        verify(harness.engine, times(1)).load(eq(harness.signature), eq(100), eq(100),
+            any(DataFetcher.class), any(DataLoadProvider.class), any(Transformation.class),
+            any(ResourceTranscoder.class), any(Priority.class), anyBoolean(),
+            any(DiskCacheStrategy.class), any(ResourceCallback.class));
     }
 
     @Test
@@ -506,8 +513,8 @@ public class GenericRequestTest {
         request.onSizeReady(100, 100);
 
         verify(harness.engine).load(any(Key.class), anyInt(), anyInt(), any(DataFetcher.class),
-                any(DataLoadProvider.class), any(Transformation.class), any(ResourceTranscoder.class),
-                eq(expected), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class));
+            any(DataLoadProvider.class), any(Transformation.class), any(ResourceTranscoder.class),
+            eq(expected), anyBoolean(), any(DiskCacheStrategy.class), any(ResourceCallback.class));
     }
 
     @Test
@@ -602,7 +609,7 @@ public class GenericRequestTest {
     }
 
     @Test
-    public void setTestPlaceholderDrawableSetOnNullModel() {
+    public void testPlaceholderDrawableSetOnNullModelWithNoErrorDrawable() {
         Drawable placeholder = new ColorDrawable(Color.RED);
 
         MockTarget target = new MockTarget();
@@ -618,7 +625,7 @@ public class GenericRequestTest {
     }
 
     @Test
-    public void testErrorDrawableSetOnNullModel() {
+    public void testErrorDrawableSetOnNullModelWithErrorDrawable() {
         Drawable placeholder = new ColorDrawable(Color.RED);
         Drawable errorPlaceholder = new ColorDrawable(Color.GREEN);
 
@@ -633,6 +640,26 @@ public class GenericRequestTest {
         request.begin();
 
         assertEquals(errorPlaceholder, target.currentPlaceholder);
+    }
+
+    @Test
+    public void testFallbackDrawableSetOnNullModelWithErrorAndFallbackDrawables() {
+        Drawable placeholder = new ColorDrawable(Color.RED);
+        Drawable errorPlaceholder = new ColorDrawable(Color.GREEN);
+        Drawable fallback = new ColorDrawable(Color.BLUE);
+
+        MockTarget target = new MockTarget();
+
+        harness.placeholderDrawable = placeholder;
+        harness.errorDrawable = errorPlaceholder;
+        harness.fallbackDrawable = fallback;
+        harness.target = target;
+        harness.model = null;
+        GenericRequest request = harness.getRequest();
+
+        request.begin();
+
+        assertEquals(fallback, target.currentPlaceholder);
     }
 
     @Test

@@ -77,6 +77,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     private Transformation<ResourceType> transformation = UnitTransformation.get();
     private boolean isTransformationSet;
     private boolean isThumbnailBuilt;
+    private Drawable fallbackDrawable;
+    private int fallbackResource;
 
     GenericRequestBuilder(LoadProvider<ModelType, DataType, ResourceType, TranscodeType> loadProvider,
             Class<TranscodeType> transcodeClass, GenericRequestBuilder<ModelType, ?, ?, ?> other) {
@@ -448,6 +450,49 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
+     * Sets an {@link android.graphics.drawable.Drawable} to display if the model provided to
+     * {@link #load(Object)} is {@code null}.
+     *
+     * <p>
+     *   If a fallback is not set, null models will cause the error drawable to be displayed. If
+     *   the error drawable is not set, the placeholder will be displayed.
+     * </p>
+     *
+     * @see #placeholder(Drawable)
+     * @see #placeholder(int)
+     *
+     * @param drawable The drawable to display as a placeholder.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> fallback(
+            Drawable drawable) {
+        this.fallbackDrawable = drawable;
+
+        return this;
+    }
+
+    /**
+     * Sets a resource to display if the model provided to {@link #load(Object)} is {@code null}.
+     *
+     * <p>
+     *   If a fallback is not set, null models will cause the error drawable to be displayed. If
+     *   the error drawable is not set, the placeholder will be displayed.
+     * </p>
+     *
+     * @see #placeholder(Drawable)
+     * @see #placeholder(int)
+     *
+     * @param resourceId The id of the resource to use as a fallback.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> fallback(
+            int resourceId) {
+        this.fallbackResource = resourceId;
+
+        return this;
+    }
+
+    /**
      * Sets a resource to display if a load fails.
      *
      * @param resourceId The id of the resource to use as a placeholder.
@@ -802,6 +847,8 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
                 placeholderId,
                 errorPlaceholder,
                 errorId,
+                fallbackDrawable,
+                fallbackResource,
                 requestListener,
                 requestCoordinator,
                 glide.getEngine(),

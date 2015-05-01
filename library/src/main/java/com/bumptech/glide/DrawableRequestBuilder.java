@@ -329,6 +329,18 @@ public class DrawableRequestBuilder<ModelType>
         return this;
     }
 
+    @Override
+    public DrawableRequestBuilder<ModelType> fallback(Drawable drawable) {
+        super.fallback(drawable);
+        return this;
+    }
+
+    @Override
+    public DrawableRequestBuilder<ModelType> fallback(int resourceId) {
+        super.fallback(resourceId);
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -319,6 +319,18 @@ public class GifRequestBuilder<ModelType>
         return this;
     }
 
+    @Override
+    public GifRequestBuilder<ModelType> fallback(Drawable drawable) {
+        super.fallback(drawable);
+        return this;
+    }
+
+    @Override
+    public GifRequestBuilder<ModelType> fallback(int resourceId) {
+        super.fallback(resourceId);
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */

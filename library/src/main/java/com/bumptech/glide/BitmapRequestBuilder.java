@@ -369,6 +369,18 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> fallback(Drawable drawable) {
+        super.fallback(drawable);
+        return this;
+    }
+
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> fallback(int resourceId) {
+        super.fallback(resourceId);
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
