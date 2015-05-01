@@ -7,13 +7,11 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.util.LogTime;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Generates {@link com.bumptech.glide.load.data.DataFetcher DataFetchers} from original source data
@@ -27,27 +25,17 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object>,
     DataFetcherGenerator.FetcherReadyCallback {
 
-  private final int width;
-  private final int height;
-  private final RequestContext<Model, ?> requestContext;
-  private final DiskCache diskCache;
+  private final DecodeHelper<?> helper;
   private final FetcherReadyCallback cb;
-  private final List<LoadData<?>> loadDataList;
 
   private int loadDataListIndex;
   private DataCacheGenerator sourceCacheGenerator;
   private Object dataToCache;
   private volatile ModelLoader.LoadData<?> loadData;
 
-  public SourceGenerator(int width, int height, RequestContext<Model, ?> requestContext,
-      DiskCache diskCache, FetcherReadyCallback cb) {
-    this.width = width;
-    this.height = height;
-    this.requestContext = requestContext;
-    this.diskCache = diskCache;
+  public SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+    this.helper = helper;
     this.cb = cb;
-
-    loadDataList = requestContext.getLoadData();
   }
 
   @Override
@@ -63,26 +51,26 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
     loadData = null;
     while (loadData == null && hasNextModelLoader()) {
-      loadData = loadDataList.get(loadDataListIndex++);
+      loadData = helper.getLoadData().get(loadDataListIndex++);
       if (loadData != null) {
-        loadData.fetcher.loadData(requestContext.getPriority(), this);
+        loadData.fetcher.loadData(helper.getPriority(), this);
       }
     }
     return loadData != null;
   }
 
   private boolean hasNextModelLoader() {
-    return loadDataListIndex < loadDataList.size();
+    return loadDataListIndex < helper.getLoadData().size();
   }
 
   private void cacheData() {
     long startTime = LogTime.getLogTime();
     try {
-      Encoder<Object> encoder = requestContext.getSourceEncoder(dataToCache);
+      Encoder<Object> encoder = helper.getSourceEncoder(dataToCache);
       DataCacheWriter<Object> writer =
-          new DataCacheWriter<>(encoder, dataToCache, requestContext.getOptions());
-      Key originalKey = new DataCacheKey(loadData.sourceKey, requestContext.getSignature());
-      diskCache.put(originalKey, writer);
+          new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
+      Key originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
+      helper.getDiskCache().put(originalKey, writer);
       if (Logs.isEnabled(Log.VERBOSE)) {
         Logs.log(Log.VERBOSE, "Finished encoding source to cache"
             + ", key: " + originalKey
@@ -95,8 +83,7 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
     }
 
     sourceCacheGenerator =
-        new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), width, height,
-            diskCache, requestContext, this);
+        new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), helper, this);
   }
 
   @Override
@@ -109,7 +96,7 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
+    DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should

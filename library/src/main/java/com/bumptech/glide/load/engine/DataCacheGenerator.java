@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 
 import java.io.File;
@@ -16,11 +15,8 @@ import java.util.List;
 class DataCacheGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
-  private final List<Key> sourceIds;
-  private final int width;
-  private final int height;
-  private final DiskCache diskCache;
-  private final RequestContext<?, ?> requestContext;
+  private List<Key> cacheKeys;
+  private final DecodeHelper<?> helper;
   private final FetcherReadyCallback cb;
 
   private int sourceIdIndex = -1;
@@ -33,13 +29,16 @@ class DataCacheGenerator implements DataFetcherGenerator,
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
 
-  public DataCacheGenerator(List<Key> sourceIds, int width, int height, DiskCache diskCache,
-      RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
-    this.sourceIds = sourceIds;
-    this.width = width;
-    this.height = height;
-    this.diskCache = diskCache;
-    this.requestContext = requestContext;
+
+  DataCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+    this(helper.getCacheKeys(), helper, cb);
+  }
+
+  // In some cases we may want to load a specific cache key (when loading from source written to
+  // cache), so we accept a list of keys rather than just obtain the list from the helper.
+  DataCacheGenerator(List<Key> cacheKeys, DecodeHelper<?> helper, FetcherReadyCallback cb) {
+    this.cacheKeys = cacheKeys;
+    this.helper = helper;
     this.cb = cb;
   }
 
@@ -47,16 +46,16 @@ class DataCacheGenerator implements DataFetcherGenerator,
   public boolean startNext() {
     while (modelLoaders == null || !hasNextModelLoader()) {
       sourceIdIndex++;
-      if (sourceIdIndex >= sourceIds.size()) {
+      if (sourceIdIndex >= cacheKeys.size()) {
         return false;
       }
 
-      Key sourceId = sourceIds.get(sourceIdIndex);
-      Key originalKey = new DataCacheKey(sourceId, requestContext.getSignature());
-      cacheFile = diskCache.get(originalKey);
+      Key sourceId = cacheKeys.get(sourceIdIndex);
+      Key originalKey = new DataCacheKey(sourceId, helper.getSignature());
+      cacheFile = helper.getDiskCache().get(originalKey);
       if (cacheFile != null) {
         this.sourceKey = sourceId;
-        modelLoaders = requestContext.getModelLoaders(cacheFile);
+        modelLoaders = helper.getModelLoaders(cacheFile);
         modelLoaderIndex = 0;
       }
     }
@@ -65,9 +64,10 @@ class DataCacheGenerator implements DataFetcherGenerator,
     while (fetcher == null && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
       fetcher =
-          modelLoader.buildLoadData(cacheFile, width, height, requestContext.getOptions()).fetcher;
+          modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),
+              helper.getOptions()).fetcher;
       if (fetcher != null) {
-        fetcher.loadData(requestContext.getPriority(), this);
+        fetcher.loadData(helper.getPriority(), this);
       }
     }
     return fetcher != null;

@@ -28,13 +28,10 @@ public class LoadPath<Data, ResourceType, Transcode> {
     this.decodePaths = Preconditions.checkNotEmpty(decodePaths);
   }
 
-  public Resource<Transcode> load(Data data, RequestContext<?, Transcode> context,
-      int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) {
-    Preconditions.checkNotNull(data);
+  public Resource<Transcode> load(DataRewinder<Data> rewinder, Options options, int width,
+      int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) {
 
     Resource<Transcode> result = null;
-    Options options = context.getOptions();
-    DataRewinder<Data> rewinder = context.getRewinder(data);
     try {
       int size = decodePaths.size();
       for (int i = 0; i < size; i++) {

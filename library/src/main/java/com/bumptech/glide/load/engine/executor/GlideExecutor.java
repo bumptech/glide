@@ -22,7 +22,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
    * @param poolSize The number of threads.
    */
   public GlideExecutor(int poolSize) {
-    this(poolSize, UncaughtThrowableStrategy.LOG);
+    this(poolSize, UncaughtThrowableStrategy.THROW);
   }
 
   /**
@@ -48,7 +48,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
    */
   public GlideExecutor(String name, int poolSize) {
     this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory(name),
-        UncaughtThrowableStrategy.LOG);
+        UncaughtThrowableStrategy.THROW);
   }
 
   public GlideExecutor(int corePoolSize, int maximumPoolSize, long keepAlive,
@@ -79,7 +79,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
     LOG {
       @Override
       protected void handle(Throwable t) {
-        if (Log.isLoggable(TAG, Log.ERROR)) {
+        if (t != null && Log.isLoggable(TAG, Log.ERROR)) {
           Log.e(TAG, "Request threw uncaught throwable", t);
         }
       }
@@ -91,7 +91,9 @@ public class GlideExecutor extends ThreadPoolExecutor {
       @Override
       protected void handle(Throwable t) {
         super.handle(t);
-        throw new RuntimeException(t);
+        if (t != null) {
+          throw new RuntimeException(t);
+        }
       }
     };
 

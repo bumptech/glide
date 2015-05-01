@@ -5,9 +5,9 @@ import android.support.v4.util.Pools;
 import android.support.v4.util.Pools.SimplePool;
 import android.util.Log;
 
+import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
@@ -66,8 +66,13 @@ public final class SingleRequest<R> implements Request,
 
   private final String tag = String.valueOf(hashCode());
 
-  private RequestContext<?, R> requestContext;
   private RequestCoordinator requestCoordinator;
+  private GlideContext glideContext;
+  private Object model;
+  private Class<R> transcodeClass;
+  private BaseRequestOptions<?> requestOptions;
+  private int overrideWidth;
+  private int overrideHeight;
   private Target<R> target;
   private RequestListener<R> requestListener;
   private Engine engine;
@@ -77,16 +82,38 @@ public final class SingleRequest<R> implements Request,
   private Engine.LoadStatus loadStatus;
   private long startTime;
   private Status status;
+  private Drawable errorDrawable;
+  private Drawable placeholderDrawable;
+  private Drawable fallbackDrawable;
 
-  public static <R> SingleRequest<R> obtain(RequestContext<?, R> requestContext, Target<R> target,
-      RequestListener<R> requestListener, RequestCoordinator requestCoordinator, Engine engine,
+  public static <R> SingleRequest<R> obtain(
+      GlideContext glideContext,
+      Object model,
+      Class<R> transcodeClass,
+      BaseRequestOptions<?> requestOptions,
+      int overrideWidth,
+      int overrideHeight,
+      Target<R> target,
+      RequestListener<R> requestListener,
+      RequestCoordinator requestCoordinator,
+      Engine engine,
       TransitionFactory<? super R> animationFactory) {
     @SuppressWarnings("unchecked") SingleRequest<R> request =
         (SingleRequest<R>) REQUEST_POOL.acquire();
     if (request == null) {
       request = new SingleRequest<>();
     }
-    request.init(requestContext, target, requestListener, requestCoordinator, engine,
+    request.init(
+        glideContext,
+        model,
+        transcodeClass,
+        requestOptions,
+        overrideWidth,
+        overrideHeight,
+        target,
+        requestListener,
+        requestCoordinator,
+        engine,
         animationFactory);
     return request;
   }
@@ -95,11 +122,24 @@ public final class SingleRequest<R> implements Request,
     // just create, instances are reused with recycle/init
   }
 
-  private void init(RequestContext<?, R> requestContext,
-      Target<R> target, RequestListener<R> requestListener,
-      RequestCoordinator requestCoordinator, Engine engine,
+  private void init(
+      GlideContext glideContext,
+      Object model,
+      Class<R> transcodeClass,
+      BaseRequestOptions<?> requestOptions,
+      int overrideWidth,
+      int overrideHeight,
+      Target<R> target,
+      RequestListener<R> requestListener,
+      RequestCoordinator requestCoordinator,
+      Engine engine,
       TransitionFactory<? super R> animationFactory) {
-    this.requestContext = requestContext;
+    this.glideContext = glideContext;
+    this.model = model;
+    this.transcodeClass = transcodeClass;
+    this.requestOptions = requestOptions;
+    this.overrideWidth = overrideWidth;
+    this.overrideHeight = overrideHeight;
     this.target = target;
     this.requestListener = requestListener;
     this.requestCoordinator = requestCoordinator;
@@ -110,27 +150,33 @@ public final class SingleRequest<R> implements Request,
 
   @Override
   public void recycle() {
-    requestContext = null;
+    glideContext = null;
+    model = null;
+    transcodeClass = null;
+    requestOptions = null;
+    overrideWidth = -1;
+    overrideHeight = -1;
     target = null;
     requestListener = null;
     requestCoordinator = null;
     animationFactory = null;
     loadedFromMemoryCache = false;
     loadStatus = null;
+    errorDrawable = null;
+    placeholderDrawable = null;
+    fallbackDrawable = null;
     REQUEST_POOL.release(this);
   }
 
   @Override
   public void begin() {
     startTime = LogTime.getLogTime();
-    if (requestContext.getModel() == null) {
+    if (model == null) {
       onLoadFailed();
       return;
     }
 
     status = Status.WAITING_FOR_SIZE;
-    int overrideWidth = requestContext.getOverrideWidth();
-    int overrideHeight = requestContext.getOverrideHeight();
     if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
       onSizeReady(overrideWidth, overrideHeight);
     } else {
@@ -139,7 +185,7 @@ public final class SingleRequest<R> implements Request,
 
     if ((status == Status.RUNNING || status == Status.WAITING_FOR_SIZE)
         && canNotifyStatusChanged()) {
-      target.onLoadStarted(requestContext.getPlaceholderDrawable());
+      target.onLoadStarted(getPlaceholderDrawable());
     }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished run method in " + LogTime.getElapsedMillis(startTime));
@@ -182,7 +228,7 @@ public final class SingleRequest<R> implements Request,
       releaseResource(resource);
     }
     if (canNotifyStatusChanged()) {
-      target.onLoadCleared(requestContext.getPlaceholderDrawable());
+      target.onLoadCleared(getPlaceholderDrawable());
     }
     // Must be after cancel().
     status = Status.CLEARED;
@@ -229,16 +275,46 @@ public final class SingleRequest<R> implements Request,
     return status == Status.FAILED;
   }
 
+  private Drawable getErrorDrawable() {
+    if (errorDrawable == null) {
+      errorDrawable = requestOptions.getErrorPlaceholder();
+      if (errorDrawable == null && requestOptions.getErrorId() > 0) {
+        errorDrawable = glideContext.getResources().getDrawable(requestOptions.getErrorId());
+      }
+    }
+    return errorDrawable;
+  }
+
+  private Drawable getPlaceholderDrawable() {
+     if (placeholderDrawable == null) {
+      placeholderDrawable = requestOptions.getPlaceholderDrawable();
+      if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
+        placeholderDrawable =
+            glideContext.getResources().getDrawable(requestOptions.getPlaceholderId());
+      }
+    }
+    return placeholderDrawable;
+  }
+
+  private Drawable getFallbackDrawable() {
+    if (fallbackDrawable == null) {
+      fallbackDrawable = requestOptions.getFallbackDrawable();
+      if (fallbackDrawable == null && requestOptions.getFallbackId() > 0) {
+        fallbackDrawable =
+            glideContext.getResources().getDrawable(requestOptions.getFallbackId());
+      }
+    }
+    return fallbackDrawable;
+  }
+
   private void setErrorPlaceholder() {
     if (!canNotifyStatusChanged()) {
       return;
     }
 
-    Object model = requestContext.getModel();
-    Drawable error = model == null
-        ? requestContext.getFallbackDrawable() : requestContext.getErrorDrawable();
+    Drawable error = model == null ? getFallbackDrawable() : getErrorDrawable();
     if (error == null) {
-      error = requestContext.getPlaceholderDrawable();
+      error = getPlaceholderDrawable();
     }
     target.onLoadFailed(error);
   }
@@ -256,7 +332,7 @@ public final class SingleRequest<R> implements Request,
     }
     status = Status.RUNNING;
 
-    float sizeMultiplier = requestContext.getSizeMultiplier();
+    float sizeMultiplier = requestOptions.getSizeMultiplier();
     width = Math.round(sizeMultiplier * width);
     height = Math.round(sizeMultiplier * height);
 
@@ -264,7 +340,21 @@ public final class SingleRequest<R> implements Request,
       logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
     }
     loadedFromMemoryCache = true;
-    loadStatus = engine.load(requestContext, width, height, this);
+    loadStatus = engine.load(
+        glideContext,
+        model,
+        requestOptions.getSignature(),
+        width,
+        height,
+        requestOptions.getResourceClass(),
+        transcodeClass,
+        requestOptions.getPriority(),
+        requestOptions.getDiskCacheStrategy(),
+        requestOptions.getTransformations(),
+        requestOptions.isTransformationRequired(),
+        requestOptions.getOptions(),
+        requestOptions.isMemoryCacheable(),
+        this);
     loadedFromMemoryCache = resource != null;
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
@@ -296,7 +386,6 @@ public final class SingleRequest<R> implements Request,
   @Override
   public void onResourceReady(Resource<?> resource) {
     loadStatus = null;
-    Class<R> transcodeClass = requestContext.getTranscodeClass();
     if (resource == null) {
       if (Logs.isEnabled(Log.ERROR)) {
         Logs.log(Log.ERROR, "Expected to receive a Resource<R> with an object of " + transcodeClass
@@ -345,8 +434,8 @@ public final class SingleRequest<R> implements Request,
     this.resource = resource;
 
     if (requestListener == null
-        || !requestListener.onResourceReady(result, requestContext.getModel(), target,
-        loadedFromMemoryCache, isFirstResource)) {
+        || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
+        isFirstResource)) {
       Transition<? super R> animation =
           animationFactory.build(loadedFromMemoryCache, isFirstResource);
       target.onResourceReady(result, animation);
@@ -372,7 +461,7 @@ public final class SingleRequest<R> implements Request,
     loadStatus = null;
     status = Status.FAILED;
     //TODO: what if this is a thumbnail request?
-    if (requestListener == null || !requestListener.onLoadFailed(requestContext.getModel(), target,
+    if (requestListener == null || !requestListener.onLoadFailed(model, target,
         isFirstReadyResource())) {
       setErrorPlaceholder();
     }

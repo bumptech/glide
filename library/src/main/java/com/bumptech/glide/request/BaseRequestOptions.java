@@ -518,6 +518,11 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return transformations;
   }
 
+  public final boolean isTransformationRequired() {
+    return isTransformationRequired;
+  }
+
+
   @SuppressWarnings("unchecked")
   public final <T> Transformation<T> getTransformation(Class<T> resourceClass) {
     Transformation<T> result = (Transformation<T>) transformations.get(resourceClass);

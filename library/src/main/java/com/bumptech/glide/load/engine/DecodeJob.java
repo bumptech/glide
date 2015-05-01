@@ -3,17 +3,23 @@ package com.bumptech.glide.load.engine;
 import android.support.v4.util.Pools;
 import android.util.Log;
 
+import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Logs;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Preconditions;
+
+import java.util.Map;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source
@@ -32,10 +38,15 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
-  private RequestContext<?, R> requestContext;
+  private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
+  private GlideContext glideContext;
+  private Key signature;
+  private Priority priority;
   private EngineKey loadKey;
   private int width;
   private int height;
+  private DiskCacheStrategy diskCacheStrategy;
+  private Options options;
   private Callback<R> callback;
   private int order;
   private Stage stage;
@@ -56,19 +67,55 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     this.pool = pool;
   }
 
-  DecodeJob<R> init(RequestContext<?, R> requestContext, EngineKey loadKey, int width, int height,
-      Callback<R> callback, int order) {
-    this.requestContext = requestContext;
+  DecodeJob<R> init(
+      GlideContext glideContext,
+      Object model,
+      EngineKey loadKey,
+      Key signature,
+      int width,
+      int height,
+      Class<?> resourceClass,
+      Class<R> transcodeClass,
+      Priority priority,
+      DiskCacheStrategy diskCacheStrategy,
+      Map<Class<?>, Transformation<?>> transformations,
+      boolean isTransformationRequired,
+      Options options,
+      Callback<R> callback,
+      int order) {
+    decodeHelper.init(
+        glideContext,
+        model,
+        signature,
+        width,
+        height,
+        diskCacheStrategy,
+        resourceClass,
+        transcodeClass,
+        priority,
+        options,
+        transformations,
+        isTransformationRequired,
+        diskCacheProvider);
+    this.glideContext = glideContext;
+    this.signature = signature;
+    this.priority = priority;
     this.loadKey = loadKey;
     this.width = width;
     this.height = height;
+    this.diskCacheStrategy = diskCacheStrategy;
+    this.options = options;
     this.callback = callback;
     this.order = order;
     return this;
   }
 
   void release() {
-    requestContext = null;
+    decodeHelper.clear();
+    glideContext = null;
+    signature = null;
+    options = null;
+    priority = null;
     loadKey = null;
     callback = null;
     stage = null;
@@ -95,7 +142,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private int getPriority() {
-    return requestContext.getPriority().ordinal();
+    return priority.ordinal();
   }
 
   /**
@@ -181,14 +228,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
     switch (stage) {
       case RESOURCE_CACHE:
-        return new ResourceCacheGenerator(width, height, diskCacheProvider.getDiskCache(),
-            requestContext, this);
+        return new ResourceCacheGenerator(decodeHelper, this);
       case DATA_CACHE:
-        return new DataCacheGenerator(requestContext.getCacheKeys(), width, height,
-            diskCacheProvider.getDiskCache(), requestContext, this);
+        return new DataCacheGenerator(decodeHelper, this);
       case SOURCE:
-        return new SourceGenerator<>(width, height, requestContext,
-            diskCacheProvider.getDiskCache(), this);
+        return new SourceGenerator<>(decodeHelper, this);
       default:
         throw new IllegalStateException("Unrecognized stage: " + stage);
     }
@@ -236,13 +280,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     if (current == null) {
       return null;
     }
-    DiskCacheStrategy strategy = requestContext.getDiskCacheStrategy();
     switch (current) {
       case INITIALIZE:
-        return strategy.decodeCachedResource()
+        return diskCacheStrategy.decodeCachedResource()
             ? Stage.RESOURCE_CACHE : getNextStage(Stage.RESOURCE_CACHE);
       case RESOURCE_CACHE:
-        return strategy.decodeCachedData()
+        return diskCacheStrategy.decodeCachedData()
             ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);
       case DATA_CACHE:
         return Stage.SOURCE;
@@ -315,7 +358,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   @SuppressWarnings("unchecked")
   private <Data> Resource<R> decodeFromFetcher(Data data, DataSource dataSource) {
-    LoadPath<Data, ?, R> path = requestContext.getLoadPath((Class<Data>) data.getClass());
+    LoadPath<Data, ?, R> path = decodeHelper.getLoadPath((Class<Data>) data.getClass());
     if (path != null) {
       return runLoadPath(data, dataSource, path);
     } else {
@@ -325,7 +368,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private <Data, ResourceType> Resource<R> runLoadPath(Data data, DataSource dataSource,
       LoadPath<Data, ResourceType, R> path) {
-    return path.load(data, requestContext, width, height,
+    DataRewinder<Data> rewinder = glideContext.getRegistry().getRewinder(data);
+    return path.load(rewinder, options, width, height,
         new DecodeCallback<ResourceType>(dataSource));
   }
 
@@ -334,11 +378,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void logWithTimeAndKey(String message, long startTime, String extraArgs) {
-    Logs.log(Log.VERBOSE, message + " in " + LogTime.getElapsedMillis(startTime)
-        + ", load key: " + loadKey
-        + (extraArgs != null ? ", " + extraArgs : "")
-        + ", thread: " + Thread.currentThread().getName());
+    Logs.log(Log.VERBOSE,
+        message + " in " + LogTime.getElapsedMillis(startTime) + ", load key: " + loadKey + (
+            extraArgs != null ? ", " + extraArgs : "") + ", thread: " + Thread.currentThread()
+            .getName());
   }
+
 
   class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
@@ -354,7 +399,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       Transformation<Z> appliedTransformation = null;
       Resource<Z> transformed = decoded;
       if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
-        appliedTransformation = requestContext.getTransformation(resourceSubClass);
+        appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
         transformed = appliedTransformation.transform(decoded, width, height);
       }
       // TODO: Make this the responsibility of the Transformation.
@@ -364,17 +409,16 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
       final EncodeStrategy encodeStrategy;
       final ResourceEncoder<Z> encoder;
-      if (requestContext.isResourceEncoderAvailable(transformed)) {
-        encoder = requestContext.getResultEncoder(transformed);
-        encodeStrategy = encoder.getEncodeStrategy(requestContext.getOptions());
+      if (decodeHelper.isResourceEncoderAvailable(transformed)) {
+        encoder = decodeHelper.getResultEncoder(transformed);
+        encodeStrategy = encoder.getEncodeStrategy(options);
       } else {
         encoder = null;
         encodeStrategy = EncodeStrategy.NONE;
       }
 
       long startEncodeTime = LogTime.getLogTime();
-      DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
-      boolean isFromAlternateCacheKey = !requestContext.isSourceKey(currentSourceKey);
+      boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
       if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
           encodeStrategy)) {
         if (encoder == null) {
@@ -382,16 +426,16 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         }
         final Key key;
         if (encodeStrategy == EncodeStrategy.SOURCE) {
-          key = new DataCacheKey(currentSourceKey, requestContext.getSignature());
+          key = new DataCacheKey(currentSourceKey, signature);
         } else if (encodeStrategy == EncodeStrategy.TRANSFORMED) {
-          key = new ResourceCacheKey(currentSourceKey, requestContext.getSignature(), width, height,
-              appliedTransformation, resourceSubClass, requestContext.getOptions());
+          key = new ResourceCacheKey(currentSourceKey, signature, width, height,
+              appliedTransformation, resourceSubClass, options);
         } else {
           throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
         }
 
         diskCacheProvider.getDiskCache().put(key, new DataCacheWriter<>(encoder, transformed,
-            requestContext.getOptions()));
+            options));
         if (Logs.isEnabled(Log.VERBOSE)) {
           logWithTimeAndKey("Encoded resource to cache", startEncodeTime,
               "cache key: " + key

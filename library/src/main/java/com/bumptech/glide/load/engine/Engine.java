@@ -5,7 +5,11 @@ import android.os.MessageQueue;
 import android.support.v4.util.Pools;
 import android.util.Log;
 
+import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
@@ -123,16 +127,28 @@ public class Engine implements EngineJobListener,
    * @param height The target height in pixels of the desired resource.
    * @param cb     The callback that will be called when the load completes.
    */
-  public <Z, R> LoadStatus load(RequestContext<?, R> requestContext, int width, int height,
+  public <R> LoadStatus load(
+      GlideContext glideContext,
+      Object model,
+      Key signature,
+      int width,
+      int height,
+      Class<?> resourceClass,
+      Class<R> transcodeClass,
+      Priority priority,
+      DiskCacheStrategy diskCacheStrategy,
+      Map<Class<?>, Transformation<?>> transformations,
+      boolean isTransformationRequired,
+      Options options,
+      boolean isMemoryCacheable,
       ResourceCallback cb) {
     Util.assertMainThread();
     long startTime = LogTime.getLogTime();
 
-    requestContext.setDimens(width, height);
+    EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,
+        resourceClass, transcodeClass, options);
 
-    EngineKey key = keyFactory.buildKey(requestContext, width, height);
-
-    EngineResource<?> cached = loadFromCache(key, requestContext.isMemoryCacheable());
+    EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
     if (cached != null) {
       cb.onResourceReady(cached);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -141,7 +157,7 @@ public class Engine implements EngineJobListener,
       return null;
     }
 
-    EngineResource<?> active = loadFromActiveResources(key, requestContext.isMemoryCacheable());
+    EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
     if (active != null) {
       cb.onResourceReady(active);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -159,8 +175,22 @@ public class Engine implements EngineJobListener,
       return new LoadStatus(cb, current);
     }
 
-    EngineJob<R> engineJob = engineJobFactory.build(key, requestContext.isMemoryCacheable());
-    DecodeJob<R> decodeJob = decodeJobFactory.build(requestContext, key, width, height, engineJob);
+    EngineJob<R> engineJob = engineJobFactory.build(key, isMemoryCacheable);
+    DecodeJob<R> decodeJob = decodeJobFactory.build(
+        glideContext,
+        model,
+        key,
+        signature,
+        width,
+        height,
+        resourceClass,
+        transcodeClass,
+        priority,
+        diskCacheStrategy,
+        transformations,
+        isTransformationRequired,
+        options,
+        engineJob);
     jobs.put(key, engineJob);
     engineJob.addCallback(cb);
     engineJob.start(decodeJob);
@@ -357,16 +387,43 @@ public class Engine implements EngineJobListener,
     }
 
     @SuppressWarnings("unchecked")
-    <R> DecodeJob<R> build(RequestContext<?, R> requestContext, EngineKey loadKey, int width,
-        int height, DecodeJob.Callback<R> callback) {
+    <R> DecodeJob<R> build(GlideContext glideContext,
+        Object model,
+        EngineKey loadKey,
+        Key signature,
+        int width,
+        int height,
+        Class<?> resourceClass,
+        Class<R> transcodeClass,
+        Priority priority,
+        DiskCacheStrategy diskCacheStrategy,
+        Map<Class<?>, Transformation<?>> transformations,
+        boolean isTransformationRequired,
+        Options options,
+        DecodeJob.Callback<R> callback) {
       DecodeJob<R> result = (DecodeJob<R>) pool.acquire();
       if (result == null) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
           Log.v(TAG, "Create new job");
         }
-        result = new DecodeJob<R>(diskCacheProvider, pool);
+        result = new DecodeJob<>(diskCacheProvider, pool);
       }
-      return result.init(requestContext, loadKey, width, height, callback, creationOrder++);
+      return result.init(
+          glideContext,
+          model,
+          loadKey,
+          signature,
+          width,
+          height,
+          resourceClass,
+          transcodeClass,
+          priority,
+          diskCacheStrategy,
+          transformations,
+          isTransformationRequired,
+          options,
+          callback,
+          creationOrder++);
     }
   }
 

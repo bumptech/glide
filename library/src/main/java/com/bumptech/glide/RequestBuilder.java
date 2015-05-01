@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
@@ -566,11 +565,17 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       int overrideWidth, int overrideHeight) {
     requestOptions.lock();
 
-    RequestContext<?, TranscodeType> requestContext =
-        new RequestContext<>(context, model, transcodeClass, requestOptions, priority,
-            overrideWidth, overrideHeight);
-
-    return SingleRequest.obtain(requestContext, target, requestListener, requestCoordinator,
-        context.getEngine(), transitionOptions.getTransitionFactory());
+    return SingleRequest.obtain(
+        context,
+        model,
+        transcodeClass,
+        requestOptions,
+        overrideWidth,
+        overrideHeight,
+        target,
+        requestListener,
+        requestCoordinator,
+        context.getEngine(),
+        transitionOptions.getTransitionFactory());
   }
 }
