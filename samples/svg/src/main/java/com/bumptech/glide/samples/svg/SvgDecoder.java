@@ -1,4 +1,4 @@
-package com.bumptech.svgsample.app;
+package com.bumptech.glide.samples.svg;
 
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;

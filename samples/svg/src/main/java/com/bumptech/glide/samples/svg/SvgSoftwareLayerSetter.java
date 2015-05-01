@@ -1,4 +1,4 @@
-package com.bumptech.svgsample.app;
+package com.bumptech.glide.samples.svg;
 
 import android.annotation.TargetApi;
 import android.graphics.drawable.PictureDrawable;

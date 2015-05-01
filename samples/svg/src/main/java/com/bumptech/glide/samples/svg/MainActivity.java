@@ -1,4 +1,4 @@
-package com.bumptech.svgsample.app;
+package com.bumptech.glide.samples.svg;
 
 import android.app.Activity;
 import android.content.ContentResolver;

@@ -9,7 +9,7 @@ android {
     buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
-        applicationId 'com.bumptech.svgsample.app'
+        applicationId 'com.bumptech.glide.samples.svg'
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
@@ -25,5 +25,5 @@ dependencies {
 
 task run(type: Exec, dependsOn: 'installDebug') {
     description 'Installs the APK and runs the main activity: "gradlew :samples:???:run"'
-    commandLine "${android.sdkDirectory}/platform-tools/adb", 'shell', 'am', 'start', '-n', 'com.bumptech.svgsample.app/.MainActivity'
+    commandLine "${android.sdkDirectory}/platform-tools/adb", 'shell', 'am', 'start', '-n', 'com.bumptech.glide.samples.svg/.MainActivity'
 }
