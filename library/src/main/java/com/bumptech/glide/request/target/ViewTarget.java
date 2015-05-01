@@ -39,9 +39,37 @@ import java.util.List;
  */
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     private static final String TAG = "ViewTarget";
+    private static boolean isTagUsedAtLeastOnce = false;
+    private static Integer tagId = null;
 
     protected final T view;
     private final SizeDeterminer sizeDeterminer;
+
+    /**
+     * Sets the android resource id to use in conjunction with {@link View#setTag(int, Object)}
+     * to store temporary state allowing loads to be automatically cancelled and resources re-used
+     * in scrolling lists.
+     *
+     * <p>
+     *   If no tag id is set, Glide will use {@link View#setTag(Object)}.
+     * </p>
+     *
+     * <p>
+     *   Warning: prior to Android 4.0 tags were stored in a static map. Using this method prior
+     *   to Android 4.0 may cause memory leaks and isn't recommended. If you do use this method
+     *   on older versions, be sure to call {@link com.bumptech.glide.Glide#clear(View)} on any view
+     *   you start a load into to ensure that the static state is removed.
+     * </p>
+     *
+     * @param tagId The android resource to use.
+     */
+    public static void setTagId(int tagId) {
+        if (ViewTarget.tagId != null || isTagUsedAtLeastOnce) {
+            throw new IllegalArgumentException("You cannot set the tag id more than once or change"
+                + " the tag id after the first request has been made");
+        }
+        ViewTarget.tagId = tagId;
+    }
 
     public ViewTarget(T view) {
         if (view == null) {
@@ -79,7 +107,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
      */
     @Override
     public void setRequest(Request request) {
-        view.setTag(request);
+        setTag(request);
     }
 
     /**
@@ -96,7 +124,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
      */
     @Override
     public Request getRequest() {
-        Object tag = view.getTag();
+        Object tag = getTag();
         Request request = null;
         if (tag != null) {
             if (tag instanceof Request) {
@@ -106,6 +134,23 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
             }
         }
         return request;
+    }
+
+    private void setTag(Object tag) {
+        if (tagId == null) {
+            isTagUsedAtLeastOnce = true;
+            view.setTag(tag);
+        } else {
+            view.setTag(tagId, tag);
+        }
+    }
+
+    private Object getTag() {
+        if (tagId == null) {
+            return view.getTag();
+        } else {
+            return view.getTag(tagId);
+        }
     }
 
     @Override

@@ -419,6 +419,7 @@ public class Glide {
         Request request = target.getRequest();
         if (request != null) {
             request.clear();
+            target.setRequest(null);
         }
     }
 
