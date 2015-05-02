@@ -12,16 +12,11 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class UnitTranscoderTest {
 
-    @Test
-    public void testReturnsTheGivenResource() {
-        Resource resource = mock(Resource.class);
-        ResourceTranscoder<Object, Object> unitTranscoder = UnitTranscoder.get();
+  @Test
+  public void testReturnsTheGivenResource() {
+    Resource resource = mock(Resource.class);
+    ResourceTranscoder<Object, Object> unitTranscoder = UnitTranscoder.get();
 
-        assertEquals(resource, unitTranscoder.transcode(resource));
-    }
-
-    @Test
-    public void testHasEmptyId() {
-        assertEquals("", UnitTranscoder.get().getId());
-    }
+    assertEquals(resource, unitTranscoder.transcode(resource));
+  }
 }

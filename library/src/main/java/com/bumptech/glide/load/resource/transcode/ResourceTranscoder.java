@@ -10,12 +10,10 @@ import com.bumptech.glide.load.engine.Resource;
  */
 public interface ResourceTranscoder<Z, R> {
 
-    /**
-     * Transcodes the given resource to the new resource type and returns the wew resource.
-     *
-     * @param toTranscode The resource to transcode.
-     */
-    Resource<R> transcode(Resource<Z> toTranscode);
-
-    String getId();
+  /**
+   * Transcodes the given resource to the new resource type and returns the wew resource.
+   *
+   * @param toTranscode The resource to transcode.
+   */
+  Resource<R> transcode(Resource<Z> toTranscode);
 }

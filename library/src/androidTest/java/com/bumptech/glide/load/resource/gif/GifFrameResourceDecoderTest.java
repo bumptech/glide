@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,32 +22,29 @@ import java.io.IOException;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class GifFrameResourceDecoderTest {
-    private GifDecoder gifDecoder;
-    private GifFrameResourceDecoder resourceDecoder;
+  private GifDecoder gifDecoder;
+  private GifFrameResourceDecoder resourceDecoder;
+  private Options options;
 
-    @Before
-    public void setUp() {
-        gifDecoder = mock(GifDecoder.class);
-        resourceDecoder = new GifFrameResourceDecoder(mock(BitmapPool.class));
-    }
+  @Before
+  public void setUp() {
+    gifDecoder = mock(GifDecoder.class);
+    resourceDecoder = new GifFrameResourceDecoder(mock(BitmapPool.class));
+    options = new Options();
+  }
 
-    @Test
-    public void testReturnsValidId() {
-        Util.assertClassHasValidId(GifFrameResourceDecoder.class, resourceDecoder.getId());
-    }
+  @Test
+  public void testReturnsFrameFromGifDecoder() throws IOException {
+    Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+    when(gifDecoder.getNextFrame()).thenReturn(expected);
 
-    @Test
-    public void testReturnsFrameFromGifDecoder() throws IOException {
-        Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
-        when(gifDecoder.getNextFrame()).thenReturn(expected);
+    assertEquals(expected, resourceDecoder.decode(gifDecoder, 100, 100, options).get());
+  }
 
-        assertEquals(expected, resourceDecoder.decode(gifDecoder, 100, 100).get());
-    }
+  @Test
+  public void testReturnsNullIfGifDecoderReturnsNullFrame() {
+    when(gifDecoder.getNextFrame()).thenReturn(null);
 
-    @Test
-    public void testReturnsNullIfGifDecoderReturnsNullFrame() {
-        when(gifDecoder.getNextFrame()).thenReturn(null);
-
-        assertNull(resourceDecoder.decode(gifDecoder, 100, 100));
-    }
+    assertNull(resourceDecoder.decode(gifDecoder, 100, 100, options));
+  }
 }

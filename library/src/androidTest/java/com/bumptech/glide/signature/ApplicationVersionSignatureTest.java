@@ -8,8 +8,8 @@ import com.bumptech.glide.tests.KeyAssertions;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
@@ -19,22 +19,22 @@ import java.security.NoSuchAlgorithmException;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class ApplicationVersionSignatureTest {
 
-    @After
-    public void tearDown() {
-        ApplicationVersionSignature.reset();
-    }
+  @After
+  public void tearDown() {
+    ApplicationVersionSignature.reset();
+  }
 
-    @Test
-    public void testCanGetKeyForSignature() {
-        Key key = ApplicationVersionSignature.obtain(Robolectric.application);
-        assertNotNull(key);
-    }
+  @Test
+  public void testCanGetKeyForSignature() {
+    Key key = ApplicationVersionSignature.obtain(RuntimeEnvironment.application);
+    assertNotNull(key);
+  }
 
-    @Test
-    public void testKeyForSignatureIsTheSameAcrossCallsInTheSamePackage() throws NoSuchAlgorithmException,
-            UnsupportedEncodingException {
-        Key first = ApplicationVersionSignature.obtain(Robolectric.application);
-        Key second = ApplicationVersionSignature.obtain(Robolectric.application);
-        KeyAssertions.assertSame(first, second);
-    }
+  @Test
+  public void testKeyForSignatureIsTheSameAcrossCallsInTheSamePackage()
+      throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    Key first = ApplicationVersionSignature.obtain(RuntimeEnvironment.application);
+    Key second = ApplicationVersionSignature.obtain(RuntimeEnvironment.application);
+    KeyAssertions.assertSame(first, second);
+  }
 }

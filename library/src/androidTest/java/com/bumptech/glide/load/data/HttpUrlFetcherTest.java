@@ -1,10 +1,8 @@
 package com.bumptech.glide.load.data;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -28,95 +28,92 @@ import java.net.URL;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class HttpUrlFetcherTest {
-    private HttpURLConnection urlConnection;
-    private HttpUrlFetcher fetcher;
-    private GlideUrl glideUrl;
-    private InputStream stream;
+  @Mock HttpURLConnection urlConnection;
+  @Mock HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory;
+  @Mock GlideUrl glideUrl;
+  @Mock InputStream stream;
+  @Mock DataFetcher.DataCallback<InputStream> callback;
 
-    @Before
-    public void setUp() throws IOException {
-        urlConnection =  mock(HttpURLConnection.class);
-        URL url = new URL("http://www.google.com");
-        HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory = mock(HttpUrlFetcher.HttpUrlConnectionFactory.class);
-        when(connectionFactory.build(eq(url))).thenReturn(urlConnection);
+  private static final int TIMEOUT_MS = 100;
+  private HttpUrlFetcher fetcher;
 
-        glideUrl = mock(GlideUrl.class);
-        when(glideUrl.toURL()).thenReturn(url);
-        fetcher = new HttpUrlFetcher(glideUrl, connectionFactory);
-        stream = mock(InputStream.class);
-        when(urlConnection.getInputStream()).thenReturn(stream);
-        when(urlConnection.getResponseCode()).thenReturn(200);
-    }
+  @Before
+  public void setUp() throws IOException {
+    MockitoAnnotations.initMocks(this);
+    URL url = new URL("http://www.google.com");
 
-    @Test
-    public void testReturnsModelAsString() {
-        final String expected = "fakeId";
-        when(glideUrl.getCacheKey()).thenReturn(expected);
-        assertEquals(expected, fetcher.getId());
-    }
+    when(connectionFactory.build(eq(url))).thenReturn(urlConnection);
+    when(urlConnection.getInputStream()).thenReturn(stream);
+    when(urlConnection.getResponseCode()).thenReturn(200);
+    when(glideUrl.toURL()).thenReturn(url);
 
-    @Test
-    public void testSetsReadTimeout() throws Exception {
-        fetcher.loadData(Priority.HIGH);
-        verify(urlConnection).setReadTimeout(eq(2500));
-    }
+    fetcher = new HttpUrlFetcher(glideUrl, TIMEOUT_MS, connectionFactory);
+  }
 
-    @Test
-    public void testSetsConnectTimeout() throws Exception {
-        fetcher.loadData(Priority.IMMEDIATE);
-        verify(urlConnection).setConnectTimeout(eq(2500));
-    }
+  @Test
+  public void testSetsReadTimeout() throws IOException {
+    fetcher.loadData(Priority.HIGH, callback);
+    verify(urlConnection).setReadTimeout(eq(TIMEOUT_MS));
+  }
 
-    @Test
-    public void testReturnsNullIfCancelledBeforeConnects() throws Exception {
-        InputStream notExpected = new ByteArrayInputStream(new byte[0]);
-        when(urlConnection.getInputStream()).thenReturn(notExpected);
+  @Test
+  public void testSetsConnectTimeout() throws IOException {
+    fetcher.loadData(Priority.IMMEDIATE, callback);
+    verify(urlConnection).setConnectTimeout(eq(TIMEOUT_MS));
+  }
 
-        fetcher.cancel();
-        assertNull(fetcher.loadData(Priority.LOW));
-    }
+  @Test
+  public void testReturnsNullIfCancelledBeforeConnects() throws IOException {
+    InputStream notExpected = new ByteArrayInputStream(new byte[0]);
+    when(urlConnection.getInputStream()).thenReturn(notExpected);
 
-    @Test
-    public void testDisconnectsUrlOnCleanup() throws Exception {
-        fetcher.loadData(Priority.HIGH);
-        fetcher.cleanup();
+    fetcher.cancel();
+    fetcher.loadData(Priority.LOW, callback);
+    verify(callback).onDataReady(isNull(InputStream.class));
+  }
 
-        verify(urlConnection).disconnect();
-    }
+  @Test
+  public void testDisconnectsUrlOnCleanup() throws IOException {
+    fetcher.loadData(Priority.HIGH, callback);
+    fetcher.cleanup();
 
-    @Test
-    public void testDoesNotThrowIfCleanupCalledBeforeStarted() {
-        fetcher.cleanup();
-    }
+    verify(urlConnection).disconnect();
+  }
 
-    @Test
-    public void testDoesNotThrowIfCancelCalledBeforeStart() {
-        fetcher.cancel();
-    }
+  @Test
+  public void testDoesNotThrowIfCleanupCalledBeforeStarted() {
+    fetcher.cleanup();
+  }
 
-    @Test
-    public void testCancelDoesNotDisconnectIfAlreadyConnected() throws Exception {
-        fetcher.loadData(Priority.HIGH);
-        fetcher.cancel();
+  @Test
+  public void testDoesNotThrowIfCancelCalledBeforeStart() {
+    fetcher.cancel();
+  }
 
-        verify(urlConnection, never()).disconnect();
-    }
+  @Test
+  public void testCancelDoesNotDisconnectIfAlreadyConnected()
+      throws IOException {
+    fetcher.loadData(Priority.HIGH, callback);
+    fetcher.cancel();
 
-    @Test
-    public void testClosesStreamInCleanupIfNotNull() throws Exception {
-        fetcher.loadData(Priority.HIGH);
-        fetcher.cleanup();
+    verify(urlConnection, never()).disconnect();
+  }
 
-        verify(stream).close();
-    }
+  @Test
+  public void testClosesStreamInCleanupIfNotNull() throws IOException {
+    fetcher.loadData(Priority.HIGH, callback);
+    fetcher.cleanup();
 
-    @Test
-    public void testClosesStreamBeforeDisconnectingConnection() throws Exception {
-        fetcher.loadData(Priority.NORMAL);
-        fetcher.cleanup();
+    verify(stream).close();
+  }
 
-        InOrder order = inOrder(stream, urlConnection);
-        order.verify(stream).close();
-        order.verify(urlConnection).disconnect();
-    }
+  @Test
+  public void testClosesStreamBeforeDisconnectingConnection() throws IOException {
+    fetcher.loadData(Priority.NORMAL, callback);
+    fetcher.cleanup();
+
+    InOrder order = inOrder(stream, urlConnection);
+    order.verify(stream).close();
+    order.verify(urlConnection).disconnect();
+  }
 }

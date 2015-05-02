@@ -12,38 +12,39 @@ import java.security.NoSuchAlgorithmException;
 @RunWith(JUnit4.class)
 public class MediaStoreSignatureTest {
 
-    @Test
-    public void testSignaturesDifferIfMimeTypeDiffers() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        MediaStoreSignature first = new MediaStoreSignature("first", 100, 1);
-        MediaStoreSignature second = new MediaStoreSignature("second", 100, 1);
+  @Test
+  public void testSignaturesDifferIfMimeTypeDiffers()
+      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    MediaStoreSignature first = new MediaStoreSignature("first", 100, 1);
+    MediaStoreSignature second = new MediaStoreSignature("second", 100, 1);
 
-        KeyAssertions.assertDifferent(first, second);
-    }
+    KeyAssertions.assertDifferent(first, second);
+  }
 
-    @Test
-    public void testSignaturesDifferIfDateModifiedDiffers() throws UnsupportedEncodingException,
-            NoSuchAlgorithmException {
-        MediaStoreSignature first = new MediaStoreSignature("mimeType", 100, 1);
-        MediaStoreSignature second = new MediaStoreSignature("mimeType", 999, 1);
+  @Test
+  public void testSignaturesDifferIfDateModifiedDiffers()
+      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    MediaStoreSignature first = new MediaStoreSignature("mimeType", 100, 1);
+    MediaStoreSignature second = new MediaStoreSignature("mimeType", 999, 1);
 
-        KeyAssertions.assertDifferent(first, second);
-    }
+    KeyAssertions.assertDifferent(first, second);
+  }
 
-    @Test
-    public void testSignaturesDifferIfOrientationDiffers() throws UnsupportedEncodingException,
-            NoSuchAlgorithmException {
-        MediaStoreSignature first = new MediaStoreSignature("mimeType", 100, 1);
-        MediaStoreSignature second = new MediaStoreSignature("mimeType", 100, 9);
+  @Test
+  public void testSignaturesDifferIfOrientationDiffers()
+      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    MediaStoreSignature first = new MediaStoreSignature("mimeType", 100, 1);
+    MediaStoreSignature second = new MediaStoreSignature("mimeType", 100, 9);
 
-        KeyAssertions.assertDifferent(first, second);
-    }
+    KeyAssertions.assertDifferent(first, second);
+  }
 
-    @Test
-    public void testSignaturesAreTheSameIfAllArgsAreTheSame() throws UnsupportedEncodingException,
-            NoSuchAlgorithmException {
-        MediaStoreSignature first = new MediaStoreSignature("mimeType", 100, 1);
-        MediaStoreSignature second = new MediaStoreSignature("mimeType", 100, 1);
+  @Test
+  public void testSignaturesAreTheSameIfAllArgsAreTheSame()
+      throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    MediaStoreSignature first = new MediaStoreSignature("mimeType", 100, 1);
+    MediaStoreSignature second = new MediaStoreSignature("mimeType", 100, 1);
 
-        KeyAssertions.assertSame(first, second);
-    }
+    KeyAssertions.assertSame(first, second);
+  }
 }

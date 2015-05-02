@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -10,75 +11,82 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class FitCenterTest {
-    private FitCenterHarness harness;
 
-    @Before
-    public void setUp() {
-        harness = new FitCenterHarness();
-    }
+  @Mock BitmapPool pool;
+  @Mock Resource<Bitmap> resource;
+  private FitCenter fitCenter;
+  private int bitmapWidth;
+  private int bitmapHeight;
 
-    @Test
-    public void testDoesNotPutNullBitmapAcquiredFromPool() {
-        when(harness.pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    bitmapWidth = 100;
+    bitmapHeight = 100;
+    Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+    when(resource.get()).thenReturn(bitmap);
 
-        harness.fitCenter.transform(harness.resource, 100, 100);
+    fitCenter = new FitCenter(pool);
+  }
 
-        verify(harness.pool, never()).put(any(Bitmap.class));
-    }
+  @Test
+  public void testDoesNotPutNullBitmapAcquiredFromPool() {
+    when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
 
-    @Test
-    public void testReturnsGivenResourceIfMatchesSizeExactly() {
-        Resource<Bitmap> result = harness.fitCenter.transform(harness.resource, harness.bitmapWidth,
-                harness.bitmapHeight);
+    fitCenter.transform(resource, 100, 100);
 
-        assertEquals(harness.resource, result);
-    }
+    verify(pool, never()).put(any(Bitmap.class));
+  }
 
-    @Test
-    public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
-        harness.fitCenter.transform(harness.resource, harness.bitmapWidth,
-                harness.bitmapHeight);
+  @Test
+  public void testReturnsGivenResourceIfMatchesSizeExactly() {
+    Resource<Bitmap> result =
+        fitCenter.transform(resource, bitmapWidth, bitmapHeight);
 
-        verify(harness.resource, never()).recycle();
-    }
+    assertEquals(resource, result);
+  }
 
-    @Test
-    public void testDoesNotRecycleGivenResource() {
-        harness.fitCenter.transform(harness.resource, 50, 50);
+  @Test
+  public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
+    fitCenter.transform(resource, bitmapWidth, bitmapHeight);
 
-        verify(harness.resource, never()).recycle();
-    }
+    verify(resource, never()).recycle();
+  }
 
-    @Test
-    public void testHasValidId() {
-        Util.assertClassHasValidId(FitCenter.class, harness.fitCenter.getId());
-    }
+  @Test
+  public void testDoesNotRecycleGivenResource() {
+    fitCenter.transform(resource, 50, 50);
 
+    verify(resource, never()).recycle();
+  }
 
-    private static class FitCenterHarness {
-        int bitmapWidth = 100;
-        int bitmapHeight = 100;
-        Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-        BitmapResource resource = mock(BitmapResource.class);
-        BitmapPool pool = mock(BitmapPool.class);
+  @Test
+  public void testEquals() throws NoSuchAlgorithmException {
+    KeyAssertions.assertSame(fitCenter, new FitCenter(pool));
 
-        FitCenter fitCenter = new FitCenter(pool);
-
-        public FitCenterHarness() {
-            when(resource.get()).thenReturn(bitmap);
-        }
-    }
+    Transformation<Bitmap> other = mock(Transformation.class);
+    doAnswer(new Util.WriteDigest("other")).when(other)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    KeyAssertions.assertDifferent(fitCenter, other);
+  }
 }

@@ -1,86 +1,114 @@
 package com.bumptech.glide.load.model.stream;
 
-import android.content.Context;
 import android.text.TextUtils;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * A base class for loading images over http/https. Can be subclassed for use with any model that can be translated
- * in to {@link java.io.InputStream} data.
+ * A base class for loading data over http/https. Can be subclassed for use with any model that can
+ * be translated in to {@link java.io.InputStream} data.
  *
- * @param <T> The type of the model.
+ * @param <Model> The type of the model.
  */
-public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
-    private final ModelLoader<GlideUrl, InputStream> concreteLoader;
-    private final ModelCache<T, GlideUrl> modelCache;
+public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, InputStream> {
+  private final ModelLoader<GlideUrl, InputStream> concreteLoader;
+  private final ModelCache<Model, GlideUrl> modelCache;
 
-    public BaseGlideUrlLoader(Context context) {
-        this(context, null);
+  protected BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader) {
+    this(concreteLoader, null);
+  }
+
+  protected BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader,
+      ModelCache<Model, GlideUrl> modelCache) {
+    this.concreteLoader = concreteLoader;
+    this.modelCache = modelCache;
+  }
+
+  @Override
+  public LoadData<InputStream> buildLoadData(Model model, int width, int height, Options options) {
+    GlideUrl result = null;
+    if (modelCache != null) {
+      result = modelCache.get(model, width, height);
     }
 
-    public BaseGlideUrlLoader(Context context, ModelCache<T, GlideUrl> modelCache) {
-        this(Glide.buildModelLoader(GlideUrl.class, InputStream.class, context), modelCache);
+    if (result == null) {
+      String stringURL = getUrl(model, width, height, options);
+      if (TextUtils.isEmpty(stringURL)) {
+        return null;
+      }
+
+      result = new GlideUrl(stringURL, getHeaders(model, width, height, options));
+
+      if (modelCache != null) {
+        modelCache.put(model, width, height, result);
+      }
     }
 
-    public BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader) {
-        this(concreteLoader, null);
+    // TODO: this is expensive and slow to calculate every time, we should either cache these, or
+    // try to come up with a way to avoid finding them when not necessary.
+    List<String> alternateUrls = getAlternateUrls(model, width, height, options);
+    LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height,
+        options);
+    if (alternateUrls.isEmpty()) {
+      return concreteLoaderData;
+    } else {
+      return new LoadData<>(concreteLoaderData.sourceKey, getAlternateKeys(alternateUrls),
+          concreteLoaderData.fetcher);
     }
+  }
 
-    public BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader, ModelCache<T, GlideUrl> modelCache) {
-        this.concreteLoader = concreteLoader;
-        this.modelCache = modelCache;
+  private static List<Key> getAlternateKeys(List<String> alternateUrls) {
+    List<Key> result = new ArrayList<>(alternateUrls.size());
+    for (String alternate : alternateUrls) {
+      result.add(new GlideUrl(alternate));
     }
+    return result;
+  }
 
-    @Override
-    public DataFetcher<InputStream> getResourceFetcher(T model, int width, int height) {
-        GlideUrl result = null;
-        if (modelCache != null) {
-            result = modelCache.get(model, width, height);
-        }
+  /**
+   * Returns a valid url http:// or https:// for the given model and dimensions as a string.
+   *
+   * @param model  The model.
+   * @param width  The width in pixels of the view/target the image will be loaded into.
+   * @param height The height in pixels of the view/target the image will be loaded into.
+   */
+  protected abstract String getUrl(Model model, int width, int height, Options options);
 
-        if (result == null) {
-            String stringURL = getUrl(model, width, height);
-            if (TextUtils.isEmpty(stringURL)) {
-               return null;
-            }
+  /**
+   * Returns a list of alternate urls for the given model, width, and height from which equivalent
+   * data can be obtained (usually the same image with the same aspect ratio, but in a larger size)
+   * as the primary url.
+   *
+   * <p> Implementing this method allows Glide to fulfill requests for bucketed images in smaller
+   * bucket sizes using already cached data for larger bucket sizes. </p>
+   *
+   * @param width  The width in pixels of the view/target the image will be loaded into.
+   * @param height The height in pixels of the view/target the image will be loaded into.
+   */
+  protected List<String> getAlternateUrls(Model model, int width, int height,
+      Options options) {
+    return Collections.emptyList();
+  }
 
-            result = new GlideUrl(stringURL, getHeaders(model, width, height));
-
-            if (modelCache != null) {
-                modelCache.put(model, width, height, result);
-            }
-        }
-
-        return concreteLoader.getResourceFetcher(result, width, height);
-    }
-
-    /**
-     * Get a valid url http:// or https:// for the given model and dimensions as a string.
-     *
-     * @param model The model.
-     * @param width The width in pixels of the view/target the image will be loaded into.
-     * @param height The height in pixels of the view/target the image will be loaded into.
-     * @return The String url.
-     */
-    protected abstract String getUrl(T model, int width, int height);
-
-    /**
-     * Get the headers for the given model and dimensions as a map of strings to sets of strings.
-     *
-     * @param model The model.
-     * @param width The width in pixels of the view/target the image will be loaded into.
-     * @param height The height in pixels of the view/target the image will be loaded into.
-     * @return The Headers object containing the headers, or null if no headers should be added.
-     */
-    protected Headers getHeaders(T model, int width, int height) {
-        return Headers.NONE;
-    }
+  /**
+   * Returns the headers for the given model and dimensions as a map of strings to sets of strings,
+   * or null if no headers should be added.
+   *
+   * @param model The model.
+   * @param width The width in pixels of the view/target the image will be loaded into.
+   * @param height The height in pixels of the view/target the image will be loaded into.
+   */
+  protected Headers getHeaders(Model model, int width, int height, Options options) {
+    return Headers.NONE;
+  }
 }

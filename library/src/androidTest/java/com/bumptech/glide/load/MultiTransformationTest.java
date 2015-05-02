@@ -4,138 +4,121 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.Util;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @RunWith(JUnit4.class)
 public class MultiTransformationTest {
-    @Test
-    public void testReturnsConcatenatedTransformationIds() {
-        String firstId = "firstId";
-        Transformation first = mock(Transformation.class);
-        when(first.getId()).thenReturn(firstId);
-        String secondId = "secondId";
-        Transformation second = mock(Transformation.class);
-        when(second.getId()).thenReturn(secondId);
-        String thirdId = "thirdId";
-        Transformation third = mock(Transformation.class);
-        when(third.getId()).thenReturn(thirdId);
 
-        MultiTransformation transformation = new MultiTransformation(first, second, third);
+  @Mock Transformation<Object> first;
+  @Mock Transformation<Object> second;
+  @Mock Resource<Object> initial;
+  @Mock Resource<Object> firstTransformed;
+  @Mock Resource<Object> secondTransformed;
 
-        final String expected = firstId + secondId + thirdId;
-        assertEquals(expected, transformation.getId());
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+  }
 
-        ArrayList<Transformation> transformations = new ArrayList<Transformation>();
-        transformations.add(first);
-        transformations.add(second);
-        transformations.add(third);
+  @Test
+  public void testAppliesTransformationsInOrder() {
+    final int width = 584;
+    final int height = 768;
 
-        transformation = new MultiTransformation(transformations);
+    MultiTransformation<Object> transformation = new MultiTransformation<>(first, second);
+    when(first.transform(eq(initial), eq(width), eq(height))).thenReturn(firstTransformed);
 
-        assertEquals(expected, transformation.getId());
-    }
+    when(second.transform(eq(firstTransformed), eq(width), eq(height)))
+        .thenReturn(secondTransformed);
 
-    @Test
-    public void testAppliesTransformationsInOrder() {
-        final int width = 584;
-        final int height = 768;
+    assertEquals(secondTransformed, transformation.transform(initial, width, height));
+  }
 
-        Resource initial = mock(Resource.class);
+  @Test
+  public void testInitialResourceIsNotRecycled() {
+    when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(firstTransformed);
 
-        Resource firstTransformed = mock(Resource.class);
-        Transformation first = mock(Transformation.class);
-        when(first.transform(eq(initial), eq(width), eq(height))).thenReturn(firstTransformed);
+    MultiTransformation<Object> transformation = new MultiTransformation(first);
 
-        Resource secondTransformed = mock(Resource.class);
-        Transformation second = mock(Transformation.class);
-        when(second.transform(eq(firstTransformed), eq(width), eq(height))).thenReturn(secondTransformed);
+    transformation.transform(initial, 123, 456);
 
-        MultiTransformation transformation = new MultiTransformation(first, second);
+    verify(initial, never()).recycle();
+  }
 
-        assertEquals(secondTransformed, transformation.transform(initial, width, height));
-    }
+  @Test
+  public void testInitialResourceIsNotRecycledEvenIfReturnedByMultipleTransformations() {
+    when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(initial);
+    when(second.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(initial);
 
-    @Test
-    public void testInitialResourceIsNotRecycled() {
-        Resource initial = mock(Resource.class);
+    MultiTransformation<Object> transformation = new MultiTransformation<>(first, second);
+    transformation.transform(initial, 1111, 2222);
 
-        Resource transformed = mock(Resource.class);
-        Transformation first = mock(Transformation.class);
-        when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(transformed);
+    verify(initial, never()).recycle();
+  }
 
-        MultiTransformation transformation = new MultiTransformation(first);
+  @Test
+  public void
+  testInitialResourceIsNotRecycledIfReturnedByOneTransformationButNotByALaterTransformation() {
+    when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(initial);
+    when(second.transform(any(Resource.class), anyInt(), anyInt()))
+        .thenReturn(mock(Resource.class));
 
-        transformation.transform(initial, 123, 456);
+    MultiTransformation<Object> transformation = new MultiTransformation<>(first, second);
+    transformation.transform(initial, 1, 2);
 
-        verify(initial, never()).recycle();
-    }
+    verify(initial, never()).recycle();
+  }
 
-    @Test
-    public void testInitialResourceIsNotRecycledEvenIfReturnedByMultipleTransformations() {
-        Resource initial = mock(Resource.class);
-        Transformation first = mock(Transformation.class);
-        when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(initial);
-        Transformation second = mock(Transformation.class);
-        when(second.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(initial);
+  @Test
+  public void testFinalResourceIsNotRecycled() {
+    when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(firstTransformed);
 
-        MultiTransformation transformation = new MultiTransformation(first, second);
-        transformation.transform(initial, 1111, 2222);
+    MultiTransformation<Object> transformation = new MultiTransformation<>(first);
 
-        verify(initial, never()).recycle();
-    }
+    transformation.transform(mock(Resource.class), 111, 222);
 
-    @Test
-    public void testInitialResourceIsNotRecycledIfReturnedByOneTransformationButNotByALaterTransformation() {
-        Resource initial = mock(Resource.class);
-        Transformation first = mock(Transformation.class);
-        when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(initial);
-        Transformation second = mock(Transformation.class);
-        when(second.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(mock(Resource.class));
+    verify(firstTransformed, never()).recycle();
+  }
 
-        MultiTransformation transformation = new MultiTransformation(first, second);
-        transformation.transform(initial, 1, 2);
+  @Test
+  public void testIntermediateResourcesAreRecycled() {
+    when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(firstTransformed);
+    when(second.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(secondTransformed);
 
-        verify(initial, never()).recycle();
-    }
+    MultiTransformation<Object> transformation = new MultiTransformation<>(first, second);
 
-    @Test
-    public void testFinalResourceIsNotRecycled() {
-        Resource transformed = mock(Resource.class);
-        Transformation first = mock(Transformation.class);
-        when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(transformed);
+    transformation.transform(mock(Resource.class), 233, 454);
 
-        MultiTransformation transformation = new MultiTransformation(first);
+    verify(firstTransformed).recycle();
+  }
 
-        transformation.transform(mock(Resource.class), 111, 222);
+  @Test
+  public void testEquals() throws NoSuchAlgorithmException {
+    doAnswer(new Util.WriteDigest("first")).when(first)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    KeyAssertions.assertSame(new MultiTransformation<>(first), new MultiTransformation<>(first));
 
-        verify(transformed, never()).recycle();
-    }
-
-    @Test
-    public void testIntermediateResourcesAreRecycled() {
-        Resource firstTransformed = mock(Resource.class);
-        Transformation first = mock(Transformation.class);
-        when(first.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(firstTransformed);
-
-        Resource secondTransformed = mock(Resource.class);
-        Transformation second = mock(Transformation.class);
-        when(second.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(secondTransformed);
-
-        MultiTransformation transformation = new MultiTransformation(first, second);
-
-        transformation.transform(mock(Resource.class), 233, 454);
-
-        verify(firstTransformed).recycle();
-    }
+    doAnswer(new Util.WriteDigest("second")).when(second)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    KeyAssertions.assertDifferent(new MultiTransformation<>(first),
+        new MultiTransformation<>(second));
+  }
 }

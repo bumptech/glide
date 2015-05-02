@@ -22,57 +22,53 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class AttributeStrategyKeyTest {
 
-    private AttributeStrategy.KeyPool keyPool;
+  private AttributeStrategy.KeyPool keyPool;
 
-    @Before
-    public void setUp() {
-        keyPool = mock(AttributeStrategy.KeyPool.class);
-    }
+  @Before
+  public void setUp() {
+    keyPool = mock(AttributeStrategy.KeyPool.class);
+  }
 
-    @Test
-    public void testEquality() {
-        Key first = new Key(keyPool);
-        first.init(100, 100, Bitmap.Config.ARGB_4444);
-        Key second = new Key(keyPool);
-        second.init(100, 100, Bitmap.Config.ARGB_4444);
+  @Test
+  public void testEquality() {
+    Key first = new Key(keyPool);
+    first.init(100, 100, Bitmap.Config.ARGB_4444);
+    Key second = new Key(keyPool);
+    second.init(100, 100, Bitmap.Config.ARGB_4444);
 
-        Key third = new Key(keyPool);
-        third.init(200, 100, Bitmap.Config.ARGB_4444);
+    Key third = new Key(keyPool);
+    third.init(200, 100, Bitmap.Config.ARGB_4444);
 
-        Key fourth = new Key(keyPool);
-        fourth.init(100, 200, Bitmap.Config.ARGB_4444);
+    Key fourth = new Key(keyPool);
+    fourth.init(100, 200, Bitmap.Config.ARGB_4444);
 
-        Key fifth = new Key(keyPool);
-        fifth.init(100, 100, Bitmap.Config.RGB_565);
+    Key fifth = new Key(keyPool);
+    fifth.init(100, 100, Bitmap.Config.RGB_565);
 
-        new EqualsTester()
-                .addEqualityGroup(first, second)
-                .addEqualityGroup(third)
-                .addEqualityGroup(fourth)
-                .addEqualityGroup(fifth)
-                .testEquals();
-    }
+    new EqualsTester().addEqualityGroup(first, second).addEqualityGroup(third)
+        .addEqualityGroup(fourth).addEqualityGroup(fifth).testEquals();
+  }
 
-    @Test
-    public void testReturnsSelfToPoolOnOffer() {
-        Key key = new Key(keyPool);
-        key.offer();
+  @Test
+  public void testReturnsSelfToPoolOnOffer() {
+    Key key = new Key(keyPool);
+    key.offer();
 
-        verify(keyPool).offer(eq(key));
-    }
+    verify(keyPool).offer(eq(key));
+  }
 
-    @Test
-    public void testInitSetsAttributes() {
-        Key key = new Key(keyPool);
-        key.init(100, 100, Bitmap.Config.ARGB_4444);
+  @Test
+  public void testInitSetsAttributes() {
+    Key key = new Key(keyPool);
+    key.init(100, 100, Bitmap.Config.ARGB_4444);
 
-        Key other = new Key(keyPool);
-        other.init(200, 200, Bitmap.Config.RGB_565);
+    Key other = new Key(keyPool);
+    other.init(200, 200, Bitmap.Config.RGB_565);
 
-        assertNotEquals(key, other);
+    assertNotEquals(key, other);
 
-        key.init(200, 200, Bitmap.Config.RGB_565);
+    key.init(200, 200, Bitmap.Config.RGB_565);
 
-        assertEquals(key, other);
-    }
+    assertEquals(key, other);
+  }
 }

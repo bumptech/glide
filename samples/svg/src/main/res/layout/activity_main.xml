@@ -1,12 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/description"
@@ -16,7 +16,7 @@
         android:onClick="clearCache"
         android:clickable="true"
         android:text="@string/hello_world"
-    />
+        />
 
     <Button
         android:id="@+id/button"
@@ -27,7 +27,7 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:onClick="cycleScaleType"
         android:text="@string/scaleType"
-    />
+        />
 
     <View
         android:id="@+id/align"
@@ -36,7 +36,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-     />
+        />
 
     <ImageView
         android:id="@+id/svg_image_view1"
@@ -52,7 +52,7 @@
         android:background="#808"
         android:contentDescription="@string/android_linen_content_description"
         android:src="@drawable/image_error"
-    />
+        />
 
     <ImageView
         android:id="@+id/svg_image_view2"

@@ -12,17 +12,23 @@ import java.io.IOException;
  * Fetches an {@link android.os.ParcelFileDescriptor} for a local {@link android.net.Uri}.
  */
 public class FileDescriptorLocalUriFetcher extends LocalUriFetcher<ParcelFileDescriptor> {
-    public FileDescriptorLocalUriFetcher(Context context, Uri uri) {
-        super(context, uri);
-    }
+  public FileDescriptorLocalUriFetcher(Context context, Uri uri) {
+    super(context, uri);
+  }
 
-    @Override
-    protected ParcelFileDescriptor loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException {
-        return contentResolver.openAssetFileDescriptor(uri, "r").getParcelFileDescriptor();
-    }
+  @Override
+  protected ParcelFileDescriptor loadResource(Uri uri, ContentResolver contentResolver)
+      throws FileNotFoundException {
+    return contentResolver.openAssetFileDescriptor(uri, "r").getParcelFileDescriptor();
+  }
 
-    @Override
-    protected void close(ParcelFileDescriptor data) throws IOException {
-        data.close();
-    }
+  @Override
+  protected void close(ParcelFileDescriptor data) throws IOException {
+    data.close();
+  }
+
+  @Override
+  public Class<ParcelFileDescriptor> getDataClass() {
+    return ParcelFileDescriptor.class;
+  }
 }

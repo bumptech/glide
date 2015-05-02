@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
@@ -27,6 +27,11 @@ android {
 
         versionCode VERSION_CODE as int
         versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 

@@ -10,118 +10,117 @@ import com.bumptech.glide.tests.Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class DiskLruCacheWrapperTest {
-    private DiskLruCacheWrapper cache;
-    private byte[] data;
-    private StringKey key;
+  private DiskLruCacheWrapper cache;
+  private byte[] data;
+  private StringKey key;
 
-    @Before
-    public void setUp() {
-        File dir = Robolectric.application.getCacheDir();
-        cache = new DiskLruCacheWrapper(dir, 10 * 1024 * 1024);
-        key = new StringKey("test" + Math.random());
-        data = new byte[] { 1, 2, 3, 4, 5, 6 };
-    }
+  @Before
+  public void setUp() {
+    File dir = RuntimeEnvironment.application.getCacheDir();
+    cache = new DiskLruCacheWrapper(dir, 10 * 1024 * 1024);
+    key = new StringKey("test" + Math.random());
+    data = new byte[] { 1, 2, 3, 4, 5, 6 };
+  }
 
-    @Test
-    public void testCanInsertAndGet() throws IOException {
-        cache.put(key, new DiskCache.Writer() {
-            @Override
-            public boolean write(File file) {
-                try {
-                    Util.writeFile(file, data);
-                } catch (IOException e) {
-                    fail(e.toString());
-                }
-                return true;
-            }
-        });
-
-        byte[] received = Util.readFile(cache.get(key), data.length);
-
-        assertArrayEquals(data, received);
-    }
-
-    @Test
-    public void testDoesNotCommitIfWriterReturnsFalse() {
-        cache.put(key, new DiskCache.Writer() {
-            @Override
-            public boolean write(File file) {
-                return false;
-            }
-        });
-
-        assertNull(cache.get(key));
-    }
-
-    @Test
-    public void testDoesNotCommitIfWriterWritesButReturnsFalse() {
-        cache.put(key, new DiskCache.Writer() {
-            @Override
-            public boolean write(File file) {
-                try {
-                    Util.writeFile(file, data);
-                } catch (IOException e) {
-                    fail(e.toString());
-                }
-                return false;
-            }
-        });
-
-        assertNull(cache.get(key));
-    }
-
-    @Test
-    public void testEditIsAbortedIfWriterThrows() throws IOException {
+  @Test
+  public void testCanInsertAndGet() throws IOException {
+    cache.put(key, new DiskCache.Writer() {
+      @Override
+      public boolean write(File file) {
         try {
-            cache.put(key, new DiskCache.Writer() {
-                @Override
-                public boolean write(File file) {
-                    throw new RuntimeException("test");
-                }
-            });
-        } catch (RuntimeException e) {
-            // Expected.
+          Util.writeFile(file, data);
+        } catch (IOException e) {
+          fail(e.toString());
         }
+        return true;
+      }
+    });
 
-        cache.put(key, new DiskCache.Writer() {
-            @Override
-            public boolean write(File file) {
-                try {
-                    Util.writeFile(file, data);
-                } catch (IOException e) {
-                    fail(e.toString());
-                }
-                return true;
-            }
-        });
+    byte[] received = Util.readFile(cache.get(key), data.length);
 
-        byte[] received = Util.readFile(cache.get(key), data.length);
+    assertArrayEquals(data, received);
+  }
 
-        assertArrayEquals(data, received);
-    }
+  @Test
+  public void testDoesNotCommitIfWriterReturnsFalse() {
+    cache.put(key, new DiskCache.Writer() {
+      @Override
+      public boolean write(File file) {
+        return false;
+      }
+    });
 
-    private static class StringKey implements Key {
-        private final String key;
+    assertNull(cache.get(key));
+  }
 
-        public StringKey(String key) {
-            this.key = key;
+  @Test
+  public void testDoesNotCommitIfWriterWritesButReturnsFalse() {
+    cache.put(key, new DiskCache.Writer() {
+      @Override
+      public boolean write(File file) {
+        try {
+          Util.writeFile(file, data);
+        } catch (IOException e) {
+          fail(e.toString());
         }
+        return false;
+      }
+    });
 
+    assertNull(cache.get(key));
+  }
+
+  @Test
+  public void testEditIsAbortedIfWriterThrows() throws IOException {
+    try {
+      cache.put(key, new DiskCache.Writer() {
         @Override
-        public void updateDiskCacheKey(MessageDigest messageDigest) throws UnsupportedEncodingException {
-            messageDigest.update(key.getBytes());
+        public boolean write(File file) {
+          throw new RuntimeException("test");
         }
+      });
+    } catch (RuntimeException e) {
+      // Expected.
     }
+
+    cache.put(key, new DiskCache.Writer() {
+      @Override
+      public boolean write(File file) {
+        try {
+          Util.writeFile(file, data);
+        } catch (IOException e) {
+          fail(e.toString());
+        }
+        return true;
+      }
+    });
+
+    byte[] received = Util.readFile(cache.get(key), data.length);
+
+    assertArrayEquals(data, received);
+  }
+
+  private static class StringKey implements Key {
+    private final String key;
+
+    public StringKey(String key) {
+      this.key = key;
+    }
+
+    @Override
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+      messageDigest.update(key.getBytes());
+    }
+  }
 }

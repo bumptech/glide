@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.file;
 
 import static org.junit.Assert.assertEquals;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 
 import org.junit.Before;
@@ -15,23 +16,20 @@ import java.io.IOException;
 @RunWith(JUnit4.class)
 public class FileDecoderTest {
 
-    private FileDecoder decoder;
+  private FileDecoder decoder;
+  private Options options;
 
-    @Before
-    public void setUp() {
-        decoder = new FileDecoder();
-    }
+  @Before
+  public void setUp() {
+    decoder = new FileDecoder();
+    options = new Options();
+  }
 
-    @Test
-    public void testReturnsEmptyId() {
-        assertEquals("", decoder.getId());
-    }
+  @Test
+  public void testReturnsGivenFileAsResource() throws IOException {
+    File expected = new File("testFile");
+    Resource<File> decoded = decoder.decode(expected, 1, 1, options);
 
-    @Test
-    public void testReturnsGivenFileAsResource() throws IOException {
-        File expected = new File("testFile");
-        Resource<File> decoded = decoder.decode(expected, 1, 1);
-
-        assertEquals(expected, decoded.get());
-    }
+    assertEquals(expected, decoded.get());
+  }
 }

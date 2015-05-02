@@ -8,110 +8,207 @@ import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-/**
- * A calculator that tries to intelligently determine cache sizes for a given device based on some constants and the
- * devices screen density, width, and height.
- */
-public class MemorySizeCalculator {
-    private static final String TAG = "MemorySizeCalculator";
+import com.bumptech.glide.util.Preconditions;
 
+/**
+ * A calculator that tries to intelligently determine cache sizes for a given device based on some
+ * constants and the devices screen density, width, and height.
+ */
+public final class MemorySizeCalculator {
+  private static final String TAG = "MemorySizeCalculator";
+  // Visible for testing.
+  static final int BYTES_PER_ARGB_8888_PIXEL = 4;
+
+  private final int bitmapPoolSize;
+  private final int memoryCacheSize;
+  private final Context context;
+
+  interface ScreenDimensions {
+    int getWidthPixels();
+    int getHeightPixels();
+  }
+
+  MemorySizeCalculator(Context context, ActivityManager activityManager,
+      ScreenDimensions screenDimensions, float memoryCacheScreens, float bitmapPoolScreens,
+      float maxSizeMultiplier, float lowMemoryMaxSizeMultiplier) {
+    this.context = context;
+    final int maxSize = getMaxSize(activityManager, maxSizeMultiplier, lowMemoryMaxSizeMultiplier);
+
+    final int screenSize = screenDimensions.getWidthPixels() * screenDimensions.getHeightPixels()
+        * BYTES_PER_ARGB_8888_PIXEL;
+
+    int targetPoolSize = Math.round(screenSize * bitmapPoolScreens);
+    int targetMemoryCacheSize = Math.round(screenSize * memoryCacheScreens);
+
+    if (targetMemoryCacheSize + targetPoolSize <= maxSize) {
+      memoryCacheSize = targetMemoryCacheSize;
+      bitmapPoolSize = targetPoolSize;
+    } else {
+      float part = maxSize / (bitmapPoolScreens + memoryCacheScreens);
+      memoryCacheSize = Math.round(part * memoryCacheScreens);
+      bitmapPoolSize = Math.round(part * bitmapPoolScreens);
+    }
+
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "Calculation complete"
+          + ", Calculated memory cache size: " + toMb(memoryCacheSize)
+          + ", pool size: " + toMb(bitmapPoolSize)
+          + ", memory class limited? " + (targetMemoryCacheSize + targetPoolSize > maxSize)
+          + ", max size: " + toMb(maxSize)
+          + ", memoryClass: " + activityManager.getMemoryClass()
+          + ", isLowMemoryDevice: " + isLowMemoryDevice(activityManager));
+    }
+  }
+
+  /**
+   * Returns the recommended memory cache size for the device it is run on in bytes.
+   */
+  public int getMemoryCacheSize() {
+    return memoryCacheSize;
+  }
+
+  /**
+   * Returns the recommended bitmap pool size for the device it is run on in bytes.
+   */
+  public int getBitmapPoolSize() {
+    return bitmapPoolSize;
+  }
+
+  private static int getMaxSize(ActivityManager activityManager, float maxSizeMultiplier,
+      float lowMemoryMaxSizeMultiplier) {
+    final int memoryClassBytes = activityManager.getMemoryClass() * 1024 * 1024;
+    final boolean isLowMemoryDevice = isLowMemoryDevice(activityManager);
+    return Math.round(memoryClassBytes * (isLowMemoryDevice ? lowMemoryMaxSizeMultiplier
+        : maxSizeMultiplier));
+  }
+
+  private String toMb(int bytes) {
+    return Formatter.formatFileSize(context, bytes);
+  }
+
+  @TargetApi(Build.VERSION_CODES.KITKAT)
+  private static boolean isLowMemoryDevice(ActivityManager activityManager) {
+    final int sdkInt = Build.VERSION.SDK_INT;
+    return sdkInt < Build.VERSION_CODES.HONEYCOMB || (sdkInt >= Build.VERSION_CODES.KITKAT
+        && activityManager.isLowRamDevice());
+  }
+
+  /**
+   * Constructs an {@link MemorySizeCalculator} with reasonable defaults that can be optionally
+   * overridden.
+   */
+  public static final class Builder {
     // Visible for testing.
-    static final int BYTES_PER_ARGB_8888_PIXEL = 4;
     static final int MEMORY_CACHE_TARGET_SCREENS = 2;
     static final int BITMAP_POOL_TARGET_SCREENS = 4;
     static final float MAX_SIZE_MULTIPLIER = 0.4f;
     static final float LOW_MEMORY_MAX_SIZE_MULTIPLIER = 0.33f;
 
-    private final int bitmapPoolSize;
-    private final int memoryCacheSize;
     private final Context context;
 
-    interface ScreenDimensions {
-        int getWidthPixels();
-        int getHeightPixels();
+    // Modifiable for testing.
+    private ActivityManager activityManager;
+    private ScreenDimensions screenDimensions;
+
+    private float memoryCacheScreens = MEMORY_CACHE_TARGET_SCREENS;
+    private float bitmapPoolScreens = BITMAP_POOL_TARGET_SCREENS;
+    private float maxSizeMultiplier = MAX_SIZE_MULTIPLIER;
+    private float lowMemoryMaxSizeMultiplier = LOW_MEMORY_MAX_SIZE_MULTIPLIER;
+
+    public Builder(Context context) {
+      this.context = context;
+      activityManager =
+          (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+      screenDimensions =
+          new DisplayMetricsScreenDimensions(context.getResources().getDisplayMetrics());
     }
 
-    public MemorySizeCalculator(Context context) {
-        this(context,
-                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE),
-                new DisplayMetricsScreenDimensions(context.getResources().getDisplayMetrics()));
+    /**
+     * Sets the number of device screens worth of pixels the
+     * {@link com.bumptech.glide.load.engine.cache.MemoryCache} should be able to hold and
+     * returns this Builder.
+     */
+    public Builder setMemoryCacheScreens(float memoryCacheScreens) {
+      Preconditions.checkArgument(bitmapPoolScreens >= 0,
+          "Memory cache screens must be greater than or equal to 0");
+      this.memoryCacheScreens = memoryCacheScreens;
+      return this;
+    }
+
+    /**
+     * Sets the number of device screens worth of pixels the
+     * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} should be able to hold and
+     * returns this Builder.
+     */
+    public Builder setBitmapPoolScreens(float bitmapPoolScreens) {
+      Preconditions.checkArgument(bitmapPoolScreens >= 0,
+          "Bitmap pool screens must be greater than or equal to 0");
+      this.bitmapPoolScreens = bitmapPoolScreens;
+      return this;
+    }
+
+    /**
+     * Sets the maximum percentage of the device's memory class for standard devices that can be
+     * taken up by Glide's {@link com.bumptech.glide.load.engine.cache.MemoryCache} and
+     * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} put together, and returns
+     * this builder.
+     */
+    public Builder setMaxSizeMultiplier(float maxSizeMultiplier) {
+      Preconditions.checkArgument(maxSizeMultiplier >= 0 && maxSizeMultiplier <= 1,
+          "Size multiplier must be between 0 and 1");
+      this.maxSizeMultiplier = maxSizeMultiplier;
+      return this;
+    }
+
+    /**
+     * Sets the maximum percentage of the device's memory class for low ram devices that can be
+     * taken up by Glide's {@link com.bumptech.glide.load.engine.cache.MemoryCache} and
+     * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} put together, and returns
+     * this builder.
+     *
+     * @see ActivityManager#isLowRamDevice()
+     */
+    public Builder setLowMemoryMaxSizeMultiplier(float lowMemoryMaxSizeMultiplier) {
+      Preconditions.checkArgument(
+          lowMemoryMaxSizeMultiplier >= 0 && lowMemoryMaxSizeMultiplier <= 1,
+              "Low memory max size multiplier must be between 0 and 1");
+      this.lowMemoryMaxSizeMultiplier = lowMemoryMaxSizeMultiplier;
+      return this;
     }
 
     // Visible for testing.
-    MemorySizeCalculator(Context context, ActivityManager activityManager, ScreenDimensions screenDimensions) {
-        this.context = context;
-        final int maxSize = getMaxSize(activityManager);
-
-        final int screenSize = screenDimensions.getWidthPixels() * screenDimensions.getHeightPixels()
-                * BYTES_PER_ARGB_8888_PIXEL;
-
-        int targetPoolSize = screenSize * BITMAP_POOL_TARGET_SCREENS;
-        int targetMemoryCacheSize = screenSize * MEMORY_CACHE_TARGET_SCREENS;
-
-        if (targetMemoryCacheSize + targetPoolSize <= maxSize) {
-            memoryCacheSize = targetMemoryCacheSize;
-            bitmapPoolSize = targetPoolSize;
-        } else {
-            int part = Math.round((float) maxSize / (BITMAP_POOL_TARGET_SCREENS + MEMORY_CACHE_TARGET_SCREENS));
-            memoryCacheSize = part * MEMORY_CACHE_TARGET_SCREENS;
-            bitmapPoolSize = part * BITMAP_POOL_TARGET_SCREENS;
-        }
-
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Calculated memory cache size: " + toMb(memoryCacheSize) + " pool size: " + toMb(bitmapPoolSize)
-                    + " memory class limited? " + (targetMemoryCacheSize + targetPoolSize > maxSize) + " max size: "
-                    + toMb(maxSize) + " memoryClass: " + activityManager.getMemoryClass() + " isLowMemoryDevice: "
-                    + isLowMemoryDevice(activityManager));
-        }
+    Builder setActivityManager(ActivityManager activityManager) {
+      this.activityManager = activityManager;
+      return this;
     }
 
-    /**
-     * Returns the recommended memory cache size for the device it is run on in bytes.
-     */
-    public int getMemoryCacheSize() {
-        return memoryCacheSize;
+    // Visible for testing.
+    Builder setScreenDimensions(ScreenDimensions screenDimensions) {
+      this.screenDimensions = screenDimensions;
+      return this;
     }
 
-    /**
-     * Returns the recommended bitmap pool size for the device it is run on in bytes.
-     */
-    public int getBitmapPoolSize() {
-        return bitmapPoolSize;
+    public MemorySizeCalculator build() {
+      return new MemorySizeCalculator(context, activityManager, screenDimensions,
+          memoryCacheScreens, bitmapPoolScreens, maxSizeMultiplier, lowMemoryMaxSizeMultiplier);
+    }
+  }
+
+  private static final class DisplayMetricsScreenDimensions implements ScreenDimensions {
+    private final DisplayMetrics displayMetrics;
+
+    public DisplayMetricsScreenDimensions(DisplayMetrics displayMetrics) {
+      this.displayMetrics = displayMetrics;
     }
 
-    private static int getMaxSize(ActivityManager activityManager) {
-        final int memoryClassBytes = activityManager.getMemoryClass() * 1024 * 1024;
-        final boolean isLowMemoryDevice = isLowMemoryDevice(activityManager);
-        return Math.round(memoryClassBytes
-                * (isLowMemoryDevice ? LOW_MEMORY_MAX_SIZE_MULTIPLIER : MAX_SIZE_MULTIPLIER));
+    @Override
+    public int getWidthPixels() {
+      return displayMetrics.widthPixels;
     }
 
-    private String toMb(int bytes) {
-        return Formatter.formatFileSize(context, bytes);
+    @Override
+    public int getHeightPixels() {
+      return displayMetrics.heightPixels;
     }
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    private static boolean isLowMemoryDevice(ActivityManager activityManager) {
-        final int sdkInt = Build.VERSION.SDK_INT;
-        return sdkInt < Build.VERSION_CODES.HONEYCOMB
-                || (sdkInt >= Build.VERSION_CODES.KITKAT && activityManager.isLowRamDevice());
-    }
-
-    private static class DisplayMetricsScreenDimensions implements ScreenDimensions {
-        private final DisplayMetrics displayMetrics;
-
-        public DisplayMetricsScreenDimensions(DisplayMetrics displayMetrics) {
-            this.displayMetrics = displayMetrics;
-        }
-
-        @Override
-        public int getWidthPixels() {
-            return displayMetrics.widthPixels;
-        }
-
-        @Override
-        public int getHeightPixels() {
-            return displayMetrics.heightPixels;
-        }
-    }
+  }
 }

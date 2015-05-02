@@ -2,37 +2,47 @@ package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertEquals;
 
+import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
+import com.bumptech.glide.util.ByteBufferUtil;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class StreamEncoderTest {
-    private StreamEncoder encoder;
+  private StreamEncoder encoder;
+  private File file;
 
-    @Before
-    public void setUp() {
-        encoder = new StreamEncoder();
-    }
+  @Before
+  public void setUp() {
+    encoder = new StreamEncoder(new LruByteArrayPool());
+    file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
+  }
 
-    @Test
-    public void testReturnsEmptyId() {
-        assertEquals("", encoder.getId());
-    }
+  @After
+  public void tearDown() {
+    file.delete();
+  }
 
-    @Test
-    public void testWritesDataFromInputStreamToOutputStream() {
-        String fakeData = "SomeRandomFakeData";
-        ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        encoder.encode(is, os);
+  @Test
+  public void testWritesDataFromInputStreamToOutputStream() throws IOException {
+    String fakeData = "SomeRandomFakeData";
+    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());
+    encoder.encode(is, file, new Options());
 
-        assertEquals(fakeData, new String(os.toByteArray()));
-    }
+    byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
+
+    assertEquals(fakeData, new String(data));
+  }
 }

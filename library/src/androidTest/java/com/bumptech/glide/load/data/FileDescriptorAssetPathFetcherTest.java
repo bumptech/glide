@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.data;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,6 +15,8 @@ import com.bumptech.glide.Priority;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -24,49 +25,49 @@ import java.io.IOException;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class FileDescriptorAssetPathFetcherTest {
-    private FileDescriptorAssetPathFetcher fetcher;
-    private ParcelFileDescriptor expected;
-    private String assetPath;
 
-    @Before
-    public void setUp() throws IOException {
-        AssetManager assetManager = mock(AssetManager.class);
-        assetPath = "/some/asset/path";
-        fetcher = new FileDescriptorAssetPathFetcher(assetManager, assetPath);
-        expected = mock(ParcelFileDescriptor.class);
-        AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
-        when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(expected);
-        when(assetManager.openFd(eq(assetPath))).thenReturn(assetFileDescriptor);
-    }
+  @Mock AssetManager assetManager;
+  @Mock AssetFileDescriptor assetFileDescriptor;
+  @Mock DataFetcher.DataCallback<ParcelFileDescriptor> callback;
 
-    @Test
-    public void testOpensInputStreamForPathWithAssetManager() throws Exception {
-        assertEquals(expected, fetcher.loadData(Priority.NORMAL));
-    }
+  private FileDescriptorAssetPathFetcher fetcher;
+  private ParcelFileDescriptor expected;
+  private String assetPath;
 
-    @Test
-    public void testClosesOpenedInputStreamOnCleanup() throws Exception {
-        fetcher.loadData(Priority.NORMAL);
-        fetcher.cleanup();
+  @Before
+  public void setUp() throws IOException {
+    MockitoAnnotations.initMocks(this);
+    assetPath = "/some/asset/path";
+    fetcher = new FileDescriptorAssetPathFetcher(assetManager, assetPath);
+    expected = mock(ParcelFileDescriptor.class);
+    when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(expected);
+    when(assetManager.openFd(eq(assetPath))).thenReturn(assetFileDescriptor);
+  }
 
-        verify(expected).close();
-    }
+  @Test
+  public void testOpensInputStreamForPathWithAssetManager() throws Exception {
+    fetcher.loadData(Priority.NORMAL, callback);
+    verify(callback).onDataReady(eq(expected));
+  }
 
-    @Test
-    public void testReturnsAssetPathAsId() {
-        assertEquals(assetPath, fetcher.getId());
-    }
+  @Test
+  public void testClosesOpenedInputStreamOnCleanup() throws Exception {
+    fetcher.loadData(Priority.NORMAL, callback);
+    fetcher.cleanup();
 
-    @Test
-    public void testDoesNothingOnCleanupIfNoDataLoaded() throws IOException {
-        fetcher.cleanup();
-        verify(expected, never()).close();
-    }
+    verify(expected).close();
+  }
 
-    @Test
-    public void testDoesNothingOnCancel() throws Exception {
-        fetcher.loadData(Priority.NORMAL);
-        fetcher.cancel();
-        verify(expected, never()).close();
-    }
+  @Test
+  public void testDoesNothingOnCleanupIfNoDataLoaded() throws IOException {
+    fetcher.cleanup();
+    verify(expected, never()).close();
+  }
+
+  @Test
+  public void testDoesNothingOnCancel() throws Exception {
+    fetcher.loadData(Priority.NORMAL, callback);
+    fetcher.cancel();
+    verify(expected, never()).close();
+  }
 }

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.util.Preconditions;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -18,74 +19,74 @@ import java.util.concurrent.locks.ReentrantLock;
  *  0, the lock can safely be removed from the map. </p>
  */
 final class DiskCacheWriteLocker {
-    private final Map<Key, WriteLock> locks = new HashMap<Key, WriteLock>();
-    private final WriteLockPool writeLockPool = new WriteLockPool();
+  private final Map<Key, WriteLock> locks = new HashMap<>();
+  private final WriteLockPool writeLockPool = new WriteLockPool();
 
-    void acquire(Key key) {
-        WriteLock writeLock;
-        synchronized (this) {
-            writeLock = locks.get(key);
-            if (writeLock == null) {
-                writeLock = writeLockPool.obtain();
-                locks.put(key, writeLock);
-            }
-            writeLock.interestedThreads++;
-        }
-
-        writeLock.lock.lock();
+  void acquire(Key key) {
+    WriteLock writeLock;
+    synchronized (this) {
+      writeLock = locks.get(key);
+      if (writeLock == null) {
+        writeLock = writeLockPool.obtain();
+        locks.put(key, writeLock);
+      }
+      writeLock.interestedThreads++;
     }
 
-    void release(Key key) {
-        WriteLock writeLock;
-        synchronized (this) {
-            writeLock = locks.get(key);
-            if (writeLock == null || writeLock.interestedThreads <= 0) {
-                throw new IllegalArgumentException(
-                    "Cannot release a lock that is not held" + ", key: " + key + ", interestedThreads: "
-                        + (writeLock == null ? 0 : writeLock.interestedThreads));
-            }
+    writeLock.lock.lock();
+  }
 
-            if (--writeLock.interestedThreads == 0) {
-                WriteLock removed = locks.remove(key);
-                if (!removed.equals(writeLock)) {
-                    throw new IllegalStateException("Removed the wrong lock"
-                        + ", expected to remove: " + writeLock
-                        + ", but actually removed: " + removed
-                        + ", key: " + key);
-                }
-                writeLockPool.offer(removed);
-            }
+  void release(Key key) {
+    WriteLock writeLock;
+    synchronized (this) {
+      writeLock = Preconditions.checkNotNull(locks.get(key));
+      Preconditions.checkArgument(writeLock.interestedThreads >= 1,
+          "Cannot release a lock that is not held"
+              + ", key: " + key
+              + ", interestedThreads: " + writeLock.interestedThreads);
+
+      writeLock.interestedThreads--;
+      if (writeLock.interestedThreads == 0) {
+        WriteLock removed = locks.remove(key);
+        if (!removed.equals(writeLock)) {
+          throw new IllegalStateException("Removed the wrong lock"
+              + ", expected to remove: " + writeLock
+              + ", but actually removed: " + removed
+              + ", key: " + key);
         }
-
-        writeLock.lock.unlock();
+        writeLockPool.offer(removed);
+      }
     }
 
-    private static class WriteLock  {
-        final Lock lock = new ReentrantLock();
-        int interestedThreads;
+    writeLock.lock.unlock();
+  }
+
+  private static class WriteLock  {
+    final Lock lock = new ReentrantLock();
+    int interestedThreads;
+  }
+
+  private static class WriteLockPool {
+    private static final int MAX_POOL_SIZE = 10;
+    private final Queue<WriteLock> pool = new ArrayDeque<>();
+
+    WriteLock obtain() {
+      WriteLock result;
+      synchronized (pool) {
+        result = pool.poll();
+      }
+      if (result == null) {
+        result = new WriteLock();
+      }
+      return result;
     }
 
-    private static class WriteLockPool {
-        private static final int MAX_POOL_SIZE = 10;
-        private final Queue<WriteLock> pool = new ArrayDeque<WriteLock>();
-
-        WriteLock obtain() {
-            WriteLock result;
-            synchronized (pool) {
-                result = pool.poll();
-            }
-            if (result == null) {
-                result = new WriteLock();
-            }
-            return result;
+    void offer(WriteLock writeLock) {
+      synchronized (pool) {
+        if (pool.size() < MAX_POOL_SIZE) {
+          pool.offer(writeLock);
         }
-
-        void offer(WriteLock writeLock) {
-            synchronized (pool) {
-                if (pool.size() < MAX_POOL_SIZE) {
-                    pool.offer(writeLock);
-                }
-            }
-        }
+      }
     }
+  }
 }

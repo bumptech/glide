@@ -5,5 +5,8 @@
             android:src="@android:drawable/sym_def_app_icon"
             android:gravity="center" />
     </item>
-    <item android:top="20dp" android:bottom="20dp" android:drawable="@drawable/dot_dot_dot" />
+    <item
+        android:top="20dp"
+        android:bottom="20dp"
+        android:drawable="@drawable/dot_dot_dot"/>
 </layer-list>
