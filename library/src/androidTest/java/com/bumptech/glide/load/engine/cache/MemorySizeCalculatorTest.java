@@ -20,6 +20,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowActivityManager;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -124,6 +125,8 @@ public class MemorySizeCalculatorTest {
 
     Util.setSdkVersionInt(10);
 
+    // Keep the bitmap pool size constant, even though normally it would change.
+    harness.byteArrayPoolSizeBytes *= 2;
     final int smallMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
     final int smallBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
@@ -131,12 +134,24 @@ public class MemorySizeCalculatorTest {
     assertThat(smallBitmapPoolSize).isLessThan(normalBitmapPoolSize);
   }
 
+  @Test
+  public void testByteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
+    ShadowActivityManager activityManager = Shadows.shadowOf(harness.activityManager);
+    activityManager.setMemoryClass(getLargeEnoughMemoryClass());
+
+    Util.setSdkVersionInt(10);
+
+    int byteArrayPoolSize = harness.getCalculator().getByteArrayPoolSize();
+    assertThat(byteArrayPoolSize).isEqualTo(harness.byteArrayPoolSizeBytes / 2);
+  }
+
   private int getLargeEnoughMemoryClass() {
     float totalScreenBytes =
         harness.getScreenSize() * (harness.bitmapPoolScreens + harness.memoryCacheScreens);
+    float totalBytes = totalScreenBytes + harness.byteArrayPoolSizeBytes;
     // Memory class is in mb, not bytes!
-    float totalScreenMb = totalScreenBytes / (1024 * 1024);
-    float memoryClassMb = totalScreenMb / harness.sizeMultiplier;
+    float totalMb = totalBytes / (1024 * 1024);
+    float memoryClassMb = totalMb / harness.sizeMultiplier;
     return (int) Math.ceil(memoryClassMb);
   }
 
@@ -146,6 +161,7 @@ public class MemorySizeCalculatorTest {
     float memoryCacheScreens = MemorySizeCalculator.Builder.MEMORY_CACHE_TARGET_SCREENS;
     float bitmapPoolScreens = MemorySizeCalculator.Builder.BITMAP_POOL_TARGET_SCREENS;
     float sizeMultiplier = MemorySizeCalculator.Builder.MAX_SIZE_MULTIPLIER;
+    int byteArrayPoolSizeBytes = MemorySizeCalculator.Builder.BYTE_ARRAY_POOL_SIZE_BYTES;
     ActivityManager activityManager =
         (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
     MemorySizeCalculator.ScreenDimensions screenDimensions =
@@ -160,6 +176,7 @@ public class MemorySizeCalculatorTest {
           .setMaxSizeMultiplier(sizeMultiplier)
           .setActivityManager(activityManager)
           .setScreenDimensions(screenDimensions)
+          .setByteArrayPoolSize(byteArrayPoolSizeBytes)
           .build();
     }
 

@@ -18,10 +18,12 @@ public final class MemorySizeCalculator {
   private static final String TAG = "MemorySizeCalculator";
   // Visible for testing.
   static final int BYTES_PER_ARGB_8888_PIXEL = 4;
+  static final int LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR = 2;
 
   private final int bitmapPoolSize;
   private final int memoryCacheSize;
   private final Context context;
+  private final int byteArrayPoolSize;
 
   interface ScreenDimensions {
     int getWidthPixels();
@@ -30,8 +32,10 @@ public final class MemorySizeCalculator {
 
   MemorySizeCalculator(Context context, ActivityManager activityManager,
       ScreenDimensions screenDimensions, float memoryCacheScreens, float bitmapPoolScreens,
-      float maxSizeMultiplier, float lowMemoryMaxSizeMultiplier) {
+      int targetByteArrayPoolSize, float maxSizeMultiplier, float lowMemoryMaxSizeMultiplier) {
     this.context = context;
+    byteArrayPoolSize = isLowMemoryDevice(activityManager)
+        ? targetByteArrayPoolSize / LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR : targetByteArrayPoolSize;
     final int maxSize = getMaxSize(activityManager, maxSizeMultiplier, lowMemoryMaxSizeMultiplier);
 
     final int screenSize = screenDimensions.getWidthPixels() * screenDimensions.getHeightPixels()
@@ -39,12 +43,13 @@ public final class MemorySizeCalculator {
 
     int targetPoolSize = Math.round(screenSize * bitmapPoolScreens);
     int targetMemoryCacheSize = Math.round(screenSize * memoryCacheScreens);
+    int availableSize = maxSize - byteArrayPoolSize;
 
-    if (targetMemoryCacheSize + targetPoolSize <= maxSize) {
+    if (targetMemoryCacheSize + targetPoolSize <= availableSize) {
       memoryCacheSize = targetMemoryCacheSize;
       bitmapPoolSize = targetPoolSize;
     } else {
-      float part = maxSize / (bitmapPoolScreens + memoryCacheScreens);
+      float part = availableSize / (bitmapPoolScreens + memoryCacheScreens);
       memoryCacheSize = Math.round(part * memoryCacheScreens);
       bitmapPoolSize = Math.round(part * bitmapPoolScreens);
     }
@@ -53,6 +58,7 @@ public final class MemorySizeCalculator {
       Log.d(TAG, "Calculation complete"
           + ", Calculated memory cache size: " + toMb(memoryCacheSize)
           + ", pool size: " + toMb(bitmapPoolSize)
+          + ", byte array size: " + toMb(byteArrayPoolSize)
           + ", memory class limited? " + (targetMemoryCacheSize + targetPoolSize > maxSize)
           + ", max size: " + toMb(maxSize)
           + ", memoryClass: " + activityManager.getMemoryClass()
@@ -74,6 +80,13 @@ public final class MemorySizeCalculator {
     return bitmapPoolSize;
   }
 
+  /**
+   * Returns the recommended byte array pool size for the device it is run on in bytes.
+   */
+  public int getByteArrayPoolSize() {
+    return byteArrayPoolSize;
+  }
+
   private static int getMaxSize(ActivityManager activityManager, float maxSizeMultiplier,
       float lowMemoryMaxSizeMultiplier) {
     final int memoryClassBytes = activityManager.getMemoryClass() * 1024 * 1024;
@@ -89,8 +102,8 @@ public final class MemorySizeCalculator {
   @TargetApi(Build.VERSION_CODES.KITKAT)
   private static boolean isLowMemoryDevice(ActivityManager activityManager) {
     final int sdkInt = Build.VERSION.SDK_INT;
-    return sdkInt < Build.VERSION_CODES.HONEYCOMB || (sdkInt >= Build.VERSION_CODES.KITKAT
-        && activityManager.isLowRamDevice());
+    return sdkInt < Build.VERSION_CODES.HONEYCOMB
+        || (sdkInt >= Build.VERSION_CODES.KITKAT && activityManager.isLowRamDevice());
   }
 
   /**
@@ -103,6 +116,8 @@ public final class MemorySizeCalculator {
     static final int BITMAP_POOL_TARGET_SCREENS = 4;
     static final float MAX_SIZE_MULTIPLIER = 0.4f;
     static final float LOW_MEMORY_MAX_SIZE_MULTIPLIER = 0.33f;
+    // 4MB.
+    static final int BYTE_ARRAY_POOL_SIZE_BYTES = 4 * 1024 * 1024;
 
     private final Context context;
 
@@ -114,6 +129,7 @@ public final class MemorySizeCalculator {
     private float bitmapPoolScreens = BITMAP_POOL_TARGET_SCREENS;
     private float maxSizeMultiplier = MAX_SIZE_MULTIPLIER;
     private float lowMemoryMaxSizeMultiplier = LOW_MEMORY_MAX_SIZE_MULTIPLIER;
+    private int byteArrayPoolSizeBytes = BYTE_ARRAY_POOL_SIZE_BYTES;
 
     public Builder(Context context) {
       this.context = context;
@@ -176,6 +192,19 @@ public final class MemorySizeCalculator {
       return this;
     }
 
+    /**
+     * Sets the size in bytes of the {@link
+     * com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool} to use to store temporary
+     * arrays while decoding data and returns this builder.
+     *
+     * <p>This number will be halved on low memory devices that return {@code true} from
+     * {@link ActivityManager#isLowRamDevice()}.
+     */
+    public Builder setByteArrayPoolSize(int byteArrayPoolSizeBytes) {
+      this.byteArrayPoolSizeBytes = byteArrayPoolSizeBytes;
+      return this;
+    }
+
     // Visible for testing.
     Builder setActivityManager(ActivityManager activityManager) {
       this.activityManager = activityManager;
@@ -190,7 +219,8 @@ public final class MemorySizeCalculator {
 
     public MemorySizeCalculator build() {
       return new MemorySizeCalculator(context, activityManager, screenDimensions,
-          memoryCacheScreens, bitmapPoolScreens, maxSizeMultiplier, lowMemoryMaxSizeMultiplier);
+          memoryCacheScreens, bitmapPoolScreens, byteArrayPoolSizeBytes, maxSizeMultiplier,
+          lowMemoryMaxSizeMultiplier);
     }
   }
 

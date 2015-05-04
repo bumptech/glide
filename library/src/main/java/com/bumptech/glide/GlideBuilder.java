@@ -220,7 +220,7 @@ public class GlideBuilder {
     }
 
     if (byteArrayPool == null) {
-      byteArrayPool = new LruByteArrayPool();
+      byteArrayPool = new LruByteArrayPool(memorySizeCalculator.getByteArrayPoolSize());
     }
 
     if (memoryCache == null) {
