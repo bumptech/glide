@@ -92,8 +92,10 @@ public class GifFrameLoaderTest {
   }
 
   @Test
-  public void testReturnsSizeBasedOnBufferAndCurrentFrame() {
-    assertThat(loader.getSize()).isEqualTo(byteBuffer.limit() + Util.getBitmapByteSize(firstFrame));
+  public void testReturnsSizeFromGifDecoderAndCurrentFrame() {
+    int decoderByteSize = 123456;
+    when(gifDecoder.getByteSize()).thenReturn(decoderByteSize);
+    assertThat(loader.getSize()).isEqualTo(decoderByteSize + Util.getBitmapByteSize(firstFrame));
   }
 
   @Test

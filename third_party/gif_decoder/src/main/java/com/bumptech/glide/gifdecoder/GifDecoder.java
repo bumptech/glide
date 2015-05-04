@@ -95,6 +95,8 @@ public class GifDecoder {
 
   private static final int INITIAL_FRAME_POINTER = -1;
 
+  private static final int BYTES_PER_INTEGER = 4;
+
   // We can't tell if a gif has transparency to decode a partial frame on top of a previous
   // frame, or if the final frame will actually have transparent pixels, so we must always use a
   // format that supports  transparency. We can't use ARGB_4444 because of framework issues drawing
@@ -255,6 +257,14 @@ public class GifDecoder {
    */
   public int getLoopCount() {
     return header.loopCount;
+  }
+
+  /**
+   * Returns an estimated byte size for this decoder based on the data provided to {@link
+   * #setData(GifHeader, byte[])}, as well as internal buffers.
+   */
+  public int getByteSize() {
+    return rawData.limit() + mainPixels.length + (mainScratch.length * BYTES_PER_INTEGER);
   }
 
   /**

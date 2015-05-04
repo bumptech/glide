@@ -125,7 +125,7 @@ class GifFrameLoader {
   }
 
   int getSize() {
-    return getBuffer().limit() + getFrameSize();
+    return gifDecoder.getByteSize() + getFrameSize();
   }
 
   private int getFrameSize() {
