@@ -86,10 +86,10 @@ public class LruBitmapPool implements BitmapPool {
     if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize
         || !allowedConfigs.contains(bitmap.getConfig())) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG,
-            "Reject bitmap from pool" + ", bitmap: " + strategy.logBitmap(bitmap) + ", is mutable: "
-                + bitmap.isMutable() + ", is allowed config: " + allowedConfigs
-                .contains(bitmap.getConfig()));
+        Log.v(TAG, "Reject bitmap from pool"
+                + ", bitmap: " + strategy.logBitmap(bitmap)
+                + ", is mutable: " + bitmap.isMutable()
+                + ", is allowed config: " + allowedConfigs.contains(bitmap.getConfig()));
       }
       return false;
     }

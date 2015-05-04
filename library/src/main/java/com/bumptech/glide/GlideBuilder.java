@@ -1,9 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Build;
-import android.util.Log;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
@@ -19,14 +17,12 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.FifoPriorityThreadPoolExecutor;
 
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
 /**
  * A builder class for setting default structural classes for Glide to use.
  */
 public class GlideBuilder {
-  private static final String TAG = "Glide";
   private final Context context;
 
   private Engine engine;
@@ -163,14 +159,7 @@ public class GlideBuilder {
    * @return This builder.
    */
   public GlideBuilder setDecodeFormat(DecodeFormat decodeFormat) {
-    if (DecodeFormat.REQUIRE_ARGB_8888 && decodeFormat != DecodeFormat.PREFER_ARGB_8888) {
-      this.decodeFormat = DecodeFormat.PREFER_ARGB_8888;
-      if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Unsafe to use RGB_565 on KitKat or Lollipop, ignoring setDecodeFormat");
-      }
-    } else {
-      this.decodeFormat = decodeFormat;
-    }
+    this.decodeFormat = decodeFormat;
     return this;
   }
 
@@ -224,11 +213,7 @@ public class GlideBuilder {
     if (bitmapPool == null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         int size = memorySizeCalculator.getBitmapPoolSize();
-        if (DecodeFormat.REQUIRE_ARGB_8888) {
-          bitmapPool = new LruBitmapPool(size, Collections.singleton(Bitmap.Config.ARGB_8888));
-        } else {
-          bitmapPool = new LruBitmapPool(size);
-        }
+        bitmapPool = new LruBitmapPool(size);
       } else {
         bitmapPool = new BitmapPoolAdapter();
       }
