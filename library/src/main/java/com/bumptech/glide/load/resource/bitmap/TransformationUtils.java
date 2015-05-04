@@ -21,6 +21,12 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 public final class TransformationUtils {
   private static final String TAG = "TransformationUtils";
   public static final int PAINT_FLAGS = Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
+  private static final Paint DEFAULT_PAINT = new Paint(PAINT_FLAGS);
+  private static final Paint CIRCLE_CROP_PAINT;
+  static {
+    CIRCLE_CROP_PAINT = new Paint(PAINT_FLAGS | Paint.ANTI_ALIAS_FLAG);
+    CIRCLE_CROP_PAINT.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+  }
 
   private TransformationUtils() {
     // Utility class.
@@ -69,8 +75,7 @@ public final class TransformationUtils {
     TransformationUtils.setAlpha(toCrop, result);
 
     Canvas canvas = new Canvas(result);
-    Paint paint = new Paint(PAINT_FLAGS);
-    canvas.drawBitmap(toCrop, m, paint);
+    canvas.drawBitmap(toCrop, m, DEFAULT_PAINT);
     return result;
   }
 
@@ -127,8 +132,7 @@ public final class TransformationUtils {
     Canvas canvas = new Canvas(toReuse);
     Matrix matrix = new Matrix();
     matrix.setScale(minPercentage, minPercentage);
-    Paint paint = new Paint(PAINT_FLAGS);
-    canvas.drawBitmap(toFit, matrix, paint);
+    canvas.drawBitmap(toFit, matrix, DEFAULT_PAINT);
 
     return toReuse;
   }
@@ -265,8 +269,7 @@ public final class TransformationUtils {
     matrix.postTranslate(-newRect.left, -newRect.top);
 
     final Canvas canvas = new Canvas(result);
-    final Paint paint = new Paint(PAINT_FLAGS);
-    canvas.drawBitmap(toOrient, matrix, paint);
+    canvas.drawBitmap(toOrient, matrix, DEFAULT_PAINT);
 
     return result;
   }
@@ -303,15 +306,12 @@ public final class TransformationUtils {
         srcMinEdge, srcMinEdge);
 
     Canvas canvas = new Canvas(result);
-    Paint paint = new Paint(PAINT_FLAGS);
-    paint.setAntiAlias(true);
 
     // Draw a circle
-    canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius, paint);
+    canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius, CIRCLE_CROP_PAINT);
 
     // Draw the bitmap in the circle
-    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-    canvas.drawBitmap(toCrop, srcRect, destRect, paint);
+    canvas.drawBitmap(toCrop, srcRect, destRect, CIRCLE_CROP_PAINT);
 
     return result;
   }
