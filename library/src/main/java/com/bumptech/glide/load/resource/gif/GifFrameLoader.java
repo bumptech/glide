@@ -9,14 +9,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider;
-import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -33,8 +30,6 @@ import java.util.List;
 import java.util.UUID;
 
 class GifFrameLoader {
-  private static final String TAG = "GifFrameLoader";
-
   private final GifDecoder gifDecoder;
   private final Handler handler;
   private final Context context;
@@ -54,13 +49,11 @@ class GifFrameLoader {
     void onFrameReady(int index);
   }
 
-  public GifFrameLoader(Context context, BitmapProvider bitmapProvider, GifHeader gifHeader,
-      ByteBuffer byteBuffer, int width, int height,  Transformation<Bitmap> transformation,
-      Bitmap firstFrame) {
+  public GifFrameLoader(Context context, GifDecoder gifDecoder, int width, int height,
+      Transformation<Bitmap> transformation, Bitmap firstFrame) {
     this(context,
         Glide.with(context),
-        new GifDecoder(bitmapProvider, gifHeader, byteBuffer,
-            getSampleSize(gifHeader, width, height)),
+        gifDecoder,
         null /*handler*/,
         getRequestBuilder(context, width, height), transformation, firstFrame);
   }
@@ -267,21 +260,6 @@ class GifFrameLoader {
       Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
       handler.sendMessageAtTime(msg, targetTime);
     }
-  }
-  private static int getSampleSize(GifHeader gifHeader, int targetWidth, int targetHeight) {
-    int exactSampleSize = Math.min(gifHeader.getHeight() / targetHeight,
-        gifHeader.getWidth() / targetWidth);
-    int powerOfTwoSampleSize = exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize);
-    // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code
-    // than 0.
-    int sampleSize = Math.max(1, powerOfTwoSampleSize);
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Downsampling gif"
-          + ", sampleSize: " + sampleSize
-          + ", target dimens: [" + targetWidth + "x" + targetHeight
-          + ", actual dimens: [" + gifHeader.getWidth() + "x" + gifHeader.getHeight());
-    }
-    return sampleSize;
   }
 
   private static RequestBuilder<Bitmap> getRequestBuilder(Context context, int width, int height) {

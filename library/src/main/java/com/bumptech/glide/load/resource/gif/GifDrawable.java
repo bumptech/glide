@@ -15,7 +15,6 @@ import android.os.Build;
 import android.view.Gravity;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
@@ -75,9 +74,6 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    * Constructor for GifDrawable.
    *
    * @param context             A context.
-   * @param bitmapProvider      An {@link com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider}
-   *                            that can be used to retrieve re-usable
-   *                            {@link android.graphics.Bitmap}s.
    * @param bitmapPool          A {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}
    *                            that can be used to return the first frame when this drawable is
    *                            recycled.
@@ -91,16 +87,16 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    *                            height of the view or
    *                            {@link com.bumptech.glide.request.target.Target}
    *                            this drawable is being loaded into).
-   * @param gifHeader           The header data for this gif.
+   * @param gifDecoder          The decoder to use to decode gif data.
    * @param firstFrame          The decoded and transformed first frame of this gif.
    * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
    */
-  public GifDrawable(Context context, GifDecoder.BitmapProvider bitmapProvider,
-      BitmapPool bitmapPool, ByteBuffer byteBuffer, Transformation<Bitmap> frameTransformation,
-      int targetFrameWidth, int targetFrameHeight, GifHeader gifHeader, Bitmap firstFrame) {
+  public GifDrawable(Context context, GifDecoder gifDecoder, BitmapPool bitmapPool,
+      Transformation<Bitmap> frameTransformation, int targetFrameWidth, int targetFrameHeight,
+      Bitmap firstFrame) {
     this(new GifState(context, bitmapPool,
-        new GifFrameLoader(context, bitmapProvider, gifHeader, byteBuffer, targetFrameWidth,
-            targetFrameHeight, frameTransformation, firstFrame)));
+        new GifFrameLoader(context, gifDecoder, targetFrameWidth, targetFrameHeight,
+            frameTransformation, firstFrame)));
   }
 
   GifDrawable(GifState state) {

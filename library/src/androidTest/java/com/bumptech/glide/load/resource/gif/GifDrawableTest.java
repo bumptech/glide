@@ -24,7 +24,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -39,8 +38,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.nio.ByteBuffer;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
@@ -317,12 +314,10 @@ public class GifDrawableTest {
 
   @Test
   public void testReturnsNewDrawableFromConstantState() {
-    GifHeader gifHeader = new GifHeader();
-    GifDecoder.BitmapProvider provider = mock(GifDecoder.BitmapProvider.class);
     Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     drawable =
-        new GifDrawable(RuntimeEnvironment.application, provider, bitmapPool,
-            ByteBuffer.allocate(10), transformation, 100, 100, gifHeader, firstFrame);
+        new GifDrawable(RuntimeEnvironment.application, mock(GifDecoder.class), bitmapPool,
+            transformation, 100, 100, firstFrame);
 
     assertNotNull(drawable.getConstantState().newDrawable());
     assertNotNull(
@@ -484,9 +479,8 @@ public class GifDrawableTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfConstructedWithNullFirstFrame() {
-    new GifDrawable(RuntimeEnvironment.application, mock(GifDecoder.BitmapProvider.class),
-        bitmapPool, ByteBuffer.allocate(10), transformation, 100, 100,
-        mock(GifHeader.class), null);
+    new GifDrawable(RuntimeEnvironment.application, mock(GifDecoder.class), bitmapPool,
+        transformation, 100, 100, null);
   }
 
   @Test

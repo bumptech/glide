@@ -162,9 +162,6 @@ public class GifDecoder {
   public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
       int sampleSize) {
     this(provider);
-    if (sampleSize <= 0) {
-      throw new IllegalArgumentException("Sample size must be >=0, not: " + sampleSize);
-    }
     setData(gifHeader, rawData, sampleSize);
   }
 
@@ -389,6 +386,11 @@ public class GifDecoder {
   }
 
   public synchronized void setData(GifHeader header, ByteBuffer buffer, int sampleSize) {
+    if (sampleSize <= 0) {
+      throw new IllegalArgumentException("Sample size must be >=0, not: " + sampleSize);
+    }
+    // Make sure sample size is a power of 2.
+    sampleSize = Integer.highestOneBit(sampleSize);
     this.status = STATUS_OK;
     this.header = header;
     isFirstFrameTransparent = false;
