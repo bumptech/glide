@@ -129,6 +129,7 @@ public class GifDecoder {
   private int sampleSize;
   private int downsampledHeight;
   private int downsampledWidth;
+  private boolean isFirstFrameTransparent;
 
   /**
    * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs
@@ -366,6 +367,7 @@ public class GifDecoder {
     }
     previousImage = null;
     rawData = null;
+    isFirstFrameTransparent = false;
   }
 
   public synchronized void setData(GifHeader header, byte[] data) {
@@ -379,6 +381,7 @@ public class GifDecoder {
   public synchronized void setData(GifHeader header, ByteBuffer buffer, int sampleSize) {
     this.status = STATUS_OK;
     this.header = header;
+    isFirstFrameTransparent = false;
     framePointer = INITIAL_FRAME_POINTER;
     // Initialize the raw data buffer.
     rawData = buffer.asReadOnlyBuffer();
@@ -443,6 +446,11 @@ public class GifDecoder {
         int c = 0;
         if (!currentFrame.transparency) {
           c = header.bgColor;
+        } else if (framePointer == 0) {
+          // TODO: We should check and see if all individual pixels are replaced. If they are, the
+          // first frame isn't actually transparent. For now, it's simpler and safer to assume
+          // drawing a transparent background means the GIF contains transparency.
+          isFirstFrameTransparent = true;
         }
         Arrays.fill(dest, c);
       } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {
@@ -463,6 +471,7 @@ public class GifDecoder {
     int pass = 1;
     int inc = 8;
     int iline = 0;
+    boolean isFirstFrame = framePointer == 0;
     for (int i = 0; i < downsampledIH; i++) {
       int line = i;
       if (currentFrame.interlace) {
@@ -506,6 +515,8 @@ public class GifDecoder {
           int averageColor = averageColorsNear(sx, maxPositionInSource, currentFrame.iw);
           if (averageColor != 0) {
             dest[dx] = averageColor;
+          } else if (!isFirstFrameTransparent && isFirstFrame) {
+            isFirstFrameTransparent = true;
           }
           sx += sampleSize;
           dx++;
@@ -744,9 +755,11 @@ public class GifDecoder {
   }
 
   private Bitmap getNextBitmap() {
-    Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, BITMAP_CONFIG);
+    Bitmap.Config config = isFirstFrameTransparent
+        ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+    Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, config);
     if (result == null) {
-      result = Bitmap.createBitmap(downsampledWidth, downsampledHeight, BITMAP_CONFIG);
+      result = Bitmap.createBitmap(downsampledWidth, downsampledHeight, config);
     }
     setAlpha(result);
     return result;
