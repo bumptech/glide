@@ -64,7 +64,7 @@ public final class LruByteArrayPool implements ByteArrayPool {
     synchronized (this) {
       Integer possibleSize = sortedSizes.ceilingKey(size);
       final Key key;
-      if (possibleSize != null && possibleSize <= (MAX_SIZE_MULTIPLE * size)) {
+      if (mayFillRequest(size, possibleSize)) {
         key = keyPool.get(possibleSize);
       } else {
         key = keyPool.get(size);
@@ -91,6 +91,15 @@ public final class LruByteArrayPool implements ByteArrayPool {
 
   private boolean isSmallEnoughForReuse(int byteSize) {
     return byteSize <= maxSizeBytes / SINGLE_ARRAY_MAX_SIZE_DIVISOR;
+  }
+
+  private boolean mayFillRequest(int requestedSize, Integer actualSize) {
+    return actualSize != null
+        && (isNoMoreThanHalfFull() || actualSize <= (MAX_OVER_SIZE_MULTIPLE * requestedSize));
+  }
+
+  private boolean isNoMoreThanHalfFull() {
+    return currentSizeBytes == 0 || (maxSizeBytes / currentSizeBytes >= 2);
   }
 
   @Override
