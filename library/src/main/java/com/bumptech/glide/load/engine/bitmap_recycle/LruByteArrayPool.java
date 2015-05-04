@@ -13,7 +13,13 @@ public final class LruByteArrayPool implements ByteArrayPool {
   private static final String TAG = "LruBytesPool";
   // 4MB.
   private static final int DEFAULT_SIZE = 4 * 1024 * 1024;
-  private static final int MAX_SIZE_MULTIPLE = 8;
+  /**
+   * The maximum number of times larger a byte array may be to be than a requested size to eligble
+   * to be returned from the pool.
+   */
+  private static final int MAX_OVER_SIZE_MULTIPLE = 8;
+  /** Used to calculate the maximum % of the total pool size a single byte array may consume. */
+  private static final int SINGLE_ARRAY_MAX_SIZE_DIVISOR = 2;
   private final GroupedLinkedMap<Key, byte[]> groupedMap = new GroupedLinkedMap<>();
   private final KeyPool keyPool = new KeyPool();
   private final TreeMap<Integer, Integer> sortedSizes = new TreeMap<>();
@@ -40,6 +46,9 @@ public final class LruByteArrayPool implements ByteArrayPool {
   @Override
   public synchronized void put(byte[] bytes) {
     int size = bytes.length;
+    if (!isSmallEnoughForReuse(size)) {
+      return;
+    }
     Key key = keyPool.get(size);
 
     groupedMap.put(key, bytes);
@@ -78,6 +87,10 @@ public final class LruByteArrayPool implements ByteArrayPool {
     }
 
     return result;
+  }
+
+  private boolean isSmallEnoughForReuse(int byteSize) {
+    return byteSize <= maxSizeBytes / SINGLE_ARRAY_MAX_SIZE_DIVISOR;
   }
 
   @Override
