@@ -126,8 +126,8 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG, "Downsampling gif"
           + ", sampleSize: " + sampleSize
-          + ", target dimens: [" + targetWidth + "x" + targetHeight
-          + ", actual dimens: [" + gifHeader.getWidth() + "x" + gifHeader.getHeight());
+          + ", target dimens: [" + targetWidth + "x" + targetHeight + "]"
+          + ", actual dimens: [" + gifHeader.getWidth() + "x" + gifHeader.getHeight() + "]");
     }
     return sampleSize;
   }
