@@ -30,7 +30,7 @@ public class ExifTest {
     InputStream is = null;
     try {
       is = open(filePrefix + "_" + expectedOrientation + ".jpg");
-      assertEquals(new ImageHeaderParser(is, new LruByteArrayPool()).getOrientation(),
+      assertEquals(new ImageHeaderParser(is, byteArrayPool).getOrientation(),
           expectedOrientation);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -52,8 +52,8 @@ public class ExifTest {
 
   @Test
   public void testIssue387() throws IOException {
-      InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
-      assertThat(new ImageHeaderParser(is, byteArrayPool).getOrientation()).isEqualTo(6);
+    InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
+    assertThat(new ImageHeaderParser(is, byteArrayPool).getOrientation()).isEqualTo(6);
   }
 
   @Test
@@ -67,6 +67,18 @@ public class ExifTest {
   public void testPortrait() throws IOException {
     for (int i = 1; i <= 8; i++) {
       assertOrientation("Portrait", i);
+    }
+  }
+
+  @Test
+  public void testHandlesInexactSizesInByteArrayPools() {
+    for (int i = 1; i <= 8; i++) {
+      byteArrayPool.put(new byte[LruByteArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
+      assertOrientation("Portrait", i);
+    }
+    for (int i = 1; i <= 8; i++) {
+      byteArrayPool.put(new byte[LruByteArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
+      assertOrientation("Landscape", i);
     }
   }
 }

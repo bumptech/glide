@@ -232,7 +232,6 @@ public final class TransformationUtils {
         break;
       default:
         degreesToRotate = 0;
-
     }
     return degreesToRotate;
   }

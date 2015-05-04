@@ -33,7 +33,7 @@ class ThumbnailStreamOpener {
   }
 
   public int getOrientation(Context context, Uri uri) {
-    int orientation = -1;
+    int orientation = ImageHeaderParser.UNKNOWN_ORIENTATION;
     InputStream is = null;
     try {
       is = context.getContentResolver().openInputStream(uri);
@@ -51,7 +51,7 @@ class ThumbnailStreamOpener {
           }
       }
     }
-      return orientation;
+    return orientation;
   }
 
   public InputStream open(Context context, Uri uri) throws FileNotFoundException {

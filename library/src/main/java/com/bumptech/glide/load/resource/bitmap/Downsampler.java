@@ -271,7 +271,7 @@ public final class Downsampler {
 
   private int getOrientation(InputStream is) throws IOException {
     is.mark(MARK_POSITION);
-    int orientation = 0;
+    int orientation = ImageHeaderParser.UNKNOWN_ORIENTATION;
     try {
       orientation = new ImageHeaderParser(is, byteArrayPool).getOrientation();
     } catch (IOException e) {
