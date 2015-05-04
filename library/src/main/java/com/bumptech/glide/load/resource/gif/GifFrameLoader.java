@@ -155,7 +155,6 @@ class GifFrameLoader {
   void clear() {
     callbacks.clear();
     recycleFirstFrame();
-    gifDecoder.clear();
     stop();
     if (current != null) {
       requestManager.clear(current);
@@ -165,6 +164,7 @@ class GifFrameLoader {
       requestManager.clear(next);
       next = null;
     }
+    gifDecoder.clear();
     isCleared = true;
   }
 
