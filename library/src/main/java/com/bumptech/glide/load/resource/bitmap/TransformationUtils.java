@@ -22,10 +22,12 @@ public final class TransformationUtils {
   private static final String TAG = "TransformationUtils";
   public static final int PAINT_FLAGS = Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
   private static final Paint DEFAULT_PAINT = new Paint(PAINT_FLAGS);
-  private static final Paint CIRCLE_CROP_PAINT;
+  private static final int CIRCLE_CROP_PAINT_FLAGS = PAINT_FLAGS | Paint.ANTI_ALIAS_FLAG;
+  private static final Paint CIRCLE_CROP_SHAPE_PAINT = new Paint(CIRCLE_CROP_PAINT_FLAGS);
+  private static final Paint CIRCLE_CROP_BITMAP_PAINT;
   static {
-    CIRCLE_CROP_PAINT = new Paint(PAINT_FLAGS | Paint.ANTI_ALIAS_FLAG);
-    CIRCLE_CROP_PAINT.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+    CIRCLE_CROP_BITMAP_PAINT = new Paint(CIRCLE_CROP_PAINT_FLAGS);
+    CIRCLE_CROP_BITMAP_PAINT.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
   }
 
   private TransformationUtils() {
@@ -307,10 +309,11 @@ public final class TransformationUtils {
     Canvas canvas = new Canvas(result);
 
     // Draw a circle
-    canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius, CIRCLE_CROP_PAINT);
+    canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius,
+        CIRCLE_CROP_SHAPE_PAINT);
 
     // Draw the bitmap in the circle
-    canvas.drawBitmap(toCrop, srcRect, destRect, CIRCLE_CROP_PAINT);
+    canvas.drawBitmap(toCrop, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
 
     return result;
   }
