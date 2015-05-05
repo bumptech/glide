@@ -292,6 +292,8 @@ public class GifDecoder {
       previousFrame = header.frames.get(previousIndex);
     }
 
+    final int savedBgColor = header.bgColor;
+
     // Set the appropriate color table.
     if (currentFrame.lct == null) {
       act = header.gct;
@@ -324,6 +326,7 @@ public class GifDecoder {
     if (currentFrame.transparency) {
       act[currentFrame.transIndex] = save;
     }
+    header.bgColor = savedBgColor;
 
     return result;
   }
