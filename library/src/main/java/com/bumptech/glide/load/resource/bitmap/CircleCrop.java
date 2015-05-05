@@ -15,7 +15,10 @@ import java.security.MessageDigest;
  * <p> Uses a PorterDuff blend mode, see http://ssp.impulsetrain.com/porterduff.html. </p>
  */
 public class CircleCrop extends BitmapTransformation {
-  private static final String ID = "com.bumptech.glide.load.resource.bitmap.CircleCrop";
+  // The version of this transformation, incremented to correct an error in a previous version.
+  // See #455.
+  private static final int VERSION = 1;
+  private static final String ID = "com.bumptech.glide.load.resource.bitmap.CircleCrop." + VERSION;
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
   public CircleCrop(Context context) {
