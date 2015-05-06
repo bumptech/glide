@@ -3,7 +3,7 @@ package com.bumptech.glide;
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -48,7 +48,7 @@ public class RequestManagerTest {
     MockitoAnnotations.initMocks(this);
     connectivityMonitor = mock(ConnectivityMonitor.class);
     ConnectivityMonitorFactory factory = mock(ConnectivityMonitorFactory.class);
-    when(factory.build(any(Context.class), any(ConnectivityMonitor.ConnectivityListener.class)))
+    when(factory.build(isA(Context.class), isA(ConnectivityMonitor.ConnectivityListener.class)))
         .thenAnswer(new Answer<ConnectivityMonitor>() {
           @Override
           public ConnectivityMonitor answer(InvocationOnMock invocation) throws Throwable {

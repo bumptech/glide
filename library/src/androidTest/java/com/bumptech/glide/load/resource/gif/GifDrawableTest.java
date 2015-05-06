@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -78,7 +79,7 @@ public class GifDrawableTest {
     Canvas canvas = mock(Canvas.class);
     drawable.draw(canvas);
 
-    verify(canvas).drawBitmap(eq(firstFrame), anyRect(), anyRect(), anyPaint());
+    verify(canvas).drawBitmap(eq(firstFrame), (Rect) isNull(), isARect(), isAPaint());
   }
 
   @Test
@@ -86,7 +87,7 @@ public class GifDrawableTest {
     drawable = new GifDrawable(RuntimeEnvironment.application, frameLoader, bitmapPool, paint);
     Canvas canvas = mock(Canvas.class);
 
-    verify(canvas, never()).drawBitmap(any(Bitmap.class), anyRect(), anyRect(), anyPaint());
+    verify(canvas, never()).drawBitmap(isA(Bitmap.class), isARect(), isARect(), isAPaint());
   }
 
   @Test
@@ -96,8 +97,8 @@ public class GifDrawableTest {
     when(frameLoader.getCurrentFrame()).thenReturn(currentFrame);
 
     drawable.draw(canvas);
-    verify(canvas).drawBitmap(eq(currentFrame), anyRect(), anyRect(), anyPaint());
-    verify(canvas, never()).drawBitmap(eq(firstFrame), anyRect(), anyRect(), anyPaint());
+    verify(canvas).drawBitmap(eq(currentFrame), (Rect) isNull(), isARect(), isAPaint());
+    verify(canvas, never()).drawBitmap(eq(firstFrame), (Rect) isNull(), isARect(), isAPaint());
   }
 
   @Test
@@ -466,7 +467,7 @@ public class GifDrawableTest {
     drawable.recycle();
     Canvas canvas = mock(Canvas.class);
     drawable.draw(canvas);
-    verify(canvas, never()).drawBitmap(any(Bitmap.class), anyRect(), anyRect(), anyPaint());
+    verify(canvas, never()).drawBitmap(eq(bitmap), isARect(), isARect(), isAPaint());
   }
 
   @Test
@@ -491,7 +492,7 @@ public class GifDrawableTest {
     Canvas canvas = mock(Canvas.class);
     drawable.draw(canvas);
 
-    verify(canvas).drawBitmap(any(Bitmap.class), (Rect) isNull(), eq(bounds), eq(paint));
+    verify(canvas).drawBitmap(isA(Bitmap.class), (Rect) isNull(), eq(bounds), eq(paint));
   }
 
   @Test
@@ -528,12 +529,12 @@ public class GifDrawableTest {
     verify(cb, times(1 + loopCount * frameCount)).invalidateDrawable(eq(drawable));
   }
 
-  private static Paint anyPaint() {
-    return any(Paint.class);
+  private static Paint isAPaint() {
+    return isA(Paint.class);
   }
 
-  private static Rect anyRect() {
-    return any(Rect.class);
+  private static Rect isARect() {
+    return isA(Rect.class);
   }
 
   private void runLoops(int loopCount, int frameCount) {

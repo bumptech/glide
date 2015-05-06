@@ -1,8 +1,8 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +55,7 @@ public class RequestBuilderTest {
     Target target = mock(Target.class);
     getNullModelRequest().into(target);
 
-    verify(requestManager).track(eq(target), any(Request.class));
+    verify(requestManager).track(eq(target), isA(Request.class));
   }
 
   @Test
@@ -103,7 +103,7 @@ public class RequestBuilderTest {
   }
 
   private RequestBuilder getNullModelRequest() {
-    when(glideContext.buildImageViewTarget(any(ImageView.class), any(Class.class)))
+    when(glideContext.buildImageViewTarget(isA(ImageView.class), isA(Class.class)))
         .thenReturn(mock(Target.class));
     when(glideContext.getOptions()).thenReturn(new RequestOptions());
     return new RequestBuilder(glideContext, requestManager, Object.class)

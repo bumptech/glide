@@ -3,9 +3,9 @@ package com.bumptech.glide.load.resource.gif;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,17 +45,16 @@ public class ByteBufferGifDecoderTest {
   @Mock ByteBufferGifDecoder.GifHeaderParserPool parserPool;
   @Mock ByteBufferGifDecoder.GifDecoderFactory decoderFactory;
 
-
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
     gifHeader = Mockito.spy(new GifHeader());
     when(parser.parseHeader()).thenReturn(gifHeader);
-    when(parserPool.obtain(any(ByteBuffer.class))).thenReturn(parser);
+    when(parserPool.obtain(isA(ByteBuffer.class))).thenReturn(parser);
 
-    when(decoderFactory.build(any(GifDecoder.BitmapProvider.class),
-        any(GifHeader.class), any(ByteBuffer.class), anyInt()))
+    when(decoderFactory.build(isA(GifDecoder.BitmapProvider.class),
+        eq(gifHeader), isA(ByteBuffer.class), anyInt()))
         .thenReturn(gifDecoder);
 
     options = new Options();

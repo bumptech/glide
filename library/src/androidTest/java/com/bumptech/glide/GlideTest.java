@@ -3,10 +3,9 @@ package com.bumptech.glide;
 import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -20,6 +19,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
@@ -110,10 +110,10 @@ public class GlideTest {
     target = mock(Target.class);
     imageView = new ImageView(RuntimeEnvironment.application);
     imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
-    doAnswer(new CallSizeReady()).when(target).getSize(any(SizeReadyCallback.class));
+    doAnswer(new CallSizeReady()).when(target).getSize(isA(SizeReadyCallback.class));
 
     Handler bgHandler = mock(Handler.class);
-    when(bgHandler.post(any(Runnable.class))).thenAnswer(new Answer<Boolean>() {
+    when(bgHandler.post(isA(Runnable.class))).thenAnswer(new Answer<Boolean>() {
       @Override
       public Boolean answer(InvocationOnMock invocation) throws Throwable {
         Runnable runnable = (Runnable) invocation.getArguments()[0];
@@ -204,7 +204,7 @@ public class GlideTest {
     requestManager.asDrawable().load(file).into(target);
     requestManager.asDrawable().load(file).into(imageView);
 
-    verify(target).onResourceReady(any(Resource.class), any(Transition.class));
+    verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
 
     assertNotNull(imageView.getDrawable());
@@ -217,7 +217,7 @@ public class GlideTest {
     requestManager.asDrawable().load(url).into(target);
     requestManager.asDrawable().load(url).into(imageView);
 
-    verify(target).onResourceReady(any(Resource.class), any(Transition.class));
+    verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
 
     assertNotNull(imageView.getDrawable());
@@ -230,7 +230,7 @@ public class GlideTest {
 
     requestManager.asBitmap().load(uri).into(target);
 
-    verify(target).onResourceReady(any(Bitmap.class), any(Transition.class));
+    verify(target).onResourceReady(isA(Bitmap.class), isA(Transition.class));
   }
 
   @Test
@@ -240,7 +240,7 @@ public class GlideTest {
 
     requestManager.as(byte[].class).apply(decodeTypeOf(Bitmap.class)).load(uri).into(target);
 
-    verify(target).onResourceReady(any(byte[].class), any(Transition.class));
+    verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
   }
 
   @Test
@@ -267,7 +267,7 @@ public class GlideTest {
     requestManager.asDrawable().load(uri).into(target);
     requestManager.asDrawable().load(uri).into(imageView);
 
-    verify(target).onResourceReady(anyObject(), any(Transition.class));
+    verify(target).onResourceReady(notNull(), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
 
     assertNotNull(imageView.getDrawable());
@@ -340,7 +340,7 @@ public class GlideTest {
     }).into(target);
     requestManager.asDrawable().load(string).into(imageView);
 
-    verify(target).onResourceReady(any(Resource.class), any(Transition.class));
+    verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
 
     assertNotNull(imageView.getDrawable());
@@ -370,7 +370,7 @@ public class GlideTest {
     requestManager.asDrawable().load(integer).into(target);
     requestManager.asDrawable().load(integer).into(imageView);
 
-    verify(target).onResourceReady(any(Resource.class), any(Transition.class));
+    verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
 
     assertNotNull(imageView.getDrawable());
@@ -382,7 +382,7 @@ public class GlideTest {
     requestManager.asDrawable().load(bytes).into(target);
     requestManager.asDrawable().load(bytes).into(imageView);
 
-    verify(target).onResourceReady(any(Resource.class), any(Transition.class));
+    verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
 
     assertNotNull(imageView.getDrawable());
@@ -411,7 +411,7 @@ public class GlideTest {
 
     requestManager.asGif().load(fakeUri).into(target);
 
-    verify(target).onResourceReady(any(GifDrawable.class), any(Transition.class));
+    verify(target).onResourceReady(isA(GifDrawable.class), isA(Transition.class));
   }
 
   @Test
@@ -423,7 +423,7 @@ public class GlideTest {
     requestManager.as(byte[].class).apply(decodeTypeOf(GifDrawable.class)).load(fakeUri)
         .into(target);
 
-    verify(target).onResourceReady(any(byte[].class), any(Transition.class));
+    verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
   }
 
   @Test
@@ -432,7 +432,7 @@ public class GlideTest {
     mockUri(fakeUri);
     requestManager.as(byte[].class).apply(decodeTypeOf(Bitmap.class)).load(fakeUri).into(target);
 
-    verify(target).onResourceReady(any(byte[].class), any(Transition.class));
+    verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
   }
 
   @Test
@@ -442,7 +442,7 @@ public class GlideTest {
     requestManager.asDrawable().load(full).thumbnail(requestManager.asDrawable().load(thumb))
         .into(target);
 
-    verify(target, times(2)).onResourceReady(any(Drawable.class), any(Transition.class));
+    verify(target, times(2)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
   @Test
@@ -452,7 +452,7 @@ public class GlideTest {
             requestManager.asDrawable().load(mockUri("content://third"))
                 .thumbnail(requestManager.asDrawable().load(mockUri("content://fourth")))))
         .into(target);
-    verify(target, times(4)).onResourceReady(any(Drawable.class), any(Transition.class));
+    verify(target, times(4)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
   @Test
@@ -460,7 +460,7 @@ public class GlideTest {
     requestManager.asDrawable().load(mockUri("content://first"))
         .thumbnail(requestManager.asDrawable().load(mockUri("content://second")).thumbnail(0.5f))
         .into(target);
-    verify(target, times(3)).onResourceReady(any(Drawable.class), any(Transition.class));
+    verify(target, times(3)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
   @Test
@@ -510,9 +510,9 @@ public class GlideTest {
   @Test
   public void testClone() throws IOException {
     Target firstTarget = mock(Target.class);
-    doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(any(SizeReadyCallback.class));
+    doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(isA(SizeReadyCallback.class));
     Target secondTarget = mock(Target.class);
-    doAnswer(new CallSizeReady(100, 100)).when(secondTarget).getSize(any(SizeReadyCallback.class));
+    doAnswer(new CallSizeReady(100, 100)).when(secondTarget).getSize(isA(SizeReadyCallback.class));
     RequestBuilder<Drawable> firstRequest = Glide.with(getContext())
         .asDrawable()
         .load(mockUri("content://first"));
@@ -523,8 +523,8 @@ public class GlideTest {
         .apply(placeholderOf(new ColorDrawable(Color.RED)))
         .into(secondTarget);
 
-    verify(firstTarget).onResourceReady(any(Resource.class), any(Transition.class));
-    verify(secondTarget).onResourceReady(anyObject(), any(Transition.class));
+    verify(firstTarget).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
+    verify(secondTarget).onResourceReady(notNull(), isA(Transition.class));
   }
 
   @SuppressWarnings("unchecked")
@@ -533,14 +533,14 @@ public class GlideTest {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
     doAnswer(new Util.CallDataReady(null))
         .when(failFetcher)
-        .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
+        .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
     when(failFetcher.getDataClass()).thenReturn(failResource);
     ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
-    when(failLoader.buildLoadData(any(failModel), anyInt(), anyInt(), any(Options.class)))
+    when(failLoader.buildLoadData(isA(failModel), anyInt(), anyInt(), isA(Options.class)))
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), failFetcher));
-    when(failLoader.handles(any(failModel))).thenReturn(true);
+    when(failLoader.handles(isA(failModel))).thenReturn(true);
     ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
-    when(failFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
+    when(failFactory.build(isA(Context.class), isA(MultiModelLoaderFactory.class)))
         .thenReturn(failLoader);
 
     Glide.get(getContext()).getRegistry().prepend(failModel, failResource, failFactory);
@@ -579,7 +579,7 @@ public class GlideTest {
   private <T> void registerMockStreamModelLoader(final Class<T> modelClass) {
     ModelLoader<T, InputStream> modelLoader = mockStreamModelLoader(modelClass);
     ModelLoaderFactory<T, InputStream> modelLoaderFactory = mock(ModelLoaderFactory.class);
-    when(modelLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
+    when(modelLoaderFactory.build(isA(Context.class), isA(MultiModelLoaderFactory.class)))
         .thenReturn(modelLoader);
 
     Glide.get(RuntimeEnvironment.application).getRegistry()
@@ -592,14 +592,14 @@ public class GlideTest {
     DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
     try {
       doAnswer(new Util.CallDataReady(new ByteArrayInputStream(new byte[0]))).when(fetcher)
-          .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
+          .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
     } catch (Exception e) {
       // Do nothing.
     }
     when(fetcher.getDataClass()).thenReturn(InputStream.class);
-    when(modelLoader.buildLoadData(any(modelClass), anyInt(), anyInt(), any(Options.class)))
+    when(modelLoader.buildLoadData(isA(modelClass), anyInt(), anyInt(), isA(Options.class)))
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), fetcher));
-    when(modelLoader.handles(any(modelClass))).thenReturn(true);
+    when(modelLoader.handles(isA(modelClass))).thenReturn(true);
 
     return modelLoader;
   }
@@ -642,7 +642,7 @@ public class GlideTest {
           runnable.run();
           return null;
         }
-      }).when(executor).execute(any(Runnable.class));
+      }).when(executor).execute(isA(Runnable.class));
 
       DiskCache.Factory diskCacheFactory = mock(DiskCache.Factory.class);
       when(diskCacheFactory.build()).thenReturn(mock(DiskCache.class));
@@ -670,16 +670,16 @@ public class GlideTest {
       try {
         doAnswer(new Util.CallDataReady<>(loadedData))
             .when(mockStreamFetcher)
-            .loadData(any(Priority.class), any(DataFetcher.DataCallback.class));
+            .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
       ModelLoader<X, Y> mockUrlLoader = mock(ModelLoader.class);
-      when(mockUrlLoader.buildLoadData(any(modelClass), anyInt(), anyInt(), any(Options.class)))
+      when(mockUrlLoader.buildLoadData(isA(modelClass), anyInt(), anyInt(), isA(Options.class)))
           .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
-      when(mockUrlLoader.handles(any(modelClass))).thenReturn(true);
+      when(mockUrlLoader.handles(isA(modelClass))).thenReturn(true);
       ModelLoaderFactory<X, Y> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
-      when(mockUrlLoaderFactory.build(any(Context.class), any(MultiModelLoaderFactory.class)))
+      when(mockUrlLoaderFactory.build(isA(Context.class), isA(MultiModelLoaderFactory.class)))
           .thenReturn(mockUrlLoader);
 
       registry.replace(modelClass, dataClass, mockUrlLoaderFactory);

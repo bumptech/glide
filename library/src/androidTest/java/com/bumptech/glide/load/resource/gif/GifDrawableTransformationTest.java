@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.resource.gif;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -61,22 +61,22 @@ public class GifDrawableTransformationTest {
     Bitmap expectedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
     Resource<Bitmap> expectedResource = mock(Resource.class);
     when(expectedResource.get()).thenReturn(expectedBitmap);
-    when(wrapped.transform(any(Resource.class), anyInt(), anyInt())).thenReturn(expectedResource);
+    when(wrapped.transform(isA(Resource.class), anyInt(), anyInt())).thenReturn(expectedResource);
 
     transformation.transform(resource, width, height);
 
-    verify(gifDrawable).setFrameTransformation(any(Transformation.class), eq(expectedBitmap));
+    verify(gifDrawable).setFrameTransformation(isA(Transformation.class), eq(expectedBitmap));
   }
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
     doAnswer(new Util.WriteDigest("first")).when(wrapped)
-        .updateDiskCacheKey(any(MessageDigest.class));
+        .updateDiskCacheKey(isA(MessageDigest.class));
     KeyAssertions.assertSame(transformation, new GifDrawableTransformation(wrapped, bitmapPool));
 
     Transformation<Bitmap> other = mock(Transformation.class);
     doAnswer(new Util.WriteDigest("other")).when(other)
-        .updateDiskCacheKey(any(MessageDigest.class));
+        .updateDiskCacheKey(isA(MessageDigest.class));
     KeyAssertions.assertDifferent(transformation, new GifDrawableTransformation(other, bitmapPool));
   }
 }

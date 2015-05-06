@@ -3,9 +3,8 @@ package com.bumptech.glide.load.resource.gif;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -64,7 +63,7 @@ public class GifFrameLoaderTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    when(handler.obtainMessage(anyInt(), anyObject())).thenReturn(mock(Message.class));
+    when(handler.obtainMessage(anyInt(), isA(DelayTarget.class))).thenReturn(mock(Message.class));
 
     firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
@@ -83,7 +82,7 @@ public class GifFrameLoaderTest {
     Transformation<Bitmap> transformation = mock(Transformation.class);
     loader.setFrameTransformation(transformation, firstFrame);
 
-    verify(requestBuilder, times(2)).apply(any(RequestOptions.class));
+    verify(requestBuilder, times(2)).apply(isA(RequestOptions.class));
   }
 
   @Test(expected = NullPointerException.class)
@@ -102,7 +101,7 @@ public class GifFrameLoaderTest {
   public void testStartGetsNextFrameIfNotStartedAndWithNoLoadPending() {
     loader.subscribe(callback);
 
-    verify(requestBuilder).into(any(Target.class));
+    verify(requestBuilder).into(isA(Target.class));
   }
 
   @Test
@@ -111,8 +110,8 @@ public class GifFrameLoaderTest {
 
     InOrder order = inOrder(gifDecoder, requestBuilder);
     order.verify(gifDecoder).advance();
-    order.verify(requestBuilder).apply(any(BaseRequestOptions.class));
-    order.verify(requestBuilder).into(any(Target.class));
+    order.verify(requestBuilder).apply(isA(BaseRequestOptions.class));
+    order.verify(requestBuilder).into(isA(Target.class));
   }
 
   @Test
@@ -135,14 +134,14 @@ public class GifFrameLoaderTest {
     loader.subscribe(callback);
     loader.subscribe(mock(FrameCallback.class));
 
-    verify(requestBuilder, times(1)).into(any(Target.class));
+    verify(requestBuilder, times(1)).into(isA(Target.class));
   }
 
   @Test
   public void testGetNextFrameDoesNotStartLoadIfLoaderIsNotRunning() {
     loader.onFrameReady(mock(DelayTarget.class));
 
-    verify(requestBuilder, never()).into(any(Target.class));
+    verify(requestBuilder, never()).into(isA(Target.class));
   }
 
   @Test
@@ -151,7 +150,7 @@ public class GifFrameLoaderTest {
     loader.unsubscribe(callback);
     loader.subscribe(callback);
 
-    verify(requestBuilder, times(1)).into(any(Target.class));
+    verify(requestBuilder, times(1)).into(isA(Target.class));
   }
 
   @Test
@@ -162,7 +161,7 @@ public class GifFrameLoaderTest {
     loader.onFrameReady(mock(DelayTarget.class));
     loader.subscribe(callback);
 
-    verify(requestBuilder, times(2)).into(any(Target.class));
+    verify(requestBuilder, times(2)).into(isA(Target.class));
   }
 
   @Test
@@ -170,7 +169,7 @@ public class GifFrameLoaderTest {
     loader.subscribe(callback);
     loader.onFrameReady(mock(DelayTarget.class));
 
-    verify(requestBuilder, times(2)).into(any(Target.class));
+    verify(requestBuilder, times(2)).into(isA(Target.class));
   }
 
   @Test
@@ -217,7 +216,7 @@ public class GifFrameLoaderTest {
     DelayTarget delayTarget = new DelayTarget(handler, 1, targetTime);
     delayTarget.onResourceReady(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
     /*glideAnimation*/);
-    verify(handler).sendMessageAtTime(any(Message.class), eq(targetTime));
+    verify(handler).sendMessageAtTime(isA(Message.class), eq(targetTime));
   }
 
   @Test
