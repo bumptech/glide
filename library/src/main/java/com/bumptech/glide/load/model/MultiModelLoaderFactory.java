@@ -6,8 +6,10 @@ import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Capable of building an {@link ModelLoader} that wraps one or more other {@link ModelLoader}s for
@@ -18,6 +20,7 @@ public class MultiModelLoaderFactory {
   private final List<Entry<?, ?>> entries = new ArrayList<>();
   private final Context context;
   private final Factory factory;
+  private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
 
   public MultiModelLoaderFactory(Context context) {
     this(context, DEFAULT_FACTORY);
@@ -67,8 +70,18 @@ public class MultiModelLoaderFactory {
   <Model> List<ModelLoader<Model, ?>> build(Class<Model> modelClass) {
     List<ModelLoader<Model, ?>> loaders = new ArrayList<>();
     for (Entry<?, ?> entry : entries) {
+      // Avoid stack overflow recursively creating model loaders by only creating loaders in
+      // recursive requests if they haven't been created earlier in the chain. For example:
+      // A Uri loader may translate to another model, which in turn may translate back to a Uri.
+      // The original Uri loader won't be provided to the intermediate model loader, although other
+      // Uri loaders will be.
+      if (alreadyUsedEntries.contains(entry)) {
+        continue;
+      }
       if (entry.handles(modelClass)) {
+        alreadyUsedEntries.add(entry);
         loaders.add(this.<Model, Object>build(entry));
+        alreadyUsedEntries.remove(entry);
       }
     }
     return loaders;
@@ -88,8 +101,18 @@ public class MultiModelLoaderFactory {
       Class<Data> dataClass) {
     List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
     for (Entry<?, ?> entry : entries) {
+      // Avoid stack overflow recursively creating model loaders by only creating loaders in
+      // recursive requests if they haven't been created earlier in the chain. For example:
+      // A Uri loader may translate to another model, which in turn may translate back to a Uri.
+      // The original Uri loader won't be provided to the intermediate model loader, although other
+      // Uri loaders will be.
+      if (alreadyUsedEntries.contains(entry)) {
+        continue;
+      }
       if (entry.handles(modelClass, dataClass)) {
+        alreadyUsedEntries.add(entry);
         loaders.add(this.<Model, Data>build(entry));
+        alreadyUsedEntries.remove(entry);
       }
     }
     if (loaders.size() > 1) {
