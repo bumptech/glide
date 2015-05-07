@@ -20,6 +20,9 @@ import java.util.Map;
 
 final class DecodeHelper<Transcode> {
 
+  private final List<LoadData<?>> loadData = new ArrayList<>();
+  private final List<Key> cacheKeys = new ArrayList<>();
+
   private GlideContext glideContext;
   private Object model;
   private int width;
@@ -29,9 +32,7 @@ final class DecodeHelper<Transcode> {
   private Options options;
   private Map<Class<?>, Transformation<?>> transformations;
   private Class<Transcode> transcodeClass;
-  private List<LoadData<?>> loadData = new ArrayList<>();
   private boolean isLoadDataSet;
-  private List<Key> cacheKeys = new ArrayList<>();
   private boolean isCacheKeysSet;
   private Key signature;
   private Priority priority;
@@ -164,7 +165,7 @@ final class DecodeHelper<Transcode> {
     return false;
   }
 
-  synchronized List<LoadData<?>> getLoadData() {
+  List<LoadData<?>> getLoadData() {
     if (!isLoadDataSet) {
       isLoadDataSet = true;
       loadData.clear();
@@ -182,7 +183,7 @@ final class DecodeHelper<Transcode> {
     return loadData;
   }
 
-  synchronized List<Key> getCacheKeys() {
+  List<Key> getCacheKeys() {
     if (!isCacheKeysSet) {
       isCacheKeysSet = true;
       cacheKeys.clear();

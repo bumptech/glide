@@ -16,7 +16,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
@@ -181,7 +185,7 @@ public class EngineTest {
     harness.activeResources
         .put(harness.cacheKey, new WeakReference<EngineResource<?>>(harness.resource));
 
-    when(harness.requestContext.isMemoryCacheable()).thenReturn(false);
+    harness.isMemoryCacheable = false;
     harness.doLoad();
 
     verify(harness.resource, never()).acquire();
@@ -201,7 +205,7 @@ public class EngineTest {
   public void testCacheIsNotCheckedIfNotMemoryCacheable() {
     when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
 
-    when(harness.requestContext.isMemoryCacheable()).thenReturn(false);
+    harness.isMemoryCacheable = false;
     harness.doLoad();
 
     verify(harness.job).start(any(DecodeJob.class));
@@ -405,13 +409,13 @@ public class EngineTest {
     harness.doLoad();
 
     verify(harness.keyFactory)
-        .buildKey(eq(harness.requestContext), eq(harness.width), eq(harness.height));
+        .buildKey(eq(harness.model), eq(harness.signature), eq(harness.width), eq(harness.height),
+            eq(harness.transformations), eq(Object.class), eq(Object.class), eq(harness.options));
   }
 
   @Test
   public void testFactoryIsGivenNecessaryArguments() {
     boolean isMemoryCacheable = true;
-    when(harness.requestContext.isMemoryCacheable()).thenReturn(isMemoryCacheable);
     harness.doLoad();
 
     verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(isMemoryCacheable));
@@ -447,21 +451,26 @@ public class EngineTest {
     EngineResource resource = mock(EngineResource.class);
     Map<Key, EngineJob> jobs = new HashMap<>();
     Map<Key, WeakReference<EngineResource<?>>> activeResources = new HashMap<>();
-    RequestContext<Object, Object> requestContext = mock(RequestContext.class);
 
     int width = 100;
     int height = 100;
 
+    Object model = new Object();
     MemoryCache cache = mock(MemoryCache.class);
     EngineJob job;
     Engine engine;
     Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
     Engine.DecodeJobFactory decodeJobFactory = mock(Engine.DecodeJobFactory.class);
     ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
+    Key signature = mock(Key.class);
+    Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
+    Options options = new Options();
+    GlideContext glideContext = mock(GlideContext.class);
+    boolean isMemoryCacheable = true;
 
     public EngineTestHarness() {
-      when(keyFactory.buildKey(eq(requestContext), anyInt(), anyInt())).thenReturn(cacheKey);
-      when(requestContext.isMemoryCacheable()).thenReturn(true);
+      when(keyFactory.buildKey(eq(model), eq(signature), anyInt(), anyInt(), eq(transformations),
+          eq(Object.class), eq(Object.class), eq(options))).thenReturn(cacheKey);
 
       job = mock(EngineJob.class);
 
@@ -472,7 +481,20 @@ public class EngineTest {
 
     public Engine.LoadStatus doLoad() {
       when(engineJobFactory.build(eq(cacheKey), anyBoolean())).thenReturn(job);
-      return engine.load(requestContext, width, height, cb);
+      return engine.load(glideContext,
+          model,
+          signature,
+          width,
+          height,
+          Object.class,
+          Object.class,
+          Priority.HIGH,
+          DiskCacheStrategy.ALL,
+          transformations,
+          false /*isTransformationRequired*/,
+          options,
+          isMemoryCacheable,
+          cb);
     }
   }
 }

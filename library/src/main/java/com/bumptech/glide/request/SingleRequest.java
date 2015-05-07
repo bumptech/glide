@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Logs;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -73,6 +74,7 @@ public final class SingleRequest<R> implements Request,
   private BaseRequestOptions<?> requestOptions;
   private int overrideWidth;
   private int overrideHeight;
+  private Priority priority;
   private Target<R> target;
   private RequestListener<R> requestListener;
   private Engine engine;
@@ -93,6 +95,7 @@ public final class SingleRequest<R> implements Request,
       BaseRequestOptions<?> requestOptions,
       int overrideWidth,
       int overrideHeight,
+      Priority priority,
       Target<R> target,
       RequestListener<R> requestListener,
       RequestCoordinator requestCoordinator,
@@ -110,6 +113,7 @@ public final class SingleRequest<R> implements Request,
         requestOptions,
         overrideWidth,
         overrideHeight,
+        priority,
         target,
         requestListener,
         requestCoordinator,
@@ -129,6 +133,7 @@ public final class SingleRequest<R> implements Request,
       BaseRequestOptions<?> requestOptions,
       int overrideWidth,
       int overrideHeight,
+      Priority priority,
       Target<R> target,
       RequestListener<R> requestListener,
       RequestCoordinator requestCoordinator,
@@ -140,6 +145,7 @@ public final class SingleRequest<R> implements Request,
     this.requestOptions = requestOptions;
     this.overrideWidth = overrideWidth;
     this.overrideHeight = overrideHeight;
+    this.priority = priority;
     this.target = target;
     this.requestListener = requestListener;
     this.requestCoordinator = requestCoordinator;
@@ -348,7 +354,7 @@ public final class SingleRequest<R> implements Request,
         height,
         requestOptions.getResourceClass(),
         transcodeClass,
-        requestOptions.getPriority(),
+        priority,
         requestOptions.getDiskCacheStrategy(),
         requestOptions.getTransformations(),
         requestOptions.isTransformationRequired(),

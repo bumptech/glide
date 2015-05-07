@@ -14,13 +14,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 
+import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.RequestContext;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
@@ -36,7 +40,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
@@ -62,7 +68,11 @@ public class SingleRequestTest {
     int overrideWidth = -1;
     int overrideHeight = -1;
     List result = new ArrayList();
-    RequestContext<Number, List> requestContext = mock(RequestContext.class);
+    GlideContext glideContext = mock(GlideContext.class);
+    Key signature = mock(Key.class);
+    Priority priority = Priority.HIGH;
+
+    Map<Class<?>, Transformation<?>>  transformations = new HashMap<Class<?>, Transformation<?>>();
 
     public RequestHarness() {
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
@@ -71,17 +81,16 @@ public class SingleRequestTest {
     }
 
     public SingleRequest<List> getRequest() {
-      when(requestContext.getModel()).thenReturn(model);
-      when(requestContext.getTranscodeClass()).thenReturn(List.class);
-      when(requestContext.getErrorDrawable()).thenReturn(errorDrawable);
-      when(requestContext.getPlaceholderDrawable()).thenReturn(placeholderDrawable);
-      when(requestContext.getFallbackDrawable()).thenReturn(fallbackDrawable);
-      when(requestContext.getOverrideWidth()).thenReturn(overrideWidth);
-      when(requestContext.getOverrideHeight()).thenReturn(overrideHeight);
-      when(requestContext.getSizeMultiplier()).thenReturn(1f);
-
+       RequestOptions requestOptions = new RequestOptions()
+        .error(errorDrawable)
+        .placeholder(placeholderDrawable)
+        .fallback(fallbackDrawable)
+        .override(overrideWidth, overrideHeight)
+        .priority(priority)
+        .signature(signature);
       return SingleRequest
-          .obtain(requestContext, target, requestListener, requestCoordinator, engine, factory);
+          .obtain(glideContext, model, List.class, requestOptions, overrideWidth, overrideHeight,
+              priority, target, requestListener, requestCoordinator, engine, factory);
     }
   }
 
@@ -259,7 +268,10 @@ public class SingleRequestTest {
     request.onSizeReady(100, 100);
 
     verify(harness.engine, times(1))
-        .load(eq(harness.requestContext), eq(100), eq(100), any(ResourceCallback.class));
+        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
+            eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
+            eq(harness.transformations), anyBoolean(), any(Options.class),
+            anyBoolean(), any(ResourceCallback.class));
   }
 
   @Test
@@ -275,7 +287,10 @@ public class SingleRequestTest {
     Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
 
     when(harness.engine
-        .load(any(RequestContext.class), anyInt(), anyInt(), any(ResourceCallback.class)))
+       .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(), anyInt(),
+          eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
+          eq(harness.transformations), anyBoolean(), any(Options.class),
+          anyBoolean(), any(ResourceCallback.class)))
         .thenReturn(loadStatus);
 
     SingleRequest<List> request = harness.getRequest();
@@ -516,7 +531,10 @@ public class SingleRequestTest {
     final SingleRequest<List> request = harness.getRequest();
 
     when(harness.engine
-        .load(any(RequestContext.class), anyInt(), anyInt(), any(ResourceCallback.class)))
+        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
+            anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
+            any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
+            any(Options.class), anyBoolean(), any(ResourceCallback.class)))
         .thenAnswer(new Answer<Object>() {
           @Override
           public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -627,8 +645,10 @@ public class SingleRequestTest {
     request.begin();
 
     verify(harness.engine)
-        .load(eq(harness.requestContext), eq(harness.overrideWidth), eq(harness.overrideHeight),
-            any(ResourceCallback.class));
+        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
+            anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
+            any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
+            any(Options.class), anyBoolean(), any(ResourceCallback.class));
   }
 
   @Test
@@ -647,7 +667,10 @@ public class SingleRequestTest {
         .getSize(any(SizeReadyCallback.class));
 
     when(harness.engine
-        .load(eq(harness.requestContext), eq(100), eq(100), any(ResourceCallback.class)))
+        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
+            eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
+            eq(harness.transformations), anyBoolean(), any(Options.class),
+            anyBoolean(), any(ResourceCallback.class)))
         .thenAnswer(new CallResourceCallback(harness.resource));
     SingleRequest<List> request = harness.getRequest();
 
@@ -673,7 +696,10 @@ public class SingleRequestTest {
     request.onSizeReady(100, 100);
 
     verify(harness.engine, never())
-        .load(any(RequestContext.class), anyInt(), anyInt(), any(ResourceCallback.class));
+        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
+            anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
+            any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
+            any(Options.class), anyBoolean(), any(ResourceCallback.class));
   }
 
   private static class CallResourceCallback implements Answer {
@@ -710,12 +736,6 @@ public class SingleRequestTest {
       cb.onSizeReady(width, height);
       return null;
     }
-  }
-
-  private void mockContextToReturn(int resourceId, Drawable drawable) {
-    Resources resources = mock(Resources.class);
-    when(harness.requestContext.getResources()).thenReturn(resources);
-    when(resources.getDrawable(eq(resourceId))).thenReturn(drawable);
   }
 
   private static class MockTarget implements Target<List> {

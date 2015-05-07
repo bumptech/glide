@@ -17,7 +17,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
 
   /**
    * Constructor to build a fixed thread pool with the given pool size using
-   * {@link * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory}.
+   * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory}.
    *
    * @param poolSize The number of threads.
    */
@@ -27,7 +27,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
 
   /**
    * Constructor to build a fixed thread pool with the given pool size using
-   * {@link * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory}.
+   * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory}.
    *
    * @param poolSize The number of threads.
    * @param uncaughtThrowableStrategy Dictates how the pool should handle uncaught and unexpected

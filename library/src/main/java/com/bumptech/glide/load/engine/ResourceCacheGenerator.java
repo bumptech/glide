@@ -17,6 +17,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
   private final FetcherReadyCallback cb;
+  private final DecodeHelper<?> helper;
 
   private int sourceIdIndex = 0;
   private int resourceClassIndex = -1;
@@ -28,7 +29,6 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   // multiple calls to startNext.
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
-  private DecodeHelper<?> helper;
 
   public ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.helper = helper;

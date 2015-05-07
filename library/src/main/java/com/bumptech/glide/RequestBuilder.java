@@ -572,6 +572,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         requestOptions,
         overrideWidth,
         overrideHeight,
+        priority,
         target,
         requestListener,
         requestCoordinator,
