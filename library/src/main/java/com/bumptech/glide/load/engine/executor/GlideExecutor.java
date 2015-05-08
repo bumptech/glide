@@ -13,21 +13,18 @@ import java.util.concurrent.TimeUnit;
 public class GlideExecutor extends ThreadPoolExecutor {
   private static final String TAG = "GlideExecutor";
   private static final String DEFAULT_NAME = "fifo-pool";
-  private final UncaughtThrowableStrategy uncaughtThrowableStrategy;
 
   /**
-   * Constructor to build a fixed thread pool with the given pool size using
-   * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory}.
+   * Constructor to build a fixed thread pool with the given pool size.
    *
    * @param poolSize The number of threads.
    */
   public GlideExecutor(int poolSize) {
-    this(poolSize, UncaughtThrowableStrategy.LOG);
+    this(poolSize, new DefaultThreadFactory());
   }
 
   /**
-   * Constructor to build a fixed thread pool with the given pool size using
-   * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory}.
+   * Constructor to build a fixed thread pool with the given pool size.
    *
    * @param poolSize The number of threads.
    * @param uncaughtThrowableStrategy Dictates how the pool should handle uncaught and unexpected
@@ -35,34 +32,36 @@ public class GlideExecutor extends ThreadPoolExecutor {
    */
   public GlideExecutor(int poolSize,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory(),
-        uncaughtThrowableStrategy);
+    this(poolSize, new DefaultThreadFactory(uncaughtThrowableStrategy));
   }
 
   /**
-   * Constructor to build a fixed thread pool with the given pool size using {@link
-   * GlideExecutor.DefaultThreadFactory}.
+   * Constructor to build a fixed thread pool with the given pool size.
    *
    * @param name The prefix for threads created by this pool.
    * @param poolSize The number of threads.
    */
   public GlideExecutor(String name, int poolSize) {
-    this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory(name),
-        UncaughtThrowableStrategy.LOG);
+    this(poolSize, new DefaultThreadFactory(name));
   }
 
-  public GlideExecutor(int corePoolSize, int maximumPoolSize, long keepAlive,
-      TimeUnit timeUnit, ThreadFactory threadFactory,
+  /**
+   * Constructor to build a fixed thread pool with the given pool size.
+   *
+   * @param name The prefix for each thread name.
+   * @param poolSize The number of threads.
+   * @param uncaughtThrowableStrategy The {@link
+   * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
+   *                                  handle uncaught exceptions.
+   */
+  public GlideExecutor(String name, int poolSize,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    super(corePoolSize, maximumPoolSize, keepAlive, timeUnit, new PriorityBlockingQueue<Runnable>(),
-        threadFactory);
-    this.uncaughtThrowableStrategy = uncaughtThrowableStrategy;
+    this(poolSize, new DefaultThreadFactory(name, uncaughtThrowableStrategy));
   }
 
-  @Override
-  protected void afterExecute(Runnable r, Throwable t) {
-    super.afterExecute(r, t);
-    uncaughtThrowableStrategy.handle(t);
+  private GlideExecutor(int corePoolSize, ThreadFactory threadFactory) {
+    super(corePoolSize, corePoolSize, 0, TimeUnit.MILLISECONDS,
+        new PriorityBlockingQueue<Runnable>(), threadFactory);
   }
 
   /**
@@ -92,7 +91,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
       protected void handle(Throwable t) {
         super.handle(t);
         if (t != null) {
-          throw new RuntimeException(t);
+          throw new RuntimeException("Request threw uncaught throwable", t);
         }
       }
     };
@@ -106,16 +105,26 @@ public class GlideExecutor extends ThreadPoolExecutor {
    * A {@link java.util.concurrent.ThreadFactory} that builds threads with priority {@link
    * android.os.Process#THREAD_PRIORITY_BACKGROUND}.
    */
-  public static class DefaultThreadFactory implements ThreadFactory {
+  private static final class DefaultThreadFactory implements ThreadFactory {
     private final String name;
+    private final UncaughtThrowableStrategy uncaughtThrowableStrategy;
     private int threadNum = 0;
 
-    public DefaultThreadFactory() {
+    DefaultThreadFactory() {
       this(DEFAULT_NAME);
     }
 
-    public DefaultThreadFactory(String name) {
+    DefaultThreadFactory(String name) {
+      this(name, UncaughtThrowableStrategy.LOG);
+    }
+
+    DefaultThreadFactory(UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+      this(DEFAULT_NAME, uncaughtThrowableStrategy);
+    }
+
+    DefaultThreadFactory(String name, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
       this.name = name;
+      this.uncaughtThrowableStrategy = uncaughtThrowableStrategy;
     }
 
     @Override
@@ -124,7 +133,11 @@ public class GlideExecutor extends ThreadPoolExecutor {
         @Override
         public void run() {
           android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-          super.run();
+          try {
+            super.run();
+          } catch (Throwable t) {
+            uncaughtThrowableStrategy.handle(t);
+          }
         }
       };
       threadNum++;

@@ -196,11 +196,13 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
       runWrapped();
     } catch (RuntimeException e) {
-      if (!isCancelled && Log.isLoggable(TAG, Log.ERROR)) {
-        Log.e(TAG, "DecodeJob threw unexpectedly", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "DecodeJob threw unexpectedly, isCancelled: " + isCancelled, e);
       }
       notifyFailed();
-      throw e;
+      if (!isCancelled) {
+        throw e;
+      }
     }
   }
 
