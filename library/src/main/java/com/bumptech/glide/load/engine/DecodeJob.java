@@ -247,8 +247,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       generator = getNextGenerator();
 
       if (stage == Stage.SOURCE) {
-        runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
-        callback.reschedule(this);
+        reschedule();
         return;
       }
     }

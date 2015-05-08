@@ -50,13 +50,15 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
     sourceCacheGenerator = null;
 
     loadData = null;
+    boolean started = false;
     while (loadData == null && hasNextModelLoader()) {
       loadData = helper.getLoadData().get(loadDataListIndex++);
       if (loadData != null) {
+        started = true;
         loadData.fetcher.loadData(helper.getPriority(), this);
       }
     }
-    return loadData != null;
+    return started;
   }
 
   private boolean hasNextModelLoader() {

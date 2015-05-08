@@ -22,7 +22,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
    * @param poolSize The number of threads.
    */
   public GlideExecutor(int poolSize) {
-    this(poolSize, UncaughtThrowableStrategy.THROW);
+    this(poolSize, UncaughtThrowableStrategy.LOG);
   }
 
   /**
@@ -48,7 +48,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
    */
   public GlideExecutor(String name, int poolSize) {
     this(poolSize, poolSize, 0, TimeUnit.MILLISECONDS, new DefaultThreadFactory(name),
-        UncaughtThrowableStrategy.THROW);
+        UncaughtThrowableStrategy.LOG);
   }
 
   public GlideExecutor(int corePoolSize, int maximumPoolSize, long keepAlive,

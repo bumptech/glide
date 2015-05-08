@@ -71,6 +71,10 @@ final class DecodeHelper<Transcode> {
     return (DecodeHelper<R>) this;
   }
 
+  Object getModel() {
+    return model;
+  }
+
   void clear() {
     glideContext = null;
     model = null;
