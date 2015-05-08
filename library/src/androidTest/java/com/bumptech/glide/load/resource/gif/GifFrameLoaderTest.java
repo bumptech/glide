@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -56,7 +56,6 @@ public class GifFrameLoaderTest {
   @Mock RequestManager requestManager;
   private GifFrameLoader loader;
   private RequestBuilder<Bitmap> requestBuilder;
-  private ByteBuffer byteBuffer;
   private Bitmap firstFrame;
 
   @SuppressWarnings("unchecked")
@@ -67,7 +66,7 @@ public class GifFrameLoaderTest {
 
     firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
-    byteBuffer = ByteBuffer.allocate(10);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(10);
     when(gifDecoder.getData()).thenReturn(byteBuffer);
 
     requestBuilder = mock(RequestBuilder.class, new ReturnsSelfAnswer());

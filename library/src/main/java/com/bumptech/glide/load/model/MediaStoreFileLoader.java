@@ -93,6 +93,9 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
     }
   }
 
+  /**
+   * {@link ModelLoaderFactory} for {@link MediaStoreFileLoader}s.
+   */
   public static final class Factory implements ModelLoaderFactory<Uri, File> {
 
     @Override
