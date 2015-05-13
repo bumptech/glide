@@ -33,6 +33,8 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Failed to load data from asset manager", e);
       }
+      callback.onLoadFailed(e);
+      return;
     }
     callback.onDataReady(data);
   }

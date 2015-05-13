@@ -29,6 +29,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   // multiple calls to startNext.
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
+  private ResourceCacheKey currentKey;
 
   public ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.helper = helper;
@@ -53,9 +54,9 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
       Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
       Transformation<?> transformation = helper.getTransformation(resourceClass);
 
-      Key key = new ResourceCacheKey(sourceId, helper.getSignature(), helper.getWidth(),
+      currentKey = new ResourceCacheKey(sourceId, helper.getSignature(), helper.getWidth(),
           helper.getHeight(), transformation, resourceClass, helper.getOptions());
-      cacheFile = helper.getDiskCache().get(key);
+      cacheFile = helper.getDiskCache().get(currentKey);
       if (cacheFile != null) {
         this.sourceKey = sourceId;
         modelLoaders = helper.getModelLoaders(cacheFile);
@@ -93,6 +94,11 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceKey, data, fetcher, DataSource.RESOURCE_DISK_CACHE);
+    cb.onDataFetcherReady(sourceKey, data, fetcher, DataSource.RESOURCE_DISK_CACHE, currentKey);
+  }
+
+  @Override
+  public void onLoadFailed(Exception e) {
+    cb.onDataFetcherFailed(currentKey, e, fetcher, DataSource.RESOURCE_DISK_CACHE);
   }
 }

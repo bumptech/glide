@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
 
 /**
@@ -17,6 +18,8 @@ public interface ResourceCallback {
 
   /**
    * Called when a resource fails to load successfully.
+   *
+   * @param e a non-null {@link GlideException}.
    */
-  void onLoadFailed();
+  void onLoadFailed(GlideException e);
 }

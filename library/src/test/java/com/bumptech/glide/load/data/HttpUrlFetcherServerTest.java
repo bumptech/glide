@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.data;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -143,7 +143,7 @@ public class HttpUrlFetcherServerTest {
 
     getFetcher().loadData(Priority.IMMEDIATE, callback);
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test
@@ -152,7 +152,7 @@ public class HttpUrlFetcherServerTest {
 
     getFetcher().loadData(Priority.NORMAL, callback);
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test
@@ -161,7 +161,7 @@ public class HttpUrlFetcherServerTest {
 
     getFetcher().loadData(Priority.NORMAL, callback);
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test
@@ -169,7 +169,7 @@ public class HttpUrlFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
     getFetcher().loadData(Priority.LOW, callback);
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test
@@ -180,7 +180,7 @@ public class HttpUrlFetcherServerTest {
     }
     getFetcher().loadData(Priority.NORMAL, callback);
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test
@@ -188,7 +188,7 @@ public class HttpUrlFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500));
     getFetcher().loadData(Priority.NORMAL, callback);
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test
@@ -196,7 +196,7 @@ public class HttpUrlFetcherServerTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400));
     getFetcher().loadData(Priority.LOW, callback);
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test
@@ -214,7 +214,7 @@ public class HttpUrlFetcherServerTest {
       mockWebServer.enqueue(new MockResponse().setResponseCode(200));
     }
 
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(IOException.class));
   }
 
   @Test

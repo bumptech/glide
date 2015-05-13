@@ -25,6 +25,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
@@ -256,7 +257,7 @@ public class SingleRequestTest {
   public void testIsFailedAfterException() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
     assertTrue(request.isFailed());
   }
 
@@ -278,7 +279,7 @@ public class SingleRequestTest {
   public void testIsFailedAfterNoResultAndNullException() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
     assertTrue(request.isFailed());
   }
 
@@ -336,7 +337,7 @@ public class SingleRequestTest {
     harness.target = target;
     SingleRequest<List> request = harness.getRequest();
 
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
 
     assertEquals(expected, target.currentPlaceholder);
   }
@@ -419,7 +420,7 @@ public class SingleRequestTest {
   public void testIsNotRunningAfterFailing() {
     SingleRequest<List> request = harness.getRequest();
     request.begin();
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
 
     assertFalse(request.isRunning());
   }
@@ -468,7 +469,7 @@ public class SingleRequestTest {
   public void testCallsTargetOnExceptionIfNoRequestListener() {
     harness.requestListener = null;
     SingleRequest<List> request = harness.getRequest();
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
 
     verify(harness.target).onLoadFailed(eq(harness.errorDrawable));
   }
@@ -479,7 +480,7 @@ public class SingleRequestTest {
     when(harness.requestListener
         .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean()))
         .thenReturn(false);
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
 
     verify(harness.target).onLoadFailed(eq(harness.errorDrawable));
   }
@@ -491,7 +492,7 @@ public class SingleRequestTest {
         .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean()))
         .thenReturn(true);
 
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
 
     verify(harness.target, never()).onLoadFailed(any(Drawable.class));
   }
@@ -656,7 +657,7 @@ public class SingleRequestTest {
     harness.errorDrawable = new ColorDrawable(Color.RED);
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(false);
-    request.onLoadFailed();
+    request.onLoadFailed(new GlideException("test"));
 
     verify(harness.target, never()).onLoadFailed(any(Drawable.class));
   }

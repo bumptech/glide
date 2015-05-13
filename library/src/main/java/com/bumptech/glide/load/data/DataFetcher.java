@@ -30,6 +30,12 @@ public interface DataFetcher<T> {
      * Called with the loaded data if the load succeeded, or with {@code null} if the load failed.
      */
     void onDataReady(T data);
+
+    /**
+     * Called when the load fails.
+     * @param e a non-null {@link Exception} indicating why the load failed.
+     */
+    void onLoadFailed(Exception e);
   }
 
   /**

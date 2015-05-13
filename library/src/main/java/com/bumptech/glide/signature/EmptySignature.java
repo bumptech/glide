@@ -19,6 +19,11 @@ public final class EmptySignature implements Key {
   }
 
   @Override
+  public String toString() {
+    return "EmptySignature";
+  }
+
+  @Override
   public void updateDiskCacheKey(MessageDigest messageDigest) {
     // Do nothing.
   }

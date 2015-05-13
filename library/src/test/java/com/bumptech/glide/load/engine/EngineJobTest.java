@@ -79,9 +79,10 @@ public class EngineJobTest {
   public void testNotifiesAllCallbacksOnException() {
     MultiCbHarness harness = new MultiCbHarness();
     harness.job.start(harness.decodeJob);
-    harness.job.onLoadFailed();
+    GlideException exception = new GlideException("test");
+    harness.job.onLoadFailed(exception);
     for (ResourceCallback cb : harness.cbs) {
-      verify(cb).onLoadFailed();
+      verify(cb).onLoadFailed(eq(exception));
     }
   }
 
@@ -102,7 +103,7 @@ public class EngineJobTest {
     harness = new EngineJobHarness();
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onLoadFailed();
+    job.onLoadFailed(new GlideException("test"));
     ShadowLooper.runUiThreadTasks();
     verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
   }
@@ -157,10 +158,10 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.cancel();
 
-    job.onLoadFailed();
+    job.onLoadFailed(new GlideException("test"));
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb, never()).onLoadFailed();
+    verify(harness.cb, never()).onLoadFailed(any(GlideException.class));
   }
 
   @Test
@@ -215,7 +216,7 @@ public class EngineJobTest {
   public void testDoesNotNotifyCancelledIfReceivedException() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onLoadFailed();
+    job.onLoadFailed(new GlideException("test"));
 
     verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
     verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
@@ -279,13 +280,14 @@ public class EngineJobTest {
         job.addCallback(newCallback);
         return null;
       }
-    }).when(existingCallback).onLoadFailed();
+    }).when(existingCallback).onLoadFailed(any(GlideException.class));
 
+    GlideException exception = new GlideException("test");
     job.addCallback(existingCallback);
     job.start(harness.decodeJob);
-    job.onLoadFailed();
+    job.onLoadFailed(exception);
 
-    verify(newCallback).onLoadFailed();
+    verify(newCallback).onLoadFailed(eq(exception));
   }
 
   @Test
@@ -320,13 +322,14 @@ public class EngineJobTest {
         job.removeCallback(cb);
         return null;
       }
-    }).when(cb).onLoadFailed();
+    }).when(cb).onLoadFailed(any(GlideException.class));
 
+    GlideException exception = new GlideException("test");
     job.addCallback(cb);
     job.start(harness.decodeJob);
-    job.onLoadFailed();
+    job.onLoadFailed(exception);
 
-    verify(cb, times(1)).onLoadFailed();
+    verify(cb, times(1)).onLoadFailed(eq(exception));
   }
 
   @Test
@@ -386,12 +389,12 @@ public class EngineJobTest {
         job.removeCallback(notYetCalled);
         return null;
       }
-    }).when(called).onLoadFailed();
+    }).when(called).onLoadFailed(any(GlideException.class));
 
     job.addCallback(called);
     job.addCallback(notYetCalled);
     job.start(harness.decodeJob);
-    job.onLoadFailed();
+    job.onLoadFailed(new GlideException("test"));
 
     verify(notYetCalled, never()).onResourceReady(any(Resource.class));
   }

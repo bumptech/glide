@@ -19,6 +19,8 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Preconditions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,6 +41,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
   private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
+  private final List<Exception> exceptions = new ArrayList<>();
   private GlideContext glideContext;
   private Key signature;
   private Priority priority;
@@ -61,6 +64,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private volatile boolean isCancelled;
   private volatile boolean isCallbackNotified;
+  private Key currentAttemptingKey;
 
   DecodeJob(DiskCacheProvider diskCacheProvider, Pools.Pool<DecodeJob<?>> pool) {
     this.diskCacheProvider = diskCacheProvider;
@@ -129,6 +133,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     startFetchTime = 0L;
     isCancelled = false;
     isCallbackNotified = false;
+    exceptions.clear();
     pool.release(this);
   }
 
@@ -264,7 +269,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void notifyFailed() {
     setNotifiedOrThrow();
-    callback.onLoadFailed();
+    GlideException e = new GlideException("Failed to load resource", new ArrayList<>(exceptions));
+    callback.onLoadFailed(e);
   }
 
   private void notifyComplete(Resource<R> resource) {
@@ -303,16 +309,31 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   @Override
   public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
-      DataSource dataSource) {
+      DataSource dataSource, Key attemptedKey) {
     this.currentSourceKey = sourceKey;
     this.currentData = data;
     this.currentFetcher = fetcher;
     this.currentDataSource = dataSource;
+    this.currentAttemptingKey = attemptedKey;
     if (Thread.currentThread() != currentThread) {
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
     } else {
       decodeFromRetrievedData();
+    }
+  }
+
+  @Override
+  public void onDataFetcherFailed(Key attemptedKey, Exception e, DataFetcher<?> fetcher,
+      DataSource dataSource) {
+    GlideException exception = new GlideException("Fetching data failed", e);
+    exception.setLoggingDetails(attemptedKey, dataSource, fetcher.getDataClass());
+    exceptions.add(exception);
+    if (Thread.currentThread() != currentThread) {
+      runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
+      callback.reschedule(this);
+    } else {
+      runGenerators();
     }
   }
 
@@ -323,7 +344,13 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
           + ", cache key: " + currentSourceKey
           + ", fetcher: " + currentFetcher);
     }
-    Resource<R> resource = decodeFromData(currentFetcher, currentData, currentDataSource);
+    Resource<R> resource = null;
+    try {
+      resource = decodeFromData(currentFetcher, currentData, currentDataSource);
+    } catch (GlideException e) {
+      e.setLoggingDetails(currentAttemptingKey, currentDataSource);
+      exceptions.add(e);
+    }
     if (resource != null) {
       notifyComplete(resource);
       cleanup();
@@ -341,7 +368,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private <Data> Resource<R> decodeFromData(DataFetcher<?> fetcher, Data data,
-      DataSource dataSource) {
+      DataSource dataSource) throws GlideException {
     try {
       if (data == null) {
         return null;
@@ -358,7 +385,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @SuppressWarnings("unchecked")
-  private <Data> Resource<R> decodeFromFetcher(Data data, DataSource dataSource) {
+  private <Data> Resource<R> decodeFromFetcher(Data data, DataSource dataSource)
+      throws GlideException {
     LoadPath<Data, ?, R> path = decodeHelper.getLoadPath((Class<Data>) data.getClass());
     if (path != null) {
       return runLoadPath(data, dataSource, path);
@@ -368,10 +396,14 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private <Data, ResourceType> Resource<R> runLoadPath(Data data, DataSource dataSource,
-      LoadPath<Data, ResourceType, R> path) {
+      LoadPath<Data, ResourceType, R> path) throws GlideException {
     DataRewinder<Data> rewinder = glideContext.getRegistry().getRewinder(data);
-    return path.load(rewinder, options, width, height,
-        new DecodeCallback<ResourceType>(dataSource));
+    try {
+      return path.load(rewinder, options, width, height,
+          new DecodeCallback<ResourceType>(dataSource));
+    } finally {
+      rewinder.cleanup();
+    }
   }
 
   private void logWithTimeAndKey(String message, long startTime) {
@@ -456,7 +488,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
     void onResourceReady(Resource<R> resource);
 
-    void onLoadFailed();
+    void onLoadFailed(GlideException e);
 
     void reschedule(DecodeJob<?> job);
   }

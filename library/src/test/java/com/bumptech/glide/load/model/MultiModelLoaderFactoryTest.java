@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
+import com.bumptech.glide.load.engine.ExceptionListPool;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,14 +39,16 @@ public class MultiModelLoaderFactoryTest {
 
   @Rule public ExpectedException exception = ExpectedException.none();
 
+  private ExceptionListPool exceptionListPool;
   private MultiModelLoaderFactory multiFactory;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
+    exceptionListPool = new ExceptionListPool();
 
-    multiFactory =
-        new MultiModelLoaderFactory(RuntimeEnvironment.application, multiModelLoaderFactory);
+    multiFactory = new MultiModelLoaderFactory(RuntimeEnvironment.application, exceptionListPool,
+            multiModelLoaderFactory);
     when(firstFactory.build(anyContext(), eq(multiFactory))).thenReturn(firstModelLoader);
     when(secondFactory.build(anyContext(), eq(multiFactory))).thenReturn(secondModelLoader);
   }
@@ -272,7 +275,7 @@ public class MultiModelLoaderFactoryTest {
       Class<Y> dataClass) {
     ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
     multiFactory.build(modelClass, dataClass);
-    verify(multiModelLoaderFactory).build(captor.capture());
+    verify(multiModelLoaderFactory).build(captor.capture(), eq(exceptionListPool));
 
     List<ModelLoader> captured = captor.getValue();
     List<ModelLoader<X, Y>> result = new ArrayList<>(captured.size());

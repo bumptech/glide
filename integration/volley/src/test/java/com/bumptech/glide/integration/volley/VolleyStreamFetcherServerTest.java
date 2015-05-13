@@ -3,7 +3,7 @@ package com.bumptech.glide.integration.volley;
 import static com.bumptech.glide.testutil.TestUtil.assertStreamOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import android.os.SystemClock;
 
 import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -66,13 +67,8 @@ public class VolleyStreamFetcherServerTest {
     MockitoAnnotations.initMocks(this);
 
     waitForResponseLatch = new CountDownLatch(1);
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        waitForResponseLatch.countDown();
-        return null;
-      }
-    }).when(callback).onDataReady(any(InputStream.class));
+    doAnswer(new CountDown()).when(callback).onDataReady(any(InputStream.class));
+    doAnswer(new CountDown()).when(callback).onLoadFailed(any(Exception.class));
     requestQueue = Volley.newRequestQueue(RuntimeEnvironment.application);
     mockWebServer = new MockWebServer();
     mockWebServer.start();
@@ -144,49 +140,49 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testReturnsNullIfRedirectLocationIsEmpty() throws Exception {
+  public void testCallsLoadFailedIfRedirectLocationIsEmpty() throws Exception {
     for (int i = 0; i < 2; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301));
     }
 
     getFetcher().loadData(Priority.NORMAL, callback);
     waitForResponseLatch.await();
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(VolleyError.class));
   }
 
   @Test
-  public void testReturnsNullIfStatusCodeIsNegativeOne() throws Exception {
+  public void testCallsLoadFailedIfStatusCodeIsNegativeOne() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(VolleyError.class));
   }
 
   @Test
-  public void testReturnsNullAfterTooManyRedirects() throws Exception {
+  public void testCallsLoadFailedAfterTooManyRedirects() throws Exception {
     for (int i = 0; i < 20; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301)
           .setHeader("Location", mockWebServer.getUrl("/redirect" + i)));
     }
     getFetcher().loadData(Priority.NORMAL, callback);
     waitForResponseLatch.await();
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(VolleyError.class));
   }
 
   @Test
-  public void testReturnsNullIfStatusCodeIs500() throws Exception {
+  public void testCallsLoadFailedIfStatusCodeIs500() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500).setBody("error"));
     getFetcher().loadData(Priority.NORMAL, callback);
     waitForResponseLatch.await();
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(VolleyError.class));
   }
 
   @Test
-  public void testReturnsNullIfStatusCodeIs400() throws Exception {
+  public void testCallsLoadFailedIfStatusCodeIs400() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400).setBody("error"));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onLoadFailed(isA(VolleyError.class));
   }
 
   @Test
@@ -212,6 +208,15 @@ public class VolleyStreamFetcherServerTest {
   private DataFetcher<InputStream> getFetcher(Headers headers) {
     URL url = mockWebServer.getUrl(DEFAULT_PATH);
     return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString(), headers));
+  }
+
+  private class CountDown implements Answer<Void> {
+
+    @Override
+    public Void answer(InvocationOnMock invocation) throws Throwable {
+      waitForResponseLatch.countDown();
+      return null;
+    }
   }
 
   /**

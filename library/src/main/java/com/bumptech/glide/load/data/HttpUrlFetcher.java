@@ -52,7 +52,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   @Override
   public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
     long startTime = LogTime.getLogTime();
-    InputStream result = null;
+    final InputStream result;
     try {
       result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/,
           glideUrl.getHeaders());
@@ -60,7 +60,10 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Failed to load data for url", e);
       }
+      callback.onLoadFailed(e);
+      return;
     }
+
     if (Logs.isEnabled(Log.VERBOSE)) {
       Logs.log(Log.VERBOSE, "Finished http url fetcher fetch in "
           + LogTime.getElapsedMillis(startTime) + " ms and loaded "  + result);

@@ -4,6 +4,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.util.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,30 +21,51 @@ import java.util.List;
  */
 public class LoadPath<Data, ResourceType, Transcode> {
   private final Class<Data> dataClass;
+  private final ExceptionListPool listPool;
   private final List<? extends DecodePath<Data, ResourceType, Transcode>> decodePaths;
+  private final String failureMessage;
 
-  public LoadPath(Class<Data> dataClass,
-      List<DecodePath<Data, ResourceType, Transcode>> decodePaths) {
+  public LoadPath(Class<Data> dataClass, Class<ResourceType> resourceClass,
+      Class<Transcode> transcodeClass,
+      List<DecodePath<Data, ResourceType, Transcode>> decodePaths, ExceptionListPool listPool) {
     this.dataClass = dataClass;
+    this.listPool = listPool;
     this.decodePaths = Preconditions.checkNotEmpty(decodePaths);
+    failureMessage = "Failed LoadPath{" + dataClass.getSimpleName() + "->"
+        + resourceClass.getSimpleName() + "->" + transcodeClass.getSimpleName() + "}";
   }
 
   public Resource<Transcode> load(DataRewinder<Data> rewinder, Options options, int width,
-      int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) {
-
-    Resource<Transcode> result = null;
+      int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) throws GlideException {
+    List<Exception> exceptions = listPool.acquire();
     try {
-      int size = decodePaths.size();
-      for (int i = 0; i < size; i++) {
-        DecodePath<Data, ResourceType, Transcode> path = decodePaths.get(i);
-        result = path.decode(rewinder, width, height, options, decodeCallback);
-        if (result != null) {
-          break;
-        }
-      }
+      return loadWithExceptionList(rewinder, options, width, height, decodeCallback, exceptions);
     } finally {
-      rewinder.cleanup();
+      listPool.release(exceptions);
     }
+  }
+
+  private Resource<Transcode> loadWithExceptionList(DataRewinder<Data> rewinder, Options options,
+      int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback,
+      List<Exception> exceptions) throws GlideException {
+    int size = decodePaths.size();
+    Resource<Transcode> result = null;
+    for (int i = 0; i < size; i++) {
+      DecodePath<Data, ResourceType, Transcode> path = decodePaths.get(i);
+      try {
+        result = path.decode(rewinder, width, height, options, decodeCallback);
+      } catch (GlideException e) {
+        exceptions.add(e);
+      }
+      if (result != null) {
+        break;
+      }
+    }
+
+    if (result == null) {
+      throw new GlideException(failureMessage, new ArrayList<>(exceptions));
+    }
+
     return result;
   }
 

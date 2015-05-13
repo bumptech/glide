@@ -53,7 +53,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
         if (Logs.isEnabled(Log.DEBUG)) {
           Logs.log(Log.DEBUG, "OkHttp failed to obtain result", e);
         }
-        callback.onDataReady(null);
+        callback.onLoadFailed(e);
       }
 
       @Override

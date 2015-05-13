@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.engine.ExceptionListPool;
 import com.bumptech.glide.util.Preconditions;
 
 import java.util.ArrayList;
@@ -23,13 +24,15 @@ public class MultiModelLoaderFactory {
   private final Context context;
   private final Factory factory;
   private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
+  private final ExceptionListPool exceptionListPool;
 
-  public MultiModelLoaderFactory(Context context) {
-    this(context, DEFAULT_FACTORY);
+  public MultiModelLoaderFactory(Context context, ExceptionListPool exceptionListPool) {
+    this(context, exceptionListPool, DEFAULT_FACTORY);
   }
 
   // Visible for testing.
-  MultiModelLoaderFactory(Context context, Factory factory) {
+  MultiModelLoaderFactory(Context context, ExceptionListPool exceptionListPool, Factory factory) {
+    this.exceptionListPool = exceptionListPool;
     this.context = context.getApplicationContext();
     this.factory = factory;
   }
@@ -121,7 +124,7 @@ public class MultiModelLoaderFactory {
       }
     }
     if (loaders.size() > 1) {
-      return factory.build(loaders);
+      return factory.build(loaders, exceptionListPool);
     } else if (loaders.size() == 1) {
       return loaders.get(0);
     } else {
@@ -175,8 +178,8 @@ public class MultiModelLoaderFactory {
 
   static class Factory {
     public <Model, Data> MultiModelLoader<Model, Data> build(
-        List<ModelLoader<Model, Data>> modelLoaders) {
-      return new MultiModelLoader<>(modelLoaders);
+        List<ModelLoader<Model, Data>> modelLoaders, ExceptionListPool exceptionListPool) {
+      return new MultiModelLoader<>(modelLoaders, exceptionListPool);
     }
   }
 

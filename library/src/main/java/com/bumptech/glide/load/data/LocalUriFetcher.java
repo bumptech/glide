@@ -46,6 +46,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Failed to open Uri", e);
       }
+      callback.onLoadFailed(e);
+      return;
     }
     callback.onDataReady(data);
   }

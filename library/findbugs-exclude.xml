@@ -31,5 +31,9 @@
         <Class name="com.bumptech.glide.load.engine.DecodeJob" />
         <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS" />
     </Match>
+    <Match>
+       <Class name="com.bumptech.glide.load.engine.GlideException$IndentedPrintStream" />
+       <Bug pattern="DM_DEFAULT_ENCODING" />
+    </Match>
 
 </FindBugsFilter>

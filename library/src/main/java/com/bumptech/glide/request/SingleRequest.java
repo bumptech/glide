@@ -8,9 +8,9 @@ import android.support.v4.util.Pools.SimplePool;
 import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
@@ -58,7 +58,7 @@ public final class SingleRequest<R> implements Request,
      */
     CANCELLED,
     /**
-     * Cleared by the user with a placeholder put, may not be restarted.
+     * Cleared by the user with a placeholder set, may not be restarted.
      */
     CLEARED,
     /**
@@ -180,7 +180,7 @@ public final class SingleRequest<R> implements Request,
   public void begin() {
     startTime = LogTime.getLogTime();
     if (model == null) {
-      onLoadFailed();
+      onLoadFailed(new GlideException("Received null model"));
       return;
     }
 
@@ -398,26 +398,22 @@ public final class SingleRequest<R> implements Request,
   public void onResourceReady(Resource<?> resource) {
     loadStatus = null;
     if (resource == null) {
-      if (Logs.isEnabled(Log.ERROR)) {
-        Logs.log(Log.ERROR, "Expected to receive a Resource<R> with an object of " + transcodeClass
-            + " inside, but instead got null.");
-      }
-      onLoadFailed();
+      GlideException exception = new GlideException("Expected to receive a Resource<R> with an "
+          + "object of " + transcodeClass + " inside, but instead got null.");
+      onLoadFailed(exception);
       return;
     }
 
     Object received = resource.get();
     if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
       releaseResource(resource);
-      if (Logs.isEnabled(Log.ERROR)) {
-        Logs.log(Log.ERROR,
-            "Expected to receive an object of " + transcodeClass + " but instead" + " got "
-                + (received != null ? received.getClass() : "") + "{" + received + "} inside" + " "
-                + "Resource{" + resource + "}."
-                + (received != null ? "" : " " + "To indicate failure return a null Resource "
-                + "object, rather than a Resource object containing null data."));
-      }
-      onLoadFailed();
+      GlideException exception = new GlideException("Expected to receive an object of "
+          + transcodeClass + " but instead" + " got "
+          + (received != null ? received.getClass() : "") + "{" + received + "} inside" + " "
+          + "Resource{" + resource + "}."
+          + (received != null ? "" : " " + "To indicate failure return a null Resource "
+          + "object, rather than a Resource object containing null data."));
+      onLoadFailed(exception);
       return;
     }
 
@@ -464,9 +460,12 @@ public final class SingleRequest<R> implements Request,
    * A callback method that should never be invoked directly.
    */
   @Override
-  public void onLoadFailed() {
+  public void onLoadFailed(GlideException e) {
     if (Log.isLoggable(TAG, Log.DEBUG)) {
-      Log.d(TAG, "Load failed");
+      Log.d(TAG, "Load failed for: " + model, e);
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        e.logRootCauses(TAG);
+      }
     }
 
     loadStatus = null;

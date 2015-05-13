@@ -50,19 +50,21 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
 
   @Override
   public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
-    inputStream = openThumbInputStream();
-    callback.onDataReady(inputStream);
-  }
-
-  private InputStream openThumbInputStream() {
-    InputStream result = null;
     try {
-      result = opener.open(context, mediaStoreImageUri);
+      inputStream = openThumbInputStream();
     } catch (FileNotFoundException e) {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Failed to find thumbnail file", e);
       }
+      callback.onLoadFailed(e);
+      return;
     }
+
+    callback.onDataReady(inputStream);
+  }
+
+  private InputStream openThumbInputStream() throws FileNotFoundException {
+    InputStream result = opener.open(context, mediaStoreImageUri);
 
     int orientation = -1;
     if (result != null) {

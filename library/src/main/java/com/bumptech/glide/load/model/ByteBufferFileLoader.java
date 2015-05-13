@@ -65,7 +65,10 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
         if (Logs.isEnabled(Log.DEBUG)) {
           Logs.log(Log.DEBUG, "Failed to obtain ByteBuffer for file", e);
         }
+        callback.onLoadFailed(e);
+        return;
       }
+
       callback.onDataReady(result);
     }
 

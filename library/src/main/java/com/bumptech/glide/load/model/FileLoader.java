@@ -70,6 +70,8 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
         if (Logs.isEnabled(Log.DEBUG)) {
           Logs.log(Log.DEBUG, "Failed to open file", e);
         }
+        callback.onLoadFailed(e);
+        return;
       }
       callback.onDataReady(data);
     }

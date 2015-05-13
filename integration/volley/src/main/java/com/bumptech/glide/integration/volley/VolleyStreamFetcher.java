@@ -128,7 +128,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
       if (Logs.isEnabled(Log.DEBUG)) {
         Logs.log(Log.DEBUG, "Volley failed to retrieve response", volleyError);
       }
-      callback.onDataReady(null);
+      callback.onLoadFailed(volleyError);
       return super.parseNetworkError(volleyError);
     }
 

@@ -29,7 +29,6 @@ class DataCacheGenerator implements DataFetcherGenerator,
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
 
-
   DataCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this(helper.getCacheKeys(), helper, cb);
   }
@@ -89,6 +88,11 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceKey, data, fetcher, DataSource.DATA_DISK_CACHE);
+    cb.onDataFetcherReady(sourceKey, data, fetcher, DataSource.DATA_DISK_CACHE, sourceKey);
+  }
+
+  @Override
+  public void onLoadFailed(Exception e) {
+    cb.onDataFetcherFailed(sourceKey, e, fetcher, DataSource.DATA_DISK_CACHE);
   }
 }

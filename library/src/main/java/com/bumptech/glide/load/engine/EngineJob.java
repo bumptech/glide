@@ -35,11 +35,9 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   private boolean isCacheable;
 
   private boolean isCancelled;
-  // Either resource or exception (particularly exception) may be returned to us null, so use
-  // booleans to track if we've received them instead of relying on them to be non-null. See issue
-  // #180.
   private Resource<?> resource;
   private boolean hasResource;
+  private GlideException exception;
   private boolean hasLoadFailed;
   // A put of callbacks that are removed while we're notifying other callbacks of a change in
   // status.
@@ -86,7 +84,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
     if (hasResource) {
       cb.onResourceReady(engineResource);
     } else if (hasLoadFailed) {
-      cb.onLoadFailed();
+      cb.onLoadFailed(exception);
     } else {
       cbs.add(cb);
     }
@@ -192,6 +190,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
     hasResource = false;
     decodeJob.release();
     decodeJob = null;
+    exception = null;
     pool.release(this);
   }
 
@@ -202,7 +201,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   @Override
-  public void onLoadFailed() {
+  public void onLoadFailed(GlideException e) {
+    this.exception = e;
     MAIN_THREAD_HANDLER.obtainMessage(MSG_EXCEPTION, this).sendToTarget();
   }
 
@@ -231,7 +231,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
 
     for (ResourceCallback cb : cbs) {
       if (!isInIgnoredCallbacks(cb)) {
-        cb.onLoadFailed();
+        cb.onLoadFailed(exception);
       }
     }
 

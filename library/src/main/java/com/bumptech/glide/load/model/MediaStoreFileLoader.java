@@ -14,6 +14,7 @@ import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * Loads the file path for {@link MediaStore} owned {@link Uri uris}.
@@ -66,7 +67,7 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
       }
 
       if (TextUtils.isEmpty(filePath)) {
-        callback.onDataReady(null);
+        callback.onLoadFailed(new FileNotFoundException("Failed to find file path for: " + uri));
       } else {
         callback.onDataReady(new File(filePath));
       }

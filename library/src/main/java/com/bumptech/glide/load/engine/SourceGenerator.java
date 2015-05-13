@@ -32,6 +32,7 @@ class SourceGenerator implements DataFetcherGenerator,
   private DataCacheGenerator sourceCacheGenerator;
   private Object dataToCache;
   private volatile ModelLoader.LoadData<?> loadData;
+  private DataCacheKey originalKey;
 
   public SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.helper = helper;
@@ -41,9 +42,11 @@ class SourceGenerator implements DataFetcherGenerator,
   @Override
   public boolean startNext() {
     if (dataToCache != null) {
-      cacheData();
+      Object data = dataToCache;
       dataToCache = null;
+      cacheData(data);
     }
+
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
@@ -65,13 +68,13 @@ class SourceGenerator implements DataFetcherGenerator,
     return loadDataListIndex < helper.getLoadData().size();
   }
 
-  private void cacheData() {
+  private void cacheData(Object dataToCache) {
     long startTime = LogTime.getLogTime();
     try {
       Encoder<Object> encoder = helper.getSourceEncoder(dataToCache);
       DataCacheWriter<Object> writer =
           new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
-      Key originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
+      originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
       helper.getDiskCache().put(originalKey, writer);
       if (Logs.isEnabled(Log.VERBOSE)) {
         Logs.log(Log.VERBOSE, "Finished encoding source to cache"
@@ -106,8 +109,13 @@ class SourceGenerator implements DataFetcherGenerator,
       cb.reschedule();
     } else {
       cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,
-          loadData.fetcher.getDataSource());
+          loadData.fetcher.getDataSource(), originalKey);
     }
+  }
+
+  @Override
+  public void onLoadFailed(Exception e) {
+    cb.onDataFetcherFailed(originalKey, e, loadData.fetcher, loadData.fetcher.getDataSource());
   }
 
   @Override
@@ -120,9 +128,15 @@ class SourceGenerator implements DataFetcherGenerator,
   // Called from source cache generator.
   @Override
   public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
-      DataSource dataSource) {
+      DataSource dataSource, Key attemptedKey) {
     // This data fetcher will be loading from a File and provide the wrong data source, so override
     // with the data source of the original fetcher
-    cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource());
+    cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource(), sourceKey);
+  }
+
+  @Override
+  public void onDataFetcherFailed(Key sourceKey, Exception e, DataFetcher<?> fetcher,
+      DataSource dataSource) {
+    cb.onDataFetcherFailed(sourceKey, e, fetcher, loadData.fetcher.getDataSource());
   }
 }

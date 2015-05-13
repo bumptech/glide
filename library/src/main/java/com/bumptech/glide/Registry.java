@@ -8,6 +8,7 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.engine.DecodePath;
+import com.bumptech.glide.load.engine.ExceptionListPool;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -39,9 +40,11 @@ public class Registry {
   private final ModelToResourceClassCache modelToResourceClassCache =
       new ModelToResourceClassCache();
   private final LoadPathCache loadPathCache = new LoadPathCache();
+  private final ExceptionListPool exceptionListPool = new ExceptionListPool();
 
   public Registry(Context context) {
-    this.modelLoaderRegistry = new ModelLoaderRegistry(context.getApplicationContext());
+    this.modelLoaderRegistry =
+        new ModelLoaderRegistry(context.getApplicationContext(), exceptionListPool);
     this.encoderRegistry = new EncoderRegistry();
     this.decoderRegistry = new ResourceDecoderRegistry();
     this.resourceEncoderRegistry = new ResourceEncoderRegistry();
@@ -129,7 +132,8 @@ public class Registry {
       if (decodePaths.isEmpty()) {
         result = null;
       } else {
-        result = new LoadPath<>(dataClass, decodePaths);
+        result = new LoadPath<>(dataClass, resourceClass, transcodeClass, decodePaths,
+            exceptionListPool);
       }
       loadPathCache.put(dataClass, resourceClass, transcodeClass, result);
     }
@@ -153,7 +157,8 @@ public class Registry {
             decoderRegistry.getDecoders(dataClass, registeredResourceClass);
         ResourceTranscoder<TResource, Transcode> transcoder =
             transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
-        decodePaths.add(new DecodePath<>(dataClass, decoders, transcoder));
+        decodePaths.add(new DecodePath<>(dataClass, registeredResourceClass,
+            registeredTranscodeClass, decoders, transcoder, exceptionListPool));
       }
     }
     return decodePaths;
