@@ -3,7 +3,7 @@ title: 'Glide'
 subtitle: 'Fast and efficient image loading for Android'
 
 # if you wish to integrate disqus on pages set your shortname here
-disqus_shortname: ''
+disqus_shortname: 'android-glide'
 
 # if you use google analytics, add your tracking id here
 google_analytics_id: ''

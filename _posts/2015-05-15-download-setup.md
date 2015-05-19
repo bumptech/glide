@@ -4,6 +4,7 @@ title: "Download & Setup"
 category: doc
 date: 2015-05-15 21:08:05
 order: 1
+disqus: 1
 ---
 
 ### Download 

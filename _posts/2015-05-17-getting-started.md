@@ -4,6 +4,7 @@ title: "Getting Started"
 category: doc
 date: 2015-05-17 17:01:02
 order: 2
+disqus: 1
 ---
 
 ### Basic Usage
