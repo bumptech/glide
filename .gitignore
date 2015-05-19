@@ -4,6 +4,7 @@ samples/
 *.iml
 *.DS_Store
 local.properties
+_site/*
 
 .gradle
 build
