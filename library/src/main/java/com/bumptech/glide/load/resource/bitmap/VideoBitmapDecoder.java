@@ -43,7 +43,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
         public void update(byte[] keyBytes, Long value, MessageDigest messageDigest) {
           messageDigest.update(keyBytes);
           synchronized (buffer) {
-            buffer.rewind();
+            buffer.position(0);
             messageDigest.update(buffer.putLong(value).array());
           }
         }

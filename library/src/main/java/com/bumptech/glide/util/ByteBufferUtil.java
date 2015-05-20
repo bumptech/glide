@@ -102,7 +102,7 @@ public final class ByteBufferUtil {
     } else {
       ByteBuffer toCopy = byteBuffer.asReadOnlyBuffer();
       result = new byte[toCopy.limit()];
-      toCopy.rewind();
+      toCopy.position(0);
       toCopy.get(result);
     }
     return result;

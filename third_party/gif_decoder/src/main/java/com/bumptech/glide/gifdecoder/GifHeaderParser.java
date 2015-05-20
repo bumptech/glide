@@ -33,7 +33,7 @@ public class GifHeaderParser {
   public GifHeaderParser setData(ByteBuffer data) {
     reset();
     rawData = data.asReadOnlyBuffer();
-    rawData.rewind();
+    rawData.position(0);
     rawData.order(ByteOrder.LITTLE_ENDIAN);
     return this;
   }

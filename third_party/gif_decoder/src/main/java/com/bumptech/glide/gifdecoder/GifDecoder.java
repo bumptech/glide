@@ -400,7 +400,7 @@ public class GifDecoder {
     framePointer = INITIAL_FRAME_POINTER;
     // Initialize the raw data buffer.
     rawData = buffer.asReadOnlyBuffer();
-    rawData.rewind();
+    rawData.position(0);
     rawData.order(ByteOrder.LITTLE_ENDIAN);
 
     // No point in specially saving an old frame if we're never going to use it.

@@ -17,7 +17,7 @@ public class ByteBufferRewinder implements DataRewinder<ByteBuffer> {
 
   @Override
   public ByteBuffer rewindAndGet() throws IOException {
-    buffer.rewind();
+    buffer.position(0);
     return buffer;
   }
 
