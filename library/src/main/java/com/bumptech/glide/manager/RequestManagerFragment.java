@@ -114,7 +114,6 @@ public class RequestManagerFragment extends Fragment {
     }
   }
 
-
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   private Fragment getParentFragmentUsingHint() {
     final Fragment fragment;

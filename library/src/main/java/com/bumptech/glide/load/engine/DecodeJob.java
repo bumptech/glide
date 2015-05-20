@@ -234,7 +234,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       case DATA_CACHE:
         return new DataCacheGenerator(decodeHelper, this);
       case SOURCE:
-        return new SourceGenerator<>(decodeHelper, this);
+        return new SourceGenerator(decodeHelper, this);
       default:
         throw new IllegalStateException("Unrecognized stage: " + stage);
     }

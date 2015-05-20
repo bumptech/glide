@@ -21,7 +21,7 @@ import java.util.Collections;
  * <p> Depending on the disk cache strategy, source data may first be written to disk and then
  * loaded from the cache file rather than returned directly. </p>
  */
-class SourceGenerator<Model> implements DataFetcherGenerator,
+class SourceGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object>,
     DataFetcherGenerator.FetcherReadyCallback {
 
@@ -51,7 +51,7 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
     loadData = null;
     boolean started = false;
-    while (loadData == null && hasNextModelLoader()) {
+    while (!started && hasNextModelLoader()) {
       loadData = helper.getLoadData().get(loadDataListIndex++);
       if (loadData != null) {
         started = true;

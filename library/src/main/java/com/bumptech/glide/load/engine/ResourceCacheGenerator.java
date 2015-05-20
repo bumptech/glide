@@ -65,7 +65,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
     fetcher = null;
     boolean started = false;
-    while (fetcher == null && hasNextModelLoader()) {
+    while (!started && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
       fetcher =
           modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),

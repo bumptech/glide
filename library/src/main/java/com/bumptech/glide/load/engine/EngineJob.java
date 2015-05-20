@@ -131,17 +131,14 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
       return;
     }
 
+    isCancelled = true;
+    decodeJob.cancel();
     boolean isPendingJobRemoved =
         diskCacheExecutor.remove(decodeJob) || sourceExecutor.remove(decodeJob);
-    decodeJob.cancel();
-    isCancelled = true;
     listener.onEngineJobCancelled(this, key);
 
     if (isPendingJobRemoved) {
-//      Log.d("TEST", "removed pending job");
       release();
-    } else {
-//      Log.d("TEST", "Failed to remove pending job");
     }
   }
 
