@@ -60,7 +60,7 @@ public class RecyclerViewFragment extends Fragment
         new ListPreloader<>(requestManager, adapter, adapter, 3);
     RecyclerViewPreloaderListener recyclerViewPreloaderListener =
         new RecyclerViewPreloaderListener(preloader);
-    recyclerView.setOnScrollListener(recyclerViewPreloaderListener);
+    recyclerView.addOnScrollListener(recyclerViewPreloaderListener);
     recyclerView.setAdapter(adapter);
   }
 
