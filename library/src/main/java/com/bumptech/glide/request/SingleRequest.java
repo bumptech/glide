@@ -1,6 +1,8 @@
 package com.bumptech.glide.request;
 
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.util.Pools;
 import android.support.v4.util.Pools.SimplePool;
 import android.util.Log;
@@ -285,7 +287,7 @@ public final class SingleRequest<R> implements Request,
     if (errorDrawable == null) {
       errorDrawable = requestOptions.getErrorPlaceholder();
       if (errorDrawable == null && requestOptions.getErrorId() > 0) {
-        errorDrawable = glideContext.getResources().getDrawable(requestOptions.getErrorId());
+        errorDrawable = loadDrawable(requestOptions.getErrorId());
       }
     }
     return errorDrawable;
@@ -295,8 +297,7 @@ public final class SingleRequest<R> implements Request,
      if (placeholderDrawable == null) {
       placeholderDrawable = requestOptions.getPlaceholderDrawable();
       if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
-        placeholderDrawable =
-            glideContext.getResources().getDrawable(requestOptions.getPlaceholderId());
+        placeholderDrawable = loadDrawable(requestOptions.getPlaceholderId());
       }
     }
     return placeholderDrawable;
@@ -306,11 +307,15 @@ public final class SingleRequest<R> implements Request,
     if (fallbackDrawable == null) {
       fallbackDrawable = requestOptions.getFallbackDrawable();
       if (fallbackDrawable == null && requestOptions.getFallbackId() > 0) {
-        fallbackDrawable =
-            glideContext.getResources().getDrawable(requestOptions.getFallbackId());
+        fallbackDrawable = loadDrawable(requestOptions.getFallbackId());
       }
     }
     return fallbackDrawable;
+  }
+
+  private Drawable loadDrawable(int resouceId) {
+    Resources resources = glideContext.getResources();
+    return ResourcesCompat.getDrawable(resources, resouceId, requestOptions.getTheme());
   }
 
   private void setErrorPlaceholder() {

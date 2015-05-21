@@ -1,6 +1,7 @@
 package com.bumptech.glide.request;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -57,6 +58,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private static final int RESOURCE_CLASS = 1 << 13;
   private static final int FALLBACK = 1 << 14;
   private static final int FALLBACK_ID = 1 << 15;
+  private static final int THEME = 1 << 16;
 
   private int fields;
 
@@ -80,6 +82,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
   private Class<?> resourceClass = Object.class;
   private boolean isLocked;
+  private Resources.Theme theme;
 
   public final CHILD tag(String tag) {
     this.tag = tag;
@@ -230,6 +233,21 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   public final CHILD error(int resourceId) {
     this.errorId = resourceId;
     fields |= ERROR_ID;
+
+    return selfOrThrowIfLocked();
+  }
+
+  /**
+   * Sets the {@link android.content.res.Resources.Theme} to apply when loading {@link Drawable}s
+   * for resource ids provided via {@link #error(int)}, {@link #placeholder(int)}, and
+   * {@link #fallback(Drawable)}.
+   *
+   * @param theme The theme to use when loading Drawables.
+   * @return this request builder.
+   */
+  public final CHILD theme(Resources.Theme theme) {
+    this.theme = theme;
+    fields |= THEME;
 
     return selfOrThrowIfLocked();
   }
@@ -563,6 +581,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     if (isSet(other.fields, FALLBACK_ID)) {
       fallbackId = other.fallbackId;
     }
+    if (isSet(other.fields, THEME)) {
+      theme = other.theme;
+    }
     if (isSet(other.fields, IS_CACHEABLE)) {
       isCacheable = other.isCacheable;
     }
@@ -620,6 +641,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   public final Drawable getFallbackDrawable() {
     return fallbackDrawable;
+  }
+
+  public final Resources.Theme getTheme() {
+    return theme;
   }
 
   public final boolean isMemoryCacheable() {
