@@ -159,8 +159,8 @@ public class Registry {
     return decodePaths;
   }
 
-  public List<Class<?>> getRegisteredResourceClasses(Class<?> modelClass,
-      Class<?> resourceClass) {
+  public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
+      Class<Model> modelClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
     List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
 
     if (result == null) {
@@ -170,8 +170,10 @@ public class Registry {
         List<? extends Class<?>> registeredResourceClasses =
             decoderRegistry.getResourceClasses(dataClass, resourceClass);
         for (Class<?> registeredResourceClass : registeredResourceClasses) {
-          if (!result.contains(registeredResourceClass)) {
-            result.add(registeredResourceClass);
+          List<Class<Transcode>> registeredTranscodeClasses = transcoderRegistry
+              .getTranscodeClasses(registeredResourceClass, transcodeClass);
+          if (!registeredTranscodeClasses.isEmpty() && !result.contains(registeredResourceClass)) {
+              result.add(registeredResourceClass);
           }
         }
       }

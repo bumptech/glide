@@ -47,7 +47,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   private EngineResource<?> engineResource;
 
   private DecodeJob<R> decodeJob;
-  private Exception isReleased;
+  private boolean isReleased;
 
   EngineJob(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
       EngineJobListener listener, Pools.Pool<EngineJob<?>> pool) {
@@ -69,7 +69,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   EngineJob<R> init(Key key, boolean isCacheable) {
     this.key = key;
     this.isCacheable = isCacheable;
-    isReleased = null;
+    isReleased = false;
     return this;
   }
 
@@ -79,8 +79,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   public void addCallback(ResourceCallback cb) {
-    if (isReleased != null) {
-      throw new RuntimeException("Already released", isReleased);
+    if (isReleased) {
+      throw new RuntimeException("Already released");
     }
     Util.assertMainThread();
     if (hasResource) {
@@ -93,8 +93,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   public void removeCallback(ResourceCallback cb) {
-    if (isReleased != null) {
-      throw new RuntimeException("Already released", isReleased);
+    if (isReleased) {
+      throw new RuntimeException("Already released");
     }
     Util.assertMainThread();
     if (hasResource || hasLoadFailed) {
@@ -151,8 +151,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   private void handleResultOnMainThread() {
-    if (isReleased != null) {
-      throw new RuntimeException("Already released", isReleased);
+    if (isReleased) {
+      throw new RuntimeException("Already released");
     }
     if (isCancelled) {
       resource.recycle();
@@ -182,7 +182,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   private void release() {
-    isReleased = new RuntimeException("release");
+    isReleased = true;
     cbs.clear();
     key = null;
     engineResource = null;
@@ -219,8 +219,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   private void handleExceptionOnMainThread() {
-    if (isReleased != null) {
-      throw new RuntimeException("Already released", isReleased);
+    if (isReleased) {
+      throw new RuntimeException("Already released");
     }
     if (isCancelled) {
       release();

@@ -62,7 +62,6 @@ import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
-import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -443,15 +442,15 @@ public class Glide implements ComponentCallbacks2 {
     return registry;
   }
 
-  void removeFromManagers(Target<?> target, Request request) {
-    for (RequestManager requestManager : managers) {
-      if (requestManager.untrack(target, request)) {
-        return;
+  void removeFromManagers(Target<?> target) {
+    synchronized (managers) {
+      for (RequestManager requestManager : managers) {
+        if (requestManager.untrack(target)) {
+          return;
+        }
       }
     }
-    if (request != null) {
-      throw new IllegalStateException("Failed to remove request from managers");
-    }
+    throw new IllegalStateException("Failed to remove target from managers");
   }
 
   void registerRequestManager(RequestManager requestManager) {

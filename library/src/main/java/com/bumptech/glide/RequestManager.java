@@ -18,6 +18,7 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
+import com.bumptech.glide.manager.TargetTracker;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -44,6 +45,15 @@ public class RequestManager implements LifecycleListener {
   private final Lifecycle lifecycle;
   private final RequestTracker requestTracker;
   private final RequestManagerTreeNode treeNode;
+  private final TargetTracker targetTracker = new TargetTracker();
+  private final Runnable addSelfToLifecycle = new Runnable() {
+    @Override
+    public void run() {
+      lifecycle.addListener(RequestManager.this);
+    }
+  };
+  private final Handler mainHandler = new Handler(Looper.getMainLooper());
+  private final ConnectivityMonitor connectivityMonitor;
 
   public RequestManager(Context context, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
     this(context, lifecycle, treeNode, new RequestTracker(), new ConnectivityMonitorFactory());
@@ -56,7 +66,7 @@ public class RequestManager implements LifecycleListener {
     this.treeNode = treeNode;
     this.requestTracker = requestTracker;
 
-    ConnectivityMonitor connectivityMonitor =
+    connectivityMonitor =
         factory.build(context, new RequestManagerConnectivityListener(requestTracker));
 
     // If we're the application level request manager, we may be created on a background thread.
@@ -64,12 +74,7 @@ public class RequestManager implements LifecycleListener {
     // issue by delaying adding ourselves as a lifecycle listener by posting to the main thread.
     // This should be entirely safe.
     if (Util.isOnBackgroundThread()) {
-      new Handler(Looper.getMainLooper()).post(new Runnable() {
-        @Override
-        public void run() {
-          lifecycle.addListener(RequestManager.this);
-        }
-      });
+      mainHandler.post(addSelfToLifecycle);
     } else {
       lifecycle.addListener(this);
     }
@@ -168,6 +173,7 @@ public class RequestManager implements LifecycleListener {
   @Override
   public void onStart() {
     resumeRequests();
+    targetTracker.onStart();
   }
 
   /**
@@ -177,6 +183,7 @@ public class RequestManager implements LifecycleListener {
   @Override
   public void onStop() {
     pauseRequests();
+    targetTracker.onStop();
   }
 
   /**
@@ -185,8 +192,16 @@ public class RequestManager implements LifecycleListener {
    */
   @Override
   public void onDestroy() {
-    Glide.get(context).unregisterRequestManager(this);
+    targetTracker.onDestroy();
+    for (Target<?> target : targetTracker.getAll()) {
+      clear(target);
+    }
+    targetTracker.clear();
     requestTracker.clearRequests();
+    lifecycle.removeListener(this);
+    lifecycle.removeListener(connectivityMonitor);
+    mainHandler.removeCallbacks(addSelfToLifecycle);
+    Glide.get(context).unregisterRequestManager(this);
   }
 
   /**
@@ -270,27 +285,35 @@ public class RequestManager implements LifecycleListener {
       return;
     }
 
-    Request request = target.getRequest();
-    target.setRequest(null);
-    untrackOrDelegate(target, request);
+    untrackOrDelegate(target);
   }
 
-  private void untrackOrDelegate(Target<?> target, Request request) {
-    boolean isOwnedByUs = untrack(target, request);
+  private void untrackOrDelegate(Target<?> target) {
+    boolean isOwnedByUs = untrack(target);
     if (!isOwnedByUs) {
-      Glide.get(context).removeFromManagers(target, request);
+      Glide.get(context).removeFromManagers(target);
     }
   }
 
-  boolean untrack(Target<?> target, Request request) {
-    // Optimization only.
-    lifecycle.removeListener(target);
-    return requestTracker.clearRemoveAndRecycle(request);
+  boolean untrack(Target<?> target) {
+    Request request = target.getRequest();
+    if (requestTracker.clearRemoveAndRecycle(request)) {
+      targetTracker.untrack(target);
+      target.setRequest(null);
+      return true;
+    } else {
+      return true;
+    }
   }
 
   void track(Target<?> target, Request request) {
-    lifecycle.addListener(target);
+    targetTracker.track(target);
     requestTracker.runRequest(request);
+  }
+
+  @Override
+  public String toString() {
+    return super.toString() + "{tracker=" + requestTracker + ", treeNode=" + treeNode + "}";
   }
 
   private static class RequestManagerConnectivityListener implements ConnectivityMonitor

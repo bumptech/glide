@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import android.content.Context;
 
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.util.Preconditions;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.Set;
  */
 public class MultiModelLoaderFactory {
   private static final Factory DEFAULT_FACTORY = new Factory();
+  private static final ModelLoader<Object, Object> EMPTY_MODEL_LOADER = new EmptyModelLoader();
   private final List<Entry<?, ?>> entries = new ArrayList<>();
   private final Context context;
   private final Factory factory;
@@ -100,6 +102,7 @@ public class MultiModelLoaderFactory {
   public <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass,
       Class<Data> dataClass) {
     List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
+    boolean ignoredAnyEntries = false;
     for (Entry<?, ?> entry : entries) {
       // Avoid stack overflow recursively creating model loaders by only creating loaders in
       // recursive requests if they haven't been created earlier in the chain. For example:
@@ -107,6 +110,7 @@ public class MultiModelLoaderFactory {
       // The original Uri loader won't be provided to the intermediate model loader, although other
       // Uri loaders will be.
       if (alreadyUsedEntries.contains(entry)) {
+        ignoredAnyEntries = true;
         continue;
       }
       if (entry.handles(modelClass, dataClass)) {
@@ -120,7 +124,14 @@ public class MultiModelLoaderFactory {
     } else if (loaders.size() == 1) {
       return loaders.get(0);
     } else {
-      throw new NoModelLoaderAvailableException(modelClass, dataClass);
+      // Avoid crashing if recursion results in no loaders available. The assertion is supposed to
+      // catch completely unhandled types, recursion may mean a subtype isn't handled somewhere
+      // down the stack, which is often ok.
+      if (ignoredAnyEntries) {
+        return emptyModelLoader();
+      } else {
+        throw new NoModelLoaderAvailableException(modelClass, dataClass);
+      }
     }
   }
 
@@ -133,6 +144,11 @@ public class MultiModelLoaderFactory {
   private <Model, Data> ModelLoader<Model, Data> build(Entry<?, ?> entry) {
     return (ModelLoader<Model, Data>) Preconditions
         .checkNotNull(entry.factory.build(context, this));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <Model, Data> ModelLoader<Model, Data> emptyModelLoader() {
+    return (ModelLoader<Model, Data>) EMPTY_MODEL_LOADER;
   }
 
   private static class Entry<Model, Data> {
@@ -160,6 +176,19 @@ public class MultiModelLoaderFactory {
     public <Model, Data> MultiModelLoader<Model, Data> build(
         List<ModelLoader<Model, Data>> modelLoaders) {
       return new MultiModelLoader<>(modelLoaders);
+    }
+  }
+
+  private static class EmptyModelLoader implements ModelLoader<Object, Object> {
+
+    @Override
+    public LoadData<Object> buildLoadData(Object o, int width, int height, Options options) {
+      throw new UnsupportedOperationException("EmptyModelLoader does not handle data");
+    }
+
+    @Override
+    public boolean handles(Object o) {
+      return false;
     }
   }
 }

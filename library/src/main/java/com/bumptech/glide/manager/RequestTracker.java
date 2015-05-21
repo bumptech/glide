@@ -124,4 +124,9 @@ public class RequestTracker {
       }
     }
   }
+
+  @Override
+  public String toString() {
+    return super.toString() + "{numRequests=" + requests.size() + ", isPaused=" + isPaused + "}";
+  }
 }

@@ -12,7 +12,6 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -520,22 +519,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   public final boolean isTransformationRequired() {
     return isTransformationRequired;
-  }
-
-
-  @SuppressWarnings("unchecked")
-  public final <T> Transformation<T> getTransformation(Class<T> resourceClass) {
-    Transformation<T> result = (Transformation<T>) transformations.get(resourceClass);
-    if (result == null) {
-      if (!transformations.isEmpty() && isTransformationRequired) {
-        throw new IllegalArgumentException(
-            "Missing transformation for " + resourceClass + ". If you wish to"
-                + " ignore unknown resource types, use the optional transformation methods.");
-      } else {
-        return UnitTransformation.get();
-      }
-    }
-    return result;
   }
 
   /**
