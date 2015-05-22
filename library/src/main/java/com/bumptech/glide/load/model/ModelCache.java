@@ -60,6 +60,13 @@ public class ModelCache<A, B> {
     cache.put(key, value);
   }
 
+  /**
+   * Removes all entries from the cache.
+   */
+  public void clear() {
+    cache.clearMemory();
+  }
+
   // Visible for testing.
   static final class ModelKey<A> {
     private static final Queue<ModelKey<?>> KEY_QUEUE = Util.createQueue(0);
