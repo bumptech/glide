@@ -6,7 +6,7 @@ subtitle: 'Fast and efficient image loading for Android'
 disqus_shortname: 'android-glide'
 
 # if you use google analytics, add your tracking id here
-google_analytics_id: ''
+google_analytics_id: 'UA-63288121-1'
 
 # Enable/show navigation. There are there options:
 #   0 - always hide
