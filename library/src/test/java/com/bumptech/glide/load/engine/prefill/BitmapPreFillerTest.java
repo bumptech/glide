@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Range;
+import org.robolectric.RobolectricTestRunner;
 
 import android.graphics.Bitmap;
 
@@ -23,14 +24,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class BitmapPreFillerTest {
   private static final int DEFAULT_BITMAP_WIDTH = 100;
   private static final int DEFAULT_BITMAP_HEIGHT = 50;

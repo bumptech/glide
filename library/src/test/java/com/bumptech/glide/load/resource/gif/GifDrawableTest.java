@@ -14,6 +14,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -36,7 +38,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -48,8 +49,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18,
-    shadows = { GlideShadowLooper.class, BitmapTrackingShadowCanvas.class })
+@Config(manifest = Config.NONE, sdk = 18, shadows = { GlideShadowLooper.class, BitmapTrackingShadowCanvas.class })
 public class GifDrawableTest {
   private GifDrawable drawable;
   private int frameHeight;

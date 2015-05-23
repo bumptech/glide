@@ -9,6 +9,8 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -23,7 +25,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -31,7 +32,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
 public class ByteBufferGifDecoderTest {
   private static final byte[] GIF_HEADER = new byte[] { 0x47, 0x49, 0x46 };
 

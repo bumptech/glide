@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.testing.EqualsTester;
+import org.robolectric.RobolectricTestRunner;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -38,7 +39,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -46,7 +46,7 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class GifFrameLoaderTest {
 
   @Mock GifFrameLoader.FrameCallback callback;

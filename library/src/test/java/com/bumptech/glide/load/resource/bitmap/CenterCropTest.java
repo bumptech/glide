@@ -11,6 +11,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.load.Transformation;
@@ -24,7 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
@@ -32,7 +33,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class CenterCropTest {
   @Mock Resource<Bitmap> resource;
   @Mock BitmapPool pool;

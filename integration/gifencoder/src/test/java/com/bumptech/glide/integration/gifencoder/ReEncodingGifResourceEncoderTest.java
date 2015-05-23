@@ -12,6 +12,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
@@ -34,7 +36,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -47,7 +48,7 @@ import java.nio.ByteBuffer;
  * Tests for {@link com.bumptech.glide.integration.gifencoder.ReEncodingGifResourceEncoder}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class ReEncodingGifResourceEncoderTest {
   @Mock Resource<GifDrawable> resource;
   @Mock GifDecoder decoder;

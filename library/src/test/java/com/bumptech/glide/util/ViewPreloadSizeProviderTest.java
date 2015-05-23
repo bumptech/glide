@@ -3,18 +3,19 @@ package com.bumptech.glide.util;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class ViewPreloadSizeProviderTest {
 
   private View view;

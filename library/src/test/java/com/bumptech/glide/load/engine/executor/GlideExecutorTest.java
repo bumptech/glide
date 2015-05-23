@@ -2,9 +2,10 @@ package com.bumptech.glide.load.engine.executor;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import org.robolectric.RobolectricTestRunner;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class GlideExecutorTest {
 
   @Test

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
@@ -21,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  * {@link com.bumptech.glide.load.data.HttpUrlFetcherTest}, response handling should go here.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class HttpUrlFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
   private static final int TIMEOUT_TIME_MS = 300;

@@ -1,13 +1,15 @@
 package com.bumptech.glide.manager;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import org.robolectric.RobolectricTestRunner;
 
 import android.app.Activity;
 import android.content.Context;
@@ -28,14 +30,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerRetrieverTest {
   private static final String PARENT_TAG = "parent";
   private RetrieverHarness[] harnesses;

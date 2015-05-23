@@ -13,6 +13,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -60,7 +62,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -85,7 +86,7 @@ import java.util.Map;
  * Tests for the {@link Glide} interface and singleton.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = {
+@Config(manifest = Config.NONE, sdk = 18, shadows = {
     GlideTest.ShadowFileDescriptorContentResolver.class,
     GlideTest.ShadowMediaMetadataRetriever.class, GlideShadowLooper.class,
     GlideTest.MutableShadowBitmap.class })

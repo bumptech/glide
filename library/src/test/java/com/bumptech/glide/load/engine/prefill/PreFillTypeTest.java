@@ -3,16 +3,16 @@ package com.bumptech.glide.load.engine.prefill;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.testing.EqualsTester;
+import org.robolectric.RobolectricTestRunner;
 
 import android.graphics.Bitmap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class PreFillTypeTest {
 
   @Test(expected = IllegalArgumentException.class)

@@ -2,6 +2,8 @@ package com.bumptech.glide.load.data;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import org.robolectric.RobolectricTestRunner;
+
 import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.testutil.TestResourceUtil;
@@ -9,14 +11,13 @@ import com.bumptech.glide.testutil.TestResourceUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class ExifOrientationStreamTest {
   private LruByteArrayPool byteArrayPool;
 

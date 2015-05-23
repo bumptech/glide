@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
@@ -14,13 +16,12 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class GifFrameResourceDecoderTest {
   private GifDecoder gifDecoder;
   private GifFrameResourceDecoder resourceDecoder;

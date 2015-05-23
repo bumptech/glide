@@ -6,6 +6,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
@@ -14,7 +16,6 @@ import android.widget.RemoteViews;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -23,7 +24,7 @@ import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowAppWidgetManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = AppWidgetTargetTest
+@Config(manifest = Config.NONE, sdk = 18, shadows = AppWidgetTargetTest
     .UpdateShadowAppWidgetManager.class)
 public class AppWidgetTargetTest {
 

@@ -10,6 +10,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.content.Context;
 
 import com.bumptech.glide.manager.ConnectivityMonitor;
@@ -28,12 +30,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18, shadows = GlideShadowLooper.class)
+@Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerTest {
   @Mock Lifecycle lifecycle = mock(Lifecycle.class);
   @Mock RequestManagerTreeNode treeNode = mock(RequestManagerTreeNode.class);

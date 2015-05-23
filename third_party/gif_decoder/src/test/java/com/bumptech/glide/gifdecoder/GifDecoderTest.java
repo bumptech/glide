@@ -3,6 +3,8 @@ package com.bumptech.glide.gifdecoder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.graphics.Bitmap;
 
 import com.bumptech.glide.testutil.TestUtil;
@@ -10,7 +12,6 @@ import com.bumptech.glide.testutil.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
@@ -20,7 +21,7 @@ import java.io.IOException;
  * Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class GifDecoderTest {
 
   private MockProvider provider;

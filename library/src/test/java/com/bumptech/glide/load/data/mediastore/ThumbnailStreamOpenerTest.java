@@ -8,6 +8,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -18,7 +20,6 @@ import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -30,7 +31,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class ThumbnailStreamOpenerTest {
   private Harness harness;
 

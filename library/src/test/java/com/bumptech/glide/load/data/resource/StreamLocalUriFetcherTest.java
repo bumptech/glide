@@ -3,6 +3,8 @@ package com.bumptech.glide.load.data.resource;
 import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.verify;
 
+import org.robolectric.RobolectricTestRunner;
+
 import android.content.Context;
 import android.net.Uri;
 
@@ -15,14 +17,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class StreamLocalUriFetcherTest {
   @Mock DataFetcher.DataCallback<InputStream> callback;
 

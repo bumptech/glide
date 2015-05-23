@@ -7,6 +7,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.robolectric.RobolectricTestRunner;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.model.GlideUrl;
 
@@ -16,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, emulateSdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
 public class HttpUrlFetcherTest {
   @Mock HttpURLConnection urlConnection;
   @Mock HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory;
