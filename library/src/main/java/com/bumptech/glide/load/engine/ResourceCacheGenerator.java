@@ -71,7 +71,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
       fetcher =
           modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),
               helper.getOptions()).fetcher;
-      if (fetcher != null) {
+      if (fetcher != null && helper.hasLoadPath(fetcher.getDataClass())) {
         started = true;
         fetcher.loadData(helper.getPriority(), this);
       }

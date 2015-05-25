@@ -56,7 +56,9 @@ class SourceGenerator implements DataFetcherGenerator,
     boolean started = false;
     while (!started && hasNextModelLoader()) {
       loadData = helper.getLoadData().get(loadDataListIndex++);
-      if (loadData != null) {
+      if (loadData != null
+          && (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())
+          || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
         started = true;
         loadData.fetcher.loadData(helper.getPriority(), this);
       }

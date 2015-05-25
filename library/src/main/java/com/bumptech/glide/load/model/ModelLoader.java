@@ -66,8 +66,7 @@ public interface ModelLoader<Model, Data> {
    * {@link DataFetcher} will not be used if the resource is already cached.
    *
    * <p> Note - If no valid data fetcher can be returned (for example if a model has a null URL),
-   * then it is acceptable to return a null data fetcher from this method. Doing so will be treated
-   * any other failure or exception during the load process. </p>
+   * then it is acceptable to return a null data fetcher from this method. </p>
    *
    * @param model  The model representing the resource.
    * @param width  The width in pixels of the view or target the resource will be loaded into, or

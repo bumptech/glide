@@ -388,11 +388,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private <Data> Resource<R> decodeFromFetcher(Data data, DataSource dataSource)
       throws GlideException {
     LoadPath<Data, ?, R> path = decodeHelper.getLoadPath((Class<Data>) data.getClass());
-    if (path != null) {
-      return runLoadPath(data, dataSource, path);
-    } else {
-      return null;
-    }
+    return runLoadPath(data, dataSource, path);
   }
 
   private <Data, ResourceType> Resource<R> runLoadPath(Data data, DataSource dataSource,

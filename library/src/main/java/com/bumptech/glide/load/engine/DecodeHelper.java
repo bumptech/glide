@@ -125,6 +125,10 @@ final class DecodeHelper<Transcode> {
         .getRegisteredResourceClasses(model.getClass(), resourceClass, transcodeClass);
   }
 
+  boolean hasLoadPath(Class<?> dataClass) {
+    return getLoadPath(dataClass) != null;
+  }
+
   <Data> LoadPath<Data, ?, Transcode> getLoadPath(Class<Data> dataClass) {
     return glideContext.getRegistry().getLoadPath(dataClass, resourceClass, transcodeClass);
   }
