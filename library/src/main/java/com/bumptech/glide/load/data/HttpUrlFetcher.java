@@ -66,7 +66,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
     if (Logs.isEnabled(Log.VERBOSE)) {
       Logs.log(Log.VERBOSE, "Finished http url fetcher fetch in "
-          + LogTime.getElapsedMillis(startTime) + " ms and loaded "  + result);
+          + LogTime.getElapsedMillis(startTime) + " ms and loaded " + result);
     }
     callback.onDataReady(result);
   }
@@ -74,13 +74,13 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl,
       Map<String, String> headers) throws IOException {
     if (redirects >= MAXIMUM_REDIRECTS) {
-      throw new IOException("Too many (> " + MAXIMUM_REDIRECTS + ") redirects!");
+      throw new HttpException("Too many (> " + MAXIMUM_REDIRECTS + ") redirects!");
     } else {
       // Comparing the URLs using .equals performs additional network I/O and is generally broken.
       // See http://michaelscharf.blogspot.com/2006/11/javaneturlequals-and-hashcode-make.html.
       try {
         if (lastUrl != null && url.toURI().equals(lastUrl.toURI())) {
-            throw new IOException("In re-direct loop");
+          throw new HttpException("In re-direct loop");
         }
       } catch (URISyntaxException e) {
         // Do nothing, this is best effort.
@@ -94,7 +94,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     // Do our best to avoid gzip since it's both inefficient for images and also makes it more
     // difficult for us to detect and prevent partial content rendering. See #440.
     if (TextUtils.isEmpty(urlConnection.getRequestProperty(ENCODING_HEADER))) {
-        urlConnection.setRequestProperty(ENCODING_HEADER, DEFAULT_ENCODING);
+      urlConnection.setRequestProperty(ENCODING_HEADER, DEFAULT_ENCODING);
     }
     urlConnection.setConnectTimeout(timeout);
     urlConnection.setReadTimeout(timeout);
@@ -104,7 +104,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     // Connect explicitly to avoid errors in decoders if connection fails.
     urlConnection.connect();
     if (isCancelled) {
-        return null;
+      return null;
     }
     final int statusCode = urlConnection.getResponseCode();
     if (statusCode / 100 == 2) {
@@ -112,16 +112,14 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     } else if (statusCode / 100 == 3) {
       String redirectUrlString = urlConnection.getHeaderField("Location");
       if (TextUtils.isEmpty(redirectUrlString)) {
-          throw new IOException("Received empty or null redirect url");
+        throw new HttpException("Received empty or null redirect url");
       }
       URL redirectUrl = new URL(url, redirectUrlString);
       return loadDataWithRedirects(redirectUrl, redirects + 1, url, headers);
+    } else if (statusCode == -1) {
+      throw new HttpException(statusCode);
     } else {
-      if (statusCode == -1) {
-          throw new IOException("Unable to retrieve response code from HttpUrlConnection.");
-      }
-      throw new IOException("Request failed " + statusCode + ": "
-          + urlConnection.getResponseMessage());
+      throw new HttpException(urlConnection.getResponseMessage(), statusCode);
     }
   }
 
@@ -172,6 +170,34 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
   interface HttpUrlConnectionFactory {
     HttpURLConnection build(URL url) throws IOException;
+  }
+
+  /**
+   * Thrown when an http request fails.
+   *
+   * <p>Exposes the specific status code or {@link #UNKNOWN} via {@link #getStatusCode()} so
+   * users may attempt to retry certain types of errors.
+   */
+  public static final class HttpException extends IOException {
+    public static final int UNKNOWN = -1;
+    private int statusCode;
+
+    HttpException(int statusCode) {
+      this("Http request failed with status code: " + statusCode, statusCode);
+    }
+
+    HttpException(String message) {
+      this(message, UNKNOWN);
+    }
+
+    HttpException(String message, int statusCode) {
+      super(message);
+      this.statusCode = statusCode;
+    }
+
+    public int getStatusCode() {
+      return statusCode;
+    }
   }
 
   private static class DefaultHttpUrlConnectionFactory implements HttpUrlConnectionFactory {
