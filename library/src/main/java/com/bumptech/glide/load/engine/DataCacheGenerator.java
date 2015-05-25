@@ -4,6 +4,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.ModelLoader.LoadData;
 
 import java.io.File;
 import java.util.List;
@@ -23,7 +24,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
   private Key sourceKey;
   private List<ModelLoader<File, ?>> modelLoaders;
   private int modelLoaderIndex;
-  private volatile DataFetcher<?> fetcher;
+  private volatile LoadData<?> loadData;
   // PMD is wrong here, this File must be an instance variable because it may be used across
   // multiple calls to startNext.
   @SuppressWarnings("PMD.SingularField")
@@ -59,16 +60,16 @@ class DataCacheGenerator implements DataFetcherGenerator,
       }
     }
 
-    fetcher = null;
+    loadData = null;
     boolean started = false;
     while (!started && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
-      fetcher =
+      loadData =
           modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),
-              helper.getOptions()).fetcher;
-      if (fetcher != null && helper.hasLoadPath(fetcher.getDataClass())) {
+              helper.getOptions());
+      if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
         started = true;
-        fetcher.loadData(helper.getPriority(), this);
+        loadData.fetcher.loadData(helper.getPriority(), this);
       }
     }
     return started;
@@ -80,19 +81,19 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void cancel() {
-    DataFetcher<?> local = fetcher;
+    LoadData<?> local = loadData;
     if (local != null) {
-      local.cancel();
+      local.fetcher.cancel();
     }
   }
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceKey, data, fetcher, DataSource.DATA_DISK_CACHE, sourceKey);
+    cb.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.DATA_DISK_CACHE, sourceKey);
   }
 
   @Override
   public void onLoadFailed(Exception e) {
-    cb.onDataFetcherFailed(sourceKey, e, fetcher, DataSource.DATA_DISK_CACHE);
+    cb.onDataFetcherFailed(sourceKey, e, loadData.fetcher, DataSource.DATA_DISK_CACHE);
   }
 }
