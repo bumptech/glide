@@ -2,13 +2,12 @@ package com.bumptech.glide.load.engine.cache;
 
 import static org.junit.Assert.assertTrue;
 
-import org.robolectric.RobolectricTestRunner;
-
 import com.bumptech.glide.load.Key;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.security.MessageDigest;

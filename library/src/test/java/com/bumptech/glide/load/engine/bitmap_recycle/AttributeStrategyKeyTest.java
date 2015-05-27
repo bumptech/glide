@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.testing.EqualsTester;
-import org.robolectric.RobolectricTestRunner;
 
 import android.graphics.Bitmap;
 
@@ -16,6 +15,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.AttributeStrategy.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)

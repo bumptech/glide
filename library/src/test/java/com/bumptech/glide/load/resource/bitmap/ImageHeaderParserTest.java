@@ -3,8 +3,6 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import org.robolectric.RobolectricTestRunner;
-
 import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 import com.bumptech.glide.testutil.TestResourceUtil;
@@ -12,6 +10,7 @@ import com.bumptech.glide.testutil.TestResourceUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.Util;
 

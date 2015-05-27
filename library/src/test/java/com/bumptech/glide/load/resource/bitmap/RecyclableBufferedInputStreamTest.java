@@ -7,13 +7,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import org.robolectric.RobolectricTestRunner;
-
 import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;

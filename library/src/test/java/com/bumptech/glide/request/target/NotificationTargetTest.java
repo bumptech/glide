@@ -5,8 +5,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.robolectric.RobolectricTestRunner;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -16,6 +14,7 @@ import android.widget.RemoteViews;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;

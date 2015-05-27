@@ -2,8 +2,6 @@ package com.bumptech.glide.load.resource.gif;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.robolectric.RobolectricTestRunner;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
@@ -13,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;

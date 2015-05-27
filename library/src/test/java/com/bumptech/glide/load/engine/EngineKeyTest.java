@@ -5,8 +5,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
-import org.robolectric.RobolectricTestRunner;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -19,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;

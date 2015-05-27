@@ -1,8 +1,8 @@
 package com.bumptech.glide.request.target;
 
+import static com.google.common.truth.Truth.assertThat;
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewTreeObserver.OnPreDrawListener;
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyInt;
@@ -12,8 +12,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import org.robolectric.RobolectricTestRunner;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -28,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;

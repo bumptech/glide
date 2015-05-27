@@ -4,14 +4,13 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.robolectric.RobolectricTestRunner;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 

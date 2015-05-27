@@ -2,8 +2,6 @@ package com.bumptech.glide.request.target;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.robolectric.RobolectricTestRunner;
-
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,6 +12,7 @@ import android.widget.ImageView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 

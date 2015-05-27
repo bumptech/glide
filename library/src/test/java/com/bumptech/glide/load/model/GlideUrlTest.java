@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.testing.EqualsTester;
-import org.robolectric.RobolectricTestRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.net.MalformedURLException;

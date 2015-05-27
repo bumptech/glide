@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Range;
-import org.robolectric.RobolectricTestRunner;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -23,6 +22,7 @@ import com.bumptech.glide.util.Preconditions;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
