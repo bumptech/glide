@@ -109,6 +109,12 @@
 
             if (document.querySelectorAll) orderNav();
         </script>
+
+        {% include anchorjs.html %}
+        <script>
+          anchors.add()
+        </script>
+
         {% if site.google_analytics_id != "" %}
         {% include google_analytics.html %}
         {% endif %}
