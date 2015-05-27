@@ -1,0 +1,163 @@
+---
+layout: page
+title: "Targets"
+category: doc
+date: 2015-05-26 07:03:23
+order: 6
+disqus: 1
+---
+
+## About
+
+[Targets][1] in Glide act as mediators between requests and requestors. Targets are responsible for displaying placeholders, loaded resources, and determining the appropriate dimensions for each request. The most frequently used Targets are [ImageViewTargets][2] that display placeholders, Drawables, and Bitmaps using ImageView. Users can also implement their own Targets, or subclass any of the available base classes.
+
+## Specifying Targets
+
+The [into(Target)][3] method is used not only to start each request, but also to specify the Target that will receive the results of the request. Glide provides a helper method for [into(ImageView)][4] that takes an ``ImageView`` and wraps it in a ``Target`` appropriate for the requested resource type.
+
+To make it easier to use custom Targets, the ``into()`` methods return the Target provided to them:
+
+```java
+Target<Bitmap> target = Glide.with(fragment)
+        .load(url)
+        .asBitmap()
+        .into(imageView);
+...
+// Some time later:
+Glide.with(fragment).clear(target);
+```
+
+## Targets and Automatic Cancellation
+
+Targets can and generally should be re-used for each subsequent load that will be displayed in the same place. Re-using Targets allows Glide to automatically cancel and re-use resources for older loads when new loads are started. Failing to re-use Targets can lead to resources from older requests replacing those from newer requests. 
+
+
+### Custom Targets
+
+A simple way to re-use custom Targets is to simply hold on to them as instance variables:
+
+```java
+private class WidgetHolder {
+  private final Fragment fragment;
+  private final Target<Widget> widgetTarget;
+
+  public WidgetHolder(Fragment fragment, Widget widget) {
+    this.fragment = fragment;
+    widgetTarget = new CustomWidgetTarget(widget);
+  }
+
+  public void showInWidget(Uri uri) {
+    Glide.with(fragment)
+        .asDrawable()
+        .load(uri)
+        .into(widgetTarget);
+  }
+}
+```
+
+Glide is able to find and cancel requests for Targets using the [``getRequest()``][6] and [``setRequest()``][7] methods. This means that all custom Targets must implement these methods. The simplest way to do so is to subclass [``BaseTarget``][10].
+
+### ViewTargets
+
+Some custom Targets can also provide more intelligent implementations of ``getRequest()`` and ``setRequest()`` to avoid the strict requirement to re-use Targets. [ViewTarget][5], for example, does so using the Android Framework's [getTag()][8] and [setTag()][9] methods:
+
+```java
+@Override
+public Request getRequest() {
+    return (Request) view.getTag();
+}
+
+@Override
+public void setRequest(Request request) {
+    view.setTag(request);
+}
+```
+
+Because tags are properties of the View, ViewTargets for new loads can find and cancel/re-use Requests from previous ViewTargets. 
+
+As a result, when loading into views using [``into(ImageView)``][4], or when sub-classing [``ViewTarget``][5], you can pass in a new Target for each load:
+
+```java
+@Override
+public void onBindViewHolder(ViewHolder vh, int position) {
+  int resourceId = resourceIds.get(position)
+  Glide.with(fragment)
+      .asDrawable()
+      .load(resourceId)
+      .into(new CustomViewTarget(vh.imageView));
+```
+
+## Sizing
+
+By default, Glide uses the size provided by Targets via the [``getSize()``][11] method as the target size for the request. Doing so allows Glide to choose an appropriate url, downsample, crop, and Transform size appropriate images to minimize memory usage, and make sure loads are as fast as possible. 
+
+The simplest possible way to implement ``getSize()`` is to simply call the provided callback immediately:
+
+### Custom Targets
+
+```java
+@Override
+public void getSize(SizeReadyCallback cb) {
+  cb.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
+}
+```
+
+You can also pass in a size to your Target's constructor and provide those dimensions to the callback:
+
+```java
+public class CustomTarget implements Target {
+  private final int width;
+  private final int height;
+ 
+  public CustomTarget(int width, int height) {
+    this.width = width;
+    this.height = height;
+  }
+
+  ...
+
+  @Override
+  public void getSize(SizeReadyCallback cb) {
+    cb.onSizeReady(width, height);
+  }
+}
+```
+
+### View Targets
+
+ViewTargets implement ``getSize()`` by inspecting the attributes of the View and/or using an [``OnPreDrawListener``][12] to measure the View immediately before it is rendered. The logic we use is as follows:
+
+1. If either of the view's dimensions are set to a value > 0, use those dimensions
+2. If either of the view's dimensions are set to WRAP_CONTENT, use the screen width or height
+3. If at least one of the view's dimensions still has a value <= 0 and not WRAP_CONTENT, add an OnPreDrawListener to listen for layout.
+
+#### WRAP_CONTENT
+
+Note that Glide doesn't handle WRAP_CONTENT particularly well. This is because it's difficult for us to know what the user's intent is, particularly when Transformations are also requested. 
+
+We could treat WRAP_CONTENT as the user asking for the original unmodified image, but doing so runs the risk of OutOfMemoryExceptions when we load overly large images. In addition, particularly since Views typically don't extend off screen, the Android framework will probably end up downscaling any full resolution images we manage to load successfully. 
+
+Using the screen dimensions allows us to at least downsample overly large images without completely ignoring the user's request. 
+
+#### Performant View Sizes
+
+In general Glide provides the fastest and most predictable results when explicit dp sizes are set on Views it loads into. However when that's not possible, Glide also provides robust support for layout weights, MATCH_PARENT and other relative sizes using ``OnPreDrawListeners``. Finally, if nothing else will work, Glide should provide reasonable behavior for WRAP_CONTENT as well.
+
+#### Alternatives
+
+If in any case Glide seems to get View sizes wrong, you can always manually override the size, either by extending [``ViewTarget``][5] and implementing your own logic, or by using the [``override()``][13] method in ``RequestOptions``.
+
+[1]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/target/Target.html
+[2]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/target/ImageViewTarget.html
+[3]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#into(Y)
+[4]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#into(android.widget.ImageView)
+[5]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/target/ViewTarget.html
+[6]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/target/Target.html#getRequest()
+[7]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/target/Target.html#setRequest(com.bumptech.glide.request.Request)
+[8]: http://developer.android.com/reference/android/view/View.html#getTag()
+[9]: http://developer.android.com/reference/android/view/View.html#setTag(java.lang.Object)
+[10]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/request/target/BaseTarget.java
+[11]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/target/Target.html#getSize(com.bumptech.glide.request.target.SizeReadyCallback)
+[12]: http://developer.android.com/reference/android/view/ViewTreeObserver.OnPreDrawListener.html
+[13]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html#override(int,%20int)
+
