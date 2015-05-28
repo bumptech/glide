@@ -1,8 +1,8 @@
 package com.bumptech.glide.request.target;
 
-import static com.google.common.truth.Truth.assertThat;
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewTreeObserver.OnPreDrawListener;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyInt;

@@ -19,7 +19,6 @@
         <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
         <option name="IMPORT_LAYOUT_TABLE">
           <value>
-            <package name="com.google" withSubpackages="true" static="true" />
             <package name="" withSubpackages="true" static="true" />
             <emptyLine />
             <package name="com.google" withSubpackages="true" static="false" />
@@ -322,6 +321,5 @@
       </value>
     </option>
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
-    <option name="PREFERRED_PROJECT_CODE_STYLE" value="GoogleStyle" />
   </component>
 </project>

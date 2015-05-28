@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-import static com.google.common.truth.Truth.assertThat;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

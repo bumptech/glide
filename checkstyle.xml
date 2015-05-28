@@ -91,6 +91,7 @@
         <module name="ImportOrder">
           <!-- Checks for out of order import statements. -->
 
+          <property name="sortStaticImportsAlphabetically" value="true"/>
            <property name="severity" value="error"/>
            <property name="groups" value="com.google,*,java,javax"/>
            <!-- This ensures that static imports go first. -->
@@ -141,9 +142,6 @@
         <module name="NoClone" />
         <module name="NoFinalizer" />
         <module name="OneStatementPerLine" />
-        <module name="RedundantThrows" >
-            <property name="suppressLoadErrors" value="true" />
-        </module>
         <module name="IllegalInstantiation"/>
         <module name="SimplifyBooleanExpression" />
         <module name="SimplifyBooleanReturn" />

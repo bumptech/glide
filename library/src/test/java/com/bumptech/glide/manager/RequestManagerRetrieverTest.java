@@ -1,7 +1,7 @@
 package com.bumptech.glide.manager;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

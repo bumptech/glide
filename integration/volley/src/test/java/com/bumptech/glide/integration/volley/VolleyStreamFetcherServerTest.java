@@ -1,7 +1,7 @@
 package com.bumptech.glide.integration.volley;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.bumptech.glide.testutil.TestUtil.assertStreamOf;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
