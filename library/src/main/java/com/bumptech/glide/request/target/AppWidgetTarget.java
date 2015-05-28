@@ -9,7 +9,6 @@ import android.widget.RemoteViews;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
 
-
 /**
  * This class is used in order to display downloaded Bitmap inside an ImageView of an AppWidget
  * through RemoteViews.

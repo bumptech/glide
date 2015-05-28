@@ -546,6 +546,9 @@ public class GifDrawableTest {
     }
   }
 
+  /**
+   * Keeps track of the set of Bitmaps drawn to the canvas.
+   */
   @Implements(Canvas.class)
   public static class BitmapTrackingShadowCanvas extends ShadowCanvas {
     private final Set<Bitmap> drawnBitmaps = new HashSet<>();
