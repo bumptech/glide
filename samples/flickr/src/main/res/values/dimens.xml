@@ -3,4 +3,5 @@
     <dimen name="medium_photo_side">110dp</dimen>
     <dimen name="small_photo_side">55dp</dimen>
     <dimen name="flickr_list_item_height">170dp</dimen>
+    <dimen name="page_margin">8dp</dimen>
 </resources>

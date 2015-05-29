@@ -12,9 +12,7 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -116,7 +114,7 @@ public class FlickrSearchActivity extends ActionBarActivity {
       }
     });
 
-    final Button search = (Button) findViewById(R.id.search);
+    Button search = (Button) findViewById(R.id.search);
     search.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -124,32 +122,9 @@ public class FlickrSearchActivity extends ActionBarActivity {
       }
     });
 
-    final ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
-    pager.setPageMargin(50);
-    pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-      @Override
-      public void onPageScrolled(int i, float v, int i2) {
-      }
-
-      @Override
-      public void onPageSelected(int position) {
-        getSupportActionBar().getTabAt(position).select();
-      }
-
-      @Override
-      public void onPageScrollStateChanged(int i) {
-      }
-    });
-
-
-    final ActionBar actionBar = getSupportActionBar();
-    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-    for (Page page : Page.values()) {
-      final int textId = PAGE_TO_TITLE.get(page);
-      actionBar.addTab(actionBar.newTab().setText(textId).setTabListener(new TabListener(pager)));
-    }
-
+    Resources res = getResources();
+    ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
+    pager.setPageMargin(res.getDimensionPixelOffset(R.dimen.page_margin));
     pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager()));
 
     Api.get(this).registerSearchListener(searchListener);
@@ -160,7 +135,6 @@ public class FlickrSearchActivity extends ActionBarActivity {
       }
     }
 
-    final Resources res = getResources();
     int smallGridSize = res.getDimensionPixelSize(R.dimen.small_photo_side);
     int mediumGridSize = res.getDimensionPixelSize(R.dimen.medium_photo_side);
     int listHeightSize = res.getDimensionPixelSize(R.dimen.flickr_list_item_height);
@@ -228,27 +202,6 @@ public class FlickrSearchActivity extends ActionBarActivity {
     searchTerm.setText(getString(R.string.searching_for, currentSearchString));
 
     Api.get(this).search(currentSearchString);
-  }
-
-  private static class TabListener implements ActionBar.TabListener {
-    private final ViewPager pager;
-
-    public TabListener(ViewPager pager) {
-      this.pager = pager;
-    }
-
-    @Override
-    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-      pager.setCurrentItem(tab.getPosition());
-    }
-
-    @Override
-    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-    }
-
-    @Override
-    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-    }
   }
 
   private class SearchListener implements Api.SearchListener {
@@ -345,6 +298,13 @@ public class FlickrSearchActivity extends ActionBarActivity {
 
     private int getPageSize(int id) {
       return getResources().getDimensionPixelSize(id);
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+      Page page = Page.values()[position];
+      int titleId = PAGE_TO_TITLE.get(page);
+      return getString(titleId);
     }
   }
 
