@@ -134,6 +134,13 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     return state.frameLoader.getFrameCount();
   }
 
+  /**
+   * Returns the current frame index, or -1 if no frame is displayed.
+   */
+  public int getFrameIndex() {
+    return state.frameLoader.getCurrentIndex();
+  }
+
   private void resetLoopCount() {
     loopCount = 0;
   }
@@ -254,7 +261,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   @Override
-  public void onFrameReady(int frameIndex) {
+  public void onFrameReady() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getCallback() == null) {
       stop();
       invalidateSelf();
@@ -263,7 +270,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
     invalidateSelf();
 
-    if (frameIndex == state.frameLoader.getFrameCount() - 1) {
+    if (getFrameIndex() == getFrameCount() - 1) {
       loopCount++;
     }
 
