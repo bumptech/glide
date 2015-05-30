@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
@@ -112,11 +112,11 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     adapter = new PhotoAdapter();
     grid.setAdapter(adapter);
 
-    final FixedPreloadSizeProvider<Photo> preloadSizeProvider =
+    FixedPreloadSizeProvider<Photo> preloadSizeProvider =
         new FixedPreloadSizeProvider<>(photoSize, photoSize);
-    final ListPreloader<Photo> preloader = new ListPreloader<>(Glide.with(this), adapter,
+    RecyclerViewPreloader<Photo> preloader = new RecyclerViewPreloader<>(Glide.with(this), adapter,
         preloadSizeProvider, args.getInt(PRELOAD_KEY));
-    grid.addOnScrollListener(new RecyclerToListViewScrollListener(preloader));
+    grid.addOnScrollListener(preloader);
 
     if (currentPhotos != null) {
       adapter.setPhotos(currentPhotos);

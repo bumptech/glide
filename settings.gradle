@@ -10,6 +10,7 @@ include ':integration'
 include ':integration:volley'
 include ':integration:okhttp'
 include ':integration:gifencoder'
+include ':integration:recyclerview'
 include ':testutil'
 
 rootProject.name = 'glide-parent'

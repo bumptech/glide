@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
@@ -69,9 +70,9 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     list.setAdapter(adapter);
 
     preloadSizeProvider = new ViewPreloadSizeProvider<>();
-    ListPreloader<Photo> preloader = new ListPreloader<>(Glide.with(this), adapter,
+    RecyclerViewPreloader<Photo> preloader = new RecyclerViewPreloader<>(Glide.with(this), adapter,
         preloadSizeProvider, PRELOAD_AHEAD_ITEMS);
-    list.addOnScrollListener(new RecyclerToListViewScrollListener(preloader));
+    list.addOnScrollListener(preloader);
     list.setItemViewCacheSize(0);
 
     if (currentPhotos != null) {
