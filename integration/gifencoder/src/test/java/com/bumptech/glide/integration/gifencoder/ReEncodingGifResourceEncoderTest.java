@@ -54,8 +54,9 @@ public class ReEncodingGifResourceEncoderTest {
   @Mock GifHeaderParser parser;
   @Mock AnimatedGifEncoder gifEncoder;
   @Mock Resource<Bitmap> frameResource;
-  @Mock Transformation<Bitmap> frameTransformation;
   @Mock GifDrawable gifDrawable;
+  @Mock Transformation<Bitmap> frameTransformation;
+  @Mock Resource<Bitmap> transformedResource;
 
   private ReEncodingGifResourceEncoder encoder;
   private Options options;
@@ -242,12 +243,10 @@ public class ReEncodingGifResourceEncoderTest {
     when(gifDrawable.getIntrinsicHeight()).thenReturn(expectedHeight);
 
     Bitmap transformedFrame = Bitmap.createBitmap(200, 200, Bitmap.Config.RGB_565);
-    final Resource<Bitmap> transformedResource = mock(Resource.class);
     when(transformedResource.get()).thenReturn(transformedFrame);
-    Transformation<Bitmap> transformation = mock(Transformation.class);
-    when(transformation.transform(eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
+    when(frameTransformation.transform(eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
         .thenReturn(transformedResource);
-    when(gifDrawable.getFrameTransformation()).thenReturn(transformation);
+    when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
 
     encoder.encode(resource, file, options);
 
@@ -257,7 +256,6 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testRecyclesFrameResourceBeforeWritingIfTransformedResourceIsDifferent() {
     when(decoder.getFrameCount()).thenReturn(1);
-    Resource<Bitmap> transformedResource = mock(Resource.class);
     when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
         .thenReturn(transformedResource);
     Bitmap expected = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
@@ -276,7 +274,6 @@ public class ReEncodingGifResourceEncoderTest {
   public void testRecyclesTransformedResourceAfterWritingIfTransformedResourceIsDifferent() {
     when(decoder.getFrameCount()).thenReturn(1);
     Bitmap expected = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
-    Resource<Bitmap> transformedResource = mock(Resource.class);
     when(transformedResource.get()).thenReturn(expected);
     when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
         .thenReturn(transformedResource);
