@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.flickr'
-        minSdkVersion MIN_SDK_VERSION as int
+        minSdkVersion 11
         targetSdkVersion TARGET_SDK_VERSION as int
 
         versionCode 1

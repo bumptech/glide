@@ -12,16 +12,16 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -29,9 +29,13 @@ import com.bumptech.glide.load.engine.prefill.PreFillType;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
+import com.bumptech.glide.samples.flickr.api.Query;
+import com.bumptech.glide.samples.flickr.api.RecentQuery;
+import com.bumptech.glide.samples.flickr.api.SearchQuery;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,21 +47,22 @@ import java.util.concurrent.ExecutionException;
  * An activity that allows users to search for images on Flickr and that contains a series of
  * fragments that display retrieved image thumbnails.
  */
-public class FlickrSearchActivity extends ActionBarActivity {
+public class FlickrSearchActivity extends AppCompatActivity
+    implements SearchView.OnQueryTextListener {
   private static final String TAG = "FlickrSearchActivity";
-  private static final String STATE_SEARCH_STRING = "state_search_string";
+  private static final String STATE_QUERY = "state_search_string";
 
-  private EditText searchText;
+  private final QueryListener queryListener = new QueryListener();
   private View searching;
   private TextView searchTerm;
-  private Set<PhotoViewer> photoViewers = new HashSet<PhotoViewer>();
-  private List<Photo> currentPhotos = new ArrayList<Photo>();
+  private Set<PhotoViewer> photoViewers = new HashSet<>();
+  private List<Photo> currentPhotos = new ArrayList<>();
   private View searchLoading;
-  private String currentSearchString;
-  private final SearchListener searchListener = new SearchListener();
   private BackgroundThumbnailFetcher backgroundThumbnailFetcher;
   private HandlerThread backgroundThread;
   private Handler backgroundHandler;
+  private SearchView searchView;
+  private Query currentQuery;
 
   private enum Page {
     SMALL,
@@ -85,54 +90,65 @@ public class FlickrSearchActivity extends ActionBarActivity {
     }
   }
 
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater menuInflater = getMenuInflater();
+    menuInflater.inflate(R.menu.search_activity, menu);
+
+    searchView =
+        (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
+    searchView.setSubmitButtonEnabled(true);
+    searchView.setIconified(false);
+    searchView.setOnQueryTextListener(this);
+
+    return true;
+  }
+
+  @Override
+  public boolean onQueryTextSubmit(String query) {
+    executeSearch(query);
+    searchView.setQuery("", false /*submit*/);
+    return true;
+  }
+
+  @Override
+  public boolean onQueryTextChange(String newText) {
+    return false;
+  }
+
   /**
    * Called when the activity is first created.
    */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        .build());
+
     backgroundThread = new HandlerThread("BackgroundThumbnailHandlerThread");
     backgroundThread.start();
     backgroundHandler = new Handler(backgroundThread.getLooper());
 
     setContentView(R.layout.flickr_search_activity);
-    StrictMode
-        .setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build());
     searching = findViewById(R.id.searching);
     searchLoading = findViewById(R.id.search_loading);
     searchTerm = (TextView) findViewById(R.id.search_term);
-
-    searchText = (EditText) findViewById(R.id.search_text);
-    searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-      @Override
-      public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-          executeSearch();
-          return true;
-        }
-        return false;
-      }
-    });
-
-    Button search = (Button) findViewById(R.id.search);
-    search.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        executeSearch();
-      }
-    });
 
     Resources res = getResources();
     ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
     pager.setPageMargin(res.getDimensionPixelOffset(R.dimen.page_margin));
     pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager()));
 
-    Api.get(this).registerSearchListener(searchListener);
+    Api.get(this).registerSearchListener(queryListener);
     if (savedInstanceState != null) {
-      String savedSearchString = savedInstanceState.getString(STATE_SEARCH_STRING);
-      if (!TextUtils.isEmpty(savedSearchString)) {
-        executeSearch(savedSearchString);
+      Query savedQuery = savedInstanceState.getParcelable(STATE_QUERY);
+      if (savedQuery != null) {
+        executeQuery(savedQuery);
       }
+    } else {
+      executeQuery(RecentQuery.get());
     }
 
     int smallGridSize = res.getDimensionPixelSize(R.dimen.small_photo_side);
@@ -140,11 +156,13 @@ public class FlickrSearchActivity extends ActionBarActivity {
     int listHeightSize = res.getDimensionPixelSize(R.dimen.flickr_list_item_height);
     int screenWidth = getScreenWidth();
 
-    // Weight values determined experimentally by measuring the number of incurred GCs while
-    // scrolling through the various photo grids/lists.
-    Glide.get(this).preFillBitmapPool(new PreFillType.Builder(smallGridSize).setWeight(1),
-        new PreFillType.Builder(mediumGridSize).setWeight(1),
-        new PreFillType.Builder(screenWidth / 2, listHeightSize).setWeight(6));
+    if (savedInstanceState == null) {
+      // Weight values determined experimentally by measuring the number of incurred GCs while
+      // scrolling through the various photo grids/lists.
+      Glide.get(this).preFillBitmapPool(new PreFillType.Builder(smallGridSize).setWeight(1),
+          new PreFillType.Builder(mediumGridSize).setWeight(1),
+          new PreFillType.Builder(screenWidth / 2, listHeightSize).setWeight(6));
+    }
   }
 
   private int getScreenWidth() {
@@ -154,15 +172,15 @@ public class FlickrSearchActivity extends ActionBarActivity {
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    if (!TextUtils.isEmpty(currentSearchString)) {
-      outState.putString(STATE_SEARCH_STRING, currentSearchString);
+    if (currentQuery != null) {
+      outState.putParcelable(STATE_QUERY, currentQuery);
     }
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    Api.get(this).unregisterSearchListener(searchListener);
+    Api.get(this).unregisterSearchListener(queryListener);
     if (backgroundThumbnailFetcher != null) {
       backgroundThumbnailFetcher.cancel();
       backgroundThumbnailFetcher = null;
@@ -184,30 +202,29 @@ public class FlickrSearchActivity extends ActionBarActivity {
     Glide.get(this).clearMemory();
   }
 
-  private void executeSearch() {
-    String searchString = searchText.getText().toString();
-    searchText.getText().clear();
-    executeSearch(searchString);
+  private void executeSearch(String searchString) {
+    Query query = TextUtils.isEmpty(searchString) ? null : new SearchQuery(searchString);
+    executeQuery(query);
   }
 
-  private void executeSearch(String searchString) {
-    currentSearchString = searchString;
-
-    if (TextUtils.isEmpty(searchString)) {
+  private void executeQuery(Query query) {
+    currentQuery = query;
+    if (query == null) {
+      queryListener.onSearchCompleted(null, Collections.<Photo>emptyList());
       return;
     }
 
     searching.setVisibility(View.VISIBLE);
     searchLoading.setVisibility(View.VISIBLE);
-    searchTerm.setText(getString(R.string.searching_for, currentSearchString));
+    searchTerm.setText(getString(R.string.searching_for, currentQuery.getDescription()));
 
-    Api.get(this).search(currentSearchString);
+    Api.get(this).query(currentQuery);
   }
 
-  private class SearchListener implements Api.SearchListener {
+  private class QueryListener implements Api.QueryListener {
     @Override
-    public void onSearchCompleted(String searchString, List<Photo> photos) {
-      if (!TextUtils.equals(currentSearchString, searchString)) {
+    public void onSearchCompleted(Query query, List<Photo> photos) {
+      if (!isCurrentQuery(query)) {
         return;
       }
 
@@ -231,9 +248,13 @@ public class FlickrSearchActivity extends ActionBarActivity {
       currentPhotos = photos;
     }
 
+    private boolean isCurrentQuery(Query query) {
+      return currentQuery != null && currentQuery.equals(query);
+    }
+
     @Override
-    public void onSearchFailed(String searchString, Exception e) {
-      if (!TextUtils.equals(currentSearchString, searchString)) {
+    public void onSearchFailed(Query query, Exception e) {
+      if (!isCurrentQuery(query)) {
         return;
       }
 
@@ -242,7 +263,7 @@ public class FlickrSearchActivity extends ActionBarActivity {
       }
       searching.setVisibility(View.VISIBLE);
       searchLoading.setVisibility(View.INVISIBLE);
-      searchTerm.setText(getString(R.string.search_failed, currentSearchString));
+      searchTerm.setText(getString(R.string.search_failed, currentQuery.getDescription()));
     }
   }
 
@@ -281,6 +302,13 @@ public class FlickrSearchActivity extends ActionBarActivity {
       return Page.values().length;
     }
 
+    @Override
+    public CharSequence getPageTitle(int position) {
+      Page page = Page.values()[position];
+      int titleId = PAGE_TO_TITLE.get(page);
+      return getString(titleId);
+    }
+
     private Fragment pageToFragment(int position) {
       Page page = Page.values()[position];
       if (page == Page.SMALL) {
@@ -298,13 +326,6 @@ public class FlickrSearchActivity extends ActionBarActivity {
 
     private int getPageSize(int id) {
       return getResources().getDimensionPixelSize(id);
-    }
-
-    @Override
-    public CharSequence getPageTitle(int position) {
-      Page page = Page.values()[position];
-      int titleId = PAGE_TO_TITLE.get(page);
-      return getString(titleId);
     }
   }
 
