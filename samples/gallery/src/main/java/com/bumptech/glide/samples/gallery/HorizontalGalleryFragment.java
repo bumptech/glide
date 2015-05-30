@@ -5,23 +5,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 
 import java.util.List;
 
 /**
  * Displays media store data in a recycler view.
  */
-public class RecyclerViewFragment extends Fragment
+public class HorizontalGalleryFragment extends Fragment
     implements LoaderManager.LoaderCallbacks<List<MediaStoreData>> {
 
   private RecyclerView recyclerView;
@@ -56,42 +54,14 @@ public class RecyclerViewFragment extends Fragment
     RequestManager requestManager = Glide.with(this);
     RecyclerAdapter adapter =
         new RecyclerAdapter(getActivity(), mediaStoreData, requestManager);
-    ListPreloader<MediaStoreData> preloader =
-        new ListPreloader<>(requestManager, adapter, adapter, 3);
-    RecyclerViewPreloaderListener recyclerViewPreloaderListener =
-        new RecyclerViewPreloaderListener(preloader);
-    recyclerView.addOnScrollListener(recyclerViewPreloaderListener);
+    RecyclerViewPreloader<MediaStoreData> preloader =
+        new RecyclerViewPreloader<>(requestManager, adapter, adapter, 3);
+    recyclerView.addOnScrollListener(preloader);
     recyclerView.setAdapter(adapter);
   }
 
   @Override
   public void onLoaderReset(Loader<List<MediaStoreData>> loader) {
     // Do nothing.
-  }
-
-  private static class RecyclerViewPreloaderListener extends RecyclerView.OnScrollListener {
-    private final AbsListView.OnScrollListener scrollListener;
-    private int lastFirstVisible = -1;
-    private int lastVisibleCount = -1;
-    private int lastItemCount = -1;
-
-    public RecyclerViewPreloaderListener(AbsListView.OnScrollListener scrollListener) {
-      this.scrollListener = scrollListener;
-    }
-
-    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-      // Adapter the recycler view scroll listener interface to match ListView's.
-      LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-      int firstVisible = layoutManager.findFirstVisibleItemPosition();
-      int visibleCount = Math.abs(firstVisible - layoutManager.findLastVisibleItemPosition());
-      int itemCount = recyclerView.getAdapter().getItemCount();
-      if (firstVisible != lastFirstVisible || visibleCount != lastVisibleCount
-          || itemCount != lastItemCount) {
-        scrollListener.onScroll(null, firstVisible, visibleCount, itemCount);
-        lastFirstVisible = firstVisible;
-        lastFirstVisible = visibleCount;
-        lastItemCount = itemCount;
-      }
-    }
   }
 }
