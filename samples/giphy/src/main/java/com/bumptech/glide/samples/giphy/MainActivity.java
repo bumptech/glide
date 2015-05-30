@@ -7,19 +7,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,8 +27,6 @@ import java.util.List;
  * Giphy's api.
  */
 public class MainActivity extends Activity implements Api.Monitor {
-  private static final String TAG = "GiphyActivity";
-
   private GifAdapter adapter;
 
   @Override
@@ -43,24 +41,26 @@ public class MainActivity extends Activity implements Api.Monitor {
         .load(R.raw.large_giphy_logo)
         .into(giphyLogoView);
 
-    ListView gifList = (ListView) findViewById(R.id.gif_list);
+    RecyclerView gifList = (RecyclerView) findViewById(R.id.gif_list);
+    LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+    gifList.setLayoutManager(layoutManager);
 
     RequestBuilder<Drawable> gifItemRequest = Glide.with(this).asDrawable();
 
     ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider =
-        new ViewPreloadSizeProvider<Api.GifResult>();
+        new ViewPreloadSizeProvider<>();
     adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);
     gifList.setAdapter(adapter);
-    ListPreloader<Api.GifResult> preloader =
-        new ListPreloader<Api.GifResult>(Glide.with(this), adapter, preloadSizeProvider, 2);
-    gifList.setOnScrollListener(preloader);
+    RecyclerViewPreloader<Api.GifResult> preloader =
+        new RecyclerViewPreloader<>(Glide.with(this), adapter, preloadSizeProvider, 4);
+    gifList.addOnScrollListener(preloader);
   }
 
   @Override
   protected void onStart() {
     super.onStart();
     Api.get().addMonitor(this);
-    if (adapter.getCount() == 0) {
+    if (adapter.getItemCount() == 0) {
       Api.get().getTrending();
     }
   }
@@ -76,8 +76,8 @@ public class MainActivity extends Activity implements Api.Monitor {
     adapter.setResults(result.data);
   }
 
-  private static class GifAdapter extends BaseAdapter implements ListPreloader
-      .PreloadModelProvider<Api.GifResult> {
+  private static class GifAdapter extends RecyclerView.Adapter<GifViewHolder>
+      implements ListPreloader.PreloadModelProvider<Api.GifResult> {
     private static final Api.GifResult[] EMPTY_RESULTS = new Api.GifResult[0];
 
     private final Activity activity;
@@ -103,32 +103,15 @@ public class MainActivity extends Activity implements Api.Monitor {
     }
 
     @Override
-    public int getCount() {
-      return results.length;
+    public GifViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      View view = activity.getLayoutInflater().inflate(R.layout.gif_list_item, parent, false);
+      return new GifViewHolder(view);
     }
 
     @Override
-    public Api.GifResult getItem(int i) {
-      return results[i];
-    }
-
-    @Override
-    public long getItemId(int i) {
-      return 0;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      if (convertView == null) {
-        convertView = activity.getLayoutInflater().inflate(R.layout.gif_list_item, parent, false);
-      }
-
+    public void onBindViewHolder(GifViewHolder holder, int position) {
       final Api.GifResult result = results[position];
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "load result: " + result);
-      }
-      final ImageView gifView = (ImageView) convertView.findViewById(R.id.gif_view);
-      gifView.setOnClickListener(new View.OnClickListener() {
+      holder.gifView.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View view) {
           ClipboardManager clipboard =
@@ -142,23 +125,38 @@ public class MainActivity extends Activity implements Api.Monitor {
         }
       });
 
-      requestBuilder.load(result).into(gifView);
+      requestBuilder.load(result).into(holder.gifView);
 
-      preloadSizeProvider.setView(gifView);
+      preloadSizeProvider.setView(holder.gifView);
+    }
 
-      return convertView;
+    @Override
+    public long getItemId(int i) {
+      return 0;
+    }
+
+    @Override
+    public int getItemCount() {
+      return results.length;
     }
 
     @Override
     public List<Api.GifResult> getPreloadItems(int position) {
-      List<Api.GifResult> items = new ArrayList<Api.GifResult>(1);
-      items.add(getItem(position));
-      return items;
+      return Collections.singletonList(results[position]);
     }
 
     @Override
     public RequestBuilder getPreloadRequestBuilder(Api.GifResult item) {
       return requestBuilder.load(item);
+    }
+  }
+
+  private static class GifViewHolder extends RecyclerView.ViewHolder {
+    private final ImageView gifView;
+
+    public GifViewHolder(View itemView) {
+      super(itemView);
+      gifView = (ImageView) itemView.findViewById(R.id.gif_view);
     }
   }
 }
