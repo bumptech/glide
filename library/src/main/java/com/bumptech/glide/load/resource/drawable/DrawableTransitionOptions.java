@@ -8,8 +8,8 @@ import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 /**
  * Contains {@link Drawable} specific animation options.
  */
-public final class DrawableTransitionOptions extends TransitionOptions<DrawableTransitionOptions,
-    Drawable> {
+public final class DrawableTransitionOptions extends
+    TransitionOptions<DrawableTransitionOptions, Drawable> {
 
   public static DrawableTransitionOptions withCrossFade() {
     return new DrawableTransitionOptions().crossFade();

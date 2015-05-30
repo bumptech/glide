@@ -30,7 +30,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
 
   private final int maxPreload;
   private final PreloadTargetQueue preloadTargetQueue;
-  private RequestManager requestManager;
+  private final RequestManager requestManager;
   private final PreloadModelProvider<T> preloadModelProvider;
   private final PreloadSizeProvider<T> preloadDimensionProvider;
 

@@ -313,7 +313,7 @@ public class FlickrSearchActivity extends AppCompatActivity
       Page page = Page.values()[position];
       if (page == Page.SMALL) {
         int pageSize = getPageSize(R.dimen.small_photo_side);
-        return FlickrPhotoGrid.newInstance(pageSize, 30, false /*thumbnail*/);
+        return FlickrPhotoGrid.newInstance(pageSize, 15, false /*thumbnail*/);
       } else if (page == Page.MEDIUM) {
         int pageSize = getPageSize(R.dimen.medium_photo_side);
         return FlickrPhotoGrid.newInstance(pageSize, 10, true /*thumbnail*/);
