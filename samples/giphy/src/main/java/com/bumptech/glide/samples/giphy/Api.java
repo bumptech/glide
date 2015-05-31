@@ -22,8 +22,8 @@ public final class Api {
   private static volatile Api api = null;
   private static final String BETA_KEY = "dc6zaTOxFJmzC";
   private static final String BASE_URL = "https://api.giphy.com/";
-  private static final String SEARCH_PATH = "/v1/gifs/search";
-  private static final String TRENDING_PATH = "/v1/gifs/trending";
+  private static final String SEARCH_PATH = "v1/gifs/search";
+  private static final String TRENDING_PATH = "v1/gifs/trending";
   private final Handler bgHandler;
   private final Handler mainHandler;
   private final HashSet<Monitor> monitors = new HashSet<Monitor>();
