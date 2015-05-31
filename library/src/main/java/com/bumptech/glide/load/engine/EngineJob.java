@@ -24,17 +24,20 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
 
   private static final int MSG_COMPLETE = 1;
   private static final int MSG_EXCEPTION = 2;
+  // Used when we realize we're cancelled on a background thread in reschedule and can recycle
+  // immediately rather than waiting for a result or an error.
+  private static final int MSG_CANCELLED = 3;
 
   private final List<ResourceCallback> cbs = new ArrayList<>(2);
+  private final StateVerifier stateVerifier = new DefaultStateVerifier();
   private final Pools.Pool<EngineJob<?>> pool;
   private final EngineResourceFactory engineResourceFactory;
   private final EngineJobListener listener;
   private final GlideExecutor diskCacheExecutor;
   private final GlideExecutor sourceExecutor;
+
   private Key key;
   private boolean isCacheable;
-
-  private boolean isCancelled;
   private Resource<?> resource;
   private boolean hasResource;
   private GlideException exception;
@@ -43,9 +46,10 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   // status.
   private List<ResourceCallback> ignoredCallbacks;
   private EngineResource<?> engineResource;
-
   private DecodeJob<R> decodeJob;
-  private boolean isReleased;
+
+  // Checked primarily on the main thread, but also on other threads in reschedule.
+  private volatile boolean isCancelled;
 
   EngineJob(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
       EngineJobListener listener, Pools.Pool<EngineJob<?>> pool) {
@@ -67,7 +71,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   EngineJob<R> init(Key key, boolean isCacheable) {
     this.key = key;
     this.isCacheable = isCacheable;
-    isReleased = false;
+    stateVerifier.setRecycled(false /*isReleased*/);
     return this;
   }
 
@@ -77,10 +81,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   public void addCallback(ResourceCallback cb) {
-    if (isReleased) {
-      throw new RuntimeException("Already released");
-    }
     Util.assertMainThread();
+    stateVerifier.throwIfRecycled();
     if (hasResource) {
       cb.onResourceReady(engineResource);
     } else if (hasLoadFailed) {
@@ -91,10 +93,8 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   public void removeCallback(ResourceCallback cb) {
-    if (isReleased) {
-      throw new RuntimeException("Already released");
-    }
     Util.assertMainThread();
+    stateVerifier.throwIfRecycled();
     if (hasResource || hasLoadFailed) {
       addIgnoredCallback(cb);
     } else {
@@ -146,15 +146,15 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   }
 
   private void handleResultOnMainThread() {
-    if (isReleased) {
-      throw new RuntimeException("Already released");
-    }
+    stateVerifier.throwIfRecycled();
     if (isCancelled) {
       resource.recycle();
       release();
       return;
     } else if (cbs.isEmpty()) {
       throw new IllegalStateException("Received a resource without any callbacks to notify");
+    } else if (hasResource) {
+      throw new IllegalStateException("Already have resource");
     }
     engineResource = engineResourceFactory.build(resource, isCacheable);
     hasResource = true;
@@ -176,8 +176,18 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
     release();
   }
 
+  private void handleCancelledOnMainThread() {
+    stateVerifier.throwIfRecycled();
+    if (!isCancelled) {
+      throw new IllegalStateException("Not cancelled");
+    }
+    listener.onEngineJobCancelled(this, key);
+    release();
+  }
+
   private void release() {
-    isReleased = true;
+    Util.assertMainThread();
+    stateVerifier.setRecycled(true /*isReleased*/);
     cbs.clear();
     key = null;
     engineResource = null;
@@ -209,21 +219,21 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   @Override
   public void reschedule(DecodeJob<?> job) {
     if (isCancelled) {
-      release();
+      MAIN_THREAD_HANDLER.obtainMessage(MSG_CANCELLED, this).sendToTarget();
     } else {
       sourceExecutor.execute(job);
     }
   }
 
   private void handleExceptionOnMainThread() {
-    if (isReleased) {
-      throw new RuntimeException("Already released");
-    }
+    stateVerifier.throwIfRecycled();
     if (isCancelled) {
       release();
       return;
     } else if (cbs.isEmpty()) {
       throw new IllegalStateException("Received an exception without any callbacks to notify");
+    } else if (hasLoadFailed) {
+      throw new IllegalStateException("Already failed once");
     }
     hasLoadFailed = true;
 
@@ -249,17 +259,70 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
 
     @Override
     public boolean handleMessage(Message message) {
-      if (MSG_COMPLETE == message.what || MSG_EXCEPTION == message.what) {
-        EngineJob job = (EngineJob) message.obj;
-        if (MSG_COMPLETE == message.what) {
+      EngineJob job = (EngineJob) message.obj;
+      switch (message.what) {
+        case MSG_COMPLETE:
           job.handleResultOnMainThread();
-        } else {
+          break;
+        case MSG_EXCEPTION:
           job.handleExceptionOnMainThread();
-        }
-        return true;
+          break;
+        case MSG_CANCELLED:
+          job.handleCancelledOnMainThread();
+          break;
+        default:
+          throw new IllegalStateException("Unrecognized message: " + message.what);
       }
+      return true;
+    }
+  }
 
-      return false;
+  /**
+   * Verifies that the job is not in the recycled state.
+   */
+  private interface StateVerifier {
+    void throwIfRecycled();
+    void setRecycled(boolean isRecycled);
+  }
+
+  private static class DefaultStateVerifier implements StateVerifier {
+
+    private boolean isReleased;
+
+    @Override
+    public void throwIfRecycled() {
+      if (isReleased) {
+        throw new IllegalStateException("Already released");
+      }
+    }
+
+    @Override
+    public void setRecycled(boolean isRecycled) {
+      this.isReleased = isRecycled;
+    }
+  }
+
+  // Used for debugging.
+  @SuppressWarnings("unused")
+  private static class DebugStateVerifier implements StateVerifier {
+
+    // Keeps track of the stack trace where our state was set to recycled.
+    private RuntimeException recycledAtStackTraceException;
+
+    @Override
+    public void throwIfRecycled() {
+      if (recycledAtStackTraceException != null) {
+        throw new IllegalStateException("Already released", recycledAtStackTraceException);
+      }
+    }
+
+    @Override
+    public void setRecycled(boolean isRecycled) {
+      if (isRecycled) {
+        this.recycledAtStackTraceException = new RuntimeException("Released");
+      } else {
+        this.recycledAtStackTraceException = null;
+      }
     }
   }
 }
