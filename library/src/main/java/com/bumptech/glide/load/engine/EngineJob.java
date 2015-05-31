@@ -29,7 +29,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   private static final int MSG_CANCELLED = 3;
 
   private final List<ResourceCallback> cbs = new ArrayList<>(2);
-  private final StateVerifier stateVerifier = new DefaultStateVerifier();
+  private final StateVerifier stateVerifier = StateVerifier.Factory.build();
   private final Pools.Pool<EngineJob<?>> pool;
   private final EngineResourceFactory engineResourceFactory;
   private final EngineJobListener listener;
@@ -274,55 +274,6 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
           throw new IllegalStateException("Unrecognized message: " + message.what);
       }
       return true;
-    }
-  }
-
-  /**
-   * Verifies that the job is not in the recycled state.
-   */
-  private interface StateVerifier {
-    void throwIfRecycled();
-    void setRecycled(boolean isRecycled);
-  }
-
-  private static class DefaultStateVerifier implements StateVerifier {
-
-    private boolean isReleased;
-
-    @Override
-    public void throwIfRecycled() {
-      if (isReleased) {
-        throw new IllegalStateException("Already released");
-      }
-    }
-
-    @Override
-    public void setRecycled(boolean isRecycled) {
-      this.isReleased = isRecycled;
-    }
-  }
-
-  // Used for debugging.
-  @SuppressWarnings("unused")
-  private static class DebugStateVerifier implements StateVerifier {
-
-    // Keeps track of the stack trace where our state was set to recycled.
-    private RuntimeException recycledAtStackTraceException;
-
-    @Override
-    public void throwIfRecycled() {
-      if (recycledAtStackTraceException != null) {
-        throw new IllegalStateException("Already released", recycledAtStackTraceException);
-      }
-    }
-
-    @Override
-    public void setRecycled(boolean isRecycled) {
-      if (isRecycled) {
-        this.recycledAtStackTraceException = new RuntimeException("Released");
-      } else {
-        this.recycledAtStackTraceException = null;
-      }
     }
   }
 }
