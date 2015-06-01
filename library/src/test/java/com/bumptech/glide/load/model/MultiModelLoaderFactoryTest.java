@@ -8,9 +8,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.support.v4.util.Pools.Pool;
 
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
-import com.bumptech.glide.load.engine.ExceptionListPool;
+import com.bumptech.glide.util.pool.FactoryPools;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,13 +40,13 @@ public class MultiModelLoaderFactoryTest {
 
   @Rule public ExpectedException exception = ExpectedException.none();
 
-  private ExceptionListPool exceptionListPool;
+  private Pool<List<Exception>> exceptionListPool;
   private MultiModelLoaderFactory multiFactory;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    exceptionListPool = new ExceptionListPool();
+    exceptionListPool = FactoryPools.threadSafeList();
 
     multiFactory = new MultiModelLoaderFactory(RuntimeEnvironment.application, exceptionListPool,
             multiModelLoaderFactory);

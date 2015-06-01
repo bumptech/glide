@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.util.Pools;
-import android.support.v4.util.Pools.SimplePool;
 import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
@@ -18,6 +17,8 @@ import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
+import com.bumptech.glide.util.pool.FactoryPools;
+import com.bumptech.glide.util.pool.StateVerifier;
 
 /**
  * A {@link Request} that loads a {@link com.bumptech.glide.load.engine.Resource} into a given
@@ -27,9 +28,16 @@ import com.bumptech.glide.util.Util;
  */
 public final class SingleRequest<R> implements Request,
     SizeReadyCallback,
-    ResourceCallback {
+    ResourceCallback,
+    FactoryPools.Poolable {
   private static final String TAG = "Request";
-  private static final Pools.Pool<SingleRequest<?>> REQUEST_POOL = new SimplePool<>(150);
+  private static final Pools.Pool<SingleRequest<?>> POOL = FactoryPools.simple(150,
+      new FactoryPools.Factory<SingleRequest<?>>() {
+        @Override
+        public SingleRequest<?> create() {
+          return new SingleRequest<Object>();
+        }
+      });
   private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
   private enum Status {
@@ -68,6 +76,7 @@ public final class SingleRequest<R> implements Request,
   }
 
   private final String tag = String.valueOf(hashCode());
+  private final StateVerifier stateVerifier = StateVerifier.newInstance();
 
   private RequestCoordinator requestCoordinator;
   private GlideContext glideContext;
@@ -104,7 +113,7 @@ public final class SingleRequest<R> implements Request,
       Engine engine,
       TransitionFactory<? super R> animationFactory) {
     @SuppressWarnings("unchecked") SingleRequest<R> request =
-        (SingleRequest<R>) REQUEST_POOL.acquire();
+        (SingleRequest<R>) POOL.acquire();
     if (request == null) {
       request = new SingleRequest<>();
     }
@@ -157,6 +166,11 @@ public final class SingleRequest<R> implements Request,
   }
 
   @Override
+  public StateVerifier getVerifier() {
+    return stateVerifier;
+  }
+
+  @Override
   public void recycle() {
     glideContext = null;
     model = null;
@@ -173,11 +187,12 @@ public final class SingleRequest<R> implements Request,
     errorDrawable = null;
     placeholderDrawable = null;
     fallbackDrawable = null;
-    REQUEST_POOL.release(this);
+    POOL.release(this);
   }
 
   @Override
   public void begin() {
+    stateVerifier.throwIfRecycled();
     startTime = LogTime.getLogTime();
     if (model == null) {
       onLoadFailed(new GlideException("Received null model"));
@@ -209,6 +224,7 @@ public final class SingleRequest<R> implements Request,
    * @see #clear()
    */
   void cancel() {
+    stateVerifier.throwIfRecycled();
     status = Status.CANCELLED;
     if (loadStatus != null) {
       loadStatus.cancel();
@@ -335,6 +351,7 @@ public final class SingleRequest<R> implements Request,
    */
   @Override
   public void onSizeReady(int width, int height) {
+    stateVerifier.throwIfRecycled();
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("Got onSizeReady in " + LogTime.getElapsedMillis(startTime));
     }
@@ -396,6 +413,7 @@ public final class SingleRequest<R> implements Request,
   @SuppressWarnings("unchecked")
   @Override
   public void onResourceReady(Resource<?> resource) {
+    stateVerifier.throwIfRecycled();
     loadStatus = null;
     if (resource == null) {
       GlideException exception = new GlideException("Expected to receive a Resource<R> with an "
@@ -461,6 +479,7 @@ public final class SingleRequest<R> implements Request,
    */
   @Override
   public void onLoadFailed(GlideException e) {
+    stateVerifier.throwIfRecycled();
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       Log.d(TAG, "Load failed for: " + model, e);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {

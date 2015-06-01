@@ -1,8 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.content.Context;
-
-import com.bumptech.glide.load.engine.ExceptionListPool;
+import android.support.v4.util.Pools.Pool;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +18,7 @@ public class ModelLoaderRegistry {
   private final MultiModelLoaderFactory multiModelLoaderFactory;
   private final ModelLoaderCache cache = new ModelLoaderCache();
 
-  public ModelLoaderRegistry(Context context, ExceptionListPool exceptionListPool) {
+  public ModelLoaderRegistry(Context context, Pool<List<Exception>> exceptionListPool) {
     this(new MultiModelLoaderFactory(context, exceptionListPool));
   }
 

@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.v4.util.Pools.Pool;
+
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.util.Preconditions;
@@ -21,13 +23,13 @@ import java.util.List;
  */
 public class LoadPath<Data, ResourceType, Transcode> {
   private final Class<Data> dataClass;
-  private final ExceptionListPool listPool;
+  private final Pool<List<Exception>> listPool;
   private final List<? extends DecodePath<Data, ResourceType, Transcode>> decodePaths;
   private final String failureMessage;
 
   public LoadPath(Class<Data> dataClass, Class<ResourceType> resourceClass,
       Class<Transcode> transcodeClass,
-      List<DecodePath<Data, ResourceType, Transcode>> decodePaths, ExceptionListPool listPool) {
+      List<DecodePath<Data, ResourceType, Transcode>> decodePaths, Pool<List<Exception>> listPool) {
     this.dataClass = dataClass;
     this.listPool = listPool;
     this.decodePaths = Preconditions.checkNotEmpty(decodePaths);

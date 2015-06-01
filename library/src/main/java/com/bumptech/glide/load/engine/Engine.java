@@ -17,6 +17,7 @@ import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
+import com.bumptech.glide.util.pool.FactoryPools;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -377,9 +378,14 @@ public class Engine implements EngineJobListener,
 
   // Visible for testing.
   static class DecodeJobFactory {
-    private static final String TAG = "DecodeJobFactory";
     private final DecodeJob.DiskCacheProvider diskCacheProvider;
-    private final Pools.Pool<DecodeJob<?>> pool = new Pools.SimplePool<>(JOB_POOL_SIZE);
+    private final Pools.Pool<DecodeJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
+        new FactoryPools.Factory<DecodeJob<?>>() {
+          @Override
+          public DecodeJob<?> create() {
+            return new DecodeJob<Object>(diskCacheProvider, pool);
+          }
+        });
     private int creationOrder;
 
     DecodeJobFactory(DecodeJob.DiskCacheProvider diskCacheProvider) {
@@ -402,12 +408,6 @@ public class Engine implements EngineJobListener,
         Options options,
         DecodeJob.Callback<R> callback) {
       DecodeJob<R> result = (DecodeJob<R>) pool.acquire();
-      if (result == null) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(TAG, "Create new job");
-        }
-        result = new DecodeJob<>(diskCacheProvider, pool);
-      }
       return result.init(
           glideContext,
           model,
@@ -429,11 +429,16 @@ public class Engine implements EngineJobListener,
 
   // Visible for testing.
   static class EngineJobFactory {
-    private static final String TAG = "EngineJobFactory";
     private final GlideExecutor diskCacheExecutor;
     private final GlideExecutor sourceExecutor;
     private final EngineJobListener listener;
-    private final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(JOB_POOL_SIZE);
+    private final Pools.Pool<EngineJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
+        new FactoryPools.Factory<EngineJob<?>>() {
+          @Override
+          public EngineJob<?> create() {
+            return new EngineJob<Object>(diskCacheExecutor, sourceExecutor, listener, pool);
+          }
+        });
 
     EngineJobFactory(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
         EngineJobListener listener) {
@@ -445,12 +450,6 @@ public class Engine implements EngineJobListener,
     @SuppressWarnings("unchecked")
     <R> EngineJob<R> build(Key key, boolean isMemoryCacheable) {
       EngineJob<R> result = (EngineJob<R>) pool.acquire();
-      if (result == null) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(TAG, "Create new job");
-        }
-        result = new EngineJob<>(diskCacheExecutor, sourceExecutor, listener, pool);
-      }
       return result.init(key, isMemoryCacheable);
     }
   }

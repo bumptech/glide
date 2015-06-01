@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.support.v4.util.Pools.Pool;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -8,7 +9,6 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.engine.DecodePath;
-import com.bumptech.glide.load.engine.ExceptionListPool;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -21,6 +21,7 @@ import com.bumptech.glide.provider.LoadPathCache;
 import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
+import com.bumptech.glide.util.pool.FactoryPools;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +41,7 @@ public class Registry {
   private final ModelToResourceClassCache modelToResourceClassCache =
       new ModelToResourceClassCache();
   private final LoadPathCache loadPathCache = new LoadPathCache();
-  private final ExceptionListPool exceptionListPool = new ExceptionListPool();
+  private final Pool<List<Exception>> exceptionListPool = FactoryPools.threadSafeList();
 
   public Registry(Context context) {
     this.modelLoaderRegistry =

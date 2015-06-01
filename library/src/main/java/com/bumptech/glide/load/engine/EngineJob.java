@@ -9,6 +9,8 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.Util;
+import com.bumptech.glide.util.pool.FactoryPools.Poolable;
+import com.bumptech.glide.util.pool.StateVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,8 @@ import java.util.List;
  * A class that manages a load by adding and removing callbacks for for the load and notifying
  * callbacks when the load completes.
  */
-class EngineJob<R> implements DecodeJob.Callback<R> {
+class EngineJob<R> implements DecodeJob.Callback<R>,
+    Poolable {
   private static final EngineResourceFactory DEFAULT_FACTORY = new EngineResourceFactory();
   private static final Handler MAIN_THREAD_HANDLER =
       new Handler(Looper.getMainLooper(), new MainThreadCallback());
@@ -29,7 +32,7 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   private static final int MSG_CANCELLED = 3;
 
   private final List<ResourceCallback> cbs = new ArrayList<>(2);
-  private final StateVerifier stateVerifier = StateVerifier.Factory.build();
+  private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final Pools.Pool<EngineJob<?>> pool;
   private final EngineResourceFactory engineResourceFactory;
   private final EngineJobListener listener;
@@ -71,7 +74,6 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
   EngineJob<R> init(Key key, boolean isCacheable) {
     this.key = key;
     this.isCacheable = isCacheable;
-    stateVerifier.setRecycled(false /*isReleased*/);
     return this;
   }
 
@@ -187,7 +189,6 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
 
   private void release() {
     Util.assertMainThread();
-    stateVerifier.setRecycled(true /*isReleased*/);
     cbs.clear();
     key = null;
     engineResource = null;
@@ -246,6 +247,11 @@ class EngineJob<R> implements DecodeJob.Callback<R> {
     }
 
     release();
+  }
+
+  @Override
+  public StateVerifier getVerifier() {
+    return stateVerifier;
   }
 
   // Visible for testing.

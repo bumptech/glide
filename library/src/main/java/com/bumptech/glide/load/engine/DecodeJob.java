@@ -17,6 +17,8 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.pool.FactoryPools.Poolable;
+import com.bumptech.glide.util.pool.StateVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +35,13 @@ import java.util.Map;
  */
 class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Runnable,
-    Comparable<DecodeJob<?>> {
+    Comparable<DecodeJob<?>>,
+    Poolable {
   private static final String TAG = "DecodeJob";
 
   private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
   private final List<Exception> exceptions = new ArrayList<>();
-  private final StateVerifier stateVerifier = StateVerifier.Factory.build();
+  private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
   private final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
@@ -114,7 +117,6 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     this.options = options;
     this.callback = callback;
     this.order = order;
-    stateVerifier.setRecycled(false);
     this.runReason = RunReason.INITIALIZE;
     return this;
   }
@@ -138,6 +140,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     releaseManager.reset();
     deferredEncodeManager.clear();
     decodeHelper.clear();
+    isCallbackNotified = false;
     glideContext = null;
     signature = null;
     options = null;
@@ -274,7 +277,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void setNotifiedOrThrow() {
     stateVerifier.throwIfRecycled();
-    stateVerifier.setRecycled(true);
+    if (isCallbackNotified) {
+      throw new IllegalStateException("Already notified");
+    }
+    isCallbackNotified = true;
   }
 
   private Stage getNextStage(Stage current) {
@@ -419,6 +425,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         message + " in " + LogTime.getElapsedMillis(startTime) + ", load key: " + loadKey + (
             extraArgs != null ? ", " + extraArgs : "") + ", thread: " + Thread.currentThread()
             .getName());
+  }
+
+  @Override
+  public StateVerifier getVerifier() {
+    return stateVerifier;
   }
 
   class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {

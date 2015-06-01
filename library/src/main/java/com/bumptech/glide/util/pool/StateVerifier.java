@@ -1,29 +1,36 @@
-package com.bumptech.glide.load.engine;
+package com.bumptech.glide.util.pool;
 
 /**
  * Verifies that the job is not in the recycled state.
  */
-interface StateVerifier {
-  final class Factory {
-    private static final boolean DEBUG = false;
+public abstract class StateVerifier {
+  private static final boolean DEBUG = false;
 
-    private Factory() { }
-
-    static StateVerifier build() {
-      if (DEBUG) {
-        return new DebugStateVerifier();
-      } else {
-        return new DefaultStateVerifier();
-      }
+  /**
+   * Creates a new {@link StateVerifier} instance.
+   */
+  public static StateVerifier newInstance() {
+    if (DEBUG) {
+      return new DebugStateVerifier();
+    } else {
+      return new DefaultStateVerifier();
     }
   }
 
-  void throwIfRecycled();
+  private StateVerifier() { }
 
-  void setRecycled(boolean isRecycled);
+  /**
+   * Throws an exception if we believe our object is recycled and inactive (ie is currently in an
+   * object pool).
+   */
+  public abstract void throwIfRecycled();
 
-  class DefaultStateVerifier implements StateVerifier {
+  /**
+   * Sets whether or not our objet is recycled.
+   */
+  abstract void setRecycled(boolean isRecycled);
 
+  private static class DefaultStateVerifier extends StateVerifier {
     private volatile boolean isReleased;
 
     @Override
@@ -39,8 +46,7 @@ interface StateVerifier {
     }
   }
 
-  class DebugStateVerifier implements StateVerifier {
-
+  private static class DebugStateVerifier extends StateVerifier {
     // Keeps track of the stack trace where our state was set to recycled.
     private volatile RuntimeException recycledAtStackTraceException;
 
@@ -52,7 +58,7 @@ interface StateVerifier {
     }
 
     @Override
-    public void setRecycled(boolean isRecycled) {
+    void setRecycled(boolean isRecycled) {
       if (isRecycled) {
         this.recycledAtStackTraceException = new RuntimeException("Released");
       } else {
