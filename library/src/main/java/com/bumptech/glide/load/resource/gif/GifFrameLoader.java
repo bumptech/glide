@@ -46,7 +46,7 @@ class GifFrameLoader {
   private Transformation<Bitmap> transformation;
 
   public interface FrameCallback {
-    void onFrameReady(int index);
+    void onFrameReady();
   }
 
   public GifFrameLoader(Context context, GifDecoder gifDecoder, int width, int height,
@@ -119,6 +119,10 @@ class GifFrameLoader {
 
   int getSize() {
     return gifDecoder.getByteSize() + getFrameSize();
+  }
+
+  int getCurrentIndex() {
+    return current != null ? current.index : -1;
   }
 
   private int getFrameSize() {
@@ -208,7 +212,7 @@ class GifFrameLoader {
       // concurrent modifications.
       for (int i = callbacks.size() - 1; i >= 0; i--) {
         FrameCallback cb = callbacks.get(i);
-        cb.onFrameReady(delayTarget.index);
+        cb.onFrameReady();
       }
       if (previous != null) {
         handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, previous).sendToTarget();
