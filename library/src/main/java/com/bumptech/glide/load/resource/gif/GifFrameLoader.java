@@ -181,9 +181,12 @@ class GifFrameLoader {
       return;
     }
     isLoadPending = true;
+    // Get the delay before incrementing the pointer because the delay indicates the amount of time
+    // we want to spend on the current frame.
+    int delay = gifDecoder.getNextDelay();
+    long targetTime = SystemClock.uptimeMillis() + delay;
 
     gifDecoder.advance();
-    long targetTime = SystemClock.uptimeMillis() + gifDecoder.getNextDelay();
     next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
     requestBuilder.clone().apply(signatureOf(new FrameSignature())).load(gifDecoder).into(next);
   }
