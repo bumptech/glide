@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
@@ -326,7 +327,7 @@ public class GlideTest {
   private void runTestStringDefaultLoader(String string) {
     requestManager.asDrawable().load(string).listener(new RequestListener<Drawable>() {
       @Override
-      public boolean onLoadFailed(Object model, Target target,
+      public boolean onLoadFailed(GlideException e, Object model, Target target,
           boolean isFirstResource) {
         throw new RuntimeException("Load failed");
       }

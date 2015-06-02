@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.Target;
 
 /**
@@ -30,13 +31,15 @@ public interface RequestListener<R> {
    * <p> Note - if you want to reload this or any other model after an exception, you will need to
    * include all relevant builder calls (like centerCrop, placeholder etc). </p>
    *
+   * @param e               The maybe {@code null} exception containing information about why the
+   *                        request failed.
    * @param model           The model we were trying to load when the exception occurred.
    * @param target          The {@link Target} we were trying to load the image into.
    * @param isFirstResource True if this exception is for the first resource to load.
    * @return True if the listener has handled updating the target for the given exception, false to
    * allow Glide's request to update the target.
    */
-  boolean onLoadFailed(Object model, Target<R> target, boolean isFirstResource);
+  boolean onLoadFailed(GlideException e, Object model, Target<R> target, boolean isFirstResource);
 
   /**
    * Called when a load completes successfully, immediately after {@link

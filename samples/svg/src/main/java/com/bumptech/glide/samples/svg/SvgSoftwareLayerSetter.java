@@ -5,6 +5,7 @@ import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
 import android.widget.ImageView;
 
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.ImageViewTarget;
 import com.bumptech.glide.request.target.Target;
@@ -18,7 +19,7 @@ import com.bumptech.glide.request.target.Target;
 public class SvgSoftwareLayerSetter implements RequestListener<PictureDrawable> {
 
   @Override
-  public boolean onLoadFailed(Object model, Target<PictureDrawable> target,
+  public boolean onLoadFailed(GlideException e, Object model, Target<PictureDrawable> target,
       boolean isFirstResource) {
     ImageView view = ((ImageViewTarget<?>) target).getView();
     if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {

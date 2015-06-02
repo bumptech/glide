@@ -7,6 +7,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -73,7 +74,7 @@ public class SingleRequestTest {
     Key signature = mock(Key.class);
     Priority priority = Priority.HIGH;
 
-    Map<Class<?>, Transformation<?>>  transformations = new HashMap<Class<?>, Transformation<?>>();
+    Map<Class<?>, Transformation<?>>  transformations = new HashMap<>();
 
     public RequestHarness() {
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
@@ -114,8 +115,8 @@ public class SingleRequestTest {
     request.onResourceReady(null);
 
     assertTrue(request.isFailed());
-    verify(harness.requestListener)
-        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean());
+    verify(harness.requestListener).onLoadFailed(isAGlideException(), isA(Number.class),
+        eq(harness.target), anyBoolean());
   }
 
   @Test
@@ -127,8 +128,8 @@ public class SingleRequestTest {
 
     assertTrue(request.isFailed());
     verify(harness.engine).release(eq(harness.resource));
-    verify(harness.requestListener)
-        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean());
+    verify(harness.requestListener).onLoadFailed(isAGlideException(), any(Number.class),
+        eq(harness.target), anyBoolean());
   }
 
   @Test
@@ -141,8 +142,8 @@ public class SingleRequestTest {
 
     assertTrue(request.isFailed());
     verify(harness.engine).release(eq(harness.resource));
-    verify(harness.requestListener)
-        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean());
+    verify(harness.requestListener).onLoadFailed(isAGlideException(), any(Number.class),
+        eq(harness.target), anyBoolean());
   }
 
   @Test
@@ -440,7 +441,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = harness.getRequest();
     request.onResourceReady(harness.resource);
 
-    verify(harness.target).onResourceReady(eq(harness.result), any(Transition.class));
+    verify(harness.target).onResourceReady(eq(harness.result), anyTransition());
   }
 
   @Test
@@ -451,7 +452,7 @@ public class SingleRequestTest {
             anyBoolean())).thenReturn(false);
     request.onResourceReady(harness.resource);
 
-    verify(harness.target).onResourceReady(eq(harness.result), any(Transition.class));
+    verify(harness.target).onResourceReady(eq(harness.result), anyTransition());
   }
 
   @Test
@@ -462,7 +463,7 @@ public class SingleRequestTest {
             anyBoolean())).thenReturn(true);
     request.onResourceReady(harness.resource);
 
-    verify(harness.target, never()).onResourceReady(any(List.class), any(Transition.class));
+    verify(harness.target, never()).onResourceReady(any(List.class), anyTransition());
   }
 
   @Test
@@ -477,8 +478,8 @@ public class SingleRequestTest {
   @Test
   public void testCallsTargetOnExceptionIfRequestListenerReturnsFalse() {
     SingleRequest<List> request = harness.getRequest();
-    when(harness.requestListener
-        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean()))
+    when(harness.requestListener.onLoadFailed(isAGlideException(), any(Number.class),
+        eq(harness.target), anyBoolean()))
         .thenReturn(false);
     request.onLoadFailed(new GlideException("test"));
 
@@ -488,8 +489,8 @@ public class SingleRequestTest {
   @Test
   public void testDoesNotCallTargetOnExceptionIfRequestListenerReturnsTrue() {
     SingleRequest<List> request = harness.getRequest();
-    when(harness.requestListener
-        .onLoadFailed(any(Number.class), eq(harness.target), anyBoolean()))
+    when(harness.requestListener.onLoadFailed(isAGlideException(), any(Number.class),
+        eq(harness.target), anyBoolean()))
         .thenReturn(true);
 
     request.onLoadFailed(new GlideException("test"));
@@ -503,7 +504,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), any(Target.class), anyBoolean(),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
             anyBoolean());
   }
 
@@ -513,7 +514,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource);
 
     verify(harness.requestListener)
-        .onResourceReady(any(List.class), eq(harness.model), any(Target.class), anyBoolean(),
+        .onResourceReady(any(List.class), eq(harness.model), isAListTarget(), anyBoolean(),
             anyBoolean());
   }
 
@@ -547,7 +548,7 @@ public class SingleRequestTest {
     request.begin();
     request.onSizeReady(100, 100);
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), any(Target.class), eq(true),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), eq(true),
             anyBoolean());
   }
 
@@ -559,7 +560,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), any(Target.class), eq(false),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), eq(false),
             anyBoolean());
   }
 
@@ -570,7 +571,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), any(Target.class), anyBoolean(),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
             eq(true));
   }
 
@@ -581,7 +582,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), any(Target.class), anyBoolean(),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
             eq(true));
   }
 
@@ -593,14 +594,14 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), any(Target.class), anyBoolean(),
-            eq(false));
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(),
+            anyBoolean(), eq(false));
   }
 
   @Test
   public void testTargetIsCalledWithAnimationFromFactory() {
     SingleRequest<List> request = harness.getRequest();
-    Transition<List> transition = mock(Transition.class);
+    Transition<List> transition = mockTransition();
     when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(transition);
     request.onResourceReady(harness.resource);
 
@@ -679,7 +680,7 @@ public class SingleRequestTest {
     request.cancel();
     request.begin();
 
-    verify(harness.target, times(2)).onResourceReady(eq(harness.result), any(Transition.class));
+    verify(harness.target, times(2)).onResourceReady(eq(harness.result), anyTransition());
   }
 
   @Test
@@ -701,6 +702,25 @@ public class SingleRequestTest {
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
             any(Options.class), anyBoolean(), any(ResourceCallback.class));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> Transition<T> mockTransition() {
+    return mock(Transition.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Target<List> isAListTarget() {
+    return isA(Target.class);
+  }
+
+  private static GlideException isAGlideException() {
+    return isA(GlideException.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> Transition<T> anyTransition() {
+    return any(Transition.class);
   }
 
   private static class CallResourceCallback implements Answer {

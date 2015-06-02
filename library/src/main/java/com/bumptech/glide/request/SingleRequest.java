@@ -471,7 +471,7 @@ public final class SingleRequest<R> implements Request,
     loadStatus = null;
     status = Status.FAILED;
     //TODO: what if this is a thumbnail request?
-    if (requestListener == null || !requestListener.onLoadFailed(model, target,
+    if (requestListener == null || !requestListener.onLoadFailed(e, model, target,
         isFirstReadyResource())) {
       setErrorPlaceholder();
     }
