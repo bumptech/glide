@@ -6,6 +6,7 @@ import android.util.Log;
 import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
 import com.bumptech.glide.util.LogTime;
@@ -170,34 +171,6 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
 
   interface HttpUrlConnectionFactory {
     HttpURLConnection build(URL url) throws IOException;
-  }
-
-  /**
-   * Thrown when an http request fails.
-   *
-   * <p>Exposes the specific status code or {@link #UNKNOWN} via {@link #getStatusCode()} so
-   * users may attempt to retry certain types of errors.
-   */
-  public static final class HttpException extends IOException {
-    public static final int UNKNOWN = -1;
-    private int statusCode;
-
-    HttpException(int statusCode) {
-      this("Http request failed with status code: " + statusCode, statusCode);
-    }
-
-    HttpException(String message) {
-      this(message, UNKNOWN);
-    }
-
-    HttpException(String message, int statusCode) {
-      super(message);
-      this.statusCode = statusCode;
-    }
-
-    public int getStatusCode() {
-      return statusCode;
-    }
   }
 
   private static class DefaultHttpUrlConnectionFactory implements HttpUrlConnectionFactory {
