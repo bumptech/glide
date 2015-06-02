@@ -97,12 +97,6 @@ public class GifDecoder {
 
   private static final int BYTES_PER_INTEGER = 4;
 
-  // We can't tell if a gif has transparency to decode a partial frame on top of a previous
-  // frame, or if the final frame will actually have transparent pixels, so we must always use a
-  // format that supports  transparency. We can't use ARGB_4444 because of framework issues drawing
-  // onto ARGB_4444 Bitmaps using Canvas.
-  private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
-
   // Global File Header values and parsing flags.
   // Active color table.
   private int[] act;
@@ -219,7 +213,7 @@ public class GifDecoder {
    */
   public int getNextDelay() {
     if (header.frameCount <= 0 || framePointer < 0) {
-      return -1;
+      return 0;
     }
 
     return getDelay(framePointer);
@@ -243,8 +237,12 @@ public class GifDecoder {
     return framePointer;
   }
 
+  /**
+   * Resets the frame pointer to before the 0th frame, as if we'd never used this decoder to
+   * decode any frames.
+   */
   public void resetFrameIndex() {
-    framePointer = -1;
+    framePointer = INITIAL_FRAME_POINTER;
   }
 
   /**
