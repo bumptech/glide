@@ -297,12 +297,17 @@ public class RequestManager implements LifecycleListener {
 
   boolean untrack(Target<?> target) {
     Request request = target.getRequest();
+    // If the Target doesn't have a request, it's already been cleared.
+    if (request == null) {
+      return true;
+    }
+
     if (requestTracker.clearRemoveAndRecycle(request)) {
       targetTracker.untrack(target);
       target.setRequest(null);
       return true;
     } else {
-      return true;
+      return false;
     }
   }
 
