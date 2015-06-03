@@ -138,7 +138,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     listener.onEngineJobCancelled(this, key);
 
     if (isPendingJobRemoved) {
-      release();
+      release(true /*isRemovedFromQueue*/);
     }
   }
 
@@ -151,7 +151,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     stateVerifier.throwIfRecycled();
     if (isCancelled) {
       resource.recycle();
-      release();
+      release(false /*isRemovedFromQueue*/);
       return;
     } else if (cbs.isEmpty()) {
       throw new IllegalStateException("Received a resource without any callbacks to notify");
@@ -175,7 +175,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     // Our request is complete, so we can release the resource.
     engineResource.release();
 
-    release();
+    release(false /*isRemovedFromQueue*/);
   }
 
   private void handleCancelledOnMainThread() {
@@ -184,10 +184,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       throw new IllegalStateException("Not cancelled");
     }
     listener.onEngineJobCancelled(this, key);
-    release();
+    release(false /*isRemovedFromQueue*/);
   }
 
-  private void release() {
+  private void release(boolean isRemovedFromQueue) {
     Util.assertMainThread();
     cbs.clear();
     key = null;
@@ -199,7 +199,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     hasLoadFailed = false;
     isCancelled = false;
     hasResource = false;
-    decodeJob.release();
+    decodeJob.release(isRemovedFromQueue);
     decodeJob = null;
     exception = null;
     pool.release(this);
@@ -229,7 +229,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private void handleExceptionOnMainThread() {
     stateVerifier.throwIfRecycled();
     if (isCancelled) {
-      release();
+      release(false /*isRemovedFromQueue*/);
       return;
     } else if (cbs.isEmpty()) {
       throw new IllegalStateException("Received an exception without any callbacks to notify");
@@ -246,7 +246,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       }
     }
 
-    release();
+    release(false /*isRemovedFromQueue*/);
   }
 
   @Override

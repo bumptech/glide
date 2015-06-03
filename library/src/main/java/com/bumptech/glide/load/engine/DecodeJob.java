@@ -45,7 +45,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
   private final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
-  private final ReleaseManager releaseManager = new ReleaseManager(deferredEncodeManager);
+  private final ReleaseManager releaseManager = new ReleaseManager();
 
   private GlideContext glideContext;
   private Key signature;
@@ -123,15 +123,31 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   /**
    * Called when this object is no longer in use externally.
+   *
+   * @param isRemovedFromQueue {@code true} if we've been removed from the queue and {@link #run}
+   *                           is neither in progress nor will ever be called again.
    */
-  void release() {
-    if (releaseManager.release()) {
+  void release(boolean isRemovedFromQueue) {
+    if (releaseManager.release(isRemovedFromQueue)) {
       releaseInternal();
     }
   }
 
+  /**
+   * Called when we've finished encoding (either becasue the encode process is complete, or because
+   * we don't have anything to encode).
+   */
   private void onEncodeComplete() {
     if (releaseManager.onEncodeComplete()) {
+      releaseInternal();
+    }
+  }
+
+  /**
+   * Called when the load has failed due to a an error or a series of errors.
+   */
+  private void onLoadFailed() {
+    if (releaseManager.onFailed()) {
       releaseInternal();
     }
   }
@@ -268,6 +284,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     setNotifiedOrThrow();
     GlideException e = new GlideException("Failed to load resource", new ArrayList<>(exceptions));
     callback.onLoadFailed(e);
+    onLoadFailed();
   }
 
   private void notifyComplete(Resource<R> resource) {
@@ -494,35 +511,44 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
   }
 
+  /**
+   * Responsible for indicating when it is safe for the job to be cleared and returned to the pool.
+   */
   private static class ReleaseManager {
-    private final DeferredEncodeManager<?> encodeManager;
     private boolean isReleased;
     private boolean isEncodeComplete;
+    private boolean isFailed;
 
-    ReleaseManager(DeferredEncodeManager<?> encodeManager) {
-      this.encodeManager = encodeManager;
-    }
-
-    synchronized boolean release() {
+    synchronized boolean release(boolean isRemovedFromQueue) {
       isReleased = true;
-      return isComplete();
+      return isComplete(isRemovedFromQueue);
     }
 
     synchronized boolean onEncodeComplete() {
       isEncodeComplete = true;
-      return isComplete();
+      return isComplete(false /*isRemovedFromQueue*/);
+    }
+
+    synchronized boolean onFailed() {
+      isFailed = true;
+      return isComplete(false /*isRemovedFromQueue*/);
     }
 
     synchronized void reset() {
       isEncodeComplete = false;
       isReleased = false;
+      isFailed = false;
     }
 
-    private boolean isComplete() {
-      return (!encodeManager.hasResourceToEncode() || isEncodeComplete) && isReleased;
+    private boolean isComplete(boolean isRemovedFromQueue) {
+      return (isFailed || isRemovedFromQueue || isEncodeComplete) && isReleased;
     }
   }
 
+  /**
+   * Allows transformed resources to be encoded after the transcoded result is already delivered
+   * to requestors.
+   */
   private static class DeferredEncodeManager<Z> {
     private Key key;
     private ResourceEncoder<Z> encoder;
