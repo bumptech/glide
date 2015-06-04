@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -76,6 +78,7 @@ public interface ModelLoader<Model, Data> {
    *               {@link com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate that
    *               the resource should be loaded at its original height.
    */
+  @Nullable
   LoadData<Data> buildLoadData(Model model, int width, int height, Options options);
 
   /**

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
@@ -279,7 +280,7 @@ public class RequestManager implements LifecycleListener {
    *
    * @param target The Target to cancel loads for.
    */
-  public void clear(Target<?> target) {
+  public void clear(@Nullable Target<?> target) {
     Util.assertMainThread();
     if (target == null) {
       return;

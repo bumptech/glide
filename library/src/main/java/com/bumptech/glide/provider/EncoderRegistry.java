@@ -1,5 +1,7 @@
 package com.bumptech.glide.provider;
 
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.Encoder;
 
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ public class EncoderRegistry {
   private final List<Entry<?>> encoders = new ArrayList<>();
 
   @SuppressWarnings("unchecked")
+  @Nullable
   public synchronized <T> Encoder<T> getEncoder(Class<T> dataClass) {
     for (Entry<?> entry : encoders) {
       if (entry.handles(dataClass)) {

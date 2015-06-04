@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
@@ -31,6 +32,7 @@ public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream>
   }
 
   @Override
+  @Nullable
   public LoadData<InputStream> buildLoadData(Uri model, int width, int height, Options options) {
     if (MediaStoreUtil.isThumbnailSize(width, height) && isRequestingDefaultFrame(options)) {
       return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildVideoFetcher(context, model));

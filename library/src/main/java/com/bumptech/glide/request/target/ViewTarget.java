@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -39,7 +40,7 @@ import java.util.List;
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private static final String TAG = "ViewTarget";
   private static boolean isTagUsedAtLeastOnce = false;
-  private static Integer tagId = null;
+  @Nullable private static Integer tagId = null;
 
   protected final T view;
   private final SizeDeterminer sizeDeterminer;
@@ -76,7 +77,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * @param request {@inheritDoc}
    */
   @Override
-  public void setRequest(Request request) {
+  public void setRequest(@Nullable Request request) {
     setTag(request);
   }
 
@@ -92,6 +93,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * com.bumptech.glide.request.Request}. </p>
    */
   @Override
+  @Nullable
   public Request getRequest() {
     Object tag = getTag();
     Request request = null;
@@ -111,7 +113,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     return "Target for: " + view;
   }
 
-  private void setTag(Object tag) {
+  private void setTag(@Nullable Object tag) {
     if (tagId == null) {
       isTagUsedAtLeastOnce = true;
       view.setTag(tag);
@@ -120,6 +122,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
   }
 
+  @Nullable
   private Object getTag() {
     if (tagId == null) {
       return view.getTag();
@@ -160,8 +163,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     private final View view;
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
 
-    private SizeDeterminerLayoutListener layoutListener;
-    private Point displayDimens;
+    @Nullable private SizeDeterminerLayoutListener layoutListener;
+    @Nullable private Point displayDimens;
 
     public SizeDeterminer(View view) {
       this.view = view;

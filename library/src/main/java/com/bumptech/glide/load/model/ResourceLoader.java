@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.bumptech.glide.load.Options;
@@ -38,6 +39,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     return uri == null ? null : uriLoader.buildLoadData(uri, width, height, options);
   }
 
+  @Nullable
   private Uri getResourceUri(Integer model) {
     try {
       return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://"

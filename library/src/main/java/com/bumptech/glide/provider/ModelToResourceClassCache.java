@@ -1,5 +1,6 @@
 package com.bumptech.glide.provider;
 
+import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 
 import com.bumptech.glide.util.MultiClassKey;
@@ -16,6 +17,7 @@ public class ModelToResourceClassCache {
   private final ArrayMap<MultiClassKey, List<Class<?>>> registeredResourceClassCache =
       new ArrayMap<>();
 
+  @Nullable
   public List<Class<?>> get(Class<?> modelClass, Class<?> resourceClass) {
     MultiClassKey key = resourceClassKeyRef.getAndSet(null);
     if (key == null) {

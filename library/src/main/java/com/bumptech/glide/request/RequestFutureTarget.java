@@ -2,6 +2,7 @@ package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.transition.Transition;
@@ -44,8 +45,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   private final boolean assertBackgroundThread;
   private final Waiter waiter;
 
-  private R resource;
-  private Request request;
+  @Nullable private R resource;
+  @Nullable private Request request;
   private boolean isCancelled;
   private boolean resultReceived;
   private boolean loadFailed;
@@ -118,11 +119,12 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * {@inheritDoc}
    */
   @Override
-  public void setRequest(Request request) {
+  public void setRequest(@Nullable Request request) {
     this.request = request;
   }
 
   @Override
+  @Nullable
   public Request getRequest() {
     return request;
   }

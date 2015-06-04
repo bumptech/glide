@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.request.Request;
@@ -38,7 +39,7 @@ public interface Target<R> extends LifecycleListener {
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
-  void onLoadStarted(Drawable placeholder);
+  void onLoadStarted(@Nullable Drawable placeholder);
 
   /**
    * A lifecycle callback that is called when a load fails.
@@ -48,7 +49,7 @@ public interface Target<R> extends LifecycleListener {
    *
    * @param errorDrawable The error drawable to optionally show, or null.
    */
-  void onLoadFailed(Drawable errorDrawable);
+  void onLoadFailed(@Nullable Drawable errorDrawable);
 
   /**
    * The method that will be called when the resource load has finished.
@@ -62,7 +63,7 @@ public interface Target<R> extends LifecycleListener {
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
-  void onLoadCleared(Drawable placeholder);
+  void onLoadCleared(@Nullable Drawable placeholder);
 
   /**
    * A method to retrieve the size of this target.
@@ -74,10 +75,11 @@ public interface Target<R> extends LifecycleListener {
   /**
    * Sets the current request for this target to retain, should not be called outside of Glide.
    */
-  void setRequest(Request request);
+  void setRequest(@Nullable Request request);
 
   /**
    * Retrieves the current request for this target, should not be called outside of Glide.
    */
+  @Nullable
   Request getRequest();
 }

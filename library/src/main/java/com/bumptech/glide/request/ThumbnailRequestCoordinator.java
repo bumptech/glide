@@ -1,5 +1,7 @@
 package com.bumptech.glide.request;
 
+import android.support.annotation.Nullable;
+
 /**
  * A coordinator that coordinates two individual {@link Request}s that load a small thumbnail
  * version of an image and the full size version of the image at the same time.
@@ -8,7 +10,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     Request {
   private Request full;
   private Request thumb;
-  private RequestCoordinator coordinator;
+  @Nullable private RequestCoordinator coordinator;
   private boolean isRunning;
 
   public ThumbnailRequestCoordinator() {

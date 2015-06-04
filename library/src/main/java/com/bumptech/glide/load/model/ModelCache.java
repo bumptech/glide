@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.util.LruCache;
 import com.bumptech.glide.util.Util;
 
@@ -40,6 +42,7 @@ public class ModelCache<A, B> {
    * @param height The height in pixels of the view the image is being loaded into.
    * @return The cached result, or null.
    */
+  @Nullable
   public B get(A model, int width, int height) {
     ModelKey<A> key = ModelKey.get(model, width, height);
     B result = cache.get(key);

@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -49,13 +50,13 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private TransitionOptions<?, ? super TranscodeType> transitionOptions =
       (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
 
-  private Object model;
+  @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
   // than relying on model not to be null.
   private boolean isModelSet;
-  private RequestListener<TranscodeType> requestListener;
-  private RequestBuilder<TranscodeType> thumbnailBuilder;
-  private Float thumbSizeMultiplier;
+  @Nullable private RequestListener<TranscodeType> requestListener;
+  @Nullable private RequestBuilder<TranscodeType> thumbnailBuilder;
+  @Nullable private Float thumbSizeMultiplier;
   private boolean isThumbnailBuilt;
 
   RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
@@ -95,7 +96,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @return This request builder.
    */
   @SuppressWarnings("unchecked")
-  public RequestBuilder<TranscodeType> listener(RequestListener<TranscodeType> requestListener) {
+  public RequestBuilder<TranscodeType> listener(
+      @Nullable RequestListener<TranscodeType> requestListener) {
     this.requestListener = requestListener;
 
     return this;
@@ -115,7 +117,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * <p> Recursive calls to thumbnail are supported. </p>
    */
   @SuppressWarnings("unchecked")
-  public RequestBuilder<TranscodeType> thumbnail(RequestBuilder<TranscodeType> thumbnailRequest) {
+  public RequestBuilder<TranscodeType> thumbnail(
+      @Nullable RequestBuilder<TranscodeType> thumbnailRequest) {
     this.thumbnailBuilder = thumbnailRequest;
 
     return this;
@@ -166,11 +169,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @return This request builder.
    */
   @SuppressWarnings("unchecked")
-  public RequestBuilder<TranscodeType> load(Object model) {
+  public RequestBuilder<TranscodeType> load(@Nullable Object model) {
     return loadGeneric(model);
   }
 
-  private RequestBuilder<TranscodeType> loadGeneric(Object model) {
+  private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
     this.model = model;
     isModelSet = true;
     return this;
@@ -502,7 +505,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   private Request buildRequestRecursive(Target<TranscodeType> target,
-      ThumbnailRequestCoordinator parentCoordinator,
+      @Nullable ThumbnailRequestCoordinator parentCoordinator,
       TransitionOptions<?, ? super TranscodeType> transitionOptions,
       Priority priority, int overrideWidth, int overrideHeight) {
     if (thumbnailBuilder != null) {

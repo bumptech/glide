@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.bumptech.glide.load.Key;
@@ -28,13 +29,13 @@ import java.util.Map;
  */
 public class GlideUrl implements Key {
   private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
-  private final URL url;
   private final Headers headers;
-  private final String stringUrl;
+  @Nullable private final URL url;
+  @Nullable private final String stringUrl;
 
-  private String safeStringUrl;
-  private URL safeUrl;
-  private volatile byte[] cacheKeyBytes;
+  @Nullable private String safeStringUrl;
+  @Nullable private URL safeUrl;
+  @Nullable private volatile byte[] cacheKeyBytes;
 
   public GlideUrl(URL url) {
     this(url, Headers.NONE);

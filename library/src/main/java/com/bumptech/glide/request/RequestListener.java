@@ -1,5 +1,7 @@
 package com.bumptech.glide.request;
 
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.Target;
 
@@ -39,7 +41,8 @@ public interface RequestListener<R> {
    * @return True if the listener has handled updating the target for the given exception, false to
    * allow Glide's request to update the target.
    */
-  boolean onLoadFailed(GlideException e, Object model, Target<R> target, boolean isFirstResource);
+  boolean onLoadFailed(@Nullable GlideException e, Object model, Target<R> target,
+      boolean isFirstResource);
 
   /**
    * Called when a load completes successfully, immediately after {@link

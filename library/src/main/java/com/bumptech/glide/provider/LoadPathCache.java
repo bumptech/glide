@@ -1,5 +1,6 @@
 package com.bumptech.glide.provider;
 
+import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 
 import com.bumptech.glide.load.engine.LoadPath;
@@ -26,6 +27,7 @@ public class LoadPathCache {
   }
 
   @SuppressWarnings("unchecked")
+  @Nullable
   public <Data, TResource, Transcode> LoadPath<Data, TResource, Transcode> get(
       Class<Data> dataClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
     MultiClassKey key = getKey(dataClass, resourceClass, transcodeClass);

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model.stream;
 
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.bumptech.glide.load.Key;
@@ -22,19 +23,20 @@ import java.util.List;
  */
 public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, InputStream> {
   private final ModelLoader<GlideUrl, InputStream> concreteLoader;
-  private final ModelCache<Model, GlideUrl> modelCache;
+  @Nullable private final ModelCache<Model, GlideUrl> modelCache;
 
   protected BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader) {
     this(concreteLoader, null);
   }
 
   protected BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader,
-      ModelCache<Model, GlideUrl> modelCache) {
+      @Nullable ModelCache<Model, GlideUrl> modelCache) {
     this.concreteLoader = concreteLoader;
     this.modelCache = modelCache;
   }
 
   @Override
+  @Nullable
   public LoadData<InputStream> buildLoadData(Model model, int width, int height, Options options) {
     GlideUrl result = null;
     if (modelCache != null) {
@@ -108,6 +110,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
+  @Nullable
   protected Headers getHeaders(Model model, int width, int height, Options options) {
     return Headers.NONE;
   }

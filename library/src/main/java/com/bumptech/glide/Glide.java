@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -106,6 +107,7 @@ public class Glide implements ComponentCallbacks2 {
    * @param context A context.
    * @see #getPhotoCacheDir(android.content.Context, String)
    */
+  @Nullable
   public static File getPhotoCacheDir(Context context) {
     return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
   }
@@ -118,6 +120,7 @@ public class Glide implements ComponentCallbacks2 {
    * @param cacheName The name of the subdirectory in which to store the cache.
    * @see #getPhotoCacheDir(android.content.Context)
    */
+  @Nullable
   public static File getPhotoCacheDir(Context context, String cacheName) {
     File cacheDir = context.getCacheDir();
     if (cacheDir != null) {
