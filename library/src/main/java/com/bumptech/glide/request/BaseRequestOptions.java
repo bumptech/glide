@@ -368,6 +368,11 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return set(Downsampler.DECODE_FORMAT, Preconditions.checkNotNull(format));
   }
 
+  /**
+   * Sets the time position of the frame to extract from a video.
+   * @param frame The time position in microseconds of the desired frame. If negative, the Android
+   *     framework implementation return a representative frame.
+   */
   public CHILD frame(long frame) {
     return set(VideoBitmapDecoder.TARGET_FRAME, frame);
   }
