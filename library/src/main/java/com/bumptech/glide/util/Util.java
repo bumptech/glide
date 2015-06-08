@@ -138,7 +138,7 @@ public final class Util {
    */
   public static void assertBackgroundThread() {
     if (!isOnBackgroundThread()) {
-      throw new IllegalArgumentException("YOu must call this method on a background thread");
+      throw new IllegalArgumentException("You must call this method on a background thread");
     }
   }
 
