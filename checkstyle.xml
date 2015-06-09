@@ -14,6 +14,9 @@
         <property name="message" value="Line has trailing spaces."/>
     </module>
 
+    <!-- Ensure trailling newline for compatibility -->
+    <module name="NewlineAtEndOfFile" />
+
     <!-- Space after 'for' and 'if' -->
     <module name="RegexpSingleline">
         <property name="format" value="^\s*(for|if)\b[^ ]"/>
