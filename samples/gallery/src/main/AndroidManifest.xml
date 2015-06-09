@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.bumptech.glide.samples.gallery"
-          android:versionCode="1"
-          android:versionName="1.0">
-  <uses-sdk android:minSdkVersion="19"
-    android:targetSdkVersion="19" />
+          package="com.bumptech.glide.samples.gallery">
+  <uses-sdk
+    android:minSdkVersion="10"
+    android:targetSdkVersion="22" />
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-  <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
+  <application android:label="@string/app_name"
+               android:icon="@drawable/ic_launcher"
+               android:allowBackup="false">
     <activity android:name=".MainActivity"
               android:label="@string/app_name">
       <intent-filter>

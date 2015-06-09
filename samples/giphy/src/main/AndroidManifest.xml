@@ -3,8 +3,9 @@
           package="com.bumptech.glide.samples.giphy">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-sdk android:minSdkVersion="10"
-      android:targetSdkVersion="19" />
+
+    <uses-sdk android:minSdkVersion="14"
+      android:targetSdkVersion="22" />
 
     <application
         android:allowBackup="true"
