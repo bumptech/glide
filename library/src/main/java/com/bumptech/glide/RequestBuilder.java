@@ -331,7 +331,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       throw new IllegalArgumentException("You must pass in a non null Target");
     }
     if (!isModelSet) {
-      throw new IllegalArgumentException("You must first put a model (try #load())");
+      throw new IllegalArgumentException("You must call #load() before calling #into()");
     }
 
     Request previous = target.getRequest();
