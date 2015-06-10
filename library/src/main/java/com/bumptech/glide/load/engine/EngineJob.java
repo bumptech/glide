@@ -79,7 +79,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   public void start(DecodeJob<R> decodeJob) {
     this.decodeJob = decodeJob;
-    diskCacheExecutor.execute(decodeJob);
+    GlideExecutor executor = decodeJob.willDecodeFromCache() ? diskCacheExecutor : sourceExecutor;
+    executor.execute(decodeJob);
   }
 
   public void addCallback(ResourceCallback cb) {

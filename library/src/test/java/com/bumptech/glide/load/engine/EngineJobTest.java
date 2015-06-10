@@ -417,11 +417,21 @@ public class EngineJobTest {
   }
 
   @Test
-  public void testSubmitsDecodeJobToDiskCacheServiceOnStart() {
+  public void testSubmitsDecodeJobToDiskCacheServiceWhenDecodingFromCacheOnStart() {
     EngineJob<Object> job = harness.getJob();
+    when(harness.decodeJob.willDecodeFromCache()).thenReturn(true);
     job.start(harness.decodeJob);
 
     verify(harness.diskCacheService).execute(eq(harness.decodeJob));
+  }
+
+  @Test
+  public void testSubmitsDecodeJobToSourceServiceWhenDecodingFromSoureOnlyOnStart() {
+    EngineJob<Object> job = harness.getJob();
+    when(harness.decodeJob.willDecodeFromCache()).thenReturn(false);
+    job.start(harness.decodeJob);
+
+    verify(harness.sourceService).execute(eq(harness.decodeJob));
   }
 
   @SuppressWarnings("unchecked")

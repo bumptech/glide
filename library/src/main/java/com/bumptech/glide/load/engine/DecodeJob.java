@@ -122,6 +122,15 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   /**
+   * Returns true if this job will attempt to decode a resource from the disk cache, and false if it
+   * will always decode from source.
+   */
+  boolean willDecodeFromCache() {
+    Stage firstStage = getNextStage(Stage.INITIALIZE);
+    return firstStage == Stage.RESOURCE_CACHE || firstStage == Stage.DATA_CACHE;
+  }
+
+  /**
    * Called when this object is no longer in use externally.
    *
    * @param isRemovedFromQueue {@code true} if we've been removed from the queue and {@link #run}
