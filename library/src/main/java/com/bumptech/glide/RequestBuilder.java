@@ -198,7 +198,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param string A file path, or a uri or url handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
-  public RequestBuilder<TranscodeType> load(String string) {
+  public RequestBuilder<TranscodeType> load(@Nullable String string) {
     return loadGeneric(string);
   }
 
@@ -220,7 +220,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param uri The Uri representing the image. Must be of a type handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
-  public RequestBuilder<TranscodeType> load(Uri uri) {
+  public RequestBuilder<TranscodeType> load(@Nullable Uri uri) {
     return loadGeneric(uri);
   }
 
@@ -242,7 +242,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @param file The File containing the image
    */
-  public RequestBuilder<TranscodeType> load(File file) {
+  public RequestBuilder<TranscodeType> load(@Nullable File file) {
     return loadGeneric(file);
   }
 
@@ -265,7 +265,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.ApplicationVersionSignature
    */
-  public RequestBuilder<TranscodeType> load(Integer resourceId) {
+  public RequestBuilder<TranscodeType> load(@Nullable Integer resourceId) {
     return loadGeneric(resourceId).apply(signatureOf(ApplicationVersionSignature.obtain(context)));
   }
 
@@ -279,7 +279,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * {@link #load(android.net.Uri)} or {@link #load(String)}.
    */
   @Deprecated
-  public RequestBuilder<TranscodeType> load(URL url) {
+  public RequestBuilder<TranscodeType> load(@Nullable URL url) {
     return loadGeneric(url);
   }
 
@@ -292,7 +292,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param model the data to load.
    * @see #load(Object)
    */
-  public RequestBuilder<TranscodeType> load(byte[] model) {
+  public RequestBuilder<TranscodeType> load(@Nullable byte[] model) {
     return loadGeneric(model).apply(signatureOf(new StringSignature(UUID.randomUUID().toString()))
         .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true /*skipMemoryCache*/));
   }
