@@ -24,8 +24,6 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
 
   @Override
   public void release(Bitmap bitmap) {
-    if (!bitmapPool.put(bitmap)) {
-      bitmap.recycle();
-    }
+    bitmapPool.put(bitmap);
   }
 }

@@ -33,8 +33,8 @@ public class CenterCrop extends BitmapTransformation {
     final Bitmap toReuse = pool.get(outWidth, outHeight,
         toTransform.getConfig() != null ? toTransform.getConfig() : Bitmap.Config.ARGB_8888);
     Bitmap transformed = TransformationUtils.centerCrop(toReuse, toTransform, outWidth, outHeight);
-    if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
-      toReuse.recycle();
+    if (toReuse != null && toReuse != transformed) {
+      pool.put(toReuse);
     }
     return transformed;
   }

@@ -14,8 +14,8 @@ public interface BitmapPool {
   int getMaxSize();
 
   /**
-   * Multiplies the initial size of the pool by the given multipler to dynamically and synchronously
-   * allow users to adjust the size of the pool.
+   * Multiplies the initial size of the pool by the given multiplier to dynamically and
+   * synchronously allow users to adjust the size of the pool.
    *
    * <p> If the current total size of the pool is larger than the max size after the given
    * multiplier is applied, {@link Bitmap}s should be evicted until the pool is smaller than the new
@@ -26,22 +26,16 @@ public interface BitmapPool {
   void setSizeMultiplier(float sizeMultiplier);
 
   /**
-   * Adds the given {@link android.graphics.Bitmap} and returns {@code true} if the {@link
-   * android.graphics.Bitmap} was eligible to be added and {@code false} otherwise.
+   * Adds the given {@link android.graphics.Bitmap} if it is eligible to be re-used and the pool
+   * can fit it, or calls {@link Bitmap#recycle()} on the Bitmap and discards it.
    *
-   * <p> Note - If the {@link android.graphics.Bitmap} is rejected (this method returns false) then
-   * it is the caller's responsibility to call {@link android.graphics.Bitmap#recycle()}. </p>
-   *
-   * <p> Note - This method will return {@code true} if the given {@link android.graphics.Bitmap} is
-   * synchronously evicted after being accepted. The only time this method will return {@code false}
-   * is if the {@link android.graphics.Bitmap} is not eligible to be added to the pool (either it is
-   * not mutable or it is larger than the max pool size). </p>
+   * <p> Callers most <em>not</em> continue to use the Bitmap after calling this method. </p>
    *
    * @param bitmap The {@link android.graphics.Bitmap} to attempt to add.
    * @see android.graphics.Bitmap#isMutable()
    * @see android.graphics.Bitmap#recycle()
    */
-  boolean put(Bitmap bitmap);
+  void put(Bitmap bitmap);
 
   /**
    * Returns a {@link android.graphics.Bitmap} of exactly the given width, height, and

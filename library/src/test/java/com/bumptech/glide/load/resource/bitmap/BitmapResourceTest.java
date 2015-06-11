@@ -1,12 +1,9 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -56,24 +53,6 @@ public class BitmapResourceTest {
     harness.resource.recycle();
 
     verify(harness.bitmapPool).put(eq(harness.bitmap));
-  }
-
-  @Test
-  public void testBitmapIsNotRecycledIfAcceptedByPool() {
-    when(harness.bitmapPool.put(eq(harness.bitmap))).thenReturn(true);
-
-    harness.resource.recycle();
-
-    assertFalse(harness.bitmap.isRecycled());
-  }
-
-  @Test
-  public void testRecyclesBitmapIfRejectedByPool() {
-    when(harness.bitmapPool.put(eq(harness.bitmap))).thenReturn(false);
-
-    harness.resource.recycle();
-
-    assertTrue(harness.bitmap.isRecycled());
   }
 
   @Test(expected = NullPointerException.class)

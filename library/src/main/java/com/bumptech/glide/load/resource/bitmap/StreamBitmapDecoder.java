@@ -98,8 +98,8 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
       // ExceptionCatchingInputStream and throw them here.
       IOException streamException = exceptionStream.getException();
       if (streamException != null) {
-        if (downsampled != null && !bitmapPool.put(downsampled)) {
-          downsampled.recycle();
+        if (downsampled != null) {
+          bitmapPool.put(downsampled);
         }
         throw streamException;
       }

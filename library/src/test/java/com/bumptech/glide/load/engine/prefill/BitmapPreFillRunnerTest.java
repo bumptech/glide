@@ -7,6 +7,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -51,7 +52,7 @@ public class BitmapPreFillRunnerTest {
     clock = mock(BitmapPreFillRunner.Clock.class);
 
     pool = mock(BitmapPool.class);
-    when(pool.put(any(Bitmap.class))).thenAnswer(new AddBitmapPoolAnswer(addedBitmaps));
+    doAnswer(new AddBitmapPoolAnswer(addedBitmaps)).when(pool).put(any(Bitmap.class));
     cache = mock(MemoryCache.class);
     when(cache.put(any(Key.class), any(Resource.class)))
         .thenAnswer(new AddBitmapCacheAnswer(addedBitmaps));
@@ -298,7 +299,7 @@ public class BitmapPreFillRunnerTest {
     // order.verify(pool, times(numBitmaps)).put(eq(bitmap));
   }
 
-  private static class AddBitmapPoolAnswer implements Answer<Boolean> {
+  private static class AddBitmapPoolAnswer implements Answer<Void> {
     private List<Bitmap> bitmaps;
 
     public AddBitmapPoolAnswer(List<Bitmap> bitmaps) {
@@ -306,7 +307,7 @@ public class BitmapPreFillRunnerTest {
     }
 
     @Override
-    public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable {
+    public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
       Bitmap bitmap = (Bitmap) invocationOnMock.getArguments()[0];
       bitmaps.add(bitmap);
       return null;

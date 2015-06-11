@@ -193,9 +193,7 @@ class GifFrameLoader {
 
   private void recycleFirstFrame() {
     if (firstFrame != null) {
-      if (!Glide.get(context).getBitmapPool().put(firstFrame)) {
-        firstFrame.recycle();
-      }
+      Glide.get(context).getBitmapPool().put(firstFrame);
       firstFrame = null;
     }
   }

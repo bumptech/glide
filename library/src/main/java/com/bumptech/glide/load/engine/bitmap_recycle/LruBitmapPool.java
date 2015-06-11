@@ -77,7 +77,7 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   @Override
-  public synchronized boolean put(Bitmap bitmap) {
+  public synchronized void put(Bitmap bitmap) {
     if (bitmap == null) {
       throw new NullPointerException("Bitmap must not be null");
     }
@@ -92,7 +92,8 @@ public class LruBitmapPool implements BitmapPool {
                 + ", is mutable: " + bitmap.isMutable()
                 + ", is allowed config: " + allowedConfigs.contains(bitmap.getConfig()));
       }
-      return false;
+      bitmap.recycle();
+      return;
     }
 
     final int size = strategy.getSize(bitmap);
@@ -108,7 +109,6 @@ public class LruBitmapPool implements BitmapPool {
     dump();
 
     evict();
-    return true;
   }
 
   private void evict() {

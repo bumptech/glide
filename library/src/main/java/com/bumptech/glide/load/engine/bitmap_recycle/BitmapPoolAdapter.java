@@ -20,8 +20,8 @@ public class BitmapPoolAdapter implements BitmapPool {
   }
 
   @Override
-  public boolean put(Bitmap bitmap) {
-    return false;
+  public void put(Bitmap bitmap) {
+    bitmap.recycle();
   }
 
   @Override

@@ -53,8 +53,6 @@ public class LazyBitmapDrawableResource implements Resource<BitmapDrawable> {
 
   @Override
   public void recycle() {
-    if (!bitmapPool.put(bitmap)) {
-      bitmap.recycle();
-    }
+    bitmapPool.put(bitmap);
   }
 }

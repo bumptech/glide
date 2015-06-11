@@ -187,8 +187,8 @@ public final class Downsampler {
       downsampled.setDensity(displayMetrics.densityDpi);
 
       rotated = TransformationUtils.rotateImageExif(downsampled, bitmapPool, orientation);
-      if (!downsampled.equals(rotated) && !bitmapPool.put(downsampled)) {
-        downsampled.recycle();
+      if (!downsampled.equals(rotated)) {
+        bitmapPool.put(downsampled);
       }
     }
 
