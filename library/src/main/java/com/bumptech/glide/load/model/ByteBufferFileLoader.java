@@ -3,7 +3,6 @@ package com.bumptech.glide.load.model;
 import android.content.Context;
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
@@ -19,6 +18,7 @@ import java.nio.ByteBuffer;
  * Loads {@link java.nio.ByteBuffer}s using NIO for {@link java.io.File}.
  */
 public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
+  private static final String TAG = "ByteBufferFileLoader";
 
   @Override
   public LoadData<ByteBuffer> buildLoadData(File file, int width, int height,
@@ -62,8 +62,8 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
       try {
         result = ByteBufferUtil.fromFile(file);
       } catch (IOException e) {
-        if (Logs.isEnabled(Log.DEBUG)) {
-          Logs.log(Log.DEBUG, "Failed to obtain ByteBuffer for file", e);
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to obtain ByteBuffer for file", e);
         }
         callback.onLoadFailed(e);
         return;

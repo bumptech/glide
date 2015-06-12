@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import android.support.v4.util.Pools.Pool;
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.DataRewinder;
@@ -22,6 +21,7 @@ import java.util.List;
  *                       returned to the caller.
  */
 public class DecodePath<DataType, ResourceType, Transcode> {
+  private static final String TAG = "DecodePath";
   private final Class<DataType> dataClass;
   private final List<? extends ResourceDecoder<DataType, ResourceType>> decoders;
   private final ResourceTranscoder<ResourceType, Transcode> transcoder;
@@ -69,8 +69,8 @@ public class DecodePath<DataType, ResourceType, Transcode> {
           result = decoder.decode(data, width, height, options);
         }
       } catch (IOException e) {
-        if (Logs.isEnabled(Log.VERBOSE)) {
-          Logs.log(Log.VERBOSE, "Failed to decode data for " + decoder, e);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(TAG, "Failed to decode data for " + decoder, e);
         }
         exceptions.add(e);
       }

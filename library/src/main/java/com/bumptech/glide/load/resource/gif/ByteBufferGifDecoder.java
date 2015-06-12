@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -109,8 +108,8 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
         new GifDrawable(context, gifDecoder, bitmapPool, unitTransformation, width, height,
             firstFrame);
 
-    if (Logs.isEnabled(Log.VERBOSE)) {
-      Logs.log(Log.VERBOSE, "Decoded gif from stream in " + LogTime.getElapsedMillis(startTime));
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Decoded gif from stream in " + LogTime.getElapsedMillis(startTime));
     }
 
     return new GifDrawableResource(gifDrawable);

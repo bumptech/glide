@@ -9,7 +9,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -24,6 +23,7 @@ import java.util.Map;
  * A DataFetcher backed by volley for fetching images via http.
  */
 public class VolleyStreamFetcher implements DataFetcher<InputStream> {
+  private static final String TAG = "VolleyStreamFetcher";
   public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY = new VolleyRequestFactory() {
     @Override
     public Request<byte[]> create(String url, DataCallback<? super InputStream> callback,
@@ -125,8 +125,8 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     protected VolleyError parseNetworkError(VolleyError volleyError) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Volley failed to retrieve response", volleyError);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Volley failed to retrieve response", volleyError);
       }
       callback.onLoadFailed(volleyError);
       return super.parseNetworkError(volleyError);

@@ -7,7 +7,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -23,6 +22,7 @@ import java.io.InputStream;
  * files obtained from the {@link MediaStore}.
  */
 public class ThumbFetcher implements DataFetcher<InputStream> {
+  private static final String TAG = "MediaStoreThumbFetcher";
   private final Context context;
   private final Uri mediaStoreImageUri;
   private final ThumbnailStreamOpener opener;
@@ -53,8 +53,8 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     try {
       inputStream = openThumbInputStream();
     } catch (FileNotFoundException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Failed to find thumbnail file", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to find thumbnail file", e);
       }
       callback.onLoadFailed(e);
       return;

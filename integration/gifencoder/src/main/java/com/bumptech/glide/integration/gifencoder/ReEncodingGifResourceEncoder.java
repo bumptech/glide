@@ -3,7 +3,6 @@ package com.bumptech.glide.integration.gifencoder;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -157,8 +156,8 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
     try {
       ByteBufferUtil.toFile(data, file);
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.WARN)) {
-        Logs.log(Log.WARN, "Failed to write gif data", e);
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Failed to write gif data", e);
       }
       return false;
     }

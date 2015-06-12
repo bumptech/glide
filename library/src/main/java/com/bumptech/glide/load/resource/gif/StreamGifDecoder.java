@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -22,6 +21,7 @@ import java.nio.ByteBuffer;
  * the buffer to a wrapped decoder.
  */
 public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawable> {
+  private static final String TAG = "StreamGifDecoder";
   /**
    * If set to {@code true}, disables this decoder
    * ({@link #handles(InputStream, Options)} will return {@code false}). Defaults to
@@ -67,8 +67,8 @@ public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawabl
       }
       buffer.flush();
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.WARN)) {
-        Logs.log(Log.WARN, "Error reading data from stream", e);
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Error reading data from stream", e);
       }
       return null;
     }

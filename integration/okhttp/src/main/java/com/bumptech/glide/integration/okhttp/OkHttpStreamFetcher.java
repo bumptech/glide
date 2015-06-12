@@ -2,7 +2,6 @@ package com.bumptech.glide.integration.okhttp;
 
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -21,6 +20,7 @@ import java.util.Map;
  * Fetches an {@link InputStream} using the okhttp library.
  */
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
+  private static final String TAG = "OkHttpFetcher";
   private static final String USER_AGENT_HEADER = "User-Agent";
   private static final String DEFAULT_USER_AGENT = System.getProperty("http.agent");
   private final OkHttpClient client;
@@ -50,8 +50,8 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
       @Override
       public void onFailure(Request request, IOException e) {
-        if (Logs.isEnabled(Log.DEBUG)) {
-          Logs.log(Log.DEBUG, "OkHttp failed to obtain result", e);
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "OkHttp failed to obtain result", e);
         }
         callback.onLoadFailed(e);
       }
@@ -62,9 +62,8 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
           long contentLength = response.body().contentLength();
           responseBody = response.body();
           stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
-        } else if (Logs.isEnabled(Log.DEBUG)) {
-          Logs.log(Log.DEBUG, "OkHttp got error response: " + response.code() + ", "
-              + response.message());
+        } else if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "OkHttp got error response: " + response.code() + ", " + response.message());
         }
         callback.onDataReady(stream);
       }

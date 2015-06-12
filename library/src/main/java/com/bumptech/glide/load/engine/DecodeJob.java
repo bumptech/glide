@@ -4,7 +4,6 @@ import android.support.v4.util.Pools;
 import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
@@ -364,7 +363,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void decodeFromRetrievedData() {
-    if (Logs.isEnabled(Log.VERBOSE)) {
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logWithTimeAndKey("Retrieved data", startFetchTime,
           "data: " + currentData
           + ", cache key: " + currentSourceKey
@@ -415,7 +414,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
       long startTime = LogTime.getLogTime();
       Resource<R> result = decodeFromFetcher(data, dataSource);
-      if (Logs.isEnabled(Log.VERBOSE)) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Decoded result " + result, startTime);
       }
       return result;
@@ -447,10 +446,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void logWithTimeAndKey(String message, long startTime, String extraArgs) {
-    Logs.log(Log.VERBOSE,
-        message + " in " + LogTime.getElapsedMillis(startTime) + ", load key: " + loadKey + (
-            extraArgs != null ? ", " + extraArgs : "") + ", thread: " + Thread.currentThread()
-            .getName());
+    Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + ", load key: " + loadKey
+        + (extraArgs != null ? ", " + extraArgs : "") + ", thread: "
+        + Thread.currentThread().getName());
   }
 
   @Override

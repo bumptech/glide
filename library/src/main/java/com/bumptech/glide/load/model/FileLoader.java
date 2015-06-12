@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
@@ -24,6 +23,7 @@ import java.io.InputStream;
  *               java.io.InputStream} or {@link java.io.FileDescriptor} etc).
  */
 public class FileLoader<Data> implements ModelLoader<File, Data> {
+  private static final String TAG = "FileLoader";
 
   private final FileOpener<Data> fileOpener;
 
@@ -67,8 +67,8 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
       try {
         data = opener.open(file);
       } catch (FileNotFoundException e) {
-        if (Logs.isEnabled(Log.DEBUG)) {
-          Logs.log(Log.DEBUG, "Failed to open file", e);
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to open file", e);
         }
         callback.onLoadFailed(e);
         return;

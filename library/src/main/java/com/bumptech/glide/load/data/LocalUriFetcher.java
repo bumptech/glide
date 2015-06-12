@@ -5,7 +5,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 
@@ -20,6 +19,7 @@ import java.io.IOException;
  *            java.io.InputStream} or {@link android.os.ParcelFileDescriptor}.
  */
 public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
+  private static final String TAG = "LocalUriFetcher";
   private final Uri uri;
   private final Context context;
   private T data;
@@ -43,8 +43,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
     try {
       data = loadResource(uri, contentResolver);
     } catch (FileNotFoundException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Failed to open Uri", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to open Uri", e);
       }
       callback.onLoadFailed(e);
       return;

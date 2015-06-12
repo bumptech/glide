@@ -3,7 +3,6 @@ package com.bumptech.glide.load.data;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.HttpException;
@@ -58,16 +57,16 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/,
           glideUrl.getHeaders());
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Failed to load data for url", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to load data for url", e);
       }
       callback.onLoadFailed(e);
       return;
     }
 
-    if (Logs.isEnabled(Log.VERBOSE)) {
-      Logs.log(Log.VERBOSE, "Finished http url fetcher fetch in "
-          + LogTime.getElapsedMillis(startTime) + " ms and loaded " + result);
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Finished http url fetcher fetch in " + LogTime.getElapsedMillis(startTime)
+          + " ms and loaded " + result);
     }
     callback.onDataReady(result);
   }

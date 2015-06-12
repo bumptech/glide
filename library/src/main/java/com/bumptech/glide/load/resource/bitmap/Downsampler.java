@@ -7,7 +7,6 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -275,8 +274,8 @@ public final class Downsampler {
     try {
       orientation = new ImageHeaderParser(is, byteArrayPool).getOrientation();
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Cannot determine the image orientation from header", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Cannot determine the image orientation from header", e);
       }
     } finally {
       is.reset();
@@ -328,8 +327,8 @@ public final class Downsampler {
       // See: https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
       return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(type);
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Cannot determine the image type from header", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Cannot determine the image type from header", e);
       }
     } finally {
       is.reset();
@@ -349,9 +348,9 @@ public final class Downsampler {
     try {
       hasAlpha = new ImageHeaderParser(is, byteArrayPool).hasAlpha();
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Cannot determine whether the image has alpha or not from header for"
-            + " format " + format, e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Cannot determine whether the image has alpha or not from header"
+            + ", format " + format, e);
       }
     } finally {
       is.reset();
