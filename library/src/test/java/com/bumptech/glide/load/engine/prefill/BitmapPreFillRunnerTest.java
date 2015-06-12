@@ -9,7 +9,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,12 +21,15 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.tests.Util.CreateBitmap;
 import com.bumptech.glide.util.Util;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
@@ -41,22 +43,21 @@ import java.util.Map;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class BitmapPreFillRunnerTest {
-  private BitmapPreFillRunner.Clock clock;
-  private BitmapPool pool;
-  private MemoryCache cache;
+  @Mock BitmapPreFillRunner.Clock clock;
+  @Mock BitmapPool pool;
+  @Mock MemoryCache cache;
+  @Mock Handler mainHandler;
   private List<Bitmap> addedBitmaps = new ArrayList<>();
-  private Handler mainHandler;
 
   @Before
   public void setUp() {
-    clock = mock(BitmapPreFillRunner.Clock.class);
+    MockitoAnnotations.initMocks(this);
 
-    pool = mock(BitmapPool.class);
     doAnswer(new AddBitmapPoolAnswer(addedBitmaps)).when(pool).put(any(Bitmap.class));
-    cache = mock(MemoryCache.class);
+    when(pool.getDirty(anyInt(), anyInt(), any(Bitmap.Config.class)))
+        .thenAnswer(new CreateBitmap());
     when(cache.put(any(Key.class), any(Resource.class)))
         .thenAnswer(new AddBitmapCacheAnswer(addedBitmaps));
-    mainHandler = mock(Handler.class);
   }
 
   private BitmapPreFillRunner getHandler(Map<PreFillType, Integer> allocationOrder) {
@@ -269,13 +270,14 @@ public class BitmapPreFillRunnerTest {
     getHandler(allocationOrder).run();
 
     InOrder firstOrder = inOrder(pool);
-    firstOrder.verify(pool).get(eq(first.getWidth()), eq(first.getHeight()), eq(first.getConfig()));
+    firstOrder.verify(pool).getDirty(eq(first.getWidth()), eq(first.getHeight()),
+        eq(first.getConfig()));
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
     // firstOrder.verify(pool).put(eq(first));
 
     InOrder secondOrder = inOrder(pool);
     secondOrder.verify(pool)
-        .get(eq(second.getWidth()), eq(second.getHeight()), eq(second.getConfig()));
+        .getDirty(eq(second.getWidth()), eq(second.getHeight()), eq(second.getConfig()));
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
     // secondOrder.verify(pool).put(eq(second));
   }
@@ -294,7 +296,8 @@ public class BitmapPreFillRunnerTest {
     getHandler(allocationOrder).run();
 
     InOrder order = inOrder(pool);
-    order.verify(pool).get(eq(bitmap.getWidth()), eq(bitmap.getHeight()), eq(bitmap.getConfig()));
+    order.verify(pool).getDirty(eq(bitmap.getWidth()), eq(bitmap.getHeight()),
+        eq(bitmap.getConfig()));
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
     // order.verify(pool, times(numBitmaps)).put(eq(bitmap));
   }

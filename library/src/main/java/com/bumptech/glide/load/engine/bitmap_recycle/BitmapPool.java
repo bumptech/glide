@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 
 /**
  * An interface for a pool that allows users to reuse {@link android.graphics.Bitmap} objects.
@@ -39,8 +39,10 @@ public interface BitmapPool {
 
   /**
    * Returns a {@link android.graphics.Bitmap} of exactly the given width, height, and
-   * configuration, and containing only transparent pixels or null if no such {@link
-   * android.graphics.Bitmap} could be obtained from the pool.
+   * configuration, and containing only transparent pixels.
+   *
+   * <p> If no Bitmap with the requested attributes is present in the pool, a new one will be
+   * allocated. </p>
    *
    * <p> Because this method erases all pixels in the {@link Bitmap}, this method is slightly slower
    * than {@link #getDirty(int, int, android.graphics.Bitmap.Config)}. If the {@link
@@ -63,13 +65,15 @@ public interface BitmapPool {
    *               android.graphics.Bitmap}.
    * @see #getDirty(int, int, android.graphics.Bitmap.Config)
    */
-  @Nullable
+  @NonNull
   Bitmap get(int width, int height, Bitmap.Config config);
 
   /**
    * Identical to {@link #get(int, int, android.graphics.Bitmap.Config)} except that any returned
-   * non-null {@link android.graphics.Bitmap} may <em>not</em> have been erased and may contain
-   * random data.
+   * {@link android.graphics.Bitmap} may <em>not</em> have been erased and may contain random data.
+   *
+   * <p>If no Bitmap with the requested attributes is present in the pool, a new one will be
+   * allocated. </p>
    *
    * <p> Although this method is slightly more efficient than {@link #get(int, int,
    * android.graphics.Bitmap.Config)} it should be used with caution and only when the caller is
@@ -85,7 +89,7 @@ public interface BitmapPool {
    * could be obtained from the pool.
    * @see #get(int, int, android.graphics.Bitmap.Config)
    */
-  @Nullable
+  @NonNull
   Bitmap getDirty(int width, int height, Bitmap.Config config);
 
   /**

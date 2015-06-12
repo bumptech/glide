@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 import com.bumptech.glide.testutil.TestUtil;
 
@@ -95,6 +96,7 @@ public class GifDecoderTest {
 
   private static class MockProvider implements GifDecoder.BitmapProvider {
 
+    @NonNull
     @Override
     public Bitmap obtain(int width, int height, Bitmap.Config config) {
       Bitmap result = Bitmap.createBitmap(width, height, config);

@@ -6,8 +6,8 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 public class CenterCropTest {
   @Mock Resource<Bitmap> resource;
   @Mock BitmapPool pool;
+  @Mock Transformation<Bitmap> transformation;
 
   private CenterCrop centerCrop;
   private int bitmapWidth;
@@ -50,11 +51,15 @@ public class CenterCropTest {
     bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
     when(resource.get()).thenReturn(bitmap);
 
+    when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class)))
+        .thenAnswer(new Util.CreateBitmap());
+
     centerCrop = new CenterCrop(pool);
   }
 
   @Test
   public void testDoesNotPutNullBitmapAcquiredFromPool() {
+    reset(pool);
     when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
 
     centerCrop.transform(resource, 100, 100);
@@ -75,17 +80,6 @@ public class CenterCropTest {
     centerCrop.transform(resource, bitmapWidth, bitmapHeight);
 
     verify(resource, never()).recycle();
-  }
-
-  @Test
-  public void testDoesPutNonNullBitmapAcquiredFromPoolWhenUnused() {
-    Bitmap fromPool =
-        Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-    when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(fromPool);
-
-    centerCrop.transform(resource, bitmapWidth, bitmapHeight);
-
-    verify(pool).put(eq(fromPool));
   }
 
   @Test
@@ -110,7 +104,6 @@ public class CenterCropTest {
     int expectedWidth = 75;
     int expectedHeight = 74;
 
-    Resource<Bitmap> resource = mock(Resource.class);
     for (int[] dimens : new int[][] { new int[] { 800, 200 }, new int[] { 450, 100 },
         new int[] { 78, 78 } }) {
       Bitmap toTransform = Bitmap.createBitmap(dimens[0], dimens[1], Bitmap.Config.ARGB_4444);
@@ -129,7 +122,6 @@ public class CenterCropTest {
     int expectedWidth = 100;
     int expectedHeight = 100;
 
-    Resource<Bitmap> resource = mock(Resource.class);
     for (int[] dimens : new int[][] { new int[] { 50, 90 }, new int[] { 150, 2 },
         new int[] { 78, 78 } }) {
       Bitmap toTransform = Bitmap.createBitmap(dimens[0], dimens[1], Bitmap.Config.ARGB_4444);
@@ -147,9 +139,8 @@ public class CenterCropTest {
   public void testEquals() throws NoSuchAlgorithmException {
     KeyAssertions.assertSame(centerCrop, new CenterCrop(pool));
 
-    Transformation<Bitmap> other = mock(Transformation.class);
-    doAnswer(new Util.WriteDigest("other")).when(other)
+    doAnswer(new Util.WriteDigest("other")).when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertDifferent(centerCrop, other);
+    KeyAssertions.assertDifferent(centerCrop, transformation);
   }
 }

@@ -30,13 +30,7 @@ public class CenterCrop extends BitmapTransformation {
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
   protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-    final Bitmap toReuse = pool.get(outWidth, outHeight,
-        toTransform.getConfig() != null ? toTransform.getConfig() : Bitmap.Config.ARGB_8888);
-    Bitmap transformed = TransformationUtils.centerCrop(toReuse, toTransform, outWidth, outHeight);
-    if (toReuse != null && toReuse != transformed) {
-      pool.put(toReuse);
-    }
-    return transformed;
+    return TransformationUtils.centerCrop(toTransform, pool, outWidth, outHeight);
   }
 
   @Override

@@ -308,7 +308,7 @@ public final class Downsampler {
             + ", density multiplier: " + densityMultiplier);
       }
       // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
-      setInBitmap(options, pool.getDirty(expectedWidth, expectedHeight, options.inPreferredConfig));
+      setInBitmap(options, pool, expectedWidth, expectedHeight, options.inPreferredConfig);
     }
     return decodeStream(is, options, callbacks);
   }
@@ -459,9 +459,10 @@ public final class Downsampler {
   }
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-  private static void setInBitmap(BitmapFactory.Options options, Bitmap recycled) {
+  private static void setInBitmap(BitmapFactory.Options options, BitmapPool bitmapPool, int width,
+      int height, Bitmap.Config config) {
     if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
-      options.inBitmap = recycled;
+      options.inBitmap = bitmapPool.get(width, height, config);
     }
   }
 

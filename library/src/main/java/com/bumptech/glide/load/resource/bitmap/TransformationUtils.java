@@ -11,7 +11,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.os.Build;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -40,18 +40,14 @@ public final class TransformationUtils {
    * dimensions. This operation is significantly less expensive in terms of memory if a mutable
    * Bitmap with the given dimensions is passed in as well.
    *
-   * @param recycled A mutable Bitmap with dimensions width and height that we can load the cropped
-   *                 portion of toCrop into.
    * @param toCrop   The Bitmap to resize.
+   * @param pool     The BitmapPool to obtain a bitmap from.
    * @param width    The width in pixels of the final Bitmap.
    * @param height   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  @Nullable
-  public static Bitmap centerCrop(@Nullable Bitmap recycled, Bitmap toCrop, int width, int height) {
-    if (toCrop == null) {
-      return null;
-    } else if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
+  public static Bitmap centerCrop(@NonNull Bitmap toCrop, BitmapPool pool, int width, int height) {
+    if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
       return toCrop;
     }
     // From ImageView/Bitmap.createScaledBitmap.
@@ -68,13 +64,8 @@ public final class TransformationUtils {
 
     m.setScale(scale, scale);
     m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
-    final Bitmap result;
-    if (recycled != null) {
-      result = recycled;
-    } else {
-      result = Bitmap.createBitmap(width, height, getSafeConfig(toCrop));
-    }
 
+    Bitmap result = pool.get(width, height, getSafeConfig(toCrop));
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
     TransformationUtils.setAlpha(toCrop, result);
 
@@ -88,13 +79,13 @@ public final class TransformationUtils {
    * dimensions maintain the original proportions.
    *
    * @param toFit  The Bitmap to shrink.
-   * @param pool   The BitmapPool to try to reuse a bitmap from.
+   * @param pool   The BitmapPool obtain a bitmap from.
    * @param width  The width in pixels the final image will fit within.
    * @param height The height in pixels the final image will fit within.
    * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or
    * height matches the given dimensions and toFit fits within the given dimensions
    */
-  public static Bitmap fitCenter(Bitmap toFit, BitmapPool pool, int width, int height) {
+  public static Bitmap fitCenter(@NonNull Bitmap toFit, BitmapPool pool, int width, int height) {
     if (toFit.getWidth() == width && toFit.getHeight() == height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size matches input, returning input");
@@ -120,9 +111,7 @@ public final class TransformationUtils {
 
     Bitmap.Config config = getSafeConfig(toFit);
     Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
-    if (toReuse == null) {
-      toReuse = Bitmap.createBitmap(targetWidth, targetHeight, config);
-    }
+
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
     TransformationUtils.setAlpha(toFit, toReuse);
 
@@ -195,15 +184,14 @@ public final class TransformationUtils {
    *                        returned unmodified.
    * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
    */
-  public static Bitmap rotateImage(Bitmap imageToOrient, int degreesToRotate) {
+  public static Bitmap rotateImage(@NonNull Bitmap imageToOrient, int degreesToRotate) {
     Bitmap result = imageToOrient;
     try {
       if (degreesToRotate != 0) {
         Matrix matrix = new Matrix();
         matrix.setRotate(degreesToRotate);
-        result = Bitmap
-            .createBitmap(imageToOrient, 0, 0, imageToOrient.getWidth(), imageToOrient.getHeight(),
-                matrix, true);
+        result = Bitmap.createBitmap(imageToOrient, 0, 0, imageToOrient.getWidth(),
+            imageToOrient.getHeight(), matrix, true /*filter*/);
       }
     } catch (Exception e) {
       if (Log.isLoggable(TAG, Log.ERROR)) {
@@ -249,7 +237,8 @@ public final class TransformationUtils {
    * @param exifOrientation the exif orientation [1-8].
    * @return The rotated and/or flipped image or toOrient if no rotation or flip was necessary.
    */
-  public static Bitmap rotateImageExif(Bitmap toOrient, BitmapPool pool, int exifOrientation) {
+  public static Bitmap rotateImageExif(@NonNull Bitmap toOrient, BitmapPool pool,
+      int exifOrientation) {
     final Matrix matrix = new Matrix();
     initializeMatrixForRotation(exifOrientation, matrix);
     if (matrix.isIdentity()) {
@@ -265,9 +254,6 @@ public final class TransformationUtils {
 
     Bitmap.Config config = getSafeConfig(toOrient);
     Bitmap result = pool.get(newWidth, newHeight, config);
-    if (result == null) {
-      result = Bitmap.createBitmap(newWidth, newHeight, config);
-    }
 
     matrix.postTranslate(-newRect.left, -newRect.top);
 
@@ -281,23 +267,14 @@ public final class TransformationUtils {
    * Crop the image to a circle and resize to the specified width/height.  The circle crop will
    * have the same width and height equal to the min-edge of the result image.
    *
-   * @param recycled A mutable Bitmap with dimensions width and height that we can load the cropped
-   *                 portion of toCrop into.
    * @param toCrop   The Bitmap to resize.
+   * @param pool   The BitmapPool obtain a bitmap from.
    * @param destWidth    The width in pixels of the final Bitmap.
    * @param destHeight   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap circleCrop(@Nullable Bitmap recycled, Bitmap toCrop, int destWidth,
+  public static Bitmap circleCrop(@NonNull Bitmap toCrop, BitmapPool pool, int destWidth,
       int destHeight) {
-    if (toCrop == null) {
-      return null;
-    }
-
-    Bitmap result = (recycled != null) ? recycled
-        : Bitmap.createBitmap(destWidth, destHeight, getSafeConfig(toCrop));
-    setAlphaIfAvailable(result, true /*hasAlpha*/);
-
     int destMinEdge = Math.min(destWidth, destHeight);
     float radius = destMinEdge / 2f;
     Rect destRect = new Rect((destWidth - destMinEdge) / 2, (destHeight - destMinEdge) / 2,
@@ -309,6 +286,8 @@ public final class TransformationUtils {
     Rect srcRect = new Rect((srcWidth - srcMinEdge) / 2, (srcHeight - srcMinEdge) / 2,
         srcMinEdge, srcMinEdge);
 
+    Bitmap result = pool.get(destWidth, destHeight, getSafeConfig(toCrop));
+    setAlphaIfAvailable(result, true /*hasAlpha*/);
     Canvas canvas = new Canvas(result);
 
     // Draw a circle

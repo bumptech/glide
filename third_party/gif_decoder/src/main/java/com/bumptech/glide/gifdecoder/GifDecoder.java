@@ -22,9 +22,11 @@ package com.bumptech.glide.gifdecoder;
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -133,14 +135,14 @@ public class GifDecoder {
    */
   public interface BitmapProvider {
     /**
-     * Returns an {@link Bitmap} with exactly the given dimensions and config, or null if no such
-     * {@link Bitmap} could be obtained.
+     * Returns an {@link Bitmap} with exactly the given dimensions and config.
      *
      * @param width  The width in pixels of the desired {@link android.graphics.Bitmap}.
      * @param height The height in pixels of the desired {@link android.graphics.Bitmap}.
      * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link
      *               android.graphics.Bitmap}.
      */
+    @NonNull
     Bitmap obtain(int width, int height, Bitmap.Config config);
 
     /**
@@ -764,9 +766,6 @@ public class GifDecoder {
     Bitmap.Config config = isFirstFrameTransparent
         ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
     Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, config);
-    if (result == null) {
-      result = Bitmap.createBitmap(downsampledWidth, downsampledHeight, config);
-    }
     setAlpha(result);
     return result;
   }

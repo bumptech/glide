@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -17,12 +18,15 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.tests.Util.CreateBitmap;
 import com.bumptech.glide.util.Util;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -45,15 +49,16 @@ public class BitmapPreFillerTest {
   private final int poolSize = BITMAPS_IN_CACHE * defaultBitmapSize;
   private final int cacheSize = BITMAPS_IN_POOL * defaultBitmapSize;
 
-  private BitmapPool pool;
+  @Mock BitmapPool pool;
+  @Mock MemoryCache cache;
   private BitmapPreFiller bitmapPreFiller;
-  private MemoryCache cache;
 
   @Before
   public void setUp() {
-    pool = mock(BitmapPool.class);
+    MockitoAnnotations.initMocks(this);
     when(pool.getMaxSize()).thenReturn(poolSize);
-    cache = mock(MemoryCache.class);
+    when(pool.getDirty(anyInt(), anyInt(), any(Bitmap.Config.class)))
+        .thenAnswer(new CreateBitmap());
     when(cache.getMaxSize()).thenReturn(cacheSize);
 
     bitmapPreFiller = new BitmapPreFiller(cache, pool, DecodeFormat.DEFAULT);

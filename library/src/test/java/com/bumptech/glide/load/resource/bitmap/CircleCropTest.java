@@ -1,6 +1,8 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
@@ -11,6 +13,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +34,8 @@ public class CircleCropTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
+    when(bitmapPool.get(anyInt(), anyInt(), any(Bitmap.Config.class)))
+        .thenAnswer(new Util.CreateBitmap());
     circleCrop = new CircleCrop(RuntimeEnvironment.application);
   }
 

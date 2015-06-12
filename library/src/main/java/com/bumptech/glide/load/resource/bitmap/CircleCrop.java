@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
@@ -33,13 +32,7 @@ public class CircleCrop extends BitmapTransformation {
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
   protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-    final Bitmap toReuse = pool.get(outWidth, outHeight,
-        toTransform.getConfig() != null ? toTransform.getConfig() : Config.ARGB_8888);
-    Bitmap transformed = TransformationUtils.circleCrop(toReuse, toTransform, outWidth, outHeight);
-    if (toReuse != null && toReuse != transformed) {
-      pool.put(toReuse);
-    }
-    return transformed;
+    return TransformationUtils.circleCrop(toTransform, pool, outWidth, outHeight);
   }
 
   @Override

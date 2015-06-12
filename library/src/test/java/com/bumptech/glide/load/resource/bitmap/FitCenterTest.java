@@ -2,14 +2,15 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
@@ -24,16 +25,20 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowCanvas;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 18, shadows = { FitCenterTest.DrawNothingCanvas.class })
 public class FitCenterTest {
 
   @Mock BitmapPool pool;
   @Mock Resource<Bitmap> resource;
+  @Mock Transformation<Bitmap> transformation;
   private FitCenter fitCenter;
   private int bitmapWidth;
   private int bitmapHeight;
@@ -47,15 +52,6 @@ public class FitCenterTest {
     when(resource.get()).thenReturn(bitmap);
 
     fitCenter = new FitCenter(pool);
-  }
-
-  @Test
-  public void testDoesNotPutNullBitmapAcquiredFromPool() {
-    when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
-
-    fitCenter.transform(resource, 100, 100);
-
-    verify(pool, never()).put(any(Bitmap.class));
   }
 
   @Test
@@ -84,9 +80,18 @@ public class FitCenterTest {
   public void testEquals() throws NoSuchAlgorithmException {
     KeyAssertions.assertSame(fitCenter, new FitCenter(pool));
 
-    Transformation<Bitmap> other = mock(Transformation.class);
-    doAnswer(new Util.WriteDigest("other")).when(other)
+    doAnswer(new Util.WriteDigest("other")).when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertDifferent(fitCenter, other);
+    KeyAssertions.assertDifferent(fitCenter, transformation);
+  }
+
+  @Implements(Canvas.class)
+  public static final class DrawNothingCanvas extends ShadowCanvas {
+
+    @Implementation
+    @Override
+    public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
+      // Do nothing.
+    }
   }
 }

@@ -91,8 +91,15 @@ final class BitmapPreFillRunner implements Runnable {
     long start = clock.now();
     while (!toPrefill.isEmpty() && !isGcDetected(start)) {
       PreFillType toAllocate = toPrefill.remove();
-      Bitmap bitmap = Bitmap
-          .createBitmap(toAllocate.getWidth(), toAllocate.getHeight(), toAllocate.getConfig());
+      final Bitmap bitmap;
+      if (!seenTypes.contains(toAllocate)) {
+        seenTypes.add(toAllocate);
+        bitmap = bitmapPool.getDirty(toAllocate.getWidth(), toAllocate.getHeight(),
+            toAllocate.getConfig());
+      } else {
+        bitmap = Bitmap.createBitmap(toAllocate.getWidth(), toAllocate.getHeight(),
+            toAllocate.getConfig());
+      }
 
       // Don't over fill the memory cache to avoid evicting useful resources, but make sure it's
       // not empty so
@@ -100,7 +107,7 @@ final class BitmapPreFillRunner implements Runnable {
       if (getFreeMemoryCacheBytes() >= Util.getBitmapByteSize(bitmap)) {
         memoryCache.put(new UniqueKey(), BitmapResource.obtain(bitmap, bitmapPool));
       } else {
-        addToBitmapPool(toAllocate, bitmap);
+        bitmapPool.put(bitmap);
       }
 
       if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -119,21 +126,6 @@ final class BitmapPreFillRunner implements Runnable {
 
   private int getFreeMemoryCacheBytes() {
     return memoryCache.getMaxSize() - memoryCache.getCurrentSize();
-  }
-
-  private void addToBitmapPool(PreFillType toAllocate, Bitmap bitmap) {
-    // The pool may not move sizes to the front of the LRU on put. Do a get here to make sure the
-    // size we're adding
-    // is at the front of the queue so that the Bitmap we're adding won't be evicted immediately.
-    if (seenTypes.add(toAllocate)) {
-      Bitmap fromPool =
-          bitmapPool.get(toAllocate.getWidth(), toAllocate.getHeight(), toAllocate.getConfig());
-      if (fromPool != null) {
-        bitmapPool.put(fromPool);
-      }
-    }
-
-    bitmapPool.put(bitmap);
   }
 
   @Override
