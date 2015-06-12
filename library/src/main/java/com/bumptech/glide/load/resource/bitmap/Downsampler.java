@@ -186,7 +186,7 @@ public final class Downsampler {
       // the expected density dpi.
       downsampled.setDensity(displayMetrics.densityDpi);
 
-      rotated = TransformationUtils.rotateImageExif(downsampled, bitmapPool, orientation);
+      rotated = TransformationUtils.rotateImageExif(bitmapPool, downsampled, orientation);
       if (!downsampled.equals(rotated)) {
         bitmapPool.put(downsampled);
       }

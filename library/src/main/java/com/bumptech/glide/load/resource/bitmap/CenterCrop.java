@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
@@ -29,8 +30,9 @@ public class CenterCrop extends BitmapTransformation {
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
-  protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-    return TransformationUtils.centerCrop(toTransform, pool, outWidth, outHeight);
+  protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
+      int outHeight) {
+    return TransformationUtils.centerCrop(pool, toTransform, outWidth, outHeight);
   }
 
   @Override

@@ -40,13 +40,14 @@ public final class TransformationUtils {
    * dimensions. This operation is significantly less expensive in terms of memory if a mutable
    * Bitmap with the given dimensions is passed in as well.
    *
-   * @param toCrop   The Bitmap to resize.
    * @param pool     The BitmapPool to obtain a bitmap from.
+   * @param toCrop   The Bitmap to resize.
    * @param width    The width in pixels of the final Bitmap.
    * @param height   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap centerCrop(@NonNull Bitmap toCrop, BitmapPool pool, int width, int height) {
+  public static Bitmap centerCrop(@NonNull BitmapPool pool, @NonNull Bitmap toCrop, int width,
+      int height) {
     if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
       return toCrop;
     }
@@ -78,14 +79,15 @@ public final class TransformationUtils {
    * An expensive operation to resize the given Bitmap down so that it fits within the given
    * dimensions maintain the original proportions.
    *
-   * @param toFit  The Bitmap to shrink.
    * @param pool   The BitmapPool obtain a bitmap from.
+   * @param toFit  The Bitmap to shrink.
    * @param width  The width in pixels the final image will fit within.
    * @param height The height in pixels the final image will fit within.
    * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or
    * height matches the given dimensions and toFit fits within the given dimensions
    */
-  public static Bitmap fitCenter(@NonNull Bitmap toFit, BitmapPool pool, int width, int height) {
+  public static Bitmap fitCenter(@NonNull BitmapPool pool, @NonNull Bitmap toFit, int width,
+      int height) {
     if (toFit.getWidth() == width && toFit.getHeight() == height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size matches input, returning input");
@@ -151,31 +153,6 @@ public final class TransformationUtils {
   }
 
   /**
-   * Returns a matrix with rotation put based on Exif orientation tag. If the orientation is
-   * undefined or 0 null is returned.
-   *
-   * @param pathToOriginal Path to original image file that may have exif data.
-   * @return A rotation in degrees based on exif orientation
-   * @deprecated No longer used by Glide, scheduled to be removed in Glide 4.0
-   */
-  @TargetApi(Build.VERSION_CODES.ECLAIR)
-  @Deprecated
-  public static int getOrientation(String pathToOriginal) {
-    int degreesToRotate = 0;
-    try {
-      ExifInterface exif = new ExifInterface(pathToOriginal);
-      int orientation =
-          exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-      return getExifOrientationDegrees(orientation);
-    } catch (Exception e) {
-      if (Log.isLoggable(TAG, Log.ERROR)) {
-        Log.e(TAG, "Unable to get orientation for image with path=" + pathToOriginal, e);
-      }
-    }
-    return degreesToRotate;
-  }
-
-  /**
    * This is an expensive operation that copies the image in place with the pixels rotated. If
    * possible rather use getOrientationMatrix, and put that as the imageMatrix on an ImageView.
    *
@@ -231,13 +208,13 @@ public final class TransformationUtils {
   /**
    * Rotate and/or flip the image to match the given exif orientation.
    *
-   * @param toOrient        The bitmap to rotate/flip.
    * @param pool            A pool that may or may not contain an image of the necessary
    *                        dimensions.
+   * @param toOrient        The bitmap to rotate/flip.
    * @param exifOrientation the exif orientation [1-8].
    * @return The rotated and/or flipped image or toOrient if no rotation or flip was necessary.
    */
-  public static Bitmap rotateImageExif(@NonNull Bitmap toOrient, BitmapPool pool,
+  public static Bitmap rotateImageExif(@NonNull BitmapPool pool, @NonNull Bitmap toOrient,
       int exifOrientation) {
     final Matrix matrix = new Matrix();
     initializeMatrixForRotation(exifOrientation, matrix);
@@ -267,13 +244,13 @@ public final class TransformationUtils {
    * Crop the image to a circle and resize to the specified width/height.  The circle crop will
    * have the same width and height equal to the min-edge of the result image.
    *
-   * @param toCrop   The Bitmap to resize.
    * @param pool   The BitmapPool obtain a bitmap from.
+   * @param toCrop   The Bitmap to resize.
    * @param destWidth    The width in pixels of the final Bitmap.
    * @param destHeight   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap circleCrop(@NonNull Bitmap toCrop, BitmapPool pool, int destWidth,
+  public static Bitmap circleCrop(@NonNull BitmapPool pool, @NonNull Bitmap toCrop, int destWidth,
       int destHeight) {
     int destMinEdge = Math.min(destWidth, destHeight);
     float radius = destMinEdge / 2f;

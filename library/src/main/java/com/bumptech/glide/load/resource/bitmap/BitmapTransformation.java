@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
@@ -111,6 +112,6 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
    * @param outHeight   The ideal height of the transformed bitmap (the transformed heightdoes not
    *                    need to match exactly).
    */
-  protected abstract Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth,
-      int outHeight);
+  protected abstract Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
+      int outWidth, int outHeight);
 }

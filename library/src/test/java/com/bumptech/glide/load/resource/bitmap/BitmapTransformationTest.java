@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -41,7 +42,8 @@ public class BitmapTransformationTest {
       public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
+          int outWidth, int outHeight) {
         return toTransform;
       }
     };
@@ -58,7 +60,8 @@ public class BitmapTransformationTest {
       public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      protected Bitmap transform(BitmapPool pool, Bitmap bitmap, int outWidth, int outHeight) {
+      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap bitmap, int outWidth,
+          int outHeight) {
         return transformed;
       }
     };
@@ -77,7 +80,8 @@ public class BitmapTransformationTest {
       public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
+          int outWidth, int outHeight) {
         assertEquals(bitmapPool, pool);
         assertEquals(resource.get(), toTransform);
         assertEquals(expectedWidth, outWidth);
@@ -97,8 +101,8 @@ public class BitmapTransformationTest {
       public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      protected Bitmap transform(BitmapPool bitmapPool, Bitmap toTransform, int outWidth,
-          int outHeight) {
+      protected Bitmap transform(@NonNull BitmapPool bitmapPool, @NonNull Bitmap toTransform,
+          int outWidth, int outHeight) {
         return null;
       }
     };
@@ -113,8 +117,8 @@ public class BitmapTransformationTest {
       public void updateDiskCacheKey(MessageDigest messageDigest) { }
 
       @Override
-      protected Bitmap transform(BitmapPool bitmapPool, Bitmap toTransform, int outWidth,
-          int outHeight) {
+      protected Bitmap transform(@NonNull BitmapPool bitmapPool, @NonNull Bitmap toTransform,
+          int outWidth, int outHeight) {
         return null;
       }
 
@@ -130,7 +134,8 @@ public class BitmapTransformationTest {
       public void updateDiskCacheKey(MessageDigest messageDigest) {  }
 
       @Override
-      protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
+          int outWidth, int outHeight) {
         return null;
       }
     };
@@ -178,7 +183,8 @@ public class BitmapTransformationTest {
     }
 
     @Override
-    protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+    protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
+        int outHeight) {
       givenWidth = outWidth;
       givenHeight = outHeight;
       return null;
