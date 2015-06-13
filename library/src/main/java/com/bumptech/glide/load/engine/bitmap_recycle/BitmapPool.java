@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 
 /**
  * An interface for a pool that allows users to reuse {@link android.graphics.Bitmap} objects.
@@ -68,6 +69,7 @@ public interface BitmapPool {
    *               android.graphics.Bitmap}.
    * @see #getDirty(int, int, android.graphics.Bitmap.Config)
    */
+  @Nullable
   Bitmap get(int width, int height, Bitmap.Config config);
 
   /**
@@ -89,6 +91,7 @@ public interface BitmapPool {
    * could be obtained from the pool.
    * @see #get(int, int, android.graphics.Bitmap.Config)
    */
+  @Nullable
   Bitmap getDirty(int width, int height, Bitmap.Config config);
 
   /**

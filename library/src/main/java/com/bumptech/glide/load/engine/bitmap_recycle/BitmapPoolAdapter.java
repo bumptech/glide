@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 
 /**
  * An {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool BitmapPool} implementation
@@ -24,11 +25,13 @@ public class BitmapPoolAdapter implements BitmapPool {
   }
 
   @Override
+  @Nullable
   public Bitmap get(int width, int height, Bitmap.Config config) {
     return null;
   }
 
   @Override
+  @Nullable
   public Bitmap getDirty(int width, int height, Bitmap.Config config) {
     return null;
   }

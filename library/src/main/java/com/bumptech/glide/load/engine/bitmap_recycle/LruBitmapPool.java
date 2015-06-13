@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -115,6 +116,7 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   @Override
+  @Nullable
   public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
     Bitmap result = getDirty(width, height, config);
     if (result != null) {
@@ -129,6 +131,7 @@ public class LruBitmapPool implements BitmapPool {
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   @Override
+  @Nullable
   public synchronized Bitmap getDirty(int width, int height, Bitmap.Config config) {
     // Config will be null for non public config types, which can lead to transformations naively
     // passing in null as the requested config here. See issue #194.
