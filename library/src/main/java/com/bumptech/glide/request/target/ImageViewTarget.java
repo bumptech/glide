@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
@@ -15,6 +16,9 @@ import com.bumptech.glide.request.transition.Transition;
  */
 public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     implements Transition.ViewAdapter {
+
+  @Nullable
+  private Animatable animatable;
 
   public ImageViewTarget(ImageView view) {
     super(view);
@@ -82,9 +86,27 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     if (transition == null || !transition.transition(resource, this)) {
       setResource(resource);
     }
+
+    if (resource instanceof Animatable) {
+      animatable = (Animatable) resource;
+      animatable.start();
+    }
+  }
+
+  @Override
+  public void onStart() {
+    if (animatable != null) {
+      animatable.start();
+    }
+  }
+
+  @Override
+  public void onStop() {
+    if (animatable != null) {
+      animatable.stop();
+    }
   }
 
   protected abstract void setResource(@Nullable Z resource);
-
 }
 
