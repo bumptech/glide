@@ -82,11 +82,6 @@ import java.util.List;
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class Glide implements ComponentCallbacks2 {
-  /**
-   * 250 MB of cache.
-   */
-  static final int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
-
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
   private static final String TAG = "Glide";
   private static volatile Glide glide;
