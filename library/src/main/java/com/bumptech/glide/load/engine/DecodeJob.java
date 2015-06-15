@@ -295,9 +295,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     onLoadFailed();
   }
 
-  private void notifyComplete(Resource<R> resource) {
+  private void notifyComplete(Resource<R> resource, DataSource dataSource) {
     setNotifiedOrThrow();
-    callback.onResourceReady(resource);
+    callback.onResourceReady(resource, dataSource);
   }
 
   private void setNotifiedOrThrow() {
@@ -377,13 +377,13 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       exceptions.add(e);
     }
     if (resource != null) {
-      notifyEncodeAndRelease(resource);
+      notifyEncodeAndRelease(resource, currentDataSource);
     } else {
       runGenerators();
     }
   }
 
-  private void notifyEncodeAndRelease(Resource<R> resource) {
+  private void notifyEncodeAndRelease(Resource<R> resource, DataSource dataSource) {
     Resource<R> result = resource;
     LockedResource<R> lockedResource = null;
     if (deferredEncodeManager.hasResourceToEncode()) {
@@ -391,7 +391,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       result = lockedResource;
     }
 
-    notifyComplete(result);
+    notifyComplete(result, dataSource);
 
     stage = Stage.ENCODE;
     try {
@@ -591,7 +591,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   interface Callback<R> {
 
-    void onResourceReady(Resource<R> resource);
+    void onResourceReady(Resource<R> resource, DataSource dataSource);
 
     void onLoadFailed(GlideException e);
 

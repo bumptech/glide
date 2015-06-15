@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.tests.Util.anyDataSource;
+import static com.bumptech.glide.tests.Util.anyResource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -18,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
@@ -119,7 +122,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -128,7 +131,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb, never()).onResourceReady(isNull(Resource.class));
+    verify(harness.cb, never()).onResourceReady(isNull(Resource.class), anyDataSource());
   }
 
   @Test
@@ -176,8 +179,8 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
-    verify(harness.cb, never()).onResourceReady(eq(other));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb, never()).onResourceReady(eq(other), anyDataSource());
   }
 
   @Test
@@ -198,7 +201,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -217,7 +220,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -234,11 +237,11 @@ public class EngineTest {
         assertEquals(expected, resource.get());
         return null;
       }
-    }).when(harness.cb).onResourceReady(any(Resource.class));
+    }).when(harness.cb).onResourceReady(anyResource(), anyDataSource());
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(any(Resource.class));
+    verify(harness.cb).onResourceReady(anyResource(), anyDataSource());
   }
 
   @Test
@@ -307,7 +310,7 @@ public class EngineTest {
     harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
 
     WeakReference<EngineResource<?>> resourceRef = harness.activeResources.get(harness.cacheKey);
-    assertEquals(harness.resource, resourceRef.get());
+    assertThat(harness.resource).isEqualTo(resourceRef.get());
   }
 
   @Test
@@ -415,10 +418,9 @@ public class EngineTest {
 
   @Test
   public void testFactoryIsGivenNecessaryArguments() {
-    boolean isMemoryCacheable = true;
     harness.doLoad();
 
-    verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(isMemoryCacheable));
+    verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(true) /*isMemoryCacheable*/);
   }
 
   @Test

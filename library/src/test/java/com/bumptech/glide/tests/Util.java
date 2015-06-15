@@ -1,11 +1,14 @@
 package com.bumptech.glide.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 
 import android.os.Build;
 
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.Resource;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -25,8 +28,12 @@ public class Util {
     return clazz.getSimpleName() + "." + clazz.getPackage().getName();
   }
 
-  public static void assertClassHasValidId(Class clazz, String id) {
-    assertEquals(getExpectedClassId(clazz), id);
+  public static DataSource anyDataSource() {
+    return any(DataSource.class);
+  }
+
+  public static Resource<?> anyResource() {
+    return any(Resource.class);
   }
 
   public static boolean isWindows() {

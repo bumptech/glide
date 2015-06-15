@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
@@ -112,7 +113,7 @@ public class SingleRequestTest {
   public void testCanHandleNullResources() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onResourceReady(null);
+    request.onResourceReady(null, DataSource.LOCAL);
 
     assertTrue(request.isFailed());
     verify(harness.requestListener).onLoadFailed(isAGlideException(), isA(Number.class),
@@ -124,7 +125,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = harness.getRequest();
     when(harness.resource.get()).thenReturn(null);
 
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.REMOTE);
 
     assertTrue(request.isFailed());
     verify(harness.engine).release(eq(harness.resource));
@@ -138,7 +139,7 @@ public class SingleRequestTest {
     when(((Resource) (harness.resource)).get())
         .thenReturn("Invalid mocked String, this should be a List");
 
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     assertTrue(request.isFailed());
     verify(harness.engine).release(eq(harness.resource));
@@ -150,7 +151,7 @@ public class SingleRequestTest {
   public void testIsNotFailedAfterClear() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onResourceReady(null);
+    request.onResourceReady(null, DataSource.DATA_DISK_CACHE);
     request.clear();
 
     assertFalse(request.isFailed());
@@ -186,7 +187,7 @@ public class SingleRequestTest {
   public void testIsNotFailedAfterBegin() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onResourceReady(null);
+    request.onResourceReady(null, DataSource.DATA_DISK_CACHE);
     request.begin();
 
     assertFalse(request.isFailed());
@@ -196,7 +197,7 @@ public class SingleRequestTest {
   public void testIsCompleteAfterReceivingResource() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.LOCAL);
 
     assertTrue(request.isComplete());
   }
@@ -204,7 +205,7 @@ public class SingleRequestTest {
   @Test
   public void testIsNotCompleteAfterClear() {
     SingleRequest<List> request = harness.getRequest();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.REMOTE);
     request.clear();
 
     assertFalse(request.isComplete());
@@ -242,7 +243,7 @@ public class SingleRequestTest {
     harness.requestCoordinator = requestCoordinator;
     SingleRequest<List> request = harness.getRequest();
 
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(requestCoordinator).canSetImage(eq(request));
   }
@@ -308,7 +309,7 @@ public class SingleRequestTest {
   public void testResourceIsRecycledOnClear() {
     SingleRequest<List> request = harness.getRequest();
 
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.REMOTE);
     request.clear();
 
     verify(harness.engine).release(eq(harness.resource));
@@ -412,7 +413,7 @@ public class SingleRequestTest {
   public void testIsNotRunningAfterComplete() {
     SingleRequest<List> request = harness.getRequest();
     request.begin();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.REMOTE);
 
     assertFalse(request.isRunning());
   }
@@ -439,7 +440,7 @@ public class SingleRequestTest {
   public void testCallsTargetOnResourceReadyIfNoRequestListener() {
     harness.requestListener = null;
     SingleRequest<List> request = harness.getRequest();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.LOCAL);
 
     verify(harness.target).onResourceReady(eq(harness.result), anyTransition());
   }
@@ -450,7 +451,7 @@ public class SingleRequestTest {
     when(harness.requestListener
         .onResourceReady(any(List.class), any(Number.class), eq(harness.target), anyBoolean(),
             anyBoolean())).thenReturn(false);
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.LOCAL);
 
     verify(harness.target).onResourceReady(eq(harness.result), anyTransition());
   }
@@ -461,7 +462,7 @@ public class SingleRequestTest {
     when(harness.requestListener
         .onResourceReady(any(List.class), any(Number.class), eq(harness.target), anyBoolean(),
             anyBoolean())).thenReturn(true);
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.REMOTE);
 
     verify(harness.target, never()).onResourceReady(any(List.class), anyTransition());
   }
@@ -501,7 +502,7 @@ public class SingleRequestTest {
   @Test
   public void testRequestListenerIsCalledWithResourceResult() {
     SingleRequest<List> request = harness.getRequest();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
         .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
@@ -511,7 +512,7 @@ public class SingleRequestTest {
   @Test
   public void testRequestListenerIsCalledWithModel() {
     SingleRequest<List> request = harness.getRequest();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
         .onResourceReady(any(List.class), eq(harness.model), isAListTarget(), anyBoolean(),
@@ -521,7 +522,7 @@ public class SingleRequestTest {
   @Test
   public void testRequestListenerIsCalledWithTarget() {
     SingleRequest<List> request = harness.getRequest();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
         .onResourceReady(any(List.class), any(Number.class), eq(harness.target), anyBoolean(),
@@ -540,7 +541,7 @@ public class SingleRequestTest {
         .thenAnswer(new Answer<Object>() {
           @Override
           public Object answer(InvocationOnMock invocation) throws Throwable {
-            request.onResourceReady(harness.resource);
+            request.onResourceReady(harness.resource, DataSource.MEMORY_CACHE);
             return null;
           }
         });
@@ -557,7 +558,7 @@ public class SingleRequestTest {
   testRequestListenerIsCalledWithNotLoadedFromMemoryCacheIfLoadCompletesAsynchronously() {
     SingleRequest<List> request = harness.getRequest();
     request.onSizeReady(100, 100);
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.LOCAL);
 
     verify(harness.requestListener)
         .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), eq(false),
@@ -568,7 +569,7 @@ public class SingleRequestTest {
   public void testRequestListenerIsCalledWithIsFirstResourceIfNoRequestCoordinator() {
     harness.requestCoordinator = null;
     SingleRequest<List> request = harness.getRequest();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
         .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
@@ -579,7 +580,7 @@ public class SingleRequestTest {
   public void testRequestListenerIsCalledWithFirstImageIfRequestCoordinatorReturnsNoResourceSet() {
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(false);
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
         .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
@@ -591,7 +592,7 @@ public class SingleRequestTest {
   testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsResourceSet() {
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestCoordinator.isAnyResourceSet()).thenReturn(true);
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
         .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(),
@@ -603,7 +604,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = harness.getRequest();
     Transition<List> transition = mockTransition();
     when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(transition);
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.target).onResourceReady(eq(harness.result), eq(transition));
   }
@@ -686,7 +687,7 @@ public class SingleRequestTest {
   @Test
   public void testResourceOnlyReceivesOneGetOnResourceReady() {
     SingleRequest<List> request = harness.getRequest();
-    request.onResourceReady(harness.resource);
+    request.onResourceReady(harness.resource, DataSource.LOCAL);
 
     verify(harness.resource, times(1)).get();
   }
@@ -736,7 +737,7 @@ public class SingleRequestTest {
       ResourceCallback cb =
           (ResourceCallback) invocationOnMock.getArguments()[invocationOnMock.getArguments().length
               - 1];
-      cb.onResourceReady(resource);
+      cb.onResourceReady(resource, DataSource.REMOTE);
       return null;
     }
   }

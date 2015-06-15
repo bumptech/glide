@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
@@ -151,7 +152,7 @@ public class Engine implements EngineJobListener,
 
     EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
     if (cached != null) {
-      cb.onResourceReady(cached);
+      cb.onResourceReady(cached, DataSource.MEMORY_CACHE);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Loaded resource from cache", startTime, key);
       }
@@ -160,7 +161,7 @@ public class Engine implements EngineJobListener,
 
     EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
     if (active != null) {
-      cb.onResourceReady(active);
+      cb.onResourceReady(active, DataSource.MEMORY_CACHE);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Loaded resource from active resources", startTime, key);
       }

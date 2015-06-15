@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.v4.util.Pools;
 
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
@@ -42,6 +43,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private Key key;
   private boolean isCacheable;
   private Resource<?> resource;
+  private DataSource dataSource;
   private boolean hasResource;
   private GlideException exception;
   private boolean hasLoadFailed;
@@ -87,7 +89,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     Util.assertMainThread();
     stateVerifier.throwIfRecycled();
     if (hasResource) {
-      cb.onResourceReady(engineResource);
+      cb.onResourceReady(engineResource, dataSource);
     } else if (hasLoadFailed) {
       cb.onLoadFailed(exception);
     } else {
@@ -170,7 +172,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     for (ResourceCallback cb : cbs) {
       if (!isInIgnoredCallbacks(cb)) {
         engineResource.acquire();
-        cb.onResourceReady(engineResource);
+        cb.onResourceReady(engineResource, dataSource);
       }
     }
     // Our request is complete, so we can release the resource.
@@ -203,12 +205,14 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     decodeJob.release(isRemovedFromQueue);
     decodeJob = null;
     exception = null;
+    dataSource = null;
     pool.release(this);
   }
 
   @Override
-  public void onResourceReady(Resource<R> resource) {
+  public void onResourceReady(Resource<R> resource, DataSource dataSource) {
     this.resource = resource;
+    this.dataSource = dataSource;
     MAIN_THREAD_HANDLER.obtainMessage(MSG_COMPLETE, this).sendToTarget();
   }
 

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
@@ -38,7 +39,6 @@ public final class SingleRequest<R> implements Request,
           return new SingleRequest<Object>();
         }
       });
-  private static final double TO_MEGABYTE = 1d / (1024d * 1024d);
 
   private enum Status {
     /**
@@ -90,7 +90,6 @@ public final class SingleRequest<R> implements Request,
   private RequestListener<R> requestListener;
   private Engine engine;
   private TransitionFactory<? super R> animationFactory;
-  private boolean loadedFromMemoryCache;
   private Resource<R> resource;
   private Engine.LoadStatus loadStatus;
   private long startTime;
@@ -98,6 +97,8 @@ public final class SingleRequest<R> implements Request,
   private Drawable errorDrawable;
   private Drawable placeholderDrawable;
   private Drawable fallbackDrawable;
+  private int width;
+  private int height;
 
   public static <R> SingleRequest<R> obtain(
       GlideContext glideContext,
@@ -182,11 +183,12 @@ public final class SingleRequest<R> implements Request,
     requestListener = null;
     requestCoordinator = null;
     animationFactory = null;
-    loadedFromMemoryCache = false;
     loadStatus = null;
     errorDrawable = null;
     placeholderDrawable = null;
     fallbackDrawable = null;
+    width = -1;
+    height = -1;
     POOL.release(this);
   }
 
@@ -361,19 +363,18 @@ public final class SingleRequest<R> implements Request,
     status = Status.RUNNING;
 
     float sizeMultiplier = requestOptions.getSizeMultiplier();
-    width = Math.round(sizeMultiplier * width);
-    height = Math.round(sizeMultiplier * height);
+    this.width = Math.round(sizeMultiplier * width);
+    this.height = Math.round(sizeMultiplier * height);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
     }
-    loadedFromMemoryCache = true;
     loadStatus = engine.load(
         glideContext,
         model,
         requestOptions.getSignature(),
-        width,
-        height,
+        this.width,
+        this.height,
         requestOptions.getResourceClass(),
         transcodeClass,
         priority,
@@ -383,7 +384,6 @@ public final class SingleRequest<R> implements Request,
         requestOptions.getOptions(),
         requestOptions.isMemoryCacheable(),
         this);
-    loadedFromMemoryCache = resource != null;
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
     }
@@ -412,7 +412,7 @@ public final class SingleRequest<R> implements Request,
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void onResourceReady(Resource<?> resource) {
+  public void onResourceReady(Resource<?> resource, DataSource dataSource) {
     stateVerifier.throwIfRecycled();
     loadStatus = null;
     if (resource == null) {
@@ -442,36 +442,38 @@ public final class SingleRequest<R> implements Request,
       return;
     }
 
-    onResourceReady((Resource<R>) resource, (R) received);
+    onResourceReady((Resource<R>) resource, (R) received, dataSource);
   }
 
   /**
-   * Internal {@link #onResourceReady(Resource)} where arguments are known to be safe.
+   * Internal {@link #onResourceReady(Resource, DataSource)} where arguments are known to be safe.
    *
    * @param resource original {@link Resource}, never <code>null</code>
    * @param result   object returned by {@link Resource#get()}, checked for type and never
    *                 <code>null</code>
    */
-  private void onResourceReady(Resource<R> resource, R result) {
+  private void onResourceReady(Resource<R> resource, R result, DataSource dataSource) {
     // We must call isFirstReadyResource before setting status.
     boolean isFirstResource = isFirstReadyResource();
     status = Status.COMPLETE;
     this.resource = resource;
 
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Finished loading " + result.getClass().getSimpleName() + " from " + dataSource
+          + " for " + model + " with size [" + width + "x" + height + "] in "
+          + LogTime.getElapsedMillis(startTime) + " ms");
+    }
+
+    boolean isLoadedFromMemoryCache = dataSource == DataSource.MEMORY_CACHE;
     if (requestListener == null
-        || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
+        || !requestListener.onResourceReady(result, model, target, isLoadedFromMemoryCache,
         isFirstResource)) {
       Transition<? super R> animation =
-          animationFactory.build(loadedFromMemoryCache, isFirstResource);
+          animationFactory.build(isLoadedFromMemoryCache, isFirstResource);
       target.onResourceReady(result, animation);
     }
 
     notifyLoadSuccess();
-
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      logV("Resource ready in " + LogTime.getElapsedMillis(startTime) + " size: " + (
-          resource.getSize() * TO_MEGABYTE) + " fromCache: " + loadedFromMemoryCache);
-    }
   }
 
   /**

@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.tests.Util.anyDataSource;
+import static com.bumptech.glide.tests.Util.anyResource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -16,6 +18,7 @@ import static org.mockito.Mockito.when;
 import android.os.Handler;
 import android.support.v4.util.Pools;
 
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
@@ -48,17 +51,17 @@ public class EngineJobTest {
   public void testOnResourceReadyPassedToCallbacks() throws Exception {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb).onResourceReady(eq(harness.engineResource));
+    verify(harness.cb).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
   }
 
   @Test
   public void testListenerNotifiedJobCompleteOnOnResourceReady() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
 
@@ -69,9 +72,9 @@ public class EngineJobTest {
   public void testNotifiesAllCallbacksOnReady() {
     MultiCbHarness harness = new MultiCbHarness();
     harness.job.start(harness.decodeJob);
-    harness.job.onResourceReady(harness.resource);
+    harness.job.onResourceReady(harness.resource, harness.dataSource);
     for (ResourceCallback cb : harness.cbs) {
-      verify(cb).onResourceReady(eq(harness.engineResource));
+      verify(cb).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
     }
   }
 
@@ -90,7 +93,7 @@ public class EngineJobTest {
   public void testAcquiresResourceOncePerCallback() {
     MultiCbHarness harness = new MultiCbHarness();
     harness.job.start(harness.decodeJob);
-    harness.job.onResourceReady(harness.resource);
+    harness.job.onResourceReady(harness.resource, harness.dataSource);
 
     // Acquired once and then released while notifying.
     InOrder order = inOrder(harness.engineResource);
@@ -113,10 +116,10 @@ public class EngineJobTest {
     harness.isCacheable = true;
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
+    verify(harness.factory).build(anyResource(), eq(harness.isCacheable));
   }
 
   @Test
@@ -124,10 +127,10 @@ public class EngineJobTest {
     harness.isCacheable = false;
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.factory).build(any(Resource.class), eq(harness.isCacheable));
+    verify(harness.factory).build(anyResource(), eq(harness.isCacheable));
   }
 
   @Test
@@ -145,10 +148,10 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.cancel();
 
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb, never()).onResourceReady(eq(harness.resource));
+    verify(harness.cb, never()).onResourceReady(anyResource(), anyDataSource());
   }
 
   @Test
@@ -187,7 +190,7 @@ public class EngineJobTest {
   public void testResourceIsAcquiredOncePerConsumerAndOnceForCache() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     // Once while notifying and once for single callback.
     verify(harness.engineResource, times(2)).acquire();
@@ -197,7 +200,7 @@ public class EngineJobTest {
   public void testDoesNotNotifyCancelledIfCompletes() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     verify(harness.listener, never()).onEngineJobCancelled(eq(job), eq(harness.key));
   }
@@ -229,7 +232,7 @@ public class EngineJobTest {
 
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
     job.cancel();
     shadowLooper.runOneTask();
 
@@ -241,7 +244,7 @@ public class EngineJobTest {
     harness.isCacheable = false;
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     verify(harness.engineResource, times(2)).acquire();
   }
@@ -258,13 +261,13 @@ public class EngineJobTest {
         job.addCallback(newCallback);
         return null;
       }
-    }).when(existingCallback).onResourceReady(any(Resource.class));
+    }).when(existingCallback).onResourceReady(anyResource(), anyDataSource());
 
     job.addCallback(existingCallback);
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
-    verify(newCallback).onResourceReady(eq(harness.engineResource));
+    verify(newCallback).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
   }
 
   @Test
@@ -301,13 +304,13 @@ public class EngineJobTest {
         job.removeCallback(cb);
         return null;
       }
-    }).when(cb).onResourceReady(any(Resource.class));
+    }).when(cb).onResourceReady(anyResource(), anyDataSource());
 
     job.addCallback(cb);
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
-    verify(cb, times(1)).onResourceReady(any(Resource.class));
+    verify(cb, times(1)).onResourceReady(anyResource(), anyDataSource());
   }
 
   @Test
@@ -344,13 +347,13 @@ public class EngineJobTest {
         job.removeCallback(notYetCalled);
         return null;
       }
-    }).when(harness.cb).onResourceReady(any(Resource.class));
+    }).when(harness.cb).onResourceReady(anyResource(), anyDataSource());
 
     job.addCallback(notYetCalled);
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
-    verify(notYetCalled, never()).onResourceReady(any(Resource.class));
+    verify(notYetCalled, never()).onResourceReady(anyResource(), anyDataSource());
   }
 
   @Test
@@ -365,12 +368,12 @@ public class EngineJobTest {
         job.removeCallback(notYetCalled);
         return null;
       }
-    }).when(harness.cb).onResourceReady(any(Resource.class));
+    }).when(harness.cb).onResourceReady(anyResource(), anyDataSource());
 
     job.addCallback(notYetCalled);
     job.start(harness.decodeJob);
 
-    job.onResourceReady(harness.resource);
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     // Once for notifying, once for called.
     verify(harness.engineResource, times(2)).acquire();
@@ -396,7 +399,7 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
 
-    verify(notYetCalled, never()).onResourceReady(any(Resource.class));
+    verify(notYetCalled, never()).onResourceReady(anyResource(), anyDataSource());
   }
 
   @Test
@@ -434,6 +437,7 @@ public class EngineJobTest {
     verify(harness.sourceService).execute(eq(harness.decodeJob));
   }
 
+
   @SuppressWarnings("unchecked")
   private static class MultiCbHarness {
     Key key = mock(Key.class);
@@ -449,6 +453,7 @@ public class EngineJobTest {
     GlideExecutor sourceService = mock(GlideExecutor.class);
     Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
     DecodeJob<Object> decodeJob = mock(DecodeJob.class);
+    DataSource dataSource = DataSource.LOCAL;
 
     public MultiCbHarness() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
@@ -477,6 +482,7 @@ public class EngineJobTest {
     boolean isCacheable = true;
     DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
+    DataSource dataSource = DataSource.DATA_DISK_CACHE;
 
     public EngineJob<Object> getJob() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
