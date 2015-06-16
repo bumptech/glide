@@ -141,14 +141,15 @@ public class FlickrSearchActivity extends AppCompatActivity
     pager.setPageMargin(res.getDimensionPixelOffset(R.dimen.page_margin));
     pager.setAdapter(new FlickrPagerAdapter(getSupportFragmentManager()));
 
-    Api.get(this).registerSearchListener(queryListener);
+    Api.get(this).registerQueryListener(queryListener);
     if (savedInstanceState != null) {
       Query savedQuery = savedInstanceState.getParcelable(STATE_QUERY);
       if (savedQuery != null) {
         executeQuery(savedQuery);
       }
     } else {
-      executeQuery(RecentQuery.get());
+      //executeQuery(RecentQuery.get());
+      executeSearch("puppies");             // no longer displays recents, but results from puppies search
     }
 
     int smallGridSize = res.getDimensionPixelSize(R.dimen.small_photo_side);
@@ -180,7 +181,7 @@ public class FlickrSearchActivity extends AppCompatActivity
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    Api.get(this).unregisterSearchListener(queryListener);
+    Api.get(this).unregisterQueryListener(queryListener);
     if (backgroundThumbnailFetcher != null) {
       backgroundThumbnailFetcher.cancel();
       backgroundThumbnailFetcher = null;
