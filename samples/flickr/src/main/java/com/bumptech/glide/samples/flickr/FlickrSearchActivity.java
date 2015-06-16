@@ -148,8 +148,7 @@ public class FlickrSearchActivity extends AppCompatActivity
         executeQuery(savedQuery);
       }
     } else {
-      //executeQuery(RecentQuery.get());
-      executeSearch("puppies");             // no longer displays recents, but results from puppies search
+      executeSearch("puppies");
     }
 
     int smallGridSize = res.getDimensionPixelSize(R.dimen.small_photo_side);
