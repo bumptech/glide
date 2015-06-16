@@ -1,5 +1,7 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.util.Preconditions;
 
 import java.security.MessageDigest;
@@ -90,6 +92,7 @@ public final class Option<T> {
   /**
    * Returns a reasonable default to use if no other value is set, or {@code null}.
    */
+  @Nullable
   public T getDefaultValue() {
     return defaultValue;
   }

@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.widget.AbsListView;
 
@@ -88,6 +89,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      *
      * @param item A model
      */
+    @Nullable
     int[] getPreloadSize(T item, int adapterPosition, int perItemPosition);
   }
 

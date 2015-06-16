@@ -2,6 +2,7 @@ package com.bumptech.glide.manager;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
@@ -27,9 +28,9 @@ public class SupportRequestManagerFragment extends Fragment {
   private final HashSet<SupportRequestManagerFragment> childRequestManagerFragments =
       new HashSet<>();
 
-  private SupportRequestManagerFragment rootRequestManagerFragment;
-  private RequestManager requestManager;
-  private Fragment parentFragmentHint;
+  @Nullable private SupportRequestManagerFragment rootRequestManagerFragment;
+  @Nullable private RequestManager requestManager;
+  @Nullable private Fragment parentFragmentHint;
 
   public SupportRequestManagerFragment() {
     this(new ActivityFragmentLifecycle());
@@ -57,6 +58,7 @@ public class SupportRequestManagerFragment extends Fragment {
   /**
    * Returns the current {@link com.bumptech.glide.RequestManager} or null if none is put.
    */
+  @Nullable
   public RequestManager getRequestManager() {
     return requestManager;
   }

@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Build;
+import android.support.annotation.Nullable;
 
 import com.bumptech.glide.RequestManager;
 
@@ -29,9 +30,9 @@ public class RequestManagerFragment extends Fragment {
   private final HashSet<RequestManagerFragment> childRequestManagerFragments =
       new HashSet<>();
 
-  private RequestManager requestManager;
-  private RequestManagerFragment rootRequestManagerFragment;
-  private Fragment parentFragmentHint;
+  @Nullable private RequestManager requestManager;
+  @Nullable private RequestManagerFragment rootRequestManagerFragment;
+  @Nullable private Fragment parentFragmentHint;
 
   public RequestManagerFragment() {
     this(new ActivityFragmentLifecycle());
@@ -59,6 +60,7 @@ public class RequestManagerFragment extends Fragment {
   /**
    * Returns the current {@link com.bumptech.glide.RequestManager} or null if none exists.
    */
+  @Nullable
   public RequestManager getRequestManager() {
     return requestManager;
   }

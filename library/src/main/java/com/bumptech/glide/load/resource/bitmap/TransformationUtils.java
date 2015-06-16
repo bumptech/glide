@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -46,7 +47,8 @@ public final class TransformationUtils {
    * @param height   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap centerCrop(Bitmap recycled, Bitmap toCrop, int width, int height) {
+  @Nullable
+  public static Bitmap centerCrop(@Nullable Bitmap recycled, Bitmap toCrop, int width, int height) {
     if (toCrop == null) {
       return null;
     } else if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
@@ -286,7 +288,8 @@ public final class TransformationUtils {
    * @param destHeight   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap circleCrop(Bitmap recycled, Bitmap toCrop, int destWidth, int destHeight) {
+  public static Bitmap circleCrop(@Nullable Bitmap recycled, Bitmap toCrop, int destWidth,
+      int destHeight) {
     if (toCrop == null) {
       return null;
     }

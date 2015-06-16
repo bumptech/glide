@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 
@@ -40,6 +42,7 @@ public interface MemoryCache {
    *
    * @param key The key.
    */
+  @Nullable
   Resource<?> remove(Key key);
 
   /**
@@ -49,6 +52,7 @@ public interface MemoryCache {
    * @param resource The {@link com.bumptech.glide.load.engine.EngineResource} to store.
    * @return The old value of key (null if key is not in map).
    */
+  @Nullable
   Resource<?> put(Key key, Resource<?> resource);
 
   /**

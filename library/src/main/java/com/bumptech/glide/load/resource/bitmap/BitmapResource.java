@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -21,7 +22,8 @@ public class BitmapResource implements Resource<Bitmap> {
    * @param bitmap     A Bitmap.
    * @param bitmapPool A non-null {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}.
    */
-  public static BitmapResource obtain(Bitmap bitmap, BitmapPool bitmapPool) {
+  @Nullable
+  public static BitmapResource obtain(@Nullable Bitmap bitmap, BitmapPool bitmapPool) {
     if (bitmap == null) {
       return null;
     } else {
