@@ -76,8 +76,6 @@ afterEvaluate {
         enabled = false
     }
 
-    check.dependsOn('findbugs')
-
     task pmd(type: Pmd) {
 
         description 'Run pmd'
