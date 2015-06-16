@@ -166,7 +166,7 @@ public class Glide implements ComponentCallbacks2 {
 
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, ByteArrayPool byteArrayPool,
-      Context context, DecodeFormat decodeFormat) {
+      Context context, DecodeFormat decodeFormat, int logLevel) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.byteArrayPool = byteArrayPool;
@@ -244,8 +244,8 @@ public class Glide implements ComponentCallbacks2 {
 
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     RequestOptions options = new RequestOptions().format(decodeFormat);
-    glideContext =
-        new GlideContext(context, registry, imageViewTargetFactory, options, engine, this);
+    glideContext = new GlideContext(context, registry, imageViewTargetFactory, options, engine,
+        this, logLevel);
   }
 
   /**

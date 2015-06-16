@@ -27,16 +27,18 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
   private final RequestOptions options;
   private final Engine engine;
   private final ComponentCallbacks2 componentCallbacks;
+  private final int logLevel;
 
   public GlideContext(Context context, Registry registry,
       ImageViewTargetFactory imageViewTargetFactory, RequestOptions options, Engine engine,
-      ComponentCallbacks2 componentCallbacks) {
+      ComponentCallbacks2 componentCallbacks, int logLevel) {
     super(context.getApplicationContext());
     this.registry = registry;
     this.imageViewTargetFactory = imageViewTargetFactory;
     this.options = options;
     this.engine = engine;
     this.componentCallbacks = componentCallbacks;
+    this.logLevel = logLevel;
 
     mainHandler = new Handler(Looper.getMainLooper());
   }
@@ -59,6 +61,10 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
 
   public Registry getRegistry() {
     return registry;
+  }
+
+  public int getLogLevel() {
+    return logLevel;
   }
 
   @Override

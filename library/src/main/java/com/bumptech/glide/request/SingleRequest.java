@@ -31,7 +31,10 @@ public final class SingleRequest<R> implements Request,
     SizeReadyCallback,
     ResourceCallback,
     FactoryPools.Poolable {
+  /** Tag for logging internal events, not generally suitable for public use. */
   private static final String TAG = "Request";
+  /** Tag for logging externally useful events (request completion, timing etc). */
+  private static final String GLIDE_TAG = "Glide";
   private static final Pools.Pool<SingleRequest<?>> POOL = FactoryPools.simple(150,
       new FactoryPools.Factory<SingleRequest<?>>() {
         @Override
@@ -458,9 +461,9 @@ public final class SingleRequest<R> implements Request,
     status = Status.COMPLETE;
     this.resource = resource;
 
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Finished loading " + result.getClass().getSimpleName() + " from " + dataSource
-          + " for " + model + " with size [" + width + "x" + height + "] in "
+    if (glideContext.getLogLevel() <= Log.DEBUG) {
+      Log.d(GLIDE_TAG, "Finished loading " + result.getClass().getSimpleName() + " from "
+          + dataSource + " for " + model + " with size [" + width + "x" + height + "] in "
           + LogTime.getElapsedMillis(startTime) + " ms");
     }
 
@@ -482,10 +485,11 @@ public final class SingleRequest<R> implements Request,
   @Override
   public void onLoadFailed(GlideException e) {
     stateVerifier.throwIfRecycled();
-    if (Log.isLoggable(TAG, Log.DEBUG)) {
-      Log.d(TAG, "Load failed for: " + model, e);
-      if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        e.logRootCauses(TAG);
+    int logLevel = glideContext.getLogLevel();
+    if (logLevel <= Log.WARN) {
+      Log.w(GLIDE_TAG, "Load failed for " + model + " with size [" + width + "x" + height + "]", e);
+      if (logLevel <= Log.INFO) {
+        e.logRootCauses(GLIDE_TAG);
       }
     }
 

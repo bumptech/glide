@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
@@ -20,7 +21,7 @@ import com.bumptech.glide.load.engine.executor.GlideExecutor;
 /**
  * A builder class for setting default structural classes for Glide to use.
  */
-public class GlideBuilder {
+public final class GlideBuilder {
   private final Context context;
 
   private Engine engine;
@@ -32,8 +33,9 @@ public class GlideBuilder {
   private DecodeFormat decodeFormat;
   private DiskCache.Factory diskCacheFactory;
   private MemorySizeCalculator memorySizeCalculator;
+  private int logLevel = Log.INFO;
 
-  public GlideBuilder(Context context) {
+  GlideBuilder(Context context) {
     this.context = context.getApplicationContext();
   }
 
@@ -189,6 +191,40 @@ public class GlideBuilder {
     return this;
   }
 
+  /**
+   * Sets a log level constant from those in {@link Log} to indicate the desired log verbosity.
+   *
+   * <p>The level must be one of {@link Log#VERBOSE}, {@link Log#DEBUG}, {@link Log#INFO},
+   * {@link Log#WARN}, or {@link Log#ERROR}.
+   *
+   * <p>{@link Log#VERBOSE} means one or more lines will be logged per request, including
+   * timing logs and failures. {@link Log#DEBUG} means at most one line will be logged
+   * per successful request, including timing logs, although many lines may be logged for
+   * failures including multiple complete stack traces. {@link Log#INFO} means
+   * failed loads will be logged including multiple complete stack traces, but successful loads
+   * will not be logged at all. {@link Log#WARN} means only summaries of failed loads will be
+   * logged. {@link Log#ERROR} means only exceptional cases will be logged.
+   *
+   * <p>All logs will be logged using the 'Glide' tag.
+   *
+   * <p>Many other debugging logs are available in individual classes. The log level supplied here
+   * only controls a small set of informative and well formatted logs. Users wishing to debug
+   * certain aspects of the library can look for individual <code>TAG</code> variables at the tops
+   * of classes and use <code>adb shell setprop log.tag.TAG</code> to enable or disable any relevant
+   * tags.
+   *
+   * @param logLevel The log level to use from {@link Log}.
+   * @return This builder.
+   */
+  public GlideBuilder setLogLevel(int logLevel) {
+    if (logLevel < Log.VERBOSE || logLevel > Log.ERROR) {
+      throw new IllegalArgumentException("Log level must be one of Log.VERBOSE, Log.DEBUG,"
+          + " Log.INFO, Log.WARN, or Log.ERROR");
+    }
+    this.logLevel = logLevel;
+    return this;
+  }
+
   // For testing.
   GlideBuilder setEngine(Engine engine) {
     this.engine = engine;
@@ -237,6 +273,7 @@ public class GlideBuilder {
       decodeFormat = DecodeFormat.DEFAULT;
     }
 
-    return new Glide(engine, memoryCache, bitmapPool, byteArrayPool, context, decodeFormat);
+    return new Glide(engine, memoryCache, bitmapPool, byteArrayPool, context, decodeFormat,
+        logLevel);
   }
 }
