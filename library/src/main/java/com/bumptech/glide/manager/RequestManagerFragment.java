@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.bumptech.glide.RequestManager;
 
@@ -24,6 +25,7 @@ import java.util.Set;
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class RequestManagerFragment extends Fragment {
+  private static final String TAG = "RMFragment";
   private final ActivityFragmentLifecycle lifecycle;
   private final RequestManagerTreeNode requestManagerTreeNode =
       new FragmentRequestManagerTreeNode();
@@ -161,7 +163,14 @@ public class RequestManagerFragment extends Fragment {
   @Override
   public void onAttach(Activity activity) {
     super.onAttach(activity);
-    registerFragmentWithRoot(getActivity());
+    try {
+      registerFragmentWithRoot(activity);
+    } catch (IllegalArgumentException e) {
+      // OnAttach can be called after the activity is destroyed, see #497.
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Unable to register fragment with root", e);
+      }
+    }
   }
 
   @Override
