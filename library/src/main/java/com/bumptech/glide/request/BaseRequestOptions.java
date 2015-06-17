@@ -5,6 +5,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DecodeFormat;
@@ -54,12 +56,11 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private static final int IS_CACHEABLE = 1 << 8;
   private static final int OVERRIDE = 1 << 9;
   private static final int SIGNATURE = 1 << 10;
-  private static final int TAG = 1 << 11;
-  private static final int TRANSFORMATION = 1 << 12;
-  private static final int RESOURCE_CLASS = 1 << 13;
-  private static final int FALLBACK = 1 << 14;
-  private static final int FALLBACK_ID = 1 << 15;
-  private static final int THEME = 1 << 16;
+  private static final int TRANSFORMATION = 1 << 11;
+  private static final int RESOURCE_CLASS = 1 << 12;
+  private static final int FALLBACK = 1 << 13;
+  private static final int FALLBACK_ID = 1 << 14;
+  private static final int THEME = 1 << 15;
 
   private int fields;
 
@@ -74,7 +75,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private int overrideHeight = UNSET;
   private int overrideWidth = UNSET;
   private Key signature = EmptySignature.obtain();
-  private String tag;
   private boolean isTransformationRequired;
   private Drawable fallbackDrawable;
   private int fallbackId;
@@ -84,12 +84,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private Class<?> resourceClass = Object.class;
   private boolean isLocked;
   private Resources.Theme theme;
-
-  public final CHILD tag(String tag) {
-    this.tag = tag;
-    fields |= TAG;
-    return selfOrThrowIfLocked();
-  }
 
   /**
    * Applies a multiplier to the {@link com.bumptech.glide.request.target.Target}'s size before
@@ -125,7 +119,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @param strategy The strategy to use.
    * @return This request builder.
    */
-  public final CHILD diskCacheStrategy(DiskCacheStrategy strategy) {
+  public final CHILD diskCacheStrategy(@NonNull DiskCacheStrategy strategy) {
     this.diskCacheStrategy = Preconditions.checkNotNull(strategy);
     fields |= DISK_CACHE_STRATEGY;
 
@@ -138,7 +132,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @param priority A priority.
    * @return This request builder.
    */
-  public final CHILD priority(Priority priority) {
+  public final CHILD priority(@NonNull Priority priority) {
     this.priority = Preconditions.checkNotNull(priority);
     fields |= PRIORITY;
 
@@ -151,7 +145,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @param drawable The drawable to display as a placeholder.
    * @return This request builder.
    */
-  public final CHILD placeholder(Drawable drawable) {
+  public final CHILD placeholder(@Nullable Drawable drawable) {
     this.placeholderDrawable = drawable;
     fields |= PLACEHOLDER;
 
@@ -218,7 +212,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @param drawable The drawable to display.
    * @return This request builder.
    */
-  public final CHILD error(Drawable drawable) {
+  public final CHILD error(@Nullable Drawable drawable) {
     this.errorPlaceholder = drawable;
     fields |= ERROR_PLACEHOLDER;
 
@@ -297,7 +291,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    * @see com.bumptech.glide.signature.StringSignature
    */
-  public final CHILD signature(Key signature) {
+  public final CHILD signature(@NonNull Key signature) {
     this.signature = Preconditions.checkNotNull(signature);
     fields |= SIGNATURE;
     return selfOrThrowIfLocked();
@@ -330,12 +324,14 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     }
   }
 
-  public final <T> CHILD set(Option<T> option, T value) {
+  public final <T> CHILD set(@NonNull Option<T> option, @NonNull T value) {
+    Preconditions.checkNotNull(option);
+    Preconditions.checkNotNull(value);
     options.set(option, value);
     return selfOrThrowIfLocked();
   }
 
-  public final CHILD decode(Class<?> resourceClass) {
+  public final CHILD decode(@NonNull Class<?> resourceClass) {
     this.resourceClass = Preconditions.checkNotNull(resourceClass);
     fields |= RESOURCE_CLASS;
     return selfOrThrowIfLocked();
@@ -353,33 +349,48 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * Sets the value for key
    * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#COMPRESSION_FORMAT}.
    */
-  public CHILD encodeFormat(Bitmap.CompressFormat format) {
-    return set(BitmapEncoder.COMPRESSION_FORMAT, format);
+  public CHILD encodeFormat(@NonNull Bitmap.CompressFormat format) {
+    return set(BitmapEncoder.COMPRESSION_FORMAT, Preconditions.checkNotNull(format));
   }
 
   /**
    * Sets the value for key
    * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#COMPRESSION_QUALITY}.
    */
-  public CHILD encodeQuality(Integer quality) {
+  public CHILD encodeQuality(int quality) {
     return set(BitmapEncoder.COMPRESSION_QUALITY, quality);
   }
 
-  public CHILD format(DecodeFormat format) {
+  /**
+   * Sets the {@link DecodeFormat} to use when decoding {@link Bitmap} objects using
+   * {@link Downsampler}.
+   *
+   * <p>{@link DecodeFormat} is a request, not a requirement. It's possible the resource will be
+   * decoded using a decoder that cannot control the format
+   * ({@link android.media.MediaMetadataRetriever} for example), or that the decoder may choose to
+   * ignore the requested format if it can't display the image (ie RGB_565 is requested, but the
+   * image has alpha).
+   */
+  public CHILD format(@NonNull DecodeFormat format) {
     return set(Downsampler.DECODE_FORMAT, Preconditions.checkNotNull(format));
   }
 
   /**
    * Sets the time position of the frame to extract from a video.
-   * @param frame The time position in microseconds of the desired frame. If negative, the Android
-   *     framework implementation return a representative frame.
+   *
+   * @param frameTimeMicros The time position in microseconds of the desired frame. If negative, the
+   *                        Android framework implementation return a representative frame.
    */
-  public CHILD frame(long frame) {
-    return set(VideoBitmapDecoder.TARGET_FRAME, frame);
+  public CHILD frame(long frameTimeMicros) {
+    return set(VideoBitmapDecoder.TARGET_FRAME, frameTimeMicros);
   }
 
-  public CHILD downsample(DownsampleStrategy strategy) {
-    return set(Downsampler.DOWNSAMPLE_STRATEGY, strategy);
+  /**
+   * Sets the {@link DownsampleStrategy} to use when decoding {@link Bitmap Bitmaps} using
+   * {@link Downsampler}.
+   */
+  public CHILD downsample(@NonNull DownsampleStrategy strategy) {
+    return set(Downsampler.DOWNSAMPLE_STRATEGY, Preconditions.checkNotNull(strategy));
   }
 
   /**
@@ -472,7 +483,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(android.content.Context, com.bumptech.glide.load.Transformation)
    * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
    */
-  public CHILD transform(Context context, Transformation<Bitmap> transformation) {
+  public CHILD transform(Context context, @NonNull Transformation<Bitmap> transformation) {
     optionalTransform(context, transformation);
     isTransformationRequired = true;
     return selfOrThrowIfLocked();
@@ -631,9 +642,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     if (isSet(other.fields, SIZE_MULTIPLIER)) {
       sizeMultiplier = other.sizeMultiplier;
     }
-    if (isSet(other.fields, TAG)) {
-      tag = other.tag;
-    }
     if (isSet(other.fields, RESOURCE_CLASS)) {
       resourceClass = other.resourceClass;
     }
@@ -708,10 +716,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   public final float getSizeMultiplier() {
     return sizeMultiplier;
-  }
-
-  public final String getTag() {
-    return tag;
   }
 
   @SuppressWarnings("unchecked")
