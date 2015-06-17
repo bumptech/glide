@@ -30,7 +30,6 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.samples.flickr.api.Query;
-import com.bumptech.glide.samples.flickr.api.RecentQuery;
 import com.bumptech.glide.samples.flickr.api.SearchQuery;
 
 import java.io.File;
