@@ -73,6 +73,13 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().centerCrop(context);
   }
 
+  /**
+   * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop(Context)} set.
+   */
+  public static RequestOptions circleCropTransform(Context context) {
+    return new RequestOptions().circleCrop(context);
+  }
+
   public static RequestOptions bitmapTransform(Context context,
       Transformation<Bitmap> transformation) {
     return new RequestOptions().transform(context, transformation);

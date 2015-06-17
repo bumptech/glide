@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
@@ -431,6 +432,31 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   public CHILD fitCenter(Context context) {
     downsample(DownsampleStrategy.CENTER_INSIDE);
     return transform(context, new FitCenter(context));
+  }
+
+  /**
+   * Applies {@link CircleCrop} to all default types, and ignores unknown types.
+   *
+   * @param context Any {@link Context}.
+   * @see #optionalTransform(Context, Transformation)
+   * @see #circleCrop(Context)
+   */
+  public CHILD optionalCircleCrop(Context context) {
+    downsample(DownsampleStrategy.CENTER_OUTSIDE);
+    return optionalTransform(context, new CircleCrop(context));
+  }
+
+  /**
+   * Applies {@link CircleCrop} to all default types and throws an exception if asked to transform
+   * an unknown type.
+   *
+   * @param context Any {@link Context}.
+   * @see #transform(Class, Transformation)
+   * @see #optionalCenterCrop(Context)
+   */
+  public CHILD circleCrop(Context context) {
+    downsample(DownsampleStrategy.CENTER_OUTSIDE);
+    return transform(context, new CircleCrop(context));
   }
 
   /**
