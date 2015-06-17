@@ -628,7 +628,7 @@ public class GifDecoder {
     }
 
     // Initialize GIF data stream decoder.
-    dataSize = read();
+    dataSize = readByte();
     clear = 1 << dataSize;
     endOfInformation = clear + 1;
     available = clear + 2;
@@ -732,7 +732,7 @@ public class GifDecoder {
   /**
    * Reads a single byte from the input stream.
    */
-  private int read() {
+  private int readByte() {
     int curByte = 0;
     try {
       curByte = rawData.get() & 0xFF;
@@ -748,23 +748,16 @@ public class GifDecoder {
    * @return number of bytes stored in "buffer".
    */
   private int readBlock() {
-    int blockSize = read();
-    int n = 0;
+    int blockSize = readByte();
     if (blockSize > 0) {
       try {
-        int count;
-        while (n < blockSize) {
-          count = blockSize - n;
-          rawData.get(block, n, count);
-
-          n += count;
-        }
+        rawData.get(block, 0, blockSize);
       } catch (Exception e) {
         Log.w(TAG, "Error Reading Block", e);
         status = STATUS_FORMAT_ERROR;
       }
     }
-    return n;
+    return blockSize;
   }
 
   private Bitmap getNextBitmap() {
