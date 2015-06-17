@@ -54,6 +54,33 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
         }
       });
 
+  /**
+   * An integer indicating the frame option used to retrieve a target frame.
+   *
+   * <p>This option will be ignored if {@link #TARGET_FRAME} is not set or is set to
+   * {@link #DEFAULT_FRAME}.
+   *
+   * @see MediaMetadataRetriever#getFrameAtTime(long, int)
+   */
+  public static final Option<Integer> FRAME_OPTION = Option.disk(
+      "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.FrameOption",
+      null /*defaultValue*/,
+      new Option.CacheKeyUpdater<Integer>() {
+        private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+        @Override
+        public void update(byte[] keyBytes, Integer value, MessageDigest messageDigest) {
+          if (value == null) {
+            return;
+          }
+          messageDigest.update(keyBytes);
+          synchronized (buffer) {
+            buffer.position(0);
+            messageDigest.update(buffer.putInt(value).array());
+          }
+        }
+      }
+  );
+
   private static final MediaMetadataRetrieverFactory DEFAULT_FACTORY =
       new MediaMetadataRetrieverFactory();
 
@@ -91,19 +118,22 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   @Override
   public Resource<Bitmap> decode(ParcelFileDescriptor resource, int outWidth, int outHeight,
       Options options) throws IOException {
-    long frame = options.get(TARGET_FRAME);
-    if (frame < 0 && frame != DEFAULT_FRAME) {
+    long frameTimeMicros = options.get(TARGET_FRAME);
+    if (frameTimeMicros < 0 && frameTimeMicros != DEFAULT_FRAME) {
       throw new IllegalArgumentException(
-          "Requested frame must be non-negative, or DEFAULT_FRAME, given: " + frame);
+          "Requested frame must be non-negative, or DEFAULT_FRAME, given: " + frameTimeMicros);
     }
+    Integer frameOption = options.get(FRAME_OPTION);
 
     MediaMetadataRetriever mediaMetadataRetriever = factory.build();
     mediaMetadataRetriever.setDataSource(resource.getFileDescriptor());
     final Bitmap result;
-    if (frame == DEFAULT_FRAME) {
+    if (frameTimeMicros == DEFAULT_FRAME) {
       result = mediaMetadataRetriever.getFrameAtTime();
+    } else if (frameOption == null) {
+      result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros);
     } else {
-      result = mediaMetadataRetriever.getFrameAtTime(frame);
+      result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
     }
     mediaMetadataRetriever.release();
     resource.close();
