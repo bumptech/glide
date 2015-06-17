@@ -437,7 +437,6 @@ public class EngineJobTest {
     verify(harness.sourceService).execute(eq(harness.decodeJob));
   }
 
-
   @SuppressWarnings("unchecked")
   private static class MultiCbHarness {
     Key key = mock(Key.class);
