@@ -36,7 +36,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     }
 
     public StreamBitmapDecoder(BitmapPool bitmapPool, DecodeFormat decodeFormat) {
-        this(Downsampler.AT_LEAST, bitmapPool, decodeFormat);
+        this(Downsampler.AT_MOST, bitmapPool, decodeFormat);
     }
 
     public StreamBitmapDecoder(Downsampler downsampler, BitmapPool bitmapPool, DecodeFormat decodeFormat) {

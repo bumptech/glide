@@ -1,5 +1,6 @@
 .gradle
 build
+*.iml
 *.iws
 doc/**
 bin/**
