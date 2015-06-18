@@ -467,10 +467,8 @@ public final class SingleRequest<R> implements Request,
           + LogTime.getElapsedMillis(startTime) + " ms");
     }
 
-    boolean isLoadedFromMemoryCache = dataSource == DataSource.MEMORY_CACHE;
     if (requestListener == null
-        || !requestListener.onResourceReady(result, model, target, isLoadedFromMemoryCache,
-        isFirstResource)) {
+        || !requestListener.onResourceReady(result, model, target, dataSource, isFirstResource)) {
       Transition<? super R> animation =
           animationFactory.build(dataSource, isFirstResource);
       target.onResourceReady(result, animation);

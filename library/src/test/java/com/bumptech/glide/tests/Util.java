@@ -2,6 +2,7 @@ package com.bumptech.glide.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 
 import android.os.Build;
@@ -28,8 +29,8 @@ public class Util {
     return clazz.getSimpleName() + "." + clazz.getPackage().getName();
   }
 
-  public static DataSource anyDataSource() {
-    return any(DataSource.class);
+  public static DataSource isADataSource() {
+    return isA(DataSource.class);
   }
 
   public static Resource<?> anyResource() {

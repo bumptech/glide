@@ -2,6 +2,7 @@ package com.bumptech.glide.request;
 
 import android.support.annotation.Nullable;
 
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.Target;
 
@@ -51,8 +52,7 @@ public interface RequestListener<R> {
    * @param resource          The resource that was loaded for the target.
    * @param model             The specific model that was used to load the image.
    * @param target            The target the model was loaded into.
-   * @param isFromMemoryCache True if the load completed synchronously (useful for determining
-   *                          whether or not to run a transition)
+   * @param dataSource        The {@link DataSource} the resource was loaded from.
    * @param isFirstResource   True if this is the first resource to in this load to be loaded into
    *                          the target. For example when loading a thumbnail and a fullsize image,
    *                          this will be true for the first image to load and false for the
@@ -60,6 +60,6 @@ public interface RequestListener<R> {
    * @return True if the listener has handled setting the resource on the target (including any
    * animations), false to allow Glide's request to update the target (again including animations).
    */
-  boolean onResourceReady(R resource, Object model, Target<R> target, boolean isFromMemoryCache,
+  boolean onResourceReady(R resource, Object model, Target<R> target, DataSource dataSource,
       boolean isFirstResource);
 }

@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import static com.bumptech.glide.tests.Util.isADataSource;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -449,7 +450,7 @@ public class SingleRequestTest {
   public void testCallsTargetOnResourceReadyIfRequestListenerReturnsFalse() {
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestListener
-        .onResourceReady(any(List.class), any(Number.class), eq(harness.target), anyBoolean(),
+        .onResourceReady(any(List.class), any(Number.class), eq(harness.target), isADataSource(),
             anyBoolean())).thenReturn(false);
     request.onResourceReady(harness.resource, DataSource.LOCAL);
 
@@ -460,7 +461,7 @@ public class SingleRequestTest {
   public void testDoesNotCallTargetOnResourceReadyIfRequestListenerReturnsTrue() {
     SingleRequest<List> request = harness.getRequest();
     when(harness.requestListener
-        .onResourceReady(any(List.class), any(Number.class), eq(harness.target), anyBoolean(),
+        .onResourceReady(any(List.class), any(Number.class), eq(harness.target), isADataSource(),
             anyBoolean())).thenReturn(true);
     request.onResourceReady(harness.resource, DataSource.REMOTE);
 
@@ -505,7 +506,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), isADataSource(),
             anyBoolean());
   }
 
@@ -515,7 +516,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
-        .onResourceReady(any(List.class), eq(harness.model), isAListTarget(), anyBoolean(),
+        .onResourceReady(any(List.class), eq(harness.model), isAListTarget(), isADataSource(),
             anyBoolean());
   }
 
@@ -525,7 +526,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
-        .onResourceReady(any(List.class), any(Number.class), eq(harness.target), anyBoolean(),
+        .onResourceReady(any(List.class), any(Number.class), eq(harness.target), isADataSource(),
             anyBoolean());
   }
 
@@ -549,8 +550,8 @@ public class SingleRequestTest {
     request.begin();
     request.onSizeReady(100, 100);
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), eq(true),
-            anyBoolean());
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(),
+            eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
   @Test
@@ -561,8 +562,8 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource, DataSource.LOCAL);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), eq(false),
-            anyBoolean());
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(),
+            eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
@@ -572,7 +573,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), isADataSource(),
             eq(true));
   }
 
@@ -583,7 +584,7 @@ public class SingleRequestTest {
     request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.requestListener)
-        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), anyBoolean(),
+        .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(), isADataSource(),
             eq(true));
   }
 
@@ -596,7 +597,7 @@ public class SingleRequestTest {
 
     verify(harness.requestListener)
         .onResourceReady(eq(harness.result), any(Number.class), isAListTarget(),
-            anyBoolean(), eq(false));
+            isADataSource(), eq(false));
   }
 
   @Test

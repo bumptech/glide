@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine;
 
-import static com.bumptech.glide.tests.Util.anyDataSource;
 import static com.bumptech.glide.tests.Util.anyResource;
+import static com.bumptech.glide.tests.Util.isADataSource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -131,7 +131,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb, never()).onResourceReady(isNull(Resource.class), anyDataSource());
+    verify(harness.cb, never()).onResourceReady(isNull(Resource.class), isADataSource());
   }
 
   @Test
@@ -180,7 +180,7 @@ public class EngineTest {
     harness.doLoad();
 
     verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
-    verify(harness.cb, never()).onResourceReady(eq(other), anyDataSource());
+    verify(harness.cb, never()).onResourceReady(eq(other), isADataSource());
   }
 
   @Test
@@ -237,11 +237,11 @@ public class EngineTest {
         assertEquals(expected, resource.get());
         return null;
       }
-    }).when(harness.cb).onResourceReady(anyResource(), anyDataSource());
+    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(anyResource(), anyDataSource());
+    verify(harness.cb).onResourceReady(anyResource(), isADataSource());
   }
 
   @Test

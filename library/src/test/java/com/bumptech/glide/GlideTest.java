@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -334,7 +335,7 @@ public class GlideTest {
 
       @Override
       public boolean onResourceReady(Drawable resource, Object model, Target target,
-          boolean isFromMemoryCache, boolean isFirstResource) {
+          DataSource dataSource, boolean isFirstResource) {
         return false;
       }
     }).into(target);

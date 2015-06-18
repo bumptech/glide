@@ -17,6 +17,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
@@ -77,7 +78,7 @@ public class FullscreenActivity extends Activity {
 
           @Override
           public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
-              boolean isFromMemoryCache, boolean isFirstResource) {
+              DataSource dataSource, boolean isFirstResource) {
             if (resource instanceof GifDrawable) {
               gifDrawable = (GifDrawable) resource;
             } else {
