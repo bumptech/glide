@@ -6,6 +6,8 @@ import static org.mockito.Mockito.mock;
 
 import android.graphics.drawable.Drawable;
 
+import com.bumptech.glide.load.DataSource;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,18 +30,18 @@ public class DrawableCrossFadeFactoryTest {
   @Test
   public void testReturnsNoAnimationIfFromMemoryCache() {
     assertEquals(NoTransition.<Drawable>get(),
-        factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/));
+        factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/));
   }
 
   @Test
   public void testReturnsReturnsAnimationIfNotFromMemoryCacheAndIsFirstResource() {
     assertNotEquals(NoTransition.<Drawable>get(),
-        factory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/));
+        factory.build(DataSource.DATA_DISK_CACHE, true /*isFirstResource*/));
   }
 
   @Test
   public void testReturnsAnimationIfNotFromMemocyCacheAndNotIsFirstResource() {
     assertNotEquals(NoTransition.<Drawable>get(),
-        factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/));
+        factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/));
   }
 }

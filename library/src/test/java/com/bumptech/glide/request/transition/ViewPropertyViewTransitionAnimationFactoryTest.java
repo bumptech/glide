@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 
+import com.bumptech.glide.load.DataSource;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,18 +25,18 @@ public class ViewPropertyViewTransitionAnimationFactoryTest {
   @Test
   public void testReturnsNoAnimationIfFromMemoryCache() {
     assertEquals(NoTransition.get(),
-        factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/));
+        factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/));
   }
 
   @Test
   public void testReturnsNoAnimationIfNotFirstResource() {
     assertEquals(NoTransition.get(),
-        factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/));
+        factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/));
   }
 
   @Test
   public void testReturnsAnimationIfNotFromMemoryCacheAndFirstResource() {
     assertNotEquals(NoTransition.get(),
-        factory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/));
+        factory.build(DataSource.DATA_DISK_CACHE, true /*isFirstResource*/));
   }
 }

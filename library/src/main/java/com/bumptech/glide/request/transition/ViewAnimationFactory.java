@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.bumptech.glide.load.DataSource;
+
 /**
  * A {@link TransitionFactory} that produces {@link ViewTransition}s.
  *
@@ -31,12 +33,12 @@ public class ViewAnimationFactory<R> implements TransitionFactory<R> {
    * or isFirstImage is {@code false}, returns a {@link NoTransition} and otherwise returns a new
    * {@link ViewTransition}.
    *
-   * @param isFromMemoryCache {@inheritDoc}
+   * @param dataSource {@inheritDoc}
    * @param isFirstResource   {@inheritDoc}
    */
   @Override
-  public Transition<R> build(boolean isFromMemoryCache, boolean isFirstResource) {
-    if (isFromMemoryCache || !isFirstResource) {
+  public Transition<R> build(DataSource dataSource, boolean isFirstResource) {
+    if (dataSource == DataSource.MEMORY_CACHE || !isFirstResource) {
       return NoTransition.get();
     }
 

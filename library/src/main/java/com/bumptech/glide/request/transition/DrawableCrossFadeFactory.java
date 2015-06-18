@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
+import com.bumptech.glide.load.DataSource;
+
 /**
  * A factory class that produces a new {@link Transition} that varies depending on whether or not
  * the drawable was loaded from the memory cache and whether or not the drawable is the first image
@@ -45,30 +47,29 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
   }
 
   @Override
-  public Transition<Drawable> build(boolean isFromMemoryCache, boolean isFirstResource) {
-    if (isFromMemoryCache) {
+  public Transition<Drawable> build(DataSource dataSource, boolean isFirstResource) {
+    if (dataSource == DataSource.MEMORY_CACHE) {
       return NoTransition.get();
     } else if (isFirstResource) {
-      return getFirstResourceTransition();
+      return getFirstResourceTransition(dataSource);
     } else {
-      return getSecondResourceTransition();
+      return getSecondResourceTransition(dataSource);
     }
   }
 
-
-  private Transition<Drawable> getFirstResourceTransition() {
+  private Transition<Drawable> getFirstResourceTransition(DataSource dataSource) {
       if (firstResourceTransition == null) {
           Transition<Drawable> defaultAnimation =
-              viewAnimationFactory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/);
+              viewAnimationFactory.build(dataSource, true /*isFirstResource*/);
           firstResourceTransition = new DrawableCrossFadeTransition(defaultAnimation, duration);
       }
       return firstResourceTransition;
   }
 
-  private Transition<Drawable> getSecondResourceTransition() {
+  private Transition<Drawable> getSecondResourceTransition(DataSource dataSource) {
       if (secondResourceTransition == null) {
           Transition<Drawable> defaultAnimation =
-              viewAnimationFactory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/);
+              viewAnimationFactory.build(dataSource, false /*isFirstResource*/);
           secondResourceTransition = new DrawableCrossFadeTransition(defaultAnimation, duration);
       }
       return secondResourceTransition;

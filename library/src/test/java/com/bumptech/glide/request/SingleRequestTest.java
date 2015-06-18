@@ -603,7 +603,7 @@ public class SingleRequestTest {
   public void testTargetIsCalledWithAnimationFromFactory() {
     SingleRequest<List> request = harness.getRequest();
     Transition<List> transition = mockTransition();
-    when(harness.factory.build(anyBoolean(), anyBoolean())).thenReturn(transition);
+    when(harness.factory.build(any(DataSource.class), anyBoolean())).thenReturn(transition);
     request.onResourceReady(harness.resource, DataSource.DATA_DISK_CACHE);
 
     verify(harness.target).onResourceReady(eq(harness.result), eq(transition));

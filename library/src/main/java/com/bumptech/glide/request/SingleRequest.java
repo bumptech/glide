@@ -472,7 +472,7 @@ public final class SingleRequest<R> implements Request,
         || !requestListener.onResourceReady(result, model, target, isLoadedFromMemoryCache,
         isFirstResource)) {
       Transition<? super R> animation =
-          animationFactory.build(isLoadedFromMemoryCache, isFirstResource);
+          animationFactory.build(dataSource, isFirstResource);
       target.onResourceReady(result, animation);
     }
 
