@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 
@@ -23,6 +24,7 @@ import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.manager.TargetTracker;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -65,6 +67,11 @@ public class RequestManager implements LifecycleListener {
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
   private final ConnectivityMonitor connectivityMonitor;
 
+  @NonNull
+  private BaseRequestOptions<?> defaultRequestOptions;
+  @NonNull
+  private BaseRequestOptions<?> requestOptions;
+
   public RequestManager(Context context, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
     this(context, lifecycle, treeNode, new RequestTracker(), new ConnectivityMonitorFactory());
   }
@@ -90,7 +97,58 @@ public class RequestManager implements LifecycleListener {
     }
     lifecycle.addListener(connectivityMonitor);
 
+    defaultRequestOptions = this.context.getDefaultRequestOptions();
+    requestOptions = defaultRequestOptions;
+
     Glide.get(context).registerRequestManager(this);
+  }
+
+  /**
+   * Updates the default {@link RequestOptions} for all loads started with this request manager
+   * with the given {@link RequestOptions}.
+   *
+   * <p>The {@link RequestOptions} provided here are applied on top of those provided via {@link
+   * GlideBuilder#setDefaultRequestOptions(RequestOptions)}. If there are conflicts, the options
+   * applied here will win. Note that this method does not mutate options provided to
+   * {@link GlideBuilder#setDefaultRequestOptions(RequestOptions)}.
+   *
+   * <p>Multiple sets of options can be applied. If there are conflicts the last {@link
+   * RequestOptions} applied will win.
+   *
+   * <p>The modified options will only be applied to loads started after this method is called.
+   *
+   * @see RequestBuilder#apply(BaseRequestOptions)
+   *
+   * @return This request manager.
+   */
+  public RequestManager applyDefaultRequestOptions(RequestOptions requestOptions) {
+    BaseRequestOptions<?> toMutate = this.requestOptions == defaultRequestOptions
+        ? this.requestOptions.clone() : this.defaultRequestOptions;
+    this.requestOptions = toMutate.apply(requestOptions);
+    return this;
+  }
+
+  /**
+   * Replaces the default {@link RequestOptions} for all loads started with this request manager
+   * with the given {@link RequestOptions}.
+   *
+   * <p>The {@link RequestOptions} provided here replace those that have been previously provided
+   * via {@link GlideBuilder#setDefaultRequestOptions(RequestOptions)}, {@link
+   * #setDefaultRequestOptions(RequestOptions)} and {@link
+   * #applyDefaultRequestOptions(RequestOptions)}.
+   *
+   * <p>Subsequent calls to {@link #applyDefaultRequestOptions(RequestOptions)} will not mutate
+   * the {@link RequestOptions} provided here. Instead the manager will create a clone of these
+   * options and mutate the clone.
+   *
+   * @see #applyDefaultRequestOptions(RequestOptions)
+   *
+   * @return This request manager.
+   */
+  public RequestManager setDefaultRequestOptions(RequestOptions requestOptions) {
+    this.defaultRequestOptions = requestOptions;
+    this.requestOptions = requestOptions;
+    return this;
   }
 
   /**
@@ -382,8 +440,8 @@ public class RequestManager implements LifecycleListener {
     requestTracker.runRequest(request);
   }
 
-  RequestOptions getDefaultRequestOptions() {
-    return context.getDefaultRequestOptions();
+  BaseRequestOptions<?> getDefaultRequestOptions() {
+    return requestOptions;
   }
 
   @Override

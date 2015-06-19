@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import android.widget.ImageView;
 
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -106,7 +107,8 @@ public class RequestBuilderTest {
     when(glideContext.buildImageViewTarget(isA(ImageView.class), isA(Class.class)))
         .thenReturn(mock(Target.class));
     when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
-    when(requestManager.getDefaultRequestOptions()).thenReturn(new RequestOptions());
+    when(requestManager.getDefaultRequestOptions())
+        .thenReturn((BaseRequestOptions) new RequestOptions());
     return new RequestBuilder(glideContext, requestManager, Object.class)
         .load((Object) null);
   }
