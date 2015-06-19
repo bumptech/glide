@@ -107,7 +107,7 @@ public class GifDecoder {
   private ByteBuffer rawData;
 
   // Raw data read working array.
-  private final byte[] block = new byte[256];
+  private byte[] block;
 
   private GifHeaderParser parser;
 
@@ -149,6 +149,19 @@ public class GifDecoder {
      * Releases the given Bitmap back to the pool.
      */
     void release(Bitmap bitmap);
+
+    /**
+     * Returns a byte array used for decoding and generating the frame bitmap.
+     *
+     * @param size the size of the byte array to obtain
+     */
+    byte[] obtainByteArray(int size);
+
+    /**
+     * Releases the given byte array back to the pool.
+     */
+    void release(byte[] bytes);
+
   }
 
   public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
@@ -378,6 +391,9 @@ public class GifDecoder {
     previousImage = null;
     rawData = null;
     isFirstFrameTransparent = false;
+    if (block != null) {
+      bitmapProvider.release(block);
+    }
   }
 
   public synchronized void setData(GifHeader header, byte[] data) {
@@ -753,6 +769,9 @@ public class GifDecoder {
     int blockSize = readByte();
     if (blockSize > 0) {
       try {
+        if (block == null) {
+          block = bitmapProvider.obtainByteArray(255);
+        }
         rawData.get(block, 0, blockSize);
       } catch (Exception e) {
         Log.w(TAG, "Error Reading Block", e);

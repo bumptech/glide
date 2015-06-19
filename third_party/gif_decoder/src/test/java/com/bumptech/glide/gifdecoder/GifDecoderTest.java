@@ -108,5 +108,16 @@ public class GifDecoderTest {
     public void release(Bitmap bitmap) {
       // Do nothing.
     }
+
+    @Override
+    public byte[] obtainByteArray(int size) {
+      return new byte[size];
+    }
+
+    @Override
+    public void release(byte[] bytes) {
+      // Do nothing.
+    }
+
   }
 }
