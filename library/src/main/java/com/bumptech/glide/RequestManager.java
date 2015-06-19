@@ -382,6 +382,10 @@ public class RequestManager implements LifecycleListener {
     requestTracker.runRequest(request);
   }
 
+  RequestOptions getDefaultRequestOptions() {
+    return context.getDefaultRequestOptions();
+  }
+
   @Override
   public String toString() {
     return super.toString() + "{tracker=" + requestTracker + ", treeNode=" + treeNode + "}";

@@ -24,18 +24,18 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
   private final Handler mainHandler;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
-  private final RequestOptions options;
+  private final RequestOptions defaultRequestOptions;
   private final Engine engine;
   private final ComponentCallbacks2 componentCallbacks;
   private final int logLevel;
 
   public GlideContext(Context context, Registry registry,
-      ImageViewTargetFactory imageViewTargetFactory, RequestOptions options, Engine engine,
-      ComponentCallbacks2 componentCallbacks, int logLevel) {
+      ImageViewTargetFactory imageViewTargetFactory, RequestOptions defaultRequestOptions,
+      Engine engine, ComponentCallbacks2 componentCallbacks, int logLevel) {
     super(context.getApplicationContext());
     this.registry = registry;
     this.imageViewTargetFactory = imageViewTargetFactory;
-    this.options = options;
+    this.defaultRequestOptions = defaultRequestOptions;
     this.engine = engine;
     this.componentCallbacks = componentCallbacks;
     this.logLevel = logLevel;
@@ -43,8 +43,8 @@ public class GlideContext extends ContextWrapper implements ComponentCallbacks2 
     mainHandler = new Handler(Looper.getMainLooper());
   }
 
-  public RequestOptions getOptions() {
-    return options;
+  public RequestOptions getDefaultRequestOptions() {
+    return defaultRequestOptions;
   }
 
   public <X> Target<X> buildImageViewTarget(ImageView imageView, Class<X> transcodeClass) {

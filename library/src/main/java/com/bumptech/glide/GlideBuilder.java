@@ -17,6 +17,7 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.request.RequestOptions;
 
 /**
  * A builder class for setting default structural classes for Glide to use.
@@ -30,10 +31,10 @@ public final class GlideBuilder {
   private MemoryCache memoryCache;
   private GlideExecutor sourceExecutor;
   private GlideExecutor diskCacheExecutor;
-  private DecodeFormat decodeFormat;
   private DiskCache.Factory diskCacheFactory;
   private MemorySizeCalculator memorySizeCalculator;
   private int logLevel = Log.INFO;
+  private RequestOptions defaultRequestOptions = new RequestOptions();
 
   GlideBuilder(Context context) {
     this.context = context.getApplicationContext();
@@ -100,7 +101,7 @@ public final class GlideBuilder {
    * to construct the {@link com.bumptech.glide.load.engine.cache.DiskCache} to use to store {@link
    * com.bumptech.glide.load.engine.Resource} data on disk.
    *
-   * @param diskCacheFactory The disk cche factory to use.
+   * @param diskCacheFactory The disk cache factory to use.
    * @return This builder.
    */
   public GlideBuilder setDiskCache(DiskCache.Factory diskCacheFactory) {
@@ -113,7 +114,7 @@ public final class GlideBuilder {
    * {@link com.bumptech.glide.load.engine.Resource}s that are not already in the cache.
    *
    * <p> Any implementation must order requests based on their {@link com.bumptech.glide.Priority}
-   * for thumbnail requests to work properly. </p>
+   * for thumbnail requests to work properly.
    *
    * @param service The ExecutorService to use.
    * @return This builder.
@@ -130,7 +131,7 @@ public final class GlideBuilder {
    * {@link com.bumptech.glide.load.engine.Resource}s that are currently in cache.
    *
    * <p> Any implementation must order requests based on their {@link com.bumptech.glide.Priority}
-   * for thumbnail requests to work properly. </p>
+   * for thumbnail requests to work properly.
    *
    * @param service The ExecutorService to use.
    * @return This builder.
@@ -143,6 +144,21 @@ public final class GlideBuilder {
   }
 
   /**
+   * Sets the default {@link RequestOptions} to use for all loads across the app.
+   *
+   * <p>Applying additional options with {@link
+   * RequestBuilder#apply(com.bumptech.glide.request.BaseRequestOptions)} will override defaults
+   * set here.
+   *
+   * @param requestOptions The options to use by default.
+   * @return This builder.
+   */
+  public GlideBuilder setDefaultRequestOptions(RequestOptions requestOptions) {
+    this.defaultRequestOptions = requestOptions;
+    return this;
+  }
+
+  /**
    * Sets the {@link com.bumptech.glide.load.DecodeFormat} that will be the default format for all
    * the default decoders that can change the {@link android.graphics.Bitmap.Config} of the {@link
    * android.graphics.Bitmap}s they decode.
@@ -150,16 +166,14 @@ public final class GlideBuilder {
    * <p> Decode format is always a suggestion, not a requirement. See {@link
    * com.bumptech.glide.load.DecodeFormat} for more details. </p>
    *
-   * <p> If you instantiate and use a custom decoder, it will use {@link
-   * com.bumptech.glide.load.DecodeFormat#DEFAULT} as its default. </p>
-   *
-   * <p> Calls to this method are ignored on KitKat and Lollipop. See #301. </p>
-   *
    * @param decodeFormat The format to use.
    * @return This builder.
+   *
+   * @deprecated Use {@link #setDefaultRequestOptions(RequestOptions)} instead.
    */
+  @Deprecated
   public GlideBuilder setDecodeFormat(DecodeFormat decodeFormat) {
-    this.decodeFormat = decodeFormat;
+    defaultRequestOptions.apply(new RequestOptions().format(decodeFormat));
     return this;
   }
 
@@ -269,11 +283,7 @@ public final class GlideBuilder {
       engine = new Engine(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor);
     }
 
-    if (decodeFormat == null) {
-      decodeFormat = DecodeFormat.DEFAULT;
-    }
-
-    return new Glide(engine, memoryCache, bitmapPool, byteArrayPool, context, decodeFormat,
-        logLevel);
+    return new Glide(engine, memoryCache, bitmapPool, byteArrayPool, context, logLevel,
+        defaultRequestOptions.lock());
   }
 }

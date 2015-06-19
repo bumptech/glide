@@ -468,40 +468,58 @@ public class GlideTest {
 
   @Test
   public void testNullModelInGenericImageLoadDoesNotThrow() {
-    requestManager.load((Double) null).into(target);
+    requestManager.load(null).into(target);
   }
 
   @Test
   public void testNullModelInGenericVideoLoadDoesNotThrow() {
-    requestManager.load((Float) null).into(target);
+    requestManager.load(null).into(target);
   }
 
   @Test
   public void testNullModelInGenericLoadDoesNotThrow() {
-    requestManager.load((Double) null).into(target);
+    requestManager.load(null).into(target);
   }
 
   @Test
   public void testNullModelDoesNotThrow() {
-    String nullString = null;
-
     Drawable drawable = new ColorDrawable(Color.RED);
-    requestManager.load(nullString).apply(placeholderOf(drawable)).into(target);
+    requestManager
+        .load(null)
+        .apply(placeholderOf(drawable))
+        .into(target);
 
     verify(target).onLoadFailed(eq(drawable));
   }
 
   @Test
   public void testNullModelPrefersErrorDrawable() {
-    String nullString = null;
-
     Drawable placeholder = new ColorDrawable(Color.GREEN);
     Drawable error = new ColorDrawable(Color.RED);
 
-    requestManager.load(nullString).apply(placeholderOf(placeholder).error(error))
+    requestManager
+        .load(null)
+        .apply(placeholderOf(placeholder)
+            .error(error))
         .into(target);
 
     verify(target).onLoadFailed(eq(error));
+  }
+
+  @Test
+  public void testNullModelPrefersFallbackDrwaable() {
+    Drawable placeholder = new ColorDrawable(Color.GREEN);
+    Drawable error = new ColorDrawable(Color.RED);
+    Drawable fallback = new ColorDrawable(Color.BLUE);
+
+    requestManager
+        .load(null)
+        .apply(placeholderOf(placeholder)
+            .error(error)
+            .fallback(fallback))
+        .into(target);
+
+    verify(target).onLoadFailed(eq(fallback));
   }
 
   @Test

@@ -105,7 +105,8 @@ public class RequestBuilderTest {
   private RequestBuilder getNullModelRequest() {
     when(glideContext.buildImageViewTarget(isA(ImageView.class), isA(Class.class)))
         .thenReturn(mock(Target.class));
-    when(glideContext.getOptions()).thenReturn(new RequestOptions());
+    when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
+    when(requestManager.getDefaultRequestOptions()).thenReturn(new RequestOptions());
     return new RequestBuilder(glideContext, requestManager, Object.class)
         .load((Object) null);
   }

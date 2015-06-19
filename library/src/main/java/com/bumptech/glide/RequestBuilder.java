@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
@@ -34,7 +35,6 @@ import java.util.UUID;
  * {@link com.bumptech.glide.request.target.Target}.
  */
 public class RequestBuilder<TranscodeType> implements Cloneable {
-  private static final BaseRequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
   private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
       new GenericTransitionOptions<Object>();
   private static final BaseRequestOptions DOWNLOAD_ONLY_OPTIONS =
@@ -44,8 +44,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private final GlideContext context;
   private final RequestManager requestManager;
   private final Class<TranscodeType> transcodeClass;
+  private final BaseRequestOptions<?> defaultRequestOptions;
 
-  private BaseRequestOptions<?> requestOptions = DEFAULT_REQUEST_OPTIONS;
+  @NonNull private BaseRequestOptions<?> requestOptions;
   @SuppressWarnings("unchecked")
   private TransitionOptions<?, ? super TranscodeType> transitionOptions =
       (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
@@ -53,10 +54,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
   // than relying on model not to be null.
-  private boolean isModelSet;
   @Nullable private RequestListener<TranscodeType> requestListener;
   @Nullable private RequestBuilder<TranscodeType> thumbnailBuilder;
   @Nullable private Float thumbSizeMultiplier;
+  private boolean isModelSet;
   private boolean isThumbnailBuilt;
 
   RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
@@ -71,13 +72,16 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     this.requestManager = requestManager;
     this.context = Preconditions.checkNotNull(context);
     this.transcodeClass = transcodeClass;
-    requestOptions = context.getOptions().clone();
+
+    this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
+    this.requestOptions = defaultRequestOptions;
   }
 
   public RequestBuilder<TranscodeType> apply(BaseRequestOptions requestOptions) {
     Preconditions.checkNotNull(requestOptions);
-    this.requestOptions = DEFAULT_REQUEST_OPTIONS.equals(this.requestOptions) ? requestOptions
-        : this.requestOptions.apply(requestOptions);
+    BaseRequestOptions<?> toMutate = defaultRequestOptions == this.requestOptions
+        ? this.requestOptions.clone() : this.requestOptions;
+    this.requestOptions = toMutate.apply(requestOptions);
     return this;
   }
 
