@@ -117,7 +117,7 @@ public class MainActivity extends Activity implements Api.Monitor {
           ClipboardManager clipboard =
               (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
           ClipData clip =
-              ClipData.newPlainText("giphy_url", result.images.fixed_height_downsampled.url);
+              ClipData.newPlainText("giphy_url", result.images.fixed_height.url);
           clipboard.setPrimaryClip(clip);
 
           Intent fullscreenIntent = FullscreenActivity.getIntent(activity, result);

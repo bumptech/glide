@@ -48,9 +48,9 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
   @Override
   protected String getUrl(Api.GifResult model, int width, int height, Options options) {
-    Api.GifImage fixedHeight = model.images.fixed_height_downsampled;
+    Api.GifImage fixedHeight = model.images.fixed_height;
     int fixedHeightDifference = getDifference(fixedHeight, width, height);
-    Api.GifImage fixedWidth = model.images.fixed_width_downsampled;
+    Api.GifImage fixedWidth = model.images.fixed_width;
     int fixedWidthDifference = getDifference(fixedWidth, width, height);
     if (fixedHeightDifference < fixedWidthDifference && !TextUtils.isEmpty(fixedHeight.url)) {
       return fixedHeight.url;

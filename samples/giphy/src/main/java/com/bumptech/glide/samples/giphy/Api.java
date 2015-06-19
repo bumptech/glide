@@ -171,13 +171,13 @@ public final class Api {
    */
   public static class GifUrlSet {
     public GifImage original;
-    public GifImage fixed_width_downsampled;
-    public GifImage fixed_height_downsampled;
+    public GifImage fixed_width;
+    public GifImage fixed_height;
 
     @Override
     public String toString() {
-      return "GifUrlSet{" + "original=" + original + ", fixed_width_downsampled="
-          + fixed_width_downsampled + ", fixed_height_downsampled=" + fixed_height_downsampled
+      return "GifUrlSet{" + "original=" + original + ", fixed_width="
+          + fixed_width + ", fixed_height=" + fixed_height
           + '}';
     }
   }
