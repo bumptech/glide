@@ -1,6 +1,8 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
+import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
+import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +12,7 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -27,6 +30,8 @@ import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
 
+import java.io.File;
+
 /**
  * A class for managing and starting requests for Glide. Can use activity, fragment and connectivity
  * lifecycle events to intelligently stop, start, and restart requests. Retrieve either by
@@ -42,6 +47,10 @@ import com.bumptech.glide.util.Util;
 public class RequestManager implements LifecycleListener {
   private static final RequestOptions DECODE_TYPE_BITMAP = decodeTypeOf(Bitmap.class).lock();
   private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
+  private static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
+      diskCacheStrategyOf(DiskCacheStrategy.DATA).priority(Priority.LOW)
+          .skipMemoryCache(true);
+
   private final GlideContext context;
   private final Lifecycle lifecycle;
   private final RequestTracker requestTracker;
@@ -244,6 +253,34 @@ public class RequestManager implements LifecycleListener {
    */
   public RequestBuilder<Drawable> asDrawable() {
     return as(Drawable.class).transition(new DrawableTransitionOptions());
+  }
+
+  /**
+   * Attempts always load the resource into the cache and return the {@link File} containing the
+   * cached source data.
+   *
+   * <p>This method is designed to work for remote data that is or will be cached using {@link
+   * com.bumptech.glide.load.engine.DiskCacheStrategy#DATA}. As a result, specifying a
+   * {@link com.bumptech.glide.load.engine.DiskCacheStrategy} on this request is generally not
+   * recommended.
+   *
+   * @return A new request builder for downloading content to cache and returning the cache File.
+   */
+  public RequestBuilder<File> downloadOnly() {
+    return as(File.class).apply(DOWNLOAD_ONLY_OPTIONS);
+  }
+
+  /**
+   * Attempts to always load a {@link File} containing the resource, either using a file path
+   * obtained from the media store (for local images/videos), or using Glide's disk cache
+   * (for remote images/videos).
+   *
+   * <p>For remote content, prefer {@link #downloadOnly()}.
+   *
+   * @return A new request builder for obtaining File paths to content.
+   */
+  public RequestBuilder<File> asFile() {
+    return as(File.class).apply(skipMemoryCacheOf(true));
   }
 
   /**

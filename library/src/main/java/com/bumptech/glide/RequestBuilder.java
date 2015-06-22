@@ -462,7 +462,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param target The Target that will receive the cache File when the load completes
    * @param <Y>    The type of Target.
    * @return The given Target.
+   *
+   * @deprecated Use {@link RequestManager#downloadOnly()} and {@link #into(Target)}.
    */
+  @Deprecated
   public <Y extends Target<File>> Y downloadOnly(Y target) {
     return getDownloadOnlyRequest().into(target);
   }
@@ -476,7 +479,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param height The height in pixels to use to fetch the data.
    * @return A {@link java.util.concurrent.Future} that can be used to retrieve the cache File
    * containing the data.
+   *
+   * @deprecated Use {@link RequestManager#downloadOnly()} and {@link #into(int, int)}.
    */
+  @Deprecated
   public FutureTarget<File> downloadOnly(int width, int height) {
     return getDownloadOnlyRequest().into(width, height);
   }

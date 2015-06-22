@@ -351,11 +351,10 @@ public class FlickrSearchActivity extends AppCompatActivity
           return;
         }
 
-        // TODO: Calling asDrawable (or Bitmap/Gif) and then downloadOnly is weird.
         FutureTarget<File> futureTarget = Glide.with(context)
-            .asDrawable()
+            .downloadOnly()
             .load(photo)
-            .downloadOnly(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+            .into(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
 
         try {
           futureTarget.get();
@@ -368,7 +367,7 @@ public class FlickrSearchActivity extends AppCompatActivity
             Log.d(TAG, "Got ExecutionException waiting for background downloadOnly", e);
           }
         }
-        futureTarget.cancel(true /*mayInterruptIfRunning*/);
+        Glide.with(context).clear(futureTarget);
       }
     }
   }
