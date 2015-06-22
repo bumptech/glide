@@ -15,6 +15,7 @@ import android.graphics.Paint;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
 
@@ -36,9 +37,9 @@ import java.security.NoSuchAlgorithmException;
 @Config(manifest = Config.NONE, sdk = 18, shadows = { FitCenterTest.DrawNothingCanvas.class })
 public class FitCenterTest {
 
-  @Mock BitmapPool pool;
   @Mock Resource<Bitmap> resource;
   @Mock Transformation<Bitmap> transformation;
+  private BitmapPool pool;
   private FitCenter fitCenter;
   private int bitmapWidth;
   private int bitmapHeight;
@@ -50,6 +51,8 @@ public class FitCenterTest {
     bitmapHeight = 100;
     Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
     when(resource.get()).thenReturn(bitmap);
+
+    pool = new BitmapPoolAdapter();
 
     fitCenter = new FitCenter(pool);
   }
