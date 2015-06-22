@@ -1,3 +1,6 @@
+exec {
+  commandLine "git", "submodule", "update", "--init", "--recursive"
+}
 include ':library'
 include ':glide'
 include ':third_party:gif_decoder'
