@@ -307,8 +307,11 @@ public final class Downsampler {
             + ", density: " + options.inDensity
             + ", density multiplier: " + densityMultiplier);
       }
-      // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
-      setInBitmap(options, pool, expectedWidth, expectedHeight, options.inPreferredConfig);
+      // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
+      // will be -1 here.
+      if (expectedWidth > 0 && expectedHeight > 0) {
+        setInBitmap(options, pool, expectedWidth, expectedHeight, options.inPreferredConfig);
+      }
     }
     return decodeStream(is, options, callbacks);
   }
@@ -462,7 +465,8 @@ public final class Downsampler {
   private static void setInBitmap(BitmapFactory.Options options, BitmapPool bitmapPool, int width,
       int height, Bitmap.Config config) {
     if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
-      options.inBitmap = bitmapPool.get(width, height, config);
+      // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
+      options.inBitmap = bitmapPool.getDirty(width, height, config);
     }
   }
 
