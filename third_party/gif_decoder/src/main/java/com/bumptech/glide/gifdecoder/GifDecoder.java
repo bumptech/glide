@@ -27,6 +27,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -108,6 +109,13 @@ public class GifDecoder {
 
   // Raw data read working array.
   private byte[] block;
+
+  // Temporary buffer for block reading. Reads 16k chunks from the native buffer for processing,
+  // to greatly reduce JNI overhead.
+  private static final int WORK_BUFFER_SIZE = 16384;
+  @Nullable private byte[] workBuffer;
+  private int workBufferSize = 0;
+  private int workBufferPosition = 0;
 
   private GifHeaderParser parser;
 
@@ -394,6 +402,9 @@ public class GifDecoder {
     if (block != null) {
       bitmapProvider.release(block);
     }
+    if (workBuffer != null) {
+      bitmapProvider.release(workBuffer);
+    }
   }
 
   public synchronized void setData(GifHeader header, byte[] data) {
@@ -621,6 +632,8 @@ public class GifDecoder {
    * Decodes LZW image data into pixel array. Adapted from John Cristy's BitmapMagick.
    */
   private void decodeBitmapData(GifFrame frame) {
+    workBufferSize = 0;
+    workBufferPosition = 0;
     if (frame != null) {
       // Jump to the frame start position.
       rawData.position(frame.bufferFrameStart);
@@ -748,16 +761,31 @@ public class GifDecoder {
   }
 
   /**
+   * Reads the next chunk for the intermediate work buffer.
+   */
+  private void readChunkIfNeeded() {
+    if (workBufferSize > workBufferPosition) {
+      return;
+    }
+    if (workBuffer == null) {
+      workBuffer = bitmapProvider.obtainByteArray(WORK_BUFFER_SIZE);
+    }
+    workBufferPosition = 0;
+    workBufferSize = Math.min(rawData.remaining(), WORK_BUFFER_SIZE);
+    rawData.get(workBuffer, 0, workBufferSize);
+  }
+
+  /**
    * Reads a single byte from the input stream.
    */
   private int readByte() {
-    int curByte = 0;
     try {
-      curByte = rawData.get() & 0xFF;
+      readChunkIfNeeded();
+      return workBuffer[workBufferPosition++] & 0xFF;
     } catch (Exception e) {
       status = STATUS_FORMAT_ERROR;
+      return 0;
     }
-    return curByte;
   }
 
   /**
@@ -772,7 +800,22 @@ public class GifDecoder {
         if (block == null) {
           block = bitmapProvider.obtainByteArray(255);
         }
-        rawData.get(block, 0, blockSize);
+        final int remaining = workBufferSize - workBufferPosition;
+        if (remaining >= blockSize) {
+          // Block can be read from the current work buffer.
+          System.arraycopy(workBuffer, workBufferPosition, block, 0, blockSize);
+          workBufferPosition += blockSize;
+        } else if (rawData.remaining() + remaining >= blockSize) {
+          // Block can be read in two passes.
+          System.arraycopy(workBuffer, workBufferPosition, block, 0, remaining);
+          workBufferPosition = workBufferSize;
+          readChunkIfNeeded();
+          final int secondHalfRemaining = blockSize - remaining;
+          System.arraycopy(workBuffer, 0, block, remaining, secondHalfRemaining);
+          workBufferPosition += secondHalfRemaining;
+        } else {
+          status = STATUS_FORMAT_ERROR;
+        }
       } catch (Exception e) {
         Log.w(TAG, "Error Reading Block", e);
         status = STATUS_FORMAT_ERROR;
