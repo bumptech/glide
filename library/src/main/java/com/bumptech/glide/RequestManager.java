@@ -317,13 +317,21 @@ public class RequestManager implements LifecycleListener {
    *
    * @param target The Target to cancel loads for.
    */
-  public void clear(@Nullable Target<?> target) {
-    Util.assertMainThread();
+  public void clear(@Nullable final Target<?> target) {
     if (target == null) {
       return;
     }
 
-    untrackOrDelegate(target);
+    if (Util.isOnMainThread()) {
+      untrackOrDelegate(target);
+    } else {
+      mainHandler.post(new Runnable() {
+        @Override
+        public void run() {
+          clear(target);
+        }
+      });
+    }
   }
 
   private void untrackOrDelegate(Target<?> target) {
