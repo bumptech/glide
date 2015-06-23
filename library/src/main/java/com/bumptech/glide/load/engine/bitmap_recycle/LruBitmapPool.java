@@ -133,7 +133,6 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   @NonNull
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   @Override
   public Bitmap getDirty(int width, int height, Bitmap.Config config) {
     Bitmap result = getDirtyOrNull(width, height, config);
@@ -157,9 +156,7 @@ public class LruBitmapPool implements BitmapPool {
       hits++;
       currentSize -= strategy.getSize(result);
       tracker.remove(result);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-        result.setHasAlpha(true);
-      }
+      normalize(result);
     }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG, "Get bitmap=" + strategy.logBitmap(width, height, config));
@@ -167,6 +164,27 @@ public class LruBitmapPool implements BitmapPool {
     dump();
 
     return result;
+  }
+
+  // Setting these two values provides Bitmaps that are essentially equivalent to those returned
+  // from Bitmap.createBitmap.
+  private static void normalize(Bitmap bitmap) {
+    maybeSetAlpha(bitmap);
+    maybeSetPreMultiplied(bitmap);
+  }
+
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+  private static void maybeSetAlpha(Bitmap bitmap) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+      bitmap.setHasAlpha(true);
+    }
+  }
+
+  @TargetApi(Build.VERSION_CODES.KITKAT)
+  private static void maybeSetPreMultiplied(Bitmap bitmap) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      bitmap.setPremultiplied(true);
+    }
   }
 
   @Override
