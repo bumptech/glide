@@ -74,6 +74,13 @@ public class GifDrawable extends GlideDrawable implements GifFrameLoader.FrameCa
                 bitmapProvider, bitmapPool, firstFrame));
     }
 
+    public GifDrawable(GifDrawable other, Bitmap firstFrame,
+        Transformation<Bitmap> frameTransformation) {
+        this(new GifState(other.state.gifHeader, other.state.data, other.state.context,
+            frameTransformation, other.state.targetWidth, other.state.targetHeight,
+            other.state.bitmapProvider, other.state.bitmapPool, firstFrame));
+    }
+
     GifDrawable(GifState state) {
         if (state == null) {
             throw new NullPointerException("GifState must not be null");
@@ -84,6 +91,7 @@ public class GifDrawable extends GlideDrawable implements GifFrameLoader.FrameCa
         this.paint = new Paint();
         decoder.setData(state.gifHeader, state.data);
         frameLoader = new GifFrameLoader(state.context, this, decoder, state.targetWidth, state.targetHeight);
+        frameLoader.setFrameTransformation(state.frameTransformation);
     }
 
     // Visible for testing.

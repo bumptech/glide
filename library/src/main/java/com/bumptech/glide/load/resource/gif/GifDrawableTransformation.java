@@ -31,13 +31,12 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
         Bitmap firstFrame = resource.get().getFirstFrame();
         Resource<Bitmap> bitmapResource = new BitmapResource(firstFrame, bitmapPool);
         Resource<Bitmap> transformed = wrapped.transform(bitmapResource, outWidth, outHeight);
-        if (!bitmapResource.equals(transformed)) {
-            bitmapResource.recycle();
-        }
         Bitmap transformedFrame = transformed.get();
-
-        drawable.setFrameTransformation(wrapped, transformedFrame);
-        return resource;
+        if (!transformedFrame.equals(firstFrame)) {
+            return new GifDrawableResource(new GifDrawable(drawable, transformedFrame, wrapped));
+        } else {
+            return resource;
+        }
     }
 
     @Override
