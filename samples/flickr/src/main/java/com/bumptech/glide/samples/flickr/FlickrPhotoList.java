@@ -88,7 +88,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     thumbRequest = requestManager
         .asDrawable()
         .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
-            .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE))
+            .override(Api.SQUARE_THUMB_SIZE))
         .transition(withCrossFade());
 
     list.setRecyclerListener(new RecyclerView.RecyclerListener() {

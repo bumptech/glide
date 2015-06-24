@@ -87,6 +87,14 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
   }
 
   /**
+   * Returns a {@link RequestOptions} with {@link #override(int, int)} set where both the width and
+   * height are the given size.
+   */
+  public static RequestOptions overrideOf(int size) {
+    return overrideOf(size, size);
+  }
+
+  /**
    * Returns a {@link RequestOptions} object with {@link #signature} set.
    */
   public static RequestOptions signatureOf(@NonNull Key signature) {

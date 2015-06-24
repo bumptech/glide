@@ -37,7 +37,6 @@ public class MainActivity extends Activity implements Api.Monitor {
     ImageView giphyLogoView = (ImageView) findViewById(R.id.giphy_logo_view);
 
     Glide.with(this)
-        .asDrawable()
         .load(R.raw.large_giphy_logo)
         .into(giphyLogoView);
 

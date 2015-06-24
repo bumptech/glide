@@ -64,11 +64,12 @@ public class FullscreenActivity extends Activity {
     });
 
     RequestBuilder<Drawable> thumbnailRequest = Glide.with(this)
-        .asDrawable()
-        .apply(decodeTypeOf(Bitmap.class))
-        .load(result);
+        .load(result)
+        .apply(decodeTypeOf(Bitmap.class));
 
-    Glide.with(this).asDrawable().thumbnail(thumbnailRequest).load(result.images.original.url)
+    Glide.with(this)
+        .load(result.images.original.url)
+        .thumbnail(thumbnailRequest)
         .listener(new RequestListener<Drawable>() {
           @Override
           public boolean onLoadFailed(GlideException e, Object model, Target<Drawable> target,
@@ -86,6 +87,7 @@ public class FullscreenActivity extends Activity {
             }
             return false;
           }
-        }).into(gifView);
+        })
+        .into(gifView);
   }
 }

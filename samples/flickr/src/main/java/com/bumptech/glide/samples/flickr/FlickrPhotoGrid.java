@@ -78,7 +78,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
         .transition(withNoTransition())
         .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
             .centerCrop(getActivity())
-            .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
+            .override(Api.SQUARE_THUMB_SIZE));
 
     preloadRequest =
         thumbnail ? thumbnailRequest.clone().apply(priorityOf(Priority.HIGH)) : fullRequest;

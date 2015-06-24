@@ -202,8 +202,8 @@ public class GlideTest {
     File file = new File("fake");
     mockUri(Uri.fromFile(file));
 
-    requestManager.asDrawable().load(file).into(target);
-    requestManager.asDrawable().load(file).into(imageView);
+    requestManager.load(file).into(target);
+    requestManager.load(file).into(imageView);
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -215,8 +215,8 @@ public class GlideTest {
   public void testUrlDefaultLoader() throws MalformedURLException {
     URL url = new URL("http://www.google.com");
 
-    requestManager.asDrawable().load(url).into(target);
-    requestManager.asDrawable().load(url).into(imageView);
+    requestManager.load(url).into(target);
+    requestManager.load(url).into(imageView);
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -265,8 +265,8 @@ public class GlideTest {
     Uri uri = Uri.parse("content://test/something");
     mockUri(uri);
 
-    requestManager.asDrawable().load(uri).into(target);
-    requestManager.asDrawable().load(uri).into(imageView);
+    requestManager.load(uri).into(target);
+    requestManager.load(uri).into(imageView);
 
     verify(target).onResourceReady(notNull(), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -326,7 +326,7 @@ public class GlideTest {
   }
 
   private void runTestStringDefaultLoader(String string) {
-    requestManager.asDrawable().load(string).listener(new RequestListener<Drawable>() {
+    requestManager.load(string).listener(new RequestListener<Drawable>() {
       @Override
       public boolean onLoadFailed(GlideException e, Object model, Target target,
           boolean isFirstResource) {
@@ -339,7 +339,7 @@ public class GlideTest {
         return false;
       }
     }).into(target);
-    requestManager.asDrawable().load(string).into(imageView);
+    requestManager.load(string).into(imageView);
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -368,8 +368,8 @@ public class GlideTest {
     int integer = android.R.drawable.star_on;
     mockUri("android.resource://" + "android" + "/drawable/star_on");
 
-    requestManager.asDrawable().load(integer).into(target);
-    requestManager.asDrawable().load(integer).into(imageView);
+    requestManager.load(integer).into(target);
+    requestManager.load(integer).into(imageView);
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -380,8 +380,8 @@ public class GlideTest {
   @Test
   public void testByteArrayDefaultLoader() {
     byte[] bytes = new byte[10];
-    requestManager.asDrawable().load(bytes).into(target);
-    requestManager.asDrawable().load(bytes).into(imageView);
+    requestManager.load(bytes).into(target);
+    requestManager.load(bytes).into(imageView);
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -393,7 +393,7 @@ public class GlideTest {
   @Test(expected = Exception.class)
   public void testUnregisteredModelThrowsException() {
     Float unregistered = 0.5f;
-    requestManager.asDrawable().load(unregistered).into(target);
+    requestManager.load(unregistered).into(target);
   }
 
   @Test
@@ -401,7 +401,7 @@ public class GlideTest {
   public void testNonDefaultModelWithRegisteredFactoryDoesNotThrow() {
     registerMockStreamModelLoader(Float.class);
 
-    requestManager.asDrawable().load(0.5f).into(target);
+    requestManager.load(0.5f).into(target);
   }
 
   @Test
@@ -440,7 +440,9 @@ public class GlideTest {
   public void testReceivesThumbnails() {
     String full = mockUri("content://full");
     String thumb = mockUri("content://thumb");
-    requestManager.asDrawable().load(full).thumbnail(requestManager.asDrawable().load(thumb))
+    requestManager
+        .load(full)
+        .thumbnail(requestManager.load(thumb))
         .into(target);
 
     verify(target, times(2)).onResourceReady(isA(Drawable.class), isA(Transition.class));
@@ -448,35 +450,35 @@ public class GlideTest {
 
   @Test
   public void testReceivesRecursiveThumbnails() {
-    requestManager.asDrawable().load(mockUri("content://first")).thumbnail(
-        requestManager.asDrawable().load(mockUri("content://second")).thumbnail(
-            requestManager.asDrawable().load(mockUri("content://third"))
-                .thumbnail(requestManager.asDrawable().load(mockUri("content://fourth")))))
+    requestManager.load(mockUri("content://first")).thumbnail(
+        requestManager.load(mockUri("content://second")).thumbnail(
+            requestManager.load(mockUri("content://third")).thumbnail(
+                requestManager.load(mockUri("content://fourth")))))
         .into(target);
     verify(target, times(4)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
   @Test
   public void testReceivesRecursiveThumbnailWithPercentage() {
-    requestManager.asDrawable().load(mockUri("content://first"))
-        .thumbnail(requestManager.asDrawable().load(mockUri("content://second")).thumbnail(0.5f))
+    requestManager.load(mockUri("content://first"))
+        .thumbnail(requestManager.load(mockUri("content://second")).thumbnail(0.5f))
         .into(target);
     verify(target, times(3)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
   @Test
   public void testNullModelInGenericImageLoadDoesNotThrow() {
-    requestManager.asDrawable().load((Double) null).into(target);
+    requestManager.load((Double) null).into(target);
   }
 
   @Test
   public void testNullModelInGenericVideoLoadDoesNotThrow() {
-    requestManager.asDrawable().load((Float) null).into(target);
+    requestManager.load((Float) null).into(target);
   }
 
   @Test
   public void testNullModelInGenericLoadDoesNotThrow() {
-    requestManager.asDrawable().load((Double) null).into(target);
+    requestManager.load((Double) null).into(target);
   }
 
   @Test
@@ -484,7 +486,7 @@ public class GlideTest {
     String nullString = null;
 
     Drawable drawable = new ColorDrawable(Color.RED);
-    requestManager.asDrawable().load(nullString).apply(placeholderOf(drawable)).into(target);
+    requestManager.load(nullString).apply(placeholderOf(drawable)).into(target);
 
     verify(target).onLoadFailed(eq(drawable));
   }
@@ -496,7 +498,7 @@ public class GlideTest {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
     Drawable error = new ColorDrawable(Color.RED);
 
-    requestManager.asDrawable().load(nullString).apply(placeholderOf(placeholder).error(error))
+    requestManager.load(nullString).apply(placeholderOf(placeholder).error(error))
         .into(target);
 
     verify(target).onLoadFailed(eq(error));
@@ -505,7 +507,7 @@ public class GlideTest {
   @Test
   public void testByteData() {
     byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
-    requestManager.asDrawable().load(data).into(target);
+    requestManager.load(data).into(target);
   }
 
   @Test
@@ -515,7 +517,6 @@ public class GlideTest {
     Target secondTarget = mock(Target.class);
     doAnswer(new CallSizeReady(100, 100)).when(secondTarget).getSize(isA(SizeReadyCallback.class));
     RequestBuilder<Drawable> firstRequest = Glide.with(getContext())
-        .asDrawable()
         .load(mockUri("content://first"));
 
     firstRequest.into(firstTarget);

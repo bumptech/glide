@@ -256,6 +256,16 @@ public class RequestManager implements LifecycleListener {
   }
 
   /**
+   * A helper method equivalent to calling {@link #asDrawable()} and then {@link
+   * RequestBuilder#load(Object)} with the given model.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  public RequestBuilder<Drawable> load(@Nullable Object model) {
+    return asDrawable().load(model);
+  }
+
+  /**
    * Attempts always load the resource into the cache and return the {@link File} containing the
    * cached source data.
    *
@@ -268,6 +278,16 @@ public class RequestManager implements LifecycleListener {
    */
   public RequestBuilder<File> downloadOnly() {
     return as(File.class).apply(DOWNLOAD_ONLY_OPTIONS);
+  }
+
+  /**
+   * A helper method equivalent to calling {@link #downloadOnly()} ()} and then {@link
+   * RequestBuilder#load(Object)} with the given model.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  public RequestBuilder<File> download(@Nullable Object model) {
+    return downloadOnly().load(model);
   }
 
   /**

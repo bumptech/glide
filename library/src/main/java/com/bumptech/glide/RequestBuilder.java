@@ -158,7 +158,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     return this;
   }
 
-
   /**
    * Sets the specific model to load data for.
    *
@@ -398,23 +397,59 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *               overridden by
    *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)}} if
    *               previously called).
-   * @return An {@link com.bumptech.glide.request.FutureTarget} that can be used to obtain the
-   * resource in a blocking manner.
    * @see RequestManager#clear(Target)
+   *
+   * @deprecated Use {@link #submit(int, int)} instead.
    */
+  @Deprecated
   public FutureTarget<TranscodeType> into(int width, int height) {
+    return submit(width, height);
+  }
+
+  /**
+   * Returns a future that can be used to do a blocking get on a background thread.
+   *
+   * <p>This method defaults to {@link Target#SIZE_ORIGINAL} for the width and the height. However,
+   * since the width and height will be overriden by values passed to {@link
+   * RequestOptions#override(int, int)}, this method can be used whenever {@link RequestOptions}
+   * with override values are applied, or whenever you want to retrieve the image in its original
+   * size.
+   *
+   * @see #submit(int, int)
+   * @see #into(Target)
+   */
+  public FutureTarget<TranscodeType> submit() {
+    return submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
+  }
+
+  /**
+   * Returns a future that can be used to do a blocking get on a background thread.
+   *
+   * @param width  The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *               overridden by
+   *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)} if
+   *               previously called.
+   * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *               overridden by
+   *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)}} if
+   *               previously called).
+   */
+  public FutureTarget<TranscodeType> submit(int width, int height) {
     final RequestFutureTarget<TranscodeType> target =
         new RequestFutureTarget<>(context.getMainHandler(), width, height);
 
-    // TODO: Currently all loads must be started on the main thread...
-    context.getMainHandler().post(new Runnable() {
-      @Override
-      public void run() {
-        if (!target.isCancelled()) {
-          into(target);
+    if (Util.isOnBackgroundThread()) {
+      context.getMainHandler().post(new Runnable() {
+        @Override
+        public void run() {
+          if (!target.isCancelled()) {
+            into(target);
+          }
         }
-      }
-    });
+      });
+    } else {
+      into(target);
+    }
 
     return target;
   }

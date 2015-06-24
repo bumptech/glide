@@ -32,9 +32,8 @@ public class FullscreenActivity extends FragmentActivity {
     Photo photo = getIntent().getParcelableExtra(ARG_PHOTO);
 
     Glide.with(this)
-        .asDrawable()
-        .apply(fitCenterTransform(this))
         .load(photo)
+        .apply(fitCenterTransform(this))
         .into(fullscreenView);
   }
 }

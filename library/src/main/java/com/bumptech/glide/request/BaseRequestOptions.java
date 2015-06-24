@@ -281,6 +281,18 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   }
 
   /**
+   * Overrides the {@link com.bumptech.glide.request.target.Target}'s width and height with the
+   * given size.
+   *
+   * @see #override(int, int)
+   * @param size The width and height to use.
+   * @return This request builder.
+   */
+  public final CHILD override(int size) {
+    return override(size, size);
+  }
+
+  /**
    * Sets some additional data to be mixed in to the memory and disk cache keys allowing the caller
    * more control over when cached data is invalidated.
    *
