@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.model;
 
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -80,11 +82,42 @@ public final class LazyHeaders implements Headers {
      * Builder class for {@link LazyHeaders}.
      *
      * <p> This class is not thread safe. </p>
+     *
+     * <p> This class may include default values for User-Agent and Accept-Encoding headers. These
+     * will be replaced by calls to either {@link #setHeader(String, LazyHeaderFactory)} or
+     * {@link #addHeader(String, String)}, even though {@link #addHeader(String, LazyHeaderFactory)}
+     * would usually append an additional value. </p>
      */
+     // PMD doesn't like the necessary static block to initialize DEFAULT_HEADERS.
+    @SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
     public static final class Builder {
-        private boolean copyOnModify;
-        private Map<String, List<LazyHeaderFactory>> headers =
-            new HashMap<String, List<LazyHeaderFactory>>();
+        private static final String USER_AGENT_HEADER = "User-Agent";
+        private static final String DEFAULT_USER_AGENT = System.getProperty("http.agent");
+        private static final String ENCODING_HEADER = "Accept-Encoding";
+        private static final String DEFAULT_ENCODING = "identity";
+        private static final Map<String, List<LazyHeaderFactory>> DEFAULT_HEADERS;
+
+        // Set Accept-Encoding header to do our best to avoid gzip since it's both inefficient for
+        // images and also makes it more difficult for us to detect and prevent partial content
+        // rendering. See #440.
+        static {
+            Map<String, List<LazyHeaderFactory>> temp
+                = new HashMap<String, List<LazyHeaderFactory>>(2);
+            if (!TextUtils.isEmpty(DEFAULT_USER_AGENT)) {
+                temp.put(USER_AGENT_HEADER,
+                    Collections.<LazyHeaderFactory>singletonList(
+                        new StringHeaderFactory(DEFAULT_USER_AGENT)));
+            }
+            temp.put(ENCODING_HEADER,
+                Collections.<LazyHeaderFactory>singletonList(
+                    new StringHeaderFactory(DEFAULT_ENCODING)));
+            DEFAULT_HEADERS = Collections.unmodifiableMap(temp);
+        }
+
+        private boolean copyOnModify = true;
+        private boolean isEncodingDefault = true;
+        private Map<String, List<LazyHeaderFactory>> headers = DEFAULT_HEADERS;
+        private boolean isUserAgentDefault = headers.containsKey(DEFAULT_USER_AGENT);
 
         /**
          * Adds a value for the given header and returns this builder.
@@ -110,18 +143,69 @@ public final class LazyHeaders implements Headers {
          * times </p>
          */
         public Builder addHeader(String key, LazyHeaderFactory factory) {
-            if (copyOnModify) {
-                copyOnModify = false;
-                headers = copyHeaders();
+            if ((isEncodingDefault && ENCODING_HEADER.equalsIgnoreCase(key))
+                || (isUserAgentDefault && USER_AGENT_HEADER.equalsIgnoreCase(key))) {
+                return setHeader(key, factory);
             }
 
+            copyIfNecessary();
+            getFactories(key).add(factory);
+            return this;
+        }
+
+        /**
+         * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key
+         * with the given {@link LazyHeaderFactory}.
+         *
+         * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
+         *
+         * <p> Use {@link #setHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
+         * (ie an oauth token). </p>
+         */
+        public Builder setHeader(String key, String value) {
+            return setHeader(key, value == null ? null : new StringHeaderFactory(value));
+        }
+
+        /**
+         * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key
+         * with the given {@link LazyHeaderFactory}.
+         *
+         * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
+         */
+        public Builder setHeader(String key, LazyHeaderFactory factory) {
+            copyIfNecessary();
+            if (factory == null) {
+                headers.remove(key);
+            } else {
+                List<LazyHeaderFactory> factories = getFactories(key);
+                factories.clear();
+                factories.add(factory);
+            }
+
+            if (isEncodingDefault && ENCODING_HEADER.equalsIgnoreCase(key)) {
+                isEncodingDefault = false;
+            }
+            if (isUserAgentDefault && USER_AGENT_HEADER.equalsIgnoreCase(key)) {
+                isUserAgentDefault = false;
+            }
+
+            return this;
+        }
+
+        private List<LazyHeaderFactory> getFactories(String key) {
             List<LazyHeaderFactory> factories = headers.get(key);
             if (factories == null) {
                 factories = new ArrayList<LazyHeaderFactory>();
                 headers.put(key, factories);
             }
-            factories.add(factory);
-            return this;
+            return factories;
+        }
+
+        private void copyIfNecessary() {
+            if (copyOnModify) {
+                copyOnModify = false;
+                headers = copyHeaders();
+            }
         }
 
         /**

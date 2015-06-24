@@ -231,7 +231,7 @@ public class HttpUrlFetcherServerTest {
     }
 
     private HttpUrlFetcher getFetcher() {
-        return getFetcher(Headers.NONE);
+        return getFetcher(Headers.DEFAULT);
     }
 
     private HttpUrlFetcher getFetcher(Headers headers) {

@@ -81,6 +81,6 @@ public abstract class BaseGlideUrlLoader<T> implements StreamModelLoader<T> {
      * @return The Headers object containing the headers, or null if no headers should be added.
      */
     protected Headers getHeaders(T model, int width, int height) {
-        return Headers.NONE;
+        return Headers.DEFAULT;
     }
 }

@@ -26,7 +26,6 @@ public class LazyHeadersTest {
             .build()
             .getHeaders();
         assertThat(headers).containsEntry("key", "value");
-        assertThat(headers).hasSize(1);
     }
 
     @Test
@@ -38,7 +37,6 @@ public class LazyHeadersTest {
             .build()
             .getHeaders();
 
-        assertThat(headers).hasSize(1);
         assertThat(headers).containsEntry("key", "value");
     }
 
@@ -50,7 +48,6 @@ public class LazyHeadersTest {
             .build()
             .getHeaders();
 
-        assertThat(headers).hasSize(1);
         assertThat(headers).containsEntry("key", "first,second");
     }
 
@@ -66,7 +63,6 @@ public class LazyHeadersTest {
             .addHeader("key", second)
             .build()
             .getHeaders();
-        assertThat(headers).hasSize(1);
         assertThat(headers).containsEntry("key", "first,second");
     }
 
@@ -80,7 +76,6 @@ public class LazyHeadersTest {
             .build()
             .getHeaders();
 
-        assertThat(headers).hasSize(1);
         assertThat(headers).containsEntry("key", "first,second");
 
         headers = new Builder()
@@ -89,7 +84,6 @@ public class LazyHeadersTest {
             .build()
             .getHeaders();
 
-        assertThat(headers).hasSize(1);
         assertThat(headers).containsEntry("key", "second,first");
     }
 
@@ -103,7 +97,6 @@ public class LazyHeadersTest {
             .build()
             .getHeaders();
 
-        assertThat(headers).hasSize(2);
         assertThat(headers).containsEntry("first", "lazy");
         assertThat(headers).containsEntry("second", "eager");
     }
@@ -112,22 +105,110 @@ public class LazyHeadersTest {
     public void testUpdatingBuilderAfterBuildingDoesNotModifyOriginalHeaders() {
         Builder builder = new Builder();
         builder.addHeader("key", "firstValue");
+        builder.addHeader("otherKey", "otherValue");
         LazyHeaders first = builder.build();
 
         LazyHeaderFactory factory = mock(LazyHeaderFactory.class);
         when(factory.buildHeader()).thenReturn("otherValue");
         builder.addHeader("key", "secondValue");
-        builder.addHeader("otherKey", factory);
+        builder.setHeader("otherKey", factory);
         LazyHeaders second = builder.build();
 
         assertThat(first.getHeaders()).isNotEqualTo(second.getHeaders());
 
-        assertThat(first.getHeaders()).hasSize(1);
         assertThat(first.getHeaders()).containsEntry("key", "firstValue");
+        assertThat(first.getHeaders()).containsEntry("otherKey", "otherValue");
 
-        assertThat(second.getHeaders()).hasSize(2);
         assertThat(second.getHeaders()).containsEntry("key", "firstValue,secondValue");
         assertThat(second.getHeaders()).containsEntry("otherKey", "otherValue");
+    }
+
+    @Test
+    public void testSetHeaderReplacesExistingHeaders() {
+        Builder builder = new Builder();
+        builder.addHeader("key", "first")
+            .addHeader("key", "second")
+            .setHeader("key", "third");
+        LazyHeaders headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("key", "third");
+    }
+
+    @Test
+    public void testSetHeaderWithNullStringRemovesExistingHeader() {
+        Builder builder = new Builder();
+        builder.addHeader("key", "first")
+            .addHeader("key", "second")
+            .setHeader("key", (String) null);
+        LazyHeaders headers = builder.build();
+        assertThat(headers.getHeaders()).doesNotContainKey("key");
+    }
+
+    @Test
+    public void testSetHeaderWithNullLazyHeaderFactoryRemovesExistingHeader() {
+        Builder builder = new Builder();
+        builder.addHeader("key", "first")
+            .addHeader("key", "second")
+            .setHeader("key", (LazyHeaderFactory) null);
+        LazyHeaders headers = builder.build();
+        assertThat(headers.getHeaders()).doesNotContainKey("key");
+    }
+
+    @Test
+    public void testAddingEncodingHeaderReplacesDefaultThenAppends() {
+        Builder builder = new Builder();
+        builder.addHeader("Accept-Encoding", "false");
+
+        LazyHeaders headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("Accept-Encoding", "false");
+
+        builder.addHeader("Accept-Encoding", "true");
+        headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("Accept-Encoding", "false,true");
+    }
+
+    @Test
+    public void testRemovingAndAddingEncodingHeaderReplacesDefaultThenAppends() {
+        Builder builder = new Builder();
+        builder.setHeader("Accept-Encoding", (String) null);
+        LazyHeaders headers = builder.build();
+        assertThat(headers.getHeaders()).doesNotContainKey("Accept-Encoding");
+
+        builder.addHeader("Accept-Encoding", "false");
+        headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("Accept-Encoding", "false");
+
+        builder.addHeader("Accept-Encoding", "true");
+        headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("Accept-Encoding", "false,true");
+    }
+
+    @Test
+    public void testAddingUserAgentHeaderReplacesDefaultThenAppends() {
+        Builder builder = new Builder();
+        builder.addHeader("User-Agent", "false");
+
+        LazyHeaders headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("User-Agent", "false");
+
+        builder.addHeader("User-Agent", "true");
+        headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("User-Agent", "false,true");
+    }
+
+    @Test
+    public void testRemovingAndAddingUserAgentHeaderReplacesDefaultThenAppends() {
+        Builder builder = new Builder();
+        builder.setHeader("User-Agent", (String) null);
+        LazyHeaders headers = builder.build();
+        assertThat(headers.getHeaders()).doesNotContainKey("User-Agent");
+
+        builder.addHeader("User-Agent", "false");
+        headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("User-Agent", "false");
+
+        builder.addHeader("User-Agent", "true");
+        headers = builder.build();
+        assertThat(headers.getHeaders()).containsEntry("User-Agent", "false,true");
     }
 
     @Test

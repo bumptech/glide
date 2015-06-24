@@ -30,11 +30,11 @@ public class GlideUrl {
     private URL safeUrl;
 
     public GlideUrl(URL url) {
-        this(url, Headers.NONE);
+        this(url, Headers.DEFAULT);
     }
 
     public GlideUrl(String url) {
-        this(url, Headers.NONE);
+        this(url, Headers.DEFAULT);
     }
 
     public GlideUrl(URL url, Headers headers) {
