@@ -22,8 +22,6 @@ import java.util.Map;
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "HttpUrlFetcher";
-  private static final String ENCODING_HEADER = "Accept-Encoding";
-  private static final String DEFAULT_ENCODING = "identity";
   private static final int MAXIMUM_REDIRECTS = 5;
   private static final int DEFAULT_TIMEOUT_MS = 2500;
   // Visible for testing.
@@ -81,6 +79,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       try {
         if (lastUrl != null && url.toURI().equals(lastUrl.toURI())) {
           throw new HttpException("In re-direct loop");
+
         }
       } catch (URISyntaxException e) {
         // Do nothing, this is best effort.
@@ -90,11 +89,6 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     urlConnection = connectionFactory.build(url);
     for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
       urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
-    }
-    // Do our best to avoid gzip since it's both inefficient for images and also makes it more
-    // difficult for us to detect and prevent partial content rendering. See #440.
-    if (TextUtils.isEmpty(urlConnection.getRequestProperty(ENCODING_HEADER))) {
-      urlConnection.setRequestProperty(ENCODING_HEADER, DEFAULT_ENCODING);
     }
     urlConnection.setConnectTimeout(timeout);
     urlConnection.setReadTimeout(timeout);

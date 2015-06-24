@@ -21,8 +21,6 @@ import java.util.Map;
  */
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "OkHttpFetcher";
-  private static final String USER_AGENT_HEADER = "User-Agent";
-  private static final String DEFAULT_USER_AGENT = System.getProperty("http.agent");
   private final OkHttpClient client;
   private final GlideUrl url;
   private InputStream stream;
@@ -40,10 +38,6 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
       String key = headerEntry.getKey();
       requestBuilder.addHeader(key, headerEntry.getValue());
-      isUserAgentSet |= USER_AGENT_HEADER.equalsIgnoreCase(key);
-    }
-    if (!isUserAgentSet) {
-      requestBuilder.addHeader(USER_AGENT_HEADER, DEFAULT_USER_AGENT);
     }
     Request request = requestBuilder.build();
 

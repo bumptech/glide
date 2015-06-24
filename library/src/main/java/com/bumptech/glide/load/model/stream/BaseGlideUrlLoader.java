@@ -112,6 +112,6 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    */
   @Nullable
   protected Headers getHeaders(Model model, int width, int height, Options options) {
-    return Headers.NONE;
+    return Headers.DEFAULT;
   }
 }
