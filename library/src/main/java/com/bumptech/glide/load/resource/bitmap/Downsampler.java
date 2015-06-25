@@ -296,8 +296,8 @@ public final class Downsampler {
       int sampleSize = options.inSampleSize;
       int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
       int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
-      int expectedWidth = (int) Math.ceil(downsampledWidth * densityMultiplier);
-      int expectedHeight = (int) Math.ceil(downsampledHeight * densityMultiplier);
+      int expectedWidth = Math.round(downsampledWidth * densityMultiplier);
+      int expectedHeight = Math.round(downsampledHeight * densityMultiplier);
 
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Calculated target [" + expectedWidth + "x" + expectedHeight + "] for source"
