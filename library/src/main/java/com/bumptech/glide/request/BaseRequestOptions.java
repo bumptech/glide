@@ -84,6 +84,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private Class<?> resourceClass = Object.class;
   private boolean isLocked;
   private Resources.Theme theme;
+  private boolean isAutoCloneEnabled;
 
   /**
    * Applies a multiplier to the {@link com.bumptech.glide.request.target.Target}'s size before
@@ -96,6 +97,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD sizeMultiplier(float sizeMultiplier) {
+    if (isAutoCloneEnabled) {
+      return clone().sizeMultiplier(sizeMultiplier);
+    }
+
     if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
       throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
     }
@@ -120,6 +125,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD diskCacheStrategy(@NonNull DiskCacheStrategy strategy) {
+    if (isAutoCloneEnabled) {
+      return clone().diskCacheStrategy(strategy);
+    }
     this.diskCacheStrategy = Preconditions.checkNotNull(strategy);
     fields |= DISK_CACHE_STRATEGY;
 
@@ -133,6 +141,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD priority(@NonNull Priority priority) {
+    if (isAutoCloneEnabled) {
+      return clone().priority(priority);
+    }
+
     this.priority = Preconditions.checkNotNull(priority);
     fields |= PRIORITY;
 
@@ -146,6 +158,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD placeholder(@Nullable Drawable drawable) {
+    if (isAutoCloneEnabled) {
+      return clone().placeholder(drawable);
+    }
+
     this.placeholderDrawable = drawable;
     fields |= PLACEHOLDER;
 
@@ -160,6 +176,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD placeholder(int resourceId) {
+    if (isAutoCloneEnabled) {
+      return clone().placeholder(resourceId);
+    }
+
     this.placeholderId = resourceId;
     fields |= PLACEHOLDER_ID;
 
@@ -180,6 +200,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD fallback(Drawable drawable) {
+    if (isAutoCloneEnabled) {
+      return clone().fallback(drawable);
+    }
+
     this.fallbackDrawable = drawable;
     fields |= FALLBACK;
 
@@ -200,6 +224,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD fallback(int resourceId) {
+    if (isAutoCloneEnabled) {
+      return clone().fallback(resourceId);
+    }
+
     this.fallbackId = resourceId;
     fields |= FALLBACK_ID;
 
@@ -213,6 +241,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD error(@Nullable Drawable drawable) {
+    if (isAutoCloneEnabled) {
+      return clone().error(drawable);
+    }
+
     this.errorPlaceholder = drawable;
     fields |= ERROR_PLACEHOLDER;
 
@@ -226,6 +258,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD error(int resourceId) {
+    if (isAutoCloneEnabled) {
+      return clone().error(resourceId);
+    }
     this.errorId = resourceId;
     fields |= ERROR_ID;
 
@@ -241,6 +276,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return this request builder.
    */
   public final CHILD theme(Resources.Theme theme) {
+    if (isAutoCloneEnabled) {
+      return clone().theme(theme);
+    }
+
     this.theme = theme;
     fields |= THEME;
 
@@ -257,6 +296,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD skipMemoryCache(boolean skip) {
+    if (isAutoCloneEnabled) {
+      return clone().skipMemoryCache(true);
+    }
+
     this.isCacheable = !skip;
     fields |= IS_CACHEABLE;
 
@@ -273,6 +316,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @return This request builder.
    */
   public final CHILD override(int width, int height) {
+    if (isAutoCloneEnabled) {
+      return clone().override(width, height);
+    }
+
     this.overrideWidth = width;
     this.overrideHeight = height;
     fields |= OVERRIDE;
@@ -304,6 +351,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see com.bumptech.glide.signature.StringSignature
    */
   public final CHILD signature(@NonNull Key signature) {
+    if (isAutoCloneEnabled) {
+      return clone().signature(signature);
+    }
+
     this.signature = Preconditions.checkNotNull(signature);
     fields |= SIGNATURE;
     return selfOrThrowIfLocked();
@@ -330,6 +381,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
       result.transformations = new HashMap<>();
       result.transformations.putAll(transformations);
       result.isLocked = false;
+      result.isAutoCloneEnabled = false;
       return (CHILD) result;
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException(e);
@@ -337,6 +389,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   }
 
   public final <T> CHILD set(@NonNull Option<T> option, @NonNull T value) {
+    if (isAutoCloneEnabled) {
+      return clone().set(option, value);
+    }
+
     Preconditions.checkNotNull(option);
     Preconditions.checkNotNull(value);
     options.set(option, value);
@@ -344,6 +400,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   }
 
   public final CHILD decode(@NonNull Class<?> resourceClass) {
+    if (isAutoCloneEnabled) {
+      return clone().decode(resourceClass);
+    }
+
     this.resourceClass = Preconditions.checkNotNull(resourceClass);
     fields |= RESOURCE_CLASS;
     return selfOrThrowIfLocked();
@@ -414,8 +474,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #centerCrop(android.content.Context)
    */
   public CHILD optionalCenterCrop(Context context) {
-    downsample(DownsampleStrategy.CENTER_OUTSIDE);
-    return optionalTransform(context, new CenterCrop(context));
+    return optionalTransform(context, DownsampleStrategy.CENTER_OUTSIDE, new CenterCrop(context));
   }
 
   /**
@@ -427,8 +486,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalCenterCrop(android.content.Context)
    */
   public CHILD centerCrop(Context context) {
-    downsample(DownsampleStrategy.CENTER_OUTSIDE);
-    return transform(context, new CenterCrop(context));
+    return transform(context, DownsampleStrategy.CENTER_OUTSIDE, new CenterCrop(context));
   }
 
   /**
@@ -440,8 +498,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #fitCenter(android.content.Context)
    */
   public CHILD optionalFitCenter(Context context) {
-    downsample(DownsampleStrategy.CENTER_INSIDE);
-    return optionalTransform(context, new FitCenter(context));
+    return optionalTransform(context, DownsampleStrategy.CENTER_INSIDE, new FitCenter(context));
   }
 
   /**
@@ -453,8 +510,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalFitCenter(android.content.Context)
    */
   public CHILD fitCenter(Context context) {
-    downsample(DownsampleStrategy.CENTER_INSIDE);
-    return transform(context, new FitCenter(context));
+    return transform(context, DownsampleStrategy.CENTER_INSIDE, new FitCenter(context));
   }
 
   /**
@@ -465,8 +521,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #circleCrop(Context)
    */
   public CHILD optionalCircleCrop(Context context) {
-    downsample(DownsampleStrategy.CENTER_OUTSIDE);
-    return optionalTransform(context, new CircleCrop(context));
+    return optionalTransform(context, DownsampleStrategy.CENTER_OUTSIDE, new CircleCrop(context));
   }
 
   /**
@@ -478,8 +533,27 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalCenterCrop(Context)
    */
   public CHILD circleCrop(Context context) {
-    downsample(DownsampleStrategy.CENTER_OUTSIDE);
-    return transform(context, new CircleCrop(context));
+    return transform(context, DownsampleStrategy.CENTER_OUTSIDE, new CircleCrop(context));
+  }
+
+  final CHILD optionalTransform(Context context, DownsampleStrategy downsampleStrategy,
+      Transformation<Bitmap> transformation) {
+    if (isAutoCloneEnabled) {
+      return clone().optionalTransform(context, downsampleStrategy, transformation);
+    }
+
+    downsample(downsampleStrategy);
+    return optionalTransform(context, transformation);
+  }
+
+  final CHILD transform(Context context, DownsampleStrategy downsampleStrategy,
+      Transformation<Bitmap> transformation) {
+    if (isAutoCloneEnabled) {
+      return clone().transform(context, downsampleStrategy, transformation);
+    }
+
+    downsample(downsampleStrategy);
+    return transform(context, transformation);
   }
 
   /**
@@ -496,6 +570,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
    */
   public CHILD transform(Context context, @NonNull Transformation<Bitmap> transformation) {
+    if (isAutoCloneEnabled) {
+      return clone().transform(context, transformation);
+    }
+
     optionalTransform(context, transformation);
     isTransformationRequired = true;
     return selfOrThrowIfLocked();
@@ -514,6 +592,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #transform(Class, com.bumptech.glide.load.Transformation)
    */
   public CHILD optionalTransform(Context context, Transformation<Bitmap> transformation) {
+    if (isAutoCloneEnabled) {
+      return clone().optionalTransform(context, transformation);
+    }
+
     optionalTransform(Bitmap.class, transformation);
     // TODO: remove BitmapDrawable decoder and this transformation.
     optionalTransform(BitmapDrawable.class,
@@ -539,6 +621,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    */
   public final <T> CHILD optionalTransform(Class<T> resourceClass,
       Transformation<T> transformation) {
+    if (isAutoCloneEnabled) {
+      return clone().optionalTransform(resourceClass, transformation);
+    }
+
     Preconditions.checkNotNull(resourceClass);
     Preconditions.checkNotNull(transformation);
     fields |= TRANSFORMATION;
@@ -555,6 +641,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
    */
   public final <T> CHILD transform(Class<T> resourceClass, Transformation<T> transformation) {
+    if (isAutoCloneEnabled) {
+      return clone().transform(resourceClass, transformation);
+    }
+
     optionalTransform(resourceClass, transformation);
     isTransformationRequired = true;
     return selfOrThrowIfLocked();
@@ -566,6 +656,10 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * exception.
    */
   public final CHILD dontTransform() {
+    if (isAutoCloneEnabled) {
+      return clone().dontTransform();
+    }
+
     fields &= ~TRANSFORMATION;
     transformations.clear();
     isTransformationRequired = false;
@@ -580,17 +674,70 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * {@link com.bumptech.glide.TransitionOptions#dontTransition()}</p>
    */
   public final CHILD dontAnimate() {
+    if (isAutoCloneEnabled) {
+      return clone().dontAnimate();
+    }
+
     set(ByteBufferGifDecoder.DISABLE_ANIMATION, true);
     set(StreamGifDecoder.DISABLE_ANIMATION, true);
     return selfOrThrowIfLocked();
   }
 
-  public final Map<Class<?>, Transformation<?>> getTransformations() {
-    return transformations;
-  }
+  public final CHILD apply(BaseRequestOptions<?> other) {
+    if (isAutoCloneEnabled) {
+      return clone().apply(other);
+    }
 
-  public final boolean isTransformationRequired() {
-    return isTransformationRequired;
+    if (isSet(other.fields, SIZE_MULTIPLIER)) {
+      sizeMultiplier = other.sizeMultiplier;
+    }
+    if (isSet(other.fields, DISK_CACHE_STRATEGY)) {
+      diskCacheStrategy = other.diskCacheStrategy;
+    }
+    if (isSet(other.fields, PRIORITY)) {
+      priority = other.priority;
+    }
+    if (isSet(other.fields, ERROR_PLACEHOLDER)) {
+      errorPlaceholder = other.errorPlaceholder;
+    }
+    if (isSet(other.fields, ERROR_ID)) {
+      errorId = other.errorId;
+    }
+    if (isSet(other.fields, PLACEHOLDER)) {
+      placeholderDrawable = other.placeholderDrawable;
+    }
+    if (isSet(other.fields, PLACEHOLDER_ID)) {
+      placeholderId = other.placeholderId;
+    }
+    if (isSet(other.fields, IS_CACHEABLE)) {
+      isCacheable = other.isCacheable;
+    }
+    if (isSet(other.fields, OVERRIDE)) {
+      overrideWidth = other.overrideWidth;
+      overrideHeight = other.overrideHeight;
+    }
+    if (isSet(other.fields, SIGNATURE)) {
+      signature = other.signature;
+    }
+    if (isSet(other.fields, RESOURCE_CLASS)) {
+      resourceClass = other.resourceClass;
+    }
+    if (isSet(other.fields, FALLBACK)) {
+      fallbackDrawable = other.fallbackDrawable;
+    }
+    if (isSet(other.fields, FALLBACK_ID)) {
+      fallbackId = other.fallbackId;
+    }
+    if (isSet(other.fields, THEME)) {
+      theme = other.theme;
+    }
+
+    isTransformationRequired |= other.isTransformationRequired;
+    fields |= other.fields;
+    transformations.putAll(other.transformations);
+    options.putAll(other.options);
+
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -605,65 +752,45 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return (CHILD) this;
   }
 
+  /**
+   * Similar to {@link #lock()} except that mutations cause a {@link #clone()} operation to happen
+   * before the mutation resulting in all methods returning a new Object and leaving the original
+   * locked object unmodified.
+   *
+   * <p>Auto clone is not retained by cloned objects returned from mutations. The cloned objects
+   * are mutable and are not locked.
+   */
+  public final CHILD autoLock() {
+    if (isLocked && !isAutoCloneEnabled) {
+      throw new IllegalStateException("You cannot auto lock an already locked options object"
+          + ", try clone() first");
+    }
+    isAutoCloneEnabled = true;
+    return lock();
+  }
+
+  @SuppressWarnings("unchecked")
+  private CHILD selfOrThrowIfLocked() {
+    if (isLocked) {
+      throw new IllegalStateException("You cannot modify locked RequestOptions, consider clone()");
+    }
+    return (CHILD) this;
+  }
+
+  public final Map<Class<?>, Transformation<?>> getTransformations() {
+    return transformations;
+  }
+
+  public final boolean isTransformationRequired() {
+    return isTransformationRequired;
+  }
+
   public final Options getOptions() {
     return options;
   }
 
   public final Class<?> getResourceClass() {
     return resourceClass;
-  }
-
-  public final CHILD apply(BaseRequestOptions<?> other) {
-    if (isSet(other.fields, DISK_CACHE_STRATEGY)) {
-      diskCacheStrategy = other.diskCacheStrategy;
-    }
-    if (isSet(other.fields, ERROR_PLACEHOLDER)) {
-      errorPlaceholder = other.errorPlaceholder;
-    }
-    if (isSet(other.fields, ERROR_ID)) {
-      errorId = other.errorId;
-    }
-    if (isSet(other.fields, PLACEHOLDER)) {
-      placeholderDrawable = other.placeholderDrawable;
-    }
-    if (isSet(other.fields, PLACEHOLDER_ID)) {
-      placeholderId = other.placeholderId;
-    }
-    if (isSet(other.fields, FALLBACK)) {
-      fallbackDrawable = other.fallbackDrawable;
-    }
-    if (isSet(other.fields, FALLBACK_ID)) {
-      fallbackId = other.fallbackId;
-    }
-    if (isSet(other.fields, THEME)) {
-      theme = other.theme;
-    }
-    if (isSet(other.fields, IS_CACHEABLE)) {
-      isCacheable = other.isCacheable;
-    }
-    if (isSet(other.fields, SIGNATURE)) {
-      signature = other.signature;
-    }
-    if (isSet(other.fields, PRIORITY)) {
-      priority = other.priority;
-    }
-    if (isSet(other.fields, OVERRIDE)) {
-      overrideWidth = other.overrideWidth;
-      overrideHeight = other.overrideHeight;
-    }
-    if (isSet(other.fields, SIZE_MULTIPLIER)) {
-      sizeMultiplier = other.sizeMultiplier;
-    }
-    if (isSet(other.fields, RESOURCE_CLASS)) {
-      resourceClass = other.resourceClass;
-    }
-
-    isTransformationRequired |= other.isTransformationRequired;
-    fields |= other.fields;
-    transformations.putAll(other.transformations);
-    options.putAll(other.options);
-
-    return selfOrThrowIfLocked();
   }
 
   public final DiskCacheStrategy getDiskCacheStrategy() {
@@ -728,14 +855,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   public final float getSizeMultiplier() {
     return sizeMultiplier;
-  }
-
-  @SuppressWarnings("unchecked")
-  private CHILD selfOrThrowIfLocked() {
-    if (isLocked) {
-      throw new IllegalStateException("You cannot modify locked RequestOptions, consider clone()");
-    }
-    return (CHILD) this;
   }
 
   private boolean isSet(int flag) {

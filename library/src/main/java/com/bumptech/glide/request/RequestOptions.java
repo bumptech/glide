@@ -23,6 +23,14 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 @SuppressWarnings({"PMD.UseUtilityClass", "unused"})
 public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
+  private static RequestOptions skipMemoryCacheTrueOptions;
+  private static RequestOptions skipMemoryCacheFalseOptions;
+  private static RequestOptions fitCenterOptions;
+  private static RequestOptions centerCropOptions;
+  private static RequestOptions circleCropOptions;
+  private static RequestOptions noTransformOptions;
+  private static RequestOptions noAnimationOptions;
+
   /**
    * Returns a {@link RequestOptions} object with {@link #sizeMultiplier(float)} set.
    */
@@ -76,7 +84,17 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
    * Returns a {@link RequestOptions} object with {@link #skipMemoryCache(boolean)} set.
    */
   public static RequestOptions skipMemoryCacheOf(boolean skipMemoryCache) {
-    return new RequestOptions().skipMemoryCache(skipMemoryCache);
+    if (skipMemoryCache) {
+      if (skipMemoryCacheTrueOptions == null) {
+        skipMemoryCacheTrueOptions = new RequestOptions().skipMemoryCache(true).autoLock();
+      }
+      return skipMemoryCacheTrueOptions;
+    } else {
+      if (skipMemoryCacheFalseOptions == null) {
+        skipMemoryCacheFalseOptions = new RequestOptions().skipMemoryCache(false).autoLock();
+      }
+      return skipMemoryCacheFalseOptions;
+    }
   }
 
   /**
@@ -105,21 +123,36 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
    * Returns a {@link RequestOptions} object with {@link #fitCenter(Context)} set.
    */
   public static RequestOptions fitCenterTransform(Context context) {
-    return new RequestOptions().fitCenter(context);
+    if (fitCenterOptions == null) {
+      fitCenterOptions = new RequestOptions()
+          .fitCenter(context.getApplicationContext())
+          .autoLock();
+    }
+    return fitCenterOptions;
   }
 
   /**
    * Returns a {@link RequestOptions} object with {@link #circleCrop(Context)} set.
    */
   public static RequestOptions centerCropTransform(Context context) {
-    return new RequestOptions().centerCrop(context);
+    if (centerCropOptions == null) {
+      centerCropOptions = new RequestOptions()
+          .centerCrop(context.getApplicationContext())
+          .autoLock();
+    }
+    return centerCropOptions;
   }
 
   /**
    * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop(Context)} set.
    */
   public static RequestOptions circleCropTransform(Context context) {
-    return new RequestOptions().circleCrop(context);
+    if (circleCropOptions == null) {
+      circleCropOptions = new RequestOptions()
+          .circleCrop(context.getApplicationContext())
+          .autoLock();
+    }
+    return circleCropOptions;
   }
 
   /**
@@ -134,7 +167,12 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
    * Returns a {@link RequestOptions} object with {@link #dontTransform()} set.
    */
   public static RequestOptions noTransform() {
-    return new RequestOptions().dontTransform();
+    if (noTransformOptions == null) {
+      noTransformOptions = new RequestOptions()
+          .dontTransform()
+          .autoLock();
+    }
+    return noTransformOptions;
   }
 
   /**
@@ -194,6 +232,11 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
    * called.
    */
   public static RequestOptions noAnimation() {
-    return new RequestOptions().dontAnimate();
+    if (noAnimationOptions == null) {
+      noAnimationOptions = new RequestOptions()
+          .dontAnimate()
+          .autoLock();
+    }
+    return noAnimationOptions;
   }
 }
