@@ -248,8 +248,12 @@ public final class Downsampler {
     float adjustedScaleFactor = powerOfTwoSampleSize * exactScaleFactor;
 
     options.inSampleSize = powerOfTwoSampleSize;
-    options.inTargetDensity = (int) (1000 * adjustedScaleFactor + 0.5f);
-    options.inDensity = 1000;
+    // Density scaling is only supported if inBitmap is null prior to KitKat. Avoid setting
+    // densities here so we calculate the final Bitmap size correctly.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      options.inTargetDensity = (int) (1000 * adjustedScaleFactor + 0.5f);
+      options.inDensity = 1000;
+    }
     if (isScaling(options)) {
       options.inScaled = true;
     } else {

@@ -15,6 +15,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
+import com.bumptech.glide.load.resource.bitmap.DownsamplerTest.AllocationSizeBitmap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +25,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,7 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 19, shadows = AllocationSizeBitmap.class)
 public class DownsamplerTest {
   @Mock private BitmapPool bitmapPool;
   @Mock private ByteArrayPool byteArrayPool;
@@ -176,5 +180,15 @@ public class DownsamplerTest {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     bitmap.compress(compressFormat, 100, os);
     return new ByteArrayInputStream(os.toByteArray());
+  }
+
+  // Robolectric doesn't implement getAllocationByteCount correctly.
+  @Implements(Bitmap.class)
+  public static class AllocationSizeBitmap extends ShadowBitmap {
+
+    @Implementation
+    public int getAllocationByteCount() {
+      return getWidth() * getHeight() * (getConfig() == Bitmap.Config.ARGB_8888 ? 4 : 2);
+    }
   }
 }

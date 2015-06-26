@@ -12,6 +12,9 @@ public abstract class DownsampleStrategy {
    *
    * <p>This method will upscale if the requested width and height are greater than the source width
    * and height. To avoid upscaling, use {@link #AT_LEAST} or {@link #AT_MOST}.
+   *
+   * <p>On pre-KitKat devices, this is equivalent to {@link #AT_MOST} because only power of
+   * two downsampling can be used.
    */
   public static final DownsampleStrategy CENTER_INSIDE = new CenterInside();
 
@@ -22,6 +25,9 @@ public abstract class DownsampleStrategy {
    *
    * <p>This method will upscale if the requested width and height are greater than the source width
    * and height. To avoid upscaling, use {@link #AT_LEAST} or {@link #AT_MOST}.
+   *
+   * <p>On pre-KitKat devices, this is equivalent to {@link #AT_LEAST} because only power of
+   * two downsampling can be used.
    */
   public static final DownsampleStrategy CENTER_OUTSIDE = new CenterOutside();
 
@@ -56,6 +62,9 @@ public abstract class DownsampleStrategy {
    * after downsampling via {@link android.graphics.BitmapFactory.Options#inTargetDensity} and
    * {@link android.graphics.BitmapFactory.Options#inDensity}. Because of rounding errors the scale
    * factor may not be applied precisely.
+   *
+   * <p>The float scaling factor will only be applied on KitKat+. Prior to KitKat, only the power
+   * of two downsampling will be applied.
    *
    * @param sourceWidth   The width in pixels of the image to be downsampled.
    * @param sourceHeight  The height in pixels of the image to be downsampled.
