@@ -70,12 +70,12 @@ public class RequestBuilderTest {
     verify(requestManager).clear(eq(target));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullTarget() {
     getNullModelRequest().into((Target) null);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullView() {
     getNullModelRequest().into((ImageView) null);
   }

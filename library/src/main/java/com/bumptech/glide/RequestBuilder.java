@@ -37,7 +37,7 @@ import java.util.UUID;
 public class RequestBuilder<TranscodeType> implements Cloneable {
   private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
       new GenericTransitionOptions<Object>();
-  private static final BaseRequestOptions DOWNLOAD_ONLY_OPTIONS =
+  private static final BaseRequestOptions<?> DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
 
@@ -77,7 +77,14 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     this.requestOptions = defaultRequestOptions;
   }
 
-  public RequestBuilder<TranscodeType> apply(BaseRequestOptions requestOptions) {
+  /**
+   * Applies the given options to the request, options set or unset in the given options will
+   * replace those previously set in options in this class.
+   *
+   * @see BaseRequestOptions#apply(BaseRequestOptions)
+   * @return This request builder.
+   */
+  public RequestBuilder<TranscodeType> apply(@NonNull BaseRequestOptions<?> requestOptions) {
     Preconditions.checkNotNull(requestOptions);
     BaseRequestOptions<?> toMutate = defaultRequestOptions == this.requestOptions
         ? this.requestOptions.clone() : this.requestOptions;
@@ -85,8 +92,17 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     return this;
   }
 
+  /**
+   * Sets the {@link TransitionOptions} to use to transition from the placeholder or thumbnail when
+   * this load completes.
+   *
+   * <p>The given {@link TransitionOptions} will replace any {@link TransitionOptions} set
+   * previously.
+   *
+   * @return This request builder.
+   */
   public RequestBuilder<TranscodeType> transition(
-      TransitionOptions<?, ? super TranscodeType> transitionOptions) {
+      @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
     this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
     return this;
   }
@@ -328,11 +344,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @return The given target.
    * @see RequestManager#clear(Target)
    */
-  public <Y extends Target<TranscodeType>> Y into(Y target) {
+  public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
     Util.assertMainThread();
-    if (target == null) {
-      throw new IllegalArgumentException("You must pass in a non null Target");
-    }
+    Preconditions.checkNotNull(target);
     if (!isModelSet) {
       throw new IllegalArgumentException("You must call #load() before calling #into()");
     }
@@ -364,9 +378,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    */
   public Target<TranscodeType> into(ImageView view) {
     Util.assertMainThread();
-    if (view == null) {
-      throw new IllegalArgumentException("You must pass in a non null View");
-    }
+    Preconditions.checkNotNull(view);
 
     if (!requestOptions.isTransformationSet()
         && requestOptions.isTransformationAllowed()
@@ -525,7 +537,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    */
   @Deprecated
   public FutureTarget<File> downloadOnly(int width, int height) {
-    return getDownloadOnlyRequest().into(width, height);
+    return getDownloadOnlyRequest().submit(width, height);
   }
 
   private RequestBuilder<File> getDownloadOnlyRequest() {
