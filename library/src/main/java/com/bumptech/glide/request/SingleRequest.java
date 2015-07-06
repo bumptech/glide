@@ -200,6 +200,10 @@ public final class SingleRequest<R> implements Request,
     stateVerifier.throwIfRecycled();
     startTime = LogTime.getLogTime();
     if (model == null) {
+      if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
+        width = overrideWidth;
+        height = overrideHeight;
+      }
       onLoadFailed(new GlideException("Received null model"));
       return;
     }
