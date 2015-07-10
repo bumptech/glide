@@ -72,6 +72,7 @@ public final class TransformationUtils {
 
     Canvas canvas = new Canvas(result);
     canvas.drawBitmap(toCrop, m, DEFAULT_PAINT);
+    clear(canvas);
     return result;
   }
 
@@ -128,6 +129,7 @@ public final class TransformationUtils {
     Matrix matrix = new Matrix();
     matrix.setScale(minPercentage, minPercentage);
     canvas.drawBitmap(toFit, matrix, DEFAULT_PAINT);
+    clear(canvas);
 
     return toReuse;
   }
@@ -236,6 +238,7 @@ public final class TransformationUtils {
 
     final Canvas canvas = new Canvas(result);
     canvas.drawBitmap(toOrient, matrix, DEFAULT_PAINT);
+    clear(canvas);
 
     return result;
   }
@@ -273,8 +276,14 @@ public final class TransformationUtils {
 
     // Draw the bitmap in the circle
     canvas.drawBitmap(toCrop, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
+    clear(canvas);
 
     return result;
+  }
+
+  // Avoids warnings in M+.
+  private static void clear(Canvas canvas) {
+    canvas.setBitmap(null);
   }
 
   private static Bitmap.Config getSafeConfig(Bitmap bitmap) {
