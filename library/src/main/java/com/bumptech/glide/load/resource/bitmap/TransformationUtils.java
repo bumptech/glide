@@ -2,19 +2,23 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * A class with methods to efficiently resize Bitmaps.
@@ -277,6 +281,56 @@ public final class TransformationUtils {
     // Draw the bitmap in the circle
     canvas.drawBitmap(toCrop, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
     clear(canvas);
+
+    return result;
+  }
+
+  /**
+   * Creates a bitmap from a source bitmap and rounds the corners.
+   *
+   * @param toTransform the source bitmap to use as a basis for the created bitmap.
+   * @param width the width of the generated bitmap.
+   * @param height the height of the generated bitmap.
+   * @param roundingRadius the corner radius to be applied (in device-specific pixels).
+   * @return a {@link Bitmap} similar to toTransform but with rounded corners.
+   * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
+   */
+  public static Bitmap roundedCorners(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
+      int width, int height, int roundingRadius) {
+    Preconditions.checkArgument(width > 0, "width must be greater than 0.");
+    Preconditions.checkArgument(height > 0, "height must be greater than 0.");
+    Preconditions.checkArgument(roundingRadius > 0, "roundingRadius must be greater than 0.");
+
+    boolean recycleToTransform = false;
+
+    // Alpha is required for this transformation.
+    if (!Bitmap.Config.ARGB_8888.equals(toTransform.getConfig())) {
+      Bitmap argbBitmap = pool.get(toTransform.getWidth(), toTransform.getHeight(),
+          Bitmap.Config.ARGB_8888);
+      new Canvas(argbBitmap).drawBitmap(toTransform, 0, 0, null);
+
+      // We now own toTransform. It's our responsibility to replace it in the pool.
+      toTransform = argbBitmap;
+      recycleToTransform = true;
+    }
+    final Bitmap result = pool.get(width, height, Bitmap.Config.ARGB_8888);
+
+    setAlphaIfAvailable(result, true /* hasAlpha */);
+
+    BitmapShader shader = new BitmapShader(toTransform, Shader.TileMode.CLAMP,
+        Shader.TileMode.CLAMP);
+    Paint paint = new Paint();
+    paint.setAntiAlias(true);
+    paint.setShader(shader);
+    RectF rect = new RectF(0, 0, result.getWidth(), result.getHeight());
+    Canvas canvas = new Canvas(result);
+    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+    canvas.drawRoundRect(rect, roundingRadius, roundingRadius, paint);
+    clear(canvas);
+
+    if (recycleToTransform) {
+      pool.put(toTransform);
+    }
 
     return result;
   }
