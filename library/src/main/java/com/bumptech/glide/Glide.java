@@ -20,10 +20,8 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
@@ -94,7 +92,6 @@ public class Glide implements ComponentCallbacks2 {
   private final BitmapPreFiller bitmapPreFiller;
   private final GlideContext glideContext;
   private final Registry registry;
-  private final ArrayPool arrayPool;
   private final ByteArrayPool byteArrayPool;
   private final List<RequestManager> managers = new ArrayList<>();
 
@@ -168,19 +165,12 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-  Glide(
-      Engine engine,
-      MemoryCache memoryCache,
-      BitmapPool bitmapPool,
-      ArrayPool arrayPool,
-      Context context,
-      int logLevel,
-      RequestOptions defaultRequestOptions) {
+  Glide(Engine engine, MemoryCache memoryCache, BitmapPool bitmapPool, ByteArrayPool byteArrayPool,
+      Context context, int logLevel, RequestOptions defaultRequestOptions) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
-    this.arrayPool = arrayPool;
+    this.byteArrayPool = byteArrayPool;
     this.memoryCache = memoryCache;
-    this.byteArrayPool = new LruByteArrayPool();
 
     DecodeFormat decodeFormat = defaultRequestOptions.getOptions().get(Downsampler.DECODE_FORMAT);
     bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
@@ -189,8 +179,8 @@ public class Glide implements ComponentCallbacks2 {
 
     Downsampler downsampler =
         new Downsampler(resources.getDisplayMetrics(), bitmapPool, byteArrayPool);
-    ByteBufferGifDecoder byteBufferGifDecoder =
-        new ByteBufferGifDecoder(context, bitmapPool, arrayPool);
+    ByteBufferGifDecoder byteBufferGifDecoder = new ByteBufferGifDecoder(context, bitmapPool,
+        byteArrayPool);
     registry = new Registry(context)
         .register(ByteBuffer.class, new ByteBufferEncoder())
         .register(InputStream.class, new StreamEncoder(byteArrayPool))
@@ -286,10 +276,6 @@ public class Glide implements ComponentCallbacks2 {
     return byteArrayPool;
   }
 
-  public ArrayPool getArrayPool() {
-    return arrayPool;
-  }
-
   GlideContext getGlideContext() {
     return glideContext;
   }
@@ -332,7 +318,7 @@ public class Glide implements ComponentCallbacks2 {
   public void clearMemory() {
     bitmapPool.clearMemory();
     memoryCache.clearMemory();
-    arrayPool.clearMemory();
+    byteArrayPool.clearMemory();
   }
 
   /**
@@ -343,7 +329,7 @@ public class Glide implements ComponentCallbacks2 {
   public void trimMemory(int level) {
     bitmapPool.trimMemory(level);
     memoryCache.trimMemory(level);
-    arrayPool.trimMemory(level);
+    byteArrayPool.trimMemory(level);
   }
 
   /**

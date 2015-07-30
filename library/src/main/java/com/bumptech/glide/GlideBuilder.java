@@ -6,11 +6,11 @@ import android.util.Log;
 
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
-import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
@@ -27,7 +27,7 @@ public final class GlideBuilder {
 
   private Engine engine;
   private BitmapPool bitmapPool;
-  private ArrayPool arrayPool;
+  private ByteArrayPool byteArrayPool;
   private MemoryCache memoryCache;
   private GlideExecutor sourceExecutor;
   private GlideExecutor diskCacheExecutor;
@@ -53,14 +53,14 @@ public final class GlideBuilder {
   }
 
   /**
-   * Sets the {@link ArrayPool} implementation to allow variable sized arrays to be stored
+   * Sets the {@link ByteArrayPool} implementation to allow variable sized byte arrays to be stored
    * and retrieved as needed.
    *
-   * @param arrayPool The pool to use.
+   * @param byteArrayPool The pool to use.
    * @return This builder.
    */
-  public GlideBuilder setArrayPool(ArrayPool arrayPool) {
-    this.arrayPool = arrayPool;
+  public GlideBuilder setByteArrayPool(ByteArrayPool byteArrayPool) {
+    this.byteArrayPool = byteArrayPool;
     return this;
   }
 
@@ -267,8 +267,8 @@ public final class GlideBuilder {
       }
     }
 
-    if (arrayPool == null) {
-      arrayPool = new LruArrayPool(memorySizeCalculator.getArrayPoolSizeInBytes());
+    if (byteArrayPool == null) {
+      byteArrayPool = new LruByteArrayPool(memorySizeCalculator.getByteArrayPoolSize());
     }
 
     if (memoryCache == null) {
@@ -283,13 +283,7 @@ public final class GlideBuilder {
       engine = new Engine(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor);
     }
 
-    return new Glide(
-        engine,
-        memoryCache,
-        bitmapPool,
-        arrayPool,
-        context,
-        logLevel,
+    return new Glide(engine, memoryCache, bitmapPool, byteArrayPool, context, logLevel,
         defaultRequestOptions.lock());
   }
 }

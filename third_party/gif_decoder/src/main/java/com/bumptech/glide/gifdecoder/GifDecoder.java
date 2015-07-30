@@ -41,16 +41,16 @@ import java.util.Arrays;
  * Reads frame data from a GIF image source and decodes it into individual frames for animation
  * purposes.  Image data can be read from either and InputStream source or a byte[].
  *
- * <p>This class is optimized for running animations with the frames, there are no methods to get
+ * This class is optimized for running animations with the frames, there are no methods to get
  * individual frame images, only to decode the next frame in the animation sequence.  Instead, it
  * lowers its memory footprint by only housing the minimum data necessary to decode the next frame
  * in the animation sequence.
  *
- * <p>The animation must be manually moved forward using {@link #advance()} before requesting the
- * next frame.  This method must also be called before you request the first frame or an error
- * will occur.
+ * The animation must be manually moved forward using {@link #advance()} before requesting the next
+ * frame.  This method must also be called before you request the first frame or an error will
+ * occur.
  *
- * <p>Implementation adapted from sample code published in Lyons. (2004). <em>Java for
+ * Implementation adapted from sample code published in Lyons. (2004). <em>Java for
  * Programmers</em>, republished under the MIT Open Source License
  */
 public class GifDecoder {
@@ -170,17 +170,6 @@ public class GifDecoder {
      */
     void release(byte[] bytes);
 
-    /**
-     * Returns an int array used for decoding/generating the frame bitmaps
-     * @param size
-     */
-    int[] obtainIntArray(int size);
-
-    /**
-     * Release the given array back to the pool
-     * @param array
-     */
-    void release(int[] array);
   }
 
   public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
@@ -402,12 +391,8 @@ public class GifDecoder {
 
   public void clear() {
     header = null;
-    if (mainPixels != null) {
-      bitmapProvider.release(mainPixels);
-    }
-    if (mainScratch != null) {
-      bitmapProvider.release(mainScratch);
-    }
+    mainPixels = null;
+    mainScratch = null;
     if (previousImage != null) {
       bitmapProvider.release(previousImage);
     }
@@ -458,9 +443,8 @@ public class GifDecoder {
     // Now that we know the size, init scratch arrays.
     // TODO: Find a way to avoid this entirely or at least downsample it
     // (either should be possible).
-    mainPixels = bitmapProvider.obtainByteArray(header.width * header.height);
-    mainScratch =
-        bitmapProvider.obtainIntArray((header.width / sampleSize) * (header.height / sampleSize));
+    mainPixels = new byte[header.width * header.height];
+    mainScratch = new int[(header.width / sampleSize) * (header.height / sampleSize)];
     downsampledWidth = header.width / sampleSize;
     downsampledHeight = header.height / sampleSize;
   }
@@ -662,7 +646,7 @@ public class GifDecoder {
 
     if (mainPixels == null || mainPixels.length < npix) {
       // Allocate new pixel array.
-      mainPixels = bitmapProvider.obtainByteArray(npix);
+      mainPixels = new byte[npix];
     }
     if (prefix == null) {
       prefix = new short[MAX_STACK_SIZE];

@@ -141,7 +141,7 @@ public class MemorySizeCalculatorTest {
 
     Util.setSdkVersionInt(10);
 
-    int byteArrayPoolSize = harness.getCalculator().getArrayPoolSizeInBytes();
+    int byteArrayPoolSize = harness.getCalculator().getByteArrayPoolSize();
     assertThat(byteArrayPoolSize).isEqualTo(harness.byteArrayPoolSizeBytes / 2);
   }
 
@@ -161,7 +161,7 @@ public class MemorySizeCalculatorTest {
     float memoryCacheScreens = MemorySizeCalculator.Builder.MEMORY_CACHE_TARGET_SCREENS;
     float bitmapPoolScreens = MemorySizeCalculator.Builder.BITMAP_POOL_TARGET_SCREENS;
     float sizeMultiplier = MemorySizeCalculator.Builder.MAX_SIZE_MULTIPLIER;
-    int byteArrayPoolSizeBytes = MemorySizeCalculator.Builder.ARRAY_POOL_SIZE_BYTES;
+    int byteArrayPoolSizeBytes = MemorySizeCalculator.Builder.BYTE_ARRAY_POOL_SIZE_BYTES;
     ActivityManager activityManager =
         (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
     MemorySizeCalculator.ScreenDimensions screenDimensions =
@@ -176,7 +176,7 @@ public class MemorySizeCalculatorTest {
           .setMaxSizeMultiplier(sizeMultiplier)
           .setActivityManager(activityManager)
           .setScreenDimensions(screenDimensions)
-          .setArrayPoolSize(byteArrayPoolSizeBytes)
+          .setByteArrayPoolSize(byteArrayPoolSizeBytes)
           .build();
     }
 

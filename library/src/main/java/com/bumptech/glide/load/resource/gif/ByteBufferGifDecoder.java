@@ -12,10 +12,8 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
@@ -47,37 +45,31 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   private final Context context;
   private final GifHeaderParserPool parserPool;
   private final BitmapPool bitmapPool;
-  private final ArrayPool arrayPool;
+  private final ByteArrayPool byteArrayPool;
   private final GifDecoderFactory gifDecoderFactory;
   private final GifBitmapProvider provider;
 
   public ByteBufferGifDecoder(Context context) {
-    this(context, Glide.get(context).getBitmapPool(), Glide.get(context).getArrayPool());
+    this(context, Glide.get(context).getBitmapPool(), Glide.get(context).getByteArrayPool());
   }
 
-  public ByteBufferGifDecoder(
-      Context context, BitmapPool bitmapPool, ArrayPool arrayPool) {
-    this(context, bitmapPool, arrayPool, PARSER_POOL, GIF_DECODER_FACTORY);
+  public ByteBufferGifDecoder(Context context, BitmapPool bitmapPool, ByteArrayPool byteArrayPool) {
+    this(context, bitmapPool, byteArrayPool, PARSER_POOL, GIF_DECODER_FACTORY);
   }
 
   // Visible for testing.
-  ByteBufferGifDecoder(
-      Context context,
-      BitmapPool bitmapPool,
-      ArrayPool arrayPool,
-      GifHeaderParserPool parserPool,
-      GifDecoderFactory gifDecoderFactory) {
+  ByteBufferGifDecoder(Context context, BitmapPool bitmapPool, ByteArrayPool byteArrayPool,
+      GifHeaderParserPool parserPool, GifDecoderFactory gifDecoderFactory) {
     this.context = context;
     this.bitmapPool = bitmapPool;
-    this.arrayPool = arrayPool;
+    this.byteArrayPool = byteArrayPool;
     this.gifDecoderFactory = gifDecoderFactory;
-    this.provider = new GifBitmapProvider(bitmapPool, arrayPool);
+    this.provider = new GifBitmapProvider(bitmapPool, byteArrayPool);
     this.parserPool = parserPool;
   }
 
   @Override
   public boolean handles(ByteBuffer source, Options options) throws IOException {
-    ByteArrayPool byteArrayPool = new LruByteArrayPool();
     return !options.get(DISABLE_ANIMATION)
         && new ImageHeaderParser(source, byteArrayPool).getType() == ImageType.GIF;
   }

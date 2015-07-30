@@ -6,8 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 
 /**
  * Implements {@link com.bumptech.glide.gifdecoder.GifDecoder.BitmapProvider} by wrapping Glide's
@@ -15,23 +15,23 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
  */
 public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
   private final BitmapPool bitmapPool;
-  @Nullable private final ArrayPool arrayPool;
+  @Nullable private final ByteArrayPool byteArrayPool;
 
   /**
    * Constructs an instance without a shared byte array pool. Byte arrays will be always constructed
    * when requested.
    */
   public GifBitmapProvider(BitmapPool bitmapPool) {
-    this(bitmapPool, null /* arrayPool */);
+    this(bitmapPool, null /*byteArrayPool*/);
   }
 
   /**
-   * Constructs an instance with a shared array pool. Arrays will be reused where
+   * Constructs an instance with a shared byte array pool. Byte arrays will be reused where
    * possible.
    */
-  public GifBitmapProvider(BitmapPool bitmapPool, ArrayPool arrayPool) {
+  public GifBitmapProvider(BitmapPool bitmapPool, @Nullable ByteArrayPool byteArrayPool) {
     this.bitmapPool = bitmapPool;
-    this.arrayPool = arrayPool;
+    this.byteArrayPool = byteArrayPool;
   }
 
   @NonNull
@@ -47,33 +47,17 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
 
   @Override
   public byte[] obtainByteArray(int size) {
-    if (arrayPool == null) {
+    if (byteArrayPool == null) {
       return new byte[size];
     }
-    return arrayPool.get(size, byte[].class);
+    return byteArrayPool.get(size);
   }
 
   @Override
   public void release(byte[] bytes) {
-    if (arrayPool == null) {
+    if (byteArrayPool == null) {
       return;
     }
-    arrayPool.put(bytes, byte[].class);
-  }
-
-  @Override
-  public int[] obtainIntArray(int size) {
-    if (arrayPool == null) {
-      return new int[size];
-    }
-    return arrayPool.get(size, int[].class);
-  }
-
-  @Override
-  public void release(int[] array) {
-    if (arrayPool == null) {
-      return;
-    }
-    arrayPool.put(array, int[].class);
+    byteArrayPool.put(bytes);
   }
 }
