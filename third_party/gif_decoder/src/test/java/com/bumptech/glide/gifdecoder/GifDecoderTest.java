@@ -119,5 +119,15 @@ public class GifDecoderTest {
       // Do nothing.
     }
 
+    @Override
+    public int[] obtainIntArray(int size) {
+      return new int[size];
+    }
+
+    @Override
+    public void release(int[] array) {
+      // Do Nothing
+    }
+
   }
 }

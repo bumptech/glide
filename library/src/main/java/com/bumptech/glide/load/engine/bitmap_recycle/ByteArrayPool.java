@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 /**
  * Pool containing byte[] arrays of various sizes.
+ * TODO: this should be replaced with an ArrayPool
  */
 public interface ByteArrayPool {
   /**
@@ -24,16 +25,4 @@ public interface ByteArrayPool {
    * <p>If an array of the given size isn't in the pool, a new one will be allocated.
    */
   byte[] get(int size);
-
-  /**
-   * Clears all byte arrays from the pool.
-   */
-  void clearMemory();
-
-  /**
-   * Trims the size to the appropriate level.
-   *
-   * @param level A trim specified in {@link android.content.ComponentCallbacks2}.
-   */
-  void trimMemory(int level);
 }
