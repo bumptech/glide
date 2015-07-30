@@ -17,7 +17,7 @@ public class GifHeaderParser {
   public static final String TAG = "GifHeaderParser";
 
   // The minimum frame delay in hundredths of a second.
-  static final int MIN_FRAME_DELAY = 3;
+  static final int MIN_FRAME_DELAY = 2;
   // The default frame delay in hundredths of a second for GIFs with frame delays less than the
   // minimum.
   static final int DEFAULT_FRAME_DELAY = 10;
