@@ -354,7 +354,7 @@ public class FlickrSearchActivity extends AppCompatActivity
         FutureTarget<File> futureTarget = Glide.with(context)
             .downloadOnly()
             .load(photo)
-            .into(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+            .submit(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
 
         try {
           futureTarget.get();

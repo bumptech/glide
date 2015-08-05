@@ -55,7 +55,7 @@ public class HttpUrlFetcherServerTest {
     defaultFollowRedirects = HttpURLConnection.getFollowRedirects();
     HttpURLConnection.setFollowRedirects(false);
     mockWebServer = new MockWebServer();
-    mockWebServer.play();
+    mockWebServer.start();
 
     streamCaptor = ArgumentCaptor.forClass(InputStream.class);
   }
@@ -204,7 +204,7 @@ public class HttpUrlFetcherServerTest {
     MockWebServer tempWebServer = new MockWebServer();
     tempWebServer.enqueue(
         new MockResponse().setBody("test").throttleBody(1, TIMEOUT_TIME_MS, TimeUnit.MILLISECONDS));
-    tempWebServer.play();
+    tempWebServer.start();
 
     try {
       getFetcher().loadData(Priority.HIGH, callback);
@@ -233,7 +233,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   private HttpUrlFetcher getFetcher() {
-    return getFetcher(Headers.NONE);
+    return getFetcher(Headers.DEFAULT);
   }
 
   private HttpUrlFetcher getFetcher(Headers headers) {

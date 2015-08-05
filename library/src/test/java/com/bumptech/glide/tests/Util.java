@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 
+// FIXME move to testutil module
 public class Util {
 
   public static String getExpectedClassId(Class clazz) {
