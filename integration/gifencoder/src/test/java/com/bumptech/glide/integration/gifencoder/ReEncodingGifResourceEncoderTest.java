@@ -3,6 +3,7 @@ package com.bumptech.glide.integration.gifencoder;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -116,6 +117,8 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testEncode_withEncodeTransformationFalse_writesSourceDataToStream()
       throws IOException {
+    // Most likely an instance of http://stackoverflow.com/q/991489/253468
+    assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, false);
     String expected = "testString";
     byte[] data = expected.getBytes("UTF-8");
@@ -307,6 +310,8 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testWritesBytesDirectlyToDiskIfTransformationIsUnitTransformation()
       throws IOException {
+    // Most likely an instance of http://stackoverflow.com/q/991489/253468
+    assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
     when(gifDrawable.getFrameTransformation()).thenReturn(UnitTransformation.<Bitmap>get());
     String expected = "expected";
     when(gifDrawable.getBuffer()).thenReturn(ByteBuffer.wrap(expected.getBytes()));

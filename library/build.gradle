@@ -25,7 +25,7 @@ dependencies {
     testCompile 'com.google.guava:guava-testlib:18.0'
     testCompile "com.google.truth:truth:${TRUTH_VERSION}"
     testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
+    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
     testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testCompile "com.squareup.okhttp:mockwebserver:${MOCKWEBSERVER_VERSION}"
     testCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"

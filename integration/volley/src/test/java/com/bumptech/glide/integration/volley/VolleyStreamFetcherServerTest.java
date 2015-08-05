@@ -202,7 +202,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   private DataFetcher<InputStream> getFetcher() {
-    return getFetcher(Headers.NONE);
+    return getFetcher(Headers.DEFAULT);
   }
 
   private DataFetcher<InputStream> getFetcher(Headers headers) {
