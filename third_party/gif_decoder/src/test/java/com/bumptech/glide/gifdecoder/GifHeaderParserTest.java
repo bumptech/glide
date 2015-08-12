@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.bumptech.glide.gifdecoder.test.GifBytesTestUtil;
 import com.bumptech.glide.testutil.TestUtil;
@@ -213,6 +214,49 @@ public class GifHeaderParserTest {
     assertEquals(expectedFrames, header.frameCount);
     assertEquals(expectedFrames, header.frames.size());
   }
+
+  @Test
+  public void testIsAnimatedMultipleFrames() {
+    final int lzwMinCodeSize = 2;
+    final int numFrames = 3;
+
+    final int frameSize =
+        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+            + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize);
+    ByteBuffer buffer =
+        ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + numFrames * frameSize)
+            .order(ByteOrder.LITTLE_ENDIAN);
+
+    GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+    for (int i = 0; i < numFrames; i++) {
+      GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0 /*numColors*/);
+      GifBytesTestUtil.writeFakeImageData(buffer, 2);
+    }
+
+    parser.setData(buffer.array());
+    assertTrue(parser.isAnimated());
+  }
+
+  @Test
+  public void testIsNotAnimatedOneFrame() {
+    final int lzwMinCodeSize = 2;
+
+    final int frameSize =
+        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+            + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize);
+
+    ByteBuffer buffer =
+        ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + frameSize)
+            .order(ByteOrder.LITTLE_ENDIAN);
+
+    GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+    GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0 /*numColors*/);
+    GifBytesTestUtil.writeFakeImageData(buffer, 2);
+
+    parser.setData(buffer.array());
+    assertFalse(parser.isAnimated());
+  }
+
 
   @Test(expected = IllegalStateException.class)
   public void testThrowsIfParseHeaderCalledBeforeSetData() {

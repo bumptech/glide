@@ -80,12 +80,31 @@ public class GifHeaderParser {
   }
 
   /**
+   * Determines if the GIF is animated by trying to read in the first 2 frames
+   * This method reparses the data even if the header has already been read
+   */
+  public boolean isAnimated() {
+    readHeader();
+    if (!err()) {
+      readContents(2 /* maxFrames */);
+    }
+    return header.frameCount > 1;
+  }
+
+  /**
    * Main file parser. Reads GIF content blocks.
    */
   private void readContents() {
+    readContents(Integer.MAX_VALUE /* maxFrames */);
+  }
+
+  /**
+   * Main file parser. Reads GIF content blocks. Stops after reading maxFrames
+   */
+  private void readContents(int maxFrames) {
     // Read GIF file content blocks.
     boolean done = false;
-    while (!(done || err())) {
+    while (!(done || err() || header.frameCount > maxFrames)) {
       int code = read();
       switch (code) {
         // Image separator.
