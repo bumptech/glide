@@ -39,30 +39,30 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testTrimMemoryModerate() {
+  public void testTrimMemoryBackground() {
     TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
 
-    harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
+    harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
 
     verify(harness.listener).onResourceRemoved(eq(harness.first));
     verify(harness.listener).onResourceRemoved(eq(harness.second));
   }
 
   @Test
-  public void testTrimMemoryComplete() {
+  public void testTrimMemoryModerate() {
     TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
 
-    harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+    harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
 
     verify(harness.listener).onResourceRemoved(harness.first);
     verify(harness.listener).onResourceRemoved(harness.second);
   }
 
   @Test
-  public void testTrimMemoryBackground() {
+  public void testTrimMemoryUiHidden() {
     TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
 
-    harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
+    harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
 
     verify(harness.listener).onResourceRemoved(harness.first);
     verify(harness.listener, never()).onResourceRemoved(harness.second);

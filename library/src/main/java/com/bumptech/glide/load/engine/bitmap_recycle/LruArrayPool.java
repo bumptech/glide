@@ -106,9 +106,9 @@ public final class LruArrayPool implements ArrayPool {
 
   @Override
   public synchronized void trimMemory(int level) {
-    if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
+    if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
       clearMemory();
-    } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+    } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
       evictToSize(maxSize / 2);
     }
   }

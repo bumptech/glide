@@ -2,7 +2,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -68,18 +68,18 @@ public class LruArrayPoolTest {
   }
 
   @Test
-  public void testTrimMemoryBackgroundOrLessRemovesHalfOfArrays() {
-    testTrimMemory(MAX_SIZE, TRIM_MEMORY_BACKGROUND, MAX_SIZE / 2);
+  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfArrays() {
+    testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
   }
 
   @Test
-  public void testTrimMemoryBackgroundOrLessRemovesNoArraysIfPoolLessThanHalfFull() {
-    testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_BACKGROUND, MAX_SIZE / 2);
+  public void testTrimMemoryUiHiddenOrLessRemovesNoArraysIfPoolLessThanHalfFull() {
+    testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
   }
 
   @Test
-  public void testTrimMemoryModerateOrGreaterRemovesAllArrays() {
-    for (int trimLevel : new int[] {TRIM_MEMORY_MODERATE, TRIM_MEMORY_COMPLETE}) {
+  public void testTrimMemoryBackgroundOrGreaterRemovesAllArrays() {
+    for (int trimLevel : new int[] {TRIM_MEMORY_BACKGROUND, TRIM_MEMORY_COMPLETE}) {
       testTrimMemory(MAX_SIZE, trimLevel, 0);
     }
   }
