@@ -115,9 +115,9 @@ public final class LazyHeaders implements Headers {
         }
 
         private boolean copyOnModify = true;
-        private boolean isEncodingDefault = true;
         private Map<String, List<LazyHeaderFactory>> headers = DEFAULT_HEADERS;
-        private boolean isUserAgentDefault = headers.containsKey(DEFAULT_USER_AGENT);
+        private boolean isEncodingDefault = true;
+        private boolean isUserAgentDefault = true;
 
         /**
          * Adds a value for the given header and returns this builder.

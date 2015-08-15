@@ -8,6 +8,8 @@ import com.google.common.testing.EqualsTester;
 
 import com.bumptech.glide.load.model.LazyHeaders.Builder;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -18,6 +20,22 @@ import java.util.Map;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, emulateSdk = 18)
 public class LazyHeadersTest {
+    private static final String DEFAULT_USER_AGENT = "default_user_agent";
+    private static final String DEFAULT_USER_AGENT_PROPERTY = "http.agent";
+    private String initialUserAgent;
+
+    @Before
+    public void setUp() {
+        initialUserAgent = System.getProperty(DEFAULT_USER_AGENT_PROPERTY);
+        System.setProperty(DEFAULT_USER_AGENT_PROPERTY, DEFAULT_USER_AGENT);
+    }
+
+    @After
+    public void tearDown() {
+        if (initialUserAgent != null) {
+            System.setProperty(DEFAULT_USER_AGENT_PROPERTY, initialUserAgent);
+        }
+    }
 
     @Test
     public void testIncludesEagerHeaders() {
