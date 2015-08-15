@@ -112,9 +112,11 @@ public final class MemorySizeCalculator {
 
   @TargetApi(Build.VERSION_CODES.KITKAT)
   private static boolean isLowMemoryDevice(ActivityManager activityManager) {
-    final int sdkInt = Build.VERSION.SDK_INT;
-    return sdkInt < Build.VERSION_CODES.HONEYCOMB
-        || (sdkInt >= Build.VERSION_CODES.KITKAT && activityManager.isLowRamDevice());
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      return activityManager.isLowRamDevice();
+    } else {
+      return Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB;
+    }
   }
 
   /**
@@ -232,7 +234,7 @@ public final class MemorySizeCalculator {
       return new MemorySizeCalculator(context, activityManager, screenDimensions,
           memoryCacheScreens, bitmapPoolScreens, arrayPoolSizeBytes, maxSizeMultiplier,
           lowMemoryMaxSizeMultiplier);
-    }
+      }
   }
 
   private static final class DisplayMetricsScreenDimensions implements ScreenDimensions {
