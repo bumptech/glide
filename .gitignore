@@ -39,4 +39,4 @@ docs/**/*
 **/.idea/dataSources.ids
 **/.idea/datasources.xml
 **/.idea/uiDesigner.xml
-
+**/.idea/runConfigurations.xml
