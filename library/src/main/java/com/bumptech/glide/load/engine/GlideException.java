@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.bumptech.glide.load.DataSource;
@@ -178,6 +180,7 @@ public final class GlideException extends Exception {
   }
 
   private static final class IndentedAppendable implements Appendable {
+    private static final String EMPTY_SEQUENCE = "";
     private static final String INDENT = "  ";
     private final Appendable appendable;
     private boolean printedNewLine = true;
@@ -198,19 +201,31 @@ public final class GlideException extends Exception {
     }
 
     @Override
-    public Appendable append(CharSequence charSequence) throws IOException {
+    public Appendable append(@Nullable CharSequence charSequence) throws IOException {
+      charSequence = safeSequence(charSequence);
       return append(charSequence, 0, charSequence.length());
     }
 
     @Override
-    public Appendable append(CharSequence csq, int start, int end) throws IOException {
+    public Appendable append(@Nullable CharSequence charSequence, int start, int end)
+        throws IOException {
+      charSequence = safeSequence(charSequence);
       if (printedNewLine) {
         printedNewLine = false;
         appendable.append(INDENT);
       }
-      printedNewLine = csq.length() > 0 && csq.charAt(end - 1) == '\n';
-      appendable.append(csq, start, end);
+      printedNewLine = charSequence.length() > 0 && charSequence.charAt(end - 1) == '\n';
+      appendable.append(charSequence, start, end);
       return this;
+    }
+
+    @NonNull
+    private CharSequence safeSequence(@Nullable CharSequence sequence) {
+      if (sequence == null) {
+        return EMPTY_SEQUENCE;
+      } else {
+        return sequence;
+      }
     }
   }
 }
