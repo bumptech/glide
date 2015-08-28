@@ -22,6 +22,7 @@ import java.io.OutputStream;
  *     e.setDelay(1000);   // 1 frame per sec
  *     e.addFrame(image1);
  *     e.addFrame(image2);
+ *     e.addFrame(image3, 100, 100);    // set position of the frame
  *     e.finish();
  * </pre>
  *
@@ -44,6 +45,10 @@ public class AnimatedGifEncoder {
     private int width; // image size
 
     private int height;
+
+    private int fixedWidth;   // set by setSize()
+
+    private int fixedHeight;
 
     private Integer transparent = null; // transparent color if given
 
@@ -140,22 +145,43 @@ public class AnimatedGifEncoder {
      * Adds next GIF frame. The frame is not written immediately, but is actually
      * deferred until the next frame is received so that timing data can be
      * inserted. Invoking <code>finish()</code> flushes all frames. If
-     * <code>setSize</code> was not invoked, the size of the first image is used
-     * for all subsequent frames.
+     * <code>setSize</code> was invoked, the size is used for all subsequent frames.
+     * Otherwise, the actual size of the image is used for each frames.
      *
      * @param im
      *          BufferedImage containing frame to write.
      * @return true if successful.
      */
     public boolean addFrame(Bitmap im) {
+        return addFrame(im, 0, 0);
+    }
+
+    /**
+     * Adds next GIF frame to the specified position. The frame is not written immediately, but is actually
+     * deferred until the next frame is received so that timing data can be
+     * inserted. Invoking <code>finish()</code> flushes all frames. If
+     * <code>setSize</code> was invoked, the size is used for all subsequent frames.
+     * Otherwise, the actual size of the image is used for each frames.
+     *
+     * @param im
+     *          BufferedImage containing frame to write.
+     * @param x
+     *          x position of this frame
+     * @param y
+     *          y position of this frame
+     * @return true if successful.
+     */
+    public boolean addFrame(Bitmap im, int x, int y) {
         if ((im == null) || !started) {
             return false;
         }
         boolean ok = true;
         try {
-            if (!sizeSet) {
-                // use first frame's size
-                setSize(im.getWidth(), im.getHeight());
+            if (sizeSet) {
+                setFrameSize(fixedWidth, fixedHeight);
+            }
+            else{
+                setFrameSize(im.getWidth(), im.getHeight());
             }
             image = im;
             getImagePixels(); // convert to correct format if necessary
@@ -169,7 +195,7 @@ public class AnimatedGifEncoder {
                 }
             }
             writeGraphicCtrlExt(); // write graphic control extension
-            writeImageDesc(); // image descriptor
+            writeImageDesc(x, y); // image descriptor
             if (!firstFrame) {
                 writePalette(); // local color table
             }
@@ -243,8 +269,8 @@ public class AnimatedGifEncoder {
     }
 
     /**
-     * Sets the GIF frame size. The default size is the size of the first frame
-     * added if this method is not invoked.
+     * Sets the fixed GIF frame size for all the frames.
+     * This should be called before start.
      *
      * @param w
      *          int frame width.
@@ -252,15 +278,30 @@ public class AnimatedGifEncoder {
      *          int frame width.
      */
     public void setSize(int w, int h) {
-        if (started && !firstFrame)
+        if (started)
             return;
+
+        fixedWidth = w;
+        fixedHeight = h;
+        if (fixedWidth < 1)
+            fixedWidth = 320;
+        if (fixedHeight < 1)
+            fixedHeight = 240;
+
+        sizeSet = true;
+    }
+
+    /**
+     * Sets current GIF frame size.
+     *
+     * @param w
+     *          int frame width.
+     * @param h
+     *          int frame width.
+     */
+    private void setFrameSize(int w, int h) {
         width = w;
         height = h;
-        if (width < 1)
-            width = 320;
-        if (height < 1)
-            height = 240;
-        sizeSet = true;
     }
 
     /**
@@ -442,10 +483,10 @@ public class AnimatedGifEncoder {
     /**
      * Writes Image Descriptor
      */
-    private void writeImageDesc() throws IOException {
+    private void writeImageDesc(int x, int y) throws IOException {
         out.write(0x2c); // image separator
-        writeShort(0); // image position x,y = 0,0
-        writeShort(0);
+        writeShort(x); // image position
+        writeShort(y);
         writeShort(width); // image size
         writeShort(height);
         // packed fields
