@@ -163,12 +163,14 @@ public class AnimatedGifEncoder {
      * <code>setSize</code> was invoked, the size is used for all subsequent frames.
      * Otherwise, the actual size of the image is used for each frames.
      *
+     * See page 11 of http://giflib.sourceforge.net/gif89.txt for the position of the frame
+     *
      * @param im
      *          BufferedImage containing frame to write.
      * @param x
-     *          x position of this frame
+     *          Column number, in pixels, of the left edge of the image, with respect to the left edge of the Logical Screen.
      * @param y
-     *          y position of this frame
+     *          Row number, in pixels, of the top edge of the image with respect to the top edge of the Logical Screen.
      * @return true if successful.
      */
     public boolean addFrame(Bitmap im, int x, int y) {
@@ -278,15 +280,18 @@ public class AnimatedGifEncoder {
      *          int frame width.
      */
     public void setSize(int w, int h) {
-        if (started)
+        if (started) {
             return;
+        }
 
         fixedWidth = w;
         fixedHeight = h;
-        if (fixedWidth < 1)
+        if (fixedWidth < 1) {
             fixedWidth = 320;
-        if (fixedHeight < 1)
+        }
+        if (fixedHeight < 1) {
             fixedHeight = 240;
+        }
 
         sizeSet = true;
     }
