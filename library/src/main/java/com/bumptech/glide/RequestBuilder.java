@@ -368,7 +368,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       throw new IllegalArgumentException("You must pass in a non null View");
     }
 
-    if (!requestOptions.isTransformationSet() && view.getScaleType() != null) {
+    if (!requestOptions.isTransformationSet()
+        && requestOptions.isTransformationAllowed()
+        && view.getScaleType() != null) {
       if (requestOptions.isLocked()) {
         requestOptions = requestOptions.clone();
       }
