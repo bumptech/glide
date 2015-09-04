@@ -45,37 +45,37 @@ public final class TransformationUtils {
    * Bitmap with the given dimensions is passed in as well.
    *
    * @param pool     The BitmapPool to obtain a bitmap from.
-   * @param toCrop   The Bitmap to resize.
+   * @param inBitmap   The Bitmap to resize.
    * @param width    The width in pixels of the final Bitmap.
    * @param height   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap centerCrop(@NonNull BitmapPool pool, @NonNull Bitmap toCrop, int width,
+  public static Bitmap centerCrop(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
       int height) {
-    if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
-      return toCrop;
+    if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
+      return inBitmap;
     }
     // From ImageView/Bitmap.createScaledBitmap.
     final float scale;
     float dx = 0, dy = 0;
     Matrix m = new Matrix();
-    if (toCrop.getWidth() * height > width * toCrop.getHeight()) {
-      scale = (float) height / (float) toCrop.getHeight();
-      dx = (width - toCrop.getWidth() * scale) * 0.5f;
+    if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
+      scale = (float) height / (float) inBitmap.getHeight();
+      dx = (width - inBitmap.getWidth() * scale) * 0.5f;
     } else {
-      scale = (float) width / (float) toCrop.getWidth();
-      dy = (height - toCrop.getHeight() * scale) * 0.5f;
+      scale = (float) width / (float) inBitmap.getWidth();
+      dy = (height - inBitmap.getHeight() * scale) * 0.5f;
     }
 
     m.setScale(scale, scale);
     m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
 
-    Bitmap result = pool.get(width, height, getSafeConfig(toCrop));
+    Bitmap result = pool.get(width, height, getSafeConfig(inBitmap));
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
-    TransformationUtils.setAlpha(toCrop, result);
+    TransformationUtils.setAlpha(inBitmap, result);
 
     Canvas canvas = new Canvas(result);
-    canvas.drawBitmap(toCrop, m, DEFAULT_PAINT);
+    canvas.drawBitmap(inBitmap, m, DEFAULT_PAINT);
     clear(canvas);
     return result;
   }
@@ -85,46 +85,46 @@ public final class TransformationUtils {
    * dimensions maintain the original proportions.
    *
    * @param pool   The BitmapPool obtain a bitmap from.
-   * @param toFit  The Bitmap to shrink.
+   * @param inBitmap  The Bitmap to shrink.
    * @param width  The width in pixels the final image will fit within.
    * @param height The height in pixels the final image will fit within.
    * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or
    * height matches the given dimensions and toFit fits within the given dimensions
    */
-  public static Bitmap fitCenter(@NonNull BitmapPool pool, @NonNull Bitmap toFit, int width,
+  public static Bitmap fitCenter(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
       int height) {
-    if (toFit.getWidth() == width && toFit.getHeight() == height) {
+    if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size matches input, returning input");
       }
-      return toFit;
+      return inBitmap;
     }
-    final float widthPercentage = width / (float) toFit.getWidth();
-    final float heightPercentage = height / (float) toFit.getHeight();
+    final float widthPercentage = width / (float) inBitmap.getWidth();
+    final float heightPercentage = height / (float) inBitmap.getHeight();
     final float minPercentage = Math.min(widthPercentage, heightPercentage);
 
     // take the floor of the target width/height, not round. If the matrix
     // passed into drawBitmap rounds differently, we want to slightly
     // overdraw, not underdraw, to avoid artifacts from bitmap reuse.
-    final int targetWidth = (int) (minPercentage * toFit.getWidth());
-    final int targetHeight = (int) (minPercentage * toFit.getHeight());
+    final int targetWidth = (int) (minPercentage * inBitmap.getWidth());
+    final int targetHeight = (int) (minPercentage * inBitmap.getHeight());
 
-    if (toFit.getWidth() == targetWidth && toFit.getHeight() == targetHeight) {
+    if (inBitmap.getWidth() == targetWidth && inBitmap.getHeight() == targetHeight) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "adjusted target size matches input, returning input");
       }
-      return toFit;
+      return inBitmap;
     }
 
-    Bitmap.Config config = getSafeConfig(toFit);
+    Bitmap.Config config = getSafeConfig(inBitmap);
     Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
 
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
-    TransformationUtils.setAlpha(toFit, toReuse);
+    TransformationUtils.setAlpha(inBitmap, toReuse);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG, "request: " + width + "x" + height);
-      Log.v(TAG, "toFit:   " + toFit.getWidth() + "x" + toFit.getHeight());
+      Log.v(TAG, "toFit:   " + inBitmap.getWidth() + "x" + inBitmap.getHeight());
       Log.v(TAG, "toReuse: " + toReuse.getWidth() + "x" + toReuse.getHeight());
       Log.v(TAG, "minPct:   " + minPercentage);
     }
@@ -132,7 +132,7 @@ public final class TransformationUtils {
     Canvas canvas = new Canvas(toReuse);
     Matrix matrix = new Matrix();
     matrix.setScale(minPercentage, minPercentage);
-    canvas.drawBitmap(toFit, matrix, DEFAULT_PAINT);
+    canvas.drawBitmap(inBitmap, matrix, DEFAULT_PAINT);
     clear(canvas);
 
     return toReuse;
@@ -143,12 +143,12 @@ public final class TransformationUtils {
    * transform. This keeps {@link android.graphics.Bitmap#hasAlpha()}} consistent before and after
    * the transformation for transformations that don't add or remove transparent pixels.
    *
-   * @param toTransform The {@link android.graphics.Bitmap} that will be transformed.
+   * @param inBitmap The {@link android.graphics.Bitmap} that will be transformed.
    * @param outBitmap   The {@link android.graphics.Bitmap} that will be returned from the
    *                    transformation.
    */
-  public static void setAlpha(Bitmap toTransform, Bitmap outBitmap) {
-    setAlphaIfAvailable(outBitmap, toTransform.hasAlpha());
+  public static void setAlpha(Bitmap inBitmap, Bitmap outBitmap) {
+    setAlphaIfAvailable(outBitmap, inBitmap.hasAlpha());
   }
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
@@ -216,32 +216,32 @@ public final class TransformationUtils {
    *
    * @param pool            A pool that may or may not contain an image of the necessary
    *                        dimensions.
-   * @param toOrient        The bitmap to rotate/flip.
+   * @param inBitmap        The bitmap to rotate/flip.
    * @param exifOrientation the exif orientation [1-8].
    * @return The rotated and/or flipped image or toOrient if no rotation or flip was necessary.
    */
-  public static Bitmap rotateImageExif(@NonNull BitmapPool pool, @NonNull Bitmap toOrient,
+  public static Bitmap rotateImageExif(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
       int exifOrientation) {
     final Matrix matrix = new Matrix();
     initializeMatrixForRotation(exifOrientation, matrix);
     if (matrix.isIdentity()) {
-      return toOrient;
+      return inBitmap;
     }
 
     // From Bitmap.createBitmap.
-    final RectF newRect = new RectF(0, 0, toOrient.getWidth(), toOrient.getHeight());
+    final RectF newRect = new RectF(0, 0, inBitmap.getWidth(), inBitmap.getHeight());
     matrix.mapRect(newRect);
 
     final int newWidth = Math.round(newRect.width());
     final int newHeight = Math.round(newRect.height());
 
-    Bitmap.Config config = getSafeConfig(toOrient);
+    Bitmap.Config config = getSafeConfig(inBitmap);
     Bitmap result = pool.get(newWidth, newHeight, config);
 
     matrix.postTranslate(-newRect.left, -newRect.top);
 
     final Canvas canvas = new Canvas(result);
-    canvas.drawBitmap(toOrient, matrix, DEFAULT_PAINT);
+    canvas.drawBitmap(inBitmap, matrix, DEFAULT_PAINT);
     clear(canvas);
 
     return result;
@@ -252,25 +252,28 @@ public final class TransformationUtils {
    * have the same width and height equal to the min-edge of the result image.
    *
    * @param pool   The BitmapPool obtain a bitmap from.
-   * @param toCrop   The Bitmap to resize.
+   * @param inBitmap   The Bitmap to resize.
    * @param destWidth    The width in pixels of the final Bitmap.
    * @param destHeight   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap circleCrop(@NonNull BitmapPool pool, @NonNull Bitmap toCrop, int destWidth,
-      int destHeight) {
+  public static Bitmap circleCrop(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
+      int destWidth, int destHeight) {
     int destMinEdge = Math.min(destWidth, destHeight);
     float radius = destMinEdge / 2f;
     Rect destRect = new Rect((destWidth - destMinEdge) / 2, (destHeight - destMinEdge) / 2,
         destMinEdge, destMinEdge);
 
-    int srcWidth = toCrop.getWidth();
-    int srcHeight = toCrop.getHeight();
+    int srcWidth = inBitmap.getWidth();
+    int srcHeight = inBitmap.getHeight();
     int srcMinEdge = Math.min(srcWidth, srcHeight);
     Rect srcRect = new Rect((srcWidth - srcMinEdge) / 2, (srcHeight - srcMinEdge) / 2,
         srcMinEdge, srcMinEdge);
 
-    Bitmap result = pool.get(destWidth, destHeight, getSafeConfig(toCrop));
+    // Alpha is required for this transformation.
+    Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
+
+    Bitmap result = pool.get(destWidth, destHeight, getSafeConfig(toTransform));
     setAlphaIfAvailable(result, true /*hasAlpha*/);
     Canvas canvas = new Canvas(result);
 
@@ -279,41 +282,50 @@ public final class TransformationUtils {
         CIRCLE_CROP_SHAPE_PAINT);
 
     // Draw the bitmap in the circle
-    canvas.drawBitmap(toCrop, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
+    canvas.drawBitmap(toTransform, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
     clear(canvas);
 
+    if (!toTransform.equals(inBitmap)) {
+      pool.put(toTransform);
+    }
+
     return result;
+  }
+
+  private static Bitmap getAlphaSafeBitmap(@NonNull BitmapPool pool,
+      @NonNull Bitmap maybeAlphaSafe) {
+    if (Bitmap.Config.ARGB_8888.equals(maybeAlphaSafe.getConfig())) {
+      return maybeAlphaSafe;
+    }
+
+    Bitmap argbBitmap = pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(),
+        Bitmap.Config.ARGB_8888);
+    new Canvas(argbBitmap).drawBitmap(maybeAlphaSafe, 0 /*left*/, 0 /*top*/, null /*pain*/);
+
+    // We now own this Bitmap. It's our responsibility to replace it in the pool outside this method
+    // when we're finished with it.
+    return argbBitmap;
   }
 
   /**
    * Creates a bitmap from a source bitmap and rounds the corners.
    *
-   * @param toTransform the source bitmap to use as a basis for the created bitmap.
+   * @param inBitmap the source bitmap to use as a basis for the created bitmap.
    * @param width the width of the generated bitmap.
    * @param height the height of the generated bitmap.
    * @param roundingRadius the corner radius to be applied (in device-specific pixels).
-   * @return a {@link Bitmap} similar to toTransform but with rounded corners.
+   * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
    * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
    */
-  public static Bitmap roundedCorners(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
+  public static Bitmap roundedCorners(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
       int width, int height, int roundingRadius) {
     Preconditions.checkArgument(width > 0, "width must be greater than 0.");
     Preconditions.checkArgument(height > 0, "height must be greater than 0.");
     Preconditions.checkArgument(roundingRadius > 0, "roundingRadius must be greater than 0.");
 
-    boolean recycleToTransform = false;
-
     // Alpha is required for this transformation.
-    if (!Bitmap.Config.ARGB_8888.equals(toTransform.getConfig())) {
-      Bitmap argbBitmap = pool.get(toTransform.getWidth(), toTransform.getHeight(),
-          Bitmap.Config.ARGB_8888);
-      new Canvas(argbBitmap).drawBitmap(toTransform, 0, 0, null);
-
-      // We now own toTransform. It's our responsibility to replace it in the pool.
-      toTransform = argbBitmap;
-      recycleToTransform = true;
-    }
-    final Bitmap result = pool.get(width, height, Bitmap.Config.ARGB_8888);
+    Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
+    Bitmap result = pool.get(width, height, Bitmap.Config.ARGB_8888);
 
     setAlphaIfAvailable(result, true /* hasAlpha */);
 
@@ -328,7 +340,7 @@ public final class TransformationUtils {
     canvas.drawRoundRect(rect, roundingRadius, roundingRadius, paint);
     clear(canvas);
 
-    if (recycleToTransform) {
+    if (!toTransform.equals(inBitmap)) {
       pool.put(toTransform);
     }
 
