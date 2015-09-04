@@ -39,7 +39,8 @@ import java.io.OutputStream;
 public class AnimatedGifEncoder {
     private static final String TAG = "AnimatedGifEncoder";
 
-    // The minimum % of an images pixels that must be transparent for us to set a transparent index automatically.
+    // The minimum % of an images pixels that must be transparent for us to set a transparent index
+    // automatically.
     private static final double MIN_TRANSPARENT_PERCENTAGE = 4d;
 
     private int width; // image size
@@ -157,20 +158,22 @@ public class AnimatedGifEncoder {
     }
 
     /**
-     * Adds next GIF frame to the specified position. The frame is not written immediately, but is actually
-     * deferred until the next frame is received so that timing data can be
-     * inserted. Invoking <code>finish()</code> flushes all frames. If
-     * <code>setSize</code> was invoked, the size is used for all subsequent frames.
-     * Otherwise, the actual size of the image is used for each frames.
+     * Adds next GIF frame to the specified position. The frame is not written immediately, but is
+     * actually deferred until the next frame is received so that timing data can be inserted.
+     * Invoking <code>finish()</code> flushes all frames. If <code>setSize</code> was invoked, the
+     * size is used for all subsequent frames. Otherwise, the actual size of the image is used for
+     * each frame.
      *
      * See page 11 of http://giflib.sourceforge.net/gif89.txt for the position of the frame
      *
      * @param im
      *          BufferedImage containing frame to write.
      * @param x
-     *          Column number, in pixels, of the left edge of the image, with respect to the left edge of the Logical Screen.
+     *          Column number, in pixels, of the left edge of the image, with respect to the left
+     *          edge of the Logical Screen.
      * @param y
-     *          Row number, in pixels, of the top edge of the image with respect to the top edge of the Logical Screen.
+     *          Row number, in pixels, of the top edge of the image with respect to the top edge of
+     *          the Logical Screen.
      * @return true if successful.
      */
     public boolean addFrame(Bitmap im, int x, int y) {
@@ -181,8 +184,7 @@ public class AnimatedGifEncoder {
         try {
             if (sizeSet) {
                 setFrameSize(fixedWidth, fixedHeight);
-            }
-            else{
+            } else {
                 setFrameSize(im.getWidth(), im.getHeight());
             }
             image = im;
@@ -446,11 +448,12 @@ public class AnimatedGifEncoder {
         }
 
         double transparentPercentage = 100 * totalTransparentPixels / (double) pixelsInt.length;
-        // Assume images with greater where more than n% of the pixels are transparent actually have transparency.
-        // See issue #214.
+        // Assume images with greater where more than n% of the pixels are transparent actually have
+        // transparency. See issue #214.
         hasTransparentPixels = transparentPercentage > MIN_TRANSPARENT_PERCENTAGE;
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "got pixels for frame with " + transparentPercentage + "% transparent pixels");
+            Log.d(TAG, "got pixels for frame with " + transparentPercentage
+                + "% transparent pixels");
         }
     }
 
