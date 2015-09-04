@@ -4,7 +4,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
  * A fixed size LruByteArrayPool that evicts arrays using an LRU strategy to keep the pool under
  * the maximum byte size.
  *
- * TODO: update Glide to use ArrayPool<byte[]> instead
+ * TODO: update Glide to use ArrayPool<byte[]> instead.
  */
 public final class LruByteArrayPool implements ByteArrayPool {
   // 4MB.
@@ -12,7 +12,7 @@ public final class LruByteArrayPool implements ByteArrayPool {
 
   private final ArrayPool arrayPool;
 
-  public LruByteArrayPool(){
+  public LruByteArrayPool() {
     this(DEFAULT_SIZE);
   }
 

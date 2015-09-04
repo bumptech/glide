@@ -1,6 +1,9 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.bumptech.glide.util.Preconditions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +27,6 @@ public final class LruArrayPool implements ArrayPool {
   private final GroupedLinkedMap<Key, Object> groupedMap = new GroupedLinkedMap<>();
   private final KeyPool keyPool = new KeyPool();
   private final Map<Class, NavigableMap<Integer, Integer>> sortedSizes = new HashMap<>();
-  private final Map<Class, ArrayPool> pools = new HashMap<>();
   private final Map<Class, ArrayAdapterInterface> adapters = new HashMap<>();
   private final int maxSize;
   private int currentSize;
@@ -40,7 +42,7 @@ public final class LruArrayPool implements ArrayPool {
 
   @Override
   public synchronized <T> void put(T array, Class<T> arrayClass) {
-    ArrayAdapterInterface arrayAdapter = getAdapterFromType(arrayClass);
+    ArrayAdapterInterface<T> arrayAdapter = getAdapterFromType(arrayClass);
     int size = arrayAdapter.getArrayLength(array);
     if (!isSmallEnoughForReuse(size)) {
       return;
@@ -68,7 +70,7 @@ public final class LruArrayPool implements ArrayPool {
         key = keyPool.get(size, arrayClass);
       }
 
-      result = (T) groupedMap.get(key);
+      result = getArrayForKey(key);
       if (result != null) {
         currentSize -= arrayAdapter.getArrayLength(result) * arrayAdapter.getElementSizeInBytes();
         decrementArrayOfSize(arrayAdapter.getArrayLength(result), arrayClass);
@@ -84,6 +86,12 @@ public final class LruArrayPool implements ArrayPool {
       result = arrayAdapter.newArray(size);
     }
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Nullable
+  private <T> T getArrayForKey(Key key) {
+    return (T) groupedMap.get(key);
   }
 
   private boolean isSmallEnoughForReuse(int intSize) {
@@ -120,7 +128,8 @@ public final class LruArrayPool implements ArrayPool {
   private void evictToSize(int size) {
     while (currentSize > size) {
       Object evicted = groupedMap.removeLast();
-      ArrayAdapterInterface arrayAdapter = getAdapterFromType(evicted.getClass());
+      Preconditions.checkNotNull(evicted);
+      ArrayAdapterInterface<Object> arrayAdapter = getAdapterFromObject(evicted);
       currentSize -= arrayAdapter.getArrayLength(evicted) * arrayAdapter.getElementSizeInBytes();
       decrementArrayOfSize(arrayAdapter.getArrayLength(evicted), evicted.getClass());
       if (Log.isLoggable(arrayAdapter.getTag(), Log.VERBOSE)) {
@@ -129,7 +138,7 @@ public final class LruArrayPool implements ArrayPool {
     }
   }
 
-  private void decrementArrayOfSize(int size, Class arrayClass) {
+  private void decrementArrayOfSize(int size, Class<?> arrayClass) {
     NavigableMap<Integer, Integer> sizes = getSizesForAdapter(arrayClass);
     Integer current = sizes.get(size);
     if (current == null) {
@@ -143,7 +152,7 @@ public final class LruArrayPool implements ArrayPool {
     }
   }
 
-  private NavigableMap<Integer, Integer> getSizesForAdapter(Class arrayClass) {
+  private NavigableMap<Integer, Integer> getSizesForAdapter(Class<?> arrayClass) {
     NavigableMap<Integer, Integer> sizes = sortedSizes.get(arrayClass);
     if (sizes == null) {
       sizes = new TreeMap<>();
@@ -152,7 +161,13 @@ public final class LruArrayPool implements ArrayPool {
     return sizes;
   }
 
-  private ArrayAdapterInterface getAdapterFromType(Class arrayPoolClass) {
+  @SuppressWarnings("unchecked")
+  private <T> ArrayAdapterInterface<T> getAdapterFromObject(T object) {
+    return (ArrayAdapterInterface<T>) getAdapterFromType(object.getClass());
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> ArrayAdapterInterface<T> getAdapterFromType(Class<T> arrayPoolClass) {
     ArrayAdapterInterface adapter = adapters.get(arrayPoolClass);
     if (adapter == null) {
       if (arrayPoolClass.equals(int[].class)) {
@@ -170,14 +185,14 @@ public final class LruArrayPool implements ArrayPool {
 
   // VisibleForTesting
   int getCurrentSize() {
-    int cSize = 0;
-    for (Class type : sortedSizes.keySet()) {
+    int currentSize = 0;
+    for (Class<?> type : sortedSizes.keySet()) {
       for (Integer size : sortedSizes.get(type).keySet()) {
-        ArrayAdapterInterface adapter = getAdapterFromType(type);
-        cSize += size * sortedSizes.get(type).get(size) * adapter.getElementSizeInBytes();
+        ArrayAdapterInterface<?> adapter = getAdapterFromType(type);
+        currentSize += size * sortedSizes.get(type).get(size) * adapter.getElementSizeInBytes();
       }
     }
-    return cSize;
+    return currentSize;
   }
 
   private static final class KeyPool extends BaseKeyPool<Key> {

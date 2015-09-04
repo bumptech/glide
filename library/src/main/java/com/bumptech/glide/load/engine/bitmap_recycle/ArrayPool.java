@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 /**
- * Interface for an array pool that pools arrays of different types
+ * Interface for an array pool that pools arrays of different types.
  */
 public interface ArrayPool {
   /**

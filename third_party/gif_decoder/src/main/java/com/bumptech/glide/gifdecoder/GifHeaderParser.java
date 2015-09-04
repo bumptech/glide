@@ -81,7 +81,7 @@ public class GifHeaderParser {
 
   /**
    * Determines if the GIF is animated by trying to read in the first 2 frames
-   * This method reparses the data even if the header has already been read
+   * This method reparses the data even if the header has already been read.
    */
   public boolean isAnimated() {
     readHeader();

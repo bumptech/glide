@@ -205,7 +205,7 @@ public final class MemorySizeCalculator {
 
     /**
      * Sets the size in bytes of the {@link
-     * com.bumptech.glide.load.engine.bitmap_recycle.GenericArrayPool} to use to store temporary
+     * com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool} to use to store temporary
      * arrays while decoding data and returns this builder.
      *
      * <p>This number will be halved on low memory devices that return {@code true} from

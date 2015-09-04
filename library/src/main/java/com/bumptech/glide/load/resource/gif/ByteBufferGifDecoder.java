@@ -47,7 +47,6 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   private final Context context;
   private final GifHeaderParserPool parserPool;
   private final BitmapPool bitmapPool;
-  private final ArrayPool arrayPool;
   private final GifDecoderFactory gifDecoderFactory;
   private final GifBitmapProvider provider;
 
@@ -69,7 +68,6 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
       GifDecoderFactory gifDecoderFactory) {
     this.context = context;
     this.bitmapPool = bitmapPool;
-    this.arrayPool = arrayPool;
     this.gifDecoderFactory = gifDecoderFactory;
     this.provider = new GifBitmapProvider(bitmapPool, arrayPool);
     this.parserPool = parserPool;

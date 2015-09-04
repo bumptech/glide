@@ -106,7 +106,7 @@ public class BaseRequestOptionsTest {
   public void testApplyingOptions_withTransformation_overridesDontTransform() {
     options.dontTransform();
     TestOptions other = new TestOptions();
-    other.transform(RuntimeEnvironment.application, transformation);;
+    other.transform(RuntimeEnvironment.application, transformation);
 
     options.apply(other);
 

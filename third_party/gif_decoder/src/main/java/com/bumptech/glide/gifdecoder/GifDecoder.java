@@ -171,13 +171,13 @@ public class GifDecoder {
     void release(byte[] bytes);
 
     /**
-     * Returns an int array used for decoding/generating the frame bitmaps
+     * Returns an int array used for decoding/generating the frame bitmaps.
      * @param size
      */
     int[] obtainIntArray(int size);
 
     /**
-     * Release the given array back to the pool
+     * Release the given array back to the pool.
      * @param array
      */
     void release(int[] array);

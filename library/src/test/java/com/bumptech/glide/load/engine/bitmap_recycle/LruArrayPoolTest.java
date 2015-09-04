@@ -99,7 +99,7 @@ public class LruArrayPoolTest {
 
   private Object createArray(Class type, int size, int value) {
     Object array = null;
-    if (type.equals(int[].class)){
+    if (type.equals(int[].class)) {
       array = new int[size];
       Arrays.fill((int[]) array, value);
     } else if (type.equals(byte[].class)) {

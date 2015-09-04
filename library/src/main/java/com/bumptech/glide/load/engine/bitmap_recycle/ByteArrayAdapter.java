@@ -3,7 +3,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 import java.util.Arrays;
 
 /**
- * Adapter for handling primitive byte arrays
+ * Adapter for handling primitive byte arrays.
  */
 public final class ByteArrayAdapter implements ArrayAdapterInterface<byte[]> {
   private static final String TAG = "ByteArrayPool";
