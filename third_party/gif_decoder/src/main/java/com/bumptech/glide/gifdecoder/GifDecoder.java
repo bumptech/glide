@@ -318,10 +318,12 @@ public class GifDecoder {
     status = STATUS_OK;
 
     GifFrame currentFrame = header.frames.get(framePointer);
-    GifFrame previousFrame = null;
+    GifFrame previousFrame;
     int previousIndex = framePointer - 1;
     if (previousIndex >= 0) {
       previousFrame = header.frames.get(previousIndex);
+    } else {
+      previousFrame = header.frames.get(getFrameCount() - 1);
     }
 
     final int savedBgColor = header.bgColor;
