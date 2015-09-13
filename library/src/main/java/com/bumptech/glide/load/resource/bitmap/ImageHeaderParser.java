@@ -40,6 +40,10 @@ public class ImageHeaderParser {
     PNG_A(true),
     /** PNG type without alpha. */
     PNG(false),
+    /** WebP type with alpha. */
+    WEBP_A(true),
+    /** WebP type without alpha. */
+    WEBP(false),
     /**
      * Unrecognized type.
      */
@@ -71,6 +75,16 @@ public class ImageHeaderParser {
   private static final int EXIF_SEGMENT_TYPE = 0xE1;
   private static final int ORIENTATION_TAG_TYPE = 0x0112;
   private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
+  // WebP-related
+  private static final int RIFF_HEADER = 0x52494646; // "RIFF"
+  private static final int WEBP_HEADER = 0x57454250; // "WEBP"
+  private static final int VP8_HEADER = 0x56503800; // "VP8" null.
+  private static final int VP8_HEADER_MASK = 0xFFFFFF00;
+  private static final int VP8_HEADER_TYPE_MASK = 0x000000FF;
+  private static final int VP8_HEADER_TYPE_EXTENDED = 0x00000058; // 'X'
+  private static final int VP8_HEADER_TYPE_LOSSLESS = 0x0000004C; // 'L'
+  private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
+  private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
   private final ByteArrayPool byteArrayPool;
   private final Reader reader;
@@ -117,7 +131,33 @@ public class ImageHeaderParser {
       return GIF;
     }
 
-    return UNKNOWN;
+    // WebP (reads up to 21 bytes). See https://developers.google.com/speed/webp/docs/riff_container
+    // for details.
+    if (firstFourBytes != RIFF_HEADER) {
+      return UNKNOWN;
+    }
+    // Bytes 4 - 7 contain length information. Skip these.
+    reader.skip(4);
+    final int thirdFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    if (thirdFourBytes != WEBP_HEADER) {
+      return UNKNOWN;
+    }
+    final int fourthFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    if ((fourthFourBytes & VP8_HEADER_MASK) != VP8_HEADER) {
+      return UNKNOWN;
+    }
+    if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_EXTENDED) {
+      // Skip some more length bytes and check for transparency/alpha flag.
+      reader.skip(4);
+      return (reader.getByte() & WEBP_EXTENDED_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+    }
+    if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_LOSSLESS) {
+      // See chromium.googlesource.com/webm/libwebp/+/master/doc/webp-lossless-bitstream-spec.txt
+      // for more info.
+      reader.skip(4);
+      return (reader.getByte() & WEBP_LOSSLESS_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+    }
+    return ImageType.WEBP;
   }
 
   /**
