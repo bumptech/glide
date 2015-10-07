@@ -73,7 +73,8 @@ public class RequestManager implements LifecycleListener {
   private BaseRequestOptions<?> requestOptions;
 
   public RequestManager(Context context, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
-    this(context, lifecycle, treeNode, new RequestTracker(), new ConnectivityMonitorFactory());
+    this(context, lifecycle, treeNode,
+        new RequestTracker(), Glide.get(context).getConnectivityMonitorFactory());
   }
 
   RequestManager(Context context, final Lifecycle lifecycle, RequestManagerTreeNode treeNode,

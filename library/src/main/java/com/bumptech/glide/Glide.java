@@ -62,6 +62,7 @@ import com.bumptech.glide.load.resource.gif.StreamGifDecoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
+import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
@@ -96,6 +97,7 @@ public class Glide implements ComponentCallbacks2 {
   private final Registry registry;
   private final ArrayPool arrayPool;
   private final ByteArrayPool byteArrayPool;
+  private final ConnectivityMonitorFactory connectivityMonitorFactory;
   private final List<RequestManager> managers = new ArrayList<>();
 
   /**
@@ -169,17 +171,19 @@ public class Glide implements ComponentCallbacks2 {
 
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   Glide(
+      Context context,
       Engine engine,
       MemoryCache memoryCache,
       BitmapPool bitmapPool,
       ArrayPool arrayPool,
-      Context context,
+      ConnectivityMonitorFactory connectivityMonitorFactory,
       int logLevel,
       RequestOptions defaultRequestOptions) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
     this.memoryCache = memoryCache;
+    this.connectivityMonitorFactory = connectivityMonitorFactory;
     this.byteArrayPool = new LruByteArrayPool();
 
     DecodeFormat decodeFormat = defaultRequestOptions.getOptions().get(Downsampler.DECODE_FORMAT);
@@ -288,6 +292,10 @@ public class Glide implements ComponentCallbacks2 {
 
   public ArrayPool getArrayPool() {
     return arrayPool;
+  }
+
+  public ConnectivityMonitorFactory getConnectivityMonitorFactory() {
+    return connectivityMonitorFactory;
   }
 
   GlideContext getGlideContext() {

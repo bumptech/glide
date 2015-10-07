@@ -18,7 +18,7 @@ public class ConnectivityMonitorFactoryTest {
 
   @Before
   public void setUp() {
-    factory = new ConnectivityMonitorFactory();
+    factory = new DefaultConnectivityMonitorFactory();
   }
 
   @Test

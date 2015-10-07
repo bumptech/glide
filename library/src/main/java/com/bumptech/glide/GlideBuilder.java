@@ -17,6 +17,8 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.manager.ConnectivityMonitorFactory;
+import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.request.RequestOptions;
 
 /**
@@ -33,6 +35,7 @@ public final class GlideBuilder {
   private GlideExecutor diskCacheExecutor;
   private DiskCache.Factory diskCacheFactory;
   private MemorySizeCalculator memorySizeCalculator;
+  private ConnectivityMonitorFactory connectivityMonitorFactory;
   private int logLevel = Log.INFO;
   private RequestOptions defaultRequestOptions = new RequestOptions();
 
@@ -206,6 +209,19 @@ public final class GlideBuilder {
   }
 
   /**
+   * Sets the {@link com.bumptech.glide.manager.ConnectivityMonitorFactory}
+   * to use to notify {@link com.bumptech.glide.RequestManager} of connectivity events.
+   * If not set {@link com.bumptech.glide.manager.DefaultConnectivityMonitorFactory} would be used.
+   *
+   * @param factory The factory to use
+   * @return This builder.
+   */
+  public GlideBuilder setConnectivityMonitorFactory(ConnectivityMonitorFactory factory) {
+    this.connectivityMonitorFactory = factory;
+    return this;
+  }
+
+  /**
    * Sets a log level constant from those in {@link Log} to indicate the desired log verbosity.
    *
    * <p>The level must be one of {@link Log#VERBOSE}, {@link Log#DEBUG}, {@link Log#INFO},
@@ -258,6 +274,10 @@ public final class GlideBuilder {
       memorySizeCalculator = new MemorySizeCalculator.Builder(context).build();
     }
 
+    if (connectivityMonitorFactory == null) {
+      connectivityMonitorFactory = new DefaultConnectivityMonitorFactory();
+    }
+
     if (bitmapPool == null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         int size = memorySizeCalculator.getBitmapPoolSize();
@@ -284,11 +304,12 @@ public final class GlideBuilder {
     }
 
     return new Glide(
+        context,
         engine,
         memoryCache,
         bitmapPool,
         arrayPool,
-        context,
+        connectivityMonitorFactory,
         logLevel,
         defaultRequestOptions.lock());
   }
