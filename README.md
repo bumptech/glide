@@ -39,7 +39,6 @@ Or Maven:
     <groupId>com.github.bumptech.glide</groupId>
     <artifactId>glide</artifactId>
     <version>3.6.1</version>
-    <type>aar</type>
 </dependency>
 <dependency>
     <groupId>com.google.android</groupId>
@@ -122,7 +121,7 @@ app and in the 2014 Google IO app. *Version 4* is currently under development on
 Comments/bugs/questions/pull requests welcome!
 
 Build
-------
+-----
 Building Glide with gradle is fairly straight forward:
 
 ```shell
