@@ -19,7 +19,11 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
   @Override
   protected InputStream loadResource(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException {
-    return contentResolver.openInputStream(uri);
+    InputStream inputStream = contentResolver.openInputStream(uri);
+    if (inputStream == null) {
+      throw new FileNotFoundException("InputStream is null for :" + uri);
+    }
+    return inputStream;
   }
 
   @Override

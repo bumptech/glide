@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data.resource;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +27,8 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.internal.ShadowExtractor;
 
+import java.io.FileNotFoundException;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = { ContentResolverShadow.class })
 public class FileDescriptorLocalUriFetcherTest {
@@ -38,9 +41,9 @@ public class FileDescriptorLocalUriFetcherTest {
   }
 
   @Test
-  public void testLoadsFileDescriptor() throws Exception {
-    final Context context = RuntimeEnvironment.application;
-    final Uri uri = Uri.parse("file://nothing");
+  public void testLoadResource_returnsFileDescriptor() throws Exception {
+    Context context = RuntimeEnvironment.application;
+    Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
     ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
@@ -55,4 +58,17 @@ public class FileDescriptorLocalUriFetcherTest {
     verify(callback).onDataReady(eq(parcelFileDescriptor));
   }
 
+  @Test
+  public void testLoadResource_withNullFileDescriptor_callsLoadFailed() {
+    Context context = RuntimeEnvironment.application;
+    Uri uri = Uri.parse("file://nothing");
+
+    ContentResolver contentResolver = context.getContentResolver();
+    ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
+    shadow.registerFileDescriptor(uri, null /*fileDescriptor*/);
+
+    FileDescriptorLocalUriFetcher fetcher = new FileDescriptorLocalUriFetcher(context, uri);
+    fetcher.loadData(Priority.NORMAL, callback);
+    verify(callback).onLoadFailed(isA(FileNotFoundException.class));
+  }
 }
