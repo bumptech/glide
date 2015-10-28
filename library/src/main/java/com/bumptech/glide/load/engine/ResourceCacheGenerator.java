@@ -40,6 +40,9 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   @Override
   public boolean startNext() {
     List<Key> sourceIds = helper.getCacheKeys();
+    if (sourceIds.isEmpty()) {
+      return false;
+    }
     List<Class<?>> resourceClasses = helper.getRegisteredResourceClasses();
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
