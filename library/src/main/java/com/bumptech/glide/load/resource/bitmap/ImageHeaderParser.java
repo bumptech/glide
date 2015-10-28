@@ -76,13 +76,18 @@ public class ImageHeaderParser {
   private static final int ORIENTATION_TAG_TYPE = 0x0112;
   private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
   // WebP-related
-  private static final int RIFF_HEADER = 0x52494646; // "RIFF"
-  private static final int WEBP_HEADER = 0x57454250; // "WEBP"
-  private static final int VP8_HEADER = 0x56503800; // "VP8" null.
+  // "RIFF"
+  private static final int RIFF_HEADER = 0x52494646;
+  // "WEBP"
+  private static final int WEBP_HEADER = 0x57454250;
+  // "VP8" null.
+  private static final int VP8_HEADER = 0x56503800;
   private static final int VP8_HEADER_MASK = 0xFFFFFF00;
   private static final int VP8_HEADER_TYPE_MASK = 0x000000FF;
-  private static final int VP8_HEADER_TYPE_EXTENDED = 0x00000058; // 'X'
-  private static final int VP8_HEADER_TYPE_LOSSLESS = 0x0000004C; // 'L'
+  // 'X'
+  private static final int VP8_HEADER_TYPE_EXTENDED = 0x00000058;
+  // 'L'
+  private static final int VP8_HEADER_TYPE_LOSSLESS = 0x0000004C;
   private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
