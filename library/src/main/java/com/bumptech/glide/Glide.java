@@ -366,8 +366,11 @@ public class Glide {
      * @see android.content.ComponentCallbacks2#onLowMemory()
      */
     public void clearMemory() {
-        bitmapPool.clearMemory();
+        // Engine asserts this anyway when removing resources, fail faster and consistently
+        Util.assertMainThread();
+        // memory cache needs to be cleared before bitmap pool to clear re-pooled Bitmaps too. See #687.
         memoryCache.clearMemory();
+        bitmapPool.clearMemory();
     }
 
     /**
@@ -376,8 +379,11 @@ public class Glide {
      * @see android.content.ComponentCallbacks2#onTrimMemory(int)
      */
     public void trimMemory(int level) {
-        bitmapPool.trimMemory(level);
+        // Engine asserts this anyway when removing resources, fail faster and consistently
+        Util.assertMainThread();
+        // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
         memoryCache.trimMemory(level);
+        bitmapPool.trimMemory(level);
     }
 
     /**
@@ -404,6 +410,9 @@ public class Glide {
      * </p>
      */
     public void setMemoryCategory(MemoryCategory memoryCategory) {
+        // Engine asserts this anyway when removing resources, fail faster and consistently
+        Util.assertMainThread();
+        // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
         memoryCache.setSizeMultiplier(memoryCategory.getMultiplier());
         bitmapPool.setSizeMultiplier(memoryCategory.getMultiplier());
     }
