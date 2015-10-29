@@ -294,7 +294,7 @@ public class Glide implements ComponentCallbacks2 {
     return arrayPool;
   }
 
-  public ConnectivityMonitorFactory getConnectivityMonitorFactory() {
+  ConnectivityMonitorFactory getConnectivityMonitorFactory() {
     return connectivityMonitorFactory;
   }
 
