@@ -7,6 +7,9 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+/**
+ * Uses {@link android.net.ConnectivityManager} to identify connectivity changes.
+ */
 class DefaultConnectivityMonitor implements ConnectivityMonitor {
   private final Context context;
   private final ConnectivityListener listener;
