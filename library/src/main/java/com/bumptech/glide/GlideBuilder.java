@@ -263,8 +263,7 @@ public final class GlideBuilder {
 
   Glide createGlide() {
     if (sourceExecutor == null) {
-      final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
-      sourceExecutor = new GlideExecutor("source", cores);
+      sourceExecutor = new GlideExecutor("source");
     }
     if (diskCacheExecutor == null) {
       diskCacheExecutor = new GlideExecutor("disk-cache", 1);

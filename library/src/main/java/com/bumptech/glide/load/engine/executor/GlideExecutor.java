@@ -1,18 +1,36 @@
 package com.bumptech.glide.load.engine.executor;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * A prioritized {@link ThreadPoolExecutor} for running jobs in Glide.
  */
 public class GlideExecutor extends ThreadPoolExecutor {
+
   private static final String TAG = "GlideExecutor";
   private static final String DEFAULT_NAME = "fifo-pool";
+  private static final String CPU_NAME_REGEX = "cpu[0-9]+";
+  private static final String CPU_LOCATION = "/sys/devices/system/cpu/";
+  // Don't use more than four threads when automatically determining thread count..
+  private static final int MAXIMUM_AUTOMATIC_THREAD_COUNT = 4;
+
+  /**
+   * Constructor to build a fixed thread pool with an automatically determined number of threads.
+   *
+   * @see #calculateBestThreadCount()
+   */
+  public GlideExecutor() {
+    this(calculateBestThreadCount());
+  }
 
   /**
    * Constructor to build a fixed thread pool with the given pool size.
@@ -33,6 +51,16 @@ public class GlideExecutor extends ThreadPoolExecutor {
   public GlideExecutor(int poolSize,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     this(poolSize, new DefaultThreadFactory(uncaughtThrowableStrategy));
+  }
+
+  /**
+   * Constructor to build a fixed thread pool with the given name and an automatically determined
+   * number of threads.
+   *
+   * @see #calculateBestThreadCount()
+   */
+  public GlideExecutor(String name) {
+    this(calculateBestThreadCount(), new DefaultThreadFactory(name));
   }
 
   /**
@@ -60,20 +88,48 @@ public class GlideExecutor extends ThreadPoolExecutor {
   }
 
   private GlideExecutor(int corePoolSize, ThreadFactory threadFactory) {
-    super(corePoolSize, corePoolSize, 0, TimeUnit.MILLISECONDS,
-        new PriorityBlockingQueue<Runnable>(), threadFactory);
+    super(
+        corePoolSize /*corePoolSize*/,
+        corePoolSize /*maximumPoolSize*/,
+        0 /*keepAliveTime*/,
+        TimeUnit.MILLISECONDS,
+        new PriorityBlockingQueue<Runnable>(),
+        threadFactory);
   }
 
   /**
-   * A strategy for handling unexpected and uncaught throwables thrown by futures run on the pool.
+   * Determines the number of cores available on the device.
+   *
+   * <p>{@link Runtime#availableProcessors()} returns the number of awake cores, which may not
+   * be the number of available cores depending on the device's current state. See
+   * http://goo.gl/8H670N.
+   */
+  public static int calculateBestThreadCount() {
+    File cpuInfo = new File(CPU_LOCATION);
+    final Pattern cpuNamePattern = Pattern.compile(CPU_NAME_REGEX);
+    File[] cpus = cpuInfo.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File file, String s) {
+        return cpuNamePattern.matcher(s).matches();
+      }
+    });
+
+    int cpuCount = cpus != null ? cpus.length : 0;
+    int availableProcessors = Math.max(1, Runtime.getRuntime().availableProcessors());
+    return Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, Math.max(availableProcessors, cpuCount));
+  }
+
+  /**
+   * A strategy for handling unexpected and uncaught {@link Throwable}s thrown by futures run on the
+   * pool.
    */
   public enum UncaughtThrowableStrategy {
     /**
-     * Silently catches and ignores the uncaught throwables.
+     * Silently catches and ignores the uncaught {@link Throwable}s.
      */
     IGNORE,
     /**
-     * Logs the uncaught throwables using {@link #TAG} and {@link Log}.
+     * Logs the uncaught {@link Throwable}s using {@link #TAG} and {@link Log}.
      */
     LOG {
       @Override
@@ -84,7 +140,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
       }
     },
     /**
-     * Rethrows the uncaught throwables to crash the app.
+     * Rethrows the uncaught {@link Throwable}s to crash the app.
      */
     THROW {
       @Override
@@ -128,7 +184,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
     }
 
     @Override
-    public Thread newThread(Runnable runnable) {
+    public Thread newThread(@NonNull Runnable runnable) {
       final Thread result = new Thread(runnable, name + "-thread-" + threadNum) {
         @Override
         public void run() {
@@ -140,7 +196,9 @@ public class GlideExecutor extends ThreadPoolExecutor {
           }
         }
       };
-      threadNum++;
+      synchronized (this) {
+        threadNum++;
+      }
       return result;
     }
   }
