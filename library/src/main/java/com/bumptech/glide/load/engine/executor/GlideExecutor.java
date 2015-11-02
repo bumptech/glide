@@ -105,14 +105,21 @@ public class GlideExecutor extends ThreadPoolExecutor {
    * http://goo.gl/8H670N.
    */
   public static int calculateBestThreadCount() {
-    File cpuInfo = new File(CPU_LOCATION);
-    final Pattern cpuNamePattern = Pattern.compile(CPU_NAME_REGEX);
-    File[] cpus = cpuInfo.listFiles(new FilenameFilter() {
-      @Override
-      public boolean accept(File file, String s) {
-        return cpuNamePattern.matcher(s).matches();
+    File[] cpus = null;
+    try {
+      File cpuInfo = new File(CPU_LOCATION);
+      final Pattern cpuNamePattern = Pattern.compile(CPU_NAME_REGEX);
+      cpus = cpuInfo.listFiles(new FilenameFilter() {
+        @Override
+        public boolean accept(File file, String s) {
+          return cpuNamePattern.matcher(s).matches();
+        }
+      });
+    } catch (Throwable t) {
+      if (Log.isLoggable(TAG, Log.ERROR)) {
+        Log.e(TAG, "Failed to calculate accurate cpu count", t);
       }
-    });
+    }
 
     int cpuCount = cpus != null ? cpus.length : 0;
     int availableProcessors = Math.max(1, Runtime.getRuntime().availableProcessors());
@@ -164,7 +171,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
   private static final class DefaultThreadFactory implements ThreadFactory {
     private final String name;
     private final UncaughtThrowableStrategy uncaughtThrowableStrategy;
-    private int threadNum = 0;
+    private int threadNum;
 
     DefaultThreadFactory() {
       this(DEFAULT_NAME);
@@ -184,7 +191,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
     }
 
     @Override
-    public Thread newThread(@NonNull Runnable runnable) {
+    public synchronized Thread newThread(@NonNull Runnable runnable) {
       final Thread result = new Thread(runnable, name + "-thread-" + threadNum) {
         @Override
         public void run() {
@@ -196,9 +203,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
           }
         }
       };
-      synchronized (this) {
-        threadNum++;
-      }
+      threadNum++;
       return result;
     }
   }
