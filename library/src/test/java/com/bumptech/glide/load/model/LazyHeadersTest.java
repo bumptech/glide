@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.testing.EqualsTester;
 
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.model.LazyHeaders.Builder;
 
 import org.junit.After;
@@ -227,6 +229,55 @@ public class LazyHeadersTest {
     builder.addHeader("User-Agent", "true");
     headers = builder.build();
     assertThat(headers.getHeaders()).containsEntry("User-Agent", "false,true");
+  }
+
+  @Test
+  public void testKeyNotIncludedWithFactoryThatReturnsNullValue() {
+    Builder builder = new Builder();
+    builder.setHeader("test", new LazyHeaderFactory() {
+      @Nullable
+      @Override
+      public String buildHeader() {
+        return null;
+      }
+    });
+    LazyHeaders headers = builder.build();
+    assertThat(headers.getHeaders()).doesNotContainKey("test");
+  }
+
+  @Test
+  public void testKeyNotIncludedWithFactoryThatReturnsEmptyValue() {
+    Builder builder = new Builder();
+    builder.setHeader("test", new LazyHeaderFactory() {
+      @Nullable
+      @Override
+      public String buildHeader() {
+        return "";
+      }
+    });
+    LazyHeaders headers = builder.build();
+    assertThat(headers.getHeaders()).doesNotContainKey("test");
+  }
+
+  @Test
+  public void testKeyIncludedWithOneFactoryThatReturnsNullAndOneFactoryThatDoesNotReturnNull() {
+    Builder builder = new Builder();
+    builder.addHeader("test", new LazyHeaderFactory() {
+      @Nullable
+      @Override
+      public String buildHeader() {
+        return null;
+      }
+    });
+    builder.addHeader("test", new LazyHeaderFactory() {
+      @Nullable
+      @Override
+      public String buildHeader() {
+        return "value";
+      }
+    });
+    LazyHeaders headers = builder.build();
+    assertThat(headers.getHeaders()).containsEntry("test", "value");
   }
 
   @Test
