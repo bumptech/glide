@@ -26,6 +26,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
   private static RequestOptions skipMemoryCacheTrueOptions;
   private static RequestOptions skipMemoryCacheFalseOptions;
   private static RequestOptions fitCenterOptions;
+  private static RequestOptions centerInsideOptions;
   private static RequestOptions centerCropOptions;
   private static RequestOptions circleCropOptions;
   private static RequestOptions noTransformOptions;
@@ -129,6 +130,18 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
           .autoLock();
     }
     return fitCenterOptions;
+  }
+
+  /**
+   * Returns a {@link RequestOptions} object with {@link #centerInside(Context)} set.
+   */
+  public static RequestOptions centerInsideTransform(Context context) {
+    if (centerInsideOptions == null) {
+      centerInsideOptions = new RequestOptions()
+              .centerInside(context.getApplicationContext())
+              .autoLock();
+    }
+    return centerInsideOptions;
   }
 
   /**

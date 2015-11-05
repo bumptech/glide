@@ -378,6 +378,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         case CENTER_CROP:
           requestOptions.optionalCenterCrop(context);
           break;
+        case CENTER_INSIDE:
+          requestOptions.optionalCenterInside(context);
+          break;
         case FIT_CENTER:
         case FIT_START:
         case FIT_END:
