@@ -19,7 +19,7 @@ public class GlideExecutorTest {
   @Test
   public void testLoadsAreExecutedInOrder() throws InterruptedException {
     final List<Integer> resultPriorities = Collections.synchronizedList(new ArrayList<Integer>());
-    GlideExecutor executor = new GlideExecutor(1);
+    GlideExecutor executor = GlideExecutor.newDiskCacheExecutor();
     for (int i = 5; i > 0; i--) {
       executor.execute(new MockRunnable(i, new MockRunnable.OnRun() {
         @Override

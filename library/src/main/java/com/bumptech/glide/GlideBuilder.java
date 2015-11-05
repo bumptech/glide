@@ -263,10 +263,10 @@ public final class GlideBuilder {
 
   Glide createGlide() {
     if (sourceExecutor == null) {
-      sourceExecutor = new GlideExecutor("source");
+      sourceExecutor = GlideExecutor.newSourceExecutor();
     }
     if (diskCacheExecutor == null) {
-      diskCacheExecutor = new GlideExecutor("disk-cache", 1);
+      diskCacheExecutor = GlideExecutor.newDiskCacheExecutor();
     }
 
     if (memorySizeCalculator == null) {
