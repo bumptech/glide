@@ -31,6 +31,7 @@ import com.bumptech.glide.load.model.AssetUriLoader;
 import com.bumptech.glide.load.model.ByteArrayLoader;
 import com.bumptech.glide.load.model.ByteBufferEncoder;
 import com.bumptech.glide.load.model.ByteBufferFileLoader;
+import com.bumptech.glide.load.model.DataUrlLoader;
 import com.bumptech.glide.load.model.FileLoader;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.MediaStoreFileLoader;
@@ -237,6 +238,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(Integer.class, InputStream.class, new ResourceLoader.StreamFactory())
         .append(Integer.class, ParcelFileDescriptor.class,
             new ResourceLoader.FileDescriptorFactory())
+        .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory())
         .append(String.class, InputStream.class, new StringLoader.StreamFactory())
         .append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
         .append(Uri.class, InputStream.class, new HttpUriLoader.Factory())
