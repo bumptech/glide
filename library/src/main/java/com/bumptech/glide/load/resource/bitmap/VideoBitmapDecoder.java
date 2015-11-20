@@ -125,17 +125,20 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
     }
     Integer frameOption = options.get(FRAME_OPTION);
 
-    MediaMetadataRetriever mediaMetadataRetriever = factory.build();
-    mediaMetadataRetriever.setDataSource(resource.getFileDescriptor());
     final Bitmap result;
-    if (frameTimeMicros == DEFAULT_FRAME) {
-      result = mediaMetadataRetriever.getFrameAtTime();
-    } else if (frameOption == null) {
-      result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros);
-    } else {
-      result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
+    MediaMetadataRetriever mediaMetadataRetriever = factory.build();
+    try {
+      mediaMetadataRetriever.setDataSource(resource.getFileDescriptor());
+      if (frameTimeMicros == DEFAULT_FRAME) {
+        result = mediaMetadataRetriever.getFrameAtTime();
+      } else if (frameOption == null) {
+        result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros);
+      } else {
+        result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
+      }
+    } finally {
+      mediaMetadataRetriever.release();
     }
-    mediaMetadataRetriever.release();
     resource.close();
     return BitmapResource.obtain(result, bitmapPool);
   }
