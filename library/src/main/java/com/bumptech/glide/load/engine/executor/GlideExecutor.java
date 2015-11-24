@@ -156,7 +156,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
 
   @Override
   public <T> Future<T> submit(Callable<T> task) {
-    return super.submit(task);
+    return maybeWait(super.submit(task));
   }
 
   /**
