@@ -512,7 +512,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #fitCenter(android.content.Context)
    */
   public CHILD optionalFitCenter(Context context) {
-    return optionalTransform(context, DownsampleStrategy.CENTER_INSIDE, new FitCenter(context));
+    return optionalTransform(context, DownsampleStrategy.FIT_CENTER, new FitCenter(context));
   }
 
   /**
@@ -526,7 +526,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalFitCenter(android.content.Context)
    */
   public CHILD fitCenter(Context context) {
-    return transform(context, DownsampleStrategy.CENTER_INSIDE, new FitCenter(context));
+    return transform(context, DownsampleStrategy.FIT_CENTER, new FitCenter(context));
   }
 
   /**
@@ -540,7 +540,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #centerInside(Context) (android.content.Context)
    */
   public CHILD optionalCenterInside(Context context) {
-    return optionalTransform(context, DownsampleStrategy.DOWNSCALE_ONLY, new CenterInside(context));
+    return optionalTransform(context, DownsampleStrategy.CENTER_INSIDE, new CenterInside(context));
   }
 
   /**
@@ -554,7 +554,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalCenterInside(Context) (android.content.Context)
    */
   public CHILD centerInside(Context context) {
-    return transform(context, DownsampleStrategy.DOWNSCALE_ONLY, new CenterInside(context));
+    return transform(context, DownsampleStrategy.CENTER_INSIDE, new CenterInside(context));
   }
 
   /**
