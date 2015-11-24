@@ -400,17 +400,19 @@ public final class Downsampler {
     int sourceHeight = options.outHeight;
     String outMimeType = options.outMimeType;
     final Bitmap result;
+    TransformationUtils.getBitmapDrawableLock().lock();
     try {
       result = BitmapFactory.decodeStream(is, null, options);
     } catch (IllegalArgumentException e) {
       throw newIoExceptionForInBitmapAssertion(e, sourceWidth, sourceHeight, outMimeType, options);
+    } finally {
+      TransformationUtils.getBitmapDrawableLock().unlock();
     }
 
     if (options.inJustDecodeBounds) {
       is.reset();
 
     }
-
     return result;
   }
 
