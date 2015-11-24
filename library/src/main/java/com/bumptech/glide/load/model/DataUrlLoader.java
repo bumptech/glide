@@ -21,6 +21,8 @@ import java.io.InputStream;
  * <p>See http://www.ietf.org/rfc/rfc2397.txt  for a complete description of the 'data' URL scheme.
  *
  * <p>Briefly, a 'data' URL has the form: <pre>data:[mediatype][;base64],somedata"</pre>
+ *
+ * @param <Data> The type of data that can be opened.
  */
 public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
 
