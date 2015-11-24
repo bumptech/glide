@@ -42,7 +42,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   private static final String CPU_LOCATION = "/sys/devices/system/cpu/";
   // Don't use more than four threads when automatically determining thread count..
   private static final int MAXIMUM_AUTOMATIC_THREAD_COUNT = 4;
-  private final boolean runAllOnMainThread;
+  private final boolean executeSynchronously;
 
   /**
    * Returns a new fixed thread pool with the default thread count returned from
@@ -73,7 +73,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   public static GlideExecutor newDiskCacheExecutor(int threadCount, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return new GlideExecutor(threadCount, name, uncaughtThrowableStrategy,
-        true /*preventNetworkOperations*/, false /*runAllOnMainThread*/);
+        true /*preventNetworkOperations*/, false /*executeSynchronously*/);
   }
 
   /**
@@ -105,13 +105,13 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   public static GlideExecutor newSourceExecutor(int threadCount, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return new GlideExecutor(threadCount, name, uncaughtThrowableStrategy,
-        false /*preventNetworkOperations*/, false /*runAllOnMainThread*/);
+        false /*preventNetworkOperations*/, false /*executeSynchronously*/);
   }
 
   // Visible for testing.
   GlideExecutor(int poolSize, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
-      boolean runAllOnMainThread) {
+      boolean executeSynchronously) {
     super(
         poolSize /*corePoolSize*/,
         poolSize /*maximumPoolSize*/,
@@ -119,12 +119,12 @@ public final class GlideExecutor extends ThreadPoolExecutor {
         TimeUnit.MILLISECONDS,
         new PriorityBlockingQueue<Runnable>(),
         new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations));
-    this.runAllOnMainThread = runAllOnMainThread;
+    this.executeSynchronously = executeSynchronously;
   }
 
   @Override
   public void execute(Runnable command) {
-    if (runAllOnMainThread) {
+    if (executeSynchronously) {
       command.run();
     } else {
       super.execute(command);
@@ -138,7 +138,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   }
 
   private <T> Future<T> maybeWait(Future<T> future) {
-    if (runAllOnMainThread) {
+    if (executeSynchronously) {
         try {
         future.get();
       } catch (InterruptedException | ExecutionException e) {
