@@ -27,6 +27,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -476,9 +477,10 @@ public class EngineTest {
 
       job = mock(EngineJob.class);
 
-      engine = new Engine(cache, mock(DiskCache.Factory.class), mock(GlideExecutor.class),
-          mock(GlideExecutor.class), jobs, keyFactory, activeResources, engineJobFactory,
-          decodeJobFactory, resourceRecycler);
+      engine = new Engine(cache, mock(DiskCache.Factory.class),
+          GlideExecutor.newDiskCacheExecutor(),
+          MockGlideExecutor.newMainThreadExecutor(), jobs, keyFactory, activeResources,
+          engineJobFactory, decodeJobFactory, resourceRecycler);
     }
 
     public Engine.LoadStatus doLoad() {

@@ -21,6 +21,7 @@ import android.support.v4.util.Pools;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 
 import org.junit.Before;
@@ -414,27 +415,30 @@ public class EngineJobTest {
   @Test
   public void testSubmitsDecodeJobToSourceServiceOnSubmitForSource() {
     EngineJob<Object> job = harness.getJob();
+    harness.diskCacheService.shutdownNow();
     job.reschedule(harness.decodeJob);
 
-    verify(harness.sourceService).execute(eq(harness.decodeJob));
+    verify(harness.decodeJob).run();
   }
 
   @Test
   public void testSubmitsDecodeJobToDiskCacheServiceWhenDecodingFromCacheOnStart() {
     EngineJob<Object> job = harness.getJob();
     when(harness.decodeJob.willDecodeFromCache()).thenReturn(true);
+    harness.diskCacheService.shutdownNow();
     job.start(harness.decodeJob);
 
-    verify(harness.diskCacheService).execute(eq(harness.decodeJob));
+    verify(harness.decodeJob).run();
   }
 
   @Test
   public void testSubmitsDecodeJobToSourceServiceWhenDecodingFromSoureOnlyOnStart() {
     EngineJob<Object> job = harness.getJob();
     when(harness.decodeJob.willDecodeFromCache()).thenReturn(false);
+    harness.diskCacheService.shutdownNow();
     job.start(harness.decodeJob);
 
-    verify(harness.sourceService).execute(eq(harness.decodeJob));
+    verify(harness.decodeJob).run();
   }
 
   @SuppressWarnings("unchecked")
@@ -448,8 +452,8 @@ public class EngineJobTest {
     List<ResourceCallback> cbs = new ArrayList<>();
     EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
     EngineJob<Object> job;
-    GlideExecutor diskCacheService = mock(GlideExecutor.class);
-    GlideExecutor sourceService = mock(GlideExecutor.class);
+    GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
+    GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
     Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
     DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     DataSource dataSource = DataSource.LOCAL;
@@ -476,8 +480,8 @@ public class EngineJobTest {
     Resource<Object> resource = mock(Resource.class);
     EngineResource<Object> engineResource = mock(EngineResource.class);
     EngineJobListener listener = mock(EngineJobListener.class);
-    GlideExecutor diskCacheService = mock(GlideExecutor.class);
-    GlideExecutor sourceService = mock(GlideExecutor.class);
+    GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
+    GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
     boolean isCacheable = true;
     DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);

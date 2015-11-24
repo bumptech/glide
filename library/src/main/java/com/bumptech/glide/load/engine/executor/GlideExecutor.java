@@ -7,6 +7,9 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -16,7 +19,7 @@ import java.util.regex.Pattern;
 /**
  * A prioritized {@link ThreadPoolExecutor} for running jobs in Glide.
  */
-public class GlideExecutor extends ThreadPoolExecutor {
+public final class GlideExecutor extends ThreadPoolExecutor {
 
   /**
    * The default thread name prefix for executors used to load/decode/transform data not found in
@@ -39,6 +42,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
   private static final String CPU_LOCATION = "/sys/devices/system/cpu/";
   // Don't use more than four threads when automatically determining thread count..
   private static final int MAXIMUM_AUTOMATIC_THREAD_COUNT = 4;
+  private final boolean runAllOnMainThread;
 
   /**
    * Returns a new fixed thread pool with the default thread count returned from
@@ -69,7 +73,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
   public static GlideExecutor newDiskCacheExecutor(int threadCount, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return new GlideExecutor(threadCount, name, uncaughtThrowableStrategy,
-        true /*preventNetworkOperations*/);
+        true /*preventNetworkOperations*/, false /*runAllOnMainThread*/);
   }
 
   /**
@@ -101,11 +105,13 @@ public class GlideExecutor extends ThreadPoolExecutor {
   public static GlideExecutor newSourceExecutor(int threadCount, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return new GlideExecutor(threadCount, name, uncaughtThrowableStrategy,
-        false /*preventNetworkOperations*/);
+        false /*preventNetworkOperations*/, false /*runAllOnMainThread*/);
   }
 
-  private GlideExecutor(int poolSize, String name,
-      UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations) {
+  // Visible for testing.
+  GlideExecutor(int poolSize, String name,
+      UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
+      boolean runAllOnMainThread) {
     super(
         poolSize /*corePoolSize*/,
         poolSize /*maximumPoolSize*/,
@@ -113,6 +119,44 @@ public class GlideExecutor extends ThreadPoolExecutor {
         TimeUnit.MILLISECONDS,
         new PriorityBlockingQueue<Runnable>(),
         new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations));
+    this.runAllOnMainThread = runAllOnMainThread;
+  }
+
+  @Override
+  public void execute(Runnable command) {
+    if (runAllOnMainThread) {
+      command.run();
+    } else {
+      super.execute(command);
+    }
+  }
+
+  @NonNull
+  @Override
+  public Future<?> submit(Runnable task) {
+    return maybeWait(super.submit(task));
+  }
+
+  private <T> Future<T> maybeWait(Future<T> future) {
+    if (runAllOnMainThread) {
+        try {
+        future.get();
+      } catch (InterruptedException | ExecutionException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return future;
+  }
+
+  @NonNull
+  @Override
+  public <T> Future<T> submit(Runnable task, T result) {
+    return maybeWait(super.submit(task, result));
+  }
+
+  @Override
+  public <T> Future<T> submit(Callable<T> task) {
+    return super.submit(task);
   }
 
   /**
@@ -212,7 +256,7 @@ public class GlideExecutor extends ThreadPoolExecutor {
             StrictMode.setThreadPolicy(
                 new ThreadPolicy.Builder()
                     .detectNetwork()
-                    .penaltyDeathOnNetwork()
+                    .penaltyDeath()
                     .build());
           }
           try {

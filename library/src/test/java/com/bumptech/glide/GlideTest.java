@@ -39,6 +39,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -654,15 +655,7 @@ public class GlideTest {
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
       // Run all tasks on the main thread so they complete synchronously.
-      GlideExecutor executor = mock(GlideExecutor.class);
-      doAnswer(new Answer<Void>() {
-        @Override
-        public Void answer(InvocationOnMock invocation) throws Throwable {
-          Runnable runnable = (Runnable) invocation.getArguments()[0];
-          runnable.run();
-          return null;
-        }
-      }).when(executor).execute(isA(Runnable.class));
+      GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
 
       DiskCache.Factory diskCacheFactory = mock(DiskCache.Factory.class);
       when(diskCacheFactory.build()).thenReturn(mock(DiskCache.class));
