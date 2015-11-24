@@ -44,6 +44,13 @@ public abstract class DownsampleStrategy {
   public static final DownsampleStrategy AT_MOST = new AtMost();
 
   /**
+   * Returns the original image if it is smaller than the target, otherwise it will be downscaled
+   * maintaining its original aspect ratio, so that one of the image's dimensions is exactly equal
+   * to the requested size and the other is less or equal than the requested size.
+   */
+  public static final DownsampleStrategy DOWNSCALE_ONLY = new DownscaleOnly();
+
+  /**
    * Performs no downsampling or scaling.
    */
   public static final DownsampleStrategy NONE = new None();
@@ -159,6 +166,23 @@ public abstract class DownsampleStrategy {
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
       return 1f;
+    }
+
+    @Override
+    public SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+        int requestedWidth, int requestedHeight) {
+      return SampleSizeRounding.QUALITY;
+    }
+  }
+
+  private static class DownscaleOnly extends DownsampleStrategy {
+
+    @Override
+    public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight) {
+
+      return Math.min(1.f,
+          CENTER_INSIDE.getScaleFactor(sourceWidth, sourceHeight, requestedWidth, requestedHeight));
     }
 
     @Override

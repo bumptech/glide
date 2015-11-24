@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.CenterInside;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
@@ -526,6 +527,34 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    */
   public CHILD fitCenter(Context context) {
     return transform(context, DownsampleStrategy.CENTER_INSIDE, new FitCenter(context));
+  }
+
+  /**
+   * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterInside} to all default types, and
+   * ignores unknown types.
+   *
+   * <p>This will override previous calls to {@link #dontTransform()}.
+   *
+   * @param context Any {@link android.content.Context}.
+   * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
+   * @see #centerInside(Context) (android.content.Context)
+   */
+  public CHILD optionalCenterInside(Context context) {
+    return optionalTransform(context, DownsampleStrategy.DOWNSCALE_ONLY, new CenterInside(context));
+  }
+
+  /**
+   * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterInside} to all default types and
+   * throws an exception if asked to transform an unknown type.
+   *
+   * <p>This will override previous calls to {@link #dontTransform()}.
+   *
+   * @param context Any {@link android.content.Context}.
+   * @see #transform(Class, com.bumptech.glide.load.Transformation)
+   * @see #optionalCenterInside(Context) (android.content.Context)
+   */
+  public CHILD centerInside(Context context) {
+    return transform(context, DownsampleStrategy.DOWNSCALE_ONLY, new CenterInside(context));
   }
 
   /**

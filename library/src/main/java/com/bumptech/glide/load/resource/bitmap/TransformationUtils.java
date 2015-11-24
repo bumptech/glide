@@ -139,6 +139,32 @@ public final class TransformationUtils {
   }
 
   /**
+   * If the Bitmap is smaller or equal to the Target it returns the original size, if not then
+   * {@link #fitCenter(BitmapPool, Bitmap, int, int)} is called instead.
+   *
+   * @param pool   The BitmapPool obtain a bitmap from.
+   * @param inBitmap  The Bitmap to center.
+   * @param width  The width in pixels of the target.
+   * @param height The height in pixels of the target.
+   * @return returns input Bitmap if smaller or equal to target, or toFit if the Bitmap's width or
+   * height is larger than the given dimensions
+   */
+  public static Bitmap centerInside(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
+                                 int height) {
+    if (inBitmap.getWidth() <= width && inBitmap.getHeight() <= height) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "requested target size larger or equal to input, returning input");
+      }
+      return inBitmap;
+    } else {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "requested target size too big for input, fit centering instead");
+      }
+      return fitCenter(pool, inBitmap, width, height);
+    }
+  }
+
+  /**
    * Sets the alpha of the Bitmap we're going to re-use to the alpha of the Bitmap we're going to
    * transform. This keeps {@link android.graphics.Bitmap#hasAlpha()}} consistent before and after
    * the transformation for transformations that don't add or remove transparent pixels.
