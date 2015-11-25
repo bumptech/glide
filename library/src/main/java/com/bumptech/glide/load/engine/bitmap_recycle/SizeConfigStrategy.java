@@ -213,7 +213,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
       if (o instanceof Key) {
         Key other = (Key) o;
         return size == other.size
-            && (config == null ? other.config == null : config.equals(other.config));
+            && Util.bothNullOrEqual(config, other.config);
       }
       return false;
     }

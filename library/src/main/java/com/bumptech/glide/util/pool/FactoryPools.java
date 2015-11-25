@@ -105,6 +105,8 @@ public final class FactoryPools {
 
   /**
    * Creates new instances of the given type.
+   *
+   * @param <T> The type of Object that will be created.
    */
   public interface Factory<T> {
     T create();
@@ -112,6 +114,8 @@ public final class FactoryPools {
 
   /**
    * Resets state when objects are returned to the pool.
+   *
+   * @param <T> The type of Object that will be reset.
    */
   public interface Resetter<T> {
     void reset(T object);

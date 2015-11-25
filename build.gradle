@@ -40,11 +40,11 @@ subprojects { project ->
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = "6.6"
+        toolVersion = '6.12.1'
     }
 
     checkstyle {
-        configFile = new File(rootDir, 'checkstyle.xml')
+        configFile = rootProject.file('checkstyle.xml')
         configProperties.checkStyleConfigDir = rootProject.rootDir
     }
 
@@ -73,5 +73,6 @@ subprojects { project ->
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+    gradleVersion = '2.9'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

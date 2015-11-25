@@ -53,6 +53,7 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     return arrayPool.get(size, byte[].class);
   }
 
+  @SuppressWarnings("PMD.UseVarargs")
   @Override
   public void release(byte[] bytes) {
     if (arrayPool == null) {
@@ -69,6 +70,7 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     return arrayPool.get(size, int[].class);
   }
 
+  @SuppressWarnings("PMD.UseVarargs")
   @Override
   public void release(int[] array) {
     if (arrayPool == null) {

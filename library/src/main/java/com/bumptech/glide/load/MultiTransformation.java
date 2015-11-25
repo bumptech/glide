@@ -24,7 +24,7 @@ public class MultiTransformation<T> implements Transformation<T> {
   }
 
   public MultiTransformation(Collection<? extends Transformation<T>> transformationList) {
-    if (transformationList.size() < 1) {
+    if (transformationList.isEmpty()) {
       throw new IllegalArgumentException(
           "MultiTransformation must contain at least one Transformation");
     }

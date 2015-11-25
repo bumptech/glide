@@ -91,6 +91,7 @@ public class Photo implements Parcelable {
     return getPartialUrl();
   }
 
+  @SuppressWarnings({"PMD.SimplifyBooleanReturns", "RedundantIfStatement"})
   @Override
   public boolean equals(Object o) {
     if (this == o) {

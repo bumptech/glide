@@ -250,6 +250,7 @@ public final class TransformationUtils {
         break;
       default:
         degreesToRotate = 0;
+        break;
     }
     return degreesToRotate;
   }

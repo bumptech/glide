@@ -82,6 +82,10 @@ afterEvaluate {
 
     check.dependsOn('findbugs')
 
+    pmd {
+        toolVersion '5.4.0'
+    }
+
     task pmd(type: Pmd) {
         targetJdk = TargetJdk.VERSION_1_7
 

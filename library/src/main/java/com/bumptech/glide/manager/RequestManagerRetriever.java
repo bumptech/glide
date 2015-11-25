@@ -239,6 +239,7 @@ public class RequestManagerRetriever implements Handler.Callback {
         break;
       default:
         handled = false;
+        break;
     }
     if (handled && removed == null && Log.isLoggable(TAG, Log.WARN)) {
       Log.w(TAG, "Failed to remove expected request manager fragment, manager: " + key);
