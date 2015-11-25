@@ -15,6 +15,9 @@ public class NoTransition<R> implements Transition<R> {
 
   /**
    * A factory that always returns the same {@link NoTransition}.
+   *
+   * @param <R> the resource type that will be transitioned into a
+   * {@link com.bumptech.glide.request.target.Target}.
    */
   public static class NoAnimationFactory<R> implements TransitionFactory<R> {
     @SuppressWarnings("unchecked")
