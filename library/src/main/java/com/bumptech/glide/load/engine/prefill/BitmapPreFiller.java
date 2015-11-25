@@ -53,7 +53,7 @@ public final class BitmapPreFiller {
   }
 
   // Visible for testing.
-  PreFillQueue generateAllocationOrder(PreFillType[] preFillSizes) {
+  PreFillQueue generateAllocationOrder(PreFillType... preFillSizes) {
     final int maxSize =
         memoryCache.getMaxSize() - memoryCache.getCurrentSize() + bitmapPool.getMaxSize();
 

@@ -14,11 +14,12 @@ public final class IntegerArrayAdapter implements ArrayAdapterInterface<int[]> {
   }
 
   @Override
-  public int getArrayLength(int[] array) {
+  public int getArrayLength(int... array) {
     return array.length;
   }
 
   @Override
+  @SuppressWarnings("PMD.UseVarargs")
   public void resetArray(int[] array) {
     Arrays.fill(array, 0);
   }

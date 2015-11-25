@@ -40,7 +40,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
    *             android.view.ViewTreeObserver .OnPreDrawListener}
    */
   public ViewPreloadSizeProvider(View view) {
-    setView(view);
+    this.viewTarget = new SizeViewTarget(view, this);
   }
 
   @Override

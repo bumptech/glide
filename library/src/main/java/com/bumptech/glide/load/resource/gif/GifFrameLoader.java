@@ -58,6 +58,7 @@ class GifFrameLoader {
         getRequestBuilder(context, width, height), transformation, firstFrame);
   }
 
+  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
   GifFrameLoader(Context context, RequestManager requestManager, GifDecoder gifDecoder,
       Handler handler, RequestBuilder<Bitmap> requestBuilder, Transformation<Bitmap> transformation,
       Bitmap firstFrame) {

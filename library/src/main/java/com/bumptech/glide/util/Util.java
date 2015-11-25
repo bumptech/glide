@@ -37,6 +37,7 @@ public final class Util {
   // Taken from:
   // http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
   // /9655275#9655275
+  @SuppressWarnings("PMD.UseVarargs")
   private static String bytesToHex(byte[] bytes, char[] hexChars) {
     int v;
     for (int j = 0; j < bytes.length; j++) {
@@ -108,6 +109,7 @@ public final class Util {
       case ARGB_8888:
       default:
         bytesPerPixel = 4;
+        break;
     }
     return bytesPerPixel;
   }
@@ -177,5 +179,14 @@ public final class Util {
           result.add(item);
       }
       return result;
+  }
+
+  /**
+   * Null-safe equivalent of {@code a.equals(b)}.
+   *
+   * @see java.util.Objects#equals
+   */
+  public static boolean bothNullOrEqual(Object a, Object b) {
+    return a == null ? b == null : a.equals(b);
   }
 }

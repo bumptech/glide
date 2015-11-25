@@ -1,6 +1,7 @@
 package com.bumptech.glide.signature;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.util.Util;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -32,6 +33,7 @@ public class MediaStoreSignature implements Key {
     this.orientation = orientation;
   }
 
+  @SuppressWarnings({"PMD.SimplifyBooleanReturns", "RedundantIfStatement"})
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -49,10 +51,9 @@ public class MediaStoreSignature implements Key {
     if (orientation != that.orientation) {
       return false;
     }
-    if (mimeType != null ? !mimeType.equals(that.mimeType) : that.mimeType != null) {
+    if (!Util.bothNullOrEqual(mimeType, that.mimeType)) {
       return false;
     }
-
     return true;
   }
 
