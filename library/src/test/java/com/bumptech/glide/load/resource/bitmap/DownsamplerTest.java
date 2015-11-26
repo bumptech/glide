@@ -112,7 +112,7 @@ public class DownsamplerTest {
 
   @Test
   public void testCalculateScaling_withCenterInside() {
-    DownsampleStrategy strategy = DownsampleStrategy.CENTER_INSIDE;
+    DownsampleStrategy strategy = DownsampleStrategy.FIT_CENTER;
     runScaleTest(100, 100, 100, 100, strategy, 100, 100);
     runScaleTest(200, 200, 100, 100, strategy, 100, 100);
     runScaleTest(400, 400, 100, 100, strategy, 100, 100);

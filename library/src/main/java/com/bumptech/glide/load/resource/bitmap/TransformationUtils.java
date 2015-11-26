@@ -20,6 +20,11 @@ import android.util.Log;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * A class with methods to efficiently resize Bitmaps.
  */
@@ -30,6 +35,18 @@ public final class TransformationUtils {
   private static final int CIRCLE_CROP_PAINT_FLAGS = PAINT_FLAGS | Paint.ANTI_ALIAS_FLAG;
   private static final Paint CIRCLE_CROP_SHAPE_PAINT = new Paint(CIRCLE_CROP_PAINT_FLAGS);
   private static final Paint CIRCLE_CROP_BITMAP_PAINT;
+  /**
+   * https://github.com/bumptech/glide/issues/738 On some devices (Moto X with android 5.1) bitmap
+   * drawing is not thread safe.
+   * This lock only locks for these specific devices. For other types of devices the lock is always
+   * available and therefore does not impact performance
+   */
+  private static final Lock BITMAP_DRAWABLE_LOCK = "XT1097".equals(Build.MODEL)
+      // TODO: Switch to Build.VERSION_CODES.LOLLIPOP_MR1 when apps have updated target API levels.
+      && Build.VERSION.SDK_INT == 22
+      ? new ReentrantLock()
+      : new NoLock();
+
   static {
     CIRCLE_CROP_BITMAP_PAINT = new Paint(CIRCLE_CROP_PAINT_FLAGS);
     CIRCLE_CROP_BITMAP_PAINT.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
@@ -37,6 +54,11 @@ public final class TransformationUtils {
 
   private TransformationUtils() {
     // Utility class.
+  }
+
+
+  public static Lock getBitmapDrawableLock() {
+    return BITMAP_DRAWABLE_LOCK;
   }
 
   /**
@@ -74,9 +96,7 @@ public final class TransformationUtils {
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
     TransformationUtils.setAlpha(inBitmap, result);
 
-    Canvas canvas = new Canvas(result);
-    canvas.drawBitmap(inBitmap, m, DEFAULT_PAINT);
-    clear(canvas);
+    applyMatrix(inBitmap, result, m);
     return result;
   }
 
@@ -129,13 +149,37 @@ public final class TransformationUtils {
       Log.v(TAG, "minPct:   " + minPercentage);
     }
 
-    Canvas canvas = new Canvas(toReuse);
     Matrix matrix = new Matrix();
     matrix.setScale(minPercentage, minPercentage);
-    canvas.drawBitmap(inBitmap, matrix, DEFAULT_PAINT);
-    clear(canvas);
+    applyMatrix(inBitmap, toReuse, matrix);
 
     return toReuse;
+  }
+
+  /**
+   * If the Bitmap is smaller or equal to the Target it returns the original size, if not then
+   * {@link #fitCenter(BitmapPool, Bitmap, int, int)} is called instead.
+   *
+   * @param pool   The BitmapPool obtain a bitmap from.
+   * @param inBitmap  The Bitmap to center.
+   * @param width  The width in pixels of the target.
+   * @param height The height in pixels of the target.
+   * @return returns input Bitmap if smaller or equal to target, or toFit if the Bitmap's width or
+   * height is larger than the given dimensions
+   */
+  public static Bitmap centerInside(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
+                                 int height) {
+    if (inBitmap.getWidth() <= width && inBitmap.getHeight() <= height) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "requested target size larger or equal to input, returning input");
+      }
+      return inBitmap;
+    } else {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "requested target size too big for input, fit centering instead");
+      }
+      return fitCenter(pool, inBitmap, width, height);
+    }
   }
 
   /**
@@ -240,10 +284,7 @@ public final class TransformationUtils {
 
     matrix.postTranslate(-newRect.left, -newRect.top);
 
-    final Canvas canvas = new Canvas(result);
-    canvas.drawBitmap(inBitmap, matrix, DEFAULT_PAINT);
-    clear(canvas);
-
+    applyMatrix(inBitmap, result, matrix);
     return result;
   }
 
@@ -275,15 +316,20 @@ public final class TransformationUtils {
 
     Bitmap result = pool.get(destWidth, destHeight, getSafeConfig(toTransform));
     setAlphaIfAvailable(result, true /*hasAlpha*/);
-    Canvas canvas = new Canvas(result);
 
-    // Draw a circle
-    canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius,
-        CIRCLE_CROP_SHAPE_PAINT);
 
-    // Draw the bitmap in the circle
-    canvas.drawBitmap(toTransform, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
-    clear(canvas);
+    BITMAP_DRAWABLE_LOCK.lock();
+    try {
+      Canvas canvas = new Canvas(result);
+      // Draw a circle
+      canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius,
+          CIRCLE_CROP_SHAPE_PAINT);
+      // Draw the bitmap in the circle
+      canvas.drawBitmap(toTransform, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
+      clear(canvas);
+    } finally {
+      BITMAP_DRAWABLE_LOCK.unlock();
+    }
 
     if (!toTransform.equals(inBitmap)) {
       pool.put(toTransform);
@@ -335,10 +381,15 @@ public final class TransformationUtils {
     paint.setAntiAlias(true);
     paint.setShader(shader);
     RectF rect = new RectF(0, 0, result.getWidth(), result.getHeight());
-    Canvas canvas = new Canvas(result);
-    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-    canvas.drawRoundRect(rect, roundingRadius, roundingRadius, paint);
-    clear(canvas);
+    BITMAP_DRAWABLE_LOCK.lock();
+    try {
+      Canvas canvas = new Canvas(result);
+      canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+      canvas.drawRoundRect(rect, roundingRadius, roundingRadius, paint);
+      clear(canvas);
+    } finally {
+      BITMAP_DRAWABLE_LOCK.unlock();
+    }
 
     if (!toTransform.equals(inBitmap)) {
       pool.put(toTransform);
@@ -354,6 +405,18 @@ public final class TransformationUtils {
 
   private static Bitmap.Config getSafeConfig(Bitmap bitmap) {
     return bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888;
+  }
+
+  private static void applyMatrix(@NonNull Bitmap inBitmap, @NonNull Bitmap targetBitmap,
+      Matrix matrix) {
+    BITMAP_DRAWABLE_LOCK.lock();
+    try {
+      Canvas canvas = new Canvas(targetBitmap);
+      canvas.drawBitmap(inBitmap, matrix, DEFAULT_PAINT);
+      clear(canvas);
+    } finally {
+      BITMAP_DRAWABLE_LOCK.unlock();
+    }
   }
 
   // Visible for testing.
@@ -385,6 +448,39 @@ public final class TransformationUtils {
         break;
       default:
         // Do nothing.
+    }
+  }
+
+  private static final class NoLock implements Lock {
+    @Override
+    public void lock() {
+      // do nothing
+    }
+
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
+      // do nothing
+    }
+
+    @Override
+    public boolean tryLock() {
+      return true;
+    }
+
+    @Override
+    public boolean tryLock(long time, @NonNull TimeUnit unit) throws InterruptedException {
+      return true;
+    }
+
+    @Override
+    public void unlock() {
+      // do nothing
+    }
+
+    @NonNull
+    @Override
+    public Condition newCondition() {
+      throw new UnsupportedOperationException("Should not be called");
     }
   }
 }

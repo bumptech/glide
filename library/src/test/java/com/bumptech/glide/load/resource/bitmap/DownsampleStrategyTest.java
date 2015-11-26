@@ -91,11 +91,11 @@ public class DownsampleStrategyTest {
 
   @Test
   public void testCenterInside_scalesImageToFitWithinRequestedBounds() {
-    assertThat(DownsampleStrategy.CENTER_INSIDE.getScaleFactor(100, 200, 300, 300))
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(100, 200, 300, 300))
         .isEqualTo(300 / 200f);
-    assertThat(DownsampleStrategy.CENTER_INSIDE.getScaleFactor(270, 480, 724, 440))
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(270, 480, 724, 440))
         .isEqualTo(440 / 480f);
-    assertThat(DownsampleStrategy.CENTER_INSIDE.getScaleFactor(100, 100, 100, 100)).isEqualTo(1f);
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(100, 100, 100, 100)).isEqualTo(1f);
   }
 
   @Test
