@@ -26,7 +26,6 @@ import org.robolectric.shadows.ShadowNotificationManager;
 @Config(manifest = Config.NONE, sdk = 18, shadows = NotificationTargetTest
     .UpdateShadowNotificationManager.class)
 public class NotificationTargetTest {
-
   private UpdateShadowNotificationManager shadowManager;
   private RemoteViews remoteViews;
   private int viewId;
@@ -47,8 +46,8 @@ public class NotificationTargetTest {
 
 
     target =
-        new NotificationTarget(RuntimeEnvironment.application, remoteViews, viewId, 100 /*width*/,
-            100 /*height*/, notification, notificationId);
+        new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
+            viewId, remoteViews, notification, notificationId);
   }
 
   @Test
@@ -69,22 +68,21 @@ public class NotificationTargetTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfContextIsNull() {
-    new NotificationTarget(null /*context*/, mock(RemoteViews.class), 123 /*viewId*/, 100 /*width*/,
-        100 /*height*/, mock(Notification.class), 456 /*notificationId*/);
+    new NotificationTarget(null /*context*/, 100 /*width*/, 100 /*height*/,
+        123 /*viewId*/, mock(RemoteViews.class), mock(Notification.class), 456 /*notificationId*/);
   }
 
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfNotificationIsNull() {
-    new NotificationTarget(RuntimeEnvironment.application, mock(RemoteViews.class), 123 /*viewId*/,
-        100 /*width*/, 100 /*height*/, null /*notification*/, 456 /*notificationId*/);
+    new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
+        123 /*viewId*/, mock(RemoteViews.class), null /*notification*/, 456 /*notificationId*/);
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfRemoteViewsIsNull() {
-    new NotificationTarget(RuntimeEnvironment.application, null /*remoteViews*/, 123 /*viewId*/,
-        100 /*width*/,
-        100 /*height*/, mock(Notification.class), 456 /*notificationId*/);
+    new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
+        123 /*viewId*/, null /*remoteViews*/, mock(Notification.class), 456 /*notificationId*/);
   }
 
   @Implements(NotificationManager.class)
