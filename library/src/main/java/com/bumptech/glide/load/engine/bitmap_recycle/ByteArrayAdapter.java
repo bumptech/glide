@@ -5,6 +5,7 @@ import java.util.Arrays;
 /**
  * Adapter for handling primitive byte arrays.
  */
+@SuppressWarnings("PMD.UseVarargs")
 public final class ByteArrayAdapter implements ArrayAdapterInterface<byte[]> {
   private static final String TAG = "ByteArrayPool";
 
