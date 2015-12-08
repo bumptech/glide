@@ -78,6 +78,8 @@ public class CircleCropTest {
   }
 
   private void assertSamePixels(Bitmap expected, Bitmap actual) {
+    assertEquals(expected.getWidth(), actual.getWidth());
+    assertEquals(expected.getHeight(), actual.getHeight());
     assertEquals(expected.getConfig(), actual.getConfig());
     for (int y = 0; y < expected.getHeight(); y++) {
       for (int x = 0; x < expected.getWidth(); x++) {
@@ -88,18 +90,17 @@ public class CircleCropTest {
 
   @TargetApi(12)
   private Bitmap createBitmapWithRedCircle(int width, int height) {
-    Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    int minEdge = Math.min(width, height);
+    float radius = minEdge / 2f;
+
+    Bitmap result = Bitmap.createBitmap(minEdge, minEdge, Bitmap.Config.ARGB_8888);
     result.setHasAlpha(true);
     Canvas canvas = new Canvas(result);
     Paint paint = new Paint();
+    paint.setAntiAlias(true);
     paint.setColor(Color.RED);
 
-    int minEdge = Math.min(width, height);
-    float radius = minEdge / 2f;
-    int left = (width - minEdge) / 2;
-    int top = (height - minEdge) / 2;
-
-    canvas.drawCircle(left + radius, top + radius, radius, paint);
+    canvas.drawCircle(radius, radius, radius, paint);
     return result;
   }
 
