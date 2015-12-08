@@ -9,7 +9,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.media.ExifInterface;
@@ -303,30 +302,34 @@ public final class TransformationUtils {
       int destWidth, int destHeight) {
     int destMinEdge = Math.min(destWidth, destHeight);
     float radius = destMinEdge / 2f;
-    Rect destRect = new Rect((destWidth - destMinEdge) / 2, (destHeight - destMinEdge) / 2,
-        destMinEdge, destMinEdge);
 
     int srcWidth = inBitmap.getWidth();
     int srcHeight = inBitmap.getHeight();
-    int srcMinEdge = Math.min(srcWidth, srcHeight);
-    Rect srcRect = new Rect((srcWidth - srcMinEdge) / 2, (srcHeight - srcMinEdge) / 2,
-        srcMinEdge, srcMinEdge);
+
+    float scaleX = destMinEdge / (float) srcWidth;
+    float scaleY = destMinEdge / (float) srcHeight;
+    float maxScale = Math.max(scaleX, scaleY);
+
+    float scaledWidth = maxScale * srcWidth;
+    float scaledHeight = maxScale * srcHeight;
+    float left = (destMinEdge - scaledWidth) / 2f;
+    float top = (destMinEdge - scaledHeight) / 2f;
+
+    RectF destRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
 
     // Alpha is required for this transformation.
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
 
-    Bitmap result = pool.get(destWidth, destHeight, getSafeConfig(toTransform));
+    Bitmap result = pool.get(destMinEdge, destMinEdge, Bitmap.Config.ARGB_8888);
     setAlphaIfAvailable(result, true /*hasAlpha*/);
-
 
     BITMAP_DRAWABLE_LOCK.lock();
     try {
       Canvas canvas = new Canvas(result);
       // Draw a circle
-      canvas.drawCircle(destRect.left + radius, destRect.top + radius, radius,
-          CIRCLE_CROP_SHAPE_PAINT);
+      canvas.drawCircle(radius, radius, radius, CIRCLE_CROP_SHAPE_PAINT);
       // Draw the bitmap in the circle
-      canvas.drawBitmap(toTransform, srcRect, destRect, CIRCLE_CROP_BITMAP_PAINT);
+      canvas.drawBitmap(toTransform, null, destRect, CIRCLE_CROP_BITMAP_PAINT);
       clear(canvas);
     } finally {
       BITMAP_DRAWABLE_LOCK.unlock();
