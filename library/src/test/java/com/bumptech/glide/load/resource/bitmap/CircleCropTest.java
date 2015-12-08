@@ -78,8 +78,6 @@ public class CircleCropTest {
   }
 
   private void assertSamePixels(Bitmap expected, Bitmap actual) {
-    assertEquals(expected.getWidth(), actual.getWidth());
-    assertEquals(expected.getHeight(), actual.getHeight());
     assertEquals(expected.getConfig(), actual.getConfig());
     for (int y = 0; y < expected.getHeight(); y++) {
       for (int x = 0; x < expected.getWidth(); x++) {
