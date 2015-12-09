@@ -14,14 +14,21 @@ import java.security.NoSuchAlgorithmException;
 public class SafeKeyGenerator {
   private final LruCache<Key, String> loadIdToSafeHash = new LruCache<>(1000);
 
-  private static String calculateHexStringDigest(Key key) {
-     try {
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        key.updateDiskCacheKey(messageDigest);
-        return Util.sha256BytesToHex(messageDigest.digest());
-      } catch (NoSuchAlgorithmException e) {
-       throw new RuntimeException(e);
-      }
+  private static final MessageDigest MESSAGE_DIGEST;
+
+  static {
+    try {
+      MESSAGE_DIGEST = MessageDigest.getInstance("SHA-256");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static synchronized String calculateHexStringDigest(Key key) {
+    key.updateDiskCacheKey(MESSAGE_DIGEST);
+
+    // calling digest() will automatically reset()
+    return Util.sha256BytesToHex(MESSAGE_DIGEST.digest());
   }
 
   public String getSafeKey(Key key) {
