@@ -97,6 +97,12 @@ afterEvaluate { project ->
                         }
                     }
                 }
+
+                addFilter('aar_upload') { artifact, file ->
+                    artifact.name == 'Glide'
+                }
+
+                pom('aar_upload').packaging = 'aar'
             }
         }
     }
