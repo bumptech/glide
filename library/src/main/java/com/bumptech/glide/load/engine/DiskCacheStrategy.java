@@ -93,7 +93,7 @@ public abstract class DiskCacheStrategy {
   public static final DiskCacheStrategy RESOURCE = new DiskCacheStrategy() {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
-      return true;
+      return false;
     }
 
     @Override
