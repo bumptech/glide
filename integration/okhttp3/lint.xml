@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="AllowBackup" severity="ignore"/>
+    <!-- See https://github.com/square/okio/issues/58 -->
+    <issue id="InvalidPackage" severity="ignore">
+        <ignore regexp="okio-1.0.0.jar"/>
+    </issue>
+</lint>

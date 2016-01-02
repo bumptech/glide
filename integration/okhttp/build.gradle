@@ -7,7 +7,7 @@ repositories {
 dependencies {
     compile project(':glide')
 
-    compile "com.squareup.okhttp:okhttp:${OK_HTTP_VERSION}"
+    compile "com.squareup.okhttp:okhttp:2.7.1"
 }
 
 android {

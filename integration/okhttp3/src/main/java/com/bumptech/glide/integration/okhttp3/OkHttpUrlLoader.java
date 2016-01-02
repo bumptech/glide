@@ -1,4 +1,4 @@
-package com.bumptech.glide.integration.okhttp;
+package com.bumptech.glide.integration.okhttp3;
 
 import android.content.Context;
 
@@ -7,21 +7,19 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.squareup.okhttp.OkHttpClient;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
 
 import java.io.InputStream;
 
 /**
  * A simple model loader for fetching media over http/https using OkHttp.
- *
- * @deprecated replaced with com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader.
  */
-@Deprecated
 public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
-  private final OkHttpClient client;
+  private final Call.Factory client;
 
-  public OkHttpUrlLoader(OkHttpClient client) {
+  public OkHttpUrlLoader(Call.Factory client) {
     this.client = client;
   }
 
@@ -40,10 +38,10 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
    * The default factory for {@link OkHttpUrlLoader}s.
    */
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
-    private static volatile OkHttpClient internalClient;
-    private OkHttpClient client;
+    private static volatile Call.Factory internalClient;
+    private Call.Factory client;
 
-    private static OkHttpClient getInternalClient() {
+    private static Call.Factory getInternalClient() {
       if (internalClient == null) {
         synchronized (Factory.class) {
           if (internalClient == null) {
@@ -63,8 +61,10 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
     /**
      * Constructor for a new Factory that runs requests using given client.
+     *
+     * @param client this is typically an instance of {@code OkHttpClient}.
      */
-    public Factory(OkHttpClient client) {
+    public Factory(Call.Factory client) {
       this.client = client;
     }
 
