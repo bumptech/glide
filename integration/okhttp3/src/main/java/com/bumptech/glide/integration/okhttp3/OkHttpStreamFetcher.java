@@ -1,4 +1,4 @@
-package com.bumptech.glide.integration.okhttp;
+package com.bumptech.glide.integration.okhttp3;
 
 import android.util.Log;
 
@@ -7,10 +7,10 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
+import okhttp3.Call;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,18 +18,15 @@ import java.util.Map;
 
 /**
  * Fetches an {@link InputStream} using the okhttp library.
- *
- * @deprecated replaced with com.bumptech.glide.integration.okhttp3.OkHttpStreamFetcher.
  */
-@Deprecated
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "OkHttpFetcher";
-  private final OkHttpClient client;
+  private final Call.Factory client;
   private final GlideUrl url;
   private InputStream stream;
   private ResponseBody responseBody;
 
-  public OkHttpStreamFetcher(OkHttpClient client, GlideUrl url) {
+  public OkHttpStreamFetcher(Call.Factory client, GlideUrl url) {
     this.client = client;
     this.url = url;
   }
@@ -44,7 +41,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     }
     Request request = requestBuilder.build();
 
-    client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
+    client.newCall(request).enqueue(new okhttp3.Callback() {
       @Override
       public void onFailure(Request request, IOException e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -77,11 +74,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
       // Ignored
     }
     if (responseBody != null) {
-      try {
-        responseBody.close();
-      } catch (IOException e) {
-        // Ignored.
-      }
+      responseBody.close();
     }
   }
 

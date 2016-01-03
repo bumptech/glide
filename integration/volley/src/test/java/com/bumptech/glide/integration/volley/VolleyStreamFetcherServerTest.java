@@ -18,8 +18,8 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -97,7 +97,7 @@ public class VolleyStreamFetcherServerTest {
   public void testHandlesRedirect301s() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(new MockResponse().setResponseCode(301)
-        .setHeader("Location", mockWebServer.getUrl("/redirect")));
+        .setHeader("Location", mockWebServer.url("/redirect").toString()));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
@@ -109,7 +109,7 @@ public class VolleyStreamFetcherServerTest {
   public void testHandlesRedirect302s() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(new MockResponse().setResponseCode(302)
-        .setHeader("Location", mockWebServer.getUrl("/redirect")));
+        .setHeader("Location", mockWebServer.url("/redirect").toString()));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
@@ -124,7 +124,7 @@ public class VolleyStreamFetcherServerTest {
     String redirectBase = "/redirect";
     for (int i = 0; i < numRedirects; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301)
-          .setHeader("Location", mockWebServer.getUrl(redirectBase + i)));
+          .setHeader("Location", mockWebServer.url(redirectBase + i).toString()));
     }
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
 
@@ -162,7 +162,7 @@ public class VolleyStreamFetcherServerTest {
   public void testCallsLoadFailedAfterTooManyRedirects() throws Exception {
     for (int i = 0; i < 20; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301)
-          .setHeader("Location", mockWebServer.getUrl("/redirect" + i)));
+          .setHeader("Location", mockWebServer.url("/redirect" + i).toString()));
     }
     getFetcher().loadData(Priority.NORMAL, callback);
     waitForResponseLatch.await();
@@ -206,7 +206,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   private DataFetcher<InputStream> getFetcher(Headers headers) {
-    URL url = mockWebServer.getUrl(DEFAULT_PATH);
+    URL url = mockWebServer.url(DEFAULT_PATH).url();
     return new VolleyStreamFetcher(requestQueue, new GlideUrl(url.toString(), headers));
   }
 
