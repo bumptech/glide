@@ -248,7 +248,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
 
     @Override
     public synchronized Thread newThread(@NonNull Runnable runnable) {
-      final Thread result = new Thread(runnable, name + "-thread-" + threadNum) {
+      final Thread result = new Thread(runnable, "glide-" + name + "-thread-" + threadNum) {
         @Override
         public void run() {
           android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
