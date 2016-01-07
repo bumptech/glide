@@ -44,6 +44,8 @@ def getAndroidJar() {
     "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
 }
 
+project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
+
 // Generate javadocs and sources containing batched documentation and sources for all internal projects.
 ['release', 'debug'].each { variantName ->
 
@@ -102,5 +104,3 @@ artifacts {
         classifier 'sources'
     }
 }
-
-apply from: "$rootProject.projectDir/scripts/upload.gradle"
