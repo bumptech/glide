@@ -46,6 +46,8 @@ android {
 
         versionCode VERSION_CODE as int
         versionName VERSION_NAME as String
+
+        consumerProguardFiles 'proguard-rules.txt'
     }
 
     buildTypes {
