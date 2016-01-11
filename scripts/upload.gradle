@@ -55,6 +55,11 @@ afterEvaluate { project ->
     uploadArchives {
         repositories {
             mavenDeployer {
+                // allow uploading through FTP protocol with the following command:
+                // gradle uploadArchives -PSNAPSHOT_REPOSITORY_URL=ftp://host/repo/path -PUSERNAME=uname -PPASSWORD=passwd
+                configuration = configurations.create('deployerJars')
+                configuration.dependencies.add dependencies.create('org.apache.maven.wagon:wagon-ftp:2.2')
+
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
                 pom.groupId = GROUP
