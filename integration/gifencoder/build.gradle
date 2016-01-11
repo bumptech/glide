@@ -1,12 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'org.robolectric'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile project(':glide')
+    compile project(':library')
 
     testCompile project(":testutil")
     testCompile "com.google.truth:truth:${TRUTH_VERSION}"
@@ -40,4 +36,4 @@ android {
     }
 }
 
-apply from: "$rootProject.projectDir/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

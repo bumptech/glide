@@ -15,6 +15,10 @@
  *
  *
  * Based on: https://github.com/mcxiaoke/gradle-mvn-push/blob/master/gradle-mvn-push.gradle.
+ * Local test with (..._REPOSITORY_URL properties must be full paths):
+ * gradlew clean buildArchives uploadArchives --stacktrace --info -PSNAPSHOT_REPOSITORY_URL=file://p:\projects\contrib\github-glide\repo-snapshot -PRELEASE_REPOSITORY_URL=file://p:\projects\contrib\github-glide\repo-release
+ * For faster runs add: -x check
+ * 
  */
 
 apply plugin: 'maven'
@@ -113,8 +117,6 @@ afterEvaluate { project ->
             it.buildType.name.equalsIgnoreCase('release')
         }
 
-        def androidSdkDirectory = project.android.sdkDirectory
-
         task androidJavadocs(type: Javadoc, dependsOn: compileReleaseJava) {
             source = releaseVariants.collect { it.javaCompile.source }
             classpath = files(releaseVariants.collect { files(it.javaCompile.classpath.files,
@@ -122,7 +124,7 @@ afterEvaluate { project ->
 
             options {
                 links('http://docs.oracle.com/javase/7/docs/api/')
-                linksOffline('http://d.android.com/reference', '${androidSdkDirectory}/docs/reference')
+                linksOffline('http://d.android.com/reference', "${android.sdkDirectory}/docs/reference")
             }
 
             exclude '**/BuildConfig.java'
@@ -141,9 +143,34 @@ afterEvaluate { project ->
             baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
         }
 
+        task androidLibraryJar(type: Jar, dependsOn: compileReleaseJava /* == variant.javaCompile */) {
+            from compileReleaseJava.destinationDir
+            exclude '**/R.class'
+            exclude '**/BuildConfig.class'
+            baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+        }
+
         artifacts {
+            archives androidLibraryJar
             archives androidSourcesJar
             archives androidJavadocsJar
         }
+    } else if (project.plugins.hasPlugin('java')) {
+        task sourcesJar(type: Jar, dependsOn: classes) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        task javadocsJar(type: Jar, dependsOn: javadoc) {
+            classifier = 'javadoc'
+            from javadoc.destinationDir
+        }
+
+        artifacts {
+            archives sourcesJar
+            archives javadocsJar
+        }
     }
+    logger.info("Published artifacts in ${configurations.archives}:")
+    configurations.archives.artifacts.files.files.each { logger.info("\t$it"); }
 }

@@ -132,3 +132,5 @@ afterEvaluate {
         }
     }
 }
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

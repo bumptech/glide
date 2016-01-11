@@ -1,12 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'org.robolectric'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile project(':glide')
+    compile project(':library')
     compile "com.mcxiaoke.volley:library:${VOLLEY_VERSION}"
 
     testCompile project(":testutil")
@@ -35,4 +31,4 @@ android {
     }
 }
 
-apply from: "$rootProject.projectDir/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

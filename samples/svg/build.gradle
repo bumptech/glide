@@ -1,7 +1,8 @@
 apply plugin: 'com.android.application'
 
-repositories {
-    mavenCentral()
+dependencies {
+    compile project(':library')
+    compile 'com.caverock:androidsvg:1.2.1'
 }
 
 android {
@@ -21,11 +22,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-}
-
-dependencies {
-    compile project(':library')
-    compile 'com.caverock:androidsvg:1.2.1'
 }
 
 task run(type: Exec, dependsOn: 'installDebug') {

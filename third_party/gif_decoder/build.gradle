@@ -21,3 +21,5 @@ android {
         targetSdkVersion TARGET_SDK_VERSION as int
     }
 }
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

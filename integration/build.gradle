@@ -1,15 +1,1 @@
-evaluationDependsOnChildren()
-
-import com.android.build.gradle.api.BaseVariant
-subprojects {
-    android.libraryVariants.all { BaseVariant variant ->
-        def jarTask = project.tasks.create(name: "jar${variant.name.capitalize()}", type: Jar) {
-            from variant.javaCompile.destinationDir
-            exclude "**/R.class"
-            exclude "**/BuildConfig.class"
-            baseName "glide-${project.name}-integration"
-        }
-        jarTask.dependsOn variant.javaCompile
-        artifacts.add('archives', jarTask);
-    }
-}
+// keep an empty file to make sure Gradle recognizes the properties

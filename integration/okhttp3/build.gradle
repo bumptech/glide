@@ -1,11 +1,7 @@
 apply plugin: 'com.android.library'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile project(':glide')
+    compile project(':library')
 
     compile "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
 }
@@ -28,4 +24,4 @@ android {
     }
 }
 
-apply from: "$rootProject.projectDir/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
