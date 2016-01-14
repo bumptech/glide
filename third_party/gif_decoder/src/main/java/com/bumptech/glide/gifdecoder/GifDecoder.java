@@ -352,6 +352,7 @@ public class GifDecoder {
             bitmapProvider.release(previousImage);
         }
         previousImage = null;
+        rawData = null;
     }
 
     public void setData(GifHeader header, byte[] data) {
