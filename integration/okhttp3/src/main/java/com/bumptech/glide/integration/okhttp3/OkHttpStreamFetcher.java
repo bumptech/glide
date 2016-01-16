@@ -34,7 +34,6 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   @Override
   public void loadData(Priority priority, final DataCallback<? super InputStream> callback) {
     Request.Builder requestBuilder = new Request.Builder().url(url.toStringUrl());
-    boolean isUserAgentSet = false;
     for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
       String key = headerEntry.getKey();
       requestBuilder.addHeader(key, headerEntry.getValue());
@@ -43,7 +42,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
     client.newCall(request).enqueue(new okhttp3.Callback() {
       @Override
-      public void onFailure(Request request, IOException e) {
+      public void onFailure(Call call, IOException e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "OkHttp failed to obtain result", e);
         }
@@ -51,7 +50,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
       }
 
       @Override
-      public void onResponse(Response response) throws IOException {
+      public void onResponse(Call call, Response response) throws IOException {
         if (response.isSuccessful()) {
           long contentLength = response.body().contentLength();
           responseBody = response.body();
