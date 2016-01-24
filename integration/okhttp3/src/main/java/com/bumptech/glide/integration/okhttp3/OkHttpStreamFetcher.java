@@ -25,6 +25,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   private final GlideUrl url;
   private InputStream stream;
   private ResponseBody responseBody;
+  private volatile Call call;
 
   public OkHttpStreamFetcher(Call.Factory client, GlideUrl url) {
     this.client = client;
@@ -40,7 +41,8 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     }
     Request request = requestBuilder.build();
 
-    client.newCall(request).enqueue(new okhttp3.Callback() {
+    call = client.newCall(request);
+    call.enqueue(new okhttp3.Callback() {
       @Override
       public void onFailure(Call call, IOException e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -79,7 +81,10 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
   @Override
   public void cancel() {
-    // TODO: call cancel on the client when this method is called on a background thread. See #257
+    Call local = call;
+    if (local != null) {
+      local.cancel();
+    }
   }
 
   @Override
