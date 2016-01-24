@@ -21,6 +21,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     private final GlideUrl url;
     private InputStream stream;
     private ResponseBody responseBody;
+    private volatile Call call;
 
     public OkHttpStreamFetcher(Call.Factory client, GlideUrl url) {
         this.client = client;
@@ -37,7 +38,9 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
         }
         Request request = requestBuilder.build();
 
-        Response response = client.newCall(request).execute();
+        Response response;
+        call = client.newCall(request);
+        response = call.execute();
         responseBody = response.body();
         if (!response.isSuccessful()) {
             throw new IOException("Request failed with code: " + response.code());
@@ -69,6 +72,9 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void cancel() {
-        // TODO: call cancel on the client when this method is called on a background thread. See #257
+        Call local = call;
+        if (local != null) {
+            local.cancel();
+        }
     }
 }
