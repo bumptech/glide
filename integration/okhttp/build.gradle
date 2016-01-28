@@ -18,7 +18,6 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode VERSION_CODE as int
         versionName VERSION_NAME as String
     }
 }
