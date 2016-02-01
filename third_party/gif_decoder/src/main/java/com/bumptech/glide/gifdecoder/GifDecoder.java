@@ -318,12 +318,10 @@ public class GifDecoder {
     status = STATUS_OK;
 
     GifFrame currentFrame = header.frames.get(framePointer);
-    GifFrame previousFrame;
+    GifFrame previousFrame = null;
     int previousIndex = framePointer - 1;
     if (previousIndex >= 0) {
       previousFrame = header.frames.get(previousIndex);
-    } else {
-      previousFrame = header.frames.get(getFrameCount() - 1);
     }
 
     final int savedBgColor = header.bgColor;
@@ -497,6 +495,11 @@ public class GifDecoder {
     // Final location of blended pixels.
     final int[] dest = mainScratch;
 
+    // clear all pixels when meet first frame
+    if (previousFrame == null) {
+      Arrays.fill(dest, 0);
+    }
+
     // fill in starting image contents based on last image's dispose code
     if (previousFrame != null && previousFrame.dispose > DISPOSAL_UNSPECIFIED) {
       // We don't need to do anything for DISPOSAL_NONE, if it has the correct pixels so will our
@@ -520,7 +523,7 @@ public class GifDecoder {
       }
     }
 
-    // Decode pixels for this frame  into the global pixels[] scratch.
+    // Decode pixels for this frame into the global pixels[] scratch.
     decodeBitmapData(currentFrame);
 
     int downsampledIH = currentFrame.ih / sampleSize;
