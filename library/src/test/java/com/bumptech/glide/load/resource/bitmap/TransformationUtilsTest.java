@@ -445,24 +445,12 @@ public class TransformationUtilsTest {
   @Implements(Bitmap.class)
   public static class AlphaShadowBitmap extends ShadowBitmap {
 
-    private boolean hasAlpha;
-
     @Implementation
     public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
       // Robolectric doesn't match the framework behavior with null configs, so we have to do so
       // here.
       Preconditions.checkNotNull("Config must not be null");
       return ShadowBitmap.createBitmap(width, height, config);
-    }
-
-    @Implementation
-    public void setHasAlpha(boolean hasAlpha) {
-      this.hasAlpha = hasAlpha;
-    }
-
-    @Implementation
-    public boolean hasAlpha() {
-      return hasAlpha;
     }
   }
 }

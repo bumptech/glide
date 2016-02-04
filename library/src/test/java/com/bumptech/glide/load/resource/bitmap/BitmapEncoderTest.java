@@ -21,16 +21,12 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.File;
 import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = {
-    BitmapEncoderTest.AlphaShadowBitmap.class })
+@Config(manifest = Config.NONE, sdk = 18)
 public class BitmapEncoderTest {
   private EncoderHarness harness;
 
@@ -135,23 +131,6 @@ public class BitmapEncoderTest {
 
     public void tearDown() {
       file.delete();
-    }
-  }
-
-  @Implements(Bitmap.class)
-  public static class AlphaShadowBitmap extends ShadowBitmap {
-    private boolean hasAlpha;
-
-    @SuppressWarnings("unused")
-    @Implementation
-    public void setHasAlpha(boolean hasAlpha) {
-      this.hasAlpha = hasAlpha;
-    }
-
-    @SuppressWarnings("unused")
-    @Implementation
-    public boolean hasAlpha() {
-      return hasAlpha;
     }
   }
 }
