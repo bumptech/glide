@@ -25,6 +25,9 @@ import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.BitmapCrossFadeFactory;
+import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
+import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
 
@@ -43,8 +46,10 @@ import java.io.InputStream;
  * @param <ModelType> The type of model that will be loaded into the target.
  * @param <TranscodeType> The type of the transcoded resource that the target will receive
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class BitmapRequestBuilder<ModelType, TranscodeType>
-        extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType> implements BitmapOptions {
+        extends GenericRequestBuilder<ModelType, ImageVideoWrapper, Bitmap, TranscodeType>
+        implements BitmapOptions, DrawableOptions {
     private final BitmapPool bitmapPool;
 
     private Downsampler downsampler = Downsampler.AT_LEAST;
@@ -313,6 +318,80 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
         return this;
     }
 
+    private RuntimeException crossFadeNotSupported() {
+        String className = transcodeClass.getCanonicalName();
+        if (className == null) {
+            className = transcodeClass.toString();
+        }
+        return new UnsupportedOperationException(".crossFade() is not supported for " + className
+                + ", use .animate() to provide a compatible animation.");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("unchecked")
+    public final BitmapRequestBuilder<ModelType, TranscodeType> crossFade() {
+        if (Bitmap.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new BitmapCrossFadeFactory());
+        } else if (Drawable.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new DrawableCrossFadeFactory<Drawable>());
+        } else {
+            throw crossFadeNotSupported();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("unchecked")
+    public BitmapRequestBuilder<ModelType, TranscodeType> crossFade(int duration) {
+        if (Bitmap.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new BitmapCrossFadeFactory(duration));
+        } else if (Drawable.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new DrawableCrossFadeFactory<Drawable>(duration));
+        } else {
+            throw crossFadeNotSupported();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Deprecated
+    @SuppressWarnings("unchecked")
+    public BitmapRequestBuilder<ModelType, TranscodeType> crossFade(Animation animation, int duration) {
+        if (Bitmap.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new BitmapCrossFadeFactory(animation, duration));
+        } else if (Drawable.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new DrawableCrossFadeFactory<Drawable>(animation, duration));
+        } else {
+            throw crossFadeNotSupported();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("unchecked")
+    public BitmapRequestBuilder<ModelType, TranscodeType> crossFade(int animationId, int duration) {
+        if (Bitmap.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new BitmapCrossFadeFactory(context, animationId, duration));
+        } else if (Drawable.class.isAssignableFrom(transcodeClass)) {
+            return animate((GlideAnimationFactory<TranscodeType>)
+                    new DrawableCrossFadeFactory<Drawable>(context, animationId, duration));
+        } else {
+            throw crossFadeNotSupported();
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -348,6 +427,17 @@ public class BitmapRequestBuilder<ModelType, TranscodeType>
     @Override
     public BitmapRequestBuilder<ModelType, TranscodeType> animate(ViewPropertyAnimation.Animator animator) {
         super.animate(animator);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see com.bumptech.glide.request.animation.BitmapContainerCrossFadeFactory
+     */
+    @Override
+    public BitmapRequestBuilder<ModelType, TranscodeType> animate(
+            GlideAnimationFactory<TranscodeType> animationFactory) {
+        super.animate(animationFactory);
         return this;
     }
 

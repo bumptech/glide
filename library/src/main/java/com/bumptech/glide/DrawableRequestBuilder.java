@@ -23,6 +23,7 @@ import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
+import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.Target;
 
@@ -268,8 +269,7 @@ public class DrawableRequestBuilder<ModelType>
      * {@inheritDoc}
      */
     public DrawableRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(context, animationId,
-                duration));
+        super.animate(new DrawableCrossFadeFactory<GlideDrawable>(context, animationId, duration));
         return this;
     }
 
@@ -288,6 +288,15 @@ public class DrawableRequestBuilder<ModelType>
     @Override
     public DrawableRequestBuilder<ModelType> animate(ViewPropertyAnimation.Animator animator) {
         super.animate(animator);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DrawableRequestBuilder<ModelType> animate(GlideAnimationFactory<GlideDrawable> animationFactory) {
+        super.animate(animationFactory);
         return this;
     }
 
