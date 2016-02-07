@@ -12,8 +12,10 @@
       <module fileurl="file://$PROJECT_DIR$/integration/integration.iml" filepath="$PROJECT_DIR$/integration/integration.iml" />
       <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
       <module fileurl="file://$PROJECT_DIR$/integration/okhttp/okhttp.iml" filepath="$PROJECT_DIR$/integration/okhttp/okhttp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/integration/palette/palette.iml" filepath="$PROJECT_DIR$/integration/palette/palette.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/svg/svg.iml" filepath="$PROJECT_DIR$/samples/svg/svg.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/swatches/swatches.iml" filepath="$PROJECT_DIR$/samples/swatches/swatches.iml" />
       <module fileurl="file://$PROJECT_DIR$/testutil/testutil.iml" filepath="$PROJECT_DIR$/testutil/testutil.iml" />
       <module fileurl="file://$PROJECT_DIR$/third_party/third_party.iml" filepath="$PROJECT_DIR$/third_party/third_party.iml" />
       <module fileurl="file://$PROJECT_DIR$/integration/volley/volley.iml" filepath="$PROJECT_DIR$/integration/volley/volley.iml" />
