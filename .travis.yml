@@ -17,13 +17,15 @@ jdk:
 
 sudo: false
 
-script: 'travis_retry ./gradlew build --parallel'
+script: 'travis_retry ./gradlew build'
 
 after_success:
 - scripts/travis-sonatype-publish.sh
 - ./gradlew jacocoTestReport coveralls
 
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
   directories:
-    - $HOME/.gradle/caches
-
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
