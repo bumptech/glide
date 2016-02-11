@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':library')
+    compile project(':glide')
 
     compile "com.squareup.okhttp3:okhttp:${OK_HTTP3_VERSION}"
 }
