@@ -104,7 +104,7 @@ public class GifDrawableTest {
   @Test
   public void testDoesDrawCurrentFrameIfOneIsAvailable() {
     Canvas canvas = mock(Canvas.class);
-    Bitmap currentFrame = Bitmap.createBitmap(100123, 123141, Bitmap.Config.ARGB_4444);
+    Bitmap currentFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     when(frameLoader.getCurrentFrame()).thenReturn(currentFrame);
 
     drawable.draw(canvas);
