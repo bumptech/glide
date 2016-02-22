@@ -432,7 +432,7 @@ public class EngineJobTest {
   }
 
   @Test
-  public void testSubmitsDecodeJobToSourceServiceWhenDecodingFromSoureOnlyOnStart() {
+  public void testSubmitsDecodeJobToSourceServiceWhenDecodingFromSourceOnlyOnStart() {
     EngineJob<Object> job = harness.getJob();
     when(harness.decodeJob.willDecodeFromCache()).thenReturn(false);
     harness.diskCacheService.shutdownNow();

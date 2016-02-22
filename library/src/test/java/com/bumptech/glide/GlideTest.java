@@ -508,7 +508,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testNullModelPrefersFallbackDrwaable() {
+  public void testNullModelPrefersFallbackDrawable() {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
     Drawable error = new ColorDrawable(Color.RED);
     Drawable fallback = new ColorDrawable(Color.BLUE);

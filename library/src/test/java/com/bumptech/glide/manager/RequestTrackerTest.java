@@ -65,7 +65,7 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testClearRemoveAndRecyle_withAlreadyRemovedRequest_doesNothingAndReturnsFalse() {
+  public void testClearRemoveAndRecycle_withAlreadyRemovedRequest_doesNothingAndReturnsFalse() {
     Request request = mock(Request.class);
     tracker.addRequest(request);
     tracker.clearRemoveAndRecycle(request);

@@ -43,7 +43,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
 
   /**
    * Returns true if the request is the request loading the fullsize image and if neither the full
-   * nor the thumbnail image have completed sucessfully.
+   * nor the thumbnail image have completed successfully.
    *
    * @param request {@inheritDoc}.
    */
