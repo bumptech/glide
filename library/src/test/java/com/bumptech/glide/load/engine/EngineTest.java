@@ -421,7 +421,21 @@ public class EngineTest {
   public void testFactoryIsGivenNecessaryArguments() {
     harness.doLoad();
 
-    verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(true) /*isMemoryCacheable*/);
+    verify(harness.engineJobFactory).build(
+        eq(harness.cacheKey),
+        eq(true) /*isMemoryCacheable*/,
+        eq(false) /*useUnlimitedSourceGeneratorPool*/);
+  }
+
+  @Test
+  public void testFactoryIsGivenNecessaryArgumentsWithUnlimitedPool() {
+    harness.useUnlimitedSourceGeneratorPool = true;
+    harness.doLoad();
+
+    verify(harness.engineJobFactory).build(
+        eq(harness.cacheKey),
+        eq(true) /*isMemoryCacheable*/,
+        eq(true) /*useUnlimitedSourceGeneratorPool*/);
   }
 
   @Test
@@ -470,6 +484,7 @@ public class EngineTest {
     Options options = new Options();
     GlideContext glideContext = mock(GlideContext.class);
     boolean isMemoryCacheable = true;
+    boolean useUnlimitedSourceGeneratorPool = false;
 
     public EngineTestHarness() {
       when(keyFactory.buildKey(eq(model), eq(signature), anyInt(), anyInt(), eq(transformations),
@@ -479,12 +494,14 @@ public class EngineTest {
 
       engine = new Engine(cache, mock(DiskCache.Factory.class),
           GlideExecutor.newDiskCacheExecutor(),
-          MockGlideExecutor.newMainThreadExecutor(), jobs, keyFactory, activeResources,
+          MockGlideExecutor.newMainThreadExecutor(),
+          MockGlideExecutor.newMainThreadUnlimitedExecutor(),
+          jobs, keyFactory, activeResources,
           engineJobFactory, decodeJobFactory, resourceRecycler);
     }
 
     public Engine.LoadStatus doLoad() {
-      when(engineJobFactory.build(eq(cacheKey), anyBoolean())).thenReturn(job);
+      when(engineJobFactory.build(eq(cacheKey), anyBoolean(), anyBoolean())).thenReturn(job);
       return engine.load(glideContext,
           model,
           signature,
@@ -498,6 +515,7 @@ public class EngineTest {
           false /*isTransformationRequired*/,
           options,
           isMemoryCacheable,
+          useUnlimitedSourceGeneratorPool,
           cb);
     }
   }

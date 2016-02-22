@@ -64,16 +64,18 @@ public class Engine implements EngineJobListener,
   }
 
   public Engine(MemoryCache memoryCache, DiskCache.Factory diskCacheFactory,
-      GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor) {
-    this(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor, null, null, null, null,
-        null, null);
+      GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
+      GlideExecutor sourceUnlimitedExecutor) {
+    this(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor,
+        null, null, null, null, null, null);
   }
 
   // Visible for testing.
   Engine(MemoryCache cache, DiskCache.Factory diskCacheFactory, GlideExecutor diskCacheExecutor,
-      GlideExecutor sourceExecutor, Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
-      Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory,
-      DecodeJobFactory decodeJobFactory, ResourceRecycler resourceRecycler) {
+      GlideExecutor sourceExecutor, GlideExecutor sourceUnlimitedExecutor, Map<Key, EngineJob> jobs,
+      EngineKeyFactory keyFactory, Map<Key, WeakReference<EngineResource<?>>> activeResources,
+      EngineJobFactory engineJobFactory, DecodeJobFactory decodeJobFactory,
+      ResourceRecycler resourceRecycler) {
     this.cache = cache;
     this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
 
@@ -93,7 +95,8 @@ public class Engine implements EngineJobListener,
     this.jobs = jobs;
 
     if (engineJobFactory == null) {
-      engineJobFactory = new EngineJobFactory(diskCacheExecutor, sourceExecutor, this);
+      engineJobFactory = new EngineJobFactory(diskCacheExecutor, sourceExecutor,
+          sourceUnlimitedExecutor, this);
     }
     this.engineJobFactory = engineJobFactory;
 
@@ -143,6 +146,7 @@ public class Engine implements EngineJobListener,
       boolean isTransformationRequired,
       Options options,
       boolean isMemoryCacheable,
+      boolean useUnlimitedSourceExecutorPool,
       ResourceCallback cb) {
     Util.assertMainThread();
     long startTime = LogTime.getLogTime();
@@ -177,7 +181,8 @@ public class Engine implements EngineJobListener,
       return new LoadStatus(cb, current);
     }
 
-    EngineJob<R> engineJob = engineJobFactory.build(key, isMemoryCacheable);
+    EngineJob<R> engineJob = engineJobFactory.build(key, isMemoryCacheable,
+        useUnlimitedSourceExecutorPool);
     DecodeJob<R> decodeJob = decodeJobFactory.build(
         glideContext,
         model,
@@ -432,26 +437,30 @@ public class Engine implements EngineJobListener,
   static class EngineJobFactory {
     private final GlideExecutor diskCacheExecutor;
     private final GlideExecutor sourceExecutor;
+    private final GlideExecutor sourceUnlimitedExecutor;
     private final EngineJobListener listener;
     private final Pools.Pool<EngineJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
         new FactoryPools.Factory<EngineJob<?>>() {
           @Override
           public EngineJob<?> create() {
-            return new EngineJob<Object>(diskCacheExecutor, sourceExecutor, listener, pool);
+            return new EngineJob<Object>(diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor,
+                listener, pool);
           }
         });
 
     EngineJobFactory(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
-        EngineJobListener listener) {
+        GlideExecutor sourceUnlimitedExecutor, EngineJobListener listener) {
       this.diskCacheExecutor = diskCacheExecutor;
       this.sourceExecutor = sourceExecutor;
+      this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
       this.listener = listener;
     }
 
     @SuppressWarnings("unchecked")
-    <R> EngineJob<R> build(Key key, boolean isMemoryCacheable) {
+    <R> EngineJob<R> build(Key key, boolean isMemoryCacheable,
+        boolean useUnlimitedSourceGeneratorPool) {
       EngineJob<R> result = (EngineJob<R>) pool.acquire();
-      return result.init(key, isMemoryCacheable);
+      return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool);
     }
   }
 }

@@ -45,6 +45,17 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   private final boolean executeSynchronously;
 
   /**
+   * The default thread name prefix for executors from unlimited thread pool used to
+   * load/decode/transform data not found in cache.
+   */
+  private static final String SOURCE_UNLIMITED_EXECUTOR_NAME = "source-unlimited";
+  /**
+   * The default keep alive time for threads in source unlimited executor pool in milliseconds.
+   */
+  private static final long SOURCE_UNLIMITED_EXECUTOR_KEEP_ALIVE_TIME_MS =
+      TimeUnit.SECONDS.toMillis(10);
+
+  /**
    * Returns a new fixed thread pool with the default thread count returned from
    * {@link #calculateBestThreadCount()}, the {@link #DEFAULT_DISK_CACHE_EXECUTOR_NAME} thread name
    * prefix, and the
@@ -108,14 +119,46 @@ public final class GlideExecutor extends ThreadPoolExecutor {
         false /*preventNetworkOperations*/, false /*executeSynchronously*/);
   }
 
+  /**
+   * Returns a new unlimited thread pool with zero core thread count to make sure no threads are
+   * created by default, {@link #SOURCE_UNLIMITED_EXECUTOR_KEEP_ALIVE_TIME_MS} keep alive
+   * time, the {@link #SOURCE_UNLIMITED_EXECUTOR_NAME} thread name prefix, and the
+   * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy#DEFAULT}
+   * uncaught throwable strategy.
+   *
+   * <p>Source executors allow network operations on their threads.
+   */
+  public static GlideExecutor newUnlimitedSourceExecutor() {
+    return new GlideExecutor(0 /* corePoolSize */,
+        Integer.MAX_VALUE /* maximumPoolSize */,
+        SOURCE_UNLIMITED_EXECUTOR_KEEP_ALIVE_TIME_MS,
+        SOURCE_UNLIMITED_EXECUTOR_NAME,
+        UncaughtThrowableStrategy.DEFAULT,
+        false /*preventNetworkOperations*/,
+        false /*executeSynchronously*/);
+  }
+
   // Visible for testing.
   GlideExecutor(int poolSize, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
       boolean executeSynchronously) {
+    this(
+        poolSize /* corePoolSize */,
+        poolSize /* maximumPoolSize */,
+        0 /* keepAliveTimeInMs */,
+        name,
+        uncaughtThrowableStrategy,
+        preventNetworkOperations,
+        executeSynchronously);
+  }
+
+  GlideExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTimeInMs, String name,
+      UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
+      boolean executeSynchronously) {
     super(
-        poolSize /*corePoolSize*/,
-        poolSize /*maximumPoolSize*/,
-        0 /*keepAliveTime*/,
+        corePoolSize,
+        maximumPoolSize,
+        keepAliveTimeInMs,
         TimeUnit.MILLISECONDS,
         new PriorityBlockingQueue<Runnable>(),
         new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations));
@@ -139,7 +182,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
 
   private <T> Future<T> maybeWait(Future<T> future) {
     if (executeSynchronously) {
-        try {
+      try {
         future.get();
       } catch (InterruptedException | ExecutionException e) {
         throw new RuntimeException(e);

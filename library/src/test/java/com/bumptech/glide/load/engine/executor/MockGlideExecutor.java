@@ -12,4 +12,13 @@ public final class MockGlideExecutor {
         GlideExecutor.UncaughtThrowableStrategy.THROW, false /*preventNetworkOperations*/,
         true /*runAllOnMainThread*/);
   }
+
+  public static GlideExecutor newMainThreadUnlimitedExecutor() {
+    return new GlideExecutor(0 /* corePoolSize */,
+        Integer.MAX_VALUE /* maximumPoolSize */,
+        java.util.concurrent.TimeUnit.SECONDS.toMillis(10) /* keepAliveTimeInMs */,
+        "mock-unlimited-glide-executor",
+        GlideExecutor.UncaughtThrowableStrategy.THROW, false /*preventNetworkOperations*/,
+        true /*runAllOnMainThread*/);
+  }
 }

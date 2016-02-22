@@ -75,6 +75,7 @@ public class SingleRequestTest {
     GlideContext glideContext = mock(GlideContext.class);
     Key signature = mock(Key.class);
     Priority priority = Priority.HIGH;
+    boolean useUnlimitedSourceGeneratorsPool = false;
 
     Map<Class<?>, Transformation<?>>  transformations = new HashMap<>();
 
@@ -91,7 +92,8 @@ public class SingleRequestTest {
         .fallback(fallbackDrawable)
         .override(overrideWidth, overrideHeight)
         .priority(priority)
-        .signature(signature);
+        .signature(signature)
+        .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
       return SingleRequest
           .obtain(glideContext, model, List.class, requestOptions, overrideWidth, overrideHeight,
               priority, target, requestListener, requestCoordinator, engine, factory);
@@ -275,7 +277,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
             eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
             eq(harness.transformations), anyBoolean(), any(Options.class),
-            anyBoolean(), any(ResourceCallback.class));
+            anyBoolean(), anyBoolean(), any(ResourceCallback.class));
   }
 
   @Test
@@ -294,7 +296,7 @@ public class SingleRequestTest {
        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(), anyInt(),
           eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
           eq(harness.transformations), anyBoolean(), any(Options.class),
-          anyBoolean(), any(ResourceCallback.class)))
+          anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
         .thenReturn(loadStatus);
 
     SingleRequest<List> request = harness.getRequest();
@@ -538,7 +540,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), any(ResourceCallback.class)))
+            any(Options.class), anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
         .thenAnswer(new Answer<Object>() {
           @Override
           public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -652,7 +654,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), any(ResourceCallback.class));
+            any(Options.class), anyBoolean(), anyBoolean(), any(ResourceCallback.class));
   }
 
   @Test
@@ -674,7 +676,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
             eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
             eq(harness.transformations), anyBoolean(), any(Options.class),
-            anyBoolean(), any(ResourceCallback.class)))
+            anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
         .thenAnswer(new CallResourceCallback(harness.resource));
     SingleRequest<List> request = harness.getRequest();
 
@@ -703,7 +705,42 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), any(ResourceCallback.class));
+            any(Options.class), anyBoolean(), anyBoolean(), any(ResourceCallback.class));
+  }
+
+
+  @Test
+  public void testCallsSourceUnlimitedExecutorEngineIfOptionsIsSet() {
+    doAnswer(new CallSizeReady(100, 100)).when(harness.target)
+        .getSize(any(SizeReadyCallback.class));
+
+    harness.useUnlimitedSourceGeneratorsPool = true;
+
+    SingleRequest<List> request = harness.getRequest();
+    request.begin();
+
+    verify(harness.engine)
+        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
+            anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
+            any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
+            any(Options.class), anyBoolean(), eq(Boolean.TRUE), any(ResourceCallback.class));
+  }
+
+  @Test
+  public void testCallsSourceExecutorEngineIfOptionsIsSet() {
+    doAnswer(new CallSizeReady(100, 100)).when(harness.target)
+        .getSize(any(SizeReadyCallback.class));
+
+    harness.useUnlimitedSourceGeneratorsPool = false;
+
+    SingleRequest<List> request = harness.getRequest();
+    request.begin();
+
+    verify(harness.engine)
+        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
+            anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
+            any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
+            any(Options.class), anyBoolean(), eq(Boolean.FALSE), any(ResourceCallback.class));
   }
 
   @SuppressWarnings("unchecked")

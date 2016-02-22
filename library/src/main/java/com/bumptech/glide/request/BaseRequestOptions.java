@@ -64,6 +64,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private static final int THEME = 1 << 15;
   private static final int TRANSFORMATION_ALLOWED = 1 << 16;
   private static final int TRANSFORMATION_REQUIRED = 1 << 17;
+  private static final int USE_UNLIMITED_SOURCE_GENERATORS_POOL = 1 << 18;
 
   private int fields;
 
@@ -89,6 +90,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private boolean isLocked;
   private Resources.Theme theme;
   private boolean isAutoCloneEnabled;
+  private boolean useUnlimitedSourceGeneratorsPool;
 
   /**
    * Applies a multiplier to the {@link com.bumptech.glide.request.target.Target}'s size before
@@ -110,6 +112,17 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     }
     this.sizeMultiplier = sizeMultiplier;
     fields |= SIZE_MULTIPLIER;
+
+    return selfOrThrowIfLocked();
+  }
+
+  public final CHILD useUnlimitedSourceGeneratorsPool(boolean flag) {
+    if (isAutoCloneEnabled) {
+      return clone().useUnlimitedSourceGeneratorsPool(flag);
+    }
+
+    this.useUnlimitedSourceGeneratorsPool = flag;
+    fields |= USE_UNLIMITED_SOURCE_GENERATORS_POOL;
 
     return selfOrThrowIfLocked();
   }
@@ -754,6 +767,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     if (isSet(other.fields, SIZE_MULTIPLIER)) {
       sizeMultiplier = other.sizeMultiplier;
     }
+    if (isSet(other.fields, USE_UNLIMITED_SOURCE_GENERATORS_POOL)) {
+      useUnlimitedSourceGeneratorsPool = other.useUnlimitedSourceGeneratorsPool;
+    }
     if (isSet(other.fields, DISK_CACHE_STRATEGY)) {
       diskCacheStrategy = other.diskCacheStrategy;
     }
@@ -941,5 +957,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   private static boolean isSet(int fields, int flag) {
     return (fields & flag) != 0;
+  }
+
+  public final boolean getUseUnlimitedSourceGeneratorsPool() {
+    return useUnlimitedSourceGeneratorsPool;
   }
 }

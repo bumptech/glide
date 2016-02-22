@@ -393,6 +393,7 @@ public final class SingleRequest<R> implements Request,
         requestOptions.isTransformationRequired(),
         requestOptions.getOptions(),
         requestOptions.isMemoryCacheable(),
+        requestOptions.getUseUnlimitedSourceGeneratorsPool(),
         this);
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
