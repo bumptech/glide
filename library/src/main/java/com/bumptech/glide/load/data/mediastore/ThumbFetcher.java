@@ -11,7 +11,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.ExifOrientationStream;
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   }
 
   private static ThumbFetcher build(Context context, Uri uri, ThumbnailQuery query) {
-    ByteArrayPool byteArrayPool = Glide.get(context).getByteArrayPool();
+    ArrayPool byteArrayPool = Glide.get(context).getArrayPool();
     return new ThumbFetcher(context, uri, new ThumbnailStreamOpener(query, byteArrayPool));
   }
 

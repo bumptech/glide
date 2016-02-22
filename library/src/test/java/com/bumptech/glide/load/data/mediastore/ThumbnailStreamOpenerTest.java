@@ -12,8 +12,8 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -115,7 +115,7 @@ public class ThumbnailStreamOpenerTest {
     Uri uri = Uri.fromFile(file);
     ThumbnailQuery query = mock(ThumbnailQuery.class);
     FileService service = mock(FileService.class);
-    ByteArrayPool byteArrayPool = new LruByteArrayPool();
+    ArrayPool byteArrayPool = new LruArrayPool();
 
     public Harness() {
       cursor.addRow(new String[] { file.getAbsolutePath() });
