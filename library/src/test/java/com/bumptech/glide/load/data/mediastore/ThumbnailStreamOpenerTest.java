@@ -100,7 +100,7 @@ public class ThumbnailStreamOpenerTest {
   }
 
   @Test
-  public void testImageQueryReturnsImageCurosr() {
+  public void testImageQueryReturnsImageCursor() {
     Uri queryUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
     ThumbFetcher.ImageThumbnailQuery query = new ThumbFetcher.ImageThumbnailQuery();
     RoboCursor testCursor = new RoboCursor();

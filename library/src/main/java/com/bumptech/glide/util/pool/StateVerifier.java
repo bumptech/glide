@@ -26,7 +26,7 @@ public abstract class StateVerifier {
   public abstract void throwIfRecycled();
 
   /**
-   * Sets whether or not our objet is recycled.
+   * Sets whether or not our object is recycled.
    */
   abstract void setRecycled(boolean isRecycled);
 

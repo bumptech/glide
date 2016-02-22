@@ -57,7 +57,7 @@ Labels on issues are managed by contributors, you don't have to worry about them
  * **reproducible**: has enough information to very easily reproduce, mostly in form of a small project in a GitHub repo
  * **repro-needed**: we need some code to be able to reproduce and debug locally, otherwise there's not much we can do
  * **duplicate**: there's another issue which already covers/tracks this
- * **wontfix**: working as intented, or won't be fixed due to compatibility or other reasons
+ * **wontfix**: working as intended, or won't be fixed due to compatibility or other reasons
  * **invalid**: there isn't enough information to make a verdict, or unrelated to Glide
  * **non-library**: issue is not in the core library code, but rather in documentation, samples, build process, releases
  * **v4**: problem originated in v4, or question about v4 (while v3 is in wide use)

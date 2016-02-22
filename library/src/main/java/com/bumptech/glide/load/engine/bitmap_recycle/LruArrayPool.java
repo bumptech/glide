@@ -17,7 +17,7 @@ import java.util.TreeMap;
 public final class LruArrayPool implements ArrayPool {
 
   /**
-   * The maximum number of times larger an int array may be to be than a requested size to eligble
+   * The maximum number of times larger an int array may be to be than a requested size to eligible
    * to be returned from the pool.
    */
   private static final int MAX_OVER_SIZE_MULTIPLE = 8;

@@ -63,7 +63,7 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
 
   /**
    * Opens the given asset path with the given {@link android.content.res.AssetManager} and returns
-   * the conrete data type returned by the AssetManager.
+   * the concrete data type returned by the AssetManager.
    *
    * @param assetManager An AssetManager to use to open the given path.
    * @param path         A string path pointing to a resource in assets to open.
