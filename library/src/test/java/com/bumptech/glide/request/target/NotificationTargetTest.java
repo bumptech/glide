@@ -31,6 +31,7 @@ public class NotificationTargetTest {
   private int viewId;
   private Notification notification;
   private int notificationId;
+  private String notificationTag;
   private NotificationTarget target;
 
   @Before
@@ -43,11 +44,12 @@ public class NotificationTargetTest {
     viewId = 123;
     notification = mock(Notification.class);
     notificationId = 456;
+    notificationTag = "tag";
 
 
     target =
         new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
-            viewId, remoteViews, notification, notificationId);
+            viewId, remoteViews, notification, notificationId, notificationTag);
   }
 
   @Test
@@ -63,35 +65,41 @@ public class NotificationTargetTest {
     /*glideAnimation*/);
 
     assertEquals(notificationId, shadowManager.updatedNotificationId);
+    assertEquals(notificationTag, shadowManager.updatedNotificationTag);
     assertEquals(notification, shadowManager.updatedNotification);
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfContextIsNull() {
     new NotificationTarget(null /*context*/, 100 /*width*/, 100 /*height*/,
-        123 /*viewId*/, mock(RemoteViews.class), mock(Notification.class), 456 /*notificationId*/);
+        123 /*viewId*/, mock(RemoteViews.class), mock(Notification.class), 456 /*notificationId*/,
+        "tag" /*notificationTag*/);
   }
 
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfNotificationIsNull() {
     new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
-        123 /*viewId*/, mock(RemoteViews.class), null /*notification*/, 456 /*notificationId*/);
+        123 /*viewId*/, mock(RemoteViews.class), null /*notification*/, 456 /*notificationId*/,
+        "tag" /*notificationTag*/);
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfRemoteViewsIsNull() {
     new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
-        123 /*viewId*/, null /*remoteViews*/, mock(Notification.class), 456 /*notificationId*/);
+        123 /*viewId*/, null /*remoteViews*/, mock(Notification.class), 456 /*notificationId*/,
+        "tag" /*notificationTag*/);
   }
 
   @Implements(NotificationManager.class)
   public static class UpdateShadowNotificationManager extends ShadowNotificationManager {
     int updatedNotificationId;
+    String updatedNotificationTag;
     Notification updatedNotification;
 
     @Implementation
-    public void notify(int notificationId, Notification notification) {
+    public void notify(String notificationTag, int notificationId, Notification notification) {
+      updatedNotificationTag = notificationTag;
       updatedNotificationId = notificationId;
       updatedNotification = notification;
     }
