@@ -21,8 +21,10 @@ import com.bumptech.glide.util.Util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 
@@ -47,6 +49,17 @@ public final class Downsampler {
       Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy",
           DownsampleStrategy.AT_LEAST);
 
+  private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
+  private static final String ICO_MIME_TYPE = "image/x-ico";
+  private static final Set<String> NO_DOWNSAMPLE_PRE_N_MIME_TYPES =
+      Collections.unmodifiableSet(
+          new HashSet<>(
+              Arrays.asList(
+                  WBMP_MIME_TYPE,
+                  ICO_MIME_TYPE
+              )
+          )
+      );
   private static final DecodeCallbacks EMPTY_CALLBACKS = new DecodeCallbacks() {
     @Override
     public void onObtainBounds() {
@@ -240,9 +253,17 @@ public final class Downsampler {
         ? Math.max(widthScaleFactor, heightScaleFactor)
         : Math.min(widthScaleFactor, heightScaleFactor);
 
-    int powerOfTwoSampleSize = Math.max(1, Integer.highestOneBit(scaleFactor));
-    if (rounding == SampleSizeRounding.MEMORY && powerOfTwoSampleSize < (1.f / exactScaleFactor)) {
-      powerOfTwoSampleSize = powerOfTwoSampleSize << 1;
+    int powerOfTwoSampleSize;
+    // BitmapFactory does not support downsampling wbmp files on platforms <= M. See b/27305903.
+    if (Build.VERSION.SDK_INT <= 23
+        && NO_DOWNSAMPLE_PRE_N_MIME_TYPES.contains(options.outMimeType)) {
+      powerOfTwoSampleSize = 1;
+    } else {
+      powerOfTwoSampleSize = Math.max(1, Integer.highestOneBit(scaleFactor));
+      if (rounding == SampleSizeRounding.MEMORY
+          && powerOfTwoSampleSize < (1.f / exactScaleFactor)) {
+        powerOfTwoSampleSize = powerOfTwoSampleSize << 1;
+      }
     }
 
     float adjustedScaleFactor = powerOfTwoSampleSize * exactScaleFactor;

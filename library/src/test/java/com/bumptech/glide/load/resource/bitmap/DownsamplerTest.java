@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.util.DisplayMetrics;
 
 import com.bumptech.glide.load.DecodeFormat;
@@ -16,7 +17,9 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.DownsamplerTest.AllocationSizeBitmap;
+import com.bumptech.glide.tests.Util;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +46,7 @@ public class DownsamplerTest {
   @Mock private ArrayPool byteArrayPool;
   private Downsampler downsampler;
   private Options options;
+  private int initialSdkVersion;
 
   @Before
   public void setUp() throws Exception {
@@ -53,6 +57,13 @@ public class DownsamplerTest {
     when(byteArrayPool.get(anyInt(), Matchers.eq(byte[].class)))
         .thenReturn(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
     downsampler = new Downsampler(displayMetrics, bitmapPool, byteArrayPool);
+
+    initialSdkVersion = Build.VERSION.SDK_INT;
+  }
+
+  @After
+  public void tearDown() {
+    Util.setSdkVersionInt(initialSdkVersion);
   }
 
   @Test
@@ -153,9 +164,34 @@ public class DownsamplerTest {
     runScaleTest(87, 78, 100, 100, strategy, 87, 78);
   }
 
+  // BitmapFactory does not support downsampling wbmp files on platforms <=M. See b/27305903.
+  @Test
+  public void testCalculateScaling_withWbmp() {
+    Util.setSdkVersionInt(23);
+    DownsampleStrategy strategy = DownsampleStrategy.FIT_CENTER;
+    BitmapFactory.Options options = new BitmapFactory.Options();
+
+    options.outMimeType = "image/vnd.wap.wbmp";
+    runScaleTest(100, 100, 100, 100, strategy, 100, 100, options);
+    runScaleTest(200, 200, 100, 100, strategy, 100, 100, options);
+    runScaleTest(400, 400, 100, 100, strategy, 100, 100, options);
+    runScaleTest(300, 300, 100, 100, strategy, 100, 100, options);
+    runScaleTest(799, 100, 100, 100, strategy, 100, 13, options);
+    runScaleTest(800, 100, 100, 100, strategy, 100, 13, options);
+    runScaleTest(801, 100, 100, 100, strategy, 100, 13, options);
+    runScaleTest(100, 800, 100, 100, strategy, 13, 100, options);
+    runScaleTest(87, 78, 100, 100, strategy, 100, 90, options);
+  }
+
   private static void runScaleTest(int sourceWidth, int sourceHeight, int targetWidth,
       int targetHeight, DownsampleStrategy strategy, int expectedWidth, int expectedHeight) {
-    BitmapFactory.Options options = new BitmapFactory.Options();
+    runScaleTest(sourceWidth, sourceHeight, targetWidth, targetHeight, strategy, expectedWidth,
+        expectedHeight, new BitmapFactory.Options());
+  }
+
+  private static void runScaleTest(int sourceWidth, int sourceHeight, int targetWidth,
+      int targetHeight, DownsampleStrategy strategy, int expectedWidth, int expectedHeight,
+      BitmapFactory.Options options) {
     Downsampler.calculateScaling(strategy, 0, sourceWidth, sourceHeight, targetWidth, targetHeight,
         options);
     assertSize(sourceWidth, sourceHeight, expectedWidth, expectedHeight, options);
