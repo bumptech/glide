@@ -6,7 +6,7 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 
@@ -31,10 +31,10 @@ public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawabl
       "com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder.DisableAnimation", false);
 
   private final ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder;
-  private final ByteArrayPool byteArrayPool;
+  private final ArrayPool byteArrayPool;
 
   public StreamGifDecoder(ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder,
-      ByteArrayPool byteArrayPool) {
+      ArrayPool byteArrayPool) {
     this.byteBufferDecoder = byteBufferDecoder;
     this.byteArrayPool = byteArrayPool;
   }

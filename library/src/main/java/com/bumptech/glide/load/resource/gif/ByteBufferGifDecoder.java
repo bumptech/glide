@@ -14,8 +14,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
@@ -75,7 +74,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
 
   @Override
   public boolean handles(ByteBuffer source, Options options) throws IOException {
-    ByteArrayPool byteArrayPool = new LruByteArrayPool();
+    ArrayPool byteArrayPool = new LruArrayPool();
     return !options.get(DISABLE_ANIMATION)
         && new ImageHeaderParser(source, byteArrayPool).getType() == ImageType.GIF;
   }
