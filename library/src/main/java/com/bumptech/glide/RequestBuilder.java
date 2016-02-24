@@ -20,7 +20,7 @@ import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ApplicationVersionSignature;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 
@@ -312,7 +312,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @see #load(Object)
    */
   public RequestBuilder<TranscodeType> load(@Nullable byte[] model) {
-    return loadGeneric(model).apply(signatureOf(new StringSignature(UUID.randomUUID().toString()))
+    return loadGeneric(model).apply(signatureOf(new ObjectKey(UUID.randomUUID().toString()))
         .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true /*skipMemoryCache*/));
   }
 
