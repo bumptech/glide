@@ -182,10 +182,21 @@ public final class GlideExecutor extends ThreadPoolExecutor {
 
   private <T> Future<T> maybeWait(Future<T> future) {
     if (executeSynchronously) {
+      boolean interrupted = false;
       try {
-        future.get();
-      } catch (InterruptedException | ExecutionException e) {
-        throw new RuntimeException(e);
+        while (!future.isDone()) {
+          try {
+            future.get();
+          } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+          } catch (InterruptedException e) {
+            interrupted = true;
+          }
+        }
+      } finally {
+        if (interrupted) {
+          Thread.currentThread().interrupt();
+        }
       }
     }
     return future;
