@@ -29,13 +29,14 @@ public final class ManifestParser {
     try {
       ApplicationInfo appInfo = context.getPackageManager()
           .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-      if (appInfo.metaData != null) {
-        for (String key : appInfo.metaData.keySet()) {
-          if (GLIDE_MODULE_VALUE.equals(appInfo.metaData.get(key))) {
-            modules.add(parseModule(key));
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-              Log.d(TAG, "Loaded Glide module: " + key);
-            }
+      if (appInfo.metaData == null) {
+        return modules;
+      }
+      for (String key : appInfo.metaData.keySet()) {
+        if (GLIDE_MODULE_VALUE.equals(appInfo.metaData.get(key))) {
+          modules.add(parseModule(key));
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Loaded Glide module: " + key);
           }
         }
       }

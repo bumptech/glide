@@ -32,7 +32,6 @@ public final class GlideBuilder {
   private ArrayPool arrayPool;
   private MemoryCache memoryCache;
   private GlideExecutor sourceExecutor;
-  private GlideExecutor sourceUnlimitedExecutor;
   private GlideExecutor diskCacheExecutor;
   private DiskCache.Factory diskCacheFactory;
   private MemorySizeCalculator memorySizeCalculator;
@@ -267,8 +266,6 @@ public final class GlideBuilder {
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }
 
-    sourceUnlimitedExecutor = GlideExecutor.newUnlimitedSourceExecutor();
-
     if (diskCacheExecutor == null) {
       diskCacheExecutor = GlideExecutor.newDiskCacheExecutor();
     }
@@ -304,7 +301,7 @@ public final class GlideBuilder {
 
     if (engine == null) {
       engine = new Engine(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor,
-          sourceUnlimitedExecutor);
+          GlideExecutor.newUnlimitedSourceExecutor());
     }
 
     return new Glide(
