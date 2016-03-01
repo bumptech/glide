@@ -154,7 +154,7 @@ public class SupportRequestManagerFragment extends Fragment {
     super.onAttach(activity);
     try {
       registerFragmentWithRoot(getActivity());
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalStateException e) {
       // OnAttach can be called after the activity is destroyed, see #497.
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Unable to register fragment with root", e);
