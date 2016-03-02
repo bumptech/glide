@@ -35,7 +35,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowView;
-import org.robolectric.shadows.ShadowViewTreeObserver;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -394,7 +393,7 @@ public class ViewTargetTest {
   }
 
   @Implements(ViewTreeObserver.class)
-  public static class PreDrawShadowViewTreeObserver extends ShadowViewTreeObserver {
+  public static class PreDrawShadowViewTreeObserver {
     private CopyOnWriteArrayList<OnPreDrawListener> preDrawListeners = new CopyOnWriteArrayList<>();
     private boolean isAlive = true;
 
