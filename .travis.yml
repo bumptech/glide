@@ -7,7 +7,7 @@ android:
 
 sudo: false
 
-script: 'travis_retry ./gradlew build --parallel'
+script: 'travis_retry ./gradlew build'
 
 after_success:
 - scripts/travis-sonatype-publish.sh
