@@ -101,9 +101,29 @@ public class GifDecoderTest {
   }
 
   @Test
-  @Config(shadows = { CustomShadowBitmap.class })
-  public void testFirstFrameMustUsingLastFrameDispose() throws IOException {
-    byte[] data = TestUtil.resourceToBytes(getClass(), "transparent_dispose.gif");
+  @Config(shadows = {CustomShadowBitmap.class})
+  public void testFirstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalBackground()
+      throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "transparent_disposal_background.gif");
+    GifHeaderParser headerParser = new GifHeaderParser();
+    headerParser.setData(data);
+    GifHeader header = headerParser.parseHeader();
+    GifDecoder decoder = new GifDecoder(provider);
+    decoder.setData(header, data);
+    decoder.advance();
+    Bitmap firstFrame = decoder.getNextFrame();
+    decoder.advance();
+    decoder.getNextFrame();
+    decoder.advance();
+    Bitmap firstFrameTwice = decoder.getNextFrame();
+    assertTrue(Arrays.equals((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
+        (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
+  }
+
+  @Test
+  @Config(shadows = {CustomShadowBitmap.class})
+  public void testFirstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalNone() throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "transparent_disposal_none.gif");
     GifHeaderParser headerParser = new GifHeaderParser();
     headerParser.setData(data);
     GifHeader header = headerParser.parseHeader();

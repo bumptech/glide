@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
 
@@ -42,7 +42,7 @@ public class ResourceCacheKeyTest {
     mutateAndAssertDifferent(new FactoryMutation() {
       @Override
       public void mutate(Factory factory) {
-        factory.sourceKey = new StringSignature("secondKey");
+        factory.sourceKey = new ObjectKey("secondKey");
       }
     });
   }
@@ -52,7 +52,7 @@ public class ResourceCacheKeyTest {
     mutateAndAssertDifferent(new FactoryMutation() {
       @Override
       public void mutate(Factory factory) {
-        factory.signature = new StringSignature("secondSignature");
+        factory.signature = new ObjectKey("secondSignature");
       }
     });
   }
@@ -116,8 +116,8 @@ public class ResourceCacheKeyTest {
   }
 
   static class Factory {
-    Key sourceKey = new StringSignature("sourceKey");
-    Key signature = new StringSignature("signature");
+    Key sourceKey = new ObjectKey("sourceKey");
+    Key signature = new ObjectKey("signature");
     int width = 100;
     int height = 100;
     Transformation<?> transformation = mock(Transformation.class);

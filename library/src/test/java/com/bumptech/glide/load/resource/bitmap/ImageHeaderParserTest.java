@@ -3,7 +3,8 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
 import com.bumptech.glide.testutil.TestResourceUtil;
 
@@ -28,11 +29,11 @@ public class ImageHeaderParserTest {
       new byte[] { (byte) 0x89, 0x50, 0x4e, 0x47, 0xd, 0xa, 0x1a, 0xa, 0x0, 0x0, 0x0, 0xd, 0x49,
           0x48, 0x44, 0x52, 0x0, 0x0, 0x1, (byte) 0x90, 0x0, 0x0, 0x1, 0x2c, 0x8, 0x6 };
 
-  private LruByteArrayPool byteArrayPool;
+  private ArrayPool byteArrayPool;
 
   @Before
   public void setUp() {
-    byteArrayPool = new LruByteArrayPool();
+    byteArrayPool = new LruArrayPool();
   }
 
   @Test
@@ -186,11 +187,11 @@ public class ImageHeaderParserTest {
 
   private static void runTest(byte[] data, ParserTestCase test) throws IOException {
     InputStream is = new ByteArrayInputStream(data);
-    ImageHeaderParser parser = new ImageHeaderParser(is, new LruByteArrayPool());
+    ImageHeaderParser parser = new ImageHeaderParser(is, new LruArrayPool());
     test.run(parser);
 
     ByteBuffer buffer = ByteBuffer.wrap(data);
-    parser = new ImageHeaderParser(buffer, new LruByteArrayPool());
+    parser = new ImageHeaderParser(buffer, new LruArrayPool());
     test.run(parser);
   }
 

@@ -11,8 +11,8 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.SampleSizeRounding;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Preconditions;
@@ -86,10 +86,10 @@ public final class Downsampler {
 
   private final BitmapPool bitmapPool;
   private final DisplayMetrics displayMetrics;
-  private final ByteArrayPool byteArrayPool;
+  private final ArrayPool byteArrayPool;
 
   public Downsampler(DisplayMetrics displayMetrics, BitmapPool bitmapPool,
-      ByteArrayPool byteArrayPool) {
+       ArrayPool byteArrayPool) {
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
@@ -147,7 +147,7 @@ public final class Downsampler {
     Preconditions.checkArgument(is.markSupported(), "You must provide an InputStream that supports"
         + " mark()");
 
-    byte[] bytesForOptions = byteArrayPool.get(ByteArrayPool.STANDARD_BUFFER_SIZE_BYTES);
+    byte[] bytesForOptions = byteArrayPool.get(ArrayPool.STANDARD_BUFFER_SIZE_BYTES, byte[].class);
     BitmapFactory.Options bitmapFactoryOptions = getDefaultOptions();
     bitmapFactoryOptions.inTempStorage = bytesForOptions;
 
@@ -160,7 +160,7 @@ public final class Downsampler {
       return BitmapResource.obtain(result, bitmapPool);
     } finally {
       releaseOptions(bitmapFactoryOptions);
-      byteArrayPool.put(bytesForOptions);
+      byteArrayPool.put(bytesForOptions, byte[].class);
     }
   }
 

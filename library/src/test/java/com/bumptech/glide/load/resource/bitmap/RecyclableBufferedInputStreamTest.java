@@ -7,7 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class RecyclableBufferedInputStreamTest {
 
   private RecyclableBufferedInputStream stream;
   private byte[] data;
-  private LruByteArrayPool byteArrayPool;
+  private ArrayPool byteArrayPool;
 
   @Before
   public void setUp() {
@@ -38,7 +39,7 @@ public class RecyclableBufferedInputStreamTest {
       data[i] = (byte) i;
     }
 
-    byteArrayPool = new LruByteArrayPool();
+    byteArrayPool = new LruArrayPool();
     InputStream wrapped = new ByteArrayInputStream(data);
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool, BUFFER_SIZE);
   }

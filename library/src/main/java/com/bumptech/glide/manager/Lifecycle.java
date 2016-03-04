@@ -11,7 +11,7 @@ public interface Lifecycle {
 
   /**
    * Removes the given listener from the set of listeners managed by this Lifecycle implementation,
-   * returning {@code true} if the listener was removed sucessfully, and {@code false} otherwise.
+   * returning {@code true} if the listener was removed successfully, and {@code false} otherwise.
    *
    * <p>This is an optimization only, there is no guarantee that every added listener will
    * eventually be removed.

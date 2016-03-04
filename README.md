@@ -2,6 +2,7 @@ Glide
 =====
 
 [![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=master)](https://travis-ci.org/bumptech/glide)
+[Report an issue with Glide][5]
 
 Glide is a fast and efficient open source media management and image loading framework for Android that wraps media
 decoding, memory and disk caching, and resource pooling into a simple and easy to use interface.
@@ -23,12 +24,12 @@ Or use Gradle:
 
 ```gradle
 repositories {
-    mavenCentral()
+  mavenCentral() // jcenter() works as well because it pulls from Maven Central
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:3.6.1'
-    compile 'com.android.support:support-v4:19.1.0'
+  compile 'com.github.bumptech.glide:glide:3.7.0'
+  compile 'com.android.support:support-v4:19.1.0'
 }
 ```
 
@@ -36,16 +37,18 @@ Or Maven:
 
 ```xml
 <dependency>
-    <groupId>com.github.bumptech.glide</groupId>
-    <artifactId>glide</artifactId>
-    <version>3.6.1</version>
+  <groupId>com.github.bumptech.glide</groupId>
+  <artifactId>glide</artifactId>
+  <version>3.7.0</version>
 </dependency>
 <dependency>
-    <groupId>com.google.android</groupId>
-    <artifactId>support-v4</artifactId>
-    <version>r7</version>
+  <groupId>com.google.android</groupId>
+  <artifactId>support-v4</artifactId>
+  <version>r7</version>
 </dependency>
 ```
+
+For info on using the bleeding edge, see the [Snapshots][17] wiki page.
 
 Proguard
 --------
@@ -54,8 +57,8 @@ Depending on your proguard config and usage, you may need to include the followi
 ```pro
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-    **[] $VALUES;
-    public *;
+  **[] $VALUES;
+  public *;
 }
 ```
 
@@ -67,58 +70,53 @@ Simple use cases will look something like this:
 
 ```java
 // For a simple view:
-@Override
-public void onCreate(Bundle savedInstanceState) {
-    ...
-    ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
+@Override public void onCreate(Bundle savedInstanceState) {
+  ...
+  ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
 
-    Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
+  Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
 }
 
 // For a simple image list:
-@Override
-public View getView(int position, View recycled, ViewGroup container) {
-    final ImageView myImageView;
-    if (recycled == null) {
-        myImageView = (ImageView) inflater.inflate(R.layout.my_image_view, container, false);
-    } else {
-        myImageView = (ImageView) recycled;
-    }
+@Override public View getView(int position, View recycled, ViewGroup container) {
+  final ImageView myImageView;
+  if (recycled == null) {
+    myImageView = (ImageView) inflater.inflate(R.layout.my_image_view, container, false);
+  } else {
+    myImageView = (ImageView) recycled;
+  }
 
-    String url = myUrls.get(position);
+  String url = myUrls.get(position);
 
-    Glide.with(myFragment)
-        .load(url)
-        .centerCrop()
-        .placeholder(R.drawable.loading_spinner)
-        .crossFade()
-        .into(myImageView);
+  Glide
+    .with(myFragment)
+    .load(url)
+    .centerCrop()
+    .placeholder(R.drawable.loading_spinner)
+    .crossFade()
+    .into(myImageView);
 
-    return myImageView;
+  return myImageView;
 }
 
 ```
 
-OkHttp and Volley
------------------
-Support for OkHttp and Volley is provided by integration libraries you can optionally include as dependencies.
-The integration libraries are available via Maven or the [releases page][1].
-
-For instructions on including either the OkHttp or the Volley integration libraries, see the [Integration Libraries][12] wiki page.
-
-Android SDK Version
--------------------
-Glide requires a minimum SDK version of 10.
-
-License
--------
-BSD, part MIT and Apache 2.0. See the [LICENSE][16] file for details.
-
 Status
 ------
-[*Version 3*][14] is a stable public release used in multiple open source projects at Google including in the Android Camera
+[*Version 3* on the `3.0` branch][14] is a stable public release used in multiple open source projects at Google including in the Android Camera
 app and in the 2014 Google IO app. *Version 4* is currently under development on the `master` branch.
-Comments/bugs/questions/pull requests welcome!
+
+Comments/bugs/questions/pull requests are always welcome! Please read [CONTRIBUTING.md][5] on how to report issues.
+
+Compatibility
+-------------
+
+ * **Android SDK**: Glide requires a minimum API level of 10.
+ * **OkHttp 2.x**: there are optional dependencies available called `okhttp-integration`, see [Integration Libraries][12] wiki page.
+ * **OkHttp 3.x**: there are optional dependencies available called `okhttp3-integration`, see [Integration Libraries][12] wiki page.
+ * **Volley**: there are optional dependencies available called `volley-integration`, see [Integration Libraries][12] wiki page.
+ * **Round Pictures**: `CircleImageView`/`CircularImageView`/`RoundedImageView` are known to have [issues][18] with `TransitionDrawable` (`.crossFade()` with `.thumbnail()` or `.placeholder()`) and animated GIFs, use a [`BitmapTransformation`][19] (`.circleCrop()` will be available in v4) or `.dontAnimate()` to fix the issue.
+ * **Huge Images** (maps, comic strips): Glide can load huge images by downsampling them, but does not support zooming and panning `ImageView`s as they require special resource optimizations (such as tiling) to work without `OutOfMemoryError`s.
 
 Build
 -----
@@ -150,7 +148,7 @@ Development
 Follow the steps in the [Build](#build) section to setup the project and then edit the files however you wish.
 [Intellij IDEA 14][4] cleanly imports both Glide's source and tests and is the recommended way to work with Glide.
 
-To open the project in Intellij 14:
+To open the project in IntelliJ IDEA:
 
 1. Go to *File* menu or the *Welcome Screen*
 2. Click on *Open...*
@@ -176,7 +174,11 @@ Thanks
 
 Author
 ------
-Sam Judd - @samajudd
+Sam Judd - @sjudd on GitHub, @samajudd on Twitter
+
+License
+-------
+BSD, part MIT and Apache 2.0. See the [LICENSE][16] file for details.
 
 Disclaimer
 ---------
@@ -186,7 +188,7 @@ This is not an official Google product.
 [2]: https://github.com/bumptech/glide/wiki
 [3]: http://bumptech.github.io/glide/javadocs/latest/index.html
 [4]: https://www.jetbrains.com/idea/download/
-[5]: https://github.com/bumptech/glide/issues/new?body=**Glide%20Version/Integration%20library%20%28if%20any%29**%3A%0A**Device/Android%20Version**%3A%0A**Issue%20details/Repro%20steps/Use%20case%20background**%3A%0A%0A**Glide%20load%20line**%3A%0A%60%60%60java%0AGlide.with%28...%29.....load%28...%29.....into%28...%29%3B%0A%60%60%60%0A%0A**Layout%20XML**%3A%0A%60%60%60xml%0A%3C...Layout%3E%0A%20%20%20%20%3CImageView%20android%3AscaleType%3D%22...%22%20...%20/%3E%0A%3C/..Layout%3E%0A%60%60%60%0A%0A**Stack%20trace%20/%20LogCat**%3A%0A%60%60%60ruby%0Apaste%20stack%20trace%20here%0A%60%60%60
+[5]: https://github.com/bumptech/glide/blob/master/CONTRIBUTING.md
 [6]: https://groups.google.com/forum/#!forum/glidelibrary
 [7]: https://developers.google.com/open-source/cla/individual
 [8]: https://github.com/JakeWharton/DiskLruCache
@@ -198,3 +200,6 @@ This is not an official Google product.
 [14]: https://github.com/bumptech/glide/tree/3.0
 [15]: https://github.com/bumptech/glide/tree/master
 [16]: https://github.com/bumptech/glide/blob/master/LICENSE
+[17]: https://github.com/bumptech/glide/wiki/Snapshots
+[18]: https://github.com/bumptech/glide/issues?q=is%3Aissue+CircleImageView+OR+CircularImageView+OR+RoundedImageView
+[19]: https://github.com/wasabeef/glide-transformations

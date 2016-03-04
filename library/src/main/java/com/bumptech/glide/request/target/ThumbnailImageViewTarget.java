@@ -14,7 +14,7 @@ import android.widget.ImageView;
  * com.bumptech.glide.RequestBuilder#thumbnail(com.bumptech.glide.RequestBuilder)} API into views in
  * a scrolling list like ListView, GridView, or RecyclerView.
  *
- * <p>{@link FixedSizeDrawable} may cause skewing or other undesireable behavior depending on
+ * <p>{@link FixedSizeDrawable} may cause skewing or other undesirable behavior depending on
  * your images, views, and scaling. If this occurs, consider {@link DrawableImageViewTarget} or
  * {@link BitmapImageViewTarget} as alternatives.
  *

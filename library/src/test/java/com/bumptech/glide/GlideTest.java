@@ -508,7 +508,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testNullModelPrefersFallbackDrwaable() {
+  public void testNullModelPrefersFallbackDrawable() {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
     Drawable error = new ColorDrawable(Color.RED);
     Drawable fallback = new ColorDrawable(Color.BLUE);
@@ -535,7 +535,7 @@ public class GlideTest {
     doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(isA(SizeReadyCallback.class));
     Target secondTarget = mock(Target.class);
     doAnswer(new CallSizeReady(100, 100)).when(secondTarget).getSize(isA(SizeReadyCallback.class));
-    RequestBuilder<Drawable> firstRequest = Glide.with(getContext())
+    RequestBuilder<Drawable> firstRequest = requestManager
         .load(mockUri("content://first"));
 
     firstRequest.into(firstTarget);
@@ -544,7 +544,7 @@ public class GlideTest {
         .apply(placeholderOf(new ColorDrawable(Color.RED)))
         .into(secondTarget);
 
-    verify(firstTarget).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
+    verify(firstTarget).onResourceReady(isA(Drawable.class), isA(Transition.class));
     verify(secondTarget).onResourceReady(notNull(), isA(Transition.class));
   }
 

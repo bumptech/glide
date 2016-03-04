@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 
 import java.io.File;
@@ -19,14 +19,14 @@ class ThumbnailStreamOpener {
   private static final FileService DEFAULT_SERVICE = new FileService();
   private final FileService service;
   private final ThumbnailQuery query;
-  private final ByteArrayPool byteArrayPool;
+  private final ArrayPool byteArrayPool;
 
-  public ThumbnailStreamOpener(ThumbnailQuery query, ByteArrayPool byteArrayPool) {
+  public ThumbnailStreamOpener(ThumbnailQuery query, ArrayPool byteArrayPool) {
     this(DEFAULT_SERVICE, query, byteArrayPool);
   }
 
   public ThumbnailStreamOpener(FileService service, ThumbnailQuery query,
-      ByteArrayPool byteArrayPool) {
+      ArrayPool byteArrayPool) {
     this.service = service;
     this.query = query;
     this.byteArrayPool = byteArrayPool;
