@@ -3,6 +3,7 @@ package com.bumptech.glide.manager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.bumptech.glide.RequestManager;
 
@@ -20,6 +21,9 @@ import java.util.Set;
  * @see com.bumptech.glide.RequestManager
  */
 public class SupportRequestManagerFragment extends Fragment {
+
+    private static final String TAG = "SupportRMFragment";
+
     private RequestManager requestManager;
     private final ActivityFragmentLifecycle lifecycle;
     private final RequestManagerTreeNode requestManagerTreeNode =
@@ -113,10 +117,18 @@ public class SupportRequestManagerFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        rootRequestManagerFragment = RequestManagerRetriever.get()
-                .getSupportRequestManagerFragment(getActivity().getSupportFragmentManager());
-        if (rootRequestManagerFragment != this) {
-            rootRequestManagerFragment.addChildRequestManagerFragment(this);
+        try {
+            rootRequestManagerFragment = RequestManagerRetriever.get()
+                    .getSupportRequestManagerFragment(getActivity().getSupportFragmentManager());
+            if (rootRequestManagerFragment != this) {
+                rootRequestManagerFragment.addChildRequestManagerFragment(this);
+            }
+        } catch (IllegalStateException e) {
+            // OnAttach can be called after the activity is destroyed, see #497.
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "Unable to register fragment with root", e);
+
+            }
         }
     }
 
