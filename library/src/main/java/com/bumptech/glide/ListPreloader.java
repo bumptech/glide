@@ -1,9 +1,6 @@
 package com.bumptech.glide;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
 import android.widget.AbsListView;
 
 import com.bumptech.glide.request.target.BaseTarget;
@@ -91,41 +88,6 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      */
     @Nullable
     int[] getPreloadSize(T item, int adapterPosition, int perItemPosition);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link Activity}.
-   */
-  public ListPreloader(Activity activity, PreloadModelProvider<T> preloadModelProvider,
-      PreloadSizeProvider<T> preloadDimensionProvider, int maxPreload) {
-    this(Glide.with(activity), preloadModelProvider, preloadDimensionProvider, maxPreload);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link FragmentActivity}.
-   */
-  public ListPreloader(FragmentActivity fragmentActivity,
-      PreloadModelProvider<T> preloadModelProvider, PreloadSizeProvider<T> preloadDimensionProvider,
-      int maxPreload) {
-    this(Glide.with(fragmentActivity), preloadModelProvider, preloadDimensionProvider, maxPreload);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link Fragment}.
-   */
-  public ListPreloader(Fragment fragment,
-      PreloadModelProvider<T> preloadModelProvider, PreloadSizeProvider<T> preloadDimensionProvider,
-      int maxPreload) {
-    this(Glide.with(fragment), preloadModelProvider, preloadDimensionProvider, maxPreload);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link android.support.v4.app.Fragment}.
-   */
-  public ListPreloader(android.support.v4.app.Fragment fragment,
-      PreloadModelProvider<T> preloadModelProvider, PreloadSizeProvider<T> preloadDimensionProvider,
-      int maxPreload) {
-    this(Glide.with(fragment), preloadModelProvider, preloadDimensionProvider, maxPreload);
   }
 
   /**

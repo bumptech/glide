@@ -52,7 +52,7 @@ public class RequestManager implements LifecycleListener {
       diskCacheStrategyOf(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
 
-  private final GlideContext context;
+  private final Glide glide;
   private final Lifecycle lifecycle;
   private final RequestTracker requestTracker;
   private final RequestManagerTreeNode treeNode;
@@ -71,17 +71,23 @@ public class RequestManager implements LifecycleListener {
   @NonNull
   private BaseRequestOptions<?> requestOptions;
 
-  public RequestManager(Context context, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
-    this(context, lifecycle, treeNode,
-        new RequestTracker(), Glide.get(context).getConnectivityMonitorFactory());
+  public RequestManager(Glide glide, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
+    this(glide, lifecycle, treeNode, new RequestTracker(), glide.getConnectivityMonitorFactory());
   }
 
-  RequestManager(Context context, final Lifecycle lifecycle, RequestManagerTreeNode treeNode,
-      RequestTracker requestTracker, ConnectivityMonitorFactory factory) {
-    this.context = Glide.get(context).getGlideContext();
+  RequestManager(
+      Glide glide,
+      Lifecycle lifecycle,
+      RequestManagerTreeNode treeNode,
+      RequestTracker requestTracker,
+      ConnectivityMonitorFactory factory) {
+    this.glide = glide;
     this.lifecycle = lifecycle;
     this.treeNode = treeNode;
     this.requestTracker = requestTracker;
+
+    final Context context = glide.getGlideContext().getBaseContext();
+
 
     connectivityMonitor =
         factory.build(context, new RequestManagerConnectivityListener(requestTracker));
@@ -97,10 +103,10 @@ public class RequestManager implements LifecycleListener {
     }
     lifecycle.addListener(connectivityMonitor);
 
-    defaultRequestOptions = this.context.getDefaultRequestOptions();
+    defaultRequestOptions = glide.getGlideContext().getDefaultRequestOptions();
     requestOptions = defaultRequestOptions;
 
-    Glide.get(context).registerRequestManager(this);
+    glide.registerRequestManager(this);
   }
 
   /**
@@ -155,14 +161,14 @@ public class RequestManager implements LifecycleListener {
    * @see android.content.ComponentCallbacks2#onTrimMemory(int)
    */
   public void onTrimMemory(int level) {
-    context.onTrimMemory(level);
+    glide.getGlideContext().onTrimMemory(level);
   }
 
   /**
    * @see android.content.ComponentCallbacks2#onLowMemory()
    */
   public void onLowMemory() {
-    context.onLowMemory();
+    glide.getGlideContext().onLowMemory();
   }
 
   /**
@@ -269,7 +275,7 @@ public class RequestManager implements LifecycleListener {
     lifecycle.removeListener(this);
     lifecycle.removeListener(connectivityMonitor);
     mainHandler.removeCallbacks(addSelfToLifecycle);
-    Glide.get(context).unregisterRequestManager(this);
+    glide.unregisterRequestManager(this);
   }
 
   /**
@@ -371,7 +377,7 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading the given resource class.
    */
   public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
-    return new RequestBuilder<>(context, this, resourceClass);
+    return new RequestBuilder<>(glide.getGlideContext(), this, resourceClass);
   }
 
   /**
@@ -416,7 +422,7 @@ public class RequestManager implements LifecycleListener {
   private void untrackOrDelegate(Target<?> target) {
     boolean isOwnedByUs = untrack(target);
     if (!isOwnedByUs) {
-      Glide.get(context).removeFromManagers(target);
+      Glide.get(glide.getGlideContext()).removeFromManagers(target);
     }
   }
 

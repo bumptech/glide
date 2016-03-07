@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Util;
 
@@ -82,9 +83,12 @@ public class RequestManagerRetriever implements Handler.Callback {
           // activity. However, in this case since the manager attached to the application will not
           // receive lifecycle events, we must force the manager to start resumed using
           // ApplicationLifecycle.
+
+          // TODO(b/27524013): Factor out this Glide.get() call.
+          Glide glide = Glide.get(context);
           applicationManager =
-              new RequestManager(context.getApplicationContext(), new ApplicationLifecycle(),
-                  new EmptyRequestManagerTreeNode());
+              new RequestManager(
+                  glide, new ApplicationLifecycle(), new EmptyRequestManagerTreeNode());
         }
       }
     }
@@ -186,8 +190,10 @@ public class RequestManagerRetriever implements Handler.Callback {
     RequestManagerFragment current = getRequestManagerFragment(fm, parentHint);
     RequestManager requestManager = current.getRequestManager();
     if (requestManager == null) {
+      // TODO(b/27524013): Factor out this Glide.get() call.
+      Glide glide = Glide.get(context);
       requestManager =
-          new RequestManager(context, current.getLifecycle(), current.getRequestManagerTreeNode());
+          new RequestManager(glide, current.getLifecycle(), current.getRequestManagerTreeNode());
       current.setRequestManager(requestManager);
     }
     return requestManager;
@@ -214,8 +220,10 @@ public class RequestManagerRetriever implements Handler.Callback {
     SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm, parentHint);
     RequestManager requestManager = current.getRequestManager();
     if (requestManager == null) {
+      // TODO(b/27524013): Factor out this Glide.get() call.
+      Glide glide = Glide.get(context);
       requestManager =
-          new RequestManager(context, current.getLifecycle(), current.getRequestManagerTreeNode());
+          new RequestManager(glide, current.getLifecycle(), current.getRequestManagerTreeNode());
       current.setRequestManager(requestManager);
     }
     return requestManager;
