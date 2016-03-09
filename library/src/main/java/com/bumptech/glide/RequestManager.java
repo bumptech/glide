@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.ConnectivityMonitor;
@@ -280,7 +279,8 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading a {@link android.graphics.Bitmap}
    */
   public RequestBuilder<Bitmap> asBitmap() {
-    return as(Bitmap.class).transition(new BitmapTransitionOptions()).apply(DECODE_TYPE_BITMAP);
+    return as(Bitmap.class).transition(new GenericTransitionOptions<Bitmap>())
+            .apply(DECODE_TYPE_BITMAP);
   }
 
   /**
