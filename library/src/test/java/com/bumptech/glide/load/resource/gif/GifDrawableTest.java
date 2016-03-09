@@ -77,7 +77,7 @@ public class GifDrawableTest {
     frameWidth = 120;
     frameHeight = 450;
     firstFrame = Bitmap.createBitmap(frameWidth, frameHeight, Bitmap.Config.RGB_565);
-    drawable = new GifDrawable(RuntimeEnvironment.application, frameLoader, bitmapPool, paint);
+    drawable = new GifDrawable(frameLoader, bitmapPool, paint);
     when(frameLoader.getWidth()).thenReturn(frameWidth);
     when(frameLoader.getHeight()).thenReturn(frameHeight);
     when(frameLoader.getCurrentFrame()).thenReturn(firstFrame);

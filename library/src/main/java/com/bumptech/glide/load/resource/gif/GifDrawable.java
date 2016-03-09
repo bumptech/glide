@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.VisibleForTesting;
 import android.view.Gravity;
 
 import com.bumptech.glide.gifdecoder.GifDecoder;
@@ -94,7 +95,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   public GifDrawable(Context context, GifDecoder gifDecoder, BitmapPool bitmapPool,
       Transformation<Bitmap> frameTransformation, int targetFrameWidth, int targetFrameHeight,
       Bitmap firstFrame) {
-    this(new GifState(context, bitmapPool,
+    this(new GifState(bitmapPool,
         new GifFrameLoader(context, gifDecoder, targetFrameWidth, targetFrameHeight,
             frameTransformation, firstFrame)));
   }
@@ -103,9 +104,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     this.state = Preconditions.checkNotNull(state);
   }
 
-  // Visible for testing.
-  GifDrawable(Context context, GifFrameLoader frameLoader, BitmapPool bitmapPool, Paint paint) {
-    this(new GifState(context, bitmapPool, frameLoader));
+  @VisibleForTesting
+  GifDrawable(GifFrameLoader frameLoader, BitmapPool bitmapPool, Paint paint) {
+    this(new GifState(bitmapPool, frameLoader));
     this.paint = paint;
   }
 
@@ -313,13 +314,11 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   static class GifState extends ConstantState {
     static final int GRAVITY = Gravity.FILL;
-    final Context context;
     final BitmapPool bitmapPool;
     final GifFrameLoader frameLoader;
 
-    public GifState(Context context, BitmapPool bitmapPool, GifFrameLoader frameLoader) {
+    public GifState(BitmapPool bitmapPool, GifFrameLoader frameLoader) {
       this.bitmapPool = bitmapPool;
-      this.context = context.getApplicationContext();
       this.frameLoader = frameLoader;
     }
 
