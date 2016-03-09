@@ -288,6 +288,13 @@ public class Glide implements ComponentCallbacks2 {
     return arrayPool;
   }
 
+  /**
+   * @return The context associated with this instance. 
+   */
+  public Context getContext() {
+    return glideContext.getBaseContext();
+  }
+
   ConnectivityMonitorFactory getConnectivityMonitorFactory() {
     return connectivityMonitorFactory;
   }
