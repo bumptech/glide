@@ -422,7 +422,7 @@ public class RequestManager implements LifecycleListener {
   private void untrackOrDelegate(Target<?> target) {
     boolean isOwnedByUs = untrack(target);
     if (!isOwnedByUs) {
-      Glide.get(glide.getGlideContext()).removeFromManagers(target);
+      glide.removeFromManagers(target);
     }
   }
 
