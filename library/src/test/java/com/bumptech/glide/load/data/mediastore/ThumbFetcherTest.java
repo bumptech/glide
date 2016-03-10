@@ -17,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
@@ -38,12 +37,12 @@ public class ThumbFetcherTest {
     MockitoAnnotations.initMocks(this);
 
     uri = Uri.withAppendedPath(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "123");
-    fetcher = new ThumbFetcher(RuntimeEnvironment.application, uri, opener);
+    fetcher = new ThumbFetcher(uri, opener);
   }
 
   @Test
   public void testReturnsInputStreamFromThumbnailOpener() throws Exception {
-    when(opener.open(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(expected);
+    when(opener.open(eq(uri))).thenReturn(expected);
 
     fetcher.loadData(Priority.LOW, callback);
     verify(callback).onDataReady(isNotNull(InputStream.class));
@@ -51,7 +50,7 @@ public class ThumbFetcherTest {
 
   @Test
   public void testClosesInputStreamFromThumbnailOpenerOnCleanup() throws Exception {
-    when(opener.open(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(expected);
+    when(opener.open(eq(uri))).thenReturn(expected);
 
     fetcher.loadData(Priority.HIGH, callback);
 

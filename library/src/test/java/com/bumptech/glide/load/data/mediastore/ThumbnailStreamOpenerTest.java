@@ -8,6 +8,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -41,43 +42,41 @@ public class ThumbnailStreamOpenerTest {
 
   @Test
   public void testReturnsNullIfCursorIsNull() throws FileNotFoundException {
-    when(harness.query.query(eq(RuntimeEnvironment.application), eq(harness.uri))).thenReturn(null);
-    assertNull(harness.get().open(RuntimeEnvironment.application, harness.uri));
+    when(harness.query.query(eq(harness.uri))).thenReturn(null);
+    assertNull(harness.get().open(harness.uri));
   }
 
   @Test
   public void testReturnsNullIfCursorIsEmpty() throws FileNotFoundException {
-    when(harness.query.query(eq(RuntimeEnvironment.application), eq(harness.uri)))
-        .thenReturn(new MatrixCursor(new String[1]));
-    assertNull(harness.get().open(RuntimeEnvironment.application, harness.uri));
+    when(harness.query.query(eq(harness.uri))).thenReturn(new MatrixCursor(new String[1]));
+    assertNull(harness.get().open(harness.uri));
   }
 
   @Test
   public void testReturnsNullIfCursorHasEmptyPath() throws FileNotFoundException {
     MatrixCursor cursor = new MatrixCursor(new String[1]);
     cursor.addRow(new Object[] { "" });
-    when(harness.query.query(eq(RuntimeEnvironment.application), eq(harness.uri)))
-        .thenReturn(cursor);
-    assertNull(harness.get().open(RuntimeEnvironment.application, harness.uri));
+    when(harness.query.query(eq(harness.uri))).thenReturn(cursor);
+    assertNull(harness.get().open(harness.uri));
   }
 
   @Test
   public void testReturnsNullIfFileDoesNotExist() throws FileNotFoundException {
     when(harness.service.get(anyString())).thenReturn(harness.file);
     when(harness.service.exists(eq(harness.file))).thenReturn(false);
-    assertNull(harness.get().open(RuntimeEnvironment.application, harness.uri));
+    assertNull(harness.get().open(harness.uri));
   }
 
   @Test
   public void testReturnNullIfFileLengthIsZero() throws FileNotFoundException {
     when(harness.service.get(anyString())).thenReturn(harness.file);
     when(harness.service.length(eq(harness.file))).thenReturn(0L);
-    assertNull(harness.get().open(RuntimeEnvironment.application, harness.uri));
+    assertNull(harness.get().open(harness.uri));
   }
 
   @Test
   public void testClosesCursor() throws FileNotFoundException {
-    harness.get().open(RuntimeEnvironment.application, harness.uri);
+    harness.get().open(harness.uri);
     assertTrue(harness.cursor.isClosed());
   }
 
@@ -86,27 +85,33 @@ public class ThumbnailStreamOpenerTest {
     InputStream expected = new ByteArrayInputStream(new byte[0]);
     Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
         .registerInputStream(harness.uri, expected);
-    assertEquals(expected, harness.get().open(RuntimeEnvironment.application, harness.uri));
+    assertEquals(expected, harness.get().open(harness.uri));
   }
 
   @Test
   public void testVideoQueryReturnsVideoCursor() {
     Uri queryUri = MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI;
-    ThumbFetcher.VideoThumbnailQuery query = new ThumbFetcher.VideoThumbnailQuery();
+    ThumbFetcher.VideoThumbnailQuery query =
+        new ThumbFetcher.VideoThumbnailQuery(getContentResovler());
     RoboCursor testCursor = new RoboCursor();
     Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
         .setCursor(queryUri, testCursor);
-    assertEquals(testCursor, query.query(RuntimeEnvironment.application, harness.uri));
+    assertEquals(testCursor, query.query(harness.uri));
   }
 
   @Test
   public void testImageQueryReturnsImageCursor() {
     Uri queryUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
-    ThumbFetcher.ImageThumbnailQuery query = new ThumbFetcher.ImageThumbnailQuery();
+    ThumbFetcher.ImageThumbnailQuery query =
+        new ThumbFetcher.ImageThumbnailQuery(getContentResovler());
     RoboCursor testCursor = new RoboCursor();
     Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
         .setCursor(queryUri, testCursor);
-    assertEquals(testCursor, query.query(RuntimeEnvironment.application, harness.uri));
+    assertEquals(testCursor, query.query(harness.uri));
+  }
+
+  private static ContentResolver getContentResovler() {
+    return RuntimeEnvironment.application.getContentResolver();
   }
 
   private static class Harness {
@@ -119,14 +124,14 @@ public class ThumbnailStreamOpenerTest {
 
     public Harness() {
       cursor.addRow(new String[] { file.getAbsolutePath() });
-      when(query.query(eq(RuntimeEnvironment.application), eq(uri))).thenReturn(cursor);
+      when(query.query(eq(uri))).thenReturn(cursor);
       when(service.get(eq(file.getAbsolutePath()))).thenReturn(file);
       when(service.exists(eq(file))).thenReturn(true);
       when(service.length(eq(file))).thenReturn(1L);
     }
 
     public ThumbnailStreamOpener get() {
-      return new ThumbnailStreamOpener(service, query, byteArrayPool);
+      return new ThumbnailStreamOpener(service, query, byteArrayPool, getContentResovler());
     }
   }
 }
