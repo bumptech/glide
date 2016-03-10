@@ -18,7 +18,9 @@ import com.google.common.testing.EqualsTester;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.gifdecoder.GifDecoder;
@@ -32,6 +34,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.Util.ReturnsSelfAnswer;
 import com.bumptech.glide.util.Util;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,8 +74,30 @@ public class GifFrameLoaderTest {
 
     requestBuilder = mock(RequestBuilder.class, new ReturnsSelfAnswer());
 
-    loader = new GifFrameLoader(RuntimeEnvironment.application, requestManager, gifDecoder, handler,
-        requestBuilder, transformation, firstFrame);
+    loader = createGifFrameLoader(handler);
+  }
+
+  @After
+  public void tearDown() {
+    Glide.tearDown();
+  }
+
+  @NonNull
+  private GifFrameLoader createGifFrameLoader(Handler handler) {
+    Glide glide = getGlideSingleton();
+    return new GifFrameLoader(
+        glide.getContext(),
+        glide.getBitmapPool(),
+        requestManager,
+        gifDecoder,
+        handler,
+        requestBuilder,
+        transformation,
+        firstFrame);
+  }
+
+  private static Glide getGlideSingleton() {
+    return Glide.get(RuntimeEnvironment.application);
   }
 
   @SuppressWarnings("unchecked")
@@ -174,8 +199,7 @@ public class GifFrameLoaderTest {
   @Test
   public void testOnFrameReadyClearsPreviousFrame() {
     // Force the loader to create a real Handler.
-    loader = new GifFrameLoader(RuntimeEnvironment.application, requestManager, gifDecoder,
-        null /*handler*/, requestBuilder, transformation, firstFrame);
+    loader = createGifFrameLoader(null);
 
     DelayTarget previous = mock(DelayTarget.class);
     Request previousRequest = mock(Request.class);
@@ -192,9 +216,8 @@ public class GifFrameLoaderTest {
 
   @Test
   public void testOnFrameReadyWithNullResourceDoesNotClearPreviousFrame() {
-     // Force the loader to create a real Handler.
-    loader = new GifFrameLoader(RuntimeEnvironment.application, requestManager,
-        gifDecoder, null /*handler*/, requestBuilder, transformation, firstFrame);
+    // Force the loader to create a real Handler by passing null.
+    loader = createGifFrameLoader(null);
 
     DelayTarget previous = mock(DelayTarget.class);
     Request previousRequest = mock(Request.class);
@@ -229,9 +252,8 @@ public class GifFrameLoaderTest {
 
   @Test
   public void testClearsCompletedLoadOnFrameReadyIfCleared() {
-    // Force the loader to create a real Handler.
-    loader = new GifFrameLoader(RuntimeEnvironment.application, requestManager, gifDecoder,
-        null /*handler*/, requestBuilder, transformation, firstFrame);
+    // Force the loader to create a real Handler by passing null;
+    loader = createGifFrameLoader(null);
     loader.clear();
     DelayTarget delayTarget = mock(DelayTarget.class);
     Request request = mock(Request.class);

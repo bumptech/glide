@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -162,8 +163,8 @@ public class Glide implements ComponentCallbacks2 {
     return glide;
   }
 
-  // For testing.
-  static void tearDown() {
+  @VisibleForTesting
+  public static void tearDown() {
     glide = null;
   }
 
