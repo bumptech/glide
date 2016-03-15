@@ -56,6 +56,11 @@ class EngineRunnable implements Runnable, Prioritized {
         Resource<?> resource = null;
         try {
             resource = decode();
+        } catch (OutOfMemoryError e) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Out Of Memory Error decoding", e);
+            }
+            exception = new ErrorWrappingGlideException(e);
         } catch (Exception e) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "Exception decoding", e);
