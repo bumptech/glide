@@ -99,8 +99,14 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
    */
   public static final class Factory implements ModelLoaderFactory<Uri, File> {
 
+    private final Context context;
+
+    public Factory(Context context) {
+      this.context = context;
+    }
+
     @Override
-    public ModelLoader<Uri, File> build(Context context, MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Uri, File> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreFileLoader(context);
     }
 

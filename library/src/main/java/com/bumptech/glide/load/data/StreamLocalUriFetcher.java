@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.net.Uri;
 
 import java.io.FileNotFoundException;
@@ -12,8 +11,8 @@ import java.io.InputStream;
  * Fetches an {@link java.io.InputStream} for a local {@link android.net.Uri}.
  */
 public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
-  public StreamLocalUriFetcher(Context context, Uri uri) {
-    super(context, uri);
+  public StreamLocalUriFetcher(ContentResolver resolver, Uri uri) {
+    super(resolver, uri);
   }
 
   @Override

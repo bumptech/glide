@@ -561,8 +561,7 @@ public class GlideTest {
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), failFetcher));
     when(failLoader.handles(isA(failModel))).thenReturn(true);
     ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
-    when(failFactory.build(isA(Context.class), isA(MultiModelLoaderFactory.class)))
-        .thenReturn(failLoader);
+    when(failFactory.build(isA(MultiModelLoaderFactory.class))).thenReturn(failLoader);
 
     Glide.get(getContext()).getRegistry().prepend(failModel, failResource, failFactory);
   }
@@ -600,8 +599,7 @@ public class GlideTest {
   private <T> void registerMockStreamModelLoader(final Class<T> modelClass) {
     ModelLoader<T, InputStream> modelLoader = mockStreamModelLoader(modelClass);
     ModelLoaderFactory<T, InputStream> modelLoaderFactory = mock(ModelLoaderFactory.class);
-    when(modelLoaderFactory.build(isA(Context.class), isA(MultiModelLoaderFactory.class)))
-        .thenReturn(modelLoader);
+    when(modelLoaderFactory.build(isA(MultiModelLoaderFactory.class))).thenReturn(modelLoader);
 
     Glide.get(RuntimeEnvironment.application).getRegistry()
         .prepend(modelClass, InputStream.class, modelLoaderFactory);
@@ -692,7 +690,7 @@ public class GlideTest {
           .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
       when(mockUrlLoader.handles(isA(modelClass))).thenReturn(true);
       ModelLoaderFactory<X, Y> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
-      when(mockUrlLoaderFactory.build(isA(Context.class), isA(MultiModelLoaderFactory.class)))
+      when(mockUrlLoaderFactory.build(isA(MultiModelLoaderFactory.class)))
           .thenReturn(mockUrlLoader);
 
       registry.replace(modelClass, dataClass, mockUrlLoaderFactory);

@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
 import android.util.Base64;
 
 import com.bumptech.glide.Priority;
@@ -148,8 +147,7 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
     }
 
     @Override
-    public final ModelLoader<String, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public final ModelLoader<String, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new DataUrlLoader<>(opener);
     }
 

@@ -1,7 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
@@ -70,8 +68,7 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
   public static class Factory<Model> implements ModelLoaderFactory<Model, Model> {
 
     @Override
-    public ModelLoader<Model, Model> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Model, Model> build(MultiModelLoaderFactory multiFactory) {
       return new UnitModelLoader<>();
     }
 

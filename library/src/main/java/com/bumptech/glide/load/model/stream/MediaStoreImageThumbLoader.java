@@ -43,9 +43,14 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
    */
   public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
 
+    private final Context context;
+
+    public Factory(Context context) {
+      this.context = context;
+    }
+
     @Override
-    public ModelLoader<Uri, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreImageThumbLoader(context);
     }
 

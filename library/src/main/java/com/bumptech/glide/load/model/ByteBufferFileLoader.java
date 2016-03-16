@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.bumptech.glide.Priority;
@@ -37,8 +36,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
   public static class Factory implements ModelLoaderFactory<File, ByteBuffer> {
 
     @Override
-    public ModelLoader<File, ByteBuffer> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<File, ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
       return new ByteBufferFileLoader();
     }
 

@@ -22,7 +22,6 @@ public class MultiModelLoaderFactory {
   private static final Factory DEFAULT_FACTORY = new Factory();
   private static final ModelLoader<Object, Object> EMPTY_MODEL_LOADER = new EmptyModelLoader();
   private final List<Entry<?, ?>> entries = new ArrayList<>();
-  private final Context context;
   private final Factory factory;
   private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
   private final Pool<List<Exception>> exceptionListPool;
@@ -35,7 +34,6 @@ public class MultiModelLoaderFactory {
   MultiModelLoaderFactory(Context context, Pool<List<Exception>> exceptionListPool,
       Factory factory) {
     this.exceptionListPool = exceptionListPool;
-    this.context = context.getApplicationContext();
     this.factory = factory;
   }
 
@@ -158,8 +156,7 @@ public class MultiModelLoaderFactory {
 
   @SuppressWarnings("unchecked")
   private <Model, Data> ModelLoader<Model, Data> build(Entry<?, ?> entry) {
-    return (ModelLoader<Model, Data>) Preconditions
-        .checkNotNull(entry.factory.build(context, this));
+    return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
   }
 
   @SuppressWarnings("unchecked")

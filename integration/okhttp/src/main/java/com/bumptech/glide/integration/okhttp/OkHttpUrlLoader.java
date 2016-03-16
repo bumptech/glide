@@ -1,7 +1,5 @@
 package com.bumptech.glide.integration.okhttp;
 
-import android.content.Context;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -69,8 +67,7 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     }
 
     @Override
-    public ModelLoader<GlideUrl, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new OkHttpUrlLoader(client);
     }
 

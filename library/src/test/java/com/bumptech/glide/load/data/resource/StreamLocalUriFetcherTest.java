@@ -46,7 +46,7 @@ public class StreamLocalUriFetcherTest {
     ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
     shadow.registerInputStream(uri, new ByteArrayInputStream(new byte[0]));
 
-    StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context, uri);
+    StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context.getContentResolver(), uri);
     fetcher.loadData(Priority.NORMAL, callback);
     verify(callback).onDataReady(isNotNull(InputStream.class));
   }
@@ -61,7 +61,7 @@ public class StreamLocalUriFetcherTest {
 
     shadow.registerInputStream(uri, null /*inputStream*/);
 
-    StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context, uri);
+    StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context.getContentResolver(), uri);
     fetcher.loadData(Priority.LOW, callback);
 
     verify(callback).onLoadFailed(isA(FileNotFoundException.class));

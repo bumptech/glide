@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.giphy;
 
-import android.content.Context;
 import android.text.TextUtils;
 
 import com.bumptech.glide.load.Options;
@@ -31,8 +30,7 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
 
     @Override
-    public ModelLoader<Api.GifResult, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Api.GifResult, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new GiphyModelLoader(multiFactory.build(GlideUrl.class, InputStream.class));
     }
 

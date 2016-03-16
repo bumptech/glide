@@ -73,8 +73,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     }
 
     @Override
-    public ModelLoader<GlideUrl, InputStream> build(Context context,
-        MultiModelLoaderFactory factory) {
+    public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory factory) {
       return new VolleyUrlLoader(requestQueue, requestFactory);
     }
 

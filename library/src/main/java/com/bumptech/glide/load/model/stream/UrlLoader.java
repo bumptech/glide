@@ -1,7 +1,5 @@
 package com.bumptech.glide.load.model.stream;
 
-import android.content.Context;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -40,8 +38,7 @@ public class UrlLoader implements ModelLoader<URL, InputStream> {
   public static class StreamFactory implements ModelLoaderFactory<URL, InputStream> {
 
     @Override
-    public ModelLoader<URL, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<URL, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new UrlLoader(multiFactory.build(GlideUrl.class, InputStream.class));
     }
 

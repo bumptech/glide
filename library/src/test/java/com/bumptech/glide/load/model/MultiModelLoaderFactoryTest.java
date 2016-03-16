@@ -1,13 +1,11 @@
 package com.bumptech.glide.load.model;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.support.v4.util.Pools.Pool;
 
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
@@ -50,8 +48,8 @@ public class MultiModelLoaderFactoryTest {
 
     multiFactory = new MultiModelLoaderFactory(RuntimeEnvironment.application, exceptionListPool,
             multiModelLoaderFactory);
-    when(firstFactory.build(anyContext(), eq(multiFactory))).thenReturn(firstModelLoader);
-    when(secondFactory.build(anyContext(), eq(multiFactory))).thenReturn(secondModelLoader);
+    when(firstFactory.build(eq(multiFactory))).thenReturn(firstModelLoader);
+    when(secondFactory.build(eq(multiFactory))).thenReturn(secondModelLoader);
   }
 
   @Test
@@ -299,17 +297,13 @@ public class MultiModelLoaderFactoryTest {
       boolean append) {
     ModelLoaderFactory<X, Y> factory = mock(ModelLoaderFactory.class);
     ModelLoader<X, Y> loader = mock(ModelLoader.class);
-    when(factory.build(anyContext(), eq(multiFactory))).thenReturn(loader);
+    when(factory.build(eq(multiFactory))).thenReturn(loader);
     if (append) {
       multiFactory.append(modelClass, dataClass, factory);
     } else {
       multiFactory.prepend(modelClass, dataClass, factory);
     }
     return loader;
-  }
-
-  private static Context anyContext() {
-    return any(Context.class);
   }
 }
 

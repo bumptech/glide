@@ -53,7 +53,8 @@ public class FileDescriptorLocalUriFetcherTest {
     when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(parcelFileDescriptor);
     shadow.registerFileDescriptor(uri, assetFileDescriptor);
 
-    FileDescriptorLocalUriFetcher fetcher = new FileDescriptorLocalUriFetcher(context, uri);
+    FileDescriptorLocalUriFetcher fetcher =
+        new FileDescriptorLocalUriFetcher(context.getContentResolver(), uri);
     fetcher.loadData(Priority.NORMAL, callback);
     verify(callback).onDataReady(eq(parcelFileDescriptor));
   }
@@ -67,7 +68,8 @@ public class FileDescriptorLocalUriFetcherTest {
     ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
     shadow.registerFileDescriptor(uri, null /*fileDescriptor*/);
 
-    FileDescriptorLocalUriFetcher fetcher = new FileDescriptorLocalUriFetcher(context, uri);
+    FileDescriptorLocalUriFetcher fetcher =
+        new FileDescriptorLocalUriFetcher(context.getContentResolver(), uri);
     fetcher.loadData(Priority.NORMAL, callback);
     verify(callback).onLoadFailed(isA(FileNotFoundException.class));
   }

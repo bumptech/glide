@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.Nullable;
@@ -63,8 +62,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
   public static class StreamFactory implements ModelLoaderFactory<String, InputStream> {
 
     @Override
-    public ModelLoader<String, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<String, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, InputStream.class));
     }
 
@@ -81,8 +79,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
       implements ModelLoaderFactory<String, ParcelFileDescriptor> {
 
     @Override
-    public ModelLoader<String, ParcelFileDescriptor> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<String, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
     }
 

@@ -18,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
@@ -65,7 +64,7 @@ public class DataUrlLoaderTest {
     MockitoAnnotations.initMocks(this);
     DataUrlLoader.StreamFactory factory = new DataUrlLoader.StreamFactory();
     options = new Options();
-    dataUrlLoader = (DataUrlLoader) factory.build(RuntimeEnvironment.application, multiFactory);
+    dataUrlLoader = (DataUrlLoader) factory.build(multiFactory);
     fetcher = dataUrlLoader.buildLoadData(VALID_PNG, -1, -1, options).fetcher;
 
   }

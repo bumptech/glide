@@ -1,7 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
@@ -90,8 +88,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
   public static class ByteBufferFactory implements ModelLoaderFactory<byte[], ByteBuffer> {
 
     @Override
-    public ModelLoader<byte[], ByteBuffer> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<byte[], ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
       return new ByteArrayLoader<>(new Converter<ByteBuffer>() {
         @Override
         public ByteBuffer convert(byte[] model) {
@@ -117,8 +114,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
   public static class StreamFactory implements ModelLoaderFactory<byte[], InputStream> {
 
     @Override
-    public ModelLoader<byte[], InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<byte[], InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new ByteArrayLoader<>(new Converter<InputStream>() {
         @Override
         public InputStream convert(byte[] model) {

@@ -28,6 +28,8 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   private final ThumbnailStreamOpener opener;
   private InputStream inputStream;
 
+  // TODO(nnaze): These build methods do not need the full Glide or Context objects.
+
   public static ThumbFetcher buildImageFetcher(Context context, Uri uri) {
     return build(context, uri, new ImageThumbnailQuery(context.getContentResolver()));
   }

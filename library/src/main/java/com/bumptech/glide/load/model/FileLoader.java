@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -115,8 +114,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     }
 
     @Override
-    public final ModelLoader<File, Data> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public final ModelLoader<File, Data> build(MultiModelLoaderFactory multiFactory) {
       return new FileLoader<>(opener);
     }
 

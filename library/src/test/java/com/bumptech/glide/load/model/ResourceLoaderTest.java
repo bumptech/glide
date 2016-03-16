@@ -44,7 +44,7 @@ public class ResourceLoaderTest {
     MockitoAnnotations.initMocks(this);
     options = new Options();
 
-    loader = new ResourceLoader<>(RuntimeEnvironment.application, uriLoader);
+    loader = new ResourceLoader<>(RuntimeEnvironment.application.getResources(), uriLoader);
   }
 
   @Test

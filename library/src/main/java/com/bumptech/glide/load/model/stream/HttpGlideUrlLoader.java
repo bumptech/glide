@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model.stream;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.bumptech.glide.load.Options;
@@ -56,8 +55,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<>(500);
 
     @Override
-    public ModelLoader<GlideUrl, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new HttpGlideUrlLoader(modelCache);
     }
 
