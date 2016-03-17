@@ -303,7 +303,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   }
 
   /**
-   * A {@link java.util.concurrent.ThreadFactory} that builds threads with priority {@link
+   * A {@link java.util.concurrent.ThreadFactory} that builds threads slightly above priority {@link
    * android.os.Process#THREAD_PRIORITY_BACKGROUND}.
    */
   private static final class DefaultThreadFactory implements ThreadFactory {
@@ -324,7 +324,9 @@ public final class GlideExecutor extends ThreadPoolExecutor {
       final Thread result = new Thread(runnable, "glide-" + name + "-thread-" + threadNum) {
         @Override
         public void run() {
-          android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+          android.os.Process.setThreadPriority(
+              android.os.Process.THREAD_PRIORITY_BACKGROUND
+              + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
           if (preventNetworkOperations) {
             StrictMode.setThreadPolicy(
                 new ThreadPolicy.Builder()
