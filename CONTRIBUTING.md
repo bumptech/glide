@@ -12,31 +12,6 @@ When in doubt, file an issue. We'd rather close a few duplicate issues than let 
 Similarly if you support a particular feature request, feel free to let us know by commenting on the issue or [subscribing][6] to the issue.
 
 To file a new issue, please use our issue template and fill out the template as much as possible (remove irrelevant parts).
-
-<pre>**Glide Version**:
-**Integration libraries**:
-**Device/Android Version**:
-**Issue details / Repro steps / Use case background**:
-
-**Glide load line**:
-```java
-Glide.with(...).....load(...).....into(...);
-```
-
-**Layout XML**:
-```xml
-&lt;...Layout&gt;
-    &lt;ImageView android:scaleType="..." ... /&gt;
-&lt;/..Layout&gt;
-```
-
-**Stack trace / LogCat**:
-```ruby
-paste stack trace here
-```
-</pre>
-
-You can save [this as a bookmark or just click it][1] to create a new issue.
 The more information you can provide, the more likely we are to be able help.
 
 
@@ -65,7 +40,6 @@ Labels on issues are managed by contributors, you don't have to worry about them
 *bug + enhancement: feature that doesn't work, but it's an edge case that either has a workaround or doesn't affect many users*
 
 
-[1]: https://github.com/bumptech/glide/issues/new?body=**Glide%20Version**%3A%0A**Integration%20libraries**%3A%0A**Device/Android%20Version**%3A%0A**Issue%20details%20/%20Repro%20steps%20/%20Use%20case%20background**%3A%0A%0A**Glide%20load%20line**%3A%0A%60%60%60java%0AGlide.with%28...%29.....load%28...%29.....into%28...%29%3B%0A%60%60%60%0A%0A**Layout%20XML**%3A%0A%60%60%60xml%0A%3C...Layout%3E%0A%20%20%20%20%3CImageView%20android%3AscaleType%3D%22...%22%20...%20/%3E%0A%3C/..Layout%3E%0A%60%60%60%0A%0A**Stack%20trace%20/%20LogCat**%3A%0A%60%60%60ruby%0Apaste%20stack%20trace%20here%0A%60%60%60
 [2]: https://groups.google.com/forum/#!forum/glidelibrary
 [3]: http://webchat.freenode.net/?channels=glide-library
 [4]: https://developers.google.com/open-source/cla/individual

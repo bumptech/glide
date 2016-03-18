@@ -2,7 +2,6 @@ Glide
 =====
 
 [![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=master)](https://travis-ci.org/bumptech/glide)
-[Report an issue with Glide][5]
 
 Glide is a fast and efficient open source media management and image loading framework for Android that wraps media
 decoding, memory and disk caching, and resource pooling into a simple and easy to use interface.
@@ -158,7 +157,7 @@ To open the project in IntelliJ IDEA:
 Getting Help
 ------------
 To report a specific problem or feature request, [open a new issue on Github][5]. For questions, suggestions, or
-anything else, join or email [Glide's discussion group][6], or join our IRC channel: [irc.freenode.net#glide-library][13].
+anything else, email [Glide's discussion group][6], or join our IRC channel: [irc.freenode.net#glide-library][13].
 
 Contributing
 ------------
