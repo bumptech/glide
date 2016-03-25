@@ -105,7 +105,10 @@ public class GifDecoder {
 
     // Global File Header values and parsing flags.
     // Active color table.
+    // Maximum size is 256, see GifHeaderParser.readColorTable
     private int[] act;
+    // Private color table that can be modified if needed
+    private final int[] pct = new int[256];
 
     // Raw GIF data from input source.
     private ByteBuffer rawData;
@@ -271,21 +274,7 @@ public class GifDecoder {
         }
 
         // Set the appropriate color table.
-        if (currentFrame.lct == null) {
-            act = header.gct;
-        } else {
-            act = currentFrame.lct;
-            if (header.bgIndex == currentFrame.transIndex) {
-                header.bgColor = 0;
-            }
-        }
-
-        int save = 0;
-        if (currentFrame.transparency) {
-            save = act[currentFrame.transIndex];
-            // Set transparent color if specified.
-            act[currentFrame.transIndex] = 0;
-        }
+        act = currentFrame.lct != null ? currentFrame.lct : header.gct;
         if (act == null) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "No Valid Color Table");
@@ -295,15 +284,17 @@ public class GifDecoder {
             return null;
         }
 
-        // Transfer pixel data to image.
-        Bitmap result = setPixels(currentFrame, previousFrame);
-
-        // Reset the transparent pixel in the color table
         if (currentFrame.transparency) {
-            act[currentFrame.transIndex] = save;
+            // Prepare local copy of color table ("pct = act"), see #1068
+            System.arraycopy(act, 0, pct, 0, act.length);
+            // Forget about act reference from shared header object, use copied version
+            act = pct;
+            // Set transparent color if specified.
+            act[currentFrame.transIndex] = 0;
         }
 
-        return result;
+        // Transfer pixel data to image.
+        return setPixels(currentFrame, previousFrame);
     }
 
     /**
@@ -439,6 +430,9 @@ public class GifDecoder {
                 int c = 0;
                 if (!currentFrame.transparency) {
                     c = header.bgColor;
+                    if (currentFrame.lct != null && header.bgIndex == currentFrame.transIndex) {
+                        c = 0;
+                    }
                 }
                 Arrays.fill(dest, c);
             } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {

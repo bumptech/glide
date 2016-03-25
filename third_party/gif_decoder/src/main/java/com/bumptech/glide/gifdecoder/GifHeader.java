@@ -32,7 +32,6 @@ public class GifHeader {
     int bgIndex;
     // Pixel aspect ratio.
     int pixelAspect;
-    //TODO: this is set both during reading the header and while decoding frames...
     int bgColor;
     int loopCount;
 
