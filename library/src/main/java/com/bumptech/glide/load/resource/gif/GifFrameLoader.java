@@ -97,8 +97,8 @@ class GifFrameLoader {
         }
         isLoadPending = true;
 
-        gifDecoder.advance();
         long targetTime = SystemClock.uptimeMillis() + gifDecoder.getNextDelay();
+        gifDecoder.advance();
         DelayTarget next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
         requestBuilder
                 .signature(new FrameSignature())
