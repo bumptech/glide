@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 
 /**
  * Reads frame data from a GIF image source and decodes it into individual frames
@@ -434,7 +433,15 @@ public class GifDecoder {
                         c = 0;
                     }
                 }
-                Arrays.fill(dest, c);
+                // The area used by the graphic must be restored to the background color.
+                int topLeft = previousFrame.iy * width + previousFrame.ix;
+                int bottomLeft = topLeft + previousFrame.ih * width;
+                for (int left = topLeft; left < bottomLeft; left += width) {
+                    int right = left + previousFrame.iw;
+                    for (int pointer = left; pointer < right; pointer++) {
+                        dest[pointer] = c;
+                    }
+                }
             } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {
                 // Start with the previous frame
                 previousImage.getPixels(dest, 0, width, 0, 0, width, height);
