@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * Reads frame data from a GIF image source and decodes it into individual frames
@@ -420,6 +421,11 @@ public class GifDecoder {
         // Final location of blended pixels.
         final int[] dest = mainScratch;
 
+        // clear all pixels when meet first frame
+        if (previousFrame == null) {
+            Arrays.fill(dest, 0);
+        }
+
         // fill in starting image contents based on last image's dispose code
         if (previousFrame != null && previousFrame.dispose > DISPOSAL_UNSPECIFIED) {
             // We don't need to do anything for DISPOSAL_NONE, if it has the correct pixels so will our mainScratch
@@ -448,7 +454,7 @@ public class GifDecoder {
             }
         }
 
-        // Decode pixels for this frame  into the global pixels[] scratch.
+        // Decode pixels for this frame into the global pixels[] scratch.
         decodeBitmapData(currentFrame);
 
         // Copy each source line to the appropriate place in the destination.
