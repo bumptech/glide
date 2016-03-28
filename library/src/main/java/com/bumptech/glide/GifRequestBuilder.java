@@ -17,6 +17,7 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.provider.LoadProvider;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.DrawableCrossFadeFactory;
+import com.bumptech.glide.request.animation.GlideAnimationFactory;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 
 import java.io.File;
@@ -258,8 +259,7 @@ public class GifRequestBuilder<ModelType>
      */
     @Override
     public GifRequestBuilder<ModelType> crossFade(int animationId, int duration) {
-        super.animate(new DrawableCrossFadeFactory<GifDrawable>(context, animationId,
-                duration));
+        super.animate(new DrawableCrossFadeFactory<GifDrawable>(context, animationId, duration));
         return this;
     }
 
@@ -298,6 +298,15 @@ public class GifRequestBuilder<ModelType>
     @Override
     public GifRequestBuilder<ModelType> animate(ViewPropertyAnimation.Animator animator) {
         super.animate(animator);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GifRequestBuilder<ModelType> animate(GlideAnimationFactory<GifDrawable> animationFactory) {
+        super.animate(animationFactory);
         return this;
     }
 

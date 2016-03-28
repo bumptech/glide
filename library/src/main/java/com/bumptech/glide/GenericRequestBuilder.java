@@ -412,7 +412,14 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         return animate(new ViewPropertyAnimationFactory<TranscodeType>(animator));
     }
 
-    GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
+    /**
+     * Sets a factory which will create a transition to run on a view that the target may be wrapping when a resource
+     * load finishes. Will only be run if the load was loaded asynchronously (ie was not in the memory cache).
+     *
+     * @param animationFactory Animation factory which creates compatible animations.
+     * @return This request builder.
+     */
+    public GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeType> animate(
             GlideAnimationFactory<TranscodeType> animationFactory) {
         if (animationFactory == null) {
             throw new NullPointerException("Animation factory must not be null!");
@@ -423,7 +430,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
     }
 
     /**
-     * Sets an Android resource id for a {@link android.graphics.drawable.Drawable} resourceto display while a resource
+     * Sets an Android resource id for a {@link android.graphics.drawable.Drawable} resource to display while a resource
      * is loading.
      *
      * @param resourceId The id of the resource to use as a placeholder
