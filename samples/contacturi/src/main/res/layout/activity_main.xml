@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:padding="@dimen/activity_horizontal_margin"
+    tools:context="com.bumptech.glide.samples.contacturi.MainActivity">
+
+    <Button
+        android:id="@+id/button_pick_contact"
+        android:layout_width="wrap_content"
+        android:text="Pick Contact"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/image_highres"
+        android:layout_width="160dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_height="160dp"/>
+
+    <ImageView
+        android:id="@+id/image_thumbnail"
+        android:layout_width="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/image_highres"
+        android:scaleType="fitCenter"
+        android:layout_height="48dp" />
+</RelativeLayout>
