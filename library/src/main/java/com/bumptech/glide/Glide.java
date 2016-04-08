@@ -22,6 +22,8 @@ import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
@@ -95,6 +97,7 @@ public class Glide implements ComponentCallbacks2 {
   private final GlideContext glideContext;
   private final Registry registry;
   private final ArrayPool arrayPool;
+  private final ByteArrayPool byteArrayPool;
   private final ConnectivityMonitorFactory connectivityMonitorFactory;
   private final List<RequestManager> managers = new ArrayList<>();
 
@@ -182,6 +185,7 @@ public class Glide implements ComponentCallbacks2 {
     this.arrayPool = arrayPool;
     this.memoryCache = memoryCache;
     this.connectivityMonitorFactory = connectivityMonitorFactory;
+    this.byteArrayPool = new LruByteArrayPool();
 
     DecodeFormat decodeFormat = defaultRequestOptions.getOptions().get(Downsampler.DECODE_FORMAT);
     bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
@@ -189,17 +193,17 @@ public class Glide implements ComponentCallbacks2 {
     Resources resources = context.getResources();
 
     Downsampler downsampler =
-        new Downsampler(resources.getDisplayMetrics(), bitmapPool, arrayPool);
+        new Downsampler(resources.getDisplayMetrics(), bitmapPool, byteArrayPool);
     ByteBufferGifDecoder byteBufferGifDecoder =
         new ByteBufferGifDecoder(context, bitmapPool, arrayPool);
     registry = new Registry(context)
         .register(ByteBuffer.class, new ByteBufferEncoder())
-        .register(InputStream.class, new StreamEncoder(arrayPool))
+        .register(InputStream.class, new StreamEncoder(byteArrayPool))
         /* Bitmaps */
         .append(ByteBuffer.class, Bitmap.class,
             new ByteBufferBitmapDecoder(downsampler))
         .append(InputStream.class, Bitmap.class,
-            new StreamBitmapDecoder(downsampler, arrayPool))
+            new StreamBitmapDecoder(downsampler, byteArrayPool))
         .append(ParcelFileDescriptor.class, Bitmap.class, new VideoBitmapDecoder(bitmapPool))
         .register(Bitmap.class, new BitmapEncoder())
         /* GlideBitmapDrawables */
@@ -208,13 +212,13 @@ public class Glide implements ComponentCallbacks2 {
                 new ByteBufferBitmapDecoder(downsampler)))
         .append(InputStream.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool,
-                new StreamBitmapDecoder(downsampler, arrayPool)))
+                new StreamBitmapDecoder(downsampler, byteArrayPool)))
         .append(ParcelFileDescriptor.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool, new VideoBitmapDecoder(bitmapPool)))
         .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* Gifs */
         .prepend(InputStream.class, GifDrawable.class,
-            new StreamGifDecoder(byteBufferGifDecoder, arrayPool))
+            new StreamGifDecoder(byteBufferGifDecoder, byteArrayPool))
         .prepend(ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .register(GifDrawable.class, new GifDrawableEncoder())
         /* Gif Frames */
@@ -228,7 +232,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
         .append(File.class, File.class, new UnitModelLoader.Factory<File>())
         /* Models */
-        .register(new InputStreamRewinder.Factory(arrayPool))
+        .register(new InputStreamRewinder.Factory(byteArrayPool))
         .append(int.class, InputStream.class, new ResourceLoader.StreamFactory())
         .append(int.class, ParcelFileDescriptor.class, new ResourceLoader.FileDescriptorFactory())
         .append(Integer.class, InputStream.class, new ResourceLoader.StreamFactory())
@@ -282,6 +286,10 @@ public class Glide implements ComponentCallbacks2 {
    */
   public BitmapPool getBitmapPool() {
     return bitmapPool;
+  }
+
+  public ByteArrayPool getByteArrayPool() {
+    return byteArrayPool;
   }
 
   public ArrayPool getArrayPool() {

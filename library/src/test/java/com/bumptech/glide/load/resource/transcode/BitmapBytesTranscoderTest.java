@@ -49,7 +49,7 @@ public class BitmapBytesTranscoderTest {
   }
 
   @Test
-  public void testBitmapResourceIsRecycled() {
+  public void testBitampResourceIsRecycled() {
     harness.getTranscodedDescription();
 
     verify(harness.bitmapResource).recycle();

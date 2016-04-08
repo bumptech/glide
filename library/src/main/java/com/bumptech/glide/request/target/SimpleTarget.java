@@ -5,7 +5,7 @@ import com.bumptech.glide.util.Util;
 /**
  * A simple {@link com.bumptech.glide.request.target.Target} base class with default (usually noop)
  * implementations of non essential methods that allows the caller to specify an exact width/height.
- * Typically use cases look something like this:
+ * Typicaly use cases look something like this:
  * <pre>
  * <code>
  * Glide.load("http://somefakeurl.com/fakeImage.jpeg")

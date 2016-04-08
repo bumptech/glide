@@ -75,7 +75,7 @@ public class ListPreloaderTest {
       public int expectedPosition;
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+      public int[] getPreloadSize(Object item, int adapterPostion, int itemPosition) {
         return new int[] { 10, 10 };
       }
 
@@ -132,7 +132,7 @@ public class ListPreloaderTest {
       int expectedPosition = toPreload - 1;
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+      public int[] getPreloadSize(Object item, int adapterPostion, int itemPosition) {
         return new int[] { 10, 10 };
       }
 
@@ -257,8 +257,8 @@ public class ListPreloaderTest {
       }
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
-        assertEquals(expectedPosition / 2, adapterPosition);
+      public int[] getPreloadSize(Object item, int adapterPostion, int itemPosition) {
+        assertEquals(expectedPosition / 2, adapterPostion);
         assertEquals(expectedPosition % 2, itemPosition);
         expectedPosition++;
         return itemPosition == 0 ? new int[] { 10, 11 } : new int[] { 20, 21 };
@@ -275,7 +275,7 @@ public class ListPreloaderTest {
 
     preloader.onScroll(null, 1, 10, 1 + 10 + 2);
 
-    List<Integer> allValues = getTargetsSizes(request, times(4));
+    List<Integer> allValues = getTagetsSizes(request, times(4));
     assertEquals(expected, allValues);
   }
 
@@ -293,8 +293,8 @@ public class ListPreloaderTest {
       }
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
-        assertEquals(expectedPosition / 2, adapterPosition);
+      public int[] getPreloadSize(Object item, int adapterPostion, int itemPosition) {
+        assertEquals(expectedPosition / 2, adapterPostion);
         assertEquals(expectedPosition % 2, itemPosition);
         expectedPosition--;
         return itemPosition == 0 ? new int[] { 10, 11 } : new int[] { 20, 21 };
@@ -312,11 +312,11 @@ public class ListPreloaderTest {
     preloader.onScroll(null, 3, 2, 3 + 2);
     preloader.onScroll(null, 2, 2, 3 + 2);
 
-    List<Integer> allValues = getTargetsSizes(request, times(4));
+    List<Integer> allValues = getTagetsSizes(request, times(4));
     assertEquals(expected, allValues);
   }
 
-  private List<Integer> getTargetsSizes(RequestBuilder<?> requestBuilder, VerificationMode mode) {
+  private List<Integer> getTagetsSizes(RequestBuilder<?> requestBuilder, VerificationMode mode) {
     ArgumentCaptor<Integer> integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
     ArgumentCaptor<Target> targetArgumentCaptor = ArgumentCaptor.forClass(Target.class);
     SizeReadyCallback cb = mock(SizeReadyCallback.class);
@@ -372,7 +372,7 @@ public class ListPreloaderTest {
     }
 
     @Override
-    public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+    public int[] getPreloadSize(Object item, int adapterPostion, int itemPosition) {
       return new int[] { 100, 100 };
     }
   }

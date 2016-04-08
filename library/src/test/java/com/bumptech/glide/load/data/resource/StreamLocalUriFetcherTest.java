@@ -61,8 +61,8 @@ public class StreamLocalUriFetcherTest {
 
     shadow.registerInputStream(uri, null /*inputStream*/);
 
-    StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context, uri);
-    fetcher.loadData(Priority.LOW, callback);
+    StreamLocalUriFetcher fecther = new StreamLocalUriFetcher(context, uri);
+    fecther.loadData(Priority.LOW, callback);
 
     verify(callback).onLoadFailed(isA(FileNotFoundException.class));
   }

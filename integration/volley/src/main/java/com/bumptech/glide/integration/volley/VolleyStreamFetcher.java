@@ -93,7 +93,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   /**
-   * Default {@link com.android.volley.Request} implementation for Glide that receives errors and
+   * Default {@link com.android.volley.Request} implementation for Glide that recives errors and
    * results on volley's background thread.
    */
   public static class GlideRequest extends Request<byte[]> {

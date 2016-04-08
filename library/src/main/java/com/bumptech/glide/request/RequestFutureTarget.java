@@ -23,27 +23,13 @@ import java.util.concurrent.TimeoutException;
  *
  * <pre>
  *     {@code
- *      FutureTarget<File> target = null;
- *      RequestManager requestManager = Glide.with(context);
- *      try {
- *        target = requestManager
- *           .downloadOnly()
- *           .load(model)
- *           .submit();
- *        File downloadedFile = target.get();
- *        // ... do something with the file (usually throws IOException)
- *      } catch (ExecutionException | InterruptedException | IOException e) {
- *        // ... bug reporting or recovery
- *      } finally {
- *        // make sure to cancel pending operations and free resources
- *        if (target != null) {
- *          target.cancel(true); // mayInterruptIfRunning
- *        }
- *      }
+ *      RequestFutureTarget target = Glide.load("")...
+ *     Object resource = target.get();
+ *     // Do something with resource, and when finished:
+ *     target.cancel(false);
  *     }
  *     </pre>
- * The {@link #cancel(boolean)} call will cancel pending operations and
- * make sure that any resources used are recycled.
+ * The {@link #cancel(boolean)} call will make sure any resources used are recycled.
  * </p>
  *
  * @param <R> The type of the resource that will be loaded.

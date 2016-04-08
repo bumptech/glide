@@ -17,7 +17,7 @@ package com.bumptech.glide.load.resource.bitmap;
  *  limitations under the License.
  */
 
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -62,18 +62,18 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * The current position within the byte array {@code buf}.
    */
   private int pos;
-  private final ArrayPool byteArrayPool;
+  private final ByteArrayPool byteArrayPool;
 
-  public RecyclableBufferedInputStream(InputStream in, ArrayPool byteArrayPool) {
-    this(in, byteArrayPool, ArrayPool.STANDARD_BUFFER_SIZE_BYTES);
+  public RecyclableBufferedInputStream(InputStream in, ByteArrayPool byteArrayPool) {
+    this(in, byteArrayPool, ByteArrayPool.STANDARD_BUFFER_SIZE_BYTES);
   }
 
   // Visible for testing
-  RecyclableBufferedInputStream(InputStream in, ArrayPool byteArrayPool,
+  RecyclableBufferedInputStream(InputStream in, ByteArrayPool byteArrayPool,
       int bufferSize) {
     super(in);
     this.byteArrayPool = byteArrayPool;
-    buf = byteArrayPool.get(bufferSize, byte[].class);
+    buf = byteArrayPool.get(bufferSize);
   }
 
   /**
@@ -111,7 +111,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
   public synchronized void release() {
     if (buf != null) {
-      byteArrayPool.put(buf, byte[].class);
+      byteArrayPool.put(buf);
       buf = null;
     }
   }
@@ -125,7 +125,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
   @Override
   public void close() throws IOException {
     if (buf != null) {
-      byteArrayPool.put(buf, byte[].class);
+      byteArrayPool.put(buf);
       buf = null;
     }
     InputStream localIn = in;
@@ -161,13 +161,13 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
       if (newLength > marklimit) {
         newLength = marklimit;
       }
-      byte[] newbuf = byteArrayPool.get(newLength, byte[].class);
+      byte[] newbuf = byteArrayPool.get(newLength);
       System.arraycopy(localBuf, 0, newbuf, 0, localBuf.length);
       byte[] oldbuf = localBuf;
       // Reassign buf, which will invalidate any local references
       // FIXME: what if buf was null?
       localBuf = buf = newbuf;
-      byteArrayPool.put(oldbuf, byte[].class);
+      byteArrayPool.put(oldbuf);
     } else if (markpos > 0) {
       System.arraycopy(localBuf, markpos, localBuf, 0, localBuf.length - markpos);
     }

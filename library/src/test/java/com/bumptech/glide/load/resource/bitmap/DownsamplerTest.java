@@ -14,8 +14,8 @@ import android.util.DisplayMetrics;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.DownsamplerTest.AllocationSizeBitmap;
 import com.bumptech.glide.tests.Util;
 
@@ -23,7 +23,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -43,7 +42,7 @@ import java.io.InputStream;
 @Config(manifest = Config.NONE, sdk = 19, shadows = AllocationSizeBitmap.class)
 public class DownsamplerTest {
   @Mock private BitmapPool bitmapPool;
-  @Mock private ArrayPool byteArrayPool;
+  @Mock private ByteArrayPool byteArrayPool;
   private Downsampler downsampler;
   private Options options;
   private int initialSdkVersion;
@@ -54,8 +53,8 @@ public class DownsamplerTest {
     options = new Options();
     DisplayMetrics displayMetrics =
         RuntimeEnvironment.application.getResources().getDisplayMetrics();
-    when(byteArrayPool.get(anyInt(), Matchers.eq(byte[].class)))
-        .thenReturn(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
+    when(byteArrayPool.get(anyInt()))
+        .thenReturn(new byte[ByteArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
     downsampler = new Downsampler(displayMetrics, bitmapPool, byteArrayPool);
 
     initialSdkVersion = Build.VERSION.SDK_INT;

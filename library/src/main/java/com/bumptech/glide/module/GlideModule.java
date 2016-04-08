@@ -19,7 +19,7 @@ import com.bumptech.glide.Registry;
  *                      public class FlickrGlideModule implements GlideModule {
  *                          {@literal @}Override
  *                          public void applyOptions(Context context, GlideBuilder builder) {
- *                              builder.setDecodeFormat(DecodeFormat.ALWAYS_ARGB_8888);
+ *                              buidler.setDecodeFormat(DecodeFormat.ALWAYS_ARGB_8888);
  *                          }
  *
  *                          {@literal @}Override

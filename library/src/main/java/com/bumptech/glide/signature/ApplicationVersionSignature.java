@@ -55,7 +55,7 @@ public final class ApplicationVersionSignature {
     } else {
       versionCode = UUID.randomUUID().toString();
     }
-    return new ObjectKey(versionCode);
+    return new StringSignature(versionCode);
   }
 
   private ApplicationVersionSignature() {

@@ -3,7 +3,7 @@ package com.bumptech.glide.load.model;
 import static org.junit.Assert.assertEquals;
 
 import com.bumptech.glide.load.Options;
-import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.util.ByteBufferUtil;
 
 import org.junit.After;
@@ -26,7 +26,7 @@ public class StreamEncoderTest {
 
   @Before
   public void setUp() {
-    encoder = new StreamEncoder(new LruArrayPool());
+    encoder = new StreamEncoder(new LruByteArrayPool());
     file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
   }
 

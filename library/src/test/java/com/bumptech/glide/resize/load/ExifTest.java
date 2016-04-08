@@ -3,8 +3,7 @@ package com.bumptech.glide.resize.load;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
 import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
 import com.bumptech.glide.testutil.TestResourceUtil;
 
@@ -21,7 +20,7 @@ import java.io.InputStream;
 @Config(manifest = Config.NONE, sdk = 18)
 public class ExifTest {
 
-  private ArrayPool byteArrayPool;
+  private LruByteArrayPool byteArrayPool;
 
   private InputStream open(String imageName) throws IOException {
     return TestResourceUtil.openResource(getClass(), "exif-orientation-examples/" + imageName);
@@ -48,7 +47,7 @@ public class ExifTest {
 
   @Before
   public void setUp() {
-    byteArrayPool = new LruArrayPool();
+    byteArrayPool = new LruByteArrayPool();
   }
 
   @Test
@@ -74,11 +73,11 @@ public class ExifTest {
   @Test
   public void testHandlesInexactSizesInByteArrayPools() {
     for (int i = 1; i <= 8; i++) {
-      byteArrayPool.put(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES], byte[].class);
+      byteArrayPool.put(new byte[LruByteArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
       assertOrientation("Portrait", i);
     }
     for (int i = 1; i <= 8; i++) {
-      byteArrayPool.put(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES], byte[].class);
+      byteArrayPool.put(new byte[LruByteArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
       assertOrientation("Landscape", i);
     }
   }

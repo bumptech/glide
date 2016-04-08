@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Options;
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,15 +18,15 @@ import java.io.OutputStream;
  */
 public class StreamEncoder implements Encoder<InputStream> {
   private static final String TAG = "StreamEncoder";
-  private final ArrayPool byteArrayPool;
+  private final ByteArrayPool byteArrayPool;
 
-  public StreamEncoder(ArrayPool byteArrayPool) {
+  public StreamEncoder(ByteArrayPool byteArrayPool) {
     this.byteArrayPool = byteArrayPool;
   }
 
   @Override
   public boolean encode(InputStream data, File file, Options options) {
-    byte[] buffer = byteArrayPool.get(ArrayPool.STANDARD_BUFFER_SIZE_BYTES, byte[].class);
+    byte[] buffer = byteArrayPool.get(ByteArrayPool.STANDARD_BUFFER_SIZE_BYTES);
     boolean success = false;
     OutputStream os = null;
     try {
@@ -49,7 +49,7 @@ public class StreamEncoder implements Encoder<InputStream> {
           // Do nothing.
         }
       }
-      byteArrayPool.put(buffer, byte[].class);
+      byteArrayPool.put(buffer);
     }
     return success;
   }

@@ -2,7 +2,7 @@ package com.bumptech.glide.samples.flickr.api;
 
 import android.os.Parcel;
 
-/** Query using Flickr's recent API. */
+/** Query wusing flickr's recent API. */
 public final class RecentQuery implements Query {
   public static final Creator<RecentQuery> CREATOR = new Creator<RecentQuery>() {
     @Override

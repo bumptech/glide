@@ -40,7 +40,7 @@ public class DrawableCrossFadeFactoryTest {
   }
 
   @Test
-  public void testReturnsAnimationIfNotFromMemoryCacheAndNotIsFirstResource() {
+  public void testReturnsAnimationIfNotFromMemocyCacheAndNotIsFirstResource() {
     assertNotEquals(NoTransition.<Drawable>get(),
         factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/));
   }

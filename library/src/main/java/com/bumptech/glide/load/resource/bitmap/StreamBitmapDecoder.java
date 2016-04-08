@@ -5,8 +5,8 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
 import com.bumptech.glide.util.ExceptionCatchingInputStream;
 import com.bumptech.glide.util.MarkEnforcingInputStream;
 
@@ -19,9 +19,9 @@ import java.io.InputStream;
 public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap> {
 
   private final Downsampler downsampler;
-  private final ArrayPool byteArrayPool;
+  private final ByteArrayPool byteArrayPool;
 
-  public StreamBitmapDecoder(Downsampler downsampler, ArrayPool byteArrayPool) {
+  public StreamBitmapDecoder(Downsampler downsampler, ByteArrayPool byteArrayPool) {
     this.downsampler = downsampler;
     this.byteArrayPool = byteArrayPool;
   }

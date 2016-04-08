@@ -341,9 +341,9 @@ public final class SingleRequest<R> implements Request,
     return fallbackDrawable;
   }
 
-  private Drawable loadDrawable(int resourceId) {
+  private Drawable loadDrawable(int resouceId) {
     Resources resources = glideContext.getResources();
-    return ResourcesCompat.getDrawable(resources, resourceId, requestOptions.getTheme());
+    return ResourcesCompat.getDrawable(resources, resouceId, requestOptions.getTheme());
   }
 
   private void setErrorPlaceholder() {

@@ -561,7 +561,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     private ResourceEncoder<Z> encoder;
     private LockedResource<Z> toEncode;
 
-    // We just need the encoder and resource type to match, which this will enforce.
+    // We just need the encoder and resouce type to match, which this will enforce.
     @SuppressWarnings("unchecked")
     <X> void init(Key key, ResourceEncoder<X> encoder, LockedResource<X> toEncode) {
       this.key = key;

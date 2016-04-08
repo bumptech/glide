@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.bumptech.glide.util.Preconditions;
@@ -16,11 +15,9 @@ import java.util.TreeMap;
  * the maximum byte size.
  */
 public final class LruArrayPool implements ArrayPool {
-  // 4MB.
-  static final int DEFAULT_SIZE = 4 * 1024 * 1024;
 
   /**
-   * The maximum number of times larger an int array may be to be than a requested size to eligible
+   * The maximum number of times larger an int array may be to be than a requested size to eligble
    * to be returned from the pool.
    */
   private static final int MAX_OVER_SIZE_MULTIPLE = 8;
@@ -33,11 +30,6 @@ public final class LruArrayPool implements ArrayPool {
   private final Map<Class, ArrayAdapterInterface> adapters = new HashMap<>();
   private final int maxSize;
   private int currentSize;
-
-  @VisibleForTesting
-  public LruArrayPool() {
-    maxSize = DEFAULT_SIZE;
-  }
 
   /**
    * Constructor for a new pool.

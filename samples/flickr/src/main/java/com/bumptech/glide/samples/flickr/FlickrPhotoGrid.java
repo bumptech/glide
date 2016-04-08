@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A fragment that shows square image thumbnails whose size is determined by the fragment's
+ * A fragment that shows square image thumbnails whose size is determined by the framgent's
  * arguments in a grid pattern.
  */
 public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
