@@ -181,7 +181,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
   private synchronized R doGet(Long timeoutMillis)
       throws ExecutionException, InterruptedException, TimeoutException {
-    if (assertBackgroundThread) {
+    if (assertBackgroundThread && !isDone()) {
       Util.assertBackgroundThread();
     }
 

@@ -207,6 +207,14 @@ public class RequestFutureTargetTest {
     future.get();
   }
 
+  @Test
+  public void testGetSucceedsOnMainThreadIfDone()
+      throws ExecutionException, InterruptedException {
+    future = new RequestFutureTarget<>(handler, width, height, true, waiter);
+    future.onResourceReady(new Object(), null);
+    future.get();
+  }
+
   @Test(expected = InterruptedException.class)
   public void testThrowsInterruptedExceptionIfThreadInterruptedWhenDoneWaiting()
       throws InterruptedException, ExecutionException {
