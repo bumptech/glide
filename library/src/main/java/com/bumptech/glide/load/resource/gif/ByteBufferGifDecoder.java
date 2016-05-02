@@ -8,6 +8,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
+import com.bumptech.glide.gifdecoder.StandardGifDecoder;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -140,7 +141,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   static class GifDecoderFactory {
     public GifDecoder build(GifDecoder.BitmapProvider provider, GifHeader header,
         ByteBuffer data, int sampleSize) {
-      return new GifDecoder(provider, header, data, sampleSize);
+      return new StandardGifDecoder(provider, header, data, sampleSize);
     }
   }
 

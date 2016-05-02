@@ -6,6 +6,7 @@ import android.util.Log;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
+import com.bumptech.glide.gifdecoder.StandardGifDecoder;
 import com.bumptech.glide.gifencoder.AnimatedGifEncoder;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Option;
@@ -192,7 +193,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   static class Factory {
 
     public GifDecoder buildDecoder(GifDecoder.BitmapProvider bitmapProvider) {
-      return new GifDecoder(bitmapProvider);
+      return new StandardGifDecoder(bitmapProvider);
     }
 
     public GifHeaderParser buildParser() {
