@@ -93,6 +93,8 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     if (resource instanceof Animatable) {
       animatable = (Animatable) resource;
       animatable.start();
+    } else {
+      animatable = null;
     }
   }
 
