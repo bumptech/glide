@@ -172,6 +172,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   private void startRunning() {
+    Preconditions.checkArgument(!isRecycled, "You cannot start a recycled Drawable. Ensure that"
+        + "you clear any references to the Drawable when clearing the corresponding request.");
     // If we have only a single frame, we don't want to decode it endlessly.
     if (state.frameLoader.getFrameCount() == 1) {
       invalidateSelf();
@@ -189,6 +191,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   @Override
   public boolean setVisible(boolean visible, boolean restart) {
+    Preconditions.checkArgument(!isRecycled, "Cannot change the visibility of a recycled resource."
+        + " Ensure that you unset the Drawable from your View before changing the View's"
+        + " visibility.");
     isVisible = visible;
     if (!visible) {
       stopRunning();

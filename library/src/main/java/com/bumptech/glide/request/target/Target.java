@@ -31,11 +31,15 @@ public interface Target<R> extends LifecycleListener {
    * A lifecycle callback that is called when a load is started.
    *
    * <p> Note - This may not be called for every load, it is possible for example for loads to fail
-   * before the load starts (when the model object is null). </p>
+   * before the load starts (when the model object is null).
    *
    * <p> Note - This method may be called multiple times before any other lifecycle method is
    * called. Loads can be paused and restarted due to lifecycle or connectivity events and each
-   * restart may cause a call here. </p>
+   * restart may cause a call here.
+   *
+   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
+   * Transition)} is no longer displayed before redrawing the container (usually a View) or
+   * changing its visibility.
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
@@ -45,7 +49,11 @@ public interface Target<R> extends LifecycleListener {
    * A lifecycle callback that is called when a load fails.
    *
    * <p> Note - This may be called before {@link #onLoadStarted(android.graphics.drawable.Drawable)
-   * } if the model object is null. </p>
+   * } if the model object is null.
+   *
+   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
+   * Transition)} is no longer displayed before redrawing the container (usually a View) or
+   * changing its visibility.
    *
    * @param errorDrawable The error drawable to optionally show, or null.
    */
@@ -60,6 +68,10 @@ public interface Target<R> extends LifecycleListener {
 
   /**
    * A lifecycle callback that is called when a load is cancelled and its resources are freed.
+   *
+   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
+   * Transition)} is no longer displayed before redrawing the container (usually a View) or
+   * changing its visibility.
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
