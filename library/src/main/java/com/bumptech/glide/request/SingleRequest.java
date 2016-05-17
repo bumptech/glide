@@ -373,8 +373,8 @@ public final class SingleRequest<R> implements Request,
     status = Status.RUNNING;
 
     float sizeMultiplier = requestOptions.getSizeMultiplier();
-    this.width = Math.round(sizeMultiplier * width);
-    this.height = Math.round(sizeMultiplier * height);
+    this.width = maybeApplySizeMultiplier(width, sizeMultiplier);
+    this.height = maybeApplySizeMultiplier(height, sizeMultiplier);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
@@ -398,6 +398,10 @@ public final class SingleRequest<R> implements Request,
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
     }
+  }
+
+  private static int maybeApplySizeMultiplier(int size, float sizeMultiplier) {
+    return size == Target.SIZE_ORIGINAL ? size : Math.round(sizeMultiplier * size);
   }
 
   private boolean canSetResource() {
