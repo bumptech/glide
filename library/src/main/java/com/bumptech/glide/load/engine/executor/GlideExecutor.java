@@ -128,7 +128,10 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy#DEFAULT}
    * uncaught throwable strategy, and the {@link SynchronousQueue} since using default unbounded
    * blocking queue, for example, {@link PriorityBlockingQueue} effectively won't create more than
-   * {@code corePoolSize} threads. See <a href="http://developer.android.com/reference/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor documentation</a>.
+   * {@code corePoolSize} threads.
+   * See <a href=
+   * "http://developer.android.com/reference/java/util/concurrent/ThreadPoolExecutor.html">
+   * ThreadPoolExecutor documentation</a>.
    *
    * <p>Source executors allow network operations on their threads.
    */

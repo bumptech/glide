@@ -1,6 +1,5 @@
 package com.bumptech.glide;
 
-import android.content.Context;
 import android.support.v4.util.Pools.Pool;
 
 import com.bumptech.glide.load.Encoder;
@@ -43,9 +42,8 @@ public class Registry {
   private final LoadPathCache loadPathCache = new LoadPathCache();
   private final Pool<List<Exception>> exceptionListPool = FactoryPools.threadSafeList();
 
-  public Registry(Context context) {
-    this.modelLoaderRegistry =
-        new ModelLoaderRegistry(context.getApplicationContext(), exceptionListPool);
+  public Registry() {
+    this.modelLoaderRegistry = new ModelLoaderRegistry(exceptionListPool);
     this.encoderRegistry = new EncoderRegistry();
     this.decoderRegistry = new ResourceDecoderRegistry();
     this.resourceEncoderRegistry = new ResourceEncoderRegistry();

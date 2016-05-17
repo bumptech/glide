@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pools.Pool;
 
@@ -26,12 +25,12 @@ public class MultiModelLoaderFactory {
   private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
   private final Pool<List<Exception>> exceptionListPool;
 
-  public MultiModelLoaderFactory(Context context, Pool<List<Exception>> exceptionListPool) {
-    this(context, exceptionListPool, DEFAULT_FACTORY);
+  public MultiModelLoaderFactory(Pool<List<Exception>> exceptionListPool) {
+    this(exceptionListPool, DEFAULT_FACTORY);
   }
 
   // Visible for testing.
-  MultiModelLoaderFactory(Context context, Pool<List<Exception>> exceptionListPool,
+  MultiModelLoaderFactory(Pool<List<Exception>> exceptionListPool,
       Factory factory) {
     this.exceptionListPool = exceptionListPool;
     this.factory = factory;

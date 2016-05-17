@@ -26,7 +26,7 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   /**
    * Opens an input stream for a uri pointing to a local asset. Only certain uris are supported
    *
-   * @param context Any {@link android.content.Context}.
+   * @param contentResolver Any {@link android.content.ContentResolver}.
    * @param uri     A Uri pointing to a local asset. This load will fail if the uri isn't openable
    *                by {@link ContentResolver#openInputStream(android.net.Uri)}
    * @see ContentResolver#openInputStream(android.net.Uri)

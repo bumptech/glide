@@ -20,7 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -46,8 +45,8 @@ public class MultiModelLoaderFactoryTest {
     MockitoAnnotations.initMocks(this);
     exceptionListPool = FactoryPools.threadSafeList();
 
-    multiFactory = new MultiModelLoaderFactory(RuntimeEnvironment.application, exceptionListPool,
-            multiModelLoaderFactory);
+    multiFactory = new MultiModelLoaderFactory(exceptionListPool,
+        multiModelLoaderFactory);
     when(firstFactory.build(eq(multiFactory))).thenReturn(firstModelLoader);
     when(secondFactory.build(eq(multiFactory))).thenReturn(secondModelLoader);
   }

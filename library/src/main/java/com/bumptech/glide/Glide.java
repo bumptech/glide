@@ -193,7 +193,7 @@ public class Glide implements ComponentCallbacks2 {
         new Downsampler(resources.getDisplayMetrics(), bitmapPool, arrayPool);
     ByteBufferGifDecoder byteBufferGifDecoder =
         new ByteBufferGifDecoder(context, bitmapPool, arrayPool);
-    registry = new Registry(context)
+    registry = new Registry()
         .register(ByteBuffer.class, new ByteBufferEncoder())
         .register(InputStream.class, new StreamEncoder(arrayPool))
         /* Bitmaps */

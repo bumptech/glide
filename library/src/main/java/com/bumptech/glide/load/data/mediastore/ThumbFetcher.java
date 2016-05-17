@@ -22,6 +22,7 @@ import java.io.InputStream;
  * A {@link DataFetcher} implementation for {@link InputStream}s that loads data from thumbnail
  * files obtained from the {@link MediaStore}.
  */
+@SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
 public class ThumbFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "MediaStoreThumbFetcher";
   private final Uri mediaStoreImageUri;
