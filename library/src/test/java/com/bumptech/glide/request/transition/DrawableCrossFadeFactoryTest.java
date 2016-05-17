@@ -24,7 +24,8 @@ public class DrawableCrossFadeFactoryTest {
   @Before
   public void setUp() {
     ViewAnimationFactory<Drawable> viewAnimationFactory = mock(ViewAnimationFactory.class);
-    factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/);
+    factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/,
+        false /*isCrosFadeEnabled*/);
   }
 
   @Test

@@ -73,7 +73,7 @@ public class DrawableCrossFadeViewAnimationTest {
     Transition<Drawable> defaultAnimation = mock(Transition.class);
     int duration = 200;
     DrawableCrossFadeTransition animation =
-        new DrawableCrossFadeTransition(defaultAnimation, duration);
+        new DrawableCrossFadeTransition(defaultAnimation, duration, true /*isCrossFadeEnabled*/);
   }
 }
 
