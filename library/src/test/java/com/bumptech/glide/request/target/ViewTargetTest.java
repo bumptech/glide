@@ -392,6 +392,17 @@ public class ViewTargetTest {
     new TestViewTarget(null);
   }
 
+  @Test
+  public void testDecreasesDimensionsByViewPadding() {
+    SizeReadyCallback cb = mock(SizeReadyCallback.class);
+    view.setLayoutParams(new LayoutParams(100, 100));
+    view.setPadding(25, 25, 25, 25);
+
+    target.getSize(cb);
+
+    verify(cb).onSizeReady(50, 50);
+  }
+
   @Implements(ViewTreeObserver.class)
   public static class PreDrawShadowViewTreeObserver {
     private CopyOnWriteArrayList<OnPreDrawListener> preDrawListeners = new CopyOnWriteArrayList<>();
