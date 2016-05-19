@@ -85,7 +85,7 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
    */
   public static class Builder {
     private static final int DEFAULT_DURATION_MS = 300;
-    private int durationMillis = DEFAULT_DURATION_MS;
+    private int durationMillis;
     private ViewAnimationFactory<Drawable> factory;
     private boolean isCrossFadeEnabled;
 
@@ -101,6 +101,7 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
      *     {@link #setDefaultAnimationFactory(ViewAnimationFactory)} is called.
      */
     public Builder(int durationMillis) {
+      this.durationMillis = durationMillis;
       factory = new ViewAnimationFactory<>(
           new DefaultViewTransitionAnimationFactory(durationMillis));
     }
