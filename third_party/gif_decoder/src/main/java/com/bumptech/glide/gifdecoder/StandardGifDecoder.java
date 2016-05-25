@@ -475,7 +475,15 @@ public class StandardGifDecoder implements GifDecoder {
         int maxPositionInSource = sx + ((dlim - dx) * sampleSize);
         while (dx < dlim) {
           // Map color and insert in destination.
-          int averageColor = averageColorsNear(sx, maxPositionInSource, currentFrame.iw);
+          int averageColor;
+          if (sampleSize == 1) {
+            int currentColorIndex = ((int) mainPixels[sx]) & 0xff;
+            averageColor = act[currentColorIndex];
+          } else {
+            // TODO: This is substantially slower (up to 50ms per frame) than just grabbing the
+            // current color index above, even with a sample size of 1.
+            averageColor = averageColorsNear(sx, maxPositionInSource, currentFrame.iw);
+          }
           if (averageColor != 0) {
             dest[dx] = averageColor;
           } else if (!isFirstFrameTransparent && isFirstFrame) {
