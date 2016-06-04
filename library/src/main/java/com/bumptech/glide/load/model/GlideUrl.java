@@ -37,6 +37,8 @@ public class GlideUrl implements Key {
   @Nullable private URL safeUrl;
   @Nullable private volatile byte[] cacheKeyBytes;
 
+  private int hashCode;
+
   public GlideUrl(URL url) {
     this(url, Headers.DEFAULT);
   }
@@ -141,8 +143,10 @@ public class GlideUrl implements Key {
 
   @Override
   public int hashCode() {
-    int hashCode = getCacheKey().hashCode();
-    hashCode = 31 * hashCode + headers.hashCode();
+    if (hashCode == 0) {
+      hashCode = getCacheKey().hashCode();
+      hashCode = 31 * hashCode + headers.hashCode();
+    }
     return hashCode;
   }
 }
