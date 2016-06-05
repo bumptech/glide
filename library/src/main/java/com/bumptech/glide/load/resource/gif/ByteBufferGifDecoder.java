@@ -94,7 +94,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
       GifHeaderParser parser) {
     long startTime = LogTime.getLogTime();
     final GifHeader header = parser.parseHeader();
-    if (header.getNumFrames() <= 0 || header.getStatus() != GifDecoder.STATUS_OK) {
+    if (header.getNumFrames() <= 0) {
       // If we couldn't decode the GIF, we will end up with a frame count of 0.
       return null;
     }
