@@ -52,7 +52,8 @@ public final class LruArrayPool implements ArrayPool {
   public synchronized <T> void put(T array, Class<T> arrayClass) {
     ArrayAdapterInterface<T> arrayAdapter = getAdapterFromType(arrayClass);
     int size = arrayAdapter.getArrayLength(array);
-    if (!isSmallEnoughForReuse(size)) {
+    int arrayBytes = size * arrayAdapter.getElementSizeInBytes();
+    if (!isSmallEnoughForReuse(arrayBytes)) {
       return;
     }
     Key key = keyPool.get(size, arrayClass);
@@ -61,7 +62,7 @@ public final class LruArrayPool implements ArrayPool {
     NavigableMap<Integer, Integer> sizes = getSizesForAdapter(arrayClass);
     Integer current = sizes.get(key.size);
     sizes.put(key.size, current == null ? 1 : current + 1);
-    currentSize += size * arrayAdapter.getElementSizeInBytes();
+    currentSize += arrayBytes;
     evict();
   }
 
@@ -102,8 +103,8 @@ public final class LruArrayPool implements ArrayPool {
     return (T) groupedMap.get(key);
   }
 
-  private boolean isSmallEnoughForReuse(int intSize) {
-    return intSize <= maxSize / SINGLE_ARRAY_MAX_SIZE_DIVISOR;
+  private boolean isSmallEnoughForReuse(int byteSize) {
+    return byteSize <= maxSize / SINGLE_ARRAY_MAX_SIZE_DIVISOR;
   }
 
   private boolean mayFillRequest(int requestedSize, Integer actualSize) {
