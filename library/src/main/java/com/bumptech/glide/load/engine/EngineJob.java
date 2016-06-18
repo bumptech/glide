@@ -22,7 +22,7 @@ import java.util.List;
  */
 class EngineJob<R> implements DecodeJob.Callback<R>,
     Poolable {
-  private static final EngineResourceFactory DEFAULT_FACTORY = new EngineResourceFactory();
+  private static final EngineResourceFactory DEFAULT_FACTORY = new DefaultEngineResourceFactory();
   private static final Handler MAIN_THREAD_HANDLER =
       new Handler(Looper.getMainLooper(), new MainThreadCallback());
 
@@ -273,8 +273,12 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     return stateVerifier;
   }
 
+  public interface EngineResourceFactory {
+    <R> EngineResource<R> build(Resource<R> resource, boolean isMemoryCacheable);
+  }
+
   // Visible for testing.
-  static class EngineResourceFactory {
+  static class DefaultEngineResourceFactory implements EngineResourceFactory {
     public <R> EngineResource<R> build(Resource<R> resource, boolean isMemoryCacheable) {
       return new EngineResource<>(resource, isMemoryCacheable);
     }
