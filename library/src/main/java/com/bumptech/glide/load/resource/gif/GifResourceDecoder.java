@@ -45,7 +45,7 @@ public class GifResourceDecoder implements ResourceDecoder<InputStream, GifDrawa
     // Visible for testing.
     GifResourceDecoder(Context context, BitmapPool bitmapPool, GifHeaderParserPool parserPool,
             GifDecoderPool decoderPool) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.bitmapPool = bitmapPool;
         this.decoderPool = decoderPool;
         this.provider = new GifBitmapProvider(bitmapPool);
