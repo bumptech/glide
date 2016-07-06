@@ -175,7 +175,7 @@ public final class Downsampler {
     String sourceMimeType = options.outMimeType;
 
     int orientation = getOrientation(is);
-    int degreesToRotate = TransformationUtils.getExifOrientationDegrees(getOrientation(is));
+    int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
 
     options.inPreferredConfig = getConfig(is, decodeFormat);
     if (options.inPreferredConfig != Bitmap.Config.ARGB_8888) {
