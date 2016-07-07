@@ -3,7 +3,7 @@ apply plugin: 'org.robolectric'
 
 dependencies {
     compile project(':library')
-    compile "com.mcxiaoke.volley:library:${VOLLEY_VERSION}"
+    compile "com.android.volley:volley:${VOLLEY_VERSION}"
 
     testCompile project(":testutil")
     testCompile "com.google.truth:truth:${TRUTH_VERSION}"
