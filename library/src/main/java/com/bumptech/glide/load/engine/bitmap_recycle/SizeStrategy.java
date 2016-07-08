@@ -4,9 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.util.Util;
-
 import java.util.TreeMap;
 
 /**

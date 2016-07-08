@@ -1,13 +1,11 @@
 package com.bumptech.glide.load.model.stream;
 
 import android.net.Uri;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;

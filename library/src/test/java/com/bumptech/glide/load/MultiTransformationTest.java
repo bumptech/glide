@@ -14,16 +14,14 @@ import static org.mockito.Mockito.when;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 @RunWith(JUnit4.class)
 @SuppressWarnings("unchecked")

@@ -6,7 +6,6 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.squareup.okhttp.OkHttpClient;
-
 import java.io.InputStream;
 
 /**

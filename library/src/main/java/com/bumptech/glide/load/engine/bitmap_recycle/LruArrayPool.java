@@ -3,9 +3,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
-
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;

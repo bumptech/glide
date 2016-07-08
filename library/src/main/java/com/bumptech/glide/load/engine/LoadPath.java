@@ -1,11 +1,9 @@
 package com.bumptech.glide.load.engine;
 
 import android.support.v4.util.Pools.Pool;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

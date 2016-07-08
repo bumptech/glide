@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.data;
 
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 

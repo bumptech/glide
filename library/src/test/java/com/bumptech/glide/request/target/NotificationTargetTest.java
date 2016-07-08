@@ -10,7 +10,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.widget.RemoteViews;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

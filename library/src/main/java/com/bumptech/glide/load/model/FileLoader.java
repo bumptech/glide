@@ -2,13 +2,11 @@ package com.bumptech.glide.load.model;
 
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

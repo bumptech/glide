@@ -2,14 +2,12 @@ package com.bumptech.glide.samples.flickr.api;
 
 import android.content.Context;
 import android.util.SparseArray;
-
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.util.LruCache;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;

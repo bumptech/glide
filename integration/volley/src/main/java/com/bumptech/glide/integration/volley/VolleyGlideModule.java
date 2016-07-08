@@ -1,12 +1,10 @@
 package com.bumptech.glide.integration.volley;
 
 import android.content.Context;
-
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.module.GlideModule;
-
 import java.io.InputStream;
 
 /**

@@ -1,11 +1,9 @@
 package com.bumptech.glide.samples.giphy;
 
 import android.content.Context;
-
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.module.GlideModule;
-
 import java.io.InputStream;
 
 /**

@@ -2,7 +2,6 @@ package com.bumptech.glide.signature;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Util;
-
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 

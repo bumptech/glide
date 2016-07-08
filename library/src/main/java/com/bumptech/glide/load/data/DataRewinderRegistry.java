@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.HashMap;
 import java.util.Map;
 

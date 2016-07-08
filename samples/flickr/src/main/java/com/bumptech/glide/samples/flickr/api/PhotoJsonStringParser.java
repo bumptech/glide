@@ -1,11 +1,10 @@
 package com.bumptech.glide.samples.flickr.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Parses a list of {@link Photo} objects from a Flickr API response string containing JSON data.

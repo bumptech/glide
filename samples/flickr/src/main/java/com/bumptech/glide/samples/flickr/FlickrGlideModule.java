@@ -1,12 +1,10 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.samples.flickr.api.Photo;
-
 import java.io.InputStream;
 
 /**

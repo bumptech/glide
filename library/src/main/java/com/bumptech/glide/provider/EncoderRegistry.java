@@ -1,9 +1,7 @@
 package com.bumptech.glide.provider;
 
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.load.Encoder;
-
 import java.util.ArrayList;
 import java.util.List;
 

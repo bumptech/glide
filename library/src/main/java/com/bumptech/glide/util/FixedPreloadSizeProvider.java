@@ -1,7 +1,6 @@
 package com.bumptech.glide.util;
 
 import com.bumptech.glide.ListPreloader;
-
 import java.util.Arrays;
 
 /**

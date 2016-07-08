@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 

@@ -1,12 +1,10 @@
 package com.bumptech.glide.load.model;
 
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.Collections;
 import java.util.List;
 

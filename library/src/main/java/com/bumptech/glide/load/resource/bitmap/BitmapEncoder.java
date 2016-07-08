@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.util.Log;
-
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -10,7 +9,6 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

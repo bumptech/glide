@@ -13,15 +13,12 @@ import static org.mockito.Mockito.when;
 import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
 import android.os.Build;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
-
+import java.security.MessageDigest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.security.MessageDigest;
 
 @RunWith(JUnit4.class)
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)

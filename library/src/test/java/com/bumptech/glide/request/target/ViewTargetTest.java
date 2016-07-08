@@ -18,10 +18,10 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
-
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,9 +35,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowView;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = { ViewTargetTest.SizedShadowView.class,

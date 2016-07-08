@@ -1,7 +1,6 @@
 package com.bumptech.glide.provider;
 
 import com.bumptech.glide.load.ResourceDecoder;
-
 import java.util.ArrayList;
 import java.util.List;
 

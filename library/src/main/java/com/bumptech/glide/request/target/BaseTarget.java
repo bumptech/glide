@@ -1,7 +1,6 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
-
 import com.bumptech.glide.request.Request;
 
 /**

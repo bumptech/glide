@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import android.support.v4.util.Pools.Pool;
-
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -21,7 +20,6 @@ import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.util.pool.FactoryPools;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

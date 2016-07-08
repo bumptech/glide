@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.model;
 
 import android.support.v4.util.Pools.Pool;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

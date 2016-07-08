@@ -96,7 +96,7 @@
 
           <property name="sortStaticImportsAlphabetically" value="true"/>
            <property name="severity" value="error"/>
-           <property name="groups" value="com.google,*,java,javax"/>
+           <property name="groups" value="*"/>
            <!-- This ensures that static imports go first. -->
            <property name="option" value="top"/>
            <property name="tokens" value="STATIC_IMPORT, IMPORT"/>

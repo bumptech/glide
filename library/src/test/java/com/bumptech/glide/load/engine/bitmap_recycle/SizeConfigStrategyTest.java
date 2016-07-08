@@ -1,9 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-import com.google.common.testing.EqualsTester;
-
 import android.graphics.Bitmap;
-
+import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

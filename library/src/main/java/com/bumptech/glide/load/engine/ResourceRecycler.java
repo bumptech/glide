@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
 import com.bumptech.glide.util.Util;
 
 /**

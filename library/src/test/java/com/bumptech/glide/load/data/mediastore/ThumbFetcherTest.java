@@ -7,10 +7,9 @@ import static org.mockito.Mockito.when;
 
 import android.net.Uri;
 import android.provider.MediaStore;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
-
+import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,8 +17,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.io.InputStream;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)

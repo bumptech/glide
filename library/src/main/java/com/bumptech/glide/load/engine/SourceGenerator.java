@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine;
 
 import android.util.Log;
-
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
@@ -9,7 +8,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.util.LogTime;
-
 import java.util.Collections;
 
 /**

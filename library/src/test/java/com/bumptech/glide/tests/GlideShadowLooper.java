@@ -4,7 +4,6 @@ import static org.mockito.Mockito.mock;
 
 import android.os.Looper;
 import android.os.MessageQueue;
-
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowLooper;

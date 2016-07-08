@@ -1,7 +1,6 @@
 package com.bumptech.glide.load;
 
 import com.google.common.testing.EqualsTester;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;

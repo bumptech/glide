@@ -7,10 +7,8 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

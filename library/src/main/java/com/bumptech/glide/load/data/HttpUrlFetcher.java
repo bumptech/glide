@@ -2,14 +2,12 @@ package com.bumptech.glide.load.data;
 
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
 import com.bumptech.glide.util.LogTime;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;

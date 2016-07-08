@@ -3,9 +3,7 @@ package com.bumptech.glide.request;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Bitmap;
-
 import com.bumptech.glide.load.Transformation;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

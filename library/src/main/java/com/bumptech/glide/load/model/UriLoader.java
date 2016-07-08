@@ -3,13 +3,11 @@ package com.bumptech.glide.load.model;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
 import com.bumptech.glide.signature.ObjectKey;
-
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;

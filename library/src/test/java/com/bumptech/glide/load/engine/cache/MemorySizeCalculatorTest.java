@@ -4,14 +4,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Range;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
-
 import com.bumptech.glide.tests.Util;
-
+import com.google.common.collect.Range;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -2,12 +2,10 @@ package com.bumptech.glide;
 
 import android.support.annotation.Nullable;
 import android.widget.AbsListView;
-
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
-
 import java.util.List;
 import java.util.Queue;
 

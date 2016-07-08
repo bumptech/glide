@@ -8,15 +8,13 @@ import static org.junit.Assert.assertTrue;
 
 import com.bumptech.glide.gifdecoder.test.GifBytesTestUtil;
 import com.bumptech.glide.testutil.TestUtil;
-
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
  * Tests for {@link com.bumptech.glide.gifdecoder.GifHeaderParser}.

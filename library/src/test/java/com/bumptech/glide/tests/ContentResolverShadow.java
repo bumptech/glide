@@ -3,13 +3,11 @@ package com.bumptech.glide.tests;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
-
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
 
 @Implements(ContentResolver.class)
 public class ContentResolverShadow {

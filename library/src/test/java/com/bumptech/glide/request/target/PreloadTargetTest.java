@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.Request;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -4,7 +4,6 @@ import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
 
 import com.bumptech.glide.load.engine.Resource;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

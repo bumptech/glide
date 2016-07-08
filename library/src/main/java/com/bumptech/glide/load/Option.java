@@ -1,9 +1,7 @@
 package com.bumptech.glide.load;
 
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.util.Preconditions;
-
 import java.security.MessageDigest;
 
 /**

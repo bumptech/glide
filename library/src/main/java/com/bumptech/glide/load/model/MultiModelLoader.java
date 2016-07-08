@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.model;
 
 import android.support.v4.util.Pools.Pool;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
@@ -10,7 +9,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcher.DataCallback;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

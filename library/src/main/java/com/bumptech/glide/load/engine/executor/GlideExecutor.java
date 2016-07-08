@@ -4,7 +4,6 @@ import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.concurrent.BlockingQueue;

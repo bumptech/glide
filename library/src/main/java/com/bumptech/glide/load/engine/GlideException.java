@@ -3,10 +3,8 @@ package com.bumptech.glide.load.engine;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;

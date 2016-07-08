@@ -18,7 +18,6 @@ package com.bumptech.glide.load.resource.bitmap;
  */
 
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;

@@ -7,10 +7,8 @@ import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageTyp
 import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.UNKNOWN;
 
 import android.util.Log;
-
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.util.Preconditions;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;

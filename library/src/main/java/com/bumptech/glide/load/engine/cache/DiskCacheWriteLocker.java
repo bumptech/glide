@@ -2,7 +2,6 @@ package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;

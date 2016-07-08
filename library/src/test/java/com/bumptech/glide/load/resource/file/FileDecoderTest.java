@@ -4,14 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
-
+import java.io.File;
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.io.File;
-import java.io.IOException;
 
 @RunWith(JUnit4.class)
 public class FileDecoderTest {

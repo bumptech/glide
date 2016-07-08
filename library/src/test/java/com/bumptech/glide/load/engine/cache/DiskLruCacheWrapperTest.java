@@ -6,17 +6,15 @@ import static org.junit.Assert.fail;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.Util;
-
+import java.io.File;
+import java.io.IOException;
+import java.security.MessageDigest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.io.File;
-import java.io.IOException;
-import java.security.MessageDigest;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)

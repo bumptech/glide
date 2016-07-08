@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.request.Request;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -2,7 +2,6 @@ package com.bumptech.glide.util;
 
 import android.text.TextUtils;
 import android.util.Log;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;

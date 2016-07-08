@@ -3,7 +3,6 @@ package com.bumptech.glide.load.model;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.testing.EqualsTester;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

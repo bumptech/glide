@@ -1,7 +1,6 @@
 package com.bumptech.glide.integration.volley;
 
 import android.util.Log;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -13,7 +12,6 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;

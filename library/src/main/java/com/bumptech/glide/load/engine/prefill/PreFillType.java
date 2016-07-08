@@ -2,7 +2,6 @@ package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.util.Preconditions;
 
 /**

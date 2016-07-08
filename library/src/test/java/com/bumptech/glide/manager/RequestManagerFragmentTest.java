@@ -11,9 +11,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
-
 import com.bumptech.glide.RequestManager;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

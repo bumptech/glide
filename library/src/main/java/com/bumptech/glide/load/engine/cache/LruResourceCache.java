@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
 import android.annotation.SuppressLint;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LruCache;

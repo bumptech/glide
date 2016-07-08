@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.graphics.Bitmap;
-
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;

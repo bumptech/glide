@@ -6,9 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-
 import com.bumptech.glide.RequestManager;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

@@ -1,11 +1,9 @@
 package com.bumptech.glide.samples.giphy;
 
-import com.google.gson.Gson;
-
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

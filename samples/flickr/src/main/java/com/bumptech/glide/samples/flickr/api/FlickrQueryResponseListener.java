@@ -2,11 +2,9 @@ package com.bumptech.glide.samples.flickr.api;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-
-import org.json.JSONException;
-
 import java.util.Collection;
 import java.util.List;
+import org.json.JSONException;
 
 /**
  * Handles photo list responses and errors from Flickr API calls.

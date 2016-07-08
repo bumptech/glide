@@ -4,13 +4,11 @@ import android.content.ContentResolver;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorAssetPathFetcher;
 import com.bumptech.glide.load.data.StreamAssetPathFetcher;
 import com.bumptech.glide.signature.ObjectKey;
-
 import java.io.InputStream;
 
 /**

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-
 import com.bumptech.glide.load.DataSource;
 
 /**

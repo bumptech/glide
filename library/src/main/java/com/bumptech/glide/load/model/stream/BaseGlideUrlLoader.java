@@ -2,14 +2,12 @@ package com.bumptech.glide.load.model.stream;
 
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;

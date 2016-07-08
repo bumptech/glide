@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.model;
 
 import android.text.TextUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

@@ -1,13 +1,11 @@
 package com.bumptech.glide.load.engine.cache;
 
 import android.support.v4.util.Pools;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.LruCache;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 

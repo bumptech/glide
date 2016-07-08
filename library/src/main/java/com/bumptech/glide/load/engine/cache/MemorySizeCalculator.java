@@ -7,7 +7,6 @@ import android.os.Build;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
-
 import com.bumptech.glide.util.Preconditions;
 
 /**

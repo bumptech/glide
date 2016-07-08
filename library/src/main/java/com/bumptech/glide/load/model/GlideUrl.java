@@ -3,10 +3,8 @@ package com.bumptech.glide.load.model;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
