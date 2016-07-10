@@ -81,7 +81,7 @@ public class StandardGifDecoder implements GifDecoder {
 
   private static final int INITIAL_FRAME_POINTER = -1;
 
-  private static final int BYTES_PER_INTEGER = 4;
+  private static final int BYTES_PER_INTEGER = Integer.SIZE / 8;
 
   // Global File Header values and parsing flags.
   // Active color table.
@@ -349,14 +349,13 @@ public class StandardGifDecoder implements GifDecoder {
     }
 
     this.sampleSize = sampleSize;
+    downsampledWidth = header.width / sampleSize;
+    downsampledHeight = header.height / sampleSize;
     // Now that we know the size, init scratch arrays.
     // TODO: Find a way to avoid this entirely or at least downsample it
     // (either should be possible).
     mainPixels = bitmapProvider.obtainByteArray(header.width * header.height);
-    mainScratch =
-        bitmapProvider.obtainIntArray((header.width / sampleSize) * (header.height / sampleSize));
-    downsampledWidth = header.width / sampleSize;
-    downsampledHeight = header.height / sampleSize;
+    mainScratch = bitmapProvider.obtainIntArray(downsampledWidth * downsampledHeight);
   }
 
   private GifHeaderParser getHeaderParser() {
