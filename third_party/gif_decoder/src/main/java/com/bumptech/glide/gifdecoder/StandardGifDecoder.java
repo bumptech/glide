@@ -407,7 +407,19 @@ public class StandardGifDecoder implements GifDecoder {
           // drawing a transparent background means the GIF contains transparency.
           isFirstFrameTransparent = true;
         }
-        Arrays.fill(dest, c);
+        // The area used by the graphic must be restored to the background color.
+        int downsampledIH = previousFrame.ih / sampleSize;
+        int downsampledIY = previousFrame.iy / sampleSize;
+        int downsampledIW = previousFrame.iw / sampleSize;
+        int downsampledIX = previousFrame.ix / sampleSize;
+        int topLeft = downsampledIY * downsampledWidth + downsampledIX;
+        int bottomLeft = topLeft + downsampledIH * downsampledWidth;
+        for (int left = topLeft; left < bottomLeft; left += downsampledWidth) {
+          int right = left + downsampledIW;
+          for (int pointer = left; pointer < right; pointer++) {
+            dest[pointer] = c;
+          }
+        }
       } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {
         // Start with the previous frame
         previousImage.getPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth,
