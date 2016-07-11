@@ -175,11 +175,11 @@ public class Api {
     queryListeners.add(queryListener);
   }
 
-  public void registerSearchListener(QueryListener queryListener) {
+  public void registerQueryListener(QueryListener queryListener) {
     queryListeners.add(queryListener);
   }
 
-  public void unregisterSearchListener(QueryListener queryListener) {
+  public void unregisterQueryListener(QueryListener queryListener) {
     queryListeners.remove(queryListener);
   }
 
