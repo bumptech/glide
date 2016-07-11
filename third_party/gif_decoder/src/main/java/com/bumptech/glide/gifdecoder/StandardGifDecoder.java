@@ -81,11 +81,14 @@ public class StandardGifDecoder implements GifDecoder {
 
   private static final int INITIAL_FRAME_POINTER = -1;
 
-  private static final int BYTES_PER_INTEGER = 4;
+  private static final int BYTES_PER_INTEGER = Integer.SIZE / 8;
 
   // Global File Header values and parsing flags.
   // Active color table.
+  // Maximum size is 256, see GifHeaderParser.readColorTable
   private int[] act;
+  // Private color table that can be modified if needed
+  private final int[] pct = new int[256];
 
   // Raw GIF data from input source.
   private ByteBuffer rawData;
@@ -230,24 +233,8 @@ public class StandardGifDecoder implements GifDecoder {
       previousFrame = header.frames.get(previousIndex);
     }
 
-    final int savedBgColor = header.bgColor;
-
     // Set the appropriate color table.
-    if (currentFrame.lct == null) {
-      act = header.gct;
-    } else {
-      act = currentFrame.lct;
-      if (header.bgIndex == currentFrame.transIndex) {
-        header.bgColor = 0;
-      }
-    }
-
-    int save = 0;
-    if (currentFrame.transparency) {
-      save = act[currentFrame.transIndex];
-      // Set transparent color if specified.
-      act[currentFrame.transIndex] = 0;
-    }
+    act = currentFrame.lct != null ? currentFrame.lct : header.gct;
     if (act == null) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "No Valid Color Table");
@@ -257,16 +244,18 @@ public class StandardGifDecoder implements GifDecoder {
       return null;
     }
 
-    // Transfer pixel data to image.
-    Bitmap result = setPixels(currentFrame, previousFrame);
-
     // Reset the transparent pixel in the color table
     if (currentFrame.transparency) {
-      act[currentFrame.transIndex] = save;
+      // Prepare local copy of color table ("pct = act"), see #1068
+      System.arraycopy(act, 0, pct, 0, act.length);
+      // Forget about act reference from shared header object, use copied version
+      act = pct;
+      // Set transparent color if specified.
+      act[currentFrame.transIndex] = 0;
     }
-    header.bgColor = savedBgColor;
 
-    return result;
+    // Transfer pixel data to image.
+    return setPixels(currentFrame, previousFrame);
   }
 
   @Override
@@ -360,14 +349,13 @@ public class StandardGifDecoder implements GifDecoder {
     }
 
     this.sampleSize = sampleSize;
+    downsampledWidth = header.width / sampleSize;
+    downsampledHeight = header.height / sampleSize;
     // Now that we know the size, init scratch arrays.
     // TODO: Find a way to avoid this entirely or at least downsample it
     // (either should be possible).
     mainPixels = bitmapProvider.obtainByteArray(header.width * header.height);
-    mainScratch =
-        bitmapProvider.obtainIntArray((header.width / sampleSize) * (header.height / sampleSize));
-    downsampledWidth = header.width / sampleSize;
-    downsampledHeight = header.height / sampleSize;
+    mainScratch = bitmapProvider.obtainIntArray(downsampledWidth * downsampledHeight);
   }
 
   private GifHeaderParser getHeaderParser() {
@@ -409,13 +397,28 @@ public class StandardGifDecoder implements GifDecoder {
         int c = 0;
         if (!currentFrame.transparency) {
           c = header.bgColor;
+          if (currentFrame.lct != null && header.bgIndex == currentFrame.transIndex) {
+            c = 0;
+          }
         } else if (framePointer == 0) {
           // TODO: We should check and see if all individual pixels are replaced. If they are, the
           // first frame isn't actually transparent. For now, it's simpler and safer to assume
           // drawing a transparent background means the GIF contains transparency.
           isFirstFrameTransparent = true;
         }
-        Arrays.fill(dest, c);
+        // The area used by the graphic must be restored to the background color.
+        int downsampledIH = previousFrame.ih / sampleSize;
+        int downsampledIY = previousFrame.iy / sampleSize;
+        int downsampledIW = previousFrame.iw / sampleSize;
+        int downsampledIX = previousFrame.ix / sampleSize;
+        int topLeft = downsampledIY * downsampledWidth + downsampledIX;
+        int bottomLeft = topLeft + downsampledIH * downsampledWidth;
+        for (int left = topLeft; left < bottomLeft; left += downsampledWidth) {
+          int right = left + downsampledIW;
+          for (int pointer = left; pointer < right; pointer++) {
+            dest[pointer] = c;
+          }
+        }
       } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {
         // Start with the previous frame
         previousImage.getPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth,
