@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 
 import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
+import com.bumptech.glide.request.transition.TransitionFactory;
 
 /**
  * Contains {@link Drawable} specific animation options.
@@ -14,7 +15,7 @@ public final class DrawableTransitionOptions extends
   /**
    * Returns a {@link DrawableTransitionOptions} object that enables a cross fade animation.
    *
-   * @see #crossFade().
+   * @see #crossFade()
    */
   public static DrawableTransitionOptions withCrossFade() {
     return new DrawableTransitionOptions().crossFade();
@@ -23,7 +24,7 @@ public final class DrawableTransitionOptions extends
   /**
    * Returns a {@link DrawableTransitionOptions} object that enables a cross fade animation.
    *
-   * @see #crossFade(int).
+   * @see #crossFade(int)
    */
   public static DrawableTransitionOptions withCrossFade(int duration) {
     return new DrawableTransitionOptions().crossFade(duration);
@@ -32,7 +33,7 @@ public final class DrawableTransitionOptions extends
   /**
    * Returns a {@link DrawableTransitionOptions} object that enables a cross fade animation.
    *
-   * @see #crossFade(int, int).
+   * @see #crossFade(int, int)
    */
   public static DrawableTransitionOptions withCrossFade(int animationId, int duration) {
     return new DrawableTransitionOptions().crossFade(animationId, duration);
@@ -41,7 +42,7 @@ public final class DrawableTransitionOptions extends
   /**
    * Returns a {@link DrawableTransitionOptions} object that enables a cross fade animation.
    *
-   * @see #crossFade(DrawableCrossFadeFactory).
+   * @see #crossFade(DrawableCrossFadeFactory)
    */
   public static DrawableTransitionOptions withCrossFade(
       DrawableCrossFadeFactory drawableCrossFadeFactory) {
@@ -51,11 +52,21 @@ public final class DrawableTransitionOptions extends
   /**
    * Returns a {@link DrawableTransitionOptions} object that enables a cross fade animation.
    *
-   * @see #crossFade(DrawableCrossFadeFactory.Builder).
+   * @see #crossFade(DrawableCrossFadeFactory.Builder)
    */
   public static DrawableTransitionOptions withCrossFade(
       DrawableCrossFadeFactory.Builder builder) {
     return new DrawableTransitionOptions().crossFade(builder);
+  }
+
+  /**
+   * Returns a {@link DrawableTransitionOptions} object that uses the given transition factory.
+   *
+   * @see com.bumptech.glide.GenericTransitionOptions#with(TransitionFactory)
+   */
+  public static DrawableTransitionOptions with(
+      TransitionFactory<Drawable> transitionFactory) {
+    return new DrawableTransitionOptions().transition(transitionFactory);
   }
 
   /**
@@ -84,7 +95,7 @@ public final class DrawableTransitionOptions extends
    * @param animationId The id of the animation to use if no placeholder or previous resource is
    *     set, see {@link com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder
    *     #setDefaultAnimationId(int)}.
-   * @param duration The duration of the animation, see
+   * @param duration The duration of the cross fade, see
    *     {@link com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder(int)}
    */
   public DrawableTransitionOptions crossFade(int animationId, int duration) {
