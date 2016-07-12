@@ -228,4 +228,15 @@ public class EngineRunnableTest {
 
         verify(resource).recycle();
     }
+
+    @Test
+    public void testNotifiesManagerOfFailureIfJobThrowsOOMDecodingFromSource() throws Exception {
+        runnable.run();
+
+        OutOfMemoryError expected = new OutOfMemoryError("test");
+        when(job.decodeFromSource()).thenThrow(expected);
+        runnable.run();
+
+        verify(manager).onException(any(ErrorWrappingGlideException.class));
+    }
 }
