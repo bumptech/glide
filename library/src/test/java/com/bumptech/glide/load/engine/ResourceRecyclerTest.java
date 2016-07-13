@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -29,7 +29,7 @@ public class ResourceRecyclerTest {
 
   @Test
   public void testRecyclesResourceSynchronouslyIfNotAlreadyRecyclingResource() {
-    Resource resource = mock(Resource.class);
+    Resource<?> resource = mockResource();
     Shadows.shadowOf(Looper.getMainLooper()).pause();
     recycler.recycle(resource);
     verify(resource).recycle();
@@ -37,11 +37,11 @@ public class ResourceRecyclerTest {
 
   @Test
   public void testDoesNotRecycleChildResourceSynchronously() {
-    Resource parent = mock(Resource.class);
-    final Resource child = mock(Resource.class);
-    doAnswer(new Answer() {
+    Resource<?> parent = mockResource();
+    final Resource<?> child = mockResource();
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         recycler.recycle(child);
         return null;
       }

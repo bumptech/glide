@@ -179,7 +179,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   private void preloadItem(T item, int position, int i) {
     final int[] dimensions = this.preloadDimensionProvider.getPreloadSize(item, position, i);
     if (dimensions != null) {
-      RequestBuilder preloadRequestBuilder =
+      RequestBuilder<Object> preloadRequestBuilder =
           this.preloadModelProvider.getPreloadRequestBuilder(item);
       preloadRequestBuilder.into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
     }

@@ -52,7 +52,7 @@ public class ByteArrayLoaderTest {
   }
 
   @Test
-  public void testFetcherRetrunsDataClassFromConverter() {
+  public void testFetcherReturnsDataClassFromConverter() {
     when(converter.getDataClass()).thenReturn(Object.class);
     assertEquals(Object.class,
         loader.buildLoadData(new byte[10], 10, 10, options).fetcher.getDataClass());

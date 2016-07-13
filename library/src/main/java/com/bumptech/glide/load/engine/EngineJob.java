@@ -284,7 +284,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
     @Override
     public boolean handleMessage(Message message) {
-      EngineJob job = (EngineJob) message.obj;
+      EngineJob<?> job = (EngineJob<?>) message.obj;
       switch (message.what) {
         case MSG_COMPLETE:
           job.handleResultOnMainThread();

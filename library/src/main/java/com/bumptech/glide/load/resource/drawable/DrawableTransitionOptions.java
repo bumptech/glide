@@ -82,7 +82,8 @@ public final class DrawableTransitionOptions extends
    * subsequent resources (if thumbnails are used).
    *
    * @param duration The duration of the animation, see
-   *     {@link com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder(int)}
+   *     {@code DrawableCrossFadeFactory.Builder(int)}
+   * @see com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder
    */
   public DrawableTransitionOptions crossFade(int duration) {
     return crossFade(new DrawableCrossFadeFactory.Builder(duration));
@@ -93,10 +94,10 @@ public final class DrawableTransitionOptions extends
    * subsequent resources (if thumbnails are used).
    *
    * @param animationId The id of the animation to use if no placeholder or previous resource is
-   *     set, see {@link com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder
-   *     #setDefaultAnimationId(int)}.
+   *     set, see {@code DrawableCrossFadeFactory.Builder#setDefaultAnimationId(int)}.
    * @param duration The duration of the cross fade, see
-   *     {@link com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder(int)}
+   *     {@code DrawableCrossFadeFactory.Builder(int)}
+   * @see com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder
    */
   public DrawableTransitionOptions crossFade(int animationId, int duration) {
     return crossFade(

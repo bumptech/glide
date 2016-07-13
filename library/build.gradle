@@ -34,7 +34,10 @@ dependencies {
 android.testOptions.unitTests.all {
     // configure max heap size of the test JVM
     maxHeapSize = '2048m'
-    jvmArgs '-XX:MaxPermSize=2048m'
+    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
+        // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
+        jvmArgs '-XX:MaxPermSize=2048m'
+    }
 }
 
 android {

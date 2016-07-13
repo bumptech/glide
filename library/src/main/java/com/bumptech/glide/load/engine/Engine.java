@@ -33,7 +33,7 @@ public class Engine implements EngineJobListener,
     EngineResource.ResourceListener {
   private static final String TAG = "Engine";
   private static final int JOB_POOL_SIZE = 150;
-  private final Map<Key, EngineJob> jobs;
+  private final Map<Key, EngineJob<?>> jobs;
   private final EngineKeyFactory keyFactory;
   private final MemoryCache cache;
   private final EngineJobFactory engineJobFactory;
@@ -50,10 +50,10 @@ public class Engine implements EngineJobListener,
    * Allows a request to indicate it no longer is interested in a given load.
    */
   public static class LoadStatus {
-    private final EngineJob engineJob;
+    private final EngineJob<?> engineJob;
     private final ResourceCallback cb;
 
-    public LoadStatus(ResourceCallback cb, EngineJob engineJob) {
+    public LoadStatus(ResourceCallback cb, EngineJob<?> engineJob) {
       this.cb = cb;
       this.engineJob = engineJob;
     }
@@ -63,18 +63,26 @@ public class Engine implements EngineJobListener,
     }
   }
 
-  public Engine(MemoryCache memoryCache, DiskCache.Factory diskCacheFactory,
-      GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
+  public Engine(MemoryCache memoryCache,
+      DiskCache.Factory diskCacheFactory,
+      GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor) {
     this(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor,
         null, null, null, null, null, null);
   }
 
   // Visible for testing.
-  Engine(MemoryCache cache, DiskCache.Factory diskCacheFactory, GlideExecutor diskCacheExecutor,
-      GlideExecutor sourceExecutor, GlideExecutor sourceUnlimitedExecutor, Map<Key, EngineJob> jobs,
-      EngineKeyFactory keyFactory, Map<Key, WeakReference<EngineResource<?>>> activeResources,
-      EngineJobFactory engineJobFactory, DecodeJobFactory decodeJobFactory,
+  Engine(MemoryCache cache,
+      DiskCache.Factory diskCacheFactory,
+      GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor,
+      GlideExecutor sourceUnlimitedExecutor,
+      Map<Key, EngineJob<?>> jobs,
+      EngineKeyFactory keyFactory,
+      Map<Key, WeakReference<EngineResource<?>>> activeResources,
+      EngineJobFactory engineJobFactory,
+      DecodeJobFactory decodeJobFactory,
       ResourceRecycler resourceRecycler) {
     this.cache = cache;
     this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
@@ -172,7 +180,7 @@ public class Engine implements EngineJobListener,
       return null;
     }
 
-    EngineJob current = jobs.get(key);
+    EngineJob<?> current = jobs.get(key);
     if (current != null) {
       current.addCallback(cb);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -248,22 +256,22 @@ public class Engine implements EngineJobListener,
   private EngineResource<?> getEngineResourceFromCache(Key key) {
     Resource<?> cached = cache.remove(key);
 
-    final EngineResource result;
+    final EngineResource<?> result;
     if (cached == null) {
       result = null;
     } else if (cached instanceof EngineResource) {
       // Save an object allocation if we've cached an EngineResource (the typical case).
-      result = (EngineResource) cached;
+      result = (EngineResource<?>) cached;
     } else {
-      result = new EngineResource(cached, true /*isMemoryCacheable*/);
+      result = new EngineResource<>(cached, true /*isMemoryCacheable*/);
     }
     return result;
   }
 
-  public void release(Resource resource) {
+  public void release(Resource<?> resource) {
     Util.assertMainThread();
     if (resource instanceof EngineResource) {
-      ((EngineResource) resource).release();
+      ((EngineResource<?>) resource).release();
     } else {
       throw new IllegalArgumentException("Cannot release anything but an EngineResource");
     }
@@ -288,7 +296,7 @@ public class Engine implements EngineJobListener,
   @Override
   public void onEngineJobCancelled(EngineJob engineJob, Key key) {
     Util.assertMainThread();
-    EngineJob current = jobs.get(key);
+    EngineJob<?> current = jobs.get(key);
     if (engineJob.equals(current)) {
       jobs.remove(key);
     }

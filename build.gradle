@@ -65,9 +65,7 @@ subprojects { project ->
 
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
-            if (!name.contains('Test')) {
-                options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-            }
+            options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
         }
     }
 }

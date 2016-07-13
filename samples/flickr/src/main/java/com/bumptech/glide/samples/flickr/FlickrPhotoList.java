@@ -176,7 +176,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     }
 
     @Override
-    public RequestBuilder getPreloadRequestBuilder(Photo item) {
+    public RequestBuilder<Drawable> getPreloadRequestBuilder(Photo item) {
       return fullRequest.thumbnail(thumbRequest.load(item)).load(item);
     }
   }

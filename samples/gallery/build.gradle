@@ -11,14 +11,14 @@ dependencies {
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.gallery'
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
-        versionName "1.0"
+        versionName '1.0'
     }
 
     compileOptions {

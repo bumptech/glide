@@ -29,8 +29,8 @@ public final class LruArrayPool implements ArrayPool {
 
   private final GroupedLinkedMap<Key, Object> groupedMap = new GroupedLinkedMap<>();
   private final KeyPool keyPool = new KeyPool();
-  private final Map<Class, NavigableMap<Integer, Integer>> sortedSizes = new HashMap<>();
-  private final Map<Class, ArrayAdapterInterface> adapters = new HashMap<>();
+  private final Map<Class<?>, NavigableMap<Integer, Integer>> sortedSizes = new HashMap<>();
+  private final Map<Class<?>, ArrayAdapterInterface<?>> adapters = new HashMap<>();
   private final int maxSize;
   private int currentSize;
 
@@ -177,7 +177,7 @@ public final class LruArrayPool implements ArrayPool {
 
   @SuppressWarnings("unchecked")
   private <T> ArrayAdapterInterface<T> getAdapterFromType(Class<T> arrayPoolClass) {
-    ArrayAdapterInterface adapter = adapters.get(arrayPoolClass);
+    ArrayAdapterInterface<?> adapter = adapters.get(arrayPoolClass);
     if (adapter == null) {
       if (arrayPoolClass.equals(int[].class)) {
         adapter = new IntegerArrayAdapter();
@@ -189,7 +189,7 @@ public final class LruArrayPool implements ArrayPool {
       }
       adapters.put(arrayPoolClass, adapter);
     }
-    return adapter;
+    return (ArrayAdapterInterface<T>) adapter;
   }
 
   // VisibleForTesting
@@ -206,7 +206,7 @@ public final class LruArrayPool implements ArrayPool {
 
   private static final class KeyPool extends BaseKeyPool<Key> {
 
-    Key get(int size, Class arrayClass) {
+    Key get(int size, Class<?> arrayClass) {
       Key result = get();
       result.init(size, arrayClass);
       return result;
@@ -221,13 +221,13 @@ public final class LruArrayPool implements ArrayPool {
   private static final class Key implements Poolable {
     private final KeyPool pool;
     private int size;
-    private Class arrayClass;
+    private Class<?> arrayClass;
 
     Key(KeyPool pool) {
       this.pool = pool;
     }
 
-    void init(int length, Class arrayClass) {
+    void init(int length, Class<?> arrayClass) {
       this.size = length;
       this.arrayClass = arrayClass;
     }

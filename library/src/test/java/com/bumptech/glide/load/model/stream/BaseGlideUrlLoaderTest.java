@@ -101,9 +101,9 @@ public class BaseGlideUrlLoaderTest {
     int width = 400;
     int height = 500;
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[3];
         assertEquals(urlLoader.resultUrl, glideUrl.toStringUrl());
         return null;

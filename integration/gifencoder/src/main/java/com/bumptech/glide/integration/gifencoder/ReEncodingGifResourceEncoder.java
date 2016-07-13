@@ -116,7 +116,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
     }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Re-encoded gif with " + drawable.getFrameCount() + " frames and "
+      Log.v(TAG, "Re-encoded GIF with " + drawable.getFrameCount() + " frames and "
           + drawable.getBuffer().limit() + " bytes in " + LogTime.getElapsedMillis(startTime)
           + " ms");
     }
@@ -158,7 +158,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
       ByteBufferUtil.toFile(data, file);
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Failed to write gif data", e);
+        Log.w(TAG, "Failed to write GIF data", e);
       }
       return false;
     }

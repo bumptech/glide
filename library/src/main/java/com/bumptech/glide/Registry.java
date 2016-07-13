@@ -231,7 +231,7 @@ public class Registry {
       super("Failed to find any ModelLoaders for model: " + model);
     }
 
-    public NoModelLoaderAvailableException(Class modelClass, Class dataClass) {
+    public NoModelLoaderAvailableException(Class<?> modelClass, Class<?> dataClass) {
       super("Failed to find any ModelLoaders for model: " + modelClass + " and data: " + dataClass);
     }
   }

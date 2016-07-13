@@ -145,7 +145,7 @@ public class MainActivity extends Activity implements Api.Monitor {
     }
 
     @Override
-    public RequestBuilder getPreloadRequestBuilder(Api.GifResult item) {
+    public RequestBuilder<Drawable> getPreloadRequestBuilder(Api.GifResult item) {
       return requestBuilder.load(item);
     }
   }

@@ -75,6 +75,7 @@ public class ReEncodingGifResourceEncoderTest {
     when(factory.buildFrameResource(any(Bitmap.class), any(BitmapPool.class)))
         .thenReturn(frameResource);
 
+    // TODO Util.anyResource once Util is moved to testutil module (remove unchecked above!)
     when(frameTransformation.transform(any(Resource.class), anyInt(), anyInt()))
         .thenReturn(frameResource);
 

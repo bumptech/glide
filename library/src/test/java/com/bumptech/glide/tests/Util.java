@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
+import static org.mockito.Mockito.mock;
 
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -12,6 +13,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.Resource;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.util.ReflectionHelpers;
@@ -27,16 +29,40 @@ import java.security.MessageDigest;
 // FIXME move to testutil module
 public class Util {
 
-  public static String getExpectedClassId(Class clazz) {
+  public static String getExpectedClassId(Class<?> clazz) {
     return clazz.getSimpleName() + "." + clazz.getPackage().getName();
+  }
+
+  /**
+   * Gives the proper generic type to the {@link ArgumentCaptor}.
+   * Only useful when the captor's {@code T} is also a generic type.
+   * Without this it's really ugly to have a properly typed captor object.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> ArgumentCaptor<T> cast(ArgumentCaptor<?> captor) {
+    return (ArgumentCaptor<T>) captor;
   }
 
   public static DataSource isADataSource() {
     return isA(DataSource.class);
   }
 
-  public static Resource<?> anyResource() {
+  /**
+   * Creates a Mockito argument matcher to be used in verify.
+   * It returns a generic typed {@link Resource} to prevent unchecked warnings.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Resource<T> anyResource() {
     return any(Resource.class);
+  }
+
+  /**
+   * Creates a Mockito mock object.
+   * It returns a generic typed {@link Resource} to prevent unchecked warnings.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Resource<T> mockResource() {
+    return mock(Resource.class);
   }
 
   public static boolean isWindows() {

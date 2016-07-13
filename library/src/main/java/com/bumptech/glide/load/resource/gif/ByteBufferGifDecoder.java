@@ -115,7 +115,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
             firstFrame);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Decoded gif from stream in " + LogTime.getElapsedMillis(startTime));
+      Log.v(TAG, "Decoded GIF from stream in " + LogTime.getElapsedMillis(startTime));
     }
 
     return new GifDrawableResource(gifDrawable);
@@ -129,7 +129,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
     // than 0.
     int sampleSize = Math.max(1, powerOfTwoSampleSize);
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Downsampling gif"
+      Log.v(TAG, "Downsampling GIF"
           + ", sampleSize: " + sampleSize
           + ", target dimens: [" + targetWidth + "x" + targetHeight + "]"
           + ", actual dimens: [" + gifHeader.getWidth() + "x" + gifHeader.getHeight() + "]");

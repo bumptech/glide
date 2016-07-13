@@ -60,11 +60,11 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    */
   private boolean isVisible = true;
   /**
-   * The number of times we've looped over all the frames in the gif.
+   * The number of times we've looped over all the frames in the GIF.
    */
   private int loopCount;
   /**
-   * The number of times to loop through the gif animation.
+   * The number of times to loop through the GIF animation.
    */
   private int maxLoopCount = LOOP_FOREVER;
 
@@ -89,8 +89,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    *                            height of the view or
    *                            {@link com.bumptech.glide.request.target.Target}
    *                            this drawable is being loaded into).
-   * @param gifDecoder          The decoder to use to decode gif data.
-   * @param firstFrame          The decoded and transformed first frame of this gif.
+   * @param gifDecoder          The decoder to use to decode GIF data.
+   * @param firstFrame          The decoded and transformed first frame of this GIF.
    * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
    */
   public GifDrawable(Context context, GifDecoder gifDecoder, BitmapPool bitmapPool,

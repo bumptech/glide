@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import static com.bumptech.glide.load.engine.cache.MemoryCache.ResourceRemovedListener;
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
@@ -9,7 +10,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
+import android.os.Build;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
@@ -21,11 +24,12 @@ import org.junit.runners.JUnit4;
 import java.security.MessageDigest;
 
 @RunWith(JUnit4.class)
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class LruResourceCacheTest {
   private static class TrimClearMemoryCacheHarness {
     LruResourceCache resourceCache = new LruResourceCache(100);
-    Resource first = mock(Resource.class);
-    Resource second = mock(Resource.class);
+    Resource<?> first = mockResource();
+    Resource<?> second = mockResource();
 
     ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
 
@@ -71,7 +75,7 @@ public class LruResourceCacheTest {
   @Test
   public void testResourceRemovedListenerIsNotifiedWhenResourceIsRemoved() {
     LruResourceCache resourceCache = new LruResourceCache(100);
-    Resource resource = mock(Resource.class);
+    Resource<?> resource = mockResource();
     when(resource.getSize()).thenReturn(200);
 
     ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
@@ -85,17 +89,17 @@ public class LruResourceCacheTest {
   @Test
   public void testSizeIsBasedOnResource() {
     LruResourceCache resourceCache = new LruResourceCache(100);
-    Resource first = getResource(50);
+    Resource<?> first = getResource(50);
     MockKey firstKey = new MockKey();
     resourceCache.put(firstKey, first);
-    Resource second = getResource(50);
+    Resource<?> second = getResource(50);
     MockKey secondKey = new MockKey();
     resourceCache.put(secondKey, second);
 
     assertTrue(resourceCache.contains(firstKey));
     assertTrue(resourceCache.contains(secondKey));
 
-    Resource third = getResource(50);
+    Resource<?> third = getResource(50);
     MockKey thirdKey = new MockKey();
     resourceCache.put(thirdKey, third);
 
@@ -104,8 +108,8 @@ public class LruResourceCacheTest {
     assertTrue(resourceCache.contains(thirdKey));
   }
 
-  private Resource getResource(int size) {
-    Resource resource = mock(Resource.class);
+  private Resource<?> getResource(int size) {
+    Resource<?> resource = mockResource();
     when(resource.getSize()).thenReturn(size);
     return resource;
   }

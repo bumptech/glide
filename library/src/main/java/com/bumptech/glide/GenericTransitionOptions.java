@@ -11,8 +11,7 @@ import com.bumptech.glide.request.transition.ViewPropertyTransition;
  */
 @SuppressWarnings("PMD.UseUtilityClass")
 public final class GenericTransitionOptions<TranscodeType> extends
-  TransitionOptions<GenericTransitionOptions<TranscodeType>, TranscodeType> {
-
+    TransitionOptions<GenericTransitionOptions<TranscodeType>, TranscodeType> {
   /**
    * Removes any existing animation put on the builder.
    *

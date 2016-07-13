@@ -27,7 +27,8 @@ public class TranscoderRegistryTest {
 
   @Test
   public void testCanRegisterAndRetrieveResourceTranscoder() {
-    ResourceTranscoder transcoder = mock(ResourceTranscoder.class);
+    @SuppressWarnings("unchecked")
+    ResourceTranscoder<File, String> transcoder = mock(ResourceTranscoder.class);
     factories.register(File.class, String.class, transcoder);
 
     assertEquals(transcoder, factories.get(File.class, String.class));

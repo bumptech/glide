@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.transcode;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,7 +32,7 @@ public class BitmapDrawableTranscoderTest {
   @Test
   public void testReturnsBitmapDrawableResourceContainingGivenBitmap() {
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    Resource<Bitmap> resource = mock(Resource.class);
+    Resource<Bitmap> resource = mockResource();
     when(resource.get()).thenReturn(expected);
 
     Resource<BitmapDrawable> transcoded = transcoder.transcode(resource);

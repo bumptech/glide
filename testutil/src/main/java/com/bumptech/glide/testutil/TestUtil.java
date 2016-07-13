@@ -14,7 +14,7 @@ public final class TestUtil {
     // Utility class.
   }
 
-  public static byte[] resourceToBytes(Class testClass, String resourceName) throws IOException {
+  public static byte[] resourceToBytes(Class<?> testClass, String resourceName) throws IOException {
     return isToBytes(TestResourceUtil.openResource(testClass, resourceName));
   }
 
@@ -33,7 +33,7 @@ public final class TestUtil {
   }
 
   public static String isToString(InputStream is) throws IOException {
-    return new String(isToBytes(is));
+    return new String(isToBytes(is), "utf-8");
   }
 
   public static void assertStreamOf(String expected, InputStream result) throws IOException {

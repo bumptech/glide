@@ -50,9 +50,9 @@ Or Maven:
 
 For info on using the bleeding edge, see the [Snapshots][17] wiki page.
 
-Proguard
+ProGuard
 --------
-Depending on your proguard config and usage, you may need to include the following lines in your proguard.cfg:
+Depending on your ProGuard (DexGuard) config and usage, you may need to include the following lines in your proguard.cfg (see [Configuration wiki](https://github.com/bumptech/glide/wiki/Configuration#keeping-a-glidemodule) for more details):
 
 ```pro
 -keep public class * implements com.bumptech.glide.module.GlideModule
@@ -60,6 +60,7 @@ Depending on your proguard config and usage, you may need to include the followi
   **[] $VALUES;
   public *;
 }
+-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
 ```
 
 How do I use Glide?
@@ -98,7 +99,6 @@ Simple use cases will look something like this:
 
   return myImageView;
 }
-
 ```
 
 Status
@@ -167,7 +167,7 @@ Before submitting pull requests, contributors must sign Google's [individual con
 Thanks
 ------
 * The **Android team** and **Jake Wharton** for the [disk cache implementation][8] Glide's disk cache is based on.
-* **Dave Smith** for the [gif decoder gist][9] Glide's gif decoder is based on.
+* **Dave Smith** for the [GIF decoder gist][9] Glide's GIF decoder is based on.
 * **Chris Banes** for his [gradle-mvn-push][10] script.
 * **Corey Hall** for Glide's [amazing logo][11].
 * Everyone who has contributed code and reported issues!

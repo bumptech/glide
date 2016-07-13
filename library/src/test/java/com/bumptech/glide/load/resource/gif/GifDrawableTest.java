@@ -543,6 +543,7 @@ public class GifDrawableTest {
 
   @Test
   public void testReturnsCurrentTransformationInGetFrameTransformation() {
+    @SuppressWarnings("unchecked")
     Transformation<Bitmap> newTransformation = mock(Transformation.class);
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     drawable.setFrameTransformation(newTransformation, bitmap);

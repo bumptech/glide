@@ -17,7 +17,7 @@ public final class TestResourceUtil {
    * @param subPath   The sub-path under androidTest/resources where the desired resource is
    *                  located. Should not be prefixed with a '/'
    */
-  public static InputStream openResource(Class testClass, String subPath) {
+  public static InputStream openResource(Class<?> testClass, String subPath) {
     return testClass.getResourceAsStream("/" + subPath);
   }
 }

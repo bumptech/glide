@@ -15,10 +15,10 @@ android {
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.giphy'
-        minSdkVersion 14
+        minSdkVersion 14 // TODO uses Holo.Light.DarkActionBar theme
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
-        versionName '1.0.0'
+        versionName '1.0'
     }
 
     compileOptions {

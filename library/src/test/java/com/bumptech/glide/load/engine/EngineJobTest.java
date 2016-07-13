@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.isADataSource;
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -109,7 +110,7 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
     ShadowLooper.runUiThreadTasks();
-    verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
+    verify(harness.listener).onEngineJobComplete(eq(harness.key), isNull(EngineResource.class));
   }
 
   @Test
@@ -180,7 +181,7 @@ public class EngineJobTest {
   @SuppressWarnings("unchecked")
   @Test
   public void removingSomeCallbacksDoesNotCancelRunner() {
-    EngineJob job = harness.getJob();
+    EngineJob<Object> job = harness.getJob();
     job.addCallback(mock(ResourceCallback.class));
     job.removeCallback(harness.cb);
 
@@ -222,7 +223,7 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
 
-    verify(harness.listener).onEngineJobComplete(eq(harness.key), (EngineResource) isNull());
+    verify(harness.listener).onEngineJobComplete(eq(harness.key), isNull(EngineResource.class));
     verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
   }
 
@@ -256,9 +257,9 @@ public class EngineJobTest {
     final ResourceCallback existingCallback = mock(ResourceCallback.class);
     final ResourceCallback newCallback = mock(ResourceCallback.class);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         job.addCallback(newCallback);
         return null;
       }
@@ -274,13 +275,13 @@ public class EngineJobTest {
   @Test
   public void testNotifiesNewCallbackOfExceptionIfCallbackIsAddedDuringOnException() {
     harness = new EngineJobHarness();
-    final EngineJob job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     final ResourceCallback existingCallback = mock(ResourceCallback.class);
     final ResourceCallback newCallback = mock(ResourceCallback.class);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         job.addCallback(newCallback);
         return null;
       }
@@ -299,9 +300,9 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback cb = mock(ResourceCallback.class);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         job.removeCallback(cb);
         return null;
       }
@@ -320,9 +321,9 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback cb = mock(ResourceCallback.class);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         job.removeCallback(cb);
         return null;
       }
@@ -342,9 +343,9 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         job.removeCallback(notYetCalled);
         return null;
       }
@@ -363,9 +364,9 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         job.removeCallback(notYetCalled);
         return null;
       }
@@ -387,9 +388,9 @@ public class EngineJobTest {
     final ResourceCallback called = mock(ResourceCallback.class);
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         job.removeCallback(notYetCalled);
         return null;
       }
@@ -456,7 +457,7 @@ public class EngineJobTest {
   @SuppressWarnings("unchecked")
   private static class MultiCbHarness {
     Key key = mock(Key.class);
-    Resource<Object> resource = mock(Resource.class);
+    Resource<Object> resource = mockResource();
     EngineResource<Object> engineResource = mock(EngineResource.class);
     EngineJobListener listener = mock(EngineJobListener.class);
     boolean isCacheable = true;
@@ -491,7 +492,7 @@ public class EngineJobTest {
     Key key = mock(Key.class);
     Handler mainHandler = new Handler();
     ResourceCallback cb = mock(ResourceCallback.class);
-    Resource<Object> resource = mock(Resource.class);
+    Resource<Object> resource = mockResource();
     EngineResource<Object> engineResource = mock(EngineResource.class);
     EngineJobListener listener = mock(EngineJobListener.class);
     GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
@@ -505,8 +506,9 @@ public class EngineJobTest {
 
     public EngineJob<Object> getJob() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
-      EngineJob result = new EngineJob(diskCacheService, sourceService, sourceUnlimitedService,
-          listener, pool, factory).init(key, isCacheable, useUnlimitedSourceGeneratorPool);
+      EngineJob<Object> result = new EngineJob<>(
+          diskCacheService, sourceService, sourceUnlimitedService, listener, pool, factory)
+          .init(key, isCacheable, useUnlimitedSourceGeneratorPool);
       result.addCallback(cb);
       return result;
     }

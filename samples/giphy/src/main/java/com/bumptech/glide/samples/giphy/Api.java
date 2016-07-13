@@ -26,7 +26,7 @@ public final class Api {
   private static final String TRENDING_PATH = "v1/gifs/trending";
   private final Handler bgHandler;
   private final Handler mainHandler;
-  private final HashSet<Monitor> monitors = new HashSet<Monitor>();
+  private final HashSet<Monitor> monitors = new HashSet<>();
 
   private static String signUrl(String url) {
     return url + "&api_key=" + BETA_KEY;
@@ -154,7 +154,7 @@ public final class Api {
    */
   public static class GifResult {
     public String id;
-    // Page url not gif url
+    // Page url not GIF url
     public String url;
     public GifUrlSet images;
 

@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.transcode;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,13 +55,12 @@ public class BitmapBytesTranscoderTest {
     verify(harness.bitmapResource).recycle();
   }
 
-  @SuppressWarnings("unchecked")
   private static class BitmapBytesTranscoderHarness {
     Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
     int quality = 100;
     final String description = "TestDescription";
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
-    Resource<Bitmap> bitmapResource = mock(Resource.class);
+    Resource<Bitmap> bitmapResource = mockResource();
 
     public BitmapBytesTranscoderHarness() {
       when(bitmapResource.get()).thenReturn(bitmap);

@@ -92,7 +92,9 @@ import java.util.Map;
     GlideTest.ShadowFileDescriptorContentResolver.class,
     GlideTest.ShadowMediaMetadataRetriever.class, GlideShadowLooper.class,
     GlideTest.MutableShadowBitmap.class })
+@SuppressWarnings("unchecked")
 public class GlideTest {
+  @SuppressWarnings("rawtypes")
   private Target target = null;
   private ImageView imageView;
   private RequestManager requestManager;
@@ -329,13 +331,13 @@ public class GlideTest {
   private void runTestStringDefaultLoader(String string) {
     requestManager.load(string).listener(new RequestListener<Drawable>() {
       @Override
-      public boolean onLoadFailed(GlideException e, Object model, Target target,
+      public boolean onLoadFailed(GlideException e, Object model, Target<Drawable> target,
           boolean isFirstResource) {
         throw new RuntimeException("Load failed");
       }
 
       @Override
-      public boolean onResourceReady(Drawable resource, Object model, Target target,
+      public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
           DataSource dataSource, boolean isFirstResource) {
         return false;
       }
@@ -531,9 +533,9 @@ public class GlideTest {
 
   @Test
   public void testClone() throws IOException {
-    Target firstTarget = mock(Target.class);
+    Target<Drawable> firstTarget = mock(Target.class);
     doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(isA(SizeReadyCallback.class));
-    Target secondTarget = mock(Target.class);
+    Target<Drawable> secondTarget = mock(Target.class);
     doAnswer(new CallSizeReady(100, 100)).when(secondTarget).getSize(isA(SizeReadyCallback.class));
     RequestBuilder<Drawable> firstRequest = requestManager
         .load(mockUri("content://first"));
@@ -545,14 +547,14 @@ public class GlideTest {
         .into(secondTarget);
 
     verify(firstTarget).onResourceReady(isA(Drawable.class), isA(Transition.class));
-    verify(secondTarget).onResourceReady(notNull(), isA(Transition.class));
+    verify(secondTarget).onResourceReady(notNull(Drawable.class), isA(Transition.class));
   }
 
   @SuppressWarnings("unchecked")
   private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource)
       throws Exception {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
-    doAnswer(new Util.CallDataReady(null))
+    doAnswer(new Util.CallDataReady<>(null))
         .when(failFetcher)
         .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
     when(failFetcher.getDataClass()).thenReturn(failResource);
@@ -610,7 +612,7 @@ public class GlideTest {
     ModelLoader<T, InputStream> modelLoader = mock(ModelLoader.class);
     DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
     try {
-      doAnswer(new Util.CallDataReady(new ByteArrayInputStream(new byte[0]))).when(fetcher)
+      doAnswer(new Util.CallDataReady<>(new ByteArrayInputStream(new byte[0]))).when(fetcher)
           .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
     } catch (Exception e) {
       // Do nothing.
@@ -702,6 +704,7 @@ public class GlideTest {
   // a different part of the test. Each one ends up with different registered uris, which causes
   // tests to fail. We shouldn't need to do this, but using static maps seems to fix the issue.
   @Implements(value = ContentResolver.class)
+  @SuppressWarnings("unused")
   public static class ShadowFileDescriptorContentResolver {
     private static final Map<Uri, AssetFileDescriptor> URI_TO_FILE_DESCRIPTOR = new HashMap<>();
     private static final Map<Uri, InputStream> URI_TO_INPUT_STREAMS = new HashMap<>();

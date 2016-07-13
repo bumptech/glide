@@ -92,7 +92,7 @@ public class ThumbnailStreamOpenerTest {
   public void testVideoQueryReturnsVideoCursor() {
     Uri queryUri = MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI;
     ThumbFetcher.VideoThumbnailQuery query =
-        new ThumbFetcher.VideoThumbnailQuery(getContentResovler());
+        new ThumbFetcher.VideoThumbnailQuery(getContentResolver());
     RoboCursor testCursor = new RoboCursor();
     Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
         .setCursor(queryUri, testCursor);
@@ -103,14 +103,14 @@ public class ThumbnailStreamOpenerTest {
   public void testImageQueryReturnsImageCursor() {
     Uri queryUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
     ThumbFetcher.ImageThumbnailQuery query =
-        new ThumbFetcher.ImageThumbnailQuery(getContentResovler());
+        new ThumbFetcher.ImageThumbnailQuery(getContentResolver());
     RoboCursor testCursor = new RoboCursor();
     Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
         .setCursor(queryUri, testCursor);
     assertEquals(testCursor, query.query(harness.uri));
   }
 
-  private static ContentResolver getContentResovler() {
+  private static ContentResolver getContentResolver() {
     return RuntimeEnvironment.application.getContentResolver();
   }
 
@@ -131,7 +131,7 @@ public class ThumbnailStreamOpenerTest {
     }
 
     public ThumbnailStreamOpener get() {
-      return new ThumbnailStreamOpener(service, query, byteArrayPool, getContentResovler());
+      return new ThumbnailStreamOpener(service, query, byteArrayPool, getContentResolver());
     }
   }
 }

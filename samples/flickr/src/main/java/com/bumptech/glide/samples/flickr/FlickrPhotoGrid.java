@@ -208,7 +208,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     }
 
     @Override
-    public RequestBuilder getPreloadRequestBuilder(Photo item) {
+    public RequestBuilder<Drawable> getPreloadRequestBuilder(Photo item) {
       return preloadRequest.load(item);
     }
   }

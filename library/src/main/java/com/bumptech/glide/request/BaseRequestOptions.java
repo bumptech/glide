@@ -365,7 +365,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @param signature A unique non-null {@link com.bumptech.glide.load.Key} representing the current
    *                  state of the model that will be mixed in to the cache key.
    * @return This request builder.
-   * @see com.bumptech.glide.signature.StringSignature
+   * @see com.bumptech.glide.signature.ObjectKey
    */
   public final CHILD signature(@NonNull Key signature) {
     if (isAutoCloneEnabled) {
@@ -461,7 +461,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * <p>{@link DecodeFormat} is a request, not a requirement. It's possible the resource will be
    * decoded using a decoder that cannot control the format
    * ({@link android.media.MediaMetadataRetriever} for example), or that the decoder may choose to
-   * ignore the requested format if it can't display the image (ie RGB_565 is requested, but the
+   * ignore the requested format if it can't display the image (i.e. RGB_565 is requested, but the
    * image has alpha).
    */
   public CHILD format(@NonNull DecodeFormat format) {

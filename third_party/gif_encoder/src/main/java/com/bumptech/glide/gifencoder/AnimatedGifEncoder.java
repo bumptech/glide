@@ -191,7 +191,7 @@ public class AnimatedGifEncoder {
             getImagePixels(); // convert to correct format if necessary
             analyzePixels(); // build color table & map pixels
             if (firstFrame) {
-                writeLSD(); // logical screen descriptior
+                writeLSD(); // logical screen descriptor
                 writePalette(); // global color table
                 if (repeat >= 0) {
                     // use NS app extension to indicate reps
@@ -222,7 +222,7 @@ public class AnimatedGifEncoder {
         boolean ok = true;
         started = false;
         try {
-            out.write(0x3b); // gif trailer
+            out.write(0x3b); // GIF trailer
             out.flush();
             if (closeStream) {
                 out.close();

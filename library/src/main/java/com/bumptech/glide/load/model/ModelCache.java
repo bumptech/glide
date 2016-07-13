@@ -110,7 +110,7 @@ public class ModelCache<A, B> {
     @Override
     public boolean equals(Object o) {
       if (o instanceof ModelKey) {
-        ModelKey other = (ModelKey) o;
+        @SuppressWarnings("unchecked") ModelKey<A> other = (ModelKey<A>) o;
         return width == other.width && height == other.height && model.equals(other.model);
       }
       return false;

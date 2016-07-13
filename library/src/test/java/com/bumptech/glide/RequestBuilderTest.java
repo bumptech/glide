@@ -38,11 +38,12 @@ public class RequestBuilderTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfContextIsNull() {
-    new RequestBuilder(null /*context*/, requestManager, Object.class);
+    new RequestBuilder<>(null /*context*/, requestManager, Object.class);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenGlideAnimationFactoryIsNull() {
+  public void testThrowsWhenTransitionsOptionsIsNull() {
+    //noinspection ConstantConditions testing if @NonNull is enforced
     getNullModelRequest().transition(null);
   }
 
@@ -53,7 +54,7 @@ public class RequestBuilderTest {
 
   @Test
   public void testAddsNewRequestToRequestTracker() {
-    Target target = mock(Target.class);
+    Target<Object> target = mock(Target.class);
     getNullModelRequest().into(target);
 
     verify(requestManager).track(eq(target), isA(Request.class));
@@ -62,7 +63,7 @@ public class RequestBuilderTest {
   @Test
   public void testRemovesPreviousRequestFromRequestTracker() {
     Request previous = mock(Request.class);
-    Target target = mock(Target.class);
+    Target<Object> target = mock(Target.class);
     when(target.getRequest()).thenReturn(previous);
 
     getNullModelRequest().into(target);
@@ -72,7 +73,8 @@ public class RequestBuilderTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullTarget() {
-    getNullModelRequest().into((Target) null);
+    //noinspection ConstantConditions testing if @NonNull is enforced
+    getNullModelRequest().into((Target<Object>) null);
   }
 
   @Test(expected = NullPointerException.class)
@@ -94,7 +96,7 @@ public class RequestBuilderTest {
 
   @Test(expected = RuntimeException.class)
   public void testThrowsIfIntoTargetCalledOnBackgroundThread() throws InterruptedException {
-    final Target target = mock(Target.class);
+    final Target<Object> target = mock(Target.class);
     testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
       public void runTest() throws Exception {
@@ -103,13 +105,13 @@ public class RequestBuilderTest {
     });
   }
 
-  private RequestBuilder getNullModelRequest() {
+  private RequestBuilder<Object> getNullModelRequest() {
     when(glideContext.buildImageViewTarget(isA(ImageView.class), isA(Class.class)))
         .thenReturn(mock(Target.class));
     when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
     when(requestManager.getDefaultRequestOptions())
         .thenReturn((BaseRequestOptions) new RequestOptions());
-    return new RequestBuilder(glideContext, requestManager, Object.class)
+    return new RequestBuilder<>(glideContext, requestManager, Object.class)
         .load((Object) null);
   }
 }

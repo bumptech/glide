@@ -59,10 +59,10 @@ public final class GlideException extends Exception {
   /**
    * Returns a list of causes that are immediate children of this exception.
    *
-   * @see #getRootCauses().
-   *
    * <p>Causes may or may not be {@link GlideException GlideExceptions}. Causes may also not be root
-   * causes, and in turn my have been caused by other failures.
+   * causes, and in turn my have been caused by other failures.</p>
+   *
+   * @see #getRootCauses()
    */
   public List<Exception> getCauses() {
     return causes;

@@ -41,7 +41,7 @@ public class ImageViewTargetFactoryTest {
     BitmapDrawable drawable = new BitmapDrawable(RuntimeEnvironment.application.getResources(),
         Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444));
 
-    Target target = factory.buildTarget(view, BitmapDrawable.class);
+    Target<BitmapDrawable> target = factory.buildTarget(view, BitmapDrawable.class);
     target.onResourceReady(drawable, null);
     assertThat(target).isInstanceOf(DrawableImageViewTarget.class);
   }

@@ -32,7 +32,7 @@ public class GifDrawableEncoder implements ResourceEncoder<GifDrawable> {
       success = true;
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Failed to encode gif drawable data", e);
+        Log.w(TAG, "Failed to encode GIF drawable data", e);
       }
     }
     return success;

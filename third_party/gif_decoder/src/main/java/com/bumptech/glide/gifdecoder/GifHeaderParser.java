@@ -1,6 +1,8 @@
 package com.bumptech.glide.gifdecoder;
 
 import static com.bumptech.glide.gifdecoder.GifDecoder.STATUS_FORMAT_ERROR;
+import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_NONE;
+import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_UNSPECIFIED;
 
 import android.util.Log;
 
@@ -11,15 +13,112 @@ import java.util.Arrays;
 
 /**
  * A class responsible for creating {@link com.bumptech.glide.gifdecoder.GifHeader}s from data
- * representing animated gifs.
+ * representing animated GIFs.
+ *
+ * @see <a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF 89a Specification</a>
  */
 public class GifHeaderParser {
   public static final String TAG = "GifHeaderParser";
 
-  // The minimum frame delay in hundredths of a second.
+  private static final int MASK_INT_LOWEST_BYTE = 0x000000FF;
+
+  /** Identifies the beginning of an Image Descriptor. */
+  private static final int IMAGE_SEPARATOR = 0x2C;
+  /** Identifies the beginning of an extension block. */
+  private static final int EXTENSION_INTRODUCER = 0x21;
+  /** This block is a single-field block indicating the end of the GIF Data Stream. */
+  private static final int TRAILER = 0x3B;
+  // Possible labels that identify the current extension block.
+  private static final int LABEL_GRAPHIC_CONTROL_EXTENSION = 0xF9;
+  private static final int LABEL_APPLICATION_EXTENSION = 0xFF;
+  private static final int LABEL_COMMENT_EXTENSION = 0xFE;
+  private static final int LABEL_PLAIN_TEXT_EXTENSION = 0x01;
+
+  // Graphic Control Extension packed field masks
+
+  private static final int GCE_MASK_RESERVED_BITS = 0b11100000;
+  /**
+   * Mask (bits 4-2) to extract Disposal Method of the current frame.
+   *
+   * @see GifFrame.GifDisposalMethod possible values
+   */
+  private static final int GCE_MASK_DISPOSAL_METHOD = 0b00011100;
+  /**
+   * Shift so the Disposal Method extracted from the packed value is on the least significant bit.
+   */
+  private static final int GCE_DISPOSAL_METHOD_SHIFT = 2;
+  private static final int GCE_MASK_USER_INPUT_FLAG = 0b00000010;
+  /**
+   * Mask (bit 0) to extract Transparent Color Flag of the current frame.
+   * <p><b>GIF89a</b>: <i>Indicates whether a transparency index is given
+   * in the Transparent Index field.</i></p>
+   * Possible values are:<ul>
+   * <li>0 - Transparent Index is not given.</li>
+   * <li>1 - Transparent Index is given.</li>
+   * </ul>
+   */
+  private static final int GCE_MASK_TRANSPARENT_COLOR_FLAG = 0b00000001;
+
+  // Image Descriptor packed field masks (describing Local Color Table)
+
+  /**
+   * Mask (bit 7) to extract Local Color Table Flag of the current image.
+   * <p><b>GIF89a</b>: <i>Indicates the presence of a Local Color Table
+   * immediately following this Image Descriptor.</i></p>
+   */
+  private static final int DESCRIPTOR_MASK_LCT_FLAG = 0b10000000;
+  /**
+   * Mask (bit 6) to extract Interlace Flag of the current image.
+   * <p><b>GIF89a</b>: <i>Indicates if the image is interlaced.
+   * An image is interlaced in a four-pass interlace pattern.</i></p>
+   * Possible values are:<ul>
+   * <li>0 - Image is not interlaced.</li>
+   * <li>1 - Image is interlaced.</li>
+   * </ul>
+   */
+  private static final int DESCRIPTOR_MASK_INTERLACE_FLAG = 0b01000000;
+  private static final int DESCRIPTOR_MASK_SORT_FLAG = 0b00100000;
+  private static final int DESCRIPTOR_MASK_RESERVED = 0b00011000;
+  /**
+   * Mask (bits 2-0) to extract Size of the Local Color Table of the current image.
+   * <p><b>GIF89a</b>: <i>If the Local Color Table Flag is set to 1, the value in this
+   * field is used to calculate the number of bytes contained in the Local Color Table.
+   * To determine that actual size of the color table, raise 2 to [the value of the field + 1].
+   * This value should be 0 if there is no Local Color Table specified.</i></p>
+   */
+  private static final int DESCRIPTOR_MASK_LCT_SIZE = 0b00000111;
+
+  // Logical Screen Descriptor packed field masks (describing Global Color Table)
+
+  /**
+   * Mask (bit 7) to extract Global Color Table Flag of the current image.
+   * <p><b>GIF89a</b>: <i>Indicates the presence of a Global Color Table
+   * immediately following this Image Descriptor.</i></p>
+   * Possible values are:<ul>
+   * <li>0 - No Global Color Table follows, the Background Color Index field is meaningless.</li>
+   * <li>1 - A Global Color Table will immediately follow,
+   * the Background Color Index field is meaningful.</li>
+   * </ul>
+   */
+  private static final int LSD_MASK_GCT_FLAG = 0b10000000;
+  private static final int LSD_MASK_COLOR_RESOLUTION = 0b01110000;
+  private static final int LSD_MASK_SORT_FLAG = 0b00001000;
+  /**
+   * Mask (bits 2-0) to extract Size of the Global Color Table of the current image.
+   * <p><b>GIF89a</b>: <i>If the Global Color Table Flag is set to 1, the value in this
+   * field is used to calculate the number of bytes contained in the Global Color Table.
+   * To determine that actual size of the color table, raise 2 to [the value of the field + 1].
+   * Even if there is no Global Color Table specified, set this field according to the above
+   * formula so that decoders can choose the best graphics mode to display the stream in.</i></p>
+   */
+  private static final int LSD_MASK_GCT_SIZE = 0b00000111;
+
+  /** The minimum frame delay in hundredths of a second. */
   static final int MIN_FRAME_DELAY = 2;
-  // The default frame delay in hundredths of a second for GIFs with frame delays less than the
-  // minimum.
+  /**
+   * The default frame delay in hundredths of a second.
+   * This is used for GIFs with frame delays less than the minimum.
+   */
   static final int DEFAULT_FRAME_DELAY = 10;
 
   private static final int MAX_BLOCK_SIZE = 256;
@@ -81,7 +180,7 @@ public class GifHeaderParser {
 
   /**
    * Determines if the GIF is animated by trying to read in the first 2 frames
-   * This method reparses the data even if the header has already been read.
+   * This method re-parses the data even if the header has already been read.
    */
   public boolean isAnimated() {
     readHeader();
@@ -107,30 +206,25 @@ public class GifHeaderParser {
     while (!(done || err() || header.frameCount > maxFrames)) {
       int code = read();
       switch (code) {
-        // Image separator.
-        case 0x2C:
-          // The graphics control extension is optional, but will always come first if it exists.
-          // If one did
-          // exist, there will be a non-null current frame which we should use. However if one
-          // did not exist,
-          // the current frame will be null and we must create it here. See issue #134.
+        case IMAGE_SEPARATOR:
+          // The Graphic Control Extension is optional, but will always come first if it exists.
+          // If one did exist, there will be a non-null current frame which we should use.
+          // However if one did not exist, the current frame will be null
+          // and we must create it here. See issue #134.
           if (header.currentFrame == null) {
             header.currentFrame = new GifFrame();
           }
           readBitmap();
           break;
-        // Extension.
-        case 0x21:
-          code = read();
-          switch (code) {
-            // Graphics control extension.
-            case 0xf9:
+        case EXTENSION_INTRODUCER:
+          int extensionLabel = read();
+          switch (extensionLabel) {
+            case LABEL_GRAPHIC_CONTROL_EXTENSION:
               // Start a new frame.
               header.currentFrame = new GifFrame();
               readGraphicControlExt();
               break;
-            // Application extension.
-            case 0xff:
+            case LABEL_APPLICATION_EXTENSION:
               readBlock();
               String app = "";
               for (int i = 0; i < 11; i++) {
@@ -143,24 +237,22 @@ public class GifHeaderParser {
                 skip();
               }
               break;
-            // Comment extension.
-            case 0xfe:
+            case LABEL_COMMENT_EXTENSION:
               skip();
               break;
-            // Plain text extension.
-            case 0x01:
+            case LABEL_PLAIN_TEXT_EXTENSION:
               skip();
               break;
-            // Uninteresting extension.
             default:
+              // Uninteresting extension.
               skip();
           }
           break;
-        // Terminator.
-        case 0x3b:
+        case TRAILER:
+          // This block is a single-field block indicating the end of the GIF Data Stream.
           done = true;
           break;
-        // Bad byte, but keep going and see what happens break;
+        // Bad byte, but keep going and see what happens
         case 0x00:
         default:
           header.status = STATUS_FORMAT_ERROR;
@@ -169,20 +261,31 @@ public class GifHeaderParser {
   }
 
   /**
-   * Reads Graphics Control Extension values.
+   * Reads Graphic Control Extension values.
    */
   private void readGraphicControlExt() {
     // Block size.
     read();
-    // Packed fields.
+    /*
+     * Graphic Control Extension packed field:
+     *      7 6 5 4 3 2 1 0
+     *     +---------------+
+     *  1  |     |     | | |
+     *
+     * Reserved                    3 Bits
+     * Disposal Method             3 Bits
+     * User Input Flag             1 Bit
+     * Transparent Color Flag      1 Bit
+     */
     int packed = read();
     // Disposal method.
-    header.currentFrame.dispose = (packed & 0x1c) >> 2;
-    if (header.currentFrame.dispose == 0) {
+    //noinspection WrongConstant field has to be extracted from packed value
+    header.currentFrame.dispose = (packed & GCE_MASK_DISPOSAL_METHOD) >> GCE_DISPOSAL_METHOD_SHIFT;
+    if (header.currentFrame.dispose == DISPOSAL_UNSPECIFIED) {
       // Elect to keep old image if discretionary.
-      header.currentFrame.dispose = 1;
+      header.currentFrame.dispose = DISPOSAL_NONE;
     }
-    header.currentFrame.transparency = (packed & 1) != 0;
+    header.currentFrame.transparency = (packed & GCE_MASK_TRANSPARENT_COLOR_FLAG) != 0;
     // Delay in milliseconds.
     int delayInHundredthsOfASecond = readShort();
     // TODO: consider allowing -1 to indicate show forever.
@@ -206,16 +309,23 @@ public class GifHeaderParser {
     header.currentFrame.iw = readShort();
     header.currentFrame.ih = readShort();
 
+    /*
+     * Image Descriptor packed field:
+     *     7 6 5 4 3 2 1 0
+     *    +---------------+
+     * 9  | | | |   |     |
+     *
+     * Local Color Table Flag     1 Bit
+     * Interlace Flag             1 Bit
+     * Sort Flag                  1 Bit
+     * Reserved                   2 Bits
+     * Size of Local Color Table  3 Bits
+     */
     int packed = read();
-    // 1 - local color table flag interlace
-    boolean lctFlag = (packed & 0x80) != 0;
-    int lctSize = (int) Math.pow(2, (packed & 0x07) + 1);
-    // 3 - sort flag
-    // 4-5 - reserved lctSize = 2 << (packed & 7); // 6-8 - local color
-    // table size
-    header.currentFrame.interlace = (packed & 0x40) != 0;
+    boolean lctFlag = (packed & DESCRIPTOR_MASK_LCT_FLAG) != 0;
+    int lctSize = (int) Math.pow(2, (packed & DESCRIPTOR_MASK_LCT_SIZE) + 1);
+    header.currentFrame.interlace = (packed & DESCRIPTOR_MASK_INTERLACE_FLAG) != 0;
     if (lctFlag) {
-      // Read table.
       header.currentFrame.lct = readColorTable(lctSize);
     } else {
       // No local color table.
@@ -245,8 +355,8 @@ public class GifHeaderParser {
       readBlock();
       if (block[0] == 1) {
         // Loop count sub-block.
-        int b1 = ((int) block[1]) & 0xff;
-        int b2 = ((int) block[2]) & 0xff;
+        int b1 = ((int) block[1]) & MASK_INT_LOWEST_BYTE;
+        int b2 = ((int) block[2]) & MASK_INT_LOWEST_BYTE;
         header.loopCount = (b2 << 8) | b1;
       }
     } while ((blockSize > 0) && !err());
@@ -279,14 +389,20 @@ public class GifHeaderParser {
     // Logical screen size.
     header.width = readShort();
     header.height = readShort();
-    // Packed fields
+    /*
+     * Logical Screen Descriptor packed field:
+     *      7 6 5 4 3 2 1 0
+     *     +---------------+
+     *  4  | |     | |     |
+     *
+     * Global Color Table Flag     1 Bit
+     * Color Resolution            3 Bits
+     * Sort Flag                   1 Bit
+     * Size of Global Color Table  3 Bits
+     */
     int packed = read();
-    // 1 : global color table flag.
-    header.gctFlag = (packed & 0x80) != 0;
-    // 2-4 : color resolution.
-    // 5 : gct sort flag.
-    // 6-8 : gct size.
-    header.gctSize = 2 << (packed & 7);
+    header.gctFlag = (packed & LSD_MASK_GCT_FLAG) != 0;
+    header.gctSize = (int) Math.pow(2, (packed & LSD_MASK_GCT_SIZE) + 1);
     // Background color index.
     header.bgIndex = read();
     // Pixel aspect ratio
@@ -296,13 +412,13 @@ public class GifHeaderParser {
   /**
    * Reads color table as 256 RGB integer values.
    *
-   * @param ncolors int number of colors to read.
+   * @param nColors int number of colors to read.
    * @return int array containing 256 colors (packed ARGB with full alpha).
    */
-  private int[] readColorTable(int ncolors) {
-    int nbytes = 3 * ncolors;
+  private int[] readColorTable(int nColors) {
+    int nBytes = 3 * nColors;
     int[] tab = null;
-    byte[] c = new byte[nbytes];
+    byte[] c = new byte[nBytes];
 
     try {
       rawData.get(c);
@@ -312,11 +428,11 @@ public class GifHeaderParser {
       tab = new int[MAX_BLOCK_SIZE];
       int i = 0;
       int j = 0;
-      while (i < ncolors) {
-        int r = ((int) c[j++]) & 0xff;
-        int g = ((int) c[j++]) & 0xff;
-        int b = ((int) c[j++]) & 0xff;
-        tab[i++] = 0xff000000 | (r << 16) | (g << 8) | b;
+      while (i < nColors) {
+        int r = ((int) c[j++]) & MASK_INT_LOWEST_BYTE;
+        int g = ((int) c[j++]) & MASK_INT_LOWEST_BYTE;
+        int b = ((int) c[j++]) & MASK_INT_LOWEST_BYTE;
+        tab[i++] = 0xFF000000 | (r << 16) | (g << 8) | b;
       }
     } catch (BufferUnderflowException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -381,13 +497,13 @@ public class GifHeaderParser {
    * Reads a single byte from the input stream.
    */
   private int read() {
-    int curByte = 0;
+    int currByte = 0;
     try {
-      curByte = rawData.get() & 0xFF;
+      currByte = rawData.get() & MASK_INT_LOWEST_BYTE;
     } catch (Exception e) {
       header.status = STATUS_FORMAT_ERROR;
     }
-    return curByte;
+    return currByte;
   }
 
   /**

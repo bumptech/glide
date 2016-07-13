@@ -44,9 +44,10 @@ public class EngineKeyTest {
     String id = "testId";
     int width = 1;
     int height = 2;
-    Class resourceClass = Object.class;
-    Class transcodeClass = Integer.class;
+    Class<?> resourceClass = Object.class;
+    Class<?> transcodeClass = Integer.class;
     Key signature = mock(Key.class);
+    @SuppressWarnings("unchecked")
     Transformation<Object> transformation = mock(Transformation.class);
     Options options = new Options();
 
@@ -99,9 +100,9 @@ public class EngineKeyTest {
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
     EngineKey first = harness.build();
     Key signature = mock(Key.class);
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         MessageDigest digest = (MessageDigest) invocationOnMock.getArguments()[0];
         digest.update("signature".getBytes("UTF-8"));
         return null;
@@ -135,7 +136,7 @@ public class EngineKeyTest {
   public void testDiffersIfTransformationsDiffer() throws NoSuchAlgorithmException {
     EngineKey first = harness.build();
 
-    Transformation<Object> other = mock(Transformation.class);
+    @SuppressWarnings("unchecked") Transformation<Object> other = mock(Transformation.class);
     doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(any(MessageDigest.class));
     harness.transformation = other;

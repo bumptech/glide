@@ -1,12 +1,14 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.os.Build;
 
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
@@ -58,6 +60,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
+  @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   public void testEncoderObeysNonNullCompressFormat() throws IOException {
     Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
     harness.setFormat(format);
@@ -68,6 +71,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(false);
@@ -78,6 +82,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(true);
@@ -103,9 +108,8 @@ public class BitmapEncoderTest {
     assertThat(string).contains(expected);
   }
 
-  @SuppressWarnings("unchecked")
   private static class EncoderHarness {
-    Resource<Bitmap> resource = mock(Resource.class);
+    Resource<Bitmap> resource = mockResource();
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     Options options = new Options();
     File file = new File(RuntimeEnvironment.application.getCacheDir(), "test");

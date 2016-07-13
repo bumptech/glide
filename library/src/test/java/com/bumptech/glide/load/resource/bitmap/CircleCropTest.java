@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Build;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
@@ -88,7 +89,7 @@ public class CircleCropTest {
     }
   }
 
-  @TargetApi(12)
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   private Bitmap createBitmapWithRedCircle(int width, int height) {
     int minEdge = Math.min(width, height);
     float radius = minEdge / 2f;
