@@ -390,7 +390,7 @@ public class RequestManager implements LifecycleListener {
    * @param view The view to cancel loads and free resources for.
    * @throws IllegalArgumentException if an object other than Glide's metadata is put as the view's
    *                                  tag.
-   * @see #clear(Target).
+   * @see #clear(Target)
    */
   public void clear(View view) {
     clear(new ClearTarget(view));

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -34,9 +35,8 @@ public class GifDrawableTransformationTest {
   @Mock Transformation<Bitmap> wrapped;
   @Mock BitmapPool bitmapPool;
 
-  GifDrawableTransformation transformation;
+  private GifDrawableTransformation transformation;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
@@ -44,8 +44,9 @@ public class GifDrawableTransformationTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testSetsTransformationAsFrameTransformation() {
-    Resource<GifDrawable> resource = mock(Resource.class);
+    Resource<GifDrawable> resource = mockResource();
     GifDrawable gifDrawable = mock(GifDrawable.class);
     Transformation<Bitmap> unitTransformation = UnitTransformation.get();
     when(gifDrawable.getFrameTransformation()).thenReturn(unitTransformation);
@@ -59,9 +60,10 @@ public class GifDrawableTransformationTest {
     final int width = 123;
     final int height = 456;
     Bitmap expectedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-    Resource<Bitmap> expectedResource = mock(Resource.class);
+    Resource<Bitmap> expectedResource = mockResource();
     when(expectedResource.get()).thenReturn(expectedBitmap);
-    when(wrapped.transform(isA(Resource.class), anyInt(), anyInt())).thenReturn(expectedResource);
+    when(wrapped.transform(Util.<Bitmap>anyResource(), anyInt(), anyInt()))
+        .thenReturn(expectedResource);
 
     transformation.transform(resource, width, height);
 
@@ -74,7 +76,7 @@ public class GifDrawableTransformationTest {
         .updateDiskCacheKey(isA(MessageDigest.class));
     KeyAssertions.assertSame(transformation, new GifDrawableTransformation(wrapped, bitmapPool));
 
-    Transformation<Bitmap> other = mock(Transformation.class);
+    @SuppressWarnings("unchecked") Transformation<Bitmap> other = mock(Transformation.class);
     doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(isA(MessageDigest.class));
     KeyAssertions.assertDifferent(transformation, new GifDrawableTransformation(other, bitmapPool));

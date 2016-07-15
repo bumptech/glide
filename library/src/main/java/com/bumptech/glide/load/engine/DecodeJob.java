@@ -142,7 +142,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   /**
-   * Called when we've finished encoding (either becasue the encode process is complete, or because
+   * Called when we've finished encoding (either because the encode process is complete, or because
    * we don't have anything to encode).
    */
   private void onEncodeComplete() {

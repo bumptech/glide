@@ -36,7 +36,7 @@ class ResourceRecycler {
     @Override
     public boolean handleMessage(Message message) {
       if (message.what == RECYCLE_RESOURCE) {
-        Resource resource = (Resource) message.obj;
+        Resource<?> resource = (Resource<?>) message.obj;
         resource.recycle();
         return true;
       }

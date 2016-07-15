@@ -10,12 +10,12 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class SimpleResourceTest {
   private Anything object;
-  private SimpleResource resource;
+  private SimpleResource<?> resource;
 
   @Before
   public void setUp() {
     object = new Anything();
-    resource = new SimpleResource(object);
+    resource = new SimpleResource<>(object);
   }
 
   @Test

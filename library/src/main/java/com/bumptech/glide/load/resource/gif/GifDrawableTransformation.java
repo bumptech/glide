@@ -37,7 +37,7 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
 
     // The drawable needs to be initialized with the correct width and height in order for a view
     // displaying it to end up with the right dimensions. Since our transformations may arbitrarily
-    // modify the dimensions of our gif, here we create a stand in for a frame and pass it to the
+    // modify the dimensions of our GIF, here we create a stand in for a frame and pass it to the
     // transformation to see what the final transformed dimensions will be so that our drawable can
     // report the correct intrinsic width and height.
     Bitmap firstFrame = drawable.getFirstFrame();

@@ -213,12 +213,12 @@ public class Glide implements ComponentCallbacks2 {
         .append(ParcelFileDescriptor.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool, new VideoBitmapDecoder(bitmapPool)))
         .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
-        /* Gifs */
+        /* GIFs */
         .prepend(InputStream.class, GifDrawable.class,
             new StreamGifDecoder(byteBufferGifDecoder, arrayPool))
         .prepend(ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .register(GifDrawable.class, new GifDrawableEncoder())
-        /* Gif Frames */
+        /* GIF Frames */
         .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
         .append(GifDecoder.class, Bitmap.class, new GifFrameResourceDecoder(bitmapPool))
         /* Files */

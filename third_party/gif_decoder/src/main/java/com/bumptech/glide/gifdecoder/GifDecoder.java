@@ -1,32 +1,32 @@
 package com.bumptech.glide.gifdecoder;
 
 import android.graphics.Bitmap;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 
 /**
  * Shared interface for GIF decoders.
  */
 public interface GifDecoder {
+  /** File read status: No errors. */
+  int STATUS_OK = 0;
+  /** File read status: Error decoding file (may be partially decoded). */
+  int STATUS_FORMAT_ERROR = 1;
+  /** File read status: Unable to open source. */
+  int STATUS_OPEN_ERROR = 2;
+  /** Unable to fully decode the current frame. */
+  int STATUS_PARTIAL_DECODE = 3;
 
-  /**
-   * File read status: No errors.
-   */
-  public static final int STATUS_OK = 0;
-  /**
-   * File read status: Error decoding file (may be partially decoded).
-   */
-  public static final int STATUS_FORMAT_ERROR = 1;
-  /**
-   * File read status: Unable to open source.
-   */
-  public static final int STATUS_OPEN_ERROR = 2;
-  /**
-   * Unable to fully decode the current frame.
-   */
-  public static final int STATUS_PARTIAL_DECODE = 3;
+  /** Android Lint annotation for status codes that can be used with a GIF decoder. */
+  @Retention(RetentionPolicy.SOURCE)
+  @IntDef(value = {STATUS_OK, STATUS_FORMAT_ERROR, STATUS_OPEN_ERROR, STATUS_PARTIAL_DECODE})
+  @interface GifDecodeStatus {
+  }
 
   /**
    * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs
@@ -63,13 +63,11 @@ public interface GifDecoder {
 
     /**
      * Returns an int array used for decoding/generating the frame bitmaps.
-     * @param size
      */
     int[] obtainIntArray(int size);
 
     /**
      * Release the given array back to the pool.
-     * @param array
      */
     void release(int[] array);
   }
@@ -87,6 +85,7 @@ public interface GifDecoder {
    * was decoded successfully and/or completely. Format and open failures persist across frames.
    * </p>
    */
+  @GifDecodeStatus
   int getStatus();
 
   /**
@@ -153,6 +152,7 @@ public interface GifDecoder {
    * @param is containing GIF file.
    * @return read status code (0 = no errors).
    */
+  @GifDecodeStatus
   int read(InputStream is, int contentLength);
 
   void clear();
@@ -169,6 +169,7 @@ public interface GifDecoder {
    * @param data containing GIF file.
    * @return read status code (0 = no errors).
    */
+  @GifDecodeStatus
   int read(byte[] data);
 
 }

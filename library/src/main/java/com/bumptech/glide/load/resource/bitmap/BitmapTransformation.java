@@ -109,7 +109,7 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
    * @param toTransform The {@link android.graphics.Bitmap} to transform.
    * @param outWidth    The ideal width of the transformed bitmap (the transformed width does not
    *                    need to match exactly).
-   * @param outHeight   The ideal height of the transformed bitmap (the transformed heightdoes not
+   * @param outHeight   The ideal height of the transformed bitmap (the transformed height does not
    *                    need to match exactly).
    */
   protected abstract Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,

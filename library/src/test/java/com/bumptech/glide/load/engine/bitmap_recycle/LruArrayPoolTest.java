@@ -7,6 +7,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,11 +19,12 @@ import org.robolectric.annotation.Config;
 import java.util.Arrays;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.DEFAULT, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 18)
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class LruArrayPoolTest {
   private static final int MAX_SIZE = 10;
-  private static final Class ARRAY_CLASS = byte[].class;
-  private static final ArrayAdapterInterface ADAPTER = new ByteArrayAdapter();
+  private static final Class<byte[]> ARRAY_CLASS = byte[].class;
+  private static final ArrayAdapterInterface<byte[]> ADAPTER = new ByteArrayAdapter();
   private LruArrayPool pool;
 
   @Before
@@ -41,8 +45,8 @@ public class LruArrayPoolTest {
     pool.put(createArray(ARRAY_CLASS, size, value), ARRAY_CLASS);
     Object array = pool.get(size, ARRAY_CLASS);
     assertNotNull(array);
-    assertTrue(ADAPTER.getArrayLength(array) >= size);
     assertTrue(array.getClass() == ARRAY_CLASS);
+    assertTrue(ADAPTER.getArrayLength((byte[]) array) >= size);
     assertTrue(((byte[]) array)[0] == (byte) 0);
   }
 
@@ -97,7 +101,8 @@ public class LruArrayPoolTest {
     }
   }
 
-  private Object createArray(Class type, int size, int value) {
+  @SuppressWarnings("unchecked")
+  private static <T> T createArray(Class<T> type, int size, int value) {
     Object array = null;
     if (type.equals(int[].class)) {
       array = new int[size];
@@ -106,6 +111,6 @@ public class LruArrayPoolTest {
       array = new byte[size];
       Arrays.fill((byte[]) array, (byte) value);
     }
-    return array;
+    return (T) array;
   }
 }

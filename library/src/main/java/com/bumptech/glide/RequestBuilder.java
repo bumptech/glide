@@ -146,8 +146,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
 
   /**
    * Loads a resource in an identical manner to this request except with the dimensions of the
-   * target multiplied by the given size multiplier. If the thumbnail load completes before the
-   * fullsize load, the thumbnail will be shown. If the thumbnail load completes after the fullsize
+   * target multiplied by the given size multiplier. If the thumbnail load completes before the full
+   * size load, the thumbnail will be shown. If the thumbnail load completes after the full size
    * load, the thumbnail will not be shown.
    *
    * <p> Note - The thumbnail resource will be smaller than the size requested so the target (or
@@ -159,7 +159,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * and {@link com.bumptech.glide.load.Transformation}s. However,
    * {@link com.bumptech.glide.request.BaseRequestOptions#placeholder(int)} and
    * {@link com.bumptech.glide.request.BaseRequestOptions#error(int)}, and
-   * {@link #listener(RequestListener)} will only be used on the fullsize load and will not be
+   * {@link #listener(RequestListener)} will only be used on the full size load and will not be
    * copied for the thumbnail load. </p>
    *
    * <p> Recursive calls to thumbnail are supported. </p>
@@ -431,7 +431,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * Returns a future that can be used to do a blocking get on a background thread.
    *
    * <p>This method defaults to {@link Target#SIZE_ORIGINAL} for the width and the height. However,
-   * since the width and height will be overriden by values passed to {@link
+   * since the width and height will be overridden by values passed to {@link
    * RequestOptions#override(int, int)}, this method can be used whenever {@link RequestOptions}
    * with override values are applied, or whenever you want to retrieve the image in its original
    * size.

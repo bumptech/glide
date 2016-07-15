@@ -1,6 +1,7 @@
 package com.bumptech.glide.request;
 
 import static com.bumptech.glide.tests.Util.isADataSource;
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -50,6 +51,7 @@ import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
+@SuppressWarnings("rawtypes")
 public class SingleRequestTest {
   private RequestHarness harness;
 
@@ -57,21 +59,23 @@ public class SingleRequestTest {
    * {@link Number} and {@link List} are arbitrarily chosen types to test some type safety as well.
    * Both are in the middle of the hierarchy having multiple descendants and ancestors.
    */
-  @SuppressWarnings("unchecked")
   private static class RequestHarness {
     Engine engine = mock(Engine.class);
     Number model = 123456;
+    @SuppressWarnings("unchecked")
     Target<List> target = mock(Target.class);
-    Resource<List> resource = mock(Resource.class);
+    Resource<List> resource = mockResource();
     RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
     Drawable placeholderDrawable = null;
     Drawable errorDrawable = null;
     Drawable fallbackDrawable = null;
+    @SuppressWarnings("unchecked")
     RequestListener<List> requestListener = mock(RequestListener.class);
+    @SuppressWarnings("unchecked")
     TransitionFactory<List> factory = mock(TransitionFactory.class);
     int overrideWidth = -1;
     int overrideHeight = -1;
-    List result = new ArrayList();
+    List<?> result = new ArrayList<>();
     GlideContext glideContext = mock(GlideContext.class);
     Key signature = mock(Key.class);
     Priority priority = Priority.HIGH;
@@ -743,6 +747,7 @@ public class SingleRequestTest {
             any(Options.class), anyBoolean(), eq(Boolean.FALSE), any(ResourceCallback.class));
   }
 
+  // TODO do we want to move these to Util?
   @SuppressWarnings("unchecked")
   private static <T> Transition<T> mockTransition() {
     return mock(Transition.class);

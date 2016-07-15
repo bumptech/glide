@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -25,10 +26,9 @@ public class EngineResourceTest {
   private Key cacheKey = mock(Key.class);
   private Resource<Object> resource;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
-    resource = mock(Resource.class);
+    resource = mockResource();
     engineResource = new EngineResource<>(resource, true /*isMemoryCacheable*/);
     listener = mock(EngineResource.ResourceListener.class);
     engineResource.setResourceListener(cacheKey, listener);
@@ -146,9 +146,9 @@ public class EngineResourceTest {
 
   @Test
   public void testCanSetAndGetIsCacheable() {
-    engineResource = new EngineResource<>(mock(Resource.class), true);
+    engineResource = new EngineResource<>(mockResource(), true);
     assertTrue(engineResource.isCacheable());
-    engineResource = new EngineResource<>(mock(Resource.class), false);
+    engineResource = new EngineResource<>(mockResource(), false);
     assertFalse(engineResource.isCacheable());
   }
 }

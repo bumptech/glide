@@ -20,7 +20,7 @@ public abstract class StateVerifier {
   private StateVerifier() { }
 
   /**
-   * Throws an exception if we believe our object is recycled and inactive (ie is currently in an
+   * Throws an exception if we believe our object is recycled and inactive (i.e. is currently in an
    * object pool).
    */
   public abstract void throwIfRecycled();

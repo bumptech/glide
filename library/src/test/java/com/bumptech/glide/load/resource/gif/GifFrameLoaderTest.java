@@ -125,7 +125,7 @@ public class GifFrameLoaderTest {
   public void testStartGetsNextFrameIfNotStartedAndWithNoLoadPending() {
     loader.subscribe(callback);
 
-    verify(requestBuilder).into(isA(Target.class));
+    verify(requestBuilder).into(aTarget());
   }
 
   @Test
@@ -135,7 +135,7 @@ public class GifFrameLoaderTest {
     InOrder order = inOrder(gifDecoder, requestBuilder);
     order.verify(gifDecoder).advance();
     order.verify(requestBuilder).apply(isA(BaseRequestOptions.class));
-    order.verify(requestBuilder).into(isA(Target.class));
+    order.verify(requestBuilder).into(aTarget());
   }
 
   @Test
@@ -158,14 +158,14 @@ public class GifFrameLoaderTest {
     loader.subscribe(callback);
     loader.subscribe(mock(FrameCallback.class));
 
-    verify(requestBuilder, times(1)).into(isA(Target.class));
+    verify(requestBuilder, times(1)).into(aTarget());
   }
 
   @Test
   public void testGetNextFrameDoesNotStartLoadIfLoaderIsNotRunning() {
     loader.onFrameReady(mock(DelayTarget.class));
 
-    verify(requestBuilder, never()).into(isA(Target.class));
+    verify(requestBuilder, never()).into(aTarget());
   }
 
   @Test
@@ -174,7 +174,7 @@ public class GifFrameLoaderTest {
     loader.unsubscribe(callback);
     loader.subscribe(callback);
 
-    verify(requestBuilder, times(1)).into(isA(Target.class));
+    verify(requestBuilder, times(1)).into(aTarget());
   }
 
   @Test
@@ -185,7 +185,7 @@ public class GifFrameLoaderTest {
     loader.onFrameReady(mock(DelayTarget.class));
     loader.subscribe(callback);
 
-    verify(requestBuilder, times(2)).into(isA(Target.class));
+    verify(requestBuilder, times(2)).into(aTarget());
   }
 
   @Test
@@ -193,7 +193,7 @@ public class GifFrameLoaderTest {
     loader.subscribe(callback);
     loader.onFrameReady(mock(DelayTarget.class));
 
-    verify(requestBuilder, times(2)).into(isA(Target.class));
+    verify(requestBuilder, times(2)).into(aTarget());
   }
 
   @Test
@@ -283,5 +283,10 @@ public class GifFrameLoaderTest {
     new EqualsTester().addEqualityGroup(new GifFrameLoader.FrameSignature(first),
         new GifFrameLoader.FrameSignature(first))
         .addEqualityGroup(new GifFrameLoader.FrameSignature()).testEquals();
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Target<Bitmap> aTarget() {
+    return isA(Target.class);
   }
 }

@@ -75,14 +75,13 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
   }
 
   private static final class SizeViewTarget extends ViewTarget<View, Object> {
-
     public SizeViewTarget(View view, SizeReadyCallback callback) {
       super(view);
       getSize(callback);
     }
 
     @Override
-    public void onResourceReady(Object resource, Transition transition) {
+    public void onResourceReady(Object resource, Transition<? super Object> transition) {
       // Do nothing
     }
   }

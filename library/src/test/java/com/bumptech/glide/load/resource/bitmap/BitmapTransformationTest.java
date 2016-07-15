@@ -3,7 +3,6 @@ package com.bumptech.glide.load.resource.bitmap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
@@ -12,6 +11,7 @@ import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.tests.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -106,7 +106,7 @@ public class BitmapTransformationTest {
         return null;
       }
     };
-    transformation.transform(mock(Resource.class), -1, 100);
+    transformation.transform(mockResource(1, 1), -1, 100);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -123,7 +123,7 @@ public class BitmapTransformationTest {
       }
 
     };
-    transformation.transform(mock(Resource.class), 100, -1);
+    transformation.transform(mockResource(1, 1), 100, -1);
   }
 
   @Test
@@ -166,10 +166,9 @@ public class BitmapTransformationTest {
     assertEquals(expectedHeight, transform.givenHeight);
   }
 
-  @SuppressWarnings("unchecked")
   private Resource<Bitmap> mockResource(int width, int height) {
     Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-    Resource<Bitmap> resource = mock(Resource.class);
+    Resource<Bitmap> resource = Util.mockResource();
     when(resource.get()).thenReturn(bitmap);
     return resource;
   }

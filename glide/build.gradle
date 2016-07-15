@@ -59,7 +59,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
         classpath = files(getAndroidLibraryVariants(variantName).collect {
             files(it.javaCompile.classpath.files, getAndroidJar())
         })
-        classpath += getInternalJavaProjects().collect { files(it.configurations.compile) }
+        classpath += getInternalJavaProjects().collect { files(it.configurations.compile) }.sum()
 
         options {
             links("http://docs.oracle.com/javase/7/docs/api/")

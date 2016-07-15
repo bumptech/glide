@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.isADataSource;
+import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -46,6 +47,7 @@ import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = { GlideShadowLooper.class })
+@SuppressWarnings("unchecked")
 public class EngineTest {
   private EngineTestHarness harness;
 
@@ -97,7 +99,6 @@ public class EngineTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testCallbackIsAddedToExistingRunnerWithExistingLoad() {
     harness.doLoad();
 
@@ -175,7 +176,7 @@ public class EngineTest {
   @Test
   public void testActiveResourcesIsNotCheckedIfReturnedFromCache() {
     when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
-    EngineResource other = mock(EngineResource.class);
+    EngineResource<?> other = mock(EngineResource.class);
     harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource<?>>(other));
 
     harness.doLoad();
@@ -227,14 +228,14 @@ public class EngineTest {
   @Test
   public void testHandlesNonEngineResourcesFromCacheIfPresent() {
     final Object expected = new Object();
-    Resource fromCache = mock(Resource.class);
+    @SuppressWarnings("rawtypes") Resource fromCache = mockResource();
     when(fromCache.get()).thenReturn(expected);
     when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(fromCache);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Resource resource = (Resource) invocationOnMock.getArguments()[0];
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+        Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[0];
         assertEquals(expected, resource.get());
         return null;
       }
@@ -350,19 +351,18 @@ public class EngineTest {
     final Object expected = new Object();
     when(harness.resource.isCacheable()).thenReturn(true);
     when(harness.resource.get()).thenReturn(expected);
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[1];
         assertEquals(expected, resource.get());
         return null;
       }
-    }).when(harness.cache).put(eq(harness.cacheKey), any(Resource.class));
+    }).when(harness.cache).put(eq(harness.cacheKey), anyResource());
 
     harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
 
-
-    verify(harness.cache).put(eq(harness.cacheKey), any(Resource.class));
+    verify(harness.cache).put(eq(harness.cacheKey), anyResource());
   }
 
   @Test
@@ -447,7 +447,7 @@ public class EngineTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testThrowsIfAskedToReleaseNonEngineResource() {
-    harness.engine.release(mock(Resource.class));
+    harness.engine.release(mockResource());
   }
 
   @Test(expected = RuntimeException.class)
@@ -460,13 +460,13 @@ public class EngineTest {
     });
   }
 
-  @SuppressWarnings("unchecked")
   private static class EngineTestHarness {
     EngineKey cacheKey = mock(EngineKey.class);
     EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
     ResourceCallback cb = mock(ResourceCallback.class);
+    @SuppressWarnings("rawtypes")
     EngineResource resource = mock(EngineResource.class);
-    Map<Key, EngineJob> jobs = new HashMap<>();
+    Map<Key, EngineJob<?>> jobs = new HashMap<>();
     Map<Key, WeakReference<EngineResource<?>>> activeResources = new HashMap<>();
 
     int width = 100;
@@ -474,7 +474,7 @@ public class EngineTest {
 
     Object model = new Object();
     MemoryCache cache = mock(MemoryCache.class);
-    EngineJob job;
+    EngineJob<?> job;
     Engine engine;
     Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
     Engine.DecodeJobFactory decodeJobFactory = mock(Engine.DecodeJobFactory.class);
@@ -501,14 +501,15 @@ public class EngineTest {
     }
 
     public Engine.LoadStatus doLoad() {
-      when(engineJobFactory.build(eq(cacheKey), anyBoolean(), anyBoolean())).thenReturn(job);
+      when(engineJobFactory.build(eq(cacheKey), anyBoolean(), anyBoolean()))
+          .thenReturn((EngineJob<Object>) job);
       return engine.load(glideContext,
           model,
           signature,
           width,
           height,
-          Object.class,
-          Object.class,
+          Object.class /*resourceClass*/,
+          Object.class /*transcodeClass*/,
           Priority.HIGH,
           DiskCacheStrategy.ALL,
           transformations,

@@ -44,7 +44,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
     ViewTargetTest.PreDrawShadowViewTreeObserver.class })
 public class ViewTargetTest {
   private View view;
-  private ViewTarget target;
+  private ViewTarget<View, Object> target;
   private SizedShadowView shadowView;
   private PreDrawShadowViewTreeObserver shadowObserver;
 
@@ -489,7 +489,7 @@ public class ViewTargetTest {
     }
 
     @Override
-    public void onResourceReady(Object resource, Transition transition) {
+    public void onResourceReady(Object resource, Transition<? super Object> transition) {
 
     }
 

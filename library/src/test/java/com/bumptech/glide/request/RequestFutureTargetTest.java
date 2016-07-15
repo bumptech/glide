@@ -218,9 +218,9 @@ public class RequestFutureTargetTest {
   @Test(expected = InterruptedException.class)
   public void testThrowsInterruptedExceptionIfThreadInterruptedWhenDoneWaiting()
       throws InterruptedException, ExecutionException {
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         Thread.currentThread().interrupt();
         return null;
       }
@@ -232,9 +232,9 @@ public class RequestFutureTargetTest {
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionIfLoadFailsWhileWaiting()
       throws ExecutionException, InterruptedException {
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         future.onLoadFailed(null);
         return null;
       }
@@ -245,9 +245,9 @@ public class RequestFutureTargetTest {
   @Test(expected = CancellationException.class)
   public void testThrowsCancellationExceptionIfCancelledWhileWaiting()
       throws ExecutionException, InterruptedException {
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         future.cancel(false);
         return null;
       }
@@ -297,9 +297,9 @@ public class RequestFutureTargetTest {
   public void testReturnsResourceIfReceivedWhileWaiting()
       throws ExecutionException, InterruptedException {
     final Object expected = new Object();
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         future.onResourceReady(expected, null);
         return null;
       }

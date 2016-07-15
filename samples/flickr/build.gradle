@@ -17,11 +17,11 @@ android {
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.flickr'
-        minSdkVersion 11
+        minSdkVersion 11 // TODO it uses SearchView (and not the compat one)
         targetSdkVersion TARGET_SDK_VERSION as int
 
         versionCode 1
-        versionName '1.0.0'
+        versionName '1.0'
     }
 
     compileOptions {

@@ -25,12 +25,12 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE)
 public class ViewTransitionAnimationFactoryTest {
   private ViewTransition.ViewTransitionAnimationFactory viewTransitionAnimationFactory;
-  private ViewAnimationFactory factory;
+  private ViewAnimationFactory<Object> factory;
 
   @Before
   public void setUp() {
     viewTransitionAnimationFactory = mock(ViewTransition.ViewTransitionAnimationFactory.class);
-    factory = new ViewAnimationFactory(viewTransitionAnimationFactory);
+    factory = new ViewAnimationFactory<>(viewTransitionAnimationFactory);
   }
 
   @Test

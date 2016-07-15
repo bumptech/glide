@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -22,6 +23,7 @@ import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 /**
@@ -32,6 +34,7 @@ import java.util.Arrays;
 public class DataUrlLoaderTest {
 
   // A valid base64-encoded PNG (a small "Google" logo).
+  @SuppressWarnings("SpellCheckingInspection")
   private static final String VALID_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAALCA"
       + "YAAAAeEY8BAAADFElEQVR42mNgAAK5ig+CiiUfSmUL3mVL5r7PE8t5M1U06027eMYLMQZKQUMDE8eyxGrOJYmdDKtC"
       + "mTHkFfO/iCsUfTykUPFeASH6n1Es+3WjSM5rKQYqANbFcTmsC2OXYpWUKXw/R67ofQEhQ+5FecnfDnYxPJNmzAp35n"
@@ -50,13 +53,13 @@ public class DataUrlLoaderTest {
   private static final String INVALID_URL_WRONG_SCHEME1 = "test";
   private static final String INVALID_URL_WRONG_SCHEME2 = "http://google.com";
   private static final String INVALID_URL_WRONG_SCHEME3 = "data:text";
-  private static final String INVALID_URL_MISSING_COMMA = "data:image/png;base64=NOTBASE64";
+  private static final String INVALID_URL_MISSING_COMMA = "data:image/png;base64=NOT_BASE64";
   private static final String INVALID_URL_WRONG_ENCODING = "data:image/png;base32,";
 
   @Mock
   private MultiModelLoaderFactory multiFactory;
-  private DataUrlLoader<Object> dataUrlLoader;
-  private DataFetcher<Object> fetcher;
+  private DataUrlLoader<InputStream> dataUrlLoader;
+  private DataFetcher<InputStream> fetcher;
   private Options options;
 
   @Before
@@ -64,7 +67,7 @@ public class DataUrlLoaderTest {
     MockitoAnnotations.initMocks(this);
     DataUrlLoader.StreamFactory factory = new DataUrlLoader.StreamFactory();
     options = new Options();
-    dataUrlLoader = (DataUrlLoader) factory.build(multiFactory);
+    dataUrlLoader = (DataUrlLoader<InputStream>) factory.build(multiFactory);
     fetcher = dataUrlLoader.buildLoadData(VALID_PNG, -1, -1, options).fetcher;
 
   }
@@ -88,7 +91,7 @@ public class DataUrlLoaderTest {
     CallBack callback = new CallBack();
     fetcher.loadData(Priority.HIGH, callback);
     byte[] result = new byte[((ByteArrayInputStream) callback.data).available()];
-    ((ByteArrayInputStream) callback.data).read(result);
+    assertEquals(result.length, ((ByteArrayInputStream) callback.data).read(result));
     assertTrue(Arrays.equals(result, expected));
     assertNull(callback.exception);
   }

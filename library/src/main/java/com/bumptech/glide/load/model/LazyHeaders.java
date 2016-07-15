@@ -131,7 +131,7 @@ public final class LazyHeaders implements Headers {
      * Adds a value for the given header and returns this builder.
      *
      * <p> Use {@link #addHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
-     * (ie an oauth token). </p>
+     * (i.e. an OAuth token). </p>
      *
      * @see #addHeader(String, LazyHeaderFactory)
 
@@ -168,7 +168,7 @@ public final class LazyHeaders implements Headers {
      * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
      *
      * <p> Use {@link #setHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
-     * (ie an oauth token). </p>
+     * (i.e. an OAuth token). </p>
      */
     public Builder setHeader(String key, String value) {
       return setHeader(key, value == null ? null : new StringHeaderFactory(value));

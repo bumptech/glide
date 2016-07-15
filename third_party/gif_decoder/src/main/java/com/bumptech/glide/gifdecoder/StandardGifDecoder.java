@@ -1,6 +1,6 @@
 package com.bumptech.glide.gifdecoder;
 
-/**
+/*
  * Copyright (c) 2013 Xcellent Creations, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -23,9 +23,15 @@ package com.bumptech.glide.gifdecoder;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_BACKGROUND;
+import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_NONE;
+import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_PREVIOUS;
+import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_UNSPECIFIED;
+
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -51,31 +57,14 @@ import java.util.Arrays;
  *
  * <p>Implementation adapted from sample code published in Lyons. (2004). <em>Java for
  * Programmers</em>, republished under the MIT Open Source License
+ *
+ * @see <a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF 89a Specification</a>
  */
 public class StandardGifDecoder implements GifDecoder {
   private static final String TAG = StandardGifDecoder.class.getSimpleName();
 
-  /**
-   * max decoder pixel stack size.
-   */
-  private static final int MAX_STACK_SIZE = 4096;
-
-  /**
-   * GIF Disposal Method meaning take no action.
-   */
-  private static final int DISPOSAL_UNSPECIFIED = 0;
-  /**
-   * GIF Disposal Method meaning leave canvas from previous frame.
-   */
-  private static final int DISPOSAL_NONE = 1;
-  /**
-   * GIF Disposal Method meaning clear canvas to background color.
-   */
-  private static final int DISPOSAL_BACKGROUND = 2;
-  /**
-   * GIF Disposal Method meaning clear canvas to frame before last.
-   */
-  private static final int DISPOSAL_PREVIOUS = 3;
+  /** Maximum pixel stack size for decoding LZW compressed data. */
+  private static final int MAX_STACK_SIZE = 4 * 1024;
 
   private static final int NULL_CODE = -1;
 
@@ -83,22 +72,33 @@ public class StandardGifDecoder implements GifDecoder {
 
   private static final int BYTES_PER_INTEGER = Integer.SIZE / 8;
 
+  private static final int MASK_INT_LOWEST_BYTE = 0x000000FF;
+
+  @ColorInt
+  private static final int COLOR_TRANSPARENT_BLACK = 0x00000000;
+
   // Global File Header values and parsing flags.
-  // Active color table.
-  // Maximum size is 256, see GifHeaderParser.readColorTable
+  /**
+   * Active color table.
+   * Maximum size is 256, see GifHeaderParser.readColorTable
+   */
+  @ColorInt
   private int[] act;
-  // Private color table that can be modified if needed
+  /** Private color table that can be modified if needed. */
+  @ColorInt
   private final int[] pct = new int[256];
 
-  // Raw GIF data from input source.
+  /** Raw GIF data from input source. */
   private ByteBuffer rawData;
 
-  // Raw data read working array.
+  /** Raw data read working array. */
   private byte[] block;
 
-  // Temporary buffer for block reading. Reads 16k chunks from the native buffer for processing,
-  // to greatly reduce JNI overhead.
-  private static final int WORK_BUFFER_SIZE = 16384;
+  private static final int WORK_BUFFER_SIZE = 16 * 1024;
+  /**
+   * Temporary buffer for block reading.
+   * Reads 16k chunks from the native buffer for processing, to greatly reduce JNI overhead.
+   */
   @Nullable private byte[] workBuffer;
   private int workBufferSize = 0;
   private int workBufferPosition = 0;
@@ -110,6 +110,7 @@ public class StandardGifDecoder implements GifDecoder {
   private byte[] suffix;
   private byte[] pixelStack;
   private byte[] mainPixels;
+  @ColorInt
   private int[] mainScratch;
 
   private int framePointer;
@@ -117,6 +118,7 @@ public class StandardGifDecoder implements GifDecoder {
   private GifDecoder.BitmapProvider bitmapProvider;
   private Bitmap previousImage;
   private boolean savePrevious;
+  @GifDecodeStatus
   private int status;
   private int sampleSize;
   private int downsampledHeight;
@@ -213,8 +215,10 @@ public class StandardGifDecoder implements GifDecoder {
   public synchronized Bitmap getNextFrame() {
     if (header.frameCount <= 0 || framePointer < 0) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "unable to decode frame, frameCount=" + header.frameCount + " framePointer="
-            + framePointer);
+        Log.d(TAG, "Unable to decode frame"
+            + ", frameCount=" + header.frameCount
+            + ", framePointer=" + framePointer
+        );
       }
       status = STATUS_FORMAT_ERROR;
     }
@@ -237,7 +241,7 @@ public class StandardGifDecoder implements GifDecoder {
     act = currentFrame.lct != null ? currentFrame.lct : header.gct;
     if (act == null) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "No Valid Color Table");
+        Log.d(TAG, "No valid color table found for frame #" + framePointer);
       }
       // No color table defined.
       status = STATUS_FORMAT_ERROR;
@@ -251,7 +255,7 @@ public class StandardGifDecoder implements GifDecoder {
       // Forget about act reference from shared header object, use copied version
       act = pct;
       // Set transparent color if specified.
-      act[currentFrame.transIndex] = 0;
+      act[currentFrame.transIndex] = COLOR_TRANSPARENT_BLACK;
     }
 
     // Transfer pixel data to image.
@@ -262,10 +266,10 @@ public class StandardGifDecoder implements GifDecoder {
   public int read(InputStream is, int contentLength) {
     if (is != null) {
       try {
-        int capacity = (contentLength > 0) ? (contentLength + 4096) : 16384;
+        int capacity = (contentLength > 0) ? (contentLength + 4 * 1024) : 16 * 1024;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream(capacity);
         int nRead;
-        byte[] data = new byte[16384];
+        byte[] data = new byte[16 * 1024];
         while ((nRead = is.read(data, 0, data.length)) != -1) {
           buffer.write(data, 0, nRead);
         }
@@ -352,8 +356,7 @@ public class StandardGifDecoder implements GifDecoder {
     downsampledWidth = header.width / sampleSize;
     downsampledHeight = header.height / sampleSize;
     // Now that we know the size, init scratch arrays.
-    // TODO: Find a way to avoid this entirely or at least downsample it
-    // (either should be possible).
+    // TODO Find a way to avoid this entirely or at least downsample it (either should be possible).
     mainPixels = bitmapProvider.obtainByteArray(header.width * header.height);
     mainScratch = bitmapProvider.obtainIntArray(downsampledWidth * downsampledHeight);
   }
@@ -366,6 +369,7 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   @Override
+  @GifDecodeStatus
   public synchronized int read(byte[] data) {
     this.header = getHeaderParser().setData(data).parseHeader();
     if (data != null) {
@@ -385,7 +389,7 @@ public class StandardGifDecoder implements GifDecoder {
 
     // clear all pixels when meet first frame
     if (previousFrame == null) {
-      Arrays.fill(dest, 0);
+      Arrays.fill(dest, COLOR_TRANSPARENT_BLACK);
     }
 
     // fill in starting image contents based on last image's dispose code
@@ -394,11 +398,11 @@ public class StandardGifDecoder implements GifDecoder {
       // mainScratch and therefore so will our dest array.
       if (previousFrame.dispose == DISPOSAL_BACKGROUND) {
         // Start with a canvas filled with the background color
-        int c = 0;
+        @ColorInt int c = COLOR_TRANSPARENT_BLACK;
         if (!currentFrame.transparency) {
           c = header.bgColor;
           if (currentFrame.lct != null && header.bgIndex == currentFrame.transIndex) {
-            c = 0;
+            c = COLOR_TRANSPARENT_BLACK;
           }
         } else if (framePointer == 0) {
           // TODO: We should check and see if all individual pixels are replaced. If they are, the
@@ -478,16 +482,16 @@ public class StandardGifDecoder implements GifDecoder {
         int maxPositionInSource = sx + ((dlim - dx) * sampleSize);
         while (dx < dlim) {
           // Map color and insert in destination.
-          int averageColor;
+          @ColorInt int averageColor;
           if (sampleSize == 1) {
-            int currentColorIndex = ((int) mainPixels[sx]) & 0xff;
+            int currentColorIndex = ((int) mainPixels[sx]) & MASK_INT_LOWEST_BYTE;
             averageColor = act[currentColorIndex];
           } else {
             // TODO: This is substantially slower (up to 50ms per frame) than just grabbing the
             // current color index above, even with a sample size of 1.
             averageColor = averageColorsNear(sx, maxPositionInSource, currentFrame.iw);
           }
-          if (averageColor != 0) {
+          if (averageColor != COLOR_TRANSPARENT_BLACK) {
             dest[dx] = averageColor;
           } else if (!isFirstFrameTransparent && isFirstFrame) {
             isFirstFrameTransparent = true;
@@ -514,6 +518,7 @@ public class StandardGifDecoder implements GifDecoder {
     return result;
   }
 
+  @ColorInt
   private int averageColorsNear(int positionInMainPixels, int maxPositionInMainPixels,
       int currentFrameIw) {
     int alphaSum = 0;
@@ -524,40 +529,40 @@ public class StandardGifDecoder implements GifDecoder {
     int totalAdded = 0;
     // Find the pixels in the current row.
     for (int i = positionInMainPixels;
-        i < positionInMainPixels + sampleSize && i < mainPixels.length
-        && i < maxPositionInMainPixels; i++) {
-      int currentColorIndex = ((int) mainPixels[i]) & 0xff;
+         i < positionInMainPixels + sampleSize && i < mainPixels.length
+             && i < maxPositionInMainPixels; i++) {
+      int currentColorIndex = ((int) mainPixels[i]) & MASK_INT_LOWEST_BYTE;
       int currentColor = act[currentColorIndex];
       if (currentColor != 0) {
-        alphaSum += currentColor >> 24 & 0x000000ff;
-        redSum += currentColor >> 16 & 0x000000ff;
-        greenSum += currentColor >> 8 & 0x000000ff;
-        blueSum += currentColor & 0x000000ff;
+        alphaSum += currentColor >> 24 & MASK_INT_LOWEST_BYTE;
+        redSum += currentColor >> 16 & MASK_INT_LOWEST_BYTE;
+        greenSum += currentColor >> 8 & MASK_INT_LOWEST_BYTE;
+        blueSum += currentColor & MASK_INT_LOWEST_BYTE;
         totalAdded++;
       }
     }
     // Find the pixels in the next row.
     for (int i = positionInMainPixels + currentFrameIw;
-        i < positionInMainPixels + currentFrameIw + sampleSize && i < mainPixels.length
-        && i < maxPositionInMainPixels; i++) {
-      int currentColorIndex = ((int) mainPixels[i]) & 0xff;
+         i < positionInMainPixels + currentFrameIw + sampleSize && i < mainPixels.length
+             && i < maxPositionInMainPixels; i++) {
+      int currentColorIndex = ((int) mainPixels[i]) & MASK_INT_LOWEST_BYTE;
       int currentColor = act[currentColorIndex];
       if (currentColor != 0) {
-        alphaSum += currentColor >> 24 & 0x000000ff;
-        redSum += currentColor >> 16 & 0x000000ff;
-        greenSum += currentColor >> 8 & 0x000000ff;
-        blueSum += currentColor & 0x000000ff;
+        alphaSum += currentColor >> 24 & MASK_INT_LOWEST_BYTE;
+        redSum += currentColor >> 16 & MASK_INT_LOWEST_BYTE;
+        greenSum += currentColor >> 8 & MASK_INT_LOWEST_BYTE;
+        blueSum += currentColor & MASK_INT_LOWEST_BYTE;
         totalAdded++;
       }
     }
     if (totalAdded == 0) {
-      return 0;
+      return COLOR_TRANSPARENT_BLACK;
     } else {
       return ((alphaSum / totalAdded) << 24)
           | ((redSum / totalAdded) << 16)
           | ((greenSum / totalAdded) << 8)
           | (blueSum / totalAdded);
-     }
+    }
   }
 
   /**
@@ -573,8 +578,7 @@ public class StandardGifDecoder implements GifDecoder {
 
     int npix = (frame == null) ? header.width * header.height : frame.iw * frame.ih;
     int available, clear, codeMask, codeSize, endOfInformation, inCode, oldCode, bits, code, count,
-        i, datum,
-        dataSize, first, top, bi, pi;
+        i, datum, dataSize, first, top, bi, pi;
 
     if (mainPixels == null || mainPixels.length < npix) {
       // Allocate new pixel array.
@@ -618,7 +622,7 @@ public class StandardGifDecoder implements GifDecoder {
         bi = 0;
       }
 
-      datum += (((int) block[bi]) & 0xff) << bits;
+      datum += (((int) block[bi]) & MASK_INT_LOWEST_BYTE) << bits;
       bits += 8;
       bi++;
       count--;
@@ -663,7 +667,7 @@ public class StandardGifDecoder implements GifDecoder {
           pixelStack[top++] = suffix[code];
           code = prefix[code];
         }
-        first = ((int) suffix[code]) & 0xff;
+        first = ((int) suffix[code]) & MASK_INT_LOWEST_BYTE;
         pixelStack[top++] = (byte) first;
 
         // Add a new string to the string table.
@@ -688,7 +692,7 @@ public class StandardGifDecoder implements GifDecoder {
 
     // Clear missing pixels.
     for (i = pi; i < npix; i++) {
-      mainPixels[i] = 0;
+      mainPixels[i] = COLOR_TRANSPARENT_BLACK;
     }
   }
 
@@ -713,7 +717,7 @@ public class StandardGifDecoder implements GifDecoder {
   private int readByte() {
     try {
       readChunkIfNeeded();
-      return workBuffer[workBufferPosition++] & 0xFF;
+      return workBuffer[workBufferPosition++] & MASK_INT_LOWEST_BYTE;
     } catch (Exception e) {
       status = STATUS_FORMAT_ERROR;
       return 0;
@@ -764,9 +768,9 @@ public class StandardGifDecoder implements GifDecoder {
     return result;
   }
 
-  @TargetApi(12)
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   private static void setAlpha(Bitmap bitmap) {
-    if (Build.VERSION.SDK_INT >= 12) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
       bitmap.setHasAlpha(true);
     }
   }
