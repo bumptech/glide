@@ -242,6 +242,10 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * http://goo.gl/8H670N.
    */
   public static int calculateBestThreadCount() {
+    // We override the current ThreadPolicy to allow disk reads.
+    // This shouldn't actually do disk-IO and accesses a device file.
+    // See: https://github.com/bumptech/glide/issues/1170
+    ThreadPolicy originalPolicy = StrictMode.allowThreadDiskReads();
     File[] cpus = null;
     try {
       File cpuInfo = new File(CPU_LOCATION);
@@ -256,6 +260,8 @@ public final class GlideExecutor extends ThreadPoolExecutor {
       if (Log.isLoggable(TAG, Log.ERROR)) {
         Log.e(TAG, "Failed to calculate accurate cpu count", t);
       }
+    } finally {
+      StrictMode.setThreadPolicy(originalPolicy);
     }
 
     int cpuCount = cpus != null ? cpus.length : 0;
