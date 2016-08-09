@@ -2,7 +2,6 @@ package com.bumptech.glide.gifdecoder;
 
 import android.support.annotation.ColorInt;
 import android.support.annotation.IntDef;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
