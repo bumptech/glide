@@ -15,6 +15,9 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
 
   @Override
   protected void setResource(@Nullable Drawable resource) {
-    view.setImageDrawable(resource);
+    ImageView view = viewReference.get();
+    if (view != null) {
+      view.setImageDrawable(resource);
+    }
   }
 }

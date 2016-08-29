@@ -4,6 +4,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.View;
+
 import com.bumptech.glide.load.DataSource;
 
 /**
@@ -46,9 +48,14 @@ public abstract class BitmapContainerTransitionFactory<R> implements TransitionF
 
     @Override
     public boolean transition(R current, ViewAdapter adapter) {
-      Resources resources = adapter.getView().getResources();
-      Drawable currentBitmap = new BitmapDrawable(resources, getBitmap(current));
-      return transition.transition(currentBitmap, adapter);
+      View view = adapter.getView();
+      if (view == null) {
+        return false;
+      } else {
+        Resources resources = adapter.getView().getResources();
+        Drawable currentBitmap = new BitmapDrawable(resources, getBitmap(current));
+        return transition.transition(currentBitmap, adapter);
+      }
     }
   }
 }

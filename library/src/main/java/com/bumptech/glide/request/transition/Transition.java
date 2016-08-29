@@ -25,6 +25,7 @@ public interface Transition<R> {
     /**
      * Returns the wrapped {@link android.view.View}.
      */
+    @Nullable
     View getView();
 
     /**
