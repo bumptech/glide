@@ -39,6 +39,7 @@ class GifFrameLoader {
 
   private boolean isRunning = false;
   private boolean isLoadPending = false;
+  private boolean startFromFirstFrame = false;
   private RequestBuilder<Bitmap> requestBuilder;
   private DelayTarget current;
   private boolean isCleared;
@@ -198,6 +199,10 @@ class GifFrameLoader {
     if (!isRunning || isLoadPending) {
       return;
     }
+    if (startFromFirstFrame) {
+      gifDecoder.resetFrameIndex();
+      startFromFirstFrame = false;
+    }
     isLoadPending = true;
     // Get the delay before incrementing the pointer because the delay indicates the amount of time
     // we want to spend on the current frame.
@@ -214,6 +219,11 @@ class GifFrameLoader {
       bitmapPool.put(firstFrame);
       firstFrame = null;
     }
+  }
+
+  void setNextStartFromFirstFrame() {
+    Preconditions.checkArgument(!isRunning, "Can't restart a running animation");
+    startFromFirstFrame = true;
   }
 
   // Visible for testing.

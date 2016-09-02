@@ -154,6 +154,15 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     loopCount = 0;
   }
 
+  /**
+   * Starts the animation from the first frame. Can only be called while animation is not running.
+   */
+  public void startFromFirstFrame() {
+    Preconditions.checkArgument(!isRunning, "You cannot restart a currently running animation.");
+    state.frameLoader.setNextStartFromFirstFrame();
+    start();
+  }
+
   @Override
   public void start() {
     isStarted = true;
