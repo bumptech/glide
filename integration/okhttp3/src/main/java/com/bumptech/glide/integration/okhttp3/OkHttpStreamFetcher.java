@@ -52,9 +52,9 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
 
       @Override
       public void onResponse(Call call, Response response) throws IOException {
+        responseBody = response.body();
         if (response.isSuccessful()) {
           long contentLength = response.body().contentLength();
-          responseBody = response.body();
           stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
         } else if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "OkHttp got error response: " + response.code() + ", " + response.message());
