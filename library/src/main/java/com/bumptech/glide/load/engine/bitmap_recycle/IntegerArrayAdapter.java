@@ -1,7 +1,5 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-import java.util.Arrays;
-
 /**
  * Adapter for handling primitive int arrays.
  */
@@ -17,11 +15,6 @@ public final class IntegerArrayAdapter implements ArrayAdapterInterface<int[]> {
   @Override
   public int getArrayLength(int[] array) {
     return array.length;
-  }
-
-  @Override
-  public void resetArray(int[] array) {
-    Arrays.fill(array, 0);
   }
 
   @Override

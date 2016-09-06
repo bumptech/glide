@@ -22,6 +22,8 @@ public interface ArrayPool {
    * Returns a non-null array of the given type with a length >= to the given size.
    *
    * <p>If an array of the given size isn't in the pool, a new one will be allocated.
+   *
+   * <p>This class makes no guarantees about the contents of the returned array.
    */
   <T> T get(int size, Class<T> arrayClass);
   /**

@@ -85,9 +85,7 @@ public final class LruArrayPool implements ArrayPool {
       }
     }
 
-    if (result != null) {
-      arrayAdapter.resetArray(result);
-    } else {
+    if (result == null) {
       if (Log.isLoggable(arrayAdapter.getTag(), Log.VERBOSE)) {
         Log.v(arrayAdapter.getTag(), "Allocated " + size + " bytes");
       }

@@ -16,11 +16,6 @@ public interface ArrayAdapterInterface<T> {
   int getArrayLength(T array);
 
   /**
-   * Reset the array for re-use (e.g. set all values to 0).
-   */
-  void resetArray(T array);
-
-  /**
    * Allocate and return an array of the specified size.
    */
   T newArray(int length);
