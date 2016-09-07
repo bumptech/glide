@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
+import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
@@ -10,7 +11,8 @@ import com.bumptech.glide.util.Util;
 /**
  * A resource wrapping a {@link android.graphics.Bitmap} object.
  */
-public class BitmapResource implements Resource<Bitmap> {
+public class BitmapResource implements Resource<Bitmap>,
+    Initializable {
   private final Bitmap bitmap;
   private final BitmapPool bitmapPool;
 
@@ -53,5 +55,10 @@ public class BitmapResource implements Resource<Bitmap> {
   @Override
   public void recycle() {
     bitmapPool.put(bitmap);
+  }
+
+  @Override
+  public void initialize() {
+    bitmap.prepareToDraw();
   }
 }

@@ -383,6 +383,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void notifyEncodeAndRelease(Resource<R> resource, DataSource dataSource) {
+    if (resource instanceof Initializable) {
+      ((Initializable) resource).initialize();
+    }
+
     Resource<R> result = resource;
     LockedResource<R> lockedResource = null;
     if (deferredEncodeManager.hasResourceToEncode()) {
@@ -455,11 +459,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return stateVerifier;
   }
 
-  class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
+  private class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
     private final DataSource dataSource;
 
-    public DecodeCallback(DataSource dataSource) {
+    private DecodeCallback(DataSource dataSource) {
       this.dataSource = dataSource;
     }
 
