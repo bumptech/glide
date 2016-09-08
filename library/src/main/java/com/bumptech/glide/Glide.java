@@ -96,6 +96,7 @@ public class Glide implements ComponentCallbacks2 {
   private final ArrayPool arrayPool;
   private final ConnectivityMonitorFactory connectivityMonitorFactory;
   private final List<RequestManager> managers = new ArrayList<>();
+  private MemoryCategory memoryCategory = MemoryCategory.NORMAL;
 
   /**
    * Returns a directory with a default name in the private cache directory of the application to
@@ -393,13 +394,18 @@ public class Glide implements ComponentCallbacks2 {
    * used to temporarily increase or decrease memory usage for a single Activity or part of the app.
    * Use {@link GlideBuilder#setMemoryCache(MemoryCache)} to put a permanent memory size if you want
    * to change the default. </p>
+   *
+   * @return the previous MemoryCategory used by Glide.
    */
-  public void setMemoryCategory(MemoryCategory memoryCategory) {
+  public MemoryCategory setMemoryCategory(MemoryCategory memoryCategory) {
     // Engine asserts this anyway when removing resources, fail faster and consistently
     Util.assertMainThread();
     // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
     memoryCache.setSizeMultiplier(memoryCategory.getMultiplier());
     bitmapPool.setSizeMultiplier(memoryCategory.getMultiplier());
+    MemoryCategory oldCategory = this.memoryCategory;
+    this.memoryCategory = memoryCategory;
+    return oldCategory;
   }
 
   /**
