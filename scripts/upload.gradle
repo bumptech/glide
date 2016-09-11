@@ -122,7 +122,7 @@ afterEvaluate { project ->
             it.buildType.name.equalsIgnoreCase('release')
         }
 
-        task androidJavadocs(type: Javadoc, dependsOn: compileReleaseJava) {
+        task androidJavadocs(type: Javadoc, dependsOn: compileReleaseJavaWithJavac) {
             source = releaseVariants.collect { it.javaCompile.source }
             classpath = files(releaseVariants.collect { files(it.javaCompile.classpath.files,
                     project.android.bootClasspath) })
@@ -148,8 +148,8 @@ afterEvaluate { project ->
             baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
         }
 
-        task androidLibraryJar(type: Jar, dependsOn: compileReleaseJava /* == variant.javaCompile */) {
-            from compileReleaseJava.destinationDir
+        task androidLibraryJar(type: Jar, dependsOn: compileReleaseJavaWithJavac /* == variant.javaCompile */) {
+            from compileReleaseJavaWithJavac.destinationDir
             exclude '**/R.class'
             exclude '**/BuildConfig.class'
             baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"

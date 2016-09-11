@@ -198,6 +198,7 @@ public class RequestManagerFragment extends Fragment {
 
   @Override
   public void onTrimMemory(int level) {
+    super.onTrimMemory(level);
     // If an activity is re-created, onTrimMemory may be called before a manager is ever put.
     // See #329.
     if (requestManager != null) {
@@ -207,6 +208,7 @@ public class RequestManagerFragment extends Fragment {
 
   @Override
   public void onLowMemory() {
+    super.onLowMemory();
     // If an activity is re-created, onLowMemory may be called before a manager is ever put.
     // See #329.
     if (requestManager != null) {

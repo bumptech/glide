@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'org.robolectric'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
 apply plugin: 'pmd'
@@ -111,9 +110,9 @@ afterEvaluate {
 
     check.dependsOn('pmd')
 
-    task jacocoTestReport(type: JacocoReport, dependsOn: testDebug) {
-        def coverageSourceDirs = ['src/main/java']
-        group = "Reporting"
+   task jacocoTestReport(type: JacocoReport, dependsOn: testDebugUnitTest) {
+       def coverageSourceDirs = ['src/main/java']
+       group = "Reporting"
         description = "Generate Jacoco coverage reports"
 
         classDirectories = fileTree(

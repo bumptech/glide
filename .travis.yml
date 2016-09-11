@@ -3,8 +3,8 @@ android:
   components:
   - tools
   - platform-tools
-  - build-tools-22.0.1
-  - android-22
+  - build-tools-24.0.2
+  - android-24
   - extra-android-m2repository
   - extra-android-support
 
@@ -12,8 +12,7 @@ android:
   - 'android-sdk-license.*'
 
 jdk:
-  - openjdk7
-  - oraclejdk7
+  - oraclejdk8
 
 sudo: false
 

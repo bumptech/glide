@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'org.robolectric'
 
 dependencies {
     compile "com.android.support:support-annotations:${SUPPORT_V4_VERSION}"
@@ -22,4 +21,4 @@ android {
     }
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+//apply from: "${rootProject.projectDir}/scripts/upload.gradle"
