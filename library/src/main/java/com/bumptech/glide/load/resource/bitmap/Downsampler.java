@@ -7,8 +7,6 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.ImageHeaderParser;
-import com.bumptech.glide.load.ImageHeaderParserUtils;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
@@ -25,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -88,11 +85,9 @@ public final class Downsampler {
   private final BitmapPool bitmapPool;
   private final DisplayMetrics displayMetrics;
   private final ArrayPool byteArrayPool;
-  private final List<ImageHeaderParser> parsers;
 
-  public Downsampler(List<ImageHeaderParser> parsers, DisplayMetrics displayMetrics,
-      BitmapPool bitmapPool, ArrayPool byteArrayPool) {
-    this.parsers = parsers;
+  public Downsampler(DisplayMetrics displayMetrics, BitmapPool bitmapPool,
+       ArrayPool byteArrayPool) {
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
@@ -177,7 +172,7 @@ public final class Downsampler {
     int sourceHeight = sourceDimensions[1];
     String sourceMimeType = options.outMimeType;
 
-    int orientation = ImageHeaderParserUtils.getOrientation(parsers, is, byteArrayPool);
+    int orientation = getOrientation(is);
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
 
     options.inPreferredConfig = getConfig(is, decodeFormat);
@@ -296,6 +291,21 @@ public final class Downsampler {
     }
   }
 
+  private int getOrientation(InputStream is) throws IOException {
+    is.mark(MARK_POSITION);
+    int orientation = ImageHeaderParser.UNKNOWN_ORIENTATION;
+    try {
+      orientation = new ImageHeaderParser(is, byteArrayPool).getOrientation();
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Cannot determine the image orientation from header", e);
+      }
+    } finally {
+      is.reset();
+    }
+    return orientation;
+  }
+
   private Bitmap downsampleWithSize(InputStream is, BitmapFactory.Options options,
       BitmapPool pool, int sourceWidth, int sourceHeight, DecodeCallbacks callbacks)
       throws IOException {
@@ -336,8 +346,9 @@ public final class Downsampler {
       return true;
     }
 
+    is.mark(MARK_POSITION);
     try {
-      ImageHeaderParser.ImageType type = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool);
+      final ImageHeaderParser.ImageType type = new ImageHeaderParser(is, byteArrayPool).getType();
       // We cannot reuse bitmaps when decoding images that are not PNG or JPG prior to KitKat.
       // See: https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
       return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(type);
@@ -345,6 +356,8 @@ public final class Downsampler {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Cannot determine the image type from header", e);
       }
+    } finally {
+      is.reset();
     }
     return false;
   }
@@ -357,13 +370,16 @@ public final class Downsampler {
     }
 
     boolean hasAlpha = false;
+    is.mark(MARK_POSITION);
     try {
-      hasAlpha = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool).hasAlpha();;
+      hasAlpha = new ImageHeaderParser(is, byteArrayPool).hasAlpha();
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Cannot determine whether the image has alpha or not from header"
             + ", format " + format, e);
       }
+    } finally {
+      is.reset();
     }
 
     return hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
